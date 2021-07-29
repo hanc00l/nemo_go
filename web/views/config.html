@@ -1,0 +1,106 @@
+<main class="app-content">
+    <div class="app-title">
+        <div>
+            <h1><i class="fa fa-dashboard"></i> 配置管理</h1>
+        </div>
+        <ul class="app-breadcrumb breadcrumb">
+            <li class="breadcrumb-item"><i class="fa fa-home fa-lg"></i></li>
+            <li class="breadcrumb-item"><a href="/">首页</a></li>
+            <li class="breadcrumb-item active"><a href="#">配置管理</a></li>
+        </ul>
+    </div>
+    <div class="row">
+        <div class="col-md-6">
+            <div class="tile">
+                <h3 class="tile-title">端口扫描默认配置</h3>
+                <div class="tile-body">
+                    <form>
+                        <div class="form-group">
+                            <label class="col-form-label" for="input_cmdbin">
+                                <b>默认扫描程序</b>
+                            </label>
+                            <input class="form-control" id="input_cmdbin" type="text" value="">
+                            <label class="col-form-label" for="input_port">
+                                <b>默认扫描端口:</b>（支持Nmap格式的端口列表）
+                            </label>
+                            <input class="form-control" id="input_port" type="text"
+                                   placeholder="--top-ports 1000（支持Nmap格式的端口列表）" value="">
+                            <label for="select_tech"><b>NMAP探测技术</b></label>
+                            <select class="form-control" id="select_tech">
+                                <option value="-sS">-sS</option>
+                                <option value="-sT">-sT</option>
+                                <option value="-sV">-sV</option>
+                            </select>
+                            <label for="input_rate"><b>扫描速度</b></label>
+                            <input class="form-control" id="input_rate" type="text" placeholder="3000（默认）"
+                                   value="">
+                        </div>
+                        <div class="form-check form-check-inline">
+                            <label class="form-check-label" for="checkbox_ping">
+                                <input class="form-check-input" id="checkbox_ping" type="checkbox">PING
+                            </label>
+                        </div>
+                    </form>
+                </div>
+                <div class="tile-footer">
+                    <button class="btn btn-primary" type="button" id="buttonSaveNmap"><i
+                            class="fa fa-fw fa-lg fa-check-circle"></i>保存设置
+                    </button>&nbsp;&nbsp;&nbsp;
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="tile">
+                <h3 class="tile-title">修改登录密码</h3>
+                <div class="tile-body">
+                    <div class="form-group row">
+                        <label class="control-label col-md-3"> 原始密码</label>
+                        <div class="col-md-8">
+                            <input class="form-control" id="input_oldpass" type="password" value="">
+                        </div>
+                    </div>
+                    <div class="form-group row">
+                        <label class="control-label col-md-3">修改后的新密码</label>
+                        <div class="col-md-8">
+                            <input class="form-control" id="input_password1" type="password" value="">
+                        </div>
+                    </div>
+                    <div class="form-group row">
+                        <label class="control-label col-md-3">确认修改新密码</label>
+                        <div class="col-md-8">
+                            <input class="form-control" id="input_password2" type="password" value="">
+                        </div>
+                    </div>
+                </div>
+                <div class="tile-footer">
+                    <button class="btn btn-primary" type="button" id="buttonChangPassword"><i
+                            class="fa fa-fw fa-lg fa-check-circle"></i>保存设置
+                    </button>&nbsp;&nbsp;&nbsp;
+                </div>
+            </div>
+            <div class="tile">
+                <h3 class="tile-title">其它</h3>
+                <div class="tile-body">
+
+                </div>
+                <div class="tile-footer">
+                    <div class="row">
+                        <div class="col-md-8 col-md-offset-3">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="clearix"></div>
+    </div>
+</main>
+<script src="static/js/jquery/jquery-3.3.1.min.js"></script>
+<script src="static/js/bootstrap/popper.min.js"></script>
+<script src="static/js/bootstrap/bootstrap.min.js"></script>
+<script src="static/js/main.js"></script>
+<script src="static/js/plugins/pace.min.js"></script>
+<script src="static/js/plugins/jquery.dataTables.min.js"></script>
+<script src="static/js/plugins/dataTables.bootstrap.min.js"></script>
+<script src="static/js/sweetalert/sweetalert.min.js"></script>
+<script src="static/js/jquery/jquery.bootstrap-duallistbox.js"></script>
+<script src="static/js/server/config.js"></script>

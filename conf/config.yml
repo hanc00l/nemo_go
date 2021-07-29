@@ -1,0 +1,42 @@
+web:
+  host: 0.0.0.0
+  port: 5000
+  username: nemo
+  password: 648ce596dba3b408b523d3d1189b15070123456789abcdef
+  encryptKey: ZduibTKhcbb6Pi8W
+  screenshotPath: /tmp/screenshot
+database:
+  host: 127.0.0.1
+  port: 3306
+  name: nemo
+  username: nemo
+  password: nemo2020
+rabbitmq:
+  host: localhost
+  port: 5672
+  username: guest
+  password: guest
+api:
+  fofa:
+    name:
+    key:
+  icp:
+    name: chinaz
+    key:
+portscan:
+  ping: false
+  port: --top-ports 1000
+  rate: 1000
+  tech: -sS
+  cmdbin: masscan
+domainscan:
+  resolver: resolver.txt
+  wordlist: subnames.txt
+  massdnsThreads: 600
+pocscan:
+  xray:
+    pocPath: thirdparty/xray/xray/pocs
+    latest: 1.7.1
+  pocsuite:
+    pocPath: thirdparty/pocsuite/some_pocsuite
+    threads: 10

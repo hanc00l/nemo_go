@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Nemo</title>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link ref="stylesheet" type="text/css" href="static/css/bootstrap.min.css">
+    <link rel="icon" type="image/x-icon" class="js-site-favicon" href="static/css/images/favicon.ico">
+    <link rel="stylesheet" type="text/css" href="static/css/main.css">
+    <link rel="stylesheet" type="text/css" href="static/css/font-awesome/4.7.0/css/font-awesome.min.css">
+    <!-- Main CSS-->
+    <link ref="stylesheet" type="text/css" href="static/css/jquery.dataTables.min.css">
+    <link rel="stylesheet" href="/static/css/bootstrap-duallistbox/bootstrap-duallistbox.css" >
+    <style type="text/css">
+        .imgPreview {
+            display: none;
+            top: 0;
+            left: 0;
+            width: 100%;
+            /*容器占满整个屏幕*/
+            height: 100%;
+            position: fixed;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 2000;
+        }
+        .imgPreview img {
+            z-index: 2000;
+            width: 60%;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+        }
+    </style>
+</head>
+
+<body class="app sidebar-mini rtl">
+    <!-- Navbar-->
+    <header class="app-header "><a class="app-header__logo" href="index">Nemo</a>
+        <!-- Sidebar toggle button--><a class="app-sidebar__toggle" href="#" data-toggle="sidebar" id="btnsiderbar"
+            aria-label="Hide Sidebar"></a>
+        <!-- Navbar Right Menu-->
+        <ul class="app-nav">
+            <!-- <li class="app-search">
+                <form method="post" action="search">
+                    <input class="app-search__input" type="search" name="search" placeholder="Search">
+                    <button class="app-search__button search_btn" type="submit"><i class="fa fa-search"></i></button>
+                </form>
+            </li> -->
+            <!--Notification Menu-->
+            <li class="dropdown"><a class="app-nav__item" href="task-list" 
+                    aria-label="Show notifications"><i class="fa fa-bell-o fa-lg" title="任务状态信息"></i><span class="badge badge-light" id="span_show_task" title="活动任务/总任务"></span></a>
+                <div id="notification_update">
+                </div>
+            </li>
+
+            <!-- User Menu-->
+            <li class="dropdown"><a class="app-nav__item" href="#" data-toggle="dropdown"
+                    aria-label="Open Profile Menu"><i class="fa fa-user fa-lg"></i></a>
+                <ul class="dropdown-menu settings-menu dropdown-menu-right">
+                    <li><a class="dropdown-item" href="advanced-option"><i class="fa fa-cog fa-lg"></i> 设置</a></li>
+                    <li><a class="dropdown-item" href="http://github.com/hancool/nemo" target="_blank"><i
+                                class="fa fa-user fa-lg"></i> 关于</a></li>
+                    <li>
+                        <div class="dropdown-divideDataTabler"></div><a class="dropdown-item" href="logout"><i
+                                class="fa fa-sign-out fa-lg"></i> 退出</a>
+                    </li>
+                </ul>
+            </li>
+        </ul>
+    </header>
+    <!-- Sidebar menu-->
+    <aside class="app-sidebar ">
+        <ul class="app-menu">
+            <li>
+                <a class="app-menu__item" href="dashboard">
+                    <i class="app-menu__icon fa fa-dashboard"></i>
+                    <span class="app-menu__label">Dashbord</span>
+                </a>
+            </li>
+
+            <li>
+                <a class="app-menu__item" href="ip-list">
+                    <i class="app-menu__icon fa fa-gg"></i>
+                    <span class="app-menu__label">IP</span>
+                </a>
+            </li>
+            <li>
+                <a class="app-menu__item" href="domain-list">
+                    <i class="app-menu__icon fa fa-gitlab"></i>
+                    <span class="app-menu__label">Domain</span>
+                </a>
+            </li>
+            <li>
+                <a class="app-menu__item" href="vulnerability-list">
+                    <i class="app-menu__icon fa fa-bolt"></i>
+                    <span class="app-menu__label">Vulnerability</span>
+                </a>
+            </li>
+            <li>
+                <a class="app-menu__item" href="task-list">
+                    <i class="app-menu__icon fa fa-star-o"></i>
+                    <span class="app-menu__label">任务管理</span>
+                </a>
+            </li>
+            <li>
+                <a class="app-menu__item" href="org-list">
+                    <i class="app-menu__icon fa fa-users"></i>
+                    <span class="app-menu__label">组织管理</span>
+                </a>
+            </li>
+            <li class="treeview">
+                <a class="app-menu__item" href="#" data-toggle="treeview">
+                    <i class="app-menu__icon fa fa-cogs"></i>
+                    <span class="app-menu__label">系统设置</span>
+                    <i class="treeview-indicator fa fa-angle-right"></i>
+                </a>
+                <ul class="treeview-menu">
+                    <li><a class="treeview-item" href="config-list"><i class="icon fa fa-pencil"></i>配置管理</a></li>
+                    <li><a class="treeview-item" href="custom-list"><i class="icon fa fa-pencil"></i>自定义管理</a></li>
+                </ul>
+            </li>
+        </ul>
+    </aside>
+
+    {{.LayoutContent}}
+
+</body>
+</html>

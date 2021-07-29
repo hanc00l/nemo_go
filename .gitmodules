@@ -1,0 +1,6 @@
+[submodule "thirdparty/pocsuite/some_pocsuite"]
+	path = thirdparty/pocsuite/some_pocsuite
+	url = https://github.com/hanc00l/some_pocsuite
+[submodule "thirdparty/xray/xray"]
+	path = thirdparty/xray/xray
+	url = https://github.com/chaitin/xray

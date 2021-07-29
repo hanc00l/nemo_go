@@ -1,0 +1,62 @@
+<main class="app-content">
+    <div class="row">
+        <div class="col-md-12">
+            <div class="tile">
+                <div class="tile-body">
+                    <form class="row">
+                        <div class="form-group col-md-2">
+                            <label class="control-label" for="task_name">名称</label>
+                            <input class="form-control" type="text" id="task_name" placeholder="任务名称">
+                        </div>
+                        <div class="form-group col-md-2">
+                            <label class="control-label" for="task_args">参数</label>
+                            <input class="form-control" type="text" id="task_args" placeholder="任务参数">
+                        </div>
+                        <div class="form-group col-md-2">
+                            <label class="control-label" for="task_worker">Worker</label>
+                            <input class="form-control" type="text" id="task_worker" placeholder="执行的worker">
+                        </div>
+                        <div class="form-group col-md-2">
+                            <label class="control-label" for="task_state">状态</label>
+                            <select class="form-control" title="任务状态" id="task_state">
+                                <option value="">--STATE--</option>
+                                <option value="CREATED">CREATED</option>
+                                <option value="STARTED">STARTED</option>
+                                <option value="SUCCESS">SUCCESS</option>
+                                <option value="FAILURE">FAILURE</option>
+                                <option value="RECEIVED">RECEIVED</option>
+                                <option value="PENDING">PENDING</option>
+                                <option value="REVOKED">REVOKED</option>
+                                <option value="RETRY">RETRY</option>
+                            </select>
+                        </div>
+                        <div class="form-group col-md-4 align-self-end">
+                            <button class="btn btn-primary" type="button" id="search"><i
+                                    class="fa fa-fw fa-lg fa-search"></i>搜索
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+            <div class="tile">
+                <div class="tile-body">
+                    <table class="table table-hover table-bordered" id="task_table" width="100%">
+                    </table>
+                </div>
+                <!----tile body-->
+            </div> <!-- tile -->
+        </div> <!-- col md-12 -->
+    </div>
+    <!--row-->
+</main>
+<script src="static/js/jquery/jquery-3.3.1.min.js"></script>
+<script src="static/js/bootstrap/popper.min.js"></script>
+<script src="static/js/bootstrap/bootstrap.min.js"></script>
+<script src="static/js/main.js"></script>
+<script src="static/js/plugins/pace.min.js"></script>
+<!-- Data table plugin-->
+<script src="static/js/plugins/jquery.dataTables.min.js"></script>
+<script src="static/js/plugins/dataTables.bootstrap.min.js"></script>
+<script src="static/js/sweetalert/sweetalert.min.js"></script>
+<script src="static/js/jquery/jquery.bootstrap-duallistbox.js"></script>
+<script src="static/js/server/task-list.js"></script>

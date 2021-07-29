@@ -1,0 +1,348 @@
+<main class="app-content">
+    <div class="row">
+        <div class="col-md-12">
+            <div class="imgPreview"><img src="#" alt="" id="imgPreview">
+            </div>
+            <div class="tile">
+                <div class="tile-body">
+                    <form class="row">
+                        <div class="form-group col-md-2">
+                            <label class="control-label" for="select_org_id_search">组织机构</label>
+                            <select class="form-control" title="机构组构" id="select_org_id_search">
+                            </select>
+                        </div>
+                        <div class="form-group col-md-2">
+                            <label class="control-label" for="domain_address">Domain</label>
+                            <input class="form-control" type="text" id="domain_address" placeholder="域名（模糊搜索）"
+                                   value="{{ .data.DomainAddress }}">
+                        </div>
+                        <div class="form-group col-md-2">
+                            <label class="control-label" for="ip_address">IP</label>
+                            <input class="form-control" type="text" id="ip_address" placeholder="单个IP（精确匹配）"
+                                   value="{{ .data.IpAddressDomain }}">
+                        </div>
+                        <div class="form-group col-md-2">
+                            <label class="control-label" for="date_delta">更新时间</label>
+                            <select class="form-control" title="更新时间" id="date_delta">
+                                <option value="0">--不限--</option>
+                                <option value="365">一年内</option>
+                                <option value="180">半年内</option>
+                                <option value="90">三个月内</option>
+                                <option value="30">一个月内</option>
+                                <option value="7">一周内</option>
+                                <option value="1">一天内</option>
+                            </select>
+                        </div>
+                        <div class="form-group col-md-4 align-self-end">
+                            <button class="btn btn-primary" type="button" id="search"><i
+                                    class="fa fa-fw fa-lg fa-search"></i>搜索
+                            </button>
+                            <button class="btn btn-primary" type="button" id="create_task"><i
+                                    class="fa fa-plus"></i>新建任务
+                            </button>
+                            <div class="btn-group" role="group">
+                                <button id="btnGroupDrop1" type="button" class="btn btn-secondary dropdown-toggle"
+                                        data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                    <i class="fa fa-angle-double-down"></i>功能
+                                </button>
+                                <div class="dropdown-menu" aria-labelledby="btnGroupDrop1">
+                                    <a class="dropdown-item" href="#" id="domain_statistics"><i
+                                            class="fa fa-fw fa-lg fa-line-chart"></i>统计</a>
+                                    <a class="dropdown-item" href="#" id="domain_memo_export"><i
+                                            class="fa fa-fw fa-lg fa-flag"></i>备忘录信息</a>
+                                    <a class="dropdown-item" href="#" id="batch_delete"><i
+                                            class="fa fa-fw fa-lg fa-remove"></i>删除</a>
+                                </div>
+                            </div>
+                            <button class="btn btn-secondary" type="button" data-toggle="collapse"
+                                    href="#collapseExample"
+                                    role="button"
+                                    aria-expanded="false" aria-controls="collapseExample"><i
+                                    class="fa fa-angle-double-down"></i>更多
+                            </button>
+                        </div>
+                        <input type="hidden" value="{{ .data.OrgId }}" id="hidden_org_id">
+                    </form>
+                </div>
+                <div>
+                    <div class="collapse" id="collapseExample">
+                        <form class="row">
+                            <div class="form-group col-md-2">
+                                <label class="control-label" for="select_color_tag">颜色标记</label>
+                                <select class="form-control" title="颜色标记" id="select_color_tag">
+                                    <option class="bg-white" value="">--不限--</option>
+                                    <option class="bg-danger " value="badge-danger">RED</option>
+                                    <option class="bg-warning" value="badge-warning">YELLOW</option>
+                                    <option class="bg-info" value="badge-info">BLUE</option>
+                                    <option class="bg-success" value="badge-success">GREEN</option>
+                                    <option class="bg-secondary" value="badge-secondary">GRAY</option>
+                                    <option class="bg-dark" value="badge-dark">BLANK</option>
+                                </select>
+                            </div>
+                            <div class="form-group col-md-2">
+                                <label class="control-label" for="memo_content">备忘录信息</label>
+                                <input class="form-control" type="text" id="memo_content" placeholder="备忘录信息(模糊搜索）"
+                                       value="">
+                            </div>
+                            <div class="form-group col-md-2">
+                                <div class="form-check form-check-inline">
+                                    <label class="form-check-label"
+                                           for="checkbox_disable_fofa">
+                                        <input class="form-check-input"
+                                               id="checkbox_disable_fofa" type="checkbox">不看FOFA信息
+                                    </label>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+            <div class="tile">
+                <div class="tile-body">
+                    <table class="table table-hover table-bordered dataTable no-footer" id="domain_table"
+                           width="100%">
+                    </table>
+                    <!-- 模态对话框：任务-->
+                    <div class="modal fade" id="newTask" tabindex="-1" role="dialog" aria-labelledby="myModalLabel"
+                         aria-hidden="true">
+                        <div class="modal-dialog">
+                            <div class="modal-content">
+                                <div class="modal-header card-header bg-primary">
+                                    <h4 class="modal-title" id="myModalLabel">
+                                        新建任务
+                                    </h4>
+                                </div>
+                                <div class="modal-body">
+                                    <form class="form-horizontal" role="form">
+                                        <div class="form-group">
+                                            <label for="text_target">
+                                                <b><span class="text-danger">*</span>Targets:</b>
+                                            </label>
+                                            <textarea class="form-control" id="text_target" rows="4"
+                                                      placeholder="www.google.com&#10;github.com"></textarea>
+                                            <div class="bs-component">
+                                                <ul class="nav nav-tabs" id="nav_tabs">
+                                                    <li class="nav-item"><a class="nav-link active"
+                                                                            data-toggle="tab"
+                                                                            href="#domainscan"><strong>资产扫描</strong></a>
+                                                    </li>
+                                                    <li class="nav-item"><a class="nav-link" data-toggle="tab"
+                                                                            href="#vulverify"><strong>漏洞验证</strong></a>
+                                                    </li>
+                                                </ul>
+                                                <div class="tab-content" id="myTabContent">
+                                                    <div class="tab-pane fade active show" id="domainscan">
+                                                        <div class="row">
+                                                            <div class="col-md-12 bg-light">
+                                                                <label class="col-form-label">
+                                                                    <b>子域名收集:</b>
+                                                                </label>
+                                                                <br>
+                                                                <div class="form-check form-check-inline">
+                                                                    <label class="form-check-label"
+                                                                           for="checkbox_subfinder">
+                                                                        <input class="form-check-input"
+                                                                               id="checkbox_subfinder"
+                                                                               type="checkbox" checked>子域名枚举
+                                                                    </label>
+                                                                </div>
+                                                                <div class="form-check form-check-inline">
+                                                                    <label class="form-check-label"
+                                                                           for="checkbox_subdomainbrute">
+                                                                        <input class="form-check-input"
+                                                                               id="checkbox_subdomainbrute"
+                                                                               type="checkbox" checked>子域名爆破
+                                                                    </label>
+                                                                </div>
+                                                                <div class="form-check form-check-inline">
+                                                                    <label class="form-check-label"
+                                                                           for="checkbox_jsfinder" disabled="">
+                                                                        <input class="form-check-input"
+                                                                               id="checkbox_jsfinder"
+                                                                               type="checkbox" disabled>JSFinder
+                                                                    </label>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                        <div class="row">
+                                                            <div class="col-md-12">
+                                                                <label class="col-form-label">
+                                                                    <b>指纹收集：</b>
+                                                                </label>
+                                                                <br>
+                                                                <div class="form-check form-check-inline">
+                                                                    <label class="form-check-label"
+                                                                           for="checkbox_httpx">
+                                                                        <input class="form-check-input"
+                                                                               id="checkbox_httpx" type="checkbox"
+                                                                               checked>HTTPX指纹
+                                                                    </label>
+                                                                </div>
+                                                                <div class="form-check form-check-inline">
+                                                                    <label class="form-check-label"
+                                                                           for="checkbox_whatweb">
+                                                                        <input class="form-check-input"
+                                                                               id="checkbox_whatweb" type="checkbox"
+                                                                        >WhatWeb指纹
+                                                                    </label>
+                                                                </div>
+                                                                <div class="form-check form-check-inline">
+                                                                    <label class="form-check-label"
+                                                                           for="checkbox_screenshot">
+                                                                        <input class="form-check-input"
+                                                                               id="checkbox_screenshot" type="checkbox"
+                                                                               checked
+                                                                        >截图
+                                                                    </label>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                        <div class="row bg-light">
+                                                            <div class="col-md-12">
+                                                                <label class="col-form-label">
+                                                                    <b>其它：</b>
+                                                                </label>
+                                                                <br>
+                                                                <div class="form-check form-check-inline"
+                                                                     for="checkbox_fofasearch">
+                                                                    <label class="form-check-label">
+                                                                        <input class="form-check-input"
+                                                                               id="checkbox_fofasearch"
+                                                                               type="checkbox">FOFA
+                                                                    </label>
+                                                                </div>
+                                                                <div class="form-check form-check-inline"
+                                                                     for="checkbox_icpquery">
+                                                                    <label class="form-check-label">
+                                                                        <input class="form-check-input"
+                                                                               id="checkbox_icpquery"
+                                                                               type="checkbox">ICP备案
+                                                                    </label>
+                                                                </div>
+                                                                <div class="form-check form-check-inline"
+                                                                     for="checkbox_fld_domain">
+                                                                    <label class="form-check-label">
+                                                                        <input class="form-check-input"
+                                                                               id="checkbox_fld_domain"
+                                                                               type="checkbox">提取顶级域名
+                                                                    </label>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                        <div class="row">
+                                                            <div class="col-md-12">
+                                                                <label class="col-form-label">
+                                                                    <b>端口扫描：</b>
+                                                                </label>
+                                                                <br>
+                                                                <div class="form-check form-check-inline">
+                                                                    <label class="form-check-label"
+                                                                           for="checkbox_portscan">
+                                                                        <input class="form-check-input"
+                                                                               id="checkbox_portscan"
+                                                                               type="checkbox">IP扫描
+                                                                    </label>
+                                                                </div>
+                                                                <div class="form-check form-check-inline">
+                                                                    <label class="form-check-label"
+                                                                           for="checkbox_networkscan">
+                                                                        <input class="form-check-input"
+                                                                               id="checkbox_networkscan"
+                                                                               type="checkbox">C段扫描
+                                                                    </label>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                        <div class="form-group row">
+                                                            <div class="col-md-12">
+                                                                <div class="form-check form-check-inline">
+                                                                    <label class="form-check-label"
+                                                                           for="checkbox_subtask">
+                                                                        <input class="form-check-input"
+                                                                               id="checkbox_subtask"
+                                                                               type="checkbox"><b>并发子任务模式</b>
+                                                                    </label>
+                                                                </div>
+                                                                <br>
+                                                                <label for="select_org_id_task"><b>资产关联的组织机构</b></label>
+                                                                <select class="form-control"
+                                                                        id="select_org_id_task">
+                                                                </select>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <div class="tab-pane fade" id="vulverify">
+                                                        <div class="form-group row bg-light">
+                                                            <div class="col-md-12">
+                                                                <p></p>
+                                                                <div class="form-check form-check-inline">
+                                                                    <label class="form-check-label"
+                                                                           for="checkbox_pocsuite3">
+                                                                        <input class="form-check-input"
+                                                                               id="checkbox_pocsuite3"
+                                                                               type="checkbox"><b>Pocsuite3</b>
+                                                                    </label>
+                                                                </div>
+                                                                <input class="form-control"
+                                                                       id="input_pocsuite3_poc_file" type="text"
+                                                                       placeholder="--选择poc文件--" values=""
+                                                                       list="datalist_pocsuite3_poc_file">
+                                                                <datalist id="datalist_pocsuite3_poc_file"
+                                                                          style="display:none;">
+                                                                </datalist>
+                                                                <p></p>
+                                                                <div class="form-check form-check-inline">
+                                                                    <label class="form-check-label"
+                                                                           for="checkbox_xray">
+                                                                        <input class="form-check-input"
+                                                                               id="checkbox_xray"
+                                                                               type="checkbox"><b>XRay</b>
+                                                                    </label>
+                                                                </div>
+                                                                <input class="form-control" id="input_xray_poc_file"
+                                                                       type="text"
+                                                                       placeholder="--选择poc文件--" values=""
+                                                                       list="datalist_xray_poc_file">
+                                                                <datalist id="datalist_xray_poc_file"
+                                                                          style="display:none;">
+                                                                </datalist>
+                                                                <p></p>
+                                                            </div>
+                                                        </div>
+                                                        <div style="height:50px"><p></p></div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </form>
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-secondary" data-dismiss="modal"
+                                            aria-hidden="true">取消
+                                    </button>
+                                    <button class="btn btn-primary org-update" type="button" id="start_task">
+                                        开始任务
+                                    </button>
+                                </div>
+                            </div><!-- /.modal-content -->
+                        </div><!-- /.modal-dialog -->
+                    </div> <!-- table responsive-->
+                </div>
+                <!----tile body-->
+            </div> <!-- tile -->
+        </div> <!-- col md-12 -->
+    </div>
+    <!--row-->
+</main>
+<script src="static/js/jquery/jquery-3.3.1.min.js"></script>
+<script src="static/js/bootstrap/popper.min.js"></script>
+<script src="static/js/bootstrap/bootstrap.min.js"></script>
+<script src="static/js/main.js"></script>
+<script src="static/js/plugins/pace.min.js"></script>
+<!-- Data table plugin-->
+<script src="static/js/plugins/jquery.dataTables.min.js"></script>
+<script src="static/js/plugins/dataTables.bootstrap.min.js"></script>
+<script src="static/js/sweetalert/sweetalert.min.js"></script>
+<script src="static/js/jquery/jquery.bootstrap-duallistbox.js"></script>
+<script src="static/js/server/domain-list.js"></script>
+<script src="static/js/server/assert-list.js"></script>

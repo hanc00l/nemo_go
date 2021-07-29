@@ -1,0 +1,84 @@
+<main class="app-content">
+    <div class="app-title">
+        <div>
+            <h1><i class="fa fa-dashboard"></i> 自定义配置 </h1>
+        </div>
+        <ul class="app-breadcrumb breadcrumb">
+            <li class="breadcrumb-item"><i class="fa fa-home fa-lg"></i></li>
+            <li class="breadcrumb-item"><a href="/">首页</a></li>
+            <li class="breadcrumb-item active"><a href="#">自定义管理</a></li>
+        </ul>
+    </div>
+    <div class="row">
+        <div class="col-md-6">
+            <div class="tile">
+                <h3 class="tile-title">IP归属地</h3>
+                <div class="tile-body">
+                        <div class="form-group">
+                            <label class="col-form-label" for="text_iplocation">
+                                <b>IP:</b> <button class="btn btn-primary" type="button" id="buttonSaveIPLocation">保存IP设置
+                            </button>&nbsp;
+                            </label>
+                            <textarea class="form-control" id="text_iplocation" rows="8"></textarea>
+
+                            <label class="col-form-label" for="text_iplocationC">
+                                <b>C段:</b> <button class="btn btn-primary" type="button" id="buttonSaveIPLocationC">保存C段设置
+                            </button>&nbsp;
+                            </label>
+                            <textarea class="form-control" id="text_iplocationC" rows="8"></textarea>
+
+                            <label class="col-form-label" for="text_iplocationB">
+                                <b>B段:</b>
+                                <button class="btn btn-primary" type="button" id="buttonSaveIPLocationB">保存B段设置
+                                </button>&nbsp;
+                            </label>
+                            <textarea class="form-control" id="text_iplocationB" rows="8"></textarea>
+                        </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="tile">
+                <h3 class="tile-title">服务</h3>
+                <div class="tile-body">
+                    <form>
+                        <div class="form-group">
+                            <textarea class="form-control" id="text_service" rows="8"></textarea>
+                        </div>
+                    </form>
+                </div>
+                <div class="tile-footer">
+                    <button class="btn btn-primary" type="button" id="buttonSaveService"><i
+                            class="fa fa-fw fa-lg fa-check-circle"></i>保存设置
+                    </button>&nbsp;&nbsp;&nbsp;
+                </div>
+            </div>
+            <div class="tile">
+                <h3 class="tile-title">蜜罐</h3>
+                <div class="tile-body">
+                    <form>
+                        <div class="form-group">
+                            <textarea class="form-control" id="text_honeypot" rows="8"></textarea>
+                        </div>
+                    </form>
+                </div>
+                <div class="tile-footer">
+                    <button class="btn btn-primary" type="button" id="buttonSaveHoneypot"><i
+                            class="fa fa-fw fa-lg fa-check-circle"></i>保存设置
+                    </button>&nbsp;&nbsp;&nbsp;
+                </div>
+            </div>
+        </div>
+        <div class="clearix"></div>
+    </div>
+</main>
+<script src="static/js/jquery/jquery-3.3.1.min.js"></script>
+<script src="static/js/bootstrap/popper.min.js"></script>
+<script src="static/js/bootstrap/bootstrap.min.js"></script>
+<script src="static/js/main.js"></script>
+<script src="static/js/plugins/pace.min.js"></script>
+<script src="static/js/plugins/jquery.dataTables.min.js"></script>
+<script src="static/js/plugins/dataTables.bootstrap.min.js"></script>
+<script src="static/js/sweetalert/sweetalert.min.js"></script>
+<script src="static/js/jquery/jquery.bootstrap-duallistbox.js"></script>
+<script src="static/js/server/config.js"></script>

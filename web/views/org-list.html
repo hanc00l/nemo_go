@@ -1,0 +1,91 @@
+<main class="app-content">
+    <div class="app-title">
+        <div>
+            <h1><i class="fa fa-th-list"></i>&nbsp;机构列表</h1>
+            <p></p>
+        </div>
+        <ul class="app-breadcrumb breadcrumb side">
+            <li class="breadcrumb-item"><i class="fa fa-home fa-lg"></i></li>
+            <li class="breadcrumb-item"><a href="/index">首页</a></li>
+            <li class="breadcrumb-item active"><a href="#">组织列表</a></li>
+        </ul>
+    </div>
+
+    <div class="row">
+        <div class="col-md-12">
+            <div class="tile">
+                <div class="tile-body">
+                    <a class="btn btn-primary" href="org-add" role="button" title="新建组织">
+                        <i class="fa fa-gitlab fa-lg"></i>新建组织</a>
+                    <br>
+                    <br>
+                    <table class="table table-hover table-bordered dataTable no-footer" id="org_table" role="grid"
+                           aria-describedby="org_table">
+                    </table>
+                    <!-- 模态对话框：修改-->
+                    <div class="modal fade" id="editOrg" tabindex="-1" role="dialog" aria-labelledby="myModalLabel"
+                         aria-hidden="true">
+                        <div class="modal-dialog">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h4 class="modal-title" id="myModalLabel">
+                                        修改组织
+                                    </h4>
+                                </div>
+                                <div class="modal-body">
+                                    <form class="form-horizontal" role="form">
+                                        <div class="form-group">
+                                            <label class="control-label no-padding-right">组织名称</label>
+                                            <div>
+                                                <input class="form-control col-md-7" title="组织名称" id="org_name">
+                                            </div>
+                                        </div>
+                                        <div class="form-group">
+                                            <label class="control-label no-padding-right">排序号</label>
+                                            <div>
+                                                <input class="form-control col-md-7" title="排序号" id="sort_order">
+                                            </div>
+                                        </div>
+
+                                        <div class="form-group">
+                                            <label class="control-label no-padding-right">状态</label>
+                                            <div>
+                                                <select class="form-control col-md-7" title="组织状态" id="status">
+                                                    <option value="enable">Enable</option>
+                                                    <option value="disable">Disable</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                        <div class="hr hr-16 hr-dotted"></div>
+                                        <div class="modal-footer">
+                                            <button type="button" class="btn btn-secondary" data-dismiss="modal"
+                                                    aria-hidden="true">Cancel
+                                            </button>
+                                            <button class="btn btn-primary org-update" type="button" id="org_update">
+                                                <span>更新</span> <i class="fa fa-send m-l-10"></i>
+                                            </button>
+                                        </div>
+                                        <input type="hidden" id="org_id">
+                                    </form>
+                                </div>
+                            </div><!-- /.modal-content -->
+                        </div><!-- /.modal-dialog -->
+                    </div>
+                </div>
+                <!----tile body-->
+            </div> <!-- tile -->
+        </div> <!-- col md-12 -->
+    </div>
+    <!--row-->
+</main>
+<script src="static/js/jquery/jquery-3.3.1.min.js"></script>
+<script src="static/js/bootstrap/popper.min.js"></script>
+<script src="static/js/bootstrap/bootstrap.min.js"></script>
+<script src="static/js/main.js"></script>
+<script src="static/js/plugins/pace.min.js"></script>
+<!-- Data table plugin-->
+<script type="text/javascript" src="static/js/plugins/jquery.dataTables.min.js"></script>
+<script type="text/javascript" src="static/js/plugins/dataTables.bootstrap.min.js"></script>
+<script src="static/js/sweetalert/sweetalert.min.js"></script>
+<script src="static/js/jquery/jquery.bootstrap-duallistbox.js"></script>
+<script type="text/javascript" src="static/js/server/org-list.js"></script>

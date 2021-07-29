@@ -1,0 +1,96 @@
+<main class="app-content">
+    <div class="row">
+        <div class="col-md-12">
+            <div class="bs-component">
+                <div class="card">
+                    <h2 class="card-header">
+                        <div class="form-check-inline">
+                            {{ .task_info.TaskId }}
+                        </div>
+                    </h2>
+                    <div class="card-body">
+                        <b><span class="btn btn-info">任务名称</span></b>
+                        <span class="btn btn-warning text-left">
+                            {{ .task_info.TaskName }}
+                        </span>
+                        <br><br>
+                        <b><span class="btn btn-info">任务状态</span></b>
+                        <span class="btn btn-warning  text-left">{{ .task_info.State }}</span>
+                        {{ if .task_info.ReceivedTime }}
+                        <b><span class="btn btn-info">接收任务时间</span></b>
+                        <span class="btn border-success text-left">
+                           {{ .task_info.ReceivedTime }}</span>
+                        {{ end }}
+                        {{ if .task_info.StartedTime }}
+                        <b><span class="btn btn-info">开始任务时间</span></b>
+                        <span class="btn border-success text-left">
+                           {{ .task_info.StartedTime }}</span>
+                        {{ end }}
+                        <br><br>
+                        {{ if .task_info.Worker }}
+                        <b><span class="btn btn-info">任务worker</span></b>
+                        <span class="btn border-secondary text-left">
+                           {{ .task_info.Worker }}</span>
+                        {{ end }}
+                        {{ if .task_info.KwArgs }}
+                        <b><span class="btn btn-info">任务参数</span></b>
+                        <br><br>
+                        <span class="btn border-secondary text-left">
+                            {{ .task_info.KwArgs }}</span>
+                        <br><br>
+                        {{ end }}
+                        {{ if .task_info.Result }}
+                        <b><span class="btn btn-info">任务结果</span></b>
+                        <span class="btn border-secondary text-left">
+                            {{ .task_info.Result }}</span>
+                        <br><br>
+                        {{ end }}
+                        {{ if .task_info.SucceededTime }}
+                        <b><span class="btn btn-info">任务成功时间</span></b>
+                        <span class="btn border-success text-left">
+                           {{ .task_info.SucceededTime }}</span>
+                        {{ end }}
+                        {{ if .task_info.FailedTime }}
+                        <b><span class="btn btn-info">任务失败</span></b>
+                        <span class="btn border-success text-left">
+                           {{ .task_info.FailedTime }}</span>
+                        {{ end }}
+                        {{ if .task_info.RetriedTime }}
+                        <b><span class="btn btn-info">任务重试时间</span></b>
+                        <span class="btn border-success text-left">
+                           {{ .task_info.RetriedTime }}</span>
+                        {{ end }}
+                        {{ if .task_info.RevokedTime }}
+                        <b><span class="btn btn-info">任务中止时间</span></b>
+                        <span class="btn border-success text-left">
+                           {{ .task_info.RevokedTime }}</span>
+                        <br><br>
+                        {{ end }}
+                        {{ if .task_info.Runtime }}
+                        <b><span class="btn btn-info">任务执行时长</span></b>
+                        <span class="btn border-success text-left">
+                           {{ .task_info.Runtime }}</span>
+                        {{ end }}
+                        <br><br>
+                        <b><span class="btn btn-info">创建时间</span></b>
+                        <span class="btn border-success">{{ .task_info.CreateTime }}</span>
+                        <b><span class="btn btn-info">更新时间</span></b>
+                        <span class="btn border-success">{{ .task_info.UpdateTime }}</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!--row-->
+</main>
+<script src="static/js/jquery/jquery-3.3.1.min.js"></script>
+<script src="static/js/bootstrap/popper.min.js"></script>
+<script src="static/js/bootstrap/bootstrap.min.js"></script>
+<script src="static/js/main.js"></script>
+<script src="static/js/plugins/pace.min.js"></script>
+<script>
+    $(function () {
+        $("title").html(" {{ .task_info.TaskId }}-taskinfo");
+        $('#btnsiderbar').click();
+    });
+</script>

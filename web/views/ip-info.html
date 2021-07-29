@@ -1,0 +1,270 @@
+<main class="app-content">
+    <div class="row">
+        <div class="col-md-12">
+            <div class="imgPreview"><img src="#" alt="" id="imgPreview">
+            </div>
+            <div class="bs-component">
+                <div class="card">
+                    <h2 class="card-header">
+                        <div class="form-check-inline">
+                            <button type="button" id="btn_editIpMemo" class="btn btn-secondary"><i
+                                    class="fa fa-pencil-square-o"></i>编辑备忘录
+                            </button>&nbsp;
+                            <div class="dropdown">
+                                <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton"
+                                        data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><i
+                                        class="fa fa-tags"></i>
+                                    标记颜色
+                                </button>
+                                &nbsp;
+                                <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+                                    <a class="dropdown-item bg-danger"
+                                       href="javascript:mark_ip_color_tag({{ .ip_info.Id }},'badge-danger')">RED</a>
+                                    <a class="dropdown-item bg-warning"
+                                       href="javascript:mark_ip_color_tag({{ .ip_info.Id }},'badge-warning')">YELLOW</a>
+                                    <a class="dropdown-item bg-info"
+                                       href="javascript:mark_ip_color_tag({{ .ip_info.Id }},'badge-info')">BLUE</a>
+                                    <a class="dropdown-item bg-success"
+                                       href="javascript:mark_ip_color_tag({{ .ip_info.Id }},'badge-success')">GREEN</a>
+                                    <a class="dropdown-item bg-secondary"
+                                       href="javascript:mark_ip_color_tag({{ .ip_info.Id }},'badge-secondary')">GRAY</a>
+                                    <a class="dropdown-item bg-dark"
+                                       href="javascript:mark_ip_color_tag({{ .ip_info.Id }},'badge-dark')">BLANK</a>
+                                    <a class="dropdown-item  bg-white"
+                                       href="javascript:mark_ip_color_tag({{ .ip_info.Id }},'DELETE')">清除标记</a>
+                                </div>
+                            </div>
+                            {{ if .ip_info.ColorTag }}
+                            <a href="http://{{ .ip_info.IP }}" class="badge {{ .ip_info.ColorTag }}"
+                               target="_blank">{{ .ip_info.IP }}</a>
+                            {{ else }}
+                            <a href="http://{{.ip_info.IP }}" target="_blank">{{ .ip_info.IP }}</a>
+                            {{ end }}
+                        </div>
+                    </h2>
+                    <div class="card-body">
+                        {{ if .ip_info.Domain }}
+                        <span class="btn btn-info">关联域名</span>
+                        <span class="btn btn-warning text-left">
+                            {{ range .ip_info.Domain }}
+                            <a href="domain-info?domain={{ . }}" target="_blank">{{ . }}</a>&nbsp;
+                            {{ end }}
+                        </span>
+                        {{ end }}
+                        <span class="btn btn-info">端口信息</span>
+                        <span class="btn btn-warning  text-left">{{ .ip_info.Port }}</span>
+                        {{ if or .ip_info.Title .ip_info.Banner }}
+                        <br><br>
+                        {{ end }}
+                        {{ if .ip_info.Title }}
+                        <span class="btn btn-info">站点标题</span>
+                        <span style="margin: 10px;"><strong>{{ .ip_info.Title }}</strong></span>
+                        {{ end }}
+                        {{ if .ip_info.Banner }}
+                        <span class="btn btn-info">Banner</span>
+                        <span style="margin: 10px;"><strong>{{ .ip_info.Banner }}</strong></span>
+                        {{ end }}
+                        <br><br>
+                        {{ if .ip_info.Location }}
+                        <span class="btn btn-info">归属地</span>
+                        <span class="btn border-success  text-left">{{.ip_info.Location }}</span>
+                        {{ end}}
+                        {{ if .ip_info.Organization }}
+                        <span class="btn btn-info">所属组织</span>
+                        <span class="btn border-success">{{ .ip_info.Organization }}</span>
+                        {{ end }}
+                        <span class="btn btn-info">创建时间</span>
+                        <span class="btn border-success">{{ .ip_info.CreateTime }}</span>
+                        <span class="btn btn-info">更新时间</span>
+                        <span class="btn border-success">{{ .ip_info.UpdateTime }}</span>
+                        {{ if .ip_info.Memo }}
+                        <p></p>
+                        <p>
+                            <button class="btn btn-info" type="button" data-toggle="collapse"
+                                    data-target="#collapseExample" aria-expanded="false"
+                                    aria-controls="collapseExample">
+                                备忘录信息
+                            </button>
+                        </p>
+                        <div class="collapse.show" id="collapseExample">
+                            <div id="memo_content" class="card card-body">
+                                <pre>{{.ip_info.Memo }}</pre>
+                            </div>
+                        </div>
+                        {{ end }}
+                        {{ if .ip_info.Screenshot }}
+                        <p></p>
+                        <p>
+                            <button class="btn btn-info" type="button" data-toggle="collapse"
+                                    data-target="#collapseScreenShot" aria-expanded="false"
+                                    aria-controls="collapseScreenShot">
+                                ScreenShot
+                            </button>
+                        </p>
+                        <div class="collapse.show" id="collapseScreenShot">
+                            <div id="screenshot_content" class="card card-body">
+                                <div>
+                                    {{ range .ip_info.Screenshot }}
+                                    <img src="{{ .ScreenShotThumbnailFile }}" class="img" width="120"
+                                         style="display: block;float: left;margin-right: 5px;"
+                                         onclick=show_bigpic({{ .ScreenShotFile }}) title="{{ .Tooltip }}"/>
+                                    {{ end }}
+                                </div>
+                            </div>
+                        </div>
+                        {{ end }}
+                        {{ if .ip_info.Vulnerability }}
+                        <p></p>
+                        <p>
+                            <button class="btn btn-danger" type="button" data-toggle="collapse"
+                                    data-target="#collapseExample2" aria-expanded="false"
+                                    aria-controls="collapseExample2">
+                                漏洞信息
+                            </button>
+                        </p>
+                        <div class="collapse.show" id="collapseExample2">
+                            <table class="table table-bordered">
+                                <thead>
+                                <tr class="alert-dark">
+                                    <th width="10%">Target</th>
+                                    <th width="25%">URL</th>
+                                    <th width="35%">Poc File</th>
+                                    <th width="10%">Source</th>
+                                    <th width="15%">更新时间</th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                {{ range .ip_info.Vulnerability}}
+                                <tr>
+                                    <td>{{ .Target }}</td>
+                                    <td>{{ .Url }}</td>
+                                    <td>
+                                        <a href="vulnerability-info?id={{ .Id }}" target="_blank">{{ .PocFile }}</a>
+                                    </td>
+                                    <td>{{ .Source }}</td>
+                                    <td>{{ .UpdateTime }}</td>
+                                    {{ end }}
+                                </tbody>
+                            </table>
+                        </div>
+                        {{ end }}
+                    </div>
+                    <div class="card-footer text-muted">
+                        <h5>端口信息</h5>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-12">
+            <div class="tile">
+                <table class="table table-bordered">
+                    <thead>
+                    <tr>
+                        <th width="8%">IP地址</th>
+                        <th width="5%">端口</th>
+                        <th width="5%">来源</th>
+                        <th width="5%">属性</th>
+                        <th width="30%">内容</th>
+                        <th width="8%">创建时间</th>
+                        <th width="8%">更新时间</th>
+                        <th width="5%">操作</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {{ range .ip_info.PortAttr }}
+                    {{ if .TableBackgroundSet }}
+                    <tr class="alert-dark">
+                        {{ else }}
+                    <tr>
+                        {{ end }}
+                        <td>
+                            {{ .IP }}
+                        </td>
+                        <td>
+                            {{ if and .IP .Port }}
+                            {{ if eq .Port "443" "8443" }}
+                            <a href="https://{{.IP}}:{{.Port}}" target="_blank">{{.Port}}</a>
+                            {{ else }}
+                            <a href="http://{{.IP}}:{{.Port}}" target="_blank">{{.Port}}</a>
+                            {{ end }}
+                            {{ else }}
+                            {{ .Port }}
+                            {{ end }}
+                        </td>
+                        <td>
+                            {{ if eq .Source "portscan" }}
+                            <span class="badge badge-warning"> {{ .Source }}</span>
+                            {{ else if eq .Source "fofa" }}
+                            {{ if .FofaLink }}
+                            <a href="{{ .FofaLink }}" target="_blank"><span
+                                    class="badge badge-success">  {{ .Source }} </span></a>
+                            {{ else }}
+                            <span class="badge badge-success"> {{ .Source }}</span>
+                            {{end }}
+                            {{ else }}
+                            <span class="badge badge-secondary"> {{ .Source }}</span>
+                            {{ end }}
+                        </td>
+                        <td>{{ .Tag }}</td>
+                        <td>
+                            <div id="div_content"
+                                 style="width:100%;white-space:normal;word-wrap:break-word;word-break:break-all;">
+                                {{ .Content }}
+                            </div>
+                        </td>
+                        <td>{{ .CreateTime }}</td>
+                        <td>{{ .UpdateTime }}</td>
+                        <td><a class="btn btn-sm btn-danger" href="javascript:delete_port_attr({{ .Id }})"
+                               role="button" title="Delete"><i class="fa fa-trash-o"></i></a>
+                        </td>
+                    </tr>
+                    {{ end }}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    <!--row-->
+</main>
+<!-- 模态对话框：编辑备忘录-->
+<div class="modal fade" id="editMemo" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header card-header bg-primary">
+                <h4 class="modal-title" id="myModalLabel">
+                    编辑备忘录
+                </h4>
+            </div>
+            <div class="modal-body ">
+                <form class="form-horizontal" role="form">
+                    <div class="form-group">
+                        <textarea class="form-control" id="text_content" rows="15" placeholder="输入备忘录信息..."></textarea>
+                    </div>
+                    <input type="hidden" id="r_id" value="{{.ip_info.Id }}"/>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal" aria-hidden="true">取消
+                </button>
+                <button class="btn btn-primary org-update" type="button" id="btn_saveIpMemo">
+                    保存
+                </button>
+            </div>
+        </div><!-- /.modal-content -->
+    </div><!-- /.modal-dialog -->
+</div> <!-- table responsive-->
+<script src="static/js/jquery/jquery-3.3.1.min.js"></script>
+<script src="static/js/bootstrap/popper.min.js"></script>
+<script src="static/js/bootstrap/bootstrap.min.js"></script>
+<script src="static/js/main.js"></script>
+<script src="static/js/plugins/pace.min.js"></script>
+<script src="static/js/plugins/jquery.dataTables.min.js"></script>
+<script src="static/js/plugins/dataTables.bootstrap.min.js"></script>
+<script src="static/js/sweetalert/sweetalert.min.js"></script>
+<script src="static/js/jquery/jquery.bootstrap-duallistbox.js"></script>
+<script src="static/js/server/asset-info.js"></script>
+<script>
+    $("title").html(" {{.ip_info.IP }}-ipinfo");
+</script>
