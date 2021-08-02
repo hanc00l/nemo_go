@@ -18,11 +18,11 @@ rabbitmq:
   password: guest
 api:
   fofa:
-    name: xxx
-    key: xxx
+    name:
+    key:
   icp:
     name: chinaz
-    key: xxx
+    key: 
 portscan:
   ping: false
   port: --top-ports 1000
