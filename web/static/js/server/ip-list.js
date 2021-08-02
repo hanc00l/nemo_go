@@ -1,4 +1,5 @@
 $(function () {
+    load_portscan_config();
     //搜索
     $("#search").click(function () {
         $("#hidden_org_id").val($("#select_org_id_search").val())
@@ -44,6 +45,7 @@ $(function () {
                     'httpx': $('#checkbox_httpx').is(":checked"),
                     'exclude': exclude_ip,
                     'screenshot': $('#checkbox_screenshot').is(":checked"),
+                    'wappalyzer': $('#checkbox_wappalyzer').is(":checked"),
                 }, function (data, e) {
                     if (e === "success" && data['status'] == 'success') {
                         swal({
@@ -116,6 +118,7 @@ $(function () {
             $("#checkbox_exclude").prop("disabled", false);
             $("#input_exclude").prop("disabled", false);
             $("#checkbox_screenshot").prop("disabled", false);
+            $("#checkbox_wappalyzer").prop("disabled", false);
         } else {
             $("#input_port").prop("disabled", true);
             $("#select_tech").prop("disabled", true);
@@ -127,6 +130,7 @@ $(function () {
             $("#checkbox_exclude").prop("disabled", true);
             $("#input_exclude").prop("disabled", true);
             $("#checkbox_screenshot").prop("disabled", true);
+            $("#checkbox_wappalyzer").prop("disabled", true);
         }
     })
 
@@ -320,6 +324,7 @@ function get_export_options() {
 
 function load_portscan_config() {
     $.post("/config-list", function (data) {
+        $('#input_cmdbin').val(data['cmdbin']);
         $('#input_port').val(data['port']);
         $('#select_tech').val(data['tech']);
         $('#input_rate').val(data['rate']);

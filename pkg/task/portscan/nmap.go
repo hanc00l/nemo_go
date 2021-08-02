@@ -96,7 +96,7 @@ func (nmap *Nmap) parseResult(outputTempFile string) {
 				nmap.Result.SetPort(ip, portNumber)
 			}
 			service := portInfo[4]
-			if service == custom.UnknownService {
+			if service == custom.UnknownService || service == "" {
 				service = s.FindService(portNumber, ip)
 			}
 			nmap.Result.SetPortAttr(ip, portNumber, PortAttrResult{

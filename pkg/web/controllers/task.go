@@ -80,6 +80,7 @@ type portscanRequestParam struct {
 	IsSubtask    bool   `form:"subtask"`
 	ExcludeIP    string `form:"exclude"`
 	IsScreenshot bool   `form:"screenshot"`
+	IsWappalyzer bool   `form:"wappalyzer"`
 }
 
 type domainscanRequestParam struct {
@@ -97,6 +98,7 @@ type domainscanRequestParam struct {
 	IsSubtask        bool   `form:"subtask"`
 	IsScreenshot     bool   `form:"screenshot"`
 	IsICPQuery       bool   `form:"icpquery"`
+	IsWappalyzer     bool   `form:"wappalyzer"`
 }
 
 type pocscanRequestParam struct {
@@ -371,6 +373,7 @@ func (c *TaskController) doDomainscan(target string, req domainscanRequestParam)
 		IsIPPortScan:       req.IsIPPortscan,
 		IsIPSubnetPortScan: req.IsSubnetPortscan,
 		IsScreenshot:       req.IsScreenshot,
+		IsWappalyzer:       req.IsWappalyzer,
 	}
 	// config.OrgId 为int，默认为0
 	// db.Organization.OrgId为指针，默认nil
@@ -404,6 +407,7 @@ func (c *TaskController) doPortscan(target string, req portscanRequestParam) (ta
 		IsHttpx:       req.IsHttpx,
 		IsWhatWeb:     req.IsWhatweb,
 		IsScreenshot:  req.IsScreenshot,
+		IsWappalyzer:  req.IsWappalyzer,
 		CmdBin:        "masscan",
 	}
 	if req.CmdBin == "nmap" {

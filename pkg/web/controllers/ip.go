@@ -144,7 +144,7 @@ func (c *IPController) InfoAction() {
 	var ipInfo IPInfo
 	ipName := c.GetString("ip")
 	if ipName != "" {
-		ipInfo = getIPInfo(ipName,false)
+		ipInfo = getIPInfo(ipName, false)
 		// 修改背景色为交叉显示
 		if len(ipInfo.PortAttr) > 0 {
 			tableBackgroundSet := false
@@ -206,7 +206,7 @@ func (c *IPController) StatisticsAction() {
 	r := c.getStatisticsData(req)
 	//输出统计的内容
 	var content []string
-	//Port
+	// Port
 	content = append(content, fmt.Sprintf("Port(%d):", len(r.Port)))
 	var portList []string
 	for _, pair := range utils.SortMapByValue(r.Port, true) {
@@ -214,19 +214,19 @@ func (c *IPController) StatisticsAction() {
 		portList = append(portList, pair.Key)
 	}
 	content = append(content, strings.Join(portList, ","))
-	//C段
+	// C段
 	content = append(content, "")
 	content = append(content, fmt.Sprintf("Subnet(%d):", len(r.IPSubnet)))
 	for _, pair := range utils.SortMapByValue(r.IPSubnet, true) {
 		content = append(content, fmt.Sprintf("%-16s:%d", pair.Key, pair.Value))
 	}
-	//Domain
+	// IP
 	content = append(content, "")
-	content = append(content, fmt.Sprintf("Domain(%d):", len(r.IP)))
+	content = append(content, fmt.Sprintf("IP(%d):", len(r.IP)))
 	for _, pair := range utils.SortMapByValue(r.IP, false) {
 		content = append(content, fmt.Sprintf("%-16s", pair.Key))
 	}
-	//Location
+	// Location
 	content = append(content, "")
 	content = append(content, fmt.Sprintf("Location(%d):", len(r.Location)))
 	for _, pair := range utils.SortMapByValue(r.Location, true) {
@@ -380,7 +380,7 @@ func (c *IPController) getIPListData(req ipRequestParam) (resp DataTableResponse
 		ipData.Id = ipRow.Id
 		ipData.IP = ipRow.IpName
 		ipData.Location = ipRow.Location
-		ipInfo := getIPInfo(ipRow.IpName,req.DisableFofa)
+		ipInfo := getIPInfo(ipRow.IpName, req.DisableFofa)
 		ipData.ColorTag = ipInfo.ColorTag
 		ipData.MemoContent = ipInfo.Memo
 		ipData.Banner = strings.Join(utils.RemoveDuplicationElement(append(ipInfo.Title, ipInfo.Banner...)), ", ")
@@ -423,7 +423,7 @@ func (c *IPController) getIPListData(req ipRequestParam) (resp DataTableResponse
 }
 
 // getPortInfo 获取一个IP的所有端口信息集合
-func getPortInfo(ip string, ipId int,disableFofa bool) (r PortInfo) {
+func getPortInfo(ip string, ipId int, disableFofa bool) (r PortInfo) {
 	r.PortStatus = make(map[int]string)
 	r.BannerSet = make(map[string]struct{})
 	r.TitleSet = make(map[string]struct{})
@@ -441,7 +441,7 @@ func getPortInfo(ip string, ipId int,disableFofa bool) (r PortInfo) {
 		portAttrData := portAttr.GetsByRelatedId()
 		FirstRow := true
 		for _, pad := range portAttrData {
-			if disableFofa && pad.Source == "fofa"{
+			if disableFofa && pad.Source == "fofa" {
 				continue
 			}
 			pai := PortAttrInfo{}
@@ -468,7 +468,16 @@ func getPortInfo(ip string, ipId int,disableFofa bool) (r PortInfo) {
 					r.TitleSet[pad.Content] = struct{}{}
 				}
 			} else if pad.Tag == "banner" || pad.Tag == "server" || pad.Tag == "tag" {
-				if pad.Content != "unknown" {
+				if pad.Content == "unknown" {
+					continue
+				}
+				if pad.Source == "wappalyzer" {
+					for _, b := range strings.Split(pad.Content, ",") {
+						if _, ok := r.BannerSet[b]; !ok {
+							r.BannerSet[b] = struct{}{}
+						}
+					}
+				} else {
 					if _, ok := r.BannerSet[pad.Content]; !ok {
 						r.BannerSet[pad.Content] = struct{}{}
 					}
@@ -480,7 +489,7 @@ func getPortInfo(ip string, ipId int,disableFofa bool) (r PortInfo) {
 }
 
 //getIPInfo 获取一个IP的信息集合
-func getIPInfo(ipName string,disableFofa bool) (r IPInfo) {
+func getIPInfo(ipName string, disableFofa bool) (r IPInfo) {
 	ip := db.Ip{IpName: ipName}
 	if !ip.GetByIp() {
 		return r
@@ -512,7 +521,7 @@ func getIPInfo(ipName string,disableFofa bool) (r IPInfo) {
 		}
 	}
 	// port
-	portInfo := getPortInfo(ipName, ip.Id,disableFofa)
+	portInfo := getPortInfo(ipName, ip.Id, disableFofa)
 	r.PortAttr = portInfo.PortAttr
 	r.Title = utils.SetToSlice(portInfo.TitleSet)
 	r.Banner = utils.SetToSlice(portInfo.BannerSet)
@@ -561,8 +570,8 @@ func (c *IPController) getStatisticsData(req ipRequestParam) IPStatisticInfo {
 		// C段
 		ipArray := strings.Split(ipRow.IpName, ".")
 		subnet := fmt.Sprintf("%s.%s.%s.0/24", ipArray[0], ipArray[1], ipArray[2])
-		if n, ok := r.IPSubnet[ipRow.IpName]; ok {
-			r.IPSubnet[subnet] = n + 1
+		if _, ok := r.IPSubnet[ipRow.IpName]; ok {
+			r.IPSubnet[subnet] ++
 		} else {
 			r.IPSubnet[subnet] = 1
 		}
