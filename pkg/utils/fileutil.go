@@ -102,6 +102,18 @@ func DownloadFile(url, dstPathFile string) (bool, error) {
 	return true, nil
 }
 
+// CheckFileExist 检测文件或目录是否存在
+func CheckFileExist(filepath string) bool {
+	_, err := os.Stat(filepath)
+	if err == nil {
+		return true
+	}
+	if os.IsNotExist(err) {
+		return false
+	}
+	return false
+}
+
 // MakePath 创建目录，如果目录存在则直接返回
 func MakePath(filepath string) bool {
 	_, err := os.Stat(filepath)

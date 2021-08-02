@@ -7,11 +7,13 @@ import (
 	"github.com/hanc00l/nemo_go/pkg/db"
 	"github.com/hanc00l/nemo_go/pkg/logging"
 	"github.com/hanc00l/nemo_go/pkg/task/asynctask"
+	"sync"
 	"time"
 )
 
 type DashboardController struct {
 	BaseController
+	workerStatusMutex sync.Mutex
 	WorkerStatus map[string]*asynctask.WorkerStatus
 }
 
@@ -94,8 +96,10 @@ func (c *DashboardController) WorkerAliveAction() {
 		rData = &StatusResponseData{Status: Fail, Msg: "no worker name"}
 		return
 	}
+	c.workerStatusMutex.Lock()
 	c.WorkerStatus[kai.WorkerStatus.WorkerName] = &kai.WorkerStatus
 	c.WorkerStatus[kai.WorkerStatus.WorkerName].UpdateTime = time.Now()
+	c.workerStatusMutex.Unlock()
 
 	responseData := comm.NewKeepAliveResponseInfo(kai.CustomFiles)
 	rData = &StatusResponseData{Status: Success, Msg: string(responseData)}
@@ -112,6 +116,8 @@ func (c *DashboardController) WorkerAliveListAction() {
 	}
 	index := 1
 	resp := DataTableResponseData{}
+
+	c.workerStatusMutex.Lock()
 	for _, v := range c.WorkerStatus {
 		if time.Now().Sub(v.UpdateTime).Minutes() > 5 {
 			delete(c.WorkerStatus, v.WorkerName)
@@ -126,6 +132,8 @@ func (c *DashboardController) WorkerAliveListAction() {
 		})
 		index++
 	}
+	c.workerStatusMutex.Unlock()
+
 	resp.Draw = req.Draw
 	resp.RecordsTotal = len(c.WorkerStatus)
 	resp.RecordsFiltered = len(c.WorkerStatus)

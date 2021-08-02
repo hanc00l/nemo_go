@@ -48,6 +48,11 @@ func PortScan(taskId, configJSON string) (result string, err error) {
 		httpx.ResultPortScan = resultPortScan
 		httpx.Do()
 	}
+	if config.IsWappalyzer {
+		wappalyzer := fingerprint.NewWappalyzer()
+		wappalyzer.ResultPortScan = resultPortScan
+		wappalyzer.Do()
+	}
 	// 保存结果
 	result = resultPortScan.SaveResult(config)
 
