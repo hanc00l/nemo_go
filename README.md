@@ -2,7 +2,7 @@
 
 <img src="docs/image/index.png" alt="login" />
 
-Nemo是用来进行自动化信息收集的一个简单平台，通过集成常用的信息收集工具和技术，实现对内网及互联网资产信息的自动收集，提高隐患排查和渗透测试的工作效率，用Go语言完全重构了原Python版本。
+Nemo是用来进行自动化信息收集的一个简单平台，通过集成常用的信息收集工具和技术，实现对内网及互联网资产信息的自动收集，提高隐患排查和渗透测试的工作效率，用Golang完全重构了原Python版本。
 
 
 
@@ -26,6 +26,7 @@ Nemo是用来进行自动化信息收集的一个简单平台，通过集成常�
 - [WhatWeb](https://github.com/urbanadventurer/WhatWeb)
 - [HTTPX](https://github.com/projectdiscovery/httpx) 
 - [ScreenShot](https://github.com/chromedp/chromedp) （调用chrome headless）
+- [Wappalyzer](https://github.com/AliasIO/Wappalyzer) （基于[webanalyze](https://github.com/rverton/webanalyze) 代码，可[自定义指纹规则](thirdparty/wappalyzer/technologies_custom.json)）
 
 ### 4、API接口 （需提供相应的Key)
 
@@ -96,7 +97,8 @@ Tested on [ubuntu18.04 LTS](docs/install_linux.md)、macOS
 
 ## 版本更新
 
-- 2.1：2021-7-30，用Go完成对原python3版本的重构；
+- 2.2：2021-8-2，增加基于Wappalyzer规则的指纹识别功能；
+- 2.1：2021-7-30，用Golang完成对原python3版本的重构；
 
 
 

@@ -24,6 +24,7 @@ type Config struct {
 	IsIPPortScan       bool   `json:"portscan"`
 	IsIPSubnetPortScan bool   `json:"subnetPortscan"`
 	IsScreenshot       bool   `json:"screenshot"`
+	IsWappalyzer  bool   `json:"wappalyzer"`
 }
 
 // DomainAttrResult 域名属性结果

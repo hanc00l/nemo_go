@@ -1,1 +1,44 @@
 
+{"level":"info","msg":"Nemo Server started...","time":"2021-07-29T16:43:21+08:00"}
+{"level":"info","msg":"Starting Worker: NoteBookPro2.local@192.168.120.216#23995","time":"2021-07-29T16:43:30+08:00"}
+{"level":"info","msg":"login from ip:::1","time":"2021-07-29T16:45:19+08:00"}
+{"level":"info","msg":"logout from ip:::1","time":"2021-07-29T16:47:08+08:00"}
+{"level":"fatal","msg":"Worker quit gracefully","time":"2021-07-29T17:00:55+08:00"}
+{"level":"info","msg":"Nemo Server started...","time":"2021-07-30T11:14:20+08:00"}
+{"level":"info","msg":"login from ip:::1","time":"2021-07-30T11:14:28+08:00"}
+{"level":"info","msg":"Starting Worker: NoteBookPro2.local@192.168.120.216#79231","time":"2021-07-30T11:15:18+08:00"}
+{"level":"fatal","msg":"Worker quit gracefully","time":"2021-07-30T11:40:03+08:00"}
+{"level":"info","msg":"Nemo Server started...","time":"2021-07-30T11:43:57+08:00"}
+{"level":"info","msg":"login from ip:::1","time":"2021-07-30T11:44:06+08:00"}
+{"level":"info","msg":"login from ip:::1","time":"2021-07-30T11:44:26+08:00"}
+{"level":"error","msg":"http://www.freebuf.com error: Failed to retrieve: Get \"http://www.freebuf.com\": dial tcp: lookup www.freebuf.com: no such host\n","time":"2021-08-01T16:04:28+08:00"}
+{"level":"error","msg":"http://www.freebuf.com error: Failed to retrieve: Get \"http://www.freebuf.com\": dial tcp: lookup www.freebuf.com: no such host\n","time":"2021-08-01T16:12:53+08:00"}
+{"level":"error","msg":"http://13.208.249.229:9200 error: Failed to retrieve: Get \"http://13.208.249.229:9200\": dial tcp 13.208.249.229:9200: connect: network is unreachable\n","time":"2021-08-01T16:12:53+08:00"}
+{"level":"error","msg":"http://47.95.225.12/ error: Failed to retrieve: Get \"http://47.95.225.12/\": dial tcp 47.95.225.12:80: connect: network is unreachable\n","time":"2021-08-01T16:12:53+08:00"}
+{"level":"error","msg":"http://47.95.225.12/ error: Failed to retrieve: Get \"http://47.95.225.12/\": dial tcp 47.95.225.12:80: connect: network is unreachable\n","time":"2021-08-01T16:12:53+08:00"}
+{"level":"error","msg":"http://13.208.249.229:9200 error: Failed to retrieve: Get \"http://13.208.249.229:9200\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)\n","time":"2021-08-01T16:15:24+08:00"}
+{"level":"error","msg":"http://13.208.249.229:9200 error: Failed to retrieve: Get \"http://13.208.249.229:9200\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)\n","time":"2021-08-01T16:33:44+08:00"}
+{"level":"error","msg":"error decoder :EOF","time":"2021-08-01T21:58:14+08:00"}
+{"level":"error","msg":"error decoder :EOF","time":"2021-08-01T21:59:20+08:00"}
+{"level":"error","msg":"error decoder :EOF","time":"2021-08-01T22:02:27+08:00"}
+{"level":"error","msg":"error decoder :EOF","time":"2021-08-01T22:04:05+08:00"}
+{"level":"error","msg":"error decoder :EOF","time":"2021-08-01T22:04:40+08:00"}
+{"level":"error","msg":"error decoder :EOF","time":"2021-08-01T22:28:26+08:00"}
+{"level":"error","msg":"http://www.freebuf.com has too many result:1785,discarded!","time":"2021-08-02T09:01:58+08:00"}
+{"level":"error","msg":"error: can not open apps file:open /Users/user/10post-exploit/3.golang/nemo_go/thirdparty/wappalyzer/technologies_custom1.json: no such file or directory","time":"2021-08-02T09:08:24+08:00"}
+{"level":"error","msg":"load technologies1.json and technologies_custom1.json both fail","time":"2021-08-02T10:03:13+08:00"}
+{"level":"info","msg":"Nemo Server started...","time":"2021-08-02T14:00:51+08:00"}
+{"level":"info","msg":"Starting Worker: NoteBookPro2.local@192.168.120.216#33832","time":"2021-08-02T14:01:05+08:00"}
+{"level":"info","msg":"login from ip:127.0.0.1","time":"2021-08-02T14:01:28+08:00"}
+{"level":"fatal","msg":"Worker quit gracefully","time":"2021-08-02T14:08:42+08:00"}
+{"level":"info","msg":"Starting Worker: NoteBookPro2.local@192.168.120.216#35795","time":"2021-08-02T14:08:45+08:00"}
+{"level":"fatal","msg":"Worker quit gracefully","time":"2021-08-02T14:14:52+08:00"}
+{"level":"info","msg":"Starting Worker: NoteBookPro2.local@192.168.120.216#39624","time":"2021-08-02T14:25:14+08:00"}
+{"level":"info","msg":"Nemo Server started...","time":"2021-08-02T14:34:06+08:00"}
+{"level":"fatal","msg":"Worker quit gracefully","time":"2021-08-02T14:35:02+08:00"}
+{"level":"info","msg":"Nemo Server started...","time":"2021-08-02T14:35:03+08:00"}
+{"level":"info","msg":"Starting Worker: NoteBookPro2.local@192.168.120.216#41869","time":"2021-08-02T14:35:06+08:00"}
+{"level":"fatal","msg":"Worker quit gracefully","time":"2021-08-02T14:38:32+08:00"}
+{"level":"info","msg":"Starting Worker: NoteBookPro2.local@192.168.120.216#42771","time":"2021-08-02T14:38:39+08:00"}
+{"level":"info","msg":"Nemo Server started...","time":"2021-08-02T14:49:26+08:00"}
+{"level":"fatal","msg":"Worker quit gracefully","time":"2021-08-02T14:55:57+08:00"}

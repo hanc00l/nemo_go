@@ -30,6 +30,7 @@ type Config struct {
 	IsHttpx       bool   `json:"httpx"`
 	IsWhatWeb     bool   `json:"whatweb"`
 	IsScreenshot  bool   `json:"screenshot"`
+	IsWappalyzer  bool   `json:"wappalyzer"`
 	CmdBin        string `json:"cmdBin"`
 }
 
@@ -103,7 +104,7 @@ func (r *Result) SaveResult(config Config) string {
 	var resultIPCount, resultPortCount int
 	for ipName, ipResult := range r.IPResult {
 		if len(ipResult.Ports) > IpOpenedPortFilterNumber {
-			logging.RuntimeLog.Infof("ip:%s has too many open port:%d,discard to save!", ipName,len(ipResult.Ports))
+			logging.RuntimeLog.Infof("ip:%s has too many open port:%d,discard to save!", ipName, len(ipResult.Ports))
 			continue
 		}
 		//save Domain

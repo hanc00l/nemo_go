@@ -80,13 +80,13 @@ func (s *Service) FindService(portNumber int, ip string) string {
 		ipLocation := ipl.FindCustomIP(ip)
 		if ipLocation != "" {
 			serviceName, ok = s.customServiceData[fmt.Sprintf("%d/tcp", portNumber)]
-			if ok {
+			if ok && serviceName != "" {
 				return serviceName
 			}
 		}
 	}
 	serviceName, ok = s.nmapServiceData[fmt.Sprintf("%d/tcp", portNumber)]
-	if ok {
+	if ok && serviceName != "" {
 		return serviceName
 	}
 

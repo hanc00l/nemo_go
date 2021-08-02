@@ -3,6 +3,7 @@ module github.com/hanc00l/nemo_go
 go 1.16
 
 require (
+	github.com/PuerkitoBio/goquery v1.7.1 // indirect
 	github.com/RichardKnop/machinery/v2 v2.0.11
 	github.com/beego/beego/v2 v2.0.1
 	github.com/buger/jsonparser v1.1.1
@@ -18,7 +19,9 @@ require (
 	github.com/projectdiscovery/subfinder/v2 v2.4.8
 	github.com/remeh/sizedwaitgroup v1.0.0
 	github.com/rs/xid v1.3.0
+	github.com/rverton/webanalyze v0.3.3 // indirect
 	github.com/sirupsen/logrus v1.6.0
+	golang.org/x/net v0.0.0-20210726213435-c6fcb2dbf985 // indirect
 	golang.org/x/sys v0.0.0-20210630005230-0f9fa26af87c // indirect
 	golang.org/x/text v0.3.6
 	gopkg.in/yaml.v2 v2.4.0

@@ -12,7 +12,8 @@ var IgnorePort = []int{7, 9, 13, 17, 19, 21, 22, 23, 25, 26, 37, 53, 100, 106, 1
 const (
 	fpHttpxThreadNumber   = 10
 	fpWhatwebThreadNumber = 4
-	fpScreenshotThreadNum = 10
+	fpScreenshotThreadNum = 5
+	fpWappalyzerThreadNumber = 10
 )
 
 type Config struct {

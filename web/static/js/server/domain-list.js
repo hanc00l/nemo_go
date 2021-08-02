@@ -37,6 +37,7 @@ $(function () {
                     'httpx': $('#checkbox_httpx').is(":checked"),
                     'screenshot': $('#checkbox_screenshot').is(":checked"),
                     'icpquery': $('#checkbox_icpquery').is(":checked"),
+                    'wappalyzer': $('#checkbox_wappalyzer').is(":checked"),
                 }, function (data, e) {
                     if (e === "success" && data['status'] == 'success') {
                         swal({

@@ -94,6 +94,11 @@ func doFingerPrint(config domainscan.Config, resultDomainScan *domainscan.Result
 		whatweb.ResultDomainScan = *resultDomainScan
 		whatweb.Do()
 	}
+	if config.IsWappalyzer{
+		wappalyzer := fingerprint.NewWappalyzer()
+		wappalyzer.ResultDomainScan = *resultDomainScan
+		wappalyzer.Do()
+	}
 }
 
 // doPortScan 对IP进行端口扫描

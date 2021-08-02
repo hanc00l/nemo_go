@@ -575,6 +575,19 @@ func getDomainAttrFullInfo(id int, disableFofa bool) DomainAttrFullInfo {
 				CreateTime: FormatDateTime(da.CreateDatetime),
 				UpdateTime: FormatDateTime(da.UpdateDatetime),
 			})
+		} else if da.Source == "wappalyzer" && da.Tag == "banner" {
+			r.DomainAttr = append(r.DomainAttr, DomainAttrInfo{
+				Id:         da.Id,
+				Tag:        "wappalyzer",
+				Content:    da.Content,
+				CreateTime: FormatDateTime(da.CreateDatetime),
+				UpdateTime: FormatDateTime(da.UpdateDatetime),
+			})
+			for _, b := range strings.Split(da.Content, ",") {
+				if _, ok := r.BannerSet[b]; !ok {
+					r.BannerSet[b] = struct{}{}
+				}
+			}
 		}
 	}
 	if len(fofaInfo) > 0 {
