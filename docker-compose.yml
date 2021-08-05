@@ -1,0 +1,39 @@
+version: '3.7'
+services:
+    mysql:
+        image: mysql:5.7
+        container_name: mysql
+        restart: always
+        environment: 
+            MYSQL_DATABASE: nemo
+            MYSQL_USER: nemo
+            MYSQL_PASSWORD: nemo2020
+            MYSQL_ROOT_PASSWORD: root
+        ports:
+            - 3306:3306
+        volumes: 
+            - ./docker/mysql/initdb.d:/docker-entrypoint-initdb.d
+            - ./docker/mysql/conf.d:/etc/mysql/conf.d
+
+    rabbitmq:
+        image: rabbitmq:3-management-alpine
+        container_name: rabbitmq
+        environment:
+            RABBITMQ_DEFAULT_USER: guest
+            RABBITMQ_DEFAULT_PASS: guest
+        ports:
+            - 5672:5672
+
+    web:
+        build: .
+        image: nemo:v2
+        container_name: nemo
+        ports:
+            - 5000:5000
+        working_dir: /opt/nemo
+        entrypoint:
+            - /opt/nemo/docker_start.sh
+        links:
+            - mysql
+            - rabbitmq
+

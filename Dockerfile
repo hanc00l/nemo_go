@@ -9,8 +9,7 @@ RUN set -x \
     ###
     && apt-get update \
     && apt-get install -y  python3-pip python3-setuptools \
-    wget curl vim net-tools git unzip \
-    mysql-server rabbitmq-server \
+    wget curl vim net-tools  iputils-ping git unzip \
     nmap whatweb masscan chromium-browser --fix-missing
 
 # pip package
@@ -19,17 +18,10 @@ RUN set -x \
     # && python3.7 -m pip config set global.index-url 'https://pypi.mirrors.ustc.edu.cn/simple/' \
     && python3 -m pip install -U pip -i https://mirrors.aliyun.com/pypi/simple/ --user \
     && python3 -m pip install -U requests pocsuite3 -i https://mirrors.aliyun.com/pypi/simple/
-    
-COPY . /opt/nemo
-# init databse and rabbitmq
-RUN set -x \
-    && service mysql start \
-    && mysql -u root -e 'CREATE DATABASE `nemo` DEFAULT CHARACTER SET utf8mb4;' \
-    && mysql -u root -e 'CREATE USER "nemo"@"%" IDENTIFIED BY "nemo2020";GRANT ALL PRIVILEGES ON nemo.* TO "nemo"@"%";FLUSH PRIVILEGES;' \
-    && mysql -u root nemo < /opt/nemo/docs/nemo.sql \
-    && cp /opt/nemo/docs/docker_start.sh /opt/nemo \
-    && chmod +x /opt/nemo/docker_start.sh \
 
-WORKDIR /opt/nemo
-ENTRYPOINT ["/opt/nemo/docker_start.sh"]
-EXPOSE 5000
+COPY . /opt/nemo
+
+#link to mysql and rabbitmq
+RUN set -x \
+    && sed -i 's/host: 127.0.0.1/host: mysql/g' /opt/nemo/conf/config.yml \
+    && sed -i 's/host: localhost/host: rabbitmq/g' /opt/nemo/conf/config.yml

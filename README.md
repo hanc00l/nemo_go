@@ -55,8 +55,7 @@ Nemo是用来进行自动化信息收集的一个简单平台，通过集成常�
 
 ```shell
 mkdir nemo;tar xvf nemo_linux_amd64.tar -C nemo;cd nemo
-docker build  -t nemo/app:v2 .
-docker run -it -d --name nemo_app -p 5000:5000 nemo/app:v2
+docker-compose up -d
 ```
 
 正式使用建议独立VPS分布式部署。

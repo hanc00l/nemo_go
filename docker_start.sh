@@ -1,9 +1,5 @@
 #!/bin/sh
 
-# service
-service rabbitmq-server start 
-service mysql start 
-
 # start
 cd /opt/nemo
 nohup ./server_linux_amd64 &

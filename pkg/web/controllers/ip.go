@@ -570,15 +570,15 @@ func (c *IPController) getStatisticsData(req ipRequestParam) IPStatisticInfo {
 		// C段
 		ipArray := strings.Split(ipRow.IpName, ".")
 		subnet := fmt.Sprintf("%s.%s.%s.0/24", ipArray[0], ipArray[1], ipArray[2])
-		if _, ok := r.IPSubnet[ipRow.IpName]; ok {
+		if _, ok := r.IPSubnet[subnet]; ok {
 			r.IPSubnet[subnet] ++
 		} else {
 			r.IPSubnet[subnet] = 1
 		}
 		// Location
 		if ipRow.Location != "" {
-			if n, ok := r.Location[ipRow.Location]; ok {
-				r.Location[ipRow.Location] = n + 1
+			if _, ok := r.Location[ipRow.Location]; ok {
+				r.Location[ipRow.Location] ++
 			} else {
 				r.Location[ipRow.Location] = 1
 			}
@@ -587,8 +587,8 @@ func (c *IPController) getStatisticsData(req ipRequestParam) IPStatisticInfo {
 		port := db.Port{IpId: ipRow.Id}
 		for _, portRow := range port.GetsByIPId() {
 			portString := fmt.Sprintf("%d", portRow.PortNum)
-			if n, ok := r.Port[portString]; ok {
-				r.Port[portString] = n + 1
+			if _, ok := r.Port[portString]; ok {
+				r.Port[portString] ++
 			} else {
 				r.Port[portString] = 1
 			}
