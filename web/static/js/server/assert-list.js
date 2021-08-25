@@ -125,8 +125,8 @@ function show_bigpic(src) {
 //批量删除
 function batch_delete(dataTableId, url) {
     swal({
-            title: "确定要批量删除选定的IP?",
-            text: "该操作会删除所有选定IP的所有信息！",
+            title: "确定要批量删除选定的目标?",
+            text: "该操作会删除所有选定目标的所有信息！",
             type: "warning",
             showCancelButton: true,
             confirmButtonColor: "#DD6B55",

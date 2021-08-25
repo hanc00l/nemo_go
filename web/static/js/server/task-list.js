@@ -24,12 +24,12 @@ $(function () {
             },
             columns: [
                 {
-                    data: "task_id",
+                    data: "id",
                     width: "5%",
                     className: "dt-body-center",
                     title: '<input  type="checkbox" class="checkall" />',
                     "render": function (data, type, row) {
-                        var strData = '<input type="checkbox" class="checkchild" value="' + row['task_id'] + '"/>';
+                        var strData = '<input type="checkbox" class="checkchild" value="' + row['id'] + '"/>';
                         return strData;
                     }
                 },
@@ -130,6 +130,10 @@ $(function () {
     //搜索
     $("#search").click(function () {
         $("#task_table").DataTable().draw(true);
+    });
+    //批量删除
+    $("#batch_delete").click(function () {
+        batch_delete('#task_table','/task-delete');
     });
 });
 
