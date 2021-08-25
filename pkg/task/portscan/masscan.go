@@ -2,8 +2,8 @@ package portscan
 
 import (
 	"github.com/hanc00l/nemo_go/pkg/logging"
-	"github.com/hanc00l/nemo_go/pkg/utils"
 	"github.com/hanc00l/nemo_go/pkg/task/custom"
+	"github.com/hanc00l/nemo_go/pkg/utils"
 	"os"
 	"os/exec"
 	"strconv"
@@ -57,6 +57,7 @@ func (m *Masscan) Do() {
 		return
 	}
 	m.parsResult(resultTempFile)
+	filterIPHasTooMuchPort(m.Result)
 }
 
 // parsResult 解析结果

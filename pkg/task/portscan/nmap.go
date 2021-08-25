@@ -54,6 +54,7 @@ func (nmap *Nmap) Do() {
 		return
 	}
 	nmap.parseResult(resultTempFile)
+	filterIPHasTooMuchPort(nmap.Result)
 }
 
 // parseResult 解析nmap结果
