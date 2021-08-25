@@ -47,7 +47,7 @@
 - 导入nemo.sql
 
   ```
-  mysql -u root nemo < nemo.sql
+  mysql -u root nemo < docker/mysql/initdb.d/nemo.sql
   ```
 
 - 创建用户并授权

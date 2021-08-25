@@ -47,7 +47,7 @@
   ```bash
   mysql -u debian-sys-maint -p -e 'CREATE DATABASE `nemo` DEFAULT CHARACTER SET utf8mb4;' \
       && mysql -u debian-sys-maint -p -e 'CREATE USER "nemo"@"%" IDENTIFIED BY "nemo2020";GRANT ALL PRIVILEGES ON nemo.* TO "nemo"@"%";FLUSH PRIVILEGES;' \
-      && mysql  -u debian-sys-maint -p nemo < docs/nemo.sql 
+      && mysql  -u debian-sys-maint -p nemo < docker/mysql/initdb.d/nemo.sql 
   ```
 
 - **配置rabbitmq**：增加rabbitmq用户和密码
@@ -88,6 +88,8 @@
     password: nemo2020
   ```
 
+  **重要：记得要修改默认的encryptKey。**
+  
   **conf/app.conf**
 
   ```yaml
@@ -114,7 +116,7 @@
   ```
 
 
-- **nmap&masscan：**因为nmap、masscan的SYN扫描需要root权限，为避免使用sudo，设置root权限的suid
+- **nmap&masscan：** 因为nmap、masscan的SYN扫描需要root权限，为避免使用sudo，设置root权限的suid（如果默认是root则可跳过）
 
   ```bash
   cd /usr/bin \
@@ -137,7 +139,7 @@
     # host,port: server监听地址；worker用于keepalive和upload的地址
     host: 172.16.80.1
     port: 5000
-    # keepalive和upload的地址使用的密钥
+    # keepalive和upload的地址使用的密钥，与服务端的配置文件保持一致
     encryptKey: ZduibTKhcbb6Pi8W
   # server和worker访问的数据库
   database:

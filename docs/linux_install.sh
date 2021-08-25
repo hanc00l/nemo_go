@@ -16,5 +16,5 @@ python3 -m pip install -U pip -i https://mirrors.aliyun.com/pypi/simple/ --user 
 sudo service mysql start \
     && mysql -u root -e 'CREATE DATABASE `nemo` DEFAULT CHARACTER SET utf8mb4;' \
     && mysql -u root -e 'CREATE USER "nemo"@"%" IDENTIFIED BY "nemo2020";GRANT ALL PRIVILEGES ON nemo.* TO "nemo"@"%";FLUSH PRIVILEGES;' \
-    && mysql -u root nemo < docs/nemo.sql \
+    && mysql -u root nemo < docker/mysql/initdb.d/docs/nemo.sql \
 
