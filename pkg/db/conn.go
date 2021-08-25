@@ -7,10 +7,30 @@ import (
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
 	"gorm.io/gorm/logger"
+	"time"
 )
 
 // GetDB 获取一个数据库连接
 func GetDB() *gorm.DB {
+	const RetriedNumber = 5
+	const RetriedSleepTime = time.Second * 5
+	RetriedCount := 0
+	for {
+		if RetriedCount > RetriedNumber {
+			logging.RuntimeLog.Fatal("Failed to connect database!")
+			return nil
+		}
+		db := getDB()
+		if db == nil {
+			RetriedCount++
+			time.Sleep(RetriedSleepTime)
+			continue
+		}
+		return db
+	}
+}
+
+func getDB() *gorm.DB {
 	user := conf.Nemo.Database.Username
 	pass := conf.Nemo.Database.Password
 	host := conf.Nemo.Database.Host
@@ -21,7 +41,6 @@ func GetDB() *gorm.DB {
 	db, err := gorm.Open(mysql.Open(dsn), &gorm.Config{})
 	if err != nil {
 		logging.RuntimeLog.Error(err.Error())
-		logging.RuntimeLog.Fatal("Connect to database fail!")
 		return nil
 	}
 	//当没有开启debug模式的时候，gorm底层默认的log级别是Warn，
