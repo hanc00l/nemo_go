@@ -96,6 +96,7 @@ Tested on [ubuntu18.04 LTS](docs/install_linux.md)、macOS
 
 ## 版本更新
 
+- 2.3：2021-8-25，使用docker-compose构建Docker，修改数据库连接重试功能，完善端口扫描及任务等信息；
 - 2.2：2021-8-2，增加基于Wappalyzer规则的指纹识别功能；
 - 2.1：2021-7-30，用Golang完成对原python3版本的重构；
 
