@@ -118,7 +118,7 @@ func (t *Task) makeWhere(searchMap map[string]interface{}) *gorm.DB {
 
 // Gets 根据指定的条件，查询满足要求的记录
 func (t *Task) Gets(searchMap map[string]interface{}, page, rowsPerPage int) (results []Task, count int) {
-	orderBy := "received desc"
+	orderBy := "update_datetime desc"
 
 	db := t.makeWhere(searchMap).Model(t)
 	defer CloseDB(db)
