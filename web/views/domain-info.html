@@ -233,7 +233,12 @@
                             {{ if eq .Source "portscan" }}
                             <span class="badge badge-warning"> {{ .Source }}</span>
                             {{ else if eq .Source "fofa" }}
+                            {{ if .FofaLink }}
+                            <a href="{{ .FofaLink }}" target="_blank"><span
+                                    class="badge badge-success">  {{ .Source }} </span></a>
+                            {{ else }}
                             <span class="badge badge-success"> {{ .Source }}</span>
+                            {{end }}
                             {{ else }}
                             <span class="badge badge-secondary"> {{ .Source }}</span>
                             {{ end }}
