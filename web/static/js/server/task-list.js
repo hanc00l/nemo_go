@@ -204,3 +204,31 @@ function delete_task(id) {
                 });
         });
 }
+
+//批量删除
+function batch_delete(dataTableId, url) {
+    swal({
+            title: "确定要批量删除选定的目标?",
+            text: "该操作会删除所有选定目标的所有信息！",
+            type: "warning",
+            showCancelButton: true,
+            confirmButtonColor: "#DD6B55",
+            confirmButtonText: "确认删除",
+            cancelButtonText: "取消",
+            closeOnConfirm: true
+        },
+        function () {
+            $(dataTableId).DataTable().$('input[type=checkbox]:checked').each(function (i) {
+                let id = $(this).val().split("|")[0];
+                $.ajax({
+                    type: 'post',
+                    url: url + '?id=' + id,
+                    success: function (data) {
+                    },
+                    error: function (xhr, type) {
+                    }
+                });
+            });
+            $(dataTableId).DataTable().draw(false);
+        });
+}
