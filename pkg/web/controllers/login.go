@@ -2,6 +2,8 @@ package controllers
 
 import (
 	"fmt"
+	"github.com/beego/beego/v2/client/cache"
+	"github.com/beego/beego/v2/server/web/captcha"
 	"github.com/hanc00l/nemo_go/pkg/conf"
 	"github.com/hanc00l/nemo_go/pkg/logging"
 	"github.com/hanc00l/nemo_go/pkg/utils"
@@ -12,6 +14,14 @@ type LoginController struct {
 	BaseController
 }
 
+var cpt *captcha.Captcha
+
+func init() {
+	// use beego cache system store the captcha data
+	store := cache.NewMemoryCache()
+	cpt = captcha.NewWithFilter("/captcha/", store)
+}
+
 // IndexAction 登录首页
 func (c *LoginController) IndexAction() {
 	c.TplName = "login.html"
@@ -19,6 +29,9 @@ func (c *LoginController) IndexAction() {
 
 // LoginAction 登录验证
 func (c *LoginController) LoginAction() {
+	if conf.RunMode == conf.Release && !cpt.VerifyReq(c.Ctx.Request) {
+		c.Redirect("/", http.StatusFound)
+	}
 	password := c.GetString("password")
 	if password != "" && CheckPassword(password) {
 		logging.RuntimeLog.Infof("login from ip:%s", c.Ctx.Input.IP())
