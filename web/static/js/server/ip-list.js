@@ -210,11 +210,12 @@ $(function () {
                     title: "IP地址",
                     width: "10%",
                     render: function (data, type, row, meta) {
-                        var strData = "";
+                        let strData = "";
+                        let disable_fofa = $('#checkbox_disable_fofa').is(":checked");
                         if (row['color_tag']) {
-                            strData += '<h5><a href="/ip-info?ip=' + data + '" target="_blank" class="badge ' + row['color_tag'] + '">' + data + '</a></h5>';
+                            strData += '<h5><a href="/ip-info?ip=' + data + '&&disable_fofa='+disable_fofa+'" target="_blank" class="badge ' + row['color_tag'] + '">' + data + '</a></h5>';
                         } else {
-                            strData += '<a href="/ip-info?ip=' + data + '" target="_blank">' + data + '</a>';
+                            strData += '<a href="/ip-info?ip=' + data + '&&disable_fofa='+disable_fofa+'" target="_blank">' + data + '</a>';
                         }
                         if (row['vulnerability']) {
                             strData += '&nbsp;<span class="badge badge-danger" data-toggle="tooltip" data-html="true" title="' + html2Escape(row['vulnerability']) + '"><i class="fa fa-bolt"></span>';

@@ -9,7 +9,7 @@ $(function () {
 /**
  * 删除操作
  */
-function delete_op(url,id) {
+function delete_op(url, id) {
     swal({
             title: "确定要删除?",
             type: "warning",
@@ -22,7 +22,7 @@ function delete_op(url,id) {
         function () {
             $.ajax({
                 type: 'post',
-                url: url+'?id=' + id,
+                url: url + '?id=' + id,
                 success: function (data) {
                     location.reload();
                 },
@@ -48,12 +48,15 @@ function delete_domain_fofa_attr(id) {
 function html2Escape(sHtml) {
     var temp = document.createElement("div");
     (temp.textContent != null) ? (temp.textContent = sHtml) : (temp.innerText = sHtml);
-    var output = temp.innerHTML.replace(/\"/g, "&quot;").replace(/\'/g, "&acute;");;;
+    var output = temp.innerHTML.replace(/\"/g, "&quot;").replace(/\'/g, "&acute;");
+    ;
+    ;
     temp = null;
     //output = output
 
     return output;
 }
+
 //标记颜色
 function _mark_color_tag(obj_type, r_id, color) {
     var url = "/" + obj_type + "-color-tag?r_id=" + r_id;
@@ -68,6 +71,7 @@ function _mark_color_tag(obj_type, r_id, color) {
             }
         });
 }
+
 //编辑备忘信息
 function _edit_memo_content(obj_type) {
     const r_id = $('#r_id').val();
@@ -80,6 +84,7 @@ function _edit_memo_content(obj_type) {
         })
     $('#editMemo').modal('toggle');
 }
+
 //保存备忘信息
 function _save_memo_content(obj_type) {
     const r_id = $('#r_id').val();
@@ -97,12 +102,15 @@ function _save_memo_content(obj_type) {
             }
         });
 }
+
 function mark_ip_color_tag(r_id, color) {
     _mark_color_tag('ip', r_id, color);
 }
+
 function mark_domain_color_tag(r_id, color) {
     _mark_color_tag('domain', r_id, color);
 }
+
 $("#btn_editIpMemo").click(function () {
     _edit_memo_content('ip');
 });
@@ -119,4 +127,14 @@ $("#btn_saveDomainMemo").click(function () {
 function show_bigpic(src) {
     $('.imgPreview img').attr('src', src);
     $('.imgPreview').show();
+}
+
+function refresh_info(type, r_id, status) {
+    let url = type + "-info?" + type + "=" + r_id + "&&disable_fofa=";
+    if(status){
+        url += "false"
+    }else{
+        url += "true"
+    }
+    window.location.href = url;
 }

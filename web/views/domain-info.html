@@ -7,6 +7,13 @@
                 <div class="card">
                     <h2 class="card-header">
                         <div class="form-check-inline">
+                            <button type="button" id="btn_switchShowFofa" class="btn btn-secondary" onclick="refresh_info('domain','{{ .domain_info.Domain }}',{{ .domain_info.DisableFofa }})">
+                                <i class="fa fa-info-circle"></i>{{ if .domain_info.DisableFofa }}
+                                显示FOFA信息
+                                {{ else }}
+                                不看FOFA信息
+                                {{ end }}
+                            </button>&nbsp;
                             <button type="button" id="btn_editDomainMemo" class="btn btn-secondary"><i
                                     class="fa fa-pencil-square-o"></i>编辑备忘录
                             </button>&nbsp;

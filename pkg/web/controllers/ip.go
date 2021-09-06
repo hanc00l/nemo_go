@@ -68,6 +68,7 @@ type IPInfo struct {
 	CreateTime    string
 	UpdateTime    string
 	Screenshot    []ScreenshotFileInfo
+	DisableFofa   bool
 }
 
 // PortAttrInfo 每一个端口的详细数据
@@ -143,8 +144,9 @@ func (c *IPController) ListAction() {
 func (c *IPController) InfoAction() {
 	var ipInfo IPInfo
 	ipName := c.GetString("ip")
+	disableFofa, _ := c.GetBool("disable_fofa", false)
 	if ipName != "" {
-		ipInfo = getIPInfo(ipName, false)
+		ipInfo = getIPInfo(ipName, disableFofa)
 		// 修改背景色为交叉显示
 		if len(ipInfo.PortAttr) > 0 {
 			tableBackgroundSet := false
@@ -156,6 +158,7 @@ func (c *IPController) InfoAction() {
 			}
 		}
 	}
+	ipInfo.DisableFofa = disableFofa
 	c.Data["ip_info"] = ipInfo
 	c.Layout = "base.html"
 	c.TplName = "ip-info.html"
@@ -572,14 +575,14 @@ func (c *IPController) getStatisticsData(req ipRequestParam) IPStatisticInfo {
 		ipArray := strings.Split(ipRow.IpName, ".")
 		subnet := fmt.Sprintf("%s.%s.%s.0/24", ipArray[0], ipArray[1], ipArray[2])
 		if _, ok := r.IPSubnet[subnet]; ok {
-			r.IPSubnet[subnet] ++
+			r.IPSubnet[subnet]++
 		} else {
 			r.IPSubnet[subnet] = 1
 		}
 		// Location
 		if ipRow.Location != "" {
 			if _, ok := r.Location[ipRow.Location]; ok {
-				r.Location[ipRow.Location] ++
+				r.Location[ipRow.Location]++
 			} else {
 				r.Location[ipRow.Location] = 1
 			}
@@ -589,7 +592,7 @@ func (c *IPController) getStatisticsData(req ipRequestParam) IPStatisticInfo {
 		for _, portRow := range port.GetsByIPId() {
 			portString := fmt.Sprintf("%d", portRow.PortNum)
 			if _, ok := r.Port[portString]; ok {
-				r.Port[portString] ++
+				r.Port[portString]++
 			} else {
 				r.Port[portString] = 1
 			}

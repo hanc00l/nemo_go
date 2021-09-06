@@ -166,11 +166,12 @@ $(function () {
                     title: "域名",
                     width: "12%",
                     render: function (data, type, row, meta) {
-                        var strData;
+                        let strData;
+                        let disable_fofa = $('#checkbox_disable_fofa').is(":checked");
                         if (row['color_tag']) {
-                            strData = '<h5><a href="/domain-info?domain=' + data + '" target="_blank" class="badge ' + row['color_tag'] + '">' + data + '</a></h5>';
+                            strData = '<h5><a href="/domain-info?domain=' + data + '&&disable_fofa='+disable_fofa+'" target="_blank" class="badge ' + row['color_tag'] + '">' + data + '</a></h5>';
                         } else {
-                            strData = '<a href="/domain-info?domain=' + data + '" target="_blank">' + data + '</a>';
+                            strData = '<a href="/domain-info?domain=' + data + '&&disable_fofa='+disable_fofa+'" target="_blank">' + data + '</a>';
                         }
                         if (row['vulnerability']) {
                             strData += '&nbsp;<span class="badge badge-danger" data-toggle="tooltip" data-html="true" title="' + html2Escape(row['vulnerability']) + '"><i class="fa fa-bolt"></span>';
@@ -184,9 +185,10 @@ $(function () {
                         let strData = '<div style="width:100%;white-space:normal;word-wrap:break-word;word-break:break-all;">';
                         let pre_link = "";
                         let j = 0, len = data.length;
+                        let disable_fofa = $('#checkbox_disable_fofa').is(":checked");
                         for (; j < len; j++) {
                             strData += pre_link
-                            strData += '<a href="ip-info?ip=' + data[j] + '" target="_blank">' + data[j] + '</a>';
+                            strData += '<a href="ip-info?ip=' + data[j] + '&&disable_fofa='+disable_fofa+'" target="_blank">' + data[j] + '</a>';
                             pre_link = ",";
                         }
                         strData += '</div>';

@@ -64,6 +64,7 @@ type DomainInfo struct {
 	UpdateTime    string
 	Screenshot    []ScreenshotFileInfo
 	DomainAttr    []DomainAttrInfo
+	DisableFofa   bool
 }
 
 // DomainAttrInfo domain属性
@@ -127,8 +128,9 @@ func (c *DomainController) InfoAction() {
 	var domainInfo DomainInfo
 
 	domainName := c.GetString("domain")
+	disableFofa, _ := c.GetBool("disable_fofa", false)
 	if domainName != "" {
-		domainInfo = getDomainInfo(domainName, false)
+		domainInfo = getDomainInfo(domainName, disableFofa)
 		if len(domainInfo.PortAttr) > 0 {
 			tableBackgroundSet := false
 			for i, _ := range domainInfo.PortAttr {
@@ -139,6 +141,7 @@ func (c *DomainController) InfoAction() {
 			}
 		}
 	}
+	domainInfo.DisableFofa = disableFofa
 	c.Data["domain_info"] = domainInfo
 	c.Layout = "base.html"
 	c.TplName = "domain-info.html"
@@ -625,7 +628,7 @@ func (c *DomainController) getDomainStatisticsData(req domainRequestParam) Domai
 			if _, ok := dsi.Subdomain[s]; !ok {
 				dsi.Subdomain[s] = 1
 			} else {
-				dsi.Subdomain[s] ++
+				dsi.Subdomain[s]++
 			}
 		}
 		//domainIP、IP
@@ -638,7 +641,7 @@ func (c *DomainController) getDomainStatisticsData(req domainRequestParam) Domai
 				if _, ok := dsi.IP[dai.Content]; !ok {
 					dsi.IP[dai.Content] = 1
 				} else {
-					dsi.IP[dai.Content] ++
+					dsi.IP[dai.Content]++
 				}
 			}
 		}
@@ -651,7 +654,7 @@ func (c *DomainController) getDomainStatisticsData(req domainRequestParam) Domai
 			if _, ok := dsi.IPSubnet[subnet]; !ok {
 				dsi.IPSubnet[subnet] = 1
 			} else {
-				dsi.IPSubnet[subnet] ++
+				dsi.IPSubnet[subnet]++
 			}
 		}
 	}
