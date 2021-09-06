@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"github.com/beego/beego/v2/core/logs"
 	"github.com/beego/beego/v2/server/web"
 	"github.com/beego/beego/v2/server/web/context"
 	"github.com/hanc00l/nemo_go/pkg/conf"
@@ -15,6 +16,8 @@ func main() {
 	web.BConfig.WebConfig.Session.SessionOn = true
 	web.BConfig.WebConfig.Session.SessionName = "sessionID"
 	web.BConfig.CopyRequestBody = true
+	logs.SetLogger("file",`{"filename":"log/access.log"}`)
+
 
 	UrlFilterWhiteList := []string{
 		"/",

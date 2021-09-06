@@ -5,6 +5,7 @@ import (
 	"github.com/sirupsen/logrus"
 	"os"
 	"path"
+	"runtime"
 )
 
 var (
@@ -16,7 +17,14 @@ var (
 
 func init() {
 	RuntimeLog.SetLevel(logrus.InfoLevel)
-	RuntimeLog.SetFormatter(&logrus.JSONFormatter{})
+	RuntimeLog.SetReportCaller(true)
+	RuntimeLog.SetFormatter(&logrus.JSONFormatter{
+		TimestampFormat:"2006-01-02 15:03:04",
+		CallerPrettyfier: func(frame *runtime.Frame) (function string, file string) {
+			fileName := path.Base(frame.File)
+			return frame.Function, fileName
+		},
+	})
 	if file, err := os.OpenFile(path.Join(conf.GetRootPath(), "log/runtime.log"),
 		os.O_APPEND|os.O_WRONLY|os.O_CREATE, 0666); err == nil {
 		RuntimeLog.SetOutput(file)
