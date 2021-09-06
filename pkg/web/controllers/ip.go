@@ -267,6 +267,7 @@ func (c *IPController) GetMemoAction() {
 	m := &db.IpMemo{RelatedId: rid}
 	if m.GetByRelatedId() {
 		c.SucceededStatus(m.Content)
+		return
 	}
 	c.MakeStatusResponse(false)
 }
