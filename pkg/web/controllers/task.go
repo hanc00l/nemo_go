@@ -110,12 +110,14 @@ type pocscanRequestParam struct {
 }
 
 func (c *TaskController) IndexAction() {
+	c.UpdateOnlineUser()
 	c.Layout = "base.html"
 	c.TplName = "task-list.html"
 }
 
 // ListAction 漏洞列表的数据
 func (c *TaskController) ListAction() {
+	c.UpdateOnlineUser()
 	defer c.ServeJSON()
 
 	req := taskRequestParam{}

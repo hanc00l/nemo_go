@@ -36,6 +36,7 @@ func (c *LoginController) LoginAction() {
 	if password != "" && CheckPassword(password) {
 		logging.RuntimeLog.Infof("login from ip:%s", c.Ctx.Input.IP())
 		logging.CLILog.Infof("login from ip:%s", c.Ctx.Input.IP())
+		c.UpdateOnlineUser()
 		c.SetSession("IsLogin", true)
 		c.Redirect("/dashboard", http.StatusFound)
 	}
@@ -46,6 +47,7 @@ func (c *LoginController) LoginAction() {
 func (c *LoginController) LogoutAction() {
 	logging.RuntimeLog.Infof("logout from ip:%s", c.Ctx.Input.IP())
 	logging.CLILog.Infof("logout from ip:%s", c.Ctx.Input.IP())
+	c.DeleteOnlineUser()
 	c.DelSession("IsLogin")
 	c.Redirect("/", http.StatusFound)
 }

@@ -46,12 +46,14 @@ func (c *OrganizationController) GetAllAction() {
 
 // IndexAction 显示列表页面
 func (c *OrganizationController) IndexAction() {
+	c.UpdateOnlineUser()
 	c.Layout = "base.html"
 	c.TplName = "org-list.html"
 }
 
 // ListAction 获取列表显示的数据
 func (c *OrganizationController) ListAction() {
+	c.UpdateOnlineUser()
 	defer c.ServeJSON()
 
 	req := orgRequestParam{}

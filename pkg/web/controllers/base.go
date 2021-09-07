@@ -5,6 +5,8 @@ import (
 	"github.com/beego/beego/v2/server/web"
 	"github.com/hanc00l/nemo_go/pkg/logging"
 	"net/http"
+	"strings"
+	"sync"
 	"time"
 )
 
@@ -46,6 +48,19 @@ type DataTableResponseData struct {
 	RecordsFiltered int           `json:"recordsFiltered"`
 	Data            []interface{} `json:"data"`
 }
+
+// OnlineUserInfo 在线用户
+type OnlineUserInfo struct {
+	IP           string
+	LoginTime    time.Time
+	UpdateTime   time.Time
+	UpdateNumber int64
+}
+
+// OnlineUserMutex 在线用户Mutex
+var OnlineUserMutex sync.Mutex
+// OnlineUser 在线用户信息
+var OnlineUser = make(map[string]*OnlineUserInfo)
 
 func (c *BaseController) GetGlobalSessionData() GlobalSessionData {
 	data := GlobalSessionData{
@@ -105,4 +120,35 @@ func (c *BaseController) writeByteContent(out []byte) {
 // FormatDateTime 日期统一格式化
 func FormatDateTime(dt time.Time) string {
 	return dt.Format("2006-01-02 15:04:05")
+}
+
+// UpdateOnlineUser 更新在线用户IP和时间
+func (c *BaseController) UpdateOnlineUser() {
+	ip := strings.Split(c.Ctx.Request.RemoteAddr, ":")[0]
+
+	OnlineUserMutex.Lock()
+	defer OnlineUserMutex.Unlock()
+
+	if _, ok := OnlineUser[ip]; ok {
+		OnlineUser[ip].UpdateTime = time.Now()
+		OnlineUser[ip].UpdateNumber++
+	} else {
+		OnlineUser[ip] = &OnlineUserInfo{
+			IP:           ip,
+			LoginTime:    time.Now(),
+			UpdateTime:   time.Now(),
+			UpdateNumber: 1,
+		}
+	}
+}
+
+// DeleteOnlineUser 用户注销或过期，清除在线用户
+func (c *BaseController) DeleteOnlineUser() {
+	ip := strings.Split(c.Ctx.Request.RemoteAddr, ":")[0]
+	OnlineUserMutex.Lock()
+	defer OnlineUserMutex.Unlock()
+
+	if _, ok := OnlineUser[ip]; ok {
+		delete(OnlineUser, ip)
+	}
 }

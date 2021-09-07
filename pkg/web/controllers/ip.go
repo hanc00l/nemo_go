@@ -111,6 +111,7 @@ type IPStatisticInfo struct {
 
 // IndexAction GET请求显示页面
 func (c *IPController) IndexAction() {
+	c.UpdateOnlineUser()
 	sessionData := c.GetGlobalSessionData()
 	c.Data["data"] = sessionData
 	c.Layout = "base.html"
@@ -119,6 +120,7 @@ func (c *IPController) IndexAction() {
 
 // ListAction IP列表
 func (c *IPController) ListAction() {
+	c.UpdateOnlineUser()
 	defer c.ServeJSON()
 
 	req := ipRequestParam{}

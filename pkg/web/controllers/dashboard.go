@@ -14,7 +14,7 @@ import (
 type DashboardController struct {
 	BaseController
 	workerStatusMutex sync.Mutex
-	WorkerStatus map[string]*asynctask.WorkerStatus
+	WorkerStatus      map[string]*asynctask.WorkerStatus
 }
 
 type DashboardStatisticData struct {
@@ -36,8 +36,17 @@ type TaskInfoData struct {
 	TaskInfo string `json:"task_info"`
 }
 
+type OnlineUserInfoData struct {
+	Index        int    `json:"index"`
+	IP           string `json:"ip"`
+	LoginTime    string `json:"login_time"`
+	UpdateTime   string `json:"update_time"`
+	UpdateNumber int64    `json:"update_number"`
+}
+
 // IndexAction dashboard首页
 func (c *DashboardController) IndexAction() {
+	c.UpdateOnlineUser()
 	c.Layout = "base.html"
 	c.TplName = "dashboard.html"
 }
@@ -64,6 +73,7 @@ func (c *DashboardController) GetStatisticDataAction() {
 
 // GetTaskInfoAction 获取任务数据
 func (c *DashboardController) GetTaskInfoAction() {
+	c.UpdateOnlineUser()
 	defer c.ServeJSON()
 
 	searchMapActivated := make(map[string]interface{})
@@ -137,5 +147,40 @@ func (c *DashboardController) WorkerAliveListAction() {
 	resp.Draw = req.Draw
 	resp.RecordsTotal = len(c.WorkerStatus)
 	resp.RecordsFiltered = len(c.WorkerStatus)
+	c.Data["json"] = resp
+}
+
+// OnlineUserListAction 获取在线用户数据，用于Dashboard表表显示
+func (c *DashboardController) OnlineUserListAction() {
+	defer c.ServeJSON()
+
+	req := DatableRequestParam{}
+	err := c.ParseForm(&req)
+	if err != nil {
+		logging.RuntimeLog.Error(err.Error())
+	}
+	index := 1
+	resp := DataTableResponseData{}
+	OnlineUserMutex.Lock()
+	defer OnlineUserMutex.Unlock()
+
+	for _, v := range OnlineUser {
+		if time.Now().Sub(v.UpdateTime).Hours() > 24 {
+			delete(OnlineUser, v.IP)
+			continue
+		}
+		resp.Data = append(resp.Data, OnlineUserInfoData{
+			Index:      index,
+			IP:         v.IP,
+			LoginTime:  FormatDateTime(v.LoginTime),
+			UpdateTime: fmt.Sprintf("%s前", time.Now().Sub(v.UpdateTime).Truncate(time.Second).String()),
+			UpdateNumber: v.UpdateNumber,
+		})
+		index++
+	}
+
+	resp.Draw = req.Draw
+	resp.RecordsTotal = len(OnlineUser)
+	resp.RecordsFiltered = len(OnlineUser)
 	c.Data["json"] = resp
 }

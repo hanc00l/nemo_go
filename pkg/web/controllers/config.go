@@ -27,11 +27,13 @@ type DefaultPortscanConfig struct {
 }
 
 func (c *ConfigController) IndexAction() {
+	c.UpdateOnlineUser()
 	c.Layout = "base.html"
 	c.TplName = "config.html"
 }
 
 func (c *ConfigController) CustomAction() {
+	c.UpdateOnlineUser()
 	c.Layout = "base.html"
 	c.TplName = "custom.html"
 }

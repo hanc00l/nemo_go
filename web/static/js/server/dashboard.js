@@ -1,15 +1,5 @@
-function get_count_data() {
-    //异步获取任务统计信息
-    $.post("/dashboard", function (data) {
-        $("#task_active").html(data['task_active']);
-        $("#vulnerability_count").html(data['vulnerability_count']);
-        $("#domain_count").html(data['domain_count']);
-        $("#ip_count").html(data['ip_count']);
-    });
-}
-
 $(function () {
-    var table = $('#tasks-table').DataTable(
+    let tasks_table = $('#tasks-table').DataTable(
         {
             "rowID": 'uuid',
             "paging": false,
@@ -41,17 +31,7 @@ $(function () {
             ]
         }
     );//end datatable
-    get_count_data();
-    //定时刷新页面
-    setInterval(function () {
-        table.ajax.reload();
-        get_count_data();
-    }, 60 * 1000);
-});
-
-
-$(function () {
-    var table = $('#vulnerability-table').DataTable(
+    let vulnerability_table = $('#vulnerability-table').DataTable(
         {
             "rowID": 'id',
             "paging": false,
@@ -75,17 +55,7 @@ $(function () {
             ]
         }
     );//end datatable
-    get_count_data();
-    //定时刷新页面
-    setInterval(function () {
-        table.ajax.reload();
-        get_count_data();
-    }, 60 * 1000);
-});
-
-
-$(function () {
-    var table = $('#worker-table').DataTable(
+    let worker_table = $('#worker-table').DataTable(
         {
             "rowID": 'id',
             "paging": false,
@@ -98,7 +68,7 @@ $(function () {
             "ajax": {
                 "url": "/worker-list",
                 "type": "post",
-                "data": {start: 0, length: 5} //只显示最近5条记录
+                "data": {start: 0, length: 100} //显示全部记录
             },
             columns: [
                 {data: "index", title: "序号", width: "5%"},
@@ -109,11 +79,47 @@ $(function () {
             ]
         }
     );//end datatable
+    let onlineuser_table = $('#onlineuser-table').DataTable(
+        {
+            "rowID": 'id',
+            "paging": false,
+            "searching": false,
+            "processing": true,
+            "serverSide": true,
+            "autowidth": true,
+            "sort": false,
+            "dom": '<t>',
+            "ajax": {
+                "url": "/onlineuser-list",
+                "type": "post",
+                "data": {start: 0, length: 100} //显示全部记录
+            },
+            columns: [
+                {data: "index", title: "序号", width: "5%"},
+                {data: "ip", title: "IP", width: "35%"},
+                {data: 'login_time', title: '登录时间', width: '20%',},
+                {data: 'update_time', title: '更新时间', width: '20%'},
+                {data: 'update_number', title: '更新次数', width: '15%'},
+            ]
+        }
+    );//end datatable
     get_count_data();
     //定时刷新页面
     setInterval(function () {
-        table.ajax.reload();
         get_count_data();
+        onlineuser_table.ajax.reload();
+        worker_table.ajax.reload();
+        vulnerability_table.ajax.reload();
+        tasks_table.ajax.reload();
     }, 60 * 1000);
 });
 
+function get_count_data() {
+    //异步获取任务统计信息
+    $.post("/dashboard", function (data) {
+        $("#task_active").html(data['task_active']);
+        $("#vulnerability_count").html(data['vulnerability_count']);
+        $("#domain_count").html(data['domain_count']);
+        $("#ip_count").html(data['ip_count']);
+    });
+}

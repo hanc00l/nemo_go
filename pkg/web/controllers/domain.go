@@ -95,6 +95,7 @@ type DomainStatisticInfo struct {
 
 // IndexAction index
 func (c *DomainController) IndexAction() {
+	c.UpdateOnlineUser()
 	sessionData := c.GetGlobalSessionData()
 	c.Data["data"] = sessionData
 	c.Layout = "base.html"
@@ -103,6 +104,7 @@ func (c *DomainController) IndexAction() {
 
 // ListAction Datable列表数据
 func (c *DomainController) ListAction() {
+	c.UpdateOnlineUser()
 	defer c.ServeJSON()
 
 	req := domainRequestParam{}
