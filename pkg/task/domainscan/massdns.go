@@ -173,7 +173,7 @@ func (m *Massdns) processDomain(domain string) {
 	writer := bufio.NewWriter(file)
 
 	// Read the input wordlist for bruteforce generation
-	inputFile, err := os.Open(filepath.Join(conf.GetRootPath(), "thirdparty/dict", conf.Nemo.Domainscan.Wordlist))
+	inputFile, err := os.Open(filepath.Join(conf.GetRootPath(), "thirdparty/dict", conf.GlobalWorkerConfig().Domainscan.Wordlist))
 	if err != nil {
 		logging.RuntimeLog.Errorf("Could not read bruteforce wordlist: %s\n", err)
 		file.Close()
@@ -209,9 +209,9 @@ func (m *Massdns) runMassdns(domain, inputFile, outputFile string) {
 	cc := ClientConfig{
 		Domain:           domain,
 		MassdnsPath:      filepath.Join(conf.GetRootPath(), "thirdparty/massdns", "massdns_darwin_amd64"),
-		Threads:          conf.Nemo.Domainscan.MassdnsThreads,
+		Threads:          conf.GlobalWorkerConfig().Domainscan.MassdnsThreads,
 		InputFile:        inputFile,
-		ResolversFile:    filepath.Join(conf.GetRootPath(), "thirdparty/dict",conf.Nemo.Domainscan.Resolver),
+		ResolversFile:    filepath.Join(conf.GetRootPath(), "thirdparty/dict",conf.GlobalWorkerConfig().Domainscan.Resolver),
 		TempDir:          m.tempDir,
 		OutputFile:       outputFile,
 		Retries:          5,

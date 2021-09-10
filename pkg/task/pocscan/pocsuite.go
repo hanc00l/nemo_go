@@ -37,13 +37,13 @@ func (p *Pocsuite) Do() {
 		logging.RuntimeLog.Error(err.Error())
 		return
 	}
-	pocPathPfile := filepath.Join(conf.GetRootPath(), conf.Nemo.Pocscan.Pocsuite.PocPath, p.Config.PocFile)
+	pocPathPfile := filepath.Join(conf.GetRootPath(), conf.GlobalWorkerConfig().Pocscan.Pocsuite.PocPath, p.Config.PocFile)
 	cmdBin := filepath.Join(conf.GetRootPath(), "thirdparty/pocsuite/poc.py")
 	var cmdArgs []string
 	cmdArgs = append(
 		cmdArgs,
 		"-r", pocPathPfile, "-f", inputTargetFile, "-o", resultTempFile,
-		"--threads", fmt.Sprintf("%d", conf.Nemo.Pocscan.Pocsuite.Threads),
+		"--threads", fmt.Sprintf("%d", conf.GlobalWorkerConfig().Pocscan.Pocsuite.Threads),
 	)
 	cmd := exec.Command(cmdBin, cmdArgs...)
 	_, err = cmd.CombinedOutput()
@@ -72,7 +72,7 @@ func (p *Pocsuite) parsePocsuiteResult(outputTempFile string) {
 
 // LoadPocFile 加载poc文件列表
 func (p *Pocsuite) LoadPocFile() (pocs []string) {
-	files, _ := filepath.Glob(filepath.Join(conf.GetRootPath(), conf.Nemo.Pocscan.Pocsuite.PocPath, "*.py"))
+	files, _ := filepath.Glob(filepath.Join(conf.GetRootPath(), conf.GlobalWorkerConfig().Pocscan.Pocsuite.PocPath, "*.py"))
 	for _, file := range files {
 		_, pocFile := filepath.Split(file)
 		pocs = append(pocs, pocFile)

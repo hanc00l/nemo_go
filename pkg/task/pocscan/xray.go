@@ -46,7 +46,7 @@ func (x *Xray) Do() {
 	cmdArgs = append(
 		cmdArgs,
 		"--log-level", "error", "webscan", "--plugins", "phantasm", "--poc",
-		filepath.Join(conf.GetRootPath(), conf.Nemo.Pocscan.Xray.PocPath, x.Config.PocFile),
+		filepath.Join(conf.GetRootPath(), conf.GlobalWorkerConfig().Pocscan.Xray.PocPath, x.Config.PocFile),
 		"--json-output", resultTempFile, "--url-file", inputTargetFile,
 	)
 	cmd := exec.Command(cmdBin, cmdArgs...)
@@ -92,7 +92,7 @@ func (x *Xray) parseXrayResult(outputTempFile string) {
 
 // LoadPocFile 加载poc文件列表
 func (x *Xray) LoadPocFile() (pocs []string) {
-	files, _ := filepath.Glob(filepath.Join(conf.GetRootPath(), conf.Nemo.Pocscan.Xray.PocPath, "*.yml"))
+	files, _ := filepath.Glob(filepath.Join(conf.GetRootPath(), conf.GlobalWorkerConfig().Pocscan.Xray.PocPath, "*.yml"))
 	for _, file := range files {
 		_, pocFile := filepath.Split(file)
 		pocs = append(pocs, pocFile)
@@ -116,9 +116,9 @@ func (x *Xray) CheckXrayBinFile() bool {
 	tempDownloadPathFile := utils.GetTempPathFileName()
 	defer os.Remove(tempDownloadPathFile)
 
-	downloadUrl := fmt.Sprintf("https://github.com/chaitin/xray/releases/download/%s/xray_darwin_amd64.zip", conf.Nemo.Pocscan.Xray.LatestVersion)
+	downloadUrl := fmt.Sprintf("https://github.com/chaitin/xray/releases/download/%s/xray_darwin_amd64.zip", conf.GlobalWorkerConfig().Pocscan.Xray.LatestVersion)
 	if runtime.GOOS == "linux" {
-		downloadUrl = fmt.Sprintf("https://github.com/chaitin/xray/releases/download/%s/xray_linux_amd64.zip", conf.Nemo.Pocscan.Xray.LatestVersion)
+		downloadUrl = fmt.Sprintf("https://github.com/chaitin/xray/releases/download/%s/xray_linux_amd64.zip", conf.GlobalWorkerConfig().Pocscan.Xray.LatestVersion)
 	}
 	isDownloadSuccess, err := utils.DownloadFile(downloadUrl, tempDownloadPathFile)
 	if !isDownloadSuccess {

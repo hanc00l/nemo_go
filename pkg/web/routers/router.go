@@ -2,7 +2,6 @@ package routers
 
 import (
 	"github.com/beego/beego/v2/server/web"
-	"github.com/hanc00l/nemo_go/pkg/task/asynctask"
 	"github.com/hanc00l/nemo_go/pkg/web/controllers"
 )
 
@@ -18,10 +17,9 @@ func init() {
 	web.Router("/custom-load", config, "post:LoadCustomConfigAction")
 	web.Router("/custom-save", config, "post:SaveCustomConfigAction")
 
-	dashboard := &controllers.DashboardController{WorkerStatus: make(map[string]*asynctask.WorkerStatus)}
+	dashboard := &controllers.DashboardController{}
 	web.Router("/dashboard", dashboard, "get:IndexAction;post:GetStatisticDataAction")
 	web.Router("/dashboard-task-info", dashboard, "post:GetTaskInfoAction")
-	web.Router("/worker-alive", dashboard, "post:WorkerAliveAction")
 	web.Router("/worker-list", dashboard, "post:WorkerAliveListAction")
 	web.Router("/onlineuser-list", dashboard, "post:OnlineUserListAction")
 
@@ -43,7 +41,6 @@ func init() {
 	web.Router("/domain-attr-delete", domain, "post:DeleteDomainAttrAction")
 	web.Router("/domain-fofa-attr-delete", domain, "post:DeleteDomainFofaAttrAction")
 	web.Router("/domain-statistics", domain, "get:StatisticsAction")
-
 
 	web.Router("/domain-memo-get", domain, "get:GetMemoAction")
 	web.Router("/domain-memo-update", domain, "post:UpdateMemoAction")
@@ -73,8 +70,4 @@ func init() {
 	web.Router("/task-start-portscan", task, "post:StartPortScanTaskAction")
 	web.Router("/task-start-domainscan", task, "post:StartDomainScanTaskAction")
 	web.Router("/task-start-vulnerability", task, "post:StartPocScanTaskAction")
-
-	upload := &controllers.UploadController{}
-	web.Router("/upload-screenshot", upload, "post:UploadScreenshotAction")
-	web.Router("/upload-icpinfo", upload, "post:UploadICPInfoAction")
 }

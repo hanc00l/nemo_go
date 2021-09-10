@@ -1,6 +1,9 @@
 package workerapi
 
 import (
+	"context"
+	"github.com/hanc00l/nemo_go/pkg/comm"
+	"github.com/hanc00l/nemo_go/pkg/logging"
 	"github.com/hanc00l/nemo_go/pkg/task/custom"
 	"github.com/hanc00l/nemo_go/pkg/task/portscan"
 	"github.com/hanc00l/nemo_go/pkg/utils"
@@ -9,12 +12,9 @@ import (
 
 // IPLocation IP归属任务
 func IPLocation(taskId, configJSON string) (result string, err error) {
-	isRevoked, err := CheckIsExistOrRevoked(taskId)
-	if err != nil {
-		return FailedTask(err.Error()), err
-	}
-	if isRevoked {
-		return RevokedTask(""), nil
+	var ok bool
+	if ok, result, err = CheckTaskStatus(taskId); !ok {
+		return result, err
 	}
 
 	config := custom.Config{}
@@ -33,8 +33,18 @@ func IPLocation(taskId, configJSON string) (result string, err error) {
 		}
 	}
 	doLocation(&resultPortScan)
-	result = resultPortScan.SaveResult(portscan.Config{OrgId: config.OrgId})
+	// 保存结果
+	x := comm.NewXClient()
 
+	resultArgs := comm.ScanResultArgs{
+		IPConfig: &portscan.Config{OrgId: config.OrgId},
+		IPResult: resultPortScan.IPResult,
+	}
+	err = x.Call(context.Background(), "SaveScanResult", &resultArgs, &result)
+	if err != nil {
+		logging.RuntimeLog.Error(err)
+		return FailedTask(err.Error()), err
+	}
 	return SucceedTask(result), nil
 }
 

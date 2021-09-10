@@ -167,7 +167,7 @@ func (ff *Fofa) parseResult() {
 
 // SaveResult 保存搜索的结果
 func (ff *Fofa) SaveResult() string {
-	if conf.Nemo.API.Fofa.Key == "" || conf.Nemo.API.Fofa.Name == "" {
+	if conf.GlobalWorkerConfig().API.Fofa.Key == "" || conf.GlobalWorkerConfig().API.Fofa.Name == "" {
 		return "no fofa api"
 	}
 	ips := ff.IpResult.SaveResult(portscan.Config{OrgId: ff.Config.OrgId})

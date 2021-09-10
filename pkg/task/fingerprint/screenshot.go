@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"github.com/chromedp/cdproto/page"
 	"github.com/chromedp/chromedp"
-	"github.com/hanc00l/nemo_go/pkg/comm"
 	"github.com/hanc00l/nemo_go/pkg/conf"
 	"github.com/hanc00l/nemo_go/pkg/logging"
 	"github.com/hanc00l/nemo_go/pkg/task/domainscan"
@@ -21,17 +20,24 @@ import (
 )
 
 const (
-	MaxWidth    = 1980
-	MinHeight   = 1080
-	SavedWidth  = 1024
-	SavedHeight = 0 //根据比例自动缩放
-
+	MaxWidth       = 1980
+	MinHeight      = 1080
+	SavedWidth     = 1024
+	SavedHeight    = 0 //根据比例自动缩放
+	thumbnailWidth = 120
 )
 
 type ScreenShot struct {
 	ResultPortScan   portscan.Result
 	ResultDomainScan domainscan.Result
 	ResultScreenShot ScreenshotResult
+}
+
+type ScreenshotFileInfo struct {
+	Domain   string `json:"domain"`
+	Port     int    `json:"port"`
+	Protocol string `json:"protocol"`
+	Content  []byte `json:"content"`
 }
 
 // NewScreenShot 创建ScreenShot对象
@@ -78,12 +84,11 @@ func (s *ScreenShot) Do() {
 	swg.Wait()
 }
 
-// UploadResult 将screenshot的结果上传到server
-func (s *ScreenShot) UploadResult() string {
-	var count int
+// LoadResult 获取screenshot的结果文件
+func (s *ScreenShot) LoadResult() (result []ScreenshotFileInfo) {
 	for domain, r := range s.ResultScreenShot.Result {
 		for _, si := range r {
-			sfi := comm.ScreenshotFileInfo{
+			sfi := ScreenshotFileInfo{
 				Domain:   domain,
 				Port:     si.Port,
 				Protocol: si.Protocol,
@@ -94,14 +99,52 @@ func (s *ScreenShot) UploadResult() string {
 				logging.RuntimeLog.Error(err)
 				continue
 			}
-			if comm.DoUploadScreenshot(sfi) {
-				count++
-				os.Remove(si.FilePathName)
-			}
+			result = append(result, sfi)
+			os.Remove(si.FilePathName)
+		}
+	}
+	return
+}
+
+// SaveFile 保存screenshot文件到本地
+func (s *ScreenShot) SaveFile(localSavePath string, result []ScreenshotFileInfo) string {
+	count := 0
+	for _, sfi := range result {
+		// check
+		if sfi.Port == 0 || sfi.Domain == "" || sfi.Protocol == "" || len(sfi.Content) == 0 {
+			logging.RuntimeLog.Error("empty upload attribute")
+			continue
+		}
+		if !utils.CheckIPV4(sfi.Domain) && !utils.CheckDomain(sfi.Domain) {
+			logging.RuntimeLog.Errorf("invalid domain:%s", sfi.Domain)
+			continue
+		}
+		if strings.Contains(sfi.Domain, "..") || strings.Contains(sfi.Domain, "/") {
+			logging.RuntimeLog.Errorf("invalid domain:%s", sfi.Domain)
+			continue
+		}
+		domainPath := filepath.Join(localSavePath, sfi.Domain)
+		if !utils.MakePath(localSavePath) || !utils.MakePath(domainPath) {
+			logging.RuntimeLog.Errorf("check upload path fail:%s", domainPath)
+			continue
+		}
+		//保存文件
+		fileName := filepath.Join(domainPath, fmt.Sprintf("%d_%s.png", sfi.Port, sfi.Protocol))
+		err := os.WriteFile(fileName, sfi.Content, 0666)
+		if err != nil {
+			logging.RuntimeLog.Errorf("write file %s fail:%v", fileName, err)
+			continue
+		}
+		//生成缩略图
+		fileNameThumbnail := filepath.Join(domainPath, fmt.Sprintf("%d_%s_thumbnail.png", sfi.Port, sfi.Protocol))
+		if utils.ReSizePicture(fileName, fileNameThumbnail, thumbnailWidth, 0) {
+			count++
+		} else {
+			logging.RuntimeLog.Error("generate thumbnail picature fail")
 		}
 	}
 
-	return fmt.Sprintf("screenshots:%d", count)
+	return fmt.Sprintf("screenshot:%d", count)
 }
 
 // LoadScreenshotFile 获取screenshot文件
@@ -109,7 +152,7 @@ func (s *ScreenShot) LoadScreenshotFile(domain string) (r []string) {
 	if !utils.CheckDomain(domain) && !utils.CheckIPV4(domain) {
 		return
 	}
-	files, _ := filepath.Glob(filepath.Join(conf.Nemo.Web.ScreenshotPath, domain, "*.png"))
+	files, _ := filepath.Glob(filepath.Join(conf.GlobalServerConfig().Web.ScreenshotPath, domain, "*.png"))
 	for _, file := range files {
 		_, f := filepath.Split(file)
 		if !strings.HasSuffix(f, "_thumbnail.png") {
@@ -145,7 +188,7 @@ func (s *ScreenShot) Delete(domain string) bool {
 		logging.RuntimeLog.Errorf("invalid domain:%s", domain)
 		return false
 	}
-	domainPath := filepath.Join(conf.Nemo.Web.ScreenshotPath, domain)
+	domainPath := filepath.Join(conf.GlobalServerConfig().Web.ScreenshotPath, domain)
 	if err := os.RemoveAll(domainPath); err != nil {
 		return false
 	}
@@ -157,7 +200,7 @@ func DoFullScreenshot(url, path string) bool {
 	opts := append(chromedp.DefaultExecAllocatorOptions[:],
 		chromedp.Flag("headless", true),
 		chromedp.Flag("ignore-certificate-errors", true),
-		chromedp.Flag("enable-features","NetworkService"),
+		chromedp.Flag("enable-features", "NetworkService"),
 		chromedp.UserAgent(`Mozilla/5.0 (Windows NT 6.3; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/73.0.3683.103 Safari/537.36`),
 		chromedp.WindowSize(MaxWidth, MinHeight),
 	)

@@ -49,7 +49,7 @@ func (s *SubFinder) RunSubFinder(domain string) {
 	defer os.Remove(resultTempFile)
 
 	var defaultResolvers []string
-	inputFile, err := os.Open(filepath.Join(conf.GetRootPath(), "thirdparty/dict", conf.Nemo.Domainscan.Resolver))
+	inputFile, err := os.Open(filepath.Join(conf.GetRootPath(), "thirdparty/dict", conf.GlobalWorkerConfig().Domainscan.Resolver))
 	if err != nil {
 		logging.RuntimeLog.Errorf("Could not read bruteforce wordlist: %s\n", err)
 		return

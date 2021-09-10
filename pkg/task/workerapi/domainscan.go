@@ -1,9 +1,12 @@
 package workerapi
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
+	"github.com/hanc00l/nemo_go/pkg/comm"
 	"github.com/hanc00l/nemo_go/pkg/conf"
+	"github.com/hanc00l/nemo_go/pkg/logging"
 	"github.com/hanc00l/nemo_go/pkg/task/domainscan"
 	"github.com/hanc00l/nemo_go/pkg/task/fingerprint"
 	"github.com/hanc00l/nemo_go/pkg/task/portscan"
@@ -13,19 +16,15 @@ import (
 
 // DomainScan 域名任务
 func DomainScan(taskId, configJSON string) (result string, err error) {
-	isRevoked, err := CheckIsExistOrRevoked(taskId)
-	if err != nil {
-		return FailedTask(err.Error()), err
-	}
-	if isRevoked {
-		return RevokedTask(""), nil
+	var ok bool
+	if ok, result, err = CheckTaskStatus(taskId); !ok {
+		return result, err
 	}
 
 	config := domainscan.Config{}
 	if err = ParseConfig(configJSON, &config); err != nil {
 		return FailedTask(err.Error()), err
 	}
-
 	resultDomainScan := doDomainScan(config)
 	// 如果有端口扫描的选项
 	if config.IsIPPortScan || config.IsIPSubnetPortScan {
@@ -34,14 +33,30 @@ func DomainScan(taskId, configJSON string) (result string, err error) {
 	// 指纹识别
 	doFingerPrint(config, &resultDomainScan)
 	// 保存结果
-	result = resultDomainScan.SaveResult(config)
+	x := comm.NewXClient()
 
+	resultArgs := comm.ScanResultArgs{
+		DomainConfig: &config,
+		DomainResult: resultDomainScan.DomainResult,
+	}
+	err = x.Call(context.Background(), "SaveScanResult", &resultArgs, &result)
+	if err != nil {
+		logging.RuntimeLog.Error(err)
+		return FailedTask(err.Error()), err
+	}
 	if config.IsScreenshot {
 		ss := fingerprint.NewScreenShot()
 		ss.ResultDomainScan = resultDomainScan
 		ss.Do()
-		resultScreenshot := ss.UploadResult()
-		result = strings.Join([]string{result, resultScreenshot}, ",")
+		resultScreenshot := ss.LoadResult()
+		var result2 string
+		err = x.Call(context.Background(), "SaveScreenshotResult", &resultScreenshot, &result2)
+		if err != nil {
+			logging.RuntimeLog.Error(err)
+			return FailedTask(err.Error()), err
+		} else {
+			result = strings.Join([]string{result, result2}, ",")
+		}
 	}
 
 	return SucceedTask(result), nil
@@ -94,7 +109,7 @@ func doFingerPrint(config domainscan.Config, resultDomainScan *domainscan.Result
 		whatweb.ResultDomainScan = *resultDomainScan
 		whatweb.Do()
 	}
-	if config.IsWappalyzer{
+	if config.IsWappalyzer {
 		wappalyzer := fingerprint.NewWappalyzer()
 		wappalyzer.ResultDomainScan = *resultDomainScan
 		wappalyzer.Do()
@@ -110,11 +125,11 @@ func doPortScan(config domainscan.Config, resultDomainScan *domainscan.Result) {
 	configPortScan := portscan.Config{
 		OrgId:        config.OrgId,
 		Target:       ipResult,
-		Port:         conf.Nemo.Portscan.Port,
-		Rate:         conf.Nemo.Portscan.Rate,
-		CmdBin:       conf.Nemo.Portscan.Cmdbin,
-		IsPing:       conf.Nemo.Portscan.IsPing,
-		Tech:         conf.Nemo.Portscan.Tech,
+		Port:         conf.GlobalWorkerConfig().Portscan.Port,
+		Rate:         conf.GlobalWorkerConfig().Portscan.Rate,
+		CmdBin:       conf.GlobalWorkerConfig().Portscan.Cmdbin,
+		IsPing:       conf.GlobalWorkerConfig().Portscan.IsPing,
+		Tech:         conf.GlobalWorkerConfig().Portscan.Tech,
 		IsIpLocation: true,
 		IsHttpx:      config.IsHttpx,
 		IsWhatWeb:    config.IsWhatWeb,

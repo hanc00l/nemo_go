@@ -1,12 +1,9 @@
 ## MacOS安装与配置
 
-### **0、Download Release Package**
+### **0、Unpack Release Package**
 
   ```
-curl -O http://www.github.com/hanc00l/nemo_go/release/nemo_darwin_amd64.tar
-mkdir nemo
-tar xvf nemo_darwin_amd64.tar -C nemo
-cd nemo
+mkdir nemo;tar xvf nemo_darwin_amd64.tar -C nemo;cd nemo
   ```
 
 ### **1、rabbitmq**
@@ -66,16 +63,19 @@ cd WhatWeb
 make install
 ```
 
-### 5、conf/config.yaml（根据实际情况修改）
+### 5、conf/server.yml（根据实际情况修改）
 
-```
+```yaml
 web:
   host: 0.0.0.0
   port: 5000
   username: nemo
   password: 648ce596dba3b408b523d3d1189b15070123456789abcdef
-  encryptKey: ZduibTKhcbb6Pi8W
   screenshotPath: /tmp/screenshot
+rpc:
+  host: 0.0.0.0
+  port: 5001
+  authKey: ZduibTKhcbb6Pi8W
 database:
   host: 127.0.0.1
   port: 3306
@@ -87,13 +87,27 @@ rabbitmq:
   port: 5672
   username: guest
   password: guest
+```
+
+### 6、conf/worker.yml
+
+```yaml
+rpc:
+  host: 0.0.0.0
+  port: 5001
+  authKey: ZduibTKhcbb6Pi8W
+rabbitmq:
+  host: localhost
+  port: 5672
+  username: guest
+  password: guest
 api:
   fofa:
     name:
     key:
   icp:
     name: chinaz
-    key: 
+    key:
 portscan:
   ping: false
   port: --top-ports 1000
@@ -113,7 +127,7 @@ pocscan:
     threads: 10
 ```
 
-### 6、安装pocsuite3 （可选）
+### 7、安装pocsuite3 （可选）
 
   ```
 pip3 install pocsuite3

@@ -235,7 +235,7 @@ func NewFofa(config FofaConfig) *Fofa {
 
 // Do 执行fofa
 func (ff *Fofa) Do() {
-	if conf.Nemo.API.Fofa.Key == "" || conf.Nemo.API.Fofa.Name == "" {
+	if conf.GlobalWorkerConfig().API.Fofa.Key == "" || conf.GlobalWorkerConfig().API.Fofa.Name == "" {
 		logging.RuntimeLog.Error("no fofa api,exit fofa search")
 		return
 	}
@@ -250,8 +250,8 @@ func (ff *Fofa) Do() {
 
 // RunFofa 调用fofa搜索
 func (ff *Fofa) RunFofa(domain string) {
-	email := conf.Nemo.API.Fofa.Name
-	key := conf.Nemo.API.Fofa.Key
+	email := conf.GlobalWorkerConfig().API.Fofa.Name
+	key := conf.GlobalWorkerConfig().API.Fofa.Key
 
 	clt := NewFofaClient([]byte(email), []byte(key))
 	if clt == nil {

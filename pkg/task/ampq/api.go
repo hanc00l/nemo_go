@@ -1,4 +1,4 @@
-package asynctask
+package ampq
 
 import (
 	"fmt"
@@ -9,8 +9,6 @@ import (
 	eagerlock "github.com/RichardKnop/machinery/v2/locks/eager"
 	"github.com/RichardKnop/machinery/v2/tasks"
 	"github.com/hanc00l/nemo_go/pkg/conf"
-	"github.com/hanc00l/nemo_go/pkg/db"
-	"github.com/hanc00l/nemo_go/pkg/logging"
 	"sync"
 	"time"
 )
@@ -39,17 +37,21 @@ type WorkerStatus struct {
 	TaskExecutedNumber int       `json:"task_number"`
 }
 
-// GetTaskServer 获取到消息中心的连接
-func GetTaskServer() (taskServer *machinery.Server) {
-	return StartAMQPServer()
+// GetServerTaskAMPQSrever 根据server配置文件，获取到消息中心的连接
+func GetServerTaskAMPQSrever() (taskServer *machinery.Server) {
+	rabbitmq := conf.GlobalServerConfig().Rabbitmq
+	return startAMQPServer(rabbitmq.Username, rabbitmq.Password, rabbitmq.Host, rabbitmq.Port)
 }
 
-// StartAMQPServer 连接到AMQP消息队列服务器
-func StartAMQPServer() *machinery.Server {
-	amqpConfig := fmt.Sprintf("amqp://%s:%s@%s:%d/", conf.Nemo.Rabbitmq.Username,
-		conf.Nemo.Rabbitmq.Password,
-		conf.Nemo.Rabbitmq.Host,
-		conf.Nemo.Rabbitmq.Port)
+// GetWorkerAMPQServer 根据worker配置文件，获取到消息中心的连接
+func GetWorkerAMPQServer() (taskServer *machinery.Server) {
+	rabbitmq := conf.GlobalWorkerConfig().Rabbitmq
+	return startAMQPServer(rabbitmq.Username, rabbitmq.Password, rabbitmq.Host, rabbitmq.Port)
+}
+
+// startAMQPServer 连接到AMQP消息队列服务器
+func startAMQPServer(username, password, host string, port int) *machinery.Server {
+	amqpConfig := fmt.Sprintf("amqp://%s:%s@%s:%d/", username, password, host, port)
 	cnf := &config.Config{
 		Broker:          amqpConfig,
 		DefaultQueue:    "machinery_tasks",
@@ -69,52 +71,4 @@ func StartAMQPServer() *machinery.Server {
 	server := machinery.NewServer(cnf, broker, backend, lock)
 
 	return server
-}
-
-// AddTask 将任务写入到数据库中
-func AddTask(taskId, taskName, kwArgs string) {
-	dt := time.Now()
-	task := &db.Task{
-		TaskId:       taskId,
-		TaskName:     taskName,
-		KwArgs:       kwArgs,
-		State:        CREATED,
-		ReceivedTime: &dt,
-	}
-	//kwargs可能因为target很多导致超过数据库中的字段设计长度，因此作一个长度截取
-	const argsLength = 2000
-	if len(kwArgs) > argsLength {
-		task.KwArgs = fmt.Sprintf("%s...", kwArgs[:argsLength])
-	}
-	if !task.Add() {
-		logging.RuntimeLog.Errorf("Add new task fail: %s,%s,%s", taskId, taskName, kwArgs)
-	}
-}
-
-// UpdateTask 更新任务状态、结果到数据库中
-func UpdateTask(taskId, state, worker, result string) {
-	dt := time.Now()
-	task := &db.Task{
-		TaskId: taskId,
-		State:  state,
-		Worker: worker,
-		Result: result,
-	}
-	switch state {
-	case SUCCESS:
-		task.SucceededTime = &dt
-	case FAILURE:
-		task.FailedTime = &dt
-	case REVOKED:
-		task.RevokedTime = &dt
-	case STARTED:
-		task.StartedTime = &dt
-	case RETRY:
-		task.RetriedTime = &dt
-	case RECEIVED:
-		task.ReceivedTime = &dt
-	}
-	if !task.SaveOrUpdate() {
-		logging.RuntimeLog.Errorf("Update task:%s,state:%s fail !", taskId, state)
-	}
 }

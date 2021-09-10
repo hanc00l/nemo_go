@@ -4,9 +4,9 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/hanc00l/nemo_go/pkg/logging"
-	"github.com/hanc00l/nemo_go/pkg/utils"
 	"github.com/hanc00l/nemo_go/pkg/task/domainscan"
 	"github.com/hanc00l/nemo_go/pkg/task/portscan"
+	"github.com/hanc00l/nemo_go/pkg/utils"
 	"github.com/projectdiscovery/httpx/common/customheader"
 	"github.com/projectdiscovery/httpx/runner"
 	"github.com/remeh/sizedwaitgroup"
@@ -182,6 +182,5 @@ func parseHttpxResult(outputTempFile string) (result []FingerAttrResult) {
 			Content: fmt.Sprintf("%v", resultJSON.StatusCode),
 		})
 	}
-
 	return result
 }

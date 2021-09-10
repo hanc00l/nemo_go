@@ -9,7 +9,7 @@ import (
 
 const (
 	Release = "Release" //正式运行模式
-	Debug   = "Debug"     //开发模式
+	Debug   = "Debug"   //开发模式
 )
 
 // RunMode 运行模式
@@ -18,19 +18,42 @@ var RunMode = Release
 //var RunMode = Debug
 
 // Nemo 系统运行全局配置参数
-var Nemo Config
+var serverConfig *Server
+var workerConfig *Worker
 
-func init() {
-	err := Nemo.ReloadConfig()
-	if err != nil {
-		fmt.Println("Load nemo config fail!")
-		os.Exit(0)
+func GlobalServerConfig() *Server {
+	if serverConfig == nil {
+		serverConfig = new(Server)
+		err := serverConfig.ReloadConfig()
+		if err != nil {
+			fmt.Println("Load Server config fail!")
+			os.Exit(0)
+		}
 	}
+	return serverConfig
 }
 
-type Config struct {
-	Web        Web        `yaml:"web"`
-	Database   Database   `yaml:"database"`
+func GlobalWorkerConfig() *Worker {
+	if workerConfig == nil {
+		workerConfig = new(Worker)
+		err := workerConfig.ReloadConfig()
+		if err != nil {
+			fmt.Println("Load Worker config fail!")
+			os.Exit(0)
+		}
+	}
+	return workerConfig
+}
+
+type Server struct {
+	Web      Web      `yaml:"web"`
+	Rpc      RPC      `yaml:"rpc"`
+	Database Database `yaml:"database"`
+	Rabbitmq Rabbitmq `yaml:"rabbitmq"`
+}
+
+type Worker struct {
+	Rpc        RPC        `yaml:"rpc"`
 	Rabbitmq   Rabbitmq   `yaml:"rabbitmq"`
 	API        API        `yaml:"api"`
 	Portscan   Portscan   `yaml:"portscan"`
@@ -43,8 +66,13 @@ type Web struct {
 	Port           int    `yaml:"port"`
 	Username       string `yaml:"username"`
 	Password       string `yaml:"password"`
-	EncryptKey     string `yaml:"encryptKey"`
 	ScreenshotPath string `yaml:"screenshotPath"`
+}
+
+type RPC struct {
+	Host    string `yaml:"host"`
+	Port    int    `yaml:"port"`
+	AuthKey string `yaml:"authKey"`
 }
 
 type Database struct {
@@ -97,9 +125,23 @@ type Domainscan struct {
 	MassdnsThreads int    `yaml:"massdnsThreads"`
 }
 
+// WriteConfig 写配置到yaml文件中
+func (config *Server) WriteConfig() error {
+	content, err := yaml.Marshal(config)
+	if err != nil {
+		fmt.Println(err)
+		return err
+	}
+	err = os.WriteFile(filepath.Join(GetRootPath(), "conf/server.yml"), content, 0666)
+	if err != nil {
+		fmt.Println(err)
+	}
+	return err
+}
+
 // ReloadConfig 从yaml文件中加载配置
-func (config *Config) ReloadConfig() error {
-	fileContent, err := os.ReadFile(filepath.Join(GetRootPath(), "conf/config.yml"))
+func (config *Server) ReloadConfig() error {
+	fileContent, err := os.ReadFile(filepath.Join(GetRootPath(), "conf/server.yml"))
 	if err != nil {
 		fmt.Println(err)
 		return err
@@ -111,14 +153,14 @@ func (config *Config) ReloadConfig() error {
 	return err
 }
 
-// WriteConfig 写配置到yaml文件中
-func (config *Config) WriteConfig() error {
-	content, err := yaml.Marshal(config)
+// ReloadConfig 从yaml文件中加载配置
+func (config *Worker) ReloadConfig() error {
+	fileContent, err := os.ReadFile(filepath.Join(GetRootPath(), "conf/worker.yml"))
 	if err != nil {
 		fmt.Println(err)
 		return err
 	}
-	err = os.WriteFile(filepath.Join(GetRootPath(), "conf/config.yml"), content, 0666)
+	err = yaml.Unmarshal(fileContent, config)
 	if err != nil {
 		fmt.Println(err)
 	}

@@ -20,6 +20,9 @@ func init() {
 	// use beego cache system store the captcha data
 	store := cache.NewMemoryCache()
 	cpt = captcha.NewWithFilter("/captcha/", store)
+	cpt.ChallengeNums = 6
+	cpt.StdWidth = 200
+	cpt.StdHeight = 40
 }
 
 // IndexAction 登录首页
@@ -54,9 +57,9 @@ func (c *LoginController) LogoutAction() {
 
 // CheckPassword 校验密码
 func CheckPassword(password string) bool {
-	conf.Nemo.ReloadConfig()
+	conf.GlobalServerConfig().ReloadConfig()
 
-	configuredPassword := conf.Nemo.Web.Password
+	configuredPassword := conf.GlobalServerConfig().Web.Password
 	hash := configuredPassword[:32]
 	salt := configuredPassword[32:]
 	checkedPass := utils.MD5V3(fmt.Sprintf("%s%s", password, salt))
@@ -71,9 +74,9 @@ func UpdatePassword(newPassword string) bool {
 	salt := utils.GetRandomString2(16)
 	hash := utils.MD5V3(fmt.Sprintf("%s%s", newPassword, salt))
 
-	conf.Nemo.ReloadConfig()
-	conf.Nemo.Web.Password = fmt.Sprintf("%s%s", hash, salt)
-	if err := conf.Nemo.WriteConfig(); err != nil {
+	conf.GlobalServerConfig().ReloadConfig()
+	conf.GlobalServerConfig().Web.Password = fmt.Sprintf("%s%s", hash, salt)
+	if err := conf.GlobalServerConfig().WriteConfig(); err != nil {
 		return false
 	}
 	return true

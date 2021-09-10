@@ -3,7 +3,6 @@ package onlineapi
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/hanc00l/nemo_go/pkg/comm"
 	"github.com/hanc00l/nemo_go/pkg/conf"
 	"github.com/hanc00l/nemo_go/pkg/logging"
 	"github.com/hanc00l/nemo_go/pkg/task/domainscan"
@@ -18,7 +17,7 @@ type ICPQuery struct {
 	Config           ICPQueryConfig
 	ICPMap           map[string]*ICPInfo
 	cachedICpInfoNum int
-	queriedICPInfo   map[string]*ICPInfo
+	QueriedICPInfo   map[string]*ICPInfo
 }
 
 // NewICPQuery 创建ICP备案查询对象
@@ -26,7 +25,7 @@ func NewICPQuery(config ICPQueryConfig) *ICPQuery {
 	icp := ICPQuery{
 		Config:         config,
 		ICPMap:         make(map[string]*ICPInfo),
-		queriedICPInfo: make(map[string]*ICPInfo)}
+		QueriedICPInfo: make(map[string]*ICPInfo)}
 	icp.loadICPCache()
 
 	return &icp
@@ -46,7 +45,7 @@ func (i *ICPQuery) Do() {
 		}
 		icpInfo := i.runICPQuery(fldDomain)
 		if icpInfo != nil {
-			i.queriedICPInfo[fldDomain] = icpInfo
+			i.QueriedICPInfo[fldDomain] = icpInfo
 			i.ICPMap[fldDomain] = icpInfo
 			i.cachedICpInfoNum++
 		}
@@ -70,14 +69,14 @@ func (i *ICPQuery) LookupICP(domain string) *ICPInfo {
 	return nil
 }
 
-// UploadICPInfo 上传查询到的ICP备案信息到server
-func (i *ICPQuery) UploadICPInfo() string {
-	if i.queriedICPInfo != nil && len(i.queriedICPInfo) > 0 {
-		data, _ := json.Marshal(i.queriedICPInfo)
-		comm.DoUploadICPInfo(data)
-	}
-	return fmt.Sprintf("icp:%d", i.cachedICpInfoNum)
-}
+//// UploadICPInfo 上传查询到的ICP备案信息到server
+//func (i *ICPQuery) UploadICPInfo() string {
+//	if i.QueriedICPInfo != nil && len(i.QueriedICPInfo) > 0 {
+//		data, _ := json.Marshal(i.QueriedICPInfo)
+//		comm.DoUploadICPInfo(data)
+//	}
+//	return fmt.Sprintf("icp:%d", i.cachedICpInfoNum)
+//}
 
 // SaveLocalICPInfo 保存icp信息
 func (i *ICPQuery) SaveLocalICPInfo() bool {
@@ -92,11 +91,11 @@ func (i *ICPQuery) SaveLocalICPInfo() bool {
 
 // runICPQuery 通过API在线查询一个域名的ICP备案信息
 func (i *ICPQuery) runICPQuery(domain string) *ICPInfo {
-	if conf.Nemo.API.ICP.Key == "" {
+	if conf.GlobalWorkerConfig().API.ICP.Key == "" {
 		logging.RuntimeLog.Error("query key is empty")
 		return nil
 	}
-	url := fmt.Sprintf("https://apidatav2.chinaz.com/single/icp?key=%s&domain=%s", conf.Nemo.API.ICP.Key, domain)
+	url := fmt.Sprintf("https://apidatav2.chinaz.com/single/icp?key=%s&domain=%s", conf.GlobalWorkerConfig().API.ICP.Key, domain)
 	resp, err := http.Get(url)
 	if resp.StatusCode != 200 {
 		logging.RuntimeLog.Errorf("get api status code:%v", resp.Status)

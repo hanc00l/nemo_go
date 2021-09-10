@@ -1,16 +1,7 @@
-web:
-  host: 0.0.0.0
-  port: 5000
-  username: nemo
-  password: 648ce596dba3b408b523d3d1189b15070123456789abcdef
-  encryptKey: ZduibTKhcbb6Pi8W
-  screenshotPath: /tmp/screenshot
-database:
+rpc:
   host: 127.0.0.1
-  port: 3306
-  name: nemo
-  username: nemo
-  password: nemo2020
+  port: 5001
+  authKey: ZduibTKhcbb6Pi8W
 rabbitmq:
   host: localhost
   port: 5672

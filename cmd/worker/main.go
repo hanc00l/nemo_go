@@ -8,6 +8,7 @@ import (
 	"time"
 )
 
+// keepAlive worker与server的心跳与同步
 func keepAlive() {
 	time.Sleep(10 * time.Second)
 	for {

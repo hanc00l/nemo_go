@@ -17,11 +17,12 @@ func GetDB() *gorm.DB {
 	RetriedCount := 0
 	for {
 		if RetriedCount > RetriedNumber {
-			logging.RuntimeLog.Fatal("Failed to connect database!")
+			logging.RuntimeLog.Fatal("Failed to connect database")
 			return nil
 		}
 		db := getDB()
 		if db == nil {
+			logging.RuntimeLog.Error("connect to database fail,retry...")
 			RetriedCount++
 			time.Sleep(RetriedSleepTime)
 			continue
@@ -31,12 +32,9 @@ func GetDB() *gorm.DB {
 }
 
 func getDB() *gorm.DB {
-	user := conf.Nemo.Database.Username
-	pass := conf.Nemo.Database.Password
-	host := conf.Nemo.Database.Host
-	port := conf.Nemo.Database.Port
-	dbname := conf.Nemo.Database.Dbname
-	dsn := fmt.Sprintf("%s:%s@tcp(%s:%d)/%s?charset=utf8mb4&parseTime=True&loc=Local", user, pass, host, port, dbname)
+	database := conf.GlobalServerConfig().Database
+	dsn := fmt.Sprintf("%s:%s@tcp(%s:%d)/%s?charset=utf8mb4&parseTime=True&loc=Local",
+		database.Username, database.Password, database.Host, database.Port, database.Dbname)
 
 	db, err := gorm.Open(mysql.Open(dsn), &gorm.Config{})
 	if err != nil {

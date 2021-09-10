@@ -40,13 +40,14 @@ func (c *ConfigController) CustomAction() {
 
 // LoadDefaultConfigAction 获取默认的端口扫描配置参数
 func (c *ConfigController) LoadDefaultConfigAction() {
-	conf.Nemo.ReloadConfig()
+	conf.GlobalWorkerConfig().ReloadConfig()
+	portscan := conf.GlobalWorkerConfig().Portscan
 	data := DefaultPortscanConfig{
-		CmdBin: conf.Nemo.Portscan.Cmdbin,
-		Port:   conf.Nemo.Portscan.Port,
-		Rate:   conf.Nemo.Portscan.Rate,
-		Tech:   conf.Nemo.Portscan.Tech,
-		IsPing: conf.Nemo.Portscan.IsPing,
+		CmdBin: portscan.Cmdbin,
+		Port:   portscan.Port,
+		Rate:   portscan.Rate,
+		Tech:   portscan.Tech,
+		IsPing: portscan.IsPing,
 	}
 	c.Data["json"] = data
 	c.ServeJSON()

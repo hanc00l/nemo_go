@@ -64,13 +64,13 @@ docker-compose up -d
 
 ## Install
 
-Tested on [ubuntu18.04 LTS](docs/install_linux.md)、macOS
+Tested on [ubuntu18.04 LTS](docs/install_linux.md)、[macOS](docs/install_mac.md)
 
 
 
 ## Demo
 
-默认监听端口为5000，首页请访问http://ip:5000/，默认密码nemo。
+默认监听端口为5000，首页请访问http://ip:5000/，默认密码nemo；通过“系统设置--配置管理”更改默认密码。
 
 <img src="docs/image/dashboard.png" alt="dashbord"  />
 
@@ -96,6 +96,7 @@ Tested on [ubuntu18.04 LTS](docs/install_linux.md)、macOS
 
 ## 版本更新
 
+- 2.4.0：2021-9-13，使用RPC架构，优化server与worker之间的同步、server与worker的配置文件分离；增加在线的IP信息；
 - 2.3：2021-8-25，使用docker-compose构建Docker，修改数据库连接重试功能，完善端口扫描及任务等信息；
 - 2.2：2021-8-2，增加基于Wappalyzer规则的指纹识别功能；
 - 2.1：2021-7-30，用Golang完成对原python3版本的重构；

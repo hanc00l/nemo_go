@@ -23,5 +23,6 @@ COPY . /opt/nemo
 
 #link to mysql and rabbitmq
 RUN set -x \
-    && sed -i 's/host: 127.0.0.1/host: mysql/g' /opt/nemo/conf/config.yml \
-    && sed -i 's/host: localhost/host: rabbitmq/g' /opt/nemo/conf/config.yml
+    && sed -i 's/host: 127.0.0.1/host: mysql/g' /opt/nemo/conf/server.yml \
+    && sed -i 's/host: localhost/host: rabbitmq/g' /opt/nemo/conf/server.yml \
+    && sed -i 's/host: localhost/host: rabbitmq/g' /opt/nemo/conf/worker.yml

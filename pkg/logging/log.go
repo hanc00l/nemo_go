@@ -6,6 +6,7 @@ import (
 	"os"
 	"path"
 	"runtime"
+	"strings"
 )
 
 var (
@@ -19,12 +20,15 @@ func init() {
 	RuntimeLog.SetLevel(logrus.InfoLevel)
 	RuntimeLog.SetReportCaller(true)
 	RuntimeLog.SetFormatter(&logrus.JSONFormatter{
-		TimestampFormat:"2006-01-02 15:03:04",
+		TimestampFormat: "2006-01-02 15:03:04",
 		CallerPrettyfier: func(frame *runtime.Frame) (function string, file string) {
 			fileName := path.Base(frame.File)
-			return frame.Function, fileName
+			functions := strings.Split(frame.Function, "/")
+
+			return functions[len(functions)-1], fileName
 		},
 	})
+
 	if file, err := os.OpenFile(path.Join(conf.GetRootPath(), "log/runtime.log"),
 		os.O_APPEND|os.O_WRONLY|os.O_CREATE, 0666); err == nil {
 		RuntimeLog.SetOutput(file)
@@ -32,6 +36,7 @@ func init() {
 	CLILog.SetFormatter(GetCustomLoggerFormatter())
 }
 
+// GetCustomLoggerFormatter 日定义日志格式
 func GetCustomLoggerFormatter() logrus.Formatter {
 	customFormatter := new(logrus.TextFormatter)
 	customFormatter.FullTimestamp = true                    // 显示完整时间

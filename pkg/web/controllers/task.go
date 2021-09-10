@@ -6,7 +6,7 @@ import (
 	"github.com/hanc00l/nemo_go/pkg/conf"
 	"github.com/hanc00l/nemo_go/pkg/db"
 	"github.com/hanc00l/nemo_go/pkg/logging"
-	"github.com/hanc00l/nemo_go/pkg/task/asynctask"
+	"github.com/hanc00l/nemo_go/pkg/task/ampq"
 	"github.com/hanc00l/nemo_go/pkg/task/custom"
 	"github.com/hanc00l/nemo_go/pkg/task/domainscan"
 	"github.com/hanc00l/nemo_go/pkg/task/onlineapi"
@@ -173,7 +173,6 @@ func (c *TaskController) StopAction() {
 // StartPortScanTaskAction 端口扫描任务
 func (c *TaskController) StartPortScanTaskAction() {
 	defer c.ServeJSON()
-
 	// 解析参数
 	var req portscanRequestParam
 	err := c.ParseForm(&req)
@@ -416,13 +415,13 @@ func (c *TaskController) doPortscan(target string, req portscanRequestParam) (ta
 		config.CmdBin = "nmap"
 	}
 	if config.Port == "" {
-		config.Port = conf.Nemo.Portscan.Port
+		config.Port = conf.GlobalWorkerConfig().Portscan.Port
 	}
 	if config.Rate == 0 {
-		config.Rate = conf.Nemo.Portscan.Rate
+		config.Rate = conf.GlobalWorkerConfig().Portscan.Rate
 	}
 	if config.Tech == "" {
-		config.Target = conf.Nemo.Portscan.Tech
+		config.Target = conf.GlobalWorkerConfig().Portscan.Tech
 	}
 	// config.OrgId 为int，默认为0
 	// db.Organization.OrgId为指针，默认nil
@@ -644,7 +643,7 @@ func getTargetFromKwArgs(kwargs string) (target string) {
 
 // getResultMsg 从经过JSON反序列化的结果中提取出结果的消息
 func getResultMsg(resultJSON string) (msg string) {
-	var result asynctask.TaskResult
+	var result ampq.TaskResult
 	err := json.Unmarshal([]byte(resultJSON), &result)
 	if err != nil {
 		return resultJSON

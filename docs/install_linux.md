@@ -20,16 +20,6 @@
 
 - **导入并配置mysql数据库**：
 
-  mysql默认只监听127.0.0.1，需修改/etc/mysql/mysql.conf.d的bind-address，供worker远程连接（如果不需要分布式则不需要该配置）
-
-  ```ini
-  # Default Homebrew MySQL server config
-  [mysqld]
-  # Only allow connections from localhost
-  # bind-address = 127.0.0.1
-  bind-address = 0.0.0.0
-  ```
-
   由于mysql5.7新版本默认安装后不能使用root和空密码在本机登录，系统自动生成的用户名密码位于/etc/mysql/debian.cnf，请替换并使用配置文件中的user和password：
 
   ```
@@ -59,43 +49,47 @@
 
 - 配置文件
 
-  **conf/config.yml**
+  **conf/server.yml**
 
   ```yaml
   web:
-    # host,port: server监听地址；worker用于keepalive和upload的地址
+    # web server 监听IP和地址
     host: 0.0.0.0
     port: 5000
-    # 登录用户名和密码
+    # 登录用户名密码
     username: nemo
     password: 648ce596dba3b408b523d3d1189b15070123456789abcdef
-    # keepalive和upload的地址使用的密钥
-    encryptKey: ZduibTKhcbb6Pi8W
-    # Server保存screenshot的位置，同时需要修改conf/app.conf里对应表staticdir映射
+    # screenshot 在本地保存位置，需与app.conf中与static映射地址保持一致
     screenshotPath: /tmp/screenshot
-  # server和worker访问的数据库
+  # rpc监听地址和端口、auth
+  rpc: 
+    host: 0.0.0.0
+    port: 5001
+    authKey: ZduibTKhcbb6Pi8W
+  # 数据库配置
   database:
-    host: localhost
+    host: 127.0.0.1
     port: 3306
     name: nemo
     username: nemo
     password: nemo2020
-  # 消息中间件，用于分布式任务
-  rabbitmq:
+  # 消息中间件配置
+  rabbitmq: 
     host: localhost
     port: 5672
-    username: nemo
-    password: nemo2020
+    username: guest
+    password: guest
   ```
-
-  **重要：记得要修改默认的encryptKey。**
   
-  **conf/app.conf**
+  
+    **重要：记得要修改默认的authKey。**
+  
+    **conf/app.conf：**
 
-  ```yaml
-  #screenshot默认保存位置，与config.yml保持一致
-  staticdir = static:web/static screenshot:/tmp/screenshot
-  ```
+    ```yaml
+    #screenshot默认保存位置，与server.yml保持一致
+    staticdir = static:web/static screenshot:/tmp/screenshot
+    ```
 
 
 
@@ -104,7 +98,7 @@
 - **创建安装目录并解压tar包**
 
   ```bash
-  mkdir nemo;tar xvf nemo_linux_amd64.tar -C nemo;cd nemo
+  mkdir nemo;tar xvf worker_linux_amd64.tar -C nemo;cd nemo
   ```
 
 - **安装环境和依赖**
@@ -132,36 +126,45 @@
 
 - **配置文件**
 
-  **conf/config.yml** ：
+  **conf/worker.yml** ：
 
   ```yaml
-  web:
-    # host,port: server监听地址；worker用于keepalive和upload的地址
-    host: 172.16.80.1
-    port: 5000
-    # keepalive和upload的地址使用的密钥，与服务端的配置文件保持一致
-    encryptKey: ZduibTKhcbb6Pi8W
-  # server和worker访问的数据库
-  database:
-    host: 172.16.80.1
-    port: 3306
-    name: nemo
-    username: nemo
-    password: nemo2020
-  # 消息中间件，用于分布式任务
-  rabbitmq:
-    host: 172.16.80.1
+   # RPC 调用的server监听地址和端口、auth
+  rpc:
+    host: 0.0.0.0
+    port: 5001
+    authKey: ZduibTKhcbb6Pi8W
+  # 消息中间件
+  rabbitmq: 
+    host: localhost
     port: 5672
-    username: nemo
-    password: nemo2020
-  # 使用到的api的key，如果为空则该功能将不能正常使用
+    username: guest
+    password: guest
+  # 使用的API接口用户、密码，如果为空则该api不无使用
   api:
     fofa:
-      name: xxx
-      key: xxx
+      name:
+      key:
     icp:
       name: chinaz
-      key: xxx
+      key:
+  # 任务使用的参数
+  portscan:
+    ping: false
+    port: --top-ports 1000
+    rate: 1000
+    tech: -sS
+    cmdbin: masscan
+  domainscan:
+    resolver: resolver.txt
+    wordlist: subnames.txt
+    massdnsThreads: 600
+  pocscan:
+    xray:
+      pocPath: thirdparty/xray/xray/pocs
+      latest: 1.7.1
+    pocsuite:
+      pocPath: thirdparty/pocsuite/some_pocsuite
+      threads: 10
   ```
 
-  
