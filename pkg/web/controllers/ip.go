@@ -21,17 +21,18 @@ type IPController struct {
 // ipRequestParam 请求参数
 type ipRequestParam struct {
 	DatableRequestParam
-	OrgId         int    `form:"org_id"`
-	IPAddress     string `form:"ip_address"`
-	DomainAddress string `form:"domain_address"`
-	Port          string `form:"port"`
-	Content       string `form:"content"`
-	IPLocation    string `form:"iplocation"`
-	PortStatus    string `form:"port_status"`
-	ColorTag      string `form:"color_tag"`
-	MemoContent   string `form:"memo_content"`
-	DateDelta     int    `form:"date_delta"`
-	DisableFofa   bool   `form:"disable_fofa"`
+	OrgId                 int    `form:"org_id"`
+	IPAddress             string `form:"ip_address"`
+	DomainAddress         string `form:"domain_address"`
+	Port                  string `form:"port"`
+	Content               string `form:"content"`
+	IPLocation            string `form:"iplocation"`
+	PortStatus            string `form:"port_status"`
+	ColorTag              string `form:"color_tag"`
+	MemoContent           string `form:"memo_content"`
+	DateDelta             int    `form:"date_delta"`
+	AssertCreateDateDelta int    `form:"create_date_delta"`
+	DisableFofa           bool   `form:"disable_fofa"`
 }
 
 // IPListData 列表中每一行显示的IP数据
@@ -369,6 +370,9 @@ func (c *IPController) getSearchMap(req ipRequestParam) (searchMap map[string]in
 	}
 	if req.DateDelta > 0 {
 		searchMap["date_delta"] = req.DateDelta
+	}
+	if req.AssertCreateDateDelta > 0 {
+		searchMap["create_date_delta"] = req.AssertCreateDateDelta
 	}
 	return searchMap
 }

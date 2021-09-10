@@ -179,6 +179,7 @@ $(function () {
                         "color_tag": $('#select_color_tag').val(),
                         "memo_content": $('#memo_content').val(),
                         "date_delta": $('#date_delta').val(),
+                        "create_date_delta": $('#create_date_delta').val(),
                         'disable_fofa': $('#checkbox_disable_fofa').is(":checked"),
                     });
                 }

@@ -23,13 +23,14 @@ type DomainController struct {
 // domainRequestParam domain的请求参数
 type domainRequestParam struct {
 	DatableRequestParam
-	OrgId         int    `form:"org_id"`
-	IPAddress     string `form:"ip_address"`
-	DomainAddress string `form:"domain_address"`
-	ColorTag      string `form:"color_tag"`
-	MemoContent   string `form:"memo_content"`
-	DateDelta     int    `form:"date_delta"`
-	DisableFofa   bool   `form:"disable_fofa"`
+	OrgId           int    `form:"org_id"`
+	IPAddress       string `form:"ip_address"`
+	DomainAddress   string `form:"domain_address"`
+	ColorTag        string `form:"color_tag"`
+	MemoContent     string `form:"memo_content"`
+	DateDelta       int    `form:"date_delta"`
+	CreateDateDelta int    `form:"create_date_delta"`
+	DisableFofa     bool   `form:"disable_fofa"`
 }
 
 // DomainListData datable显示的每一行数据
@@ -369,6 +370,9 @@ func (c *DomainController) getSearchMap(req domainRequestParam) (searchMap map[s
 	}
 	if req.DateDelta > 0 {
 		searchMap["date_delta"] = req.DateDelta
+	}
+	if req.CreateDateDelta> 0 {
+		searchMap["create_date_delta"] = req.CreateDateDelta
 	}
 	return
 }

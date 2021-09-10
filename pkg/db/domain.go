@@ -117,6 +117,12 @@ func (domain *Domain) makeWhere(searchMap map[string]interface{}) *gorm.DB {
 			if err == nil {
 				db = db.Where("update_datetime between ? and ?", time.Now().Add(dayDelta), time.Now())
 			}
+		case "create_date_delta":
+			daysToHour := 24 * value.(int)
+			dayDelta, err := time.ParseDuration(fmt.Sprintf("-%dh", daysToHour))
+			if err == nil {
+				db = db.Where("create_datetime between ? and ?", time.Now().Add(dayDelta), time.Now())
+			}
 		default:
 			db = db.Where(column, value)
 		}
