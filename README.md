@@ -96,7 +96,7 @@ Tested on [ubuntu18.04 LTS](docs/install_linux.md)、[macOS](docs/install_mac.md
 
 ## 版本更新
 
-- 2.4.0：2021-9-13，使用RPC架构，优化server与worker之间的同步、server与worker的配置文件分离；增加在线的IP信息；
+- 2.4.0：2021-9-10，使用RPC架构，优化server与worker之间的同步、server与worker的配置文件分离；增加在线的IP信息、登录验证码、按发现时间筛选资产功能。
 - 2.3：2021-8-25，使用docker-compose构建Docker，修改数据库连接重试功能，完善端口扫描及任务等信息；
 - 2.2：2021-8-2，增加基于Wappalyzer规则的指纹识别功能；
 - 2.1：2021-7-30，用Golang完成对原python3版本的重构；
