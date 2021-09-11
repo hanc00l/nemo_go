@@ -13,6 +13,7 @@ import (
 	_ "github.com/hanc00l/nemo_go/pkg/web/routers"
 	"github.com/smallnest/rpcx/protocol"
 	"github.com/smallnest/rpcx/server"
+	"time"
 )
 
 // startWebServer 启动web server
@@ -68,5 +69,6 @@ func auth(ctx context.Context, req *protocol.Message, token string) error {
 
 func main() {
 	go startRPCServer()
+	time.Sleep(time.Second*1)
 	startWebServer()
 }
