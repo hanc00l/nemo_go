@@ -74,7 +74,7 @@ Tested on [ubuntu18.04 LTS](docs/install_linux.md)、[macOS](docs/install_mac.md
 
 ## Demo
 
-默认监听端口为5000，首页请访问http://ip:5000，默认密码nemo；通过“系统设置--配置管理”更改默认密码。
+默认监听端口为5000，默认密码 **nemo** ；通过“系统设置--配置管理”更改默认密码。
 
 <img src="docs/image/dashboard.png" alt="dashbord"  />
 
