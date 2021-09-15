@@ -77,10 +77,10 @@ type portscanRequestParam struct {
 	IsWhatweb    bool   `form:"whatweb"`
 	IsHttpx      bool   `form:"httpx"`
 	IsPing       bool   `form:"ping"`
-	IsSubtask    bool   `form:"subtask"`
 	ExcludeIP    string `form:"exclude"`
 	IsScreenshot bool   `form:"screenshot"`
 	IsWappalyzer bool   `form:"wappalyzer"`
+	TaskMode     int    `form:"taskmode"`
 }
 
 type domainscanRequestParam struct {
@@ -95,10 +95,11 @@ type domainscanRequestParam struct {
 	IsSubnetPortscan bool   `form:"networkscan"`
 	IsJSFinder       bool   `form:"jsfinder"`
 	IsFofa           bool   `form:"fofasearch"`
-	IsSubtask        bool   `form:"subtask"`
 	IsScreenshot     bool   `form:"screenshot"`
 	IsICPQuery       bool   `form:"icpquery"`
 	IsWappalyzer     bool   `form:"wappalyzer"`
+	TaskMode         int    `form:"taskmode"`
+	PortTaskMode     int    `form:"porttaskmode"`
 }
 
 type pocscanRequestParam struct {
@@ -181,42 +182,44 @@ func (c *TaskController) StartPortScanTaskAction() {
 		c.FailedStatus(err.Error())
 		return
 	}
-	// 格式化Target
 	if req.Target == "" {
 		c.FailedStatus("no target")
 		return
 	}
-	var targetList []string
-	for _, t := range strings.Split(req.Target, "\n") {
-		if tt := strings.TrimSpace(t); tt != "" {
-			targetList = append(targetList, tt)
-		}
+	if req.Port == "" {
+		req.Port = conf.GlobalWorkerConfig().Portscan.Port
 	}
-	// 是否将目标拆分为多个子任务
-	if !req.IsSubtask {
-		targetList = []string{strings.Join(targetList, ",")}
-	}
+	ts := utils.NewTaskSlice()
+	ts.TaskMode = req.TaskMode
+	ts.IpTarget = req.Target
+	ts.Port = req.Port
+	tc := conf.GlobalServerConfig().Task
+	ts.IpSliceNumber = tc.IpSliceNumber
+	ts.PortSliceNumber = tc.PortSliceNumber
+	targets, ports := ts.DoIpSlice()
 	var taskId string
-	for _, target := range targetList {
-		// 端口扫描
-		if req.IsPortScan {
-			if taskId, err = c.doPortscan(target, req); err != nil {
-				c.FailedStatus(err.Error())
-				return
+	for _, t := range targets {
+		for _, p := range ports {
+			// 端口扫描
+			if req.IsPortScan {
+				if taskId, err = c.doPortscan(t, p, req); err != nil {
+					c.FailedStatus(err.Error())
+					return
+				}
 			}
-		}
-		// IP归属地：如果有端口执行任务，则IP归属地任务在端口扫描中执行，否则单独执行
-		if !req.IsPortScan && req.IsIPLocation {
-			if taskId, err = c.doIPLocation(target, &req.OrgId); err != nil {
-				c.FailedStatus(err.Error())
-				return
+			// IP归属地：如果有端口执行任务，则IP归属地任务在端口扫描中执行，否则单独执行
+			if !req.IsPortScan && req.IsIPLocation {
+				if taskId, err = c.doIPLocation(t, &req.OrgId); err != nil {
+					c.FailedStatus(err.Error())
+					return
+				}
 			}
-		}
-		// FOFA
-		if req.IsFofa {
-			if taskId, err = c.doFofa(target, &req.OrgId, req.IsIPLocation); err != nil {
-				c.FailedStatus(err.Error())
-				return
+			// FOFA
+			if req.IsFofa {
+				if taskId, err = c.doFofa(t, &req.OrgId, req.IsIPLocation); err != nil {
+					c.FailedStatus(err.Error())
+					return
+				}
 			}
 		}
 	}
@@ -235,42 +238,31 @@ func (c *TaskController) StartDomainScanTaskAction() {
 		c.FailedStatus(err.Error())
 		return
 	}
-	// 格式化Target
 	if req.Target == "" {
 		c.FailedStatus("no target")
 		return
 	}
+	allTarget := req.Target
 	// 域名的FLD
-	var fldList []string
 	if req.IsFldDomain {
-		fldList = getDomainFLD(req.Target)
-	}
-	var targetList []string
-	for _, t := range strings.Split(req.Target, "\n") {
-		if tt := strings.TrimSpace(t); tt != "" {
-			targetList = append(targetList, tt)
+		fldList := getDomainFLD(req.Target)
+		if len(fldList) > 0 {
+			allTarget = req.Target + "," + strings.Join(fldList, ",")
 		}
 	}
-	// 是否将目标拆分为多个子任务
-	if !req.IsSubtask {
-		targetList = []string{strings.Join(targetList, ",")}
-		if req.IsFldDomain && len(fldList) > 0 {
-			targetList = []string{strings.Join([]string{targetList[0], strings.Join(fldList, ",")}, ",")}
-		}
-	} else {
-		if req.IsFldDomain && len(fldList) > 0 {
-			targetList = append(targetList, fldList...)
-		}
-	}
+	ts := utils.NewTaskSlice()
+	ts.TaskMode = req.TaskMode
+	ts.DomainTarget = allTarget
+	targets := ts.DoDomainSlice()
 	var taskId string
-	for _, target := range targetList {
+	for _, t := range targets {
 		// 每个获取子域名的方式采用独立任务，以提高速度
 		var taskStarted bool
 		if req.IsSubfinder {
 			subConfig := req
 			subConfig.IsSubdomainBrute = false
 			subConfig.IsJSFinder = false
-			if taskId, err = c.doDomainscan(target, subConfig); err != nil {
+			if taskId, err = c.doDomainscan(t, subConfig); err != nil {
 				c.FailedStatus(err.Error())
 				return
 			}
@@ -280,34 +272,30 @@ func (c *TaskController) StartDomainScanTaskAction() {
 			subConfig := req
 			subConfig.IsSubfinder = false
 			subConfig.IsJSFinder = false
-			if taskId, err = c.doDomainscan(target, subConfig); err != nil {
+			if taskId, err = c.doDomainscan(t, subConfig); err != nil {
 				c.FailedStatus(err.Error())
 				return
 			}
 			taskStarted = true
 		}
 		if req.IsJSFinder {
-			//subConfig := req
-			//subConfig.IsSubfinder = false
-			//subConfig.IsSubdomainBrute = false
-			//// TODO
-			//taskStarted = true
+			//TODO
 		}
 		// 如果没有子域名任务，则至少启动一个域名解析任务
 		if !taskStarted {
-			if taskId, err = c.doDomainscan(target, req); err != nil {
+			if taskId, err = c.doDomainscan(t, req); err != nil {
 				c.FailedStatus(err.Error())
 				return
 			}
 		}
 		if req.IsFofa {
-			if taskId, err = c.doFofa(target, &req.OrgId, true); err != nil {
+			if taskId, err = c.doFofa(t, &req.OrgId, true); err != nil {
 				c.FailedStatus(err.Error())
 				return
 			}
 		}
 		if req.IsICPQuery {
-			if taskId, err = c.doICPQuery(target); err != nil {
+			if taskId, err = c.doICPQuery(t); err != nil {
 				c.FailedStatus(err.Error())
 				return
 			}
@@ -375,6 +363,7 @@ func (c *TaskController) doDomainscan(target string, req domainscanRequestParam)
 		IsIPSubnetPortScan: req.IsSubnetPortscan,
 		IsScreenshot:       req.IsScreenshot,
 		IsWappalyzer:       req.IsWappalyzer,
+		PortTaskMode:       req.PortTaskMode,
 	}
 	// config.OrgId 为int，默认为0
 	// db.Organization.OrgId为指针，默认nil
@@ -395,11 +384,11 @@ func (c *TaskController) doDomainscan(target string, req domainscanRequestParam)
 }
 
 // doPortscan 端口扫描
-func (c *TaskController) doPortscan(target string, req portscanRequestParam) (taskId string, err error) {
+func (c *TaskController) doPortscan(target string, port string, req portscanRequestParam) (taskId string, err error) {
 	config := portscan.Config{
 		Target:        target,
 		ExcludeTarget: req.ExcludeIP,
-		Port:          req.Port,
+		Port:          port,
 		OrgId:         &req.OrgId,
 		Rate:          req.Rate,
 		IsPing:        req.IsPing,

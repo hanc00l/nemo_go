@@ -50,6 +50,7 @@ type Server struct {
 	Rpc      RPC      `yaml:"rpc"`
 	Database Database `yaml:"database"`
 	Rabbitmq Rabbitmq `yaml:"rabbitmq"`
+	Task     Task     `yaml:"task"`
 }
 
 type Worker struct {
@@ -88,6 +89,11 @@ type Rabbitmq struct {
 	Port     int    `yaml:"port"`
 	Username string `yaml:"username"`
 	Password string `yaml:"password"`
+}
+
+type Task struct {
+	IpSliceNumber   int `yaml:"ipSliceNumber"`
+	PortSliceNumber int `yaml:"portSliceNumber"`
 }
 
 type API struct {

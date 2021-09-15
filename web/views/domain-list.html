@@ -271,20 +271,25 @@
                                                                                type="checkbox">C段扫描
                                                                     </label>
                                                                 </div>
+                                                                <div class="form-check form-check-inline">
+                                                                    <select class="form-control" id="select_porttaskmode">
+                                                                        <option value="0" selected>--默认单任务--</option>
+                                                                        <option value="2">按IP切分任务</option>
+                                                                        <option value="3">按端口切分任务</option>
+                                                                        <option value="4">按IP和端口交叉切分任务</option>
+                                                                    </select>
+                                                                </div>
+
                                                             </div>
                                                         </div>
-                                                        <div class="form-group row">
+                                                        <div class="form-group row bg-light">
                                                             <div class="col-md-12">
-                                                                <div class="form-check form-check-inline">
-                                                                    <label class="form-check-label"
-                                                                           for="checkbox_subtask">
-                                                                        <input class="form-check-input"
-                                                                               id="checkbox_subtask"
-                                                                               type="checkbox"><b>并发子任务模式</b>
-                                                                    </label>
-                                                                </div>
-                                                                <br>
-                                                                <label for="select_org_id_task"><b>资产关联的组织机构</b></label>
+                                                                <label for="select_taskmode"><b>任务模式</b></label>
+                                                                <select class="form-control" id="select_taskmode">
+                                                                    <option value="0" selected>单任务（默认）</option>
+                                                                    <option value="1">每一行目标单独任务</option>
+                                                                </select>
+                                                                <label for="select_org_id_task"><b>资产归属组织</b></label>
                                                                 <select class="form-control"
                                                                         id="select_org_id_task">
                                                                 </select>

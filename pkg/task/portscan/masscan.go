@@ -35,13 +35,13 @@ func (m *Masscan) Do() {
 		cmdArgs = append(cmdArgs, "-p")
 		switch strings.Split(m.Config.Port, " ")[1] {
 		case "1000":
-			cmdArgs = append(cmdArgs, TopPorts1000)
+			cmdArgs = append(cmdArgs, utils.TopPorts1000)
 		case "100":
-			cmdArgs = append(cmdArgs, TopPorts100)
+			cmdArgs = append(cmdArgs, utils.TopPorts100)
 		case "10":
-			cmdArgs = append(cmdArgs, TopPorts10)
+			cmdArgs = append(cmdArgs, utils.TopPorts10)
 		default:
-			cmdArgs = append(cmdArgs, TopPorts100)
+			cmdArgs = append(cmdArgs, utils.TopPorts100)
 		}
 	} else {
 		cmdArgs = append(cmdArgs, "-p", m.Config.Port)

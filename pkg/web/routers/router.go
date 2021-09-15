@@ -16,6 +16,7 @@ func init() {
 	web.Router("/custom-list", config, "get:CustomAction")
 	web.Router("/custom-load", config, "post:LoadCustomConfigAction")
 	web.Router("/custom-save", config, "post:SaveCustomConfigAction")
+	web.Router("/config-save-taskslice", config, "post:SaveTaskSliceNumberAction")
 
 	dashboard := &controllers.DashboardController{}
 	web.Router("/dashboard", dashboard, "get:IndexAction;post:GetStatisticDataAction")

@@ -41,7 +41,7 @@ $(function () {
                     'whatweb': $('#checkbox_whatweb').is(":checked"),
                     'ping': $('#checkbox_ping').is(":checked"),
                     'fofasearch': $('#checkbox_fofasearch').is(":checked"),
-                    'subtask': $('#checkbox_subtask').is(":checked"),
+                    'taskmode': $('#select_taskmode').val(),
                     'httpx': $('#checkbox_httpx').is(":checked"),
                     'exclude': exclude_ip,
                     'screenshot': $('#checkbox_screenshot').is(":checked"),

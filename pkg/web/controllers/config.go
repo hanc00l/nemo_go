@@ -2,6 +2,7 @@ package controllers
 
 import (
 	"github.com/hanc00l/nemo_go/pkg/conf"
+	"github.com/hanc00l/nemo_go/pkg/utils"
 	"os"
 	"path/filepath"
 )
@@ -18,12 +19,14 @@ const (
 	Service     string = "service"
 )
 
-type DefaultPortscanConfig struct {
-	CmdBin string `json:"cmdbin"`
-	Port   string `json:"port"`
-	Rate   int    `json:"rate"`
-	Tech   string `json:"tech"`
-	IsPing bool   `json:"ping"`
+type DefaultConfig struct {
+	CmdBin          string `json:"cmdbin"`
+	Port            string `json:"port"`
+	Rate            int    `json:"rate"`
+	Tech            string `json:"tech"`
+	IsPing          bool   `json:"ping"`
+	IpSliceNumber   int    `json:"ipslicenumber"`
+	PortSliceNumber int    `json:"portslicenumber"`
 }
 
 func (c *ConfigController) IndexAction() {
@@ -42,12 +45,15 @@ func (c *ConfigController) CustomAction() {
 func (c *ConfigController) LoadDefaultConfigAction() {
 	conf.GlobalWorkerConfig().ReloadConfig()
 	portscan := conf.GlobalWorkerConfig().Portscan
-	data := DefaultPortscanConfig{
-		CmdBin: portscan.Cmdbin,
-		Port:   portscan.Port,
-		Rate:   portscan.Rate,
-		Tech:   portscan.Tech,
-		IsPing: portscan.IsPing,
+	task := conf.GlobalServerConfig().Task
+	data := DefaultConfig{
+		CmdBin:          portscan.Cmdbin,
+		Port:            portscan.Port,
+		Rate:            portscan.Rate,
+		Tech:            portscan.Tech,
+		IsPing:          portscan.IsPing,
+		IpSliceNumber:   task.IpSliceNumber,
+		PortSliceNumber: task.PortSliceNumber,
 	}
 	c.Data["json"] = data
 	c.ServeJSON()
@@ -114,6 +120,26 @@ func (c *ConfigController) SaveCustomConfigAction() {
 	if err != nil {
 		c.FailedStatus(err.Error())
 		return
+	}
+	c.SucceededStatus("")
+}
+
+// SaveTaskSliceNumberAction 保存任务切分设置
+func (c *ConfigController) SaveTaskSliceNumberAction() {
+	defer c.ServeJSON()
+
+	ipSliceNumber, err1 := c.GetInt("ipslicenumber", utils.DefaultIpSliceNumber)
+	portSliceNumber, err2 := c.GetInt("portslicenumber", utils.DefaultPortSliceNumber)
+	if err1 != nil || err2 != nil {
+		c.FailedStatus("数量错误")
+		return
+	}
+	conf.GlobalServerConfig().ReloadConfig()
+	conf.GlobalServerConfig().Task.IpSliceNumber = ipSliceNumber
+	conf.GlobalServerConfig().Task.PortSliceNumber = portSliceNumber
+	err := conf.GlobalServerConfig().WriteConfig()
+	if err != nil {
+		c.FailedStatus(err.Error())
 	}
 	c.SucceededStatus("")
 }

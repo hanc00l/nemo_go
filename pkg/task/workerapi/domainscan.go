@@ -11,6 +11,7 @@ import (
 	"github.com/hanc00l/nemo_go/pkg/task/fingerprint"
 	"github.com/hanc00l/nemo_go/pkg/task/portscan"
 	"github.com/hanc00l/nemo_go/pkg/task/serverapi"
+	"github.com/hanc00l/nemo_go/pkg/utils"
 	"strings"
 )
 
@@ -122,24 +123,37 @@ func doPortScan(config domainscan.Config, resultDomainScan *domainscan.Result) {
 	if ipResult == "" {
 		return
 	}
-	configPortScan := portscan.Config{
-		OrgId:        config.OrgId,
-		Target:       ipResult,
-		Port:         conf.GlobalWorkerConfig().Portscan.Port,
-		Rate:         conf.GlobalWorkerConfig().Portscan.Rate,
-		CmdBin:       conf.GlobalWorkerConfig().Portscan.Cmdbin,
-		IsPing:       conf.GlobalWorkerConfig().Portscan.IsPing,
-		Tech:         conf.GlobalWorkerConfig().Portscan.Tech,
-		IsIpLocation: true,
-		IsHttpx:      config.IsHttpx,
-		IsWhatWeb:    config.IsWhatWeb,
-		IsScreenshot: config.IsScreenshot,
-	}
+	portsConfig := conf.GlobalWorkerConfig().Portscan
+	ts := utils.NewTaskSlice()
+	ts.TaskMode = config.PortTaskMode
+	ts.Port = portsConfig.Port
+	ts.IpTarget = ipResult
 	if config.IsIPSubnetPortScan {
-		configPortScan.Target = ipSubnetResult
+		ts.IpTarget = ipSubnetResult
 	}
-	configPortScanJSON, _ := json.Marshal(configPortScan)
-	serverapi.NewTask("portscan", string(configPortScanJSON))
+	// worker任务执行，只能使用默认配置，无法读取server.yml中的配置
+	ts.IpSliceNumber = utils.DefaultIpSliceNumber
+	ts.PortSliceNumber = utils.DefaultPortSliceNumber
+	targets, ports := ts.DoIpSlice()
+	for _, t := range targets {
+		for _, p := range ports {
+			configPortScan := portscan.Config{
+				OrgId:        config.OrgId,
+				Target:       t,
+				Port:         p,
+				Rate:         portsConfig.Rate,
+				CmdBin:       portsConfig.Cmdbin,
+				IsPing:       portsConfig.IsPing,
+				Tech:         portsConfig.Tech,
+				IsIpLocation: true,
+				IsHttpx:      config.IsHttpx,
+				IsWhatWeb:    config.IsWhatWeb,
+				IsScreenshot: config.IsScreenshot,
+			}
+			configPortScanJSON, _ := json.Marshal(configPortScan)
+			serverapi.NewTask("portscan", string(configPortScanJSON))
+		}
+	}
 }
 
 // getResultIPList 提取域名收集结果的IP
@@ -171,5 +185,5 @@ func getResultIPList(resultDomainScan *domainscan.Result) (ipResult, ipSubnetRes
 		ipSubnetList = append(ipSubnetList, k)
 	}
 
-	return strings.Join(ipList, ","), strings.Join(ipSubnetList, ",")
+	return strings.Join(ipList, "\n"), strings.Join(ipSubnetList, "\n")
 }

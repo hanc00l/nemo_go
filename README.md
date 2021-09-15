@@ -9,13 +9,13 @@ Nemo是用来进行自动化信息收集的一个简单平台，通过集成常�
 
 ## 已实现的功能
 
-### 1、IP收集
+### 1、IP资产
 
 - Masscan、Nmap端口扫描
 - IP归属地（纯真离线数据）
 - 自定义IP归属地、Service、蜜罐
 
-### 2、域名收集
+### 2、域名资产
 
 - [Subfinder](https://github.com/projectdiscovery/subfinder) 子域名收集
 - [Massdns](https://github.com/blechschmidt/massdns) 子域名爆破
@@ -32,24 +32,28 @@ Nemo是用来进行自动化信息收集的一个简单平台，通过集成常�
 
 - [Fofa](https://fofa.so/) 
 - [ICP备案信息](http://icp.chinaz.com/) 
+- [Quake](https://quake.360.cn) [TODO]
 
 ### 5、Poc验证
 
 - [Pocsuite3](https://github.com/knownsec/pocsuite3)  && [some_pocsuite](https://github.com/hanc00l/some_pocsuite) 
 - [XRay](https://github.com/chaitin/xray)
 
-### 6、团队在线协作
+### 6、扫描任务
+
+- 分布式、异步任务执行
+- 多维度任务切分
+- Server与Worker通过 [RPC](https://github.com/smallnest/rpcx) 同步
+
+
+### 7、团队在线协作
 
 - [TODO]
 
-### 7、其它
+### 8、其它
 
 - 资产的统计、颜色标记与备忘录协作
-- 基于RabbitMQ 消息中间件实现分布式任务
-- Docker运行
-- 所需环境：Mysql、Nmap、masscan、whatweb（可选）、python3及pocsuite3（可选）、Chrome等
-
-
+- Docker支持
 
 ## Docker
 
@@ -70,7 +74,7 @@ Tested on [ubuntu18.04 LTS](docs/install_linux.md)、[macOS](docs/install_mac.md
 
 ## Demo
 
-默认监听端口为5000，首页请访问http://ip:5000/，默认密码nemo；通过“系统设置--配置管理”更改默认密码。
+默认监听端口为5000，首页请访问http://ip:5000，默认密码nemo；通过“系统设置--配置管理”更改默认密码。
 
 <img src="docs/image/dashboard.png" alt="dashbord"  />
 
@@ -96,6 +100,7 @@ Tested on [ubuntu18.04 LTS](docs/install_linux.md)、[macOS](docs/install_mac.md
 
 ## 版本更新
 
+- 2.4.1：2021-9-15，支持扫描任务按IP和端口进行多维度切分，使任务在多个worker之间均衡分布执行；
 - 2.4.0：2021-9-10，使用RPC架构，优化server与worker之间的同步、server与worker的配置文件分离；增加在线的IP信息、登录验证码、按发现时间筛选资产功能。
 - 2.3：2021-8-25，使用docker-compose构建Docker，修改数据库连接重试功能，完善端口扫描及任务等信息；
 - 2.2：2021-8-2，增加基于Wappalyzer规则的指纹识别功能；
@@ -105,6 +110,5 @@ Tested on [ubuntu18.04 LTS](docs/install_linux.md)、[macOS](docs/install_mac.md
 
 ## 参考
 
-jeffzh3ng：https://github.com/jeffzh3ng/fuxi
-
-TideSec：https://github.com/TideSec/Mars
+- jeffzh3ng：https://github.com/jeffzh3ng/fuxi
+- TideSec：https://github.com/TideSec/Mars
