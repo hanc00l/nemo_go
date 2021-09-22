@@ -200,7 +200,7 @@ func (ip *Ip) makeWhere(searchMap map[string]interface{}) *gorm.DB {
 			daysToHour := 24 * value.(int)
 			dayDelta, err := time.ParseDuration(fmt.Sprintf("-%dh", daysToHour))
 			if err == nil {
-				dbPorts := GetDB().Model(&Port{}).Select("ip_id").Distinct("ip_id").Where("update_datetime between ? and ?", time.Now().Add(dayDelta), time.Now())
+				dbPorts := GetDB().Model(&Port{}).Select("ip_id").Distinct("ip_id").Where("create_datetime between ? and ?", time.Now().Add(dayDelta), time.Now())
 				db = db.Where("id in (?)", dbPorts)
 				CloseDB(dbPorts)
 			}
