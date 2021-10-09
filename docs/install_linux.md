@@ -106,7 +106,7 @@
   ```bash
   sudo apt-get update \
       && sudo apt-get install vim git python3-pip python3-setuptools \
-      nmap whatweb masscan chromium-browser --fix-missing
+      nmap masscan chromium-browser --fix-missing
   ```
 
 

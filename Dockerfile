@@ -10,7 +10,7 @@ RUN set -x \
     && apt-get update \
     && apt-get install -y  python3-pip python3-setuptools \
     wget curl vim net-tools  iputils-ping git unzip \
-    nmap whatweb masscan chromium-browser --fix-missing
+    nmap masscan chromium-browser --fix-missing
 
 # pip package
 RUN set -x \

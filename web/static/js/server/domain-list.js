@@ -26,7 +26,7 @@ $(function () {
                     "target": target,
                     'org_id': $('#select_org_id_task').val(),
                     'subdomainbrute': $('#checkbox_subdomainbrute').is(":checked"),
-                    'whatweb': $('#checkbox_whatweb').is(":checked"),
+                    'whatweb': false,
                     'fld_domain': $('#checkbox_fld_domain').is(":checked"),
                     'portscan': $('#checkbox_portscan').is(":checked"),
                     'fofasearch': $('#checkbox_fofasearch').is(":checked"),
@@ -112,7 +112,7 @@ $(function () {
     });
     //批量删除
     $("#batch_delete").click(function () {
-        batch_delete('#domain_table','/domain-delete');
+        batch_delete('#domain_table', '/domain-delete');
     });
 
     $('#domain_table').DataTable(
@@ -171,9 +171,9 @@ $(function () {
                         let strData;
                         let disable_fofa = $('#checkbox_disable_fofa').is(":checked");
                         if (row['color_tag']) {
-                            strData = '<h5><a href="/domain-info?domain=' + data + '&&disable_fofa='+disable_fofa+'" target="_blank" class="badge ' + row['color_tag'] + '">' + data + '</a></h5>';
+                            strData = '<h5><a href="/domain-info?domain=' + data + '&&disable_fofa=' + disable_fofa + '" target="_blank" class="badge ' + row['color_tag'] + '">' + data + '</a></h5>';
                         } else {
-                            strData = '<a href="/domain-info?domain=' + data + '&&disable_fofa='+disable_fofa+'" target="_blank">' + data + '</a>';
+                            strData = '<a href="/domain-info?domain=' + data + '&&disable_fofa=' + disable_fofa + '" target="_blank">' + data + '</a>';
                         }
                         if (row['vulnerability']) {
                             strData += '&nbsp;<span class="badge badge-danger" data-toggle="tooltip" data-html="true" title="' + html2Escape(row['vulnerability']) + '"><i class="fa fa-bolt"></span>';
@@ -190,7 +190,7 @@ $(function () {
                         let disable_fofa = $('#checkbox_disable_fofa').is(":checked");
                         for (; j < len; j++) {
                             strData += pre_link
-                            strData += '<a href="ip-info?ip=' + data[j] + '&&disable_fofa='+disable_fofa+'" target="_blank">' + data[j] + '</a>';
+                            strData += '<a href="ip-info?ip=' + data[j] + '&&disable_fofa=' + disable_fofa + '" target="_blank">' + data[j] + '</a>';
                             pre_link = ",";
                         }
                         strData += '</div>';
@@ -262,7 +262,7 @@ function get_export_options() {
     url += '&color_tag=' + encodeURI($('#select_color_tag').val());
     url += '&memo_content=' + encodeURI($('#memo_content').val());
     url += '&date_delta=' + encodeURI($('#date_delta').val());
-    url += '&disable_fofa=' + encodeURI( $('#checkbox_disable_fofa').is(":checked"));
+    url += '&disable_fofa=' + encodeURI($('#checkbox_disable_fofa').is(":checked"));
 
     return url;
 }

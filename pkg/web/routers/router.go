@@ -69,6 +69,7 @@ func init() {
 	web.Router("/task-delete", task, "post:DeleteAction")
 	web.Router("/task-stop", task, "post:StopAction")
 	web.Router("/task-start-portscan", task, "post:StartPortScanTaskAction")
+	web.Router("/task-start-batchscan", task, "post:StartBatchScanTaskAction")
 	web.Router("/task-start-domainscan", task, "post:StartDomainScanTaskAction")
 	web.Router("/task-start-vulnerability", task, "post:StartPocScanTaskAction")
 }

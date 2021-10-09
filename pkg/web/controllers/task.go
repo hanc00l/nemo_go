@@ -226,6 +226,42 @@ func (c *TaskController) StartPortScanTaskAction() {
 	c.SucceededStatus(taskId)
 }
 
+// StartBatchScanTaskAction 探测+扫描任务
+func (c *TaskController) StartBatchScanTaskAction() {
+	defer c.ServeJSON()
+	// 解析参数
+	var req portscanRequestParam
+	err := c.ParseForm(&req)
+	if err != nil {
+		logging.RuntimeLog.Error(err.Error())
+		c.FailedStatus(err.Error())
+		return
+	}
+	if req.Target == "" {
+		c.FailedStatus("no target")
+		return
+	}
+	ts := utils.NewTaskSlice()
+	ts.TaskMode = req.TaskMode
+	ts.IpTarget = req.Target
+	ts.Port = req.Port
+	tc := conf.GlobalServerConfig().Task
+	ts.IpSliceNumber = tc.IpSliceNumber
+	ts.PortSliceNumber = tc.PortSliceNumber
+	targets, ports := ts.DoIpSlice()
+	var taskId string
+	for _, t := range targets {
+		for _, p := range ports {
+			// 端口扫描
+			if taskId, err = c.doBatchScan(t, p, req); err != nil {
+				c.FailedStatus(err.Error())
+				return
+			}
+		}
+	}
+	c.SucceededStatus(taskId)
+}
+
 // StartDomainScanTaskAction 域名任务
 func (c *TaskController) StartDomainScanTaskAction() {
 	defer c.ServeJSON()
@@ -425,6 +461,53 @@ func (c *TaskController) doPortscan(target string, port string, req portscanRequ
 	taskId, err = serverapi.NewTask("portscan", string(configJSON))
 	if err != nil {
 		logging.RuntimeLog.Errorf("start portscan fail:%s", err.Error())
+		return "", err
+	}
+	return taskId, nil
+}
+
+// doBatchScan 探测+端口扫描
+func (c *TaskController) doBatchScan(target string, port string, req portscanRequestParam) (taskId string, err error) {
+	config := portscan.Config{
+		Target:        target,
+		ExcludeTarget: req.ExcludeIP,
+		Port:          port,
+		OrgId:         &req.OrgId,
+		Rate:          req.Rate,
+		IsPing:        req.IsPing,
+		Tech:          req.NmapTech,
+		IsIpLocation:  req.IsIPLocation,
+		IsHttpx:       req.IsHttpx,
+		IsWhatWeb:     req.IsWhatweb,
+		IsScreenshot:  req.IsScreenshot,
+		IsWappalyzer:  req.IsWappalyzer,
+		CmdBin:        "masscan",
+	}
+	if req.CmdBin == "nmap" {
+		config.CmdBin = "nmap"
+	}
+	if config.Port == "" {
+		config.Port = "80,443,8080|" + conf.GlobalWorkerConfig().Portscan.Port
+	}
+	if config.Rate == 0 {
+		config.Rate = conf.GlobalWorkerConfig().Portscan.Rate
+	}
+	if config.Tech == "" {
+		config.Target = conf.GlobalWorkerConfig().Portscan.Tech
+	}
+	// config.OrgId 为int，默认为0
+	// db.Organization.OrgId为指针，默认nil
+	if *config.OrgId == 0 {
+		config.OrgId = nil
+	}
+	configJSON, err := json.Marshal(config)
+	if err != nil {
+		logging.RuntimeLog.Errorf("start portscan fail:%s", err.Error())
+		return "", err
+	}
+	taskId, err = serverapi.NewTask("batchscan", string(configJSON))
+	if err != nil {
+		logging.RuntimeLog.Errorf("start batchscan fail:%s", err.Error())
 		return "", err
 	}
 	return taskId, nil

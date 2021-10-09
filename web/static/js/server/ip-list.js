@@ -38,7 +38,7 @@ $(function () {
                     'bin': $('#select_bin').val(),
                     'org_id': $('#select_org_id_task').val(),
                     'iplocation': $('#checkbox_iplocation').is(":checked"),
-                    'whatweb': $('#checkbox_whatweb').is(":checked"),
+                    'whatweb': false,
                     'ping': $('#checkbox_ping').is(":checked"),
                     'fofasearch': $('#checkbox_fofasearch').is(":checked"),
                     'taskmode': $('#select_taskmode').val(),
@@ -63,7 +63,8 @@ $(function () {
                         swal('Warning', "添加任务失败! " + data['msg'], 'error');
                     }
                 });
-        } else {
+        }
+        if (getCurrentTabIndex() == 1) {
             if ($('#checkbox_pocsuite3').is(":checked") == false && $('#checkbox_xray').is(":checked") == false) {
                 swal('Warning', '请选择要使用的验证工具！', 'error');
                 return;
@@ -87,6 +88,50 @@ $(function () {
                     'pocsuite3_poc_file': $('#input_pocsuite3_poc_file').val(),
                     'xrayverify': $('#checkbox_xray').is(":checked"),
                     'xray_poc_file': $('#input_xray_poc_file').val()
+                }, function (data, e) {
+                    if (e === "success" && data['status'] == 'success') {
+                        swal({
+                                title: "新建任务成功！",
+                                text: "TaskId:" + data['msg'],
+                                type: "success",
+                                confirmButtonText: "确定",
+                                confirmButtonColor: "#41b883",
+                                closeOnConfirm: true,
+                            },
+                            function () {
+                                $('#newTask').modal('hide');
+                            });
+                    } else {
+                        swal('Warning', "添加任务失败! " + data['msg'], 'error');
+                    }
+                });
+        }
+        if (getCurrentTabIndex() == 2) {
+            const port1 = $('#input_batchscan_port1').val();
+            const port2 = $('#input_batchscan_port2').val();
+            const rate = $('#input_batchscan_rate').val();
+            let exclude_ip = "";
+            if ($('#checkbox_batchscan_exclude').is(":checked")) {
+                exclude_ip = $('#input_batchscan_exclude').val();
+            }
+            $.post("/task-start-batchscan",
+                {
+                    "target": target,
+                    "port": port1 +"|" + port2,
+                    'rate': rate,
+                    'portscan': true,
+                    'nmap_tech': $('#select_batchscan_tech').val(),
+                    'bin': $('#select_batchscan_bin').val(),
+                    'org_id': $('#select_batchscan_org_id_task').val(),
+                    'iplocation': true,
+                    'whatweb': false,
+                    'ping': $('#checkbox_batchscan_ping').is(":checked"),
+                    'fofasearch': false,
+                    'taskmode': $('#select_batchscan_taskmode').val(),
+                    'httpx': $('#checkbox_batchscan_httpx').is(":checked"),
+                    'exclude': exclude_ip,
+                    'screenshot': $('#checkbox_batchscan_screenshot').is(":checked"),
+                    'wappalyzer': false,
                 }, function (data, e) {
                     if (e === "success" && data['status'] == 'success') {
                         swal({
@@ -150,7 +195,7 @@ $(function () {
 
     //批量删除
     $("#batch_delete").click(function () {
-        batch_delete('#ip_table','/ip-delete');
+        batch_delete('#ip_table', '/ip-delete');
     });
 
     //IP列表
@@ -214,9 +259,9 @@ $(function () {
                         let strData = "";
                         let disable_fofa = $('#checkbox_disable_fofa').is(":checked");
                         if (row['color_tag']) {
-                            strData += '<h5><a href="/ip-info?ip=' + data + '&&disable_fofa='+disable_fofa+'" target="_blank" class="badge ' + row['color_tag'] + '">' + data + '</a></h5>';
+                            strData += '<h5><a href="/ip-info?ip=' + data + '&&disable_fofa=' + disable_fofa + '" target="_blank" class="badge ' + row['color_tag'] + '">' + data + '</a></h5>';
                         } else {
-                            strData += '<a href="/ip-info?ip=' + data + '&&disable_fofa='+disable_fofa+'" target="_blank">' + data + '</a>';
+                            strData += '<a href="/ip-info?ip=' + data + '&&disable_fofa=' + disable_fofa + '" target="_blank">' + data + '</a>';
                         }
                         if (row['vulnerability']) {
                             strData += '&nbsp;<span class="badge badge-danger" data-toggle="tooltip" data-html="true" title="' + html2Escape(row['vulnerability']) + '"><i class="fa fa-bolt"></span>';
@@ -319,18 +364,23 @@ function get_export_options() {
     url += '&color_tag=' + encodeURI($('#select_color_tag').val());
     url += '&memo_content=' + encodeURI($('#memo_content').val());
     url += '&date_delta=' + encodeURI($('#date_delta').val());
-    url += '&disable_fofa=' + encodeURI( $('#checkbox_disable_fofa').is(":checked"));
+    url += '&disable_fofa=' + encodeURI($('#checkbox_disable_fofa').is(":checked"));
 
     return url;
 }
 
 function load_portscan_config() {
     $.post("/config-list", function (data) {
-        $('#input_cmdbin').val(data['cmdbin']);
+        $('#select_bin').val(data['cmdbin']);
         $('#input_port').val(data['port']);
         $('#select_tech').val(data['tech']);
         $('#input_rate').val(data['rate']);
         $('#checkbox_ping').prop("checked", data['ping']);
+        $('#select_batchscan_bin').val(data['cmdbin']);
+        $('#input_batchscan_port2').val(data['port']);
+        $('#select_batchscan_tech').val(data['tech']);
+        $('#input_batchscan_rate').val(data['rate']);
+        $('#checkbox_batchscan_ping').prop("checked", data['ping']);
     });
 }
 

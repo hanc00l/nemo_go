@@ -38,14 +38,17 @@ function init_dataTables_defaultParam(param) {
 function load_org_list() {
     $("#select_org_id_search").append("<option value=''>--全部--</option>")
     $("#select_org_id_task").append("<option value=''>--无--</option>")
+    $("#select_batchscan_org_id_task").append("<option value=''>--无--</option>")
     $.post("/org-getall", {}, function (data, e) {
         if (e === "success") {
             for (let i = 0; i < data.length; i++) {
                 $("#select_org_id_search").append("<option value='" + data[i].id + "'>" + data[i].name + "</option>")
                 $("#select_org_id_task").append("<option value='" + data[i].id + "'>" + data[i].name + "</option>")
+                $("#select_batchscan_org_id_task").append("<option value='" + data[i].id + "'>" + data[i].name + "</option>")
             }
             $('#select_org_id_search').val($('#hidden_org_id').val());
             $('#select_org_id_task').val($('#hidden_org_id').val());
+            $('#select_batchscan_org_id_task').val($('#hidden_org_id').val());
         }
     });
 }
