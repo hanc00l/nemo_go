@@ -434,10 +434,10 @@ func (c *TaskController) doPortscan(target string, port string, req portscanRequ
 		IsWhatWeb:     req.IsWhatweb,
 		IsScreenshot:  req.IsScreenshot,
 		IsWappalyzer:  req.IsWappalyzer,
-		CmdBin:        "masscan",
+		CmdBin:        req.CmdBin,
 	}
-	if req.CmdBin == "nmap" {
-		config.CmdBin = "nmap"
+	if req.CmdBin == "" {
+		config.CmdBin = conf.GlobalWorkerConfig().Portscan.Cmdbin
 	}
 	if config.Port == "" {
 		config.Port = conf.GlobalWorkerConfig().Portscan.Port

@@ -17,6 +17,7 @@ type Masscan struct {
 
 // NewMasscan 创建masscan对象
 func NewMasscan(config Config) *Masscan {
+	config.CmdBin = "masscan"
 	return &Masscan{Config: config}
 }
 

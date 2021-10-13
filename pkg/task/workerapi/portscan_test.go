@@ -11,7 +11,7 @@ func TestPortScan(t *testing.T) {
 	config := portscan.Config{
 		Target:        "192.168.3.0/24",
 		ExcludeTarget: "",
-		Port:          "--top-ports 1000",
+		Port:          "--top-ports 100",
 		OrgId:         nil,
 		Rate:          1000,
 		IsPing:        true,
@@ -19,7 +19,7 @@ func TestPortScan(t *testing.T) {
 		IsIpLocation:  true,
 		IsHttpx:       true,
 		IsWhatWeb:     false,
-		CmdBin:        "nmap",
+		CmdBin:        "masnmap",
 	}
 
 	configJSON, err := json.Marshal(config)

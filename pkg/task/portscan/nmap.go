@@ -19,6 +19,7 @@ type Nmap struct {
 
 //NewNmap 创建nmap对象
 func NewNmap(config Config) *Nmap {
+	config.CmdBin = "nmap"
 	return &Nmap{Config: config}
 }
 
