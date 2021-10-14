@@ -16,7 +16,51 @@ $(function () {
     $('.imgPreview').click(function () {
         $('.imgPreview').hide();
     });
+    // 鼠标悬停时，更新任务状态信息
+    $('#span_show_task').popover({
+        trigger: 'manual',
+        placement: 'bottom',
+        html: true,
+        container: false,//'#span_show_task',
+        content: update_task_status,
+    }).on('mouseenter', function () {
+        var _this = this;
+        $(this).popover('show');
+        $(this).siblings('.popover').on('mouseleave', function () {
+            $(_this).popover('hide');
+        });
+    }).on('mouseleave', function () {
+        var _this = this;
+        setTimeout(function () {
+            if (!$('.popover:hover').length) {
+                $(_this).popover('hide')
+            }
+        }, 100);
+    });
 });
+
+/**
+ * 更新正在进行的任务信息
+ */
+function update_task_status() {
+    get_task_status();
+    let info = "进行中/待运行/已完成任务数";
+    $.ajax({
+        type: 'post',
+        async: false,
+        url: "/dashboard-task-started-info",
+        success: function (data) {
+            info = "";
+            for (let i = 0; i < data.length; i++) {
+                info += "<li class=\"list-group-item\"><strong>" + data[i].task_name + "</strong>->" + data[i].task_args + " <strong>@</strong>" + data[i].task_starting + "</li>";
+            }
+        },
+        error: function (xhr, type) {
+        }
+    });
+    if (info == "") info = "进行中/待运行/已完成任务数";
+    return info;
+}
 
 /**
  * 移除 dataTables默认参数，并设置分页值
@@ -142,6 +186,7 @@ function batch_delete(dataTableId, url) {
                 let id = $(this).val().split("|")[0];
                 $.ajax({
                     type: 'post',
+                    async: false,
                     url: url + '?id=' + id,
                     success: function (data) {
                     },

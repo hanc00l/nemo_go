@@ -14,7 +14,6 @@ import (
 	"github.com/hanc00l/nemo_go/pkg/task/portscan"
 	"github.com/hanc00l/nemo_go/pkg/task/serverapi"
 	"github.com/hanc00l/nemo_go/pkg/utils"
-	"regexp"
 	"strings"
 	"time"
 )
@@ -615,7 +614,7 @@ func (c *TaskController) getTaskListData(req taskRequestParam) (resp DataTableRe
 		t.Worker = taskRow.Worker
 		t.State = taskRow.State
 		t.Result = getResultMsg(taskRow.Result)
-		t.KwArgs = getTargetFromKwArgs(taskRow.KwArgs)
+		t.KwArgs = ParseTargetFromKwArgs(taskRow.KwArgs)
 		if taskRow.StartedTime != nil {
 			t.StartedTime = FormatDateTime(*taskRow.StartedTime)
 		}
@@ -696,23 +695,6 @@ func formatRuntime(t *db.Task) (runtime string) {
 	return
 }
 
-// getTargetFromKwArgs 从经过JSON序列化的参数中单独提取出target
-func getTargetFromKwArgs(kwargs string) (target string) {
-	const displayedLength = 100
-	//{"target":"192.168.120.0/24","executeTarget":"...
-	targetReg := regexp.MustCompile(`^{"target":"(.*?)"`)
-	targetArray := targetReg.FindStringSubmatch(kwargs)
-	if targetArray != nil {
-		target = targetArray[1]
-	} else {
-		target = kwargs
-	}
-	if len(target) > displayedLength {
-		return fmt.Sprintf("%s...", target[:displayedLength])
-	}
-	return
-}
-
 // getResultMsg 从经过JSON反序列化的结果中提取出结果的消息
 func getResultMsg(resultJSON string) (msg string) {
 	var result ampq.TaskResult
@@ -738,5 +720,24 @@ func getDomainFLD(target string) (fldDomain []string) {
 		}
 	}
 	fldDomain = utils.SetToSlice(domains)
+	return
+}
+
+// ParseTargetFromKwArgs 从经过JSON序列化的参数中单独提取出target
+func ParseTargetFromKwArgs(args string) (target string) {
+	const displayedLength = 100
+	type TargetStrut struct {
+		Target string `json:"target"`
+	}
+	var t TargetStrut
+	err := json.Unmarshal([]byte(args), &t)
+	if err != nil {
+		target = args
+	} else {
+		target = t.Target
+	}
+	if len(target) > displayedLength {
+		return fmt.Sprintf("%s...", target[:displayedLength])
+	}
 	return
 }

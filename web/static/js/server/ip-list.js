@@ -117,7 +117,7 @@ $(function () {
             $.post("/task-start-batchscan",
                 {
                     "target": target,
-                    "port": port1 +"|" + port2,
+                    "port": port1 + "|" + port2,
                     'rate': rate,
                     'portscan': true,
                     'nmap_tech': $('#select_batchscan_tech').val(),
@@ -350,7 +350,6 @@ $(function () {
         }
     );//end datatable
 });
-
 
 function get_export_options() {
     var url = '';

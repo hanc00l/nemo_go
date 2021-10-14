@@ -23,6 +23,7 @@ func init() {
 	web.Router("/dashboard-task-info", dashboard, "post:GetTaskInfoAction")
 	web.Router("/worker-list", dashboard, "post:WorkerAliveListAction")
 	web.Router("/onlineuser-list", dashboard, "post:OnlineUserListAction")
+	web.Router("/dashboard-task-started-info", dashboard, "post:GetStartedTaskInfoAction")
 
 	ip := &controllers.IPController{}
 	web.Router("/ip-list", ip, "get:IndexAction;post:ListAction")

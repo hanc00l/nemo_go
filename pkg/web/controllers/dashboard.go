@@ -32,12 +32,18 @@ type TaskInfoData struct {
 	TaskInfo string `json:"task_info"`
 }
 
+type StartedTaskInfo struct {
+	TaskName     string `json:"task_name"`
+	TaskArgs     string `json:"task_args"`
+	TaskStarting string `json:"task_starting"`
+}
+
 type OnlineUserInfoData struct {
 	Index        int    `json:"index"`
 	IP           string `json:"ip"`
 	LoginTime    string `json:"login_time"`
 	UpdateTime   string `json:"update_time"`
-	UpdateNumber int64    `json:"update_number"`
+	UpdateNumber int64  `json:"update_number"`
 }
 
 // IndexAction dashboard首页
@@ -74,12 +80,35 @@ func (c *DashboardController) GetTaskInfoAction() {
 
 	searchMapActivated := make(map[string]interface{})
 	searchMapActivated["state"] = ampq.STARTED
+	searchMapCreated := make(map[string]interface{})
+	searchMapCreated["state"] = ampq.CREATED
 	searchMapALL := make(map[string]interface{})
 	searchMapALL["date_delta"] = 7
 	task := &db.Task{}
 	data := TaskInfoData{}
-	data.TaskInfo = fmt.Sprintf("%d/%d", task.Count(searchMapActivated), task.Count(searchMapALL))
+	data.TaskInfo = fmt.Sprintf("%d/%d/%d", task.Count(searchMapActivated), task.Count(searchMapCreated), task.Count(searchMapALL))
 	c.Data["json"] = data
+}
+
+// GetStartedTaskInfoAction 获取正在执行的任务数据
+func (c *DashboardController) GetStartedTaskInfoAction() {
+	c.UpdateOnlineUser()
+	defer c.ServeJSON()
+
+	searchMapActivated := make(map[string]interface{})
+	searchMapActivated["state"] = ampq.STARTED
+	task := &db.Task{}
+	var tis []StartedTaskInfo
+	rows, _ := task.Gets(searchMapActivated, 1, 10)
+	for _, row := range rows {
+		ti := StartedTaskInfo{
+			TaskName:     row.TaskName,
+			TaskArgs:     ParseTargetFromKwArgs(row.KwArgs),
+			TaskStarting: fmt.Sprintf("%s前", time.Now().Sub(*row.StartedTime).Truncate(time.Second).String()),
+		}
+		tis = append(tis, ti)
+	}
+	c.Data["json"] = tis
 }
 
 // WorkerAliveListAction 获取worker数据，用于dashboard列表显示
@@ -137,10 +166,10 @@ func (c *DashboardController) OnlineUserListAction() {
 			continue
 		}
 		resp.Data = append(resp.Data, OnlineUserInfoData{
-			Index:      index,
-			IP:         v.IP,
-			LoginTime:  FormatDateTime(v.LoginTime),
-			UpdateTime: fmt.Sprintf("%s前", time.Now().Sub(v.UpdateTime).Truncate(time.Second).String()),
+			Index:        index,
+			IP:           v.IP,
+			LoginTime:    FormatDateTime(v.LoginTime),
+			UpdateTime:   fmt.Sprintf("%s前", time.Now().Sub(v.UpdateTime).Truncate(time.Second).String()),
 			UpdateNumber: v.UpdateNumber,
 		})
 		index++
