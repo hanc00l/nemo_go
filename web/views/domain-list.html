@@ -136,10 +136,10 @@
                                                 <ul class="nav nav-tabs" id="nav_tabs">
                                                     <li class="nav-item"><a class="nav-link active"
                                                                             data-toggle="tab"
-                                                                            href="#domainscan"><strong>资产扫描</strong></a>
+                                                                            href="#domainscan" title="对目标进行域名搜集和资产扫描"><strong>资产扫描</strong></a>
                                                     </li>
                                                     <li class="nav-item"><a class="nav-link" data-toggle="tab"
-                                                                            href="#vulverify"><strong>漏洞验证</strong></a>
+                                                                            href="#vulverify" title="对目标进行漏洞验证"><strong>漏洞验证</strong></a>
                                                     </li>
                                                 </ul>
                                                 <div class="tab-content" id="myTabContent">
@@ -155,7 +155,7 @@
                                                                            for="checkbox_subfinder">
                                                                         <input class="form-check-input"
                                                                                id="checkbox_subfinder"
-                                                                               type="checkbox" checked>子域名枚举
+                                                                               type="checkbox" checked>子域名枚举<i class="fa fa-question-circle" aria-hidden="true" title="调用内置的Subfinder模块，从多种途径进行域名被动枚举"></i>
                                                                     </label>
                                                                 </div>
                                                                 <div class="form-check form-check-inline">
@@ -163,7 +163,7 @@
                                                                            for="checkbox_subdomainbrute">
                                                                         <input class="form-check-input"
                                                                                id="checkbox_subdomainbrute"
-                                                                               type="checkbox" checked>子域名爆破
+                                                                               type="checkbox" checked>子域名爆破<i class="fa fa-question-circle" aria-hidden="true" title="调用内置的Massdns模块，通过字典方式进行域名暴力枚举"></i>
                                                                     </label>
                                                                 </div>
                                                                 <div class="form-check form-check-inline">
@@ -187,7 +187,7 @@
                                                                            for="checkbox_httpx">
                                                                         <input class="form-check-input"
                                                                                id="checkbox_httpx" type="checkbox"
-                                                                               checked>HTTPX指纹
+                                                                               checked>HTTPX指纹<i class="fa fa-question-circle" aria-hidden="true" title="通过内置的HTTPX模块，获取域名的HTTP/HTTPS信息"></i>
                                                                     </label>
                                                                 </div>
                                                                 <div class="form-check form-check-inline">
@@ -195,7 +195,7 @@
                                                                            for="checkbox_wappalyzer">
                                                                         <input class="form-check-input"
                                                                                id="checkbox_wappalyzer" type="checkbox"
-                                                                        >Wappalyzer
+                                                                        >Wappalyzer<i class="fa fa-question-circle" aria-hidden="true" title="通过内置的Wappalyzer模块，获取网站的指纹信息；&#10;指纹信息来源于默认的technologies.json和自定义的technologies_custom.json；&#10;指纹的规则和信息参见：https://www.wappalyzer.com"></i>
                                                                     </label>
                                                                 </div>
                                                                 <div class="form-check form-check-inline">
@@ -204,7 +204,7 @@
                                                                         <input class="form-check-input"
                                                                                id="checkbox_screenshot" type="checkbox"
                                                                                checked
-                                                                        >ScreenShot
+                                                                        >ScreenShot<i class="fa fa-question-circle" aria-hidden="true" title="通过调用chrome headless浏览器，获取网站的首页截图"></i>
                                                                     </label>
                                                                 </div>
                                                             </div>
@@ -220,7 +220,7 @@
                                                                     <label class="form-check-label">
                                                                         <input class="form-check-input"
                                                                                id="checkbox_fofasearch"
-                                                                               type="checkbox">FOFA
+                                                                               type="checkbox">FOFA<i class="fa fa-info-circle" aria-hidden="true" title="调用FOFA API接口查询，需在worker.yml中配置KEY"></i>
                                                                     </label>
                                                                 </div>
                                                                 <div class="form-check form-check-inline"
@@ -228,7 +228,7 @@
                                                                     <label class="form-check-label">
                                                                         <input class="form-check-input"
                                                                                id="checkbox_icpquery"
-                                                                               type="checkbox">ICP备案
+                                                                               type="checkbox">ICP备案<i class="fa fa-info-circle" aria-hidden="true" title="调用chinaz接口查询ICP备案信息，需在worker.yml中配置KEY"></i>
                                                                     </label>
                                                                 </div>
                                                                 <div class="form-check form-check-inline"
@@ -236,7 +236,7 @@
                                                                     <label class="form-check-label">
                                                                         <input class="form-check-input"
                                                                                id="checkbox_fld_domain"
-                                                                               type="checkbox">提取顶级域名
+                                                                               type="checkbox">提取顶级域名<i class="fa fa-question-circle" aria-hidden="true" title="提取目标的顶级域名（比如将api.10086.cn中的顶级域名10086.cn）并追加到目标中"></i>
                                                                     </label>
                                                                 </div>
                                                             </div>
@@ -244,7 +244,7 @@
                                                         <div class="row">
                                                             <div class="col-md-12">
                                                                 <label class="col-form-label">
-                                                                    <b>端口扫描：</b>
+                                                                    <b>端口扫描<i class="fa fa-info-circle" aria-hidden="true" title="提取本次任务结果中的IP作为新任务进行端口扫描，扫描的方法、探测技术和速度由系统设置中的端口扫描默认配置。"></i>：</b>
                                                                 </label>
                                                                 <br>
                                                                 <div class="form-check form-check-inline">
@@ -252,7 +252,7 @@
                                                                            for="checkbox_portscan">
                                                                         <input class="form-check-input"
                                                                                id="checkbox_portscan"
-                                                                               type="checkbox">IP扫描
+                                                                               type="checkbox">IP扫描<i class="fa fa-question-circle" aria-hidden="true" title="对任务结果的IP进行端口扫描"></i>
                                                                     </label>
                                                                 </div>
                                                                 <div class="form-check form-check-inline">
@@ -260,7 +260,7 @@
                                                                            for="checkbox_networkscan">
                                                                         <input class="form-check-input"
                                                                                id="checkbox_networkscan"
-                                                                               type="checkbox">C段扫描
+                                                                               type="checkbox">C段扫描<i class="fa fa-question-circle" aria-hidden="true" title="对任务结果的IP进行C段扫描"></i>
                                                                     </label>
                                                                 </div>
                                                                 <div class="form-check form-check-inline">
@@ -276,7 +276,7 @@
                                                         </div>
                                                         <div class="form-group row bg-light">
                                                             <div class="col-md-12">
-                                                                <label for="select_taskmode"><b>任务模式</b></label>
+                                                                <label for="select_taskmode"><b>任务模式</b><i class="fa fa-info-circle" aria-hidden="true" title="任务执行模式&#10;默认为所有目标为一个单独任务；可将任务按目标的行进行切分为多个任务，均衡分配到多个worker上并发执行；"></i></label>
                                                                 <select class="form-control" id="select_taskmode">
                                                                     <option value="0" selected>单任务（默认）</option>
                                                                     <option value="1">每一行目标单独任务</option>
