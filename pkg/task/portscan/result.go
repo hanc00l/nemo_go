@@ -13,19 +13,20 @@ const (
 
 // Config 端口扫描的参数配置
 type Config struct {
-	Target        string `json:"target"`
-	ExcludeTarget string `json:"executeTarget"`
-	Port          string `json:"port"`
-	OrgId         *int   `json:"orgId"`
-	Rate          int    `json:"rate"`
-	IsPing        bool   `json:"ping"`
-	Tech          string `json:"tech"`
-	IsIpLocation  bool   `json:"ipLocation"`
-	IsHttpx       bool   `json:"httpx"`
-	IsWhatWeb     bool   `json:"whatweb"`
-	IsScreenshot  bool   `json:"screenshot"`
-	IsWappalyzer  bool   `json:"wappalyzer"`
-	CmdBin        string `json:"cmdBin"`
+	Target           string `json:"target"`
+	ExcludeTarget    string `json:"executeTarget"`
+	Port             string `json:"port"`
+	OrgId            *int   `json:"orgId"`
+	Rate             int    `json:"rate"`
+	IsPing           bool   `json:"ping"`
+	Tech             string `json:"tech"`
+	IsIpLocation     bool   `json:"ipLocation"`
+	IsHttpx          bool   `json:"httpx"`
+	IsWhatWeb        bool   `json:"whatweb"`
+	IsScreenshot     bool   `json:"screenshot"`
+	IsWappalyzer     bool   `json:"wappalyzer"`
+	IsFingerprintHub bool   `json:"fingerprinthub"`
+	CmdBin           string `json:"cmdBin"`
 }
 
 // PortAttrResult 端口属性结果
@@ -139,11 +140,11 @@ func (r *Result) SaveResult(config Config) string {
 }
 
 // filterIPHasTooMuchPort 过滤有安全防护、显示太多端口开放的IP
-func filterIPHasTooMuchPort(result Result){
+func filterIPHasTooMuchPort(result Result) {
 	for ipName, ipResult := range result.IPResult {
 		if len(ipResult.Ports) > IpOpenedPortFilterNumber {
 			logging.RuntimeLog.Infof("ip:%s has too much open port:%d,discard to save!", ipName, len(ipResult.Ports))
-			delete(result.IPResult,ipName)
+			delete(result.IPResult, ipName)
 		}
 	}
 }

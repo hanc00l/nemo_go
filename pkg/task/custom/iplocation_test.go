@@ -21,9 +21,9 @@ func TestIpLocation_FindPublicIP(t *testing.T) {
 }
 
 func TestLoadCustomIP(t *testing.T) {
-	t.Log(customMap)
-	t.Log(customBMap)
-	t.Log(customCMap)
+	//t.Log(customMap)
+	//t.Log(customBMap)
+	//t.Log(customCMap)
 }
 
 func TestIpLocation_FindCustomIP(t *testing.T) {

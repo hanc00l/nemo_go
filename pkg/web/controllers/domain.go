@@ -564,7 +564,7 @@ func getDomainAttrFullInfo(id int, disableFofa bool) DomainAttrFullInfo {
 			if _, ok := r.TitleSet[da.Content]; !ok {
 				r.TitleSet[da.Content] = struct{}{}
 			}
-		} else if da.Tag == "server" {
+		} else if da.Tag == "server"  || da.Tag == "fingerprint" {
 			if _, ok := r.BannerSet[da.Content]; !ok {
 				r.BannerSet[da.Content] = struct{}{}
 			}

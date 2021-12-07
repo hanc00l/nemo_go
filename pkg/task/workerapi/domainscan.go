@@ -115,6 +115,11 @@ func doFingerPrint(config domainscan.Config, resultDomainScan *domainscan.Result
 		wappalyzer.ResultDomainScan = *resultDomainScan
 		wappalyzer.Do()
 	}
+	if config.IsFingerprintHub {
+		fp := fingerprint.NewFingerprintHub(fpConfig)
+		fp.ResultDomainScan = *resultDomainScan
+		fp.Do()
+	}
 }
 
 // doPortScan 对IP进行端口扫描
@@ -138,17 +143,18 @@ func doPortScan(config domainscan.Config, resultDomainScan *domainscan.Result) {
 	for _, t := range targets {
 		for _, p := range ports {
 			configPortScan := portscan.Config{
-				OrgId:        config.OrgId,
-				Target:       t,
-				Port:         p,
-				Rate:         portsConfig.Rate,
-				CmdBin:       portsConfig.Cmdbin,
-				IsPing:       portsConfig.IsPing,
-				Tech:         portsConfig.Tech,
-				IsIpLocation: true,
-				IsHttpx:      config.IsHttpx,
-				IsWhatWeb:    config.IsWhatWeb,
-				IsScreenshot: config.IsScreenshot,
+				OrgId:            config.OrgId,
+				Target:           t,
+				Port:             p,
+				Rate:             portsConfig.Rate,
+				CmdBin:           portsConfig.Cmdbin,
+				IsPing:           portsConfig.IsPing,
+				Tech:             portsConfig.Tech,
+				IsIpLocation:     true,
+				IsHttpx:          config.IsHttpx,
+				IsWhatWeb:        config.IsWhatWeb,
+				IsScreenshot:     config.IsScreenshot,
+				IsFingerprintHub: config.IsFingerprintHub,
 			}
 			configPortScanJSON, _ := json.Marshal(configPortScan)
 			serverapi.NewTask("portscan", string(configPortScanJSON))

@@ -32,5 +32,4 @@ func TestScreenShot_Do(t *testing.T) {
 			t.Log(s)
 		}
 	}
-	ss.UploadResult()
 }

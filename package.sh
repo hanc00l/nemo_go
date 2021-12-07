@@ -23,7 +23,7 @@ tar -cvzf release/nemo_linux_amd64.tar \
 tar -cvzf release/worker_linux_amd64.tar \
   --exclude=thirdparty/xray/xray_darwin_amd64 --exclude=conf/app.conf --exclude=server.yml \
    worker_linux_amd64 conf log thirdparty
-tar -cvzf release/worker_darwin_amd64_amd64.tar \
+tar -cvzf release/worker_darwin_amd64.tar \
   --exclude=thirdparty/xray/xray_linux_amd64 --exclude=conf/app.conf --exclude=server.yml \
   worker_darwin_amd64 conf log thirdparty
 

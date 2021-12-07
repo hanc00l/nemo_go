@@ -22,7 +22,7 @@ func keepAlive() {
 
 func main() {
 	var concurrency int
-	flag.IntVar(&concurrency, "c", 2, "concurrent number of tasks")
+	flag.IntVar(&concurrency, "c", 3, "concurrent number of tasks")
 	flag.Parse()
 
 	go keepAlive()

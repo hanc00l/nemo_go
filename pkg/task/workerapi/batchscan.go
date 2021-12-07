@@ -65,6 +65,11 @@ func BatchScan(taskId, configJSON string) (result string, err error) {
 			httpx.ResultPortScan = resultPortScan
 			httpx.Do()
 		}
+		if config.IsFingerprintHub {
+			fp := fingerprint.NewFingerprintHub(fpConfig)
+			fp.ResultPortScan = resultPortScan
+			fp.Do()
+		}
 	}
 	// 保存结果
 	x := comm.NewXClient()

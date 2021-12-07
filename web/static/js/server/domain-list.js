@@ -39,6 +39,7 @@ $(function () {
                     'screenshot': $('#checkbox_screenshot').is(":checked"),
                     'icpquery': $('#checkbox_icpquery').is(":checked"),
                     'wappalyzer': $('#checkbox_wappalyzer').is(":checked"),
+                    'fingerprinthub': $('#checkbox_fingerprinthub').is(":checked"),
                 }, function (data, e) {
                     if (e === "success" && data['status'] == 'success') {
                         swal({

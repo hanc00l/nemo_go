@@ -477,7 +477,7 @@ func getPortInfo(ip string, ipId int, disableFofa bool) (r PortInfo) {
 				if _, ok := r.TitleSet[pad.Content]; !ok {
 					r.TitleSet[pad.Content] = struct{}{}
 				}
-			} else if pad.Tag == "banner" || pad.Tag == "server" || pad.Tag == "tag" {
+			} else if pad.Tag == "banner" || pad.Tag == "server" || pad.Tag == "tag" ||  pad.Tag == "fingerprint"{
 				if pad.Content == "unknown" {
 					continue
 				}

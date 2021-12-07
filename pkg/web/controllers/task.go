@@ -64,22 +64,23 @@ type TaskInfo struct {
 }
 
 type portscanRequestParam struct {
-	Target       string `form:"target"`
-	IsPortScan   bool   `form:"portscan"`
-	IsIPLocation bool   `form:"iplocation"`
-	IsFofa       bool   `form:"fofasearch"`
-	Port         string `form:"port"`
-	Rate         int    `form:"rate"`
-	NmapTech     string `form:"nmap_tech"`
-	CmdBin       string `form:"bin"`
-	OrgId        int    `form:"org_id"`
-	IsWhatweb    bool   `form:"whatweb"`
-	IsHttpx      bool   `form:"httpx"`
-	IsPing       bool   `form:"ping"`
-	ExcludeIP    string `form:"exclude"`
-	IsScreenshot bool   `form:"screenshot"`
-	IsWappalyzer bool   `form:"wappalyzer"`
-	TaskMode     int    `form:"taskmode"`
+	Target           string `form:"target"`
+	IsPortScan       bool   `form:"portscan"`
+	IsIPLocation     bool   `form:"iplocation"`
+	IsFofa           bool   `form:"fofasearch"`
+	Port             string `form:"port"`
+	Rate             int    `form:"rate"`
+	NmapTech         string `form:"nmap_tech"`
+	CmdBin           string `form:"bin"`
+	OrgId            int    `form:"org_id"`
+	IsWhatweb        bool   `form:"whatweb"`
+	IsHttpx          bool   `form:"httpx"`
+	IsPing           bool   `form:"ping"`
+	ExcludeIP        string `form:"exclude"`
+	IsScreenshot     bool   `form:"screenshot"`
+	IsWappalyzer     bool   `form:"wappalyzer"`
+	IsFingerprintHub bool   `form:"fingerprinthub"`
+	TaskMode         int    `form:"taskmode"`
 }
 
 type domainscanRequestParam struct {
@@ -97,6 +98,7 @@ type domainscanRequestParam struct {
 	IsScreenshot     bool   `form:"screenshot"`
 	IsICPQuery       bool   `form:"icpquery"`
 	IsWappalyzer     bool   `form:"wappalyzer"`
+	IsFingerprintHub bool   `form:"fingerprinthub"`
 	TaskMode         int    `form:"taskmode"`
 	PortTaskMode     int    `form:"porttaskmode"`
 }
@@ -398,6 +400,7 @@ func (c *TaskController) doDomainscan(target string, req domainscanRequestParam)
 		IsIPSubnetPortScan: req.IsSubnetPortscan,
 		IsScreenshot:       req.IsScreenshot,
 		IsWappalyzer:       req.IsWappalyzer,
+		IsFingerprintHub:   req.IsFingerprintHub,
 		PortTaskMode:       req.PortTaskMode,
 	}
 	// config.OrgId 为int，默认为0
@@ -421,19 +424,20 @@ func (c *TaskController) doDomainscan(target string, req domainscanRequestParam)
 // doPortscan 端口扫描
 func (c *TaskController) doPortscan(target string, port string, req portscanRequestParam) (taskId string, err error) {
 	config := portscan.Config{
-		Target:        target,
-		ExcludeTarget: req.ExcludeIP,
-		Port:          port,
-		OrgId:         &req.OrgId,
-		Rate:          req.Rate,
-		IsPing:        req.IsPing,
-		Tech:          req.NmapTech,
-		IsIpLocation:  req.IsIPLocation,
-		IsHttpx:       req.IsHttpx,
-		IsWhatWeb:     req.IsWhatweb,
-		IsScreenshot:  req.IsScreenshot,
-		IsWappalyzer:  req.IsWappalyzer,
-		CmdBin:        req.CmdBin,
+		Target:           target,
+		ExcludeTarget:    req.ExcludeIP,
+		Port:             port,
+		OrgId:            &req.OrgId,
+		Rate:             req.Rate,
+		IsPing:           req.IsPing,
+		Tech:             req.NmapTech,
+		IsIpLocation:     req.IsIPLocation,
+		IsHttpx:          req.IsHttpx,
+		IsWhatWeb:        req.IsWhatweb,
+		IsScreenshot:     req.IsScreenshot,
+		IsWappalyzer:     req.IsWappalyzer,
+		IsFingerprintHub: req.IsFingerprintHub,
+		CmdBin:           req.CmdBin,
 	}
 	if req.CmdBin == "" {
 		config.CmdBin = conf.GlobalWorkerConfig().Portscan.Cmdbin
@@ -468,19 +472,20 @@ func (c *TaskController) doPortscan(target string, port string, req portscanRequ
 // doBatchScan 探测+端口扫描
 func (c *TaskController) doBatchScan(target string, port string, req portscanRequestParam) (taskId string, err error) {
 	config := portscan.Config{
-		Target:        target,
-		ExcludeTarget: req.ExcludeIP,
-		Port:          port,
-		OrgId:         &req.OrgId,
-		Rate:          req.Rate,
-		IsPing:        req.IsPing,
-		Tech:          req.NmapTech,
-		IsIpLocation:  req.IsIPLocation,
-		IsHttpx:       req.IsHttpx,
-		IsWhatWeb:     req.IsWhatweb,
-		IsScreenshot:  req.IsScreenshot,
-		IsWappalyzer:  req.IsWappalyzer,
-		CmdBin:        "masscan",
+		Target:           target,
+		ExcludeTarget:    req.ExcludeIP,
+		Port:             port,
+		OrgId:            &req.OrgId,
+		Rate:             req.Rate,
+		IsPing:           req.IsPing,
+		Tech:             req.NmapTech,
+		IsIpLocation:     req.IsIPLocation,
+		IsHttpx:          req.IsHttpx,
+		IsWhatWeb:        req.IsWhatweb,
+		IsScreenshot:     req.IsScreenshot,
+		IsWappalyzer:     req.IsWappalyzer,
+		IsFingerprintHub: req.IsFingerprintHub,
+		CmdBin:           "masscan",
 	}
 	if req.CmdBin == "nmap" {
 		config.CmdBin = "nmap"

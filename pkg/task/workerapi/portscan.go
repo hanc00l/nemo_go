@@ -59,6 +59,11 @@ func PortScan(taskId, configJSON string) (result string, err error) {
 		wappalyzer.ResultPortScan = resultPortScan
 		wappalyzer.Do()
 	}
+	if config.IsFingerprintHub {
+		fp := fingerprint.NewFingerprintHub(fpConfig)
+		fp.ResultPortScan = resultPortScan
+		fp.Do()
+	}
 	// 保存结果
 	resultArgs := comm.ScanResultArgs{
 		IPConfig: &config,

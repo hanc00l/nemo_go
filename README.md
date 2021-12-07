@@ -26,6 +26,8 @@ Nemo是用来进行自动化信息收集的一个简单平台，通过集成常�
 - [HTTPX](https://github.com/projectdiscovery/httpx) 
 - [ScreenShot](https://github.com/chromedp/chromedp) （调用chrome headless）
 - [Wappalyzer](https://github.com/AliasIO/Wappalyzer) （基于[webanalyze](https://github.com/rverton/webanalyze) 代码，可[自定义指纹规则](thirdparty/wappalyzer/technologies_custom.json)）
+- [ObserverWard](https://github.com/0x727/ObserverWard_0x727)  (指纹信息来源于https://github.com/0x727/FingerprintHub)
+
 
 ### 4、API接口 （需提供相应的Key)
 
@@ -67,7 +69,7 @@ docker-compose up -d
 
 ## Install
 
-Tested on [ubuntu18.04 LTS](docs/install_linux.md)、[macOS](docs/install_mac.md)
+Tested on [ubuntu18.04/20.04 LTS](docs/install_linux.md)、[macOS](docs/install_mac.md)
 
 
 
@@ -99,6 +101,7 @@ Tested on [ubuntu18.04 LTS](docs/install_linux.md)、[macOS](docs/install_mac.md
 
 ## 版本更新
 
+- 2.4.5：2021-12-7，增加调用ObserverWard获取应用系统的指纹信息，指纹信息来源于 [FingerprintHub](https://github.com/0x727/FingerprintHub)；
 - 2.4.4：2021-10-18，对新建任务增加部份提示信息，便于掌握任务执行的参数；状态信息可手动刷新和查看正在执行的任务；
 - 2.4.3：2021-10-13，增加IP扫描的masscan+nmap方法，masscan快速进行端口开放扫描，nmap用-sV进行详细扫描；
 - 2.4.2：2021-10-9，增加IP扫描的“探测+扫描”模式任务，增加内网资产收集的便利性；去除whatweb的安装和使用（HTTPX已基本可替代其功能）；

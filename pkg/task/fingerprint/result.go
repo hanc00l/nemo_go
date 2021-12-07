@@ -14,6 +14,7 @@ const (
 	fpWhatwebThreadNumber = 4
 	fpScreenshotThreadNum = 5
 	fpWappalyzerThreadNumber = 10
+	fpObserverWardThreadNumber =  10
 )
 
 type Config struct {
