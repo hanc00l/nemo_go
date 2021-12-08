@@ -26,3 +26,14 @@ func TestNmap_Run(t *testing.T) {
 		}
 	}
 }
+
+func TestNmap_ParseXMLResult(t *testing.T) {
+	nmap := NewNmap(Config{})
+	nmap.ParseXMLResult("/Users/user/Downloads/nmap.json")
+	for ip,ipa := range nmap.Result.IPResult{
+		t.Log(ip,ipa)
+		for port,pa := range ipa.Ports{
+			t.Log(port,pa)
+		}
+	}
+}

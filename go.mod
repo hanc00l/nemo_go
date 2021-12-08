@@ -31,6 +31,7 @@ require (
 	github.com/joeguo/tldextract v0.0.0-20210326083850-1ec7be2de68a
 	github.com/klauspost/cpuid/v2 v2.0.9 // indirect
 	github.com/klauspost/reedsolomon v1.9.13 // indirect
+	github.com/lair-framework/go-nmap v0.0.0-20191202052157-3507e0b03523
 	github.com/lib/pq v1.10.2 // indirect
 	github.com/mattn/go-isatty v0.0.13 // indirect
 	github.com/miekg/dns v1.1.43

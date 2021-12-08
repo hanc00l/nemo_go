@@ -10,6 +10,7 @@ import (
 	"strings"
 
 	"github.com/hanc00l/nemo_go/pkg/utils"
+	gonmap "github.com/lair-framework/go-nmap"
 )
 
 type Nmap struct {
@@ -112,6 +113,59 @@ func (nmap *Nmap) parseResult(outputTempFile string) {
 					Tag:     "banner",
 					Content: portInfo[6],
 				})
+			}
+		}
+	}
+}
+
+// ParseXMLResult 解析nmap的XML文件
+func (nmap *Nmap) ParseXMLResult(outputTempFile string) {
+	content, err := os.ReadFile(outputTempFile)
+	if err != nil {
+		return
+	}
+	nmapRunner, err := gonmap.Parse(content)
+	if err != nil {
+		return
+	}
+	if nmap.Result.IPResult == nil {
+		nmap.Result.IPResult = make(map[string]*IPResult)
+	}
+	for _, host := range nmapRunner.Hosts {
+		if len(host.Ports) == 0 || len(host.Addresses) == 0 {
+			continue
+		}
+		var ip string
+		for _, addr := range host.Addresses {
+			if addr.AddrType == "ipv4" {
+				ip = addr.Addr
+				break
+			}
+		}
+		if ip == "" {
+			continue
+		}
+		if !nmap.Result.HasIP(ip) {
+			nmap.Result.SetIP(ip)
+		}
+		for _, port := range host.Ports {
+			if port.State.State == "open" && port.Protocol == "tcp" {
+				if !nmap.Result.HasPort(ip, port.PortId) {
+					nmap.Result.SetPort(ip, port.PortId)
+				}
+				nmap.Result.SetPortAttr(ip, port.PortId, PortAttrResult{
+					Source:  "portscan",
+					Tag:     "service",
+					Content: port.Service.Name,
+				})
+				banner := strings.Join([]string{port.Service.Product, port.Service.Version}, " ")
+				if strings.TrimSpace(banner)!="" {
+					nmap.Result.SetPortAttr(ip, port.PortId, PortAttrResult{
+						Source:  "portscan",
+						Tag:     "banner",
+						Content: banner,
+					})
+				}
 			}
 		}
 	}

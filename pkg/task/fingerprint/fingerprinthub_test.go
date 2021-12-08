@@ -6,11 +6,11 @@ import (
 )
 
 func TestFingerprintHub_RunObserverWard(t *testing.T) {
-	f := NewFingerprintHub(Config{Target: "183.141.20.136:8082"})
-	rs := f.RunObserverWard("183.141.20.136:8082")
+	f := NewFingerprintHub(Config{})
+	rs := f.RunObserverWard("360.wintopgroup.com.cn")
 	for _,fp := range rs{
 		t.Log(fp)
-		for _,n := range fp.WhatWebName {
+		for _,n := range fp.Name {
 			t.Log(n)
 		}
 	}

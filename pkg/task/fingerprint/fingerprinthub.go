@@ -22,13 +22,13 @@ type FingerprintHub struct {
 }
 
 type FingerprintHubReult struct {
-	Url         string   `json:"url"`
-	WhatWebName []string `json:"what_web_name"`
-	Priority    int      `json:"priority"`
-	Length      int      `json:"length"`
-	Title       string   `json:"title"`
-	StatusCode  int      `json:"status_code"`
-	Plugins     []string `json:"plugins"`
+	Url        string   `json:"url"`
+	Name       []string `json:"name"`
+	Priority   int      `json:"priority"`
+	Length     int      `json:"length"`
+	Title      string   `json:"title"`
+	StatusCode int      `json:"status_code"`
+	Plugins    []string `json:"plugins"`
 }
 
 // NNewFingerprintHub 创建FingerprintHub对象
@@ -56,7 +56,7 @@ func (f *FingerprintHub) Do() {
 					fingerPrintResult := f.RunObserverWard(u)
 					if len(fingerPrintResult) > 0 {
 						for _, fpa := range fingerPrintResult {
-							for _,name  := range fpa.WhatWebName {
+							for _, name := range fpa.Name {
 								par := portscan.PortAttrResult{
 									Source:  "ObserverWard",
 									Tag:     "fingerprint",
@@ -78,7 +78,7 @@ func (f *FingerprintHub) Do() {
 				fingerPrintResult := f.RunObserverWard(d)
 				if len(fingerPrintResult) > 0 {
 					for _, fpa := range fingerPrintResult {
-						for _,name  := range fpa.WhatWebName {
+						for _, name := range fpa.Name {
 							dar := domainscan.DomainAttrResult{
 								Source:  "ObserverWard",
 								Tag:     "fingerprint",
