@@ -10,7 +10,6 @@ import (
 	"github.com/projectdiscovery/httpx/common/customheader"
 	"github.com/projectdiscovery/httpx/runner"
 	"github.com/remeh/sizedwaitgroup"
-	"math"
 	"os"
 )
 
@@ -132,7 +131,6 @@ func (x *Httpx) RunHttpx(domain string) []FingerAttrResult {
 		OutputServerHeader:  true,
 		OutputContentType:   true,
 		TLSGrab:             true,
-		MaxResponseBodySize: math.MaxInt32,
 	}
 	r, err := runner.New(options)
 	if err != nil {

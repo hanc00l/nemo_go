@@ -29,6 +29,7 @@ require (
 	github.com/hashicorp/go-immutable-radix v1.3.1 // indirect
 	github.com/hashicorp/go-multierror v1.1.1 // indirect
 	github.com/joeguo/tldextract v0.0.0-20210326083850-1ec7be2de68a
+	github.com/json-iterator/go v1.1.12 // indirect
 	github.com/klauspost/cpuid/v2 v2.0.9 // indirect
 	github.com/klauspost/reedsolomon v1.9.13 // indirect
 	github.com/lair-framework/go-nmap v0.0.0-20191202052157-3507e0b03523
@@ -37,9 +38,14 @@ require (
 	github.com/miekg/dns v1.1.43
 	github.com/peterbourgon/g2s v0.0.0-20170223122336-d4e7ad98afea // indirect
 	github.com/pkg/errors v0.9.1
-	github.com/projectdiscovery/httpx v1.0.9
-	github.com/projectdiscovery/mapcidr v0.0.7
+	github.com/projectdiscovery/blackrock v0.0.0-20210903102120-5a9d2412d21d // indirect
+	github.com/projectdiscovery/fileutil v0.0.0-20210928100737-cab279c5d4b5 // indirect
+	github.com/projectdiscovery/httputil v0.0.0-20210913064028-815c8db933ff // indirect
+	github.com/projectdiscovery/httpx v1.1.4
+	github.com/projectdiscovery/mapcidr v0.0.8
+	github.com/projectdiscovery/subfinder v2.4.9+incompatible // indirect
 	github.com/projectdiscovery/subfinder/v2 v2.4.8
+	github.com/projectdiscovery/wappalyzergo v0.0.19 // indirect
 	github.com/remeh/sizedwaitgroup v1.0.0
 	github.com/rs/cors v1.8.0 // indirect
 	github.com/rs/xid v1.3.0
@@ -54,11 +60,12 @@ require (
 	go.opencensus.io v0.23.0 // indirect
 	golang.org/x/crypto v0.0.0-20210817164053-32db794688a5 // indirect
 	golang.org/x/mod v0.5.0 // indirect
-	golang.org/x/net v0.0.0-20210903162142-ad29c8ab022f // indirect
-	golang.org/x/sys v0.0.0-20210906170528-6f6e22806c34 // indirect
+	golang.org/x/net v0.0.0-20211208012354-db4efeb81f4b // indirect
+	golang.org/x/sys v0.0.0-20211205182925-97ca703d548d // indirect
 	golang.org/x/text v0.3.7
 	golang.org/x/tools v0.1.5 // indirect
 	google.golang.org/protobuf v1.27.1 // indirect
+	gopkg.in/ini.v1 v1.66.2 // indirect
 	gopkg.in/yaml.v2 v2.4.0
 	gorm.io/driver/mysql v1.1.0
 	gorm.io/gorm v1.21.10

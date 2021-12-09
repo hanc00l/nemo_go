@@ -371,7 +371,7 @@ func (c *DomainController) getSearchMap(req domainRequestParam) (searchMap map[s
 	if req.DateDelta > 0 {
 		searchMap["date_delta"] = req.DateDelta
 	}
-	if req.CreateDateDelta> 0 {
+	if req.CreateDateDelta > 0 {
 		searchMap["create_date_delta"] = req.CreateDateDelta
 	}
 	return
@@ -564,22 +564,24 @@ func getDomainAttrFullInfo(id int, disableFofa bool) DomainAttrFullInfo {
 			if _, ok := r.TitleSet[da.Content]; !ok {
 				r.TitleSet[da.Content] = struct{}{}
 			}
-		} else if da.Tag == "server"  || da.Tag == "fingerprint" {
+		} else if da.Tag == "server" || da.Tag == "fingerprint" {
+			// banner信息：server、fingerpinter
 			if _, ok := r.BannerSet[da.Content]; !ok {
 				r.BannerSet[da.Content] = struct{}{}
 			}
-		} else if da.Tag == "whatweb" {
+			if da.Tag == "fingerprint" {
+				r.DomainAttr = append(r.DomainAttr, DomainAttrInfo{
+					Id:         da.Id,
+					Tag:        da.Tag,
+					Content:    da.Content,
+					CreateTime: FormatDateTime(da.CreateDatetime),
+					UpdateTime: FormatDateTime(da.UpdateDatetime),
+				})
+			}
+		} else if da.Tag == "whatweb" || da.Tag == "httpx" {
 			r.DomainAttr = append(r.DomainAttr, DomainAttrInfo{
 				Id:         da.Id,
-				Tag:        "whatweb",
-				Content:    da.Content,
-				CreateTime: FormatDateTime(da.CreateDatetime),
-				UpdateTime: FormatDateTime(da.UpdateDatetime),
-			})
-		} else if da.Tag == "httpx" {
-			r.DomainAttr = append(r.DomainAttr, DomainAttrInfo{
-				Id:         da.Id,
-				Tag:        "httpx",
+				Tag:        da.Tag,
 				Content:    da.Content,
 				CreateTime: FormatDateTime(da.CreateDatetime),
 				UpdateTime: FormatDateTime(da.UpdateDatetime),
