@@ -68,6 +68,7 @@ type Web struct {
 	Username       string `yaml:"username"`
 	Password       string `yaml:"password"`
 	ScreenshotPath string `yaml:"screenshotPath"`
+	TaskResultPath string `yaml:"taskresultPath"`
 }
 
 type RPC struct {

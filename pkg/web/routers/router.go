@@ -35,6 +35,7 @@ func init() {
 	web.Router("/ip-memo-update", ip, "post:UpdateMemoAction")
 	web.Router("/ip-memo-export", ip, "get:ExportMemoAction")
 	web.Router("/ip-color-tag", ip, "post:MarkColorTagAction")
+	web.Router("/ip-import-portscan", ip, "post:ImportPortscanResultAction")
 
 	domain := &controllers.DomainController{}
 	web.Router("/domain-list", domain, "get:IndexAction;post:ListAction")

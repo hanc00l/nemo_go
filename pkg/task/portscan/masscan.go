@@ -4,6 +4,7 @@ import (
 	"github.com/hanc00l/nemo_go/pkg/logging"
 	"github.com/hanc00l/nemo_go/pkg/task/custom"
 	"github.com/hanc00l/nemo_go/pkg/utils"
+	gonmap "github.com/lair-framework/go-nmap"
 	"os"
 	"os/exec"
 	"strconv"
@@ -58,7 +59,7 @@ func (m *Masscan) Do() {
 		return
 	}
 	m.parsResult(resultTempFile)
-	filterIPHasTooMuchPort(m.Result)
+	FilterIPHasTooMuchPort(m.Result)
 }
 
 // parsResult 解析结果
@@ -93,6 +94,59 @@ func (m *Masscan) parsResult(outputTempFile string) {
 				Tag:     "service",
 				Content: service,
 			})
+		}
+	}
+}
+
+// ParseXMLResult 解析XML格式的masscan扫描结果
+func (m *Masscan) ParseXMLResult(outputTempFile string) {
+	content, err := os.ReadFile(outputTempFile)
+	if err != nil {
+		return
+	}
+	m.ParseXMLContentResult(content)
+}
+
+// ParseXMLContentResult 解析XML格式的masscan扫描结果
+func (m *Masscan) ParseXMLContentResult(content []byte) {
+	s := custom.NewService()
+	// masscan的XML结果兼容Nmap，但是没有service信息
+	nmapRunner, err := gonmap.Parse(content)
+	if err != nil {
+		return
+	}
+	if m.Result.IPResult == nil {
+		m.Result.IPResult = make(map[string]*IPResult)
+	}
+	for _, host := range nmapRunner.Hosts {
+		if len(host.Ports) == 0 || len(host.Addresses) == 0 {
+			continue
+		}
+		var ip string
+		for _, addr := range host.Addresses {
+			if addr.AddrType == "ipv4" {
+				ip = addr.Addr
+				break
+			}
+		}
+		if ip == "" {
+			continue
+		}
+		if !m.Result.HasIP(ip) {
+			m.Result.SetIP(ip)
+		}
+		for _, port := range host.Ports {
+			if port.State.State == "open" && port.Protocol == "tcp" {
+				if !m.Result.HasPort(ip, port.PortId) {
+					m.Result.SetPort(ip, port.PortId)
+				}
+				service := s.FindService(port.PortId, ip)
+				m.Result.SetPortAttr(ip, port.PortId, PortAttrResult{
+					Source:  "portscan",
+					Tag:     "service",
+					Content: service,
+				})
+			}
 		}
 	}
 }

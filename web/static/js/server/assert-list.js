@@ -52,7 +52,7 @@ function update_task_status() {
         success: function (data) {
             info = "";
             for (let i = 0; i < data.length; i++) {
-                info += "<li class=\"list-group-item\"><strong>" + data[i].task_name + "</strong>->" + data[i].task_args + " <strong>@</strong>" + data[i].task_starting + "</li>";
+                info += "<li class=\"list-group-item\"><strong>" + data[i].task_name + "-></strong>" + data[i].task_args + " <strong>@</strong>" + data[i].task_starting + "</li>";
             }
         },
         error: function (xhr, type) {
@@ -83,16 +83,19 @@ function load_org_list() {
     $("#select_org_id_search").append("<option value=''>--全部--</option>")
     $("#select_org_id_task").append("<option value=''>--无--</option>")
     $("#select_batchscan_org_id_task").append("<option value=''>--无--</option>")
+    $("#select_import_org_id_task").append("<option value=''>--无--</option>")
     $.post("/org-getall", {}, function (data, e) {
         if (e === "success") {
             for (let i = 0; i < data.length; i++) {
                 $("#select_org_id_search").append("<option value='" + data[i].id + "'>" + data[i].name + "</option>")
                 $("#select_org_id_task").append("<option value='" + data[i].id + "'>" + data[i].name + "</option>")
                 $("#select_batchscan_org_id_task").append("<option value='" + data[i].id + "'>" + data[i].name + "</option>")
+                $("#select_import_org_id_task").append("<option value='" + data[i].id + "'>" + data[i].name + "</option>")
             }
             $('#select_org_id_search').val($('#hidden_org_id').val());
             $('#select_org_id_task').val($('#hidden_org_id').val());
             $('#select_batchscan_org_id_task').val($('#hidden_org_id').val());
+            $('#select_import_org_id_task').val($('#hidden_org_id').val());
         }
     });
 }

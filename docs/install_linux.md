@@ -61,6 +61,8 @@
     password: 648ce596dba3b408b523d3d1189b15070123456789abcdef
     # screenshot 在本地保存位置，需与app.conf中与static映射地址保持一致
     screenshotPath: /tmp/screenshot
+    # taskresultPath 任务结果本地保存路径，需与app.conf中的taskresult路径保存一致
+    taskresultPath: /tmp/taskresult
   # rpc监听地址和端口、auth
   rpc: 
     host: 0.0.0.0
@@ -83,12 +85,12 @@
   
   
     **重要：记得要修改默认的authKey。**
-  
-    **conf/app.conf：**
 
+    **conf/app.conf：**
+  
     ```yaml
     #screenshot默认保存位置，与server.yml保持一致
-    staticdir = static:web/static screenshot:/tmp/screenshot
+    staticdir = static:web/static screenshot:/tmp/screenshot taskresult:/tmp/taskresult
     ```
 
 
@@ -162,7 +164,7 @@
   pocscan:
     xray:
       pocPath: thirdparty/xray/xray/pocs
-      latest: 1.7.1
+      latest: 1.8.2
     pocsuite:
       pocPath: thirdparty/pocsuite/some_pocsuite
       threads: 10

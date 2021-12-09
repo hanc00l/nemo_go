@@ -26,10 +26,35 @@ func Fofa(taskId, configJSON string) (result string, err error) {
 	if config.IsIPLocation {
 		doLocation(&fofa.IpResult)
 	}
+	//指纹识别：
+	if len(fofa.IpResult.IPResult) > 0 {
+		portscanConfig := portscan.Config{
+			IsHttpx:          config.IsHttpx,
+			IsWhatWeb:        config.IsWhatWeb,
+			IsWappalyzer:     config.IsWappalyzer,
+			IsFingerprintHub: config.IsFingerprintHub,
+		}
+		DoIPFingerPrint(portscanConfig, &fofa.IpResult)
+		if fofa.Config.IsScreenshot {
+			DoScreenshotAndSave(&fofa.IpResult, nil)
+		}
+	}
+	if len(fofa.DomainResult.DomainResult) > 0 {
+		domainscanConfig := domainscan.Config{
+			IsHttpx:          config.IsHttpx,
+			IsWhatWeb:        config.IsWhatWeb,
+			IsWappalyzer:     config.IsWappalyzer,
+			IsFingerprintHub: config.IsFingerprintHub,
+		}
+		DoDomainFingerPrint(domainscanConfig, &fofa.DomainResult)
+		if fofa.Config.IsScreenshot {
+			DoScreenshotAndSave(nil, &fofa.DomainResult)
+		}
+	}
 	// 保存结果
 	x := comm.NewXClient()
-
 	args := comm.ScanResultArgs{
+		TaskID:       taskId,
 		IPConfig:     &portscan.Config{OrgId: config.OrgId},
 		DomainConfig: &domainscan.Config{OrgId: config.OrgId},
 		IPResult:     fofa.IpResult.IPResult,

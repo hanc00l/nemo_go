@@ -63,9 +63,16 @@ $(function () {
                         return strData;
                     }
                 },
-                {data: 'result', title: '结果', width: '10%',
+                {
+                    data: 'result', title: '结果', width: '10%',
                     "render": function (data, type, row) {
-                        const strData = '<div style="width:100%;white-space:normal;word-wrap:break-word;word-break:break-all;">' + data + '</div>';
+                        let strData = '<div style="width:100%;white-space:normal;word-wrap:break-word;word-break:break-all;">';
+                        if (row['resultfile'] != "") {
+                            strData += '<a href=' + row['resultfile'] + ' target="_blank">' + data + '</a>';
+                        } else {
+                            strData += data;
+                        }
+                        strData += '</div>';
                         return strData;
                     }
                 },
@@ -133,7 +140,7 @@ $(function () {
     });
     //批量删除
     $("#batch_delete").click(function () {
-        batch_delete('#task_table','/task-delete');
+        batch_delete('#task_table', '/task-delete');
     });
 });
 

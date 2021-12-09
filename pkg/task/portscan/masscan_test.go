@@ -22,3 +22,14 @@ func TestMasscan_Run(t *testing.T) {
 		}
 	}
 }
+
+func TestMasscan_ParseXMLResult(t *testing.T) {
+	m := NewMasscan(Config{})
+	m.ParseXMLResult("/Users/user/Downloads/masscan.xml")
+	for ip,ipa := range m.Result.IPResult{
+		t.Log(ip,ipa)
+		for port,pa := range ipa.Ports{
+			t.Log(port,pa)
+		}
+	}
+}

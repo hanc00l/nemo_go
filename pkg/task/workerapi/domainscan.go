@@ -8,7 +8,6 @@ import (
 	"github.com/hanc00l/nemo_go/pkg/conf"
 	"github.com/hanc00l/nemo_go/pkg/logging"
 	"github.com/hanc00l/nemo_go/pkg/task/domainscan"
-	"github.com/hanc00l/nemo_go/pkg/task/fingerprint"
 	"github.com/hanc00l/nemo_go/pkg/task/portscan"
 	"github.com/hanc00l/nemo_go/pkg/task/serverapi"
 	"github.com/hanc00l/nemo_go/pkg/utils"
@@ -32,11 +31,11 @@ func DomainScan(taskId, configJSON string) (result string, err error) {
 		doPortScan(config, &resultDomainScan)
 	}
 	// 指纹识别
-	doFingerPrint(config, &resultDomainScan)
+	DoDomainFingerPrint(config, &resultDomainScan)
 	// 保存结果
 	x := comm.NewXClient()
-
 	resultArgs := comm.ScanResultArgs{
+		TaskID:       taskId,
 		DomainConfig: &config,
 		DomainResult: resultDomainScan.DomainResult,
 	}
@@ -45,19 +44,10 @@ func DomainScan(taskId, configJSON string) (result string, err error) {
 		logging.RuntimeLog.Error(err)
 		return FailedTask(err.Error()), err
 	}
+	// Screenshot
 	if config.IsScreenshot {
-		ss := fingerprint.NewScreenShot()
-		ss.ResultDomainScan = resultDomainScan
-		ss.Do()
-		resultScreenshot := ss.LoadResult()
-		var result2 string
-		err = x.Call(context.Background(), "SaveScreenshotResult", &resultScreenshot, &result2)
-		if err != nil {
-			logging.RuntimeLog.Error(err)
-			return FailedTask(err.Error()), err
-		} else {
-			result = strings.Join([]string{result, result2}, ",")
-		}
+		result2 := DoScreenshotAndSave(nil, &resultDomainScan)
+		result = strings.Join([]string{result, result2}, ",")
 	}
 
 	return SucceedTask(result), nil
@@ -94,32 +84,6 @@ func doDomainScan(config domainscan.Config) (resultDomainScan domainscan.Result)
 	}
 
 	return resultDomainScan
-}
-
-// doFingerPrint 对域名结果进行标题指纹识别
-func doFingerPrint(config domainscan.Config, resultDomainScan *domainscan.Result) {
-	// 指纹识别
-	fpConfig := fingerprint.Config{OrgId: config.OrgId}
-	if config.IsHttpx {
-		httpx := fingerprint.NewHttpx(fpConfig)
-		httpx.ResultDomainScan = *resultDomainScan
-		httpx.Do()
-	}
-	if config.IsWhatWeb {
-		whatweb := fingerprint.NewWhatweb(fpConfig)
-		whatweb.ResultDomainScan = *resultDomainScan
-		whatweb.Do()
-	}
-	if config.IsWappalyzer {
-		wappalyzer := fingerprint.NewWappalyzer()
-		wappalyzer.ResultDomainScan = *resultDomainScan
-		wappalyzer.Do()
-	}
-	if config.IsFingerprintHub {
-		fp := fingerprint.NewFingerprintHub(fpConfig)
-		fp.ResultDomainScan = *resultDomainScan
-		fp.Do()
-	}
 }
 
 // doPortScan 对IP进行端口扫描

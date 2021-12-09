@@ -14,6 +14,42 @@ $(function () {
         $('#text_target').val(checkIP.join("\n"));
         $('#newTask').modal('toggle');
     });
+    //导入本地扫描结果窗口
+    $("#import_portscan").click(function () {
+        $('#importPortscan').modal('toggle');
+    });
+    $("#start_import").click(function () {
+        var formData = new FormData();
+        formData.append('file', $('#file')[0].files[0]);
+        formData.append('bin', $('#select_portscan_bin').val());
+        formData.append("org_id", $('#select_import_org_id_task').val());
+        $.ajax({
+            url: '/ip-import-portscan',
+            type: 'POST',
+            cache: false,
+            data: formData,
+            processData: false,
+            contentType: false
+        }).done(function (res) {
+            if (res['status'] == "success") {
+                swal({
+                        title: "导入成功！",
+                        text: res['msg'],
+                        type: "success",
+                        confirmButtonText: "确定",
+                        confirmButtonColor: "#41b883",
+                        closeOnConfirm: true,
+                    },
+                    function () {
+                        $('#importPortscan').modal('hide');
+                    });
+            } else {
+                swal('Warning', '导入失败！' + res['msg'], 'error');
+            }
+        }).fail(function (res) {
+            swal('Warning', '导入失败！' + res['msg'], 'error');
+        });
+    })
     //执行新建任务Button
     $("#start_task").click(function () {
         const target = $('#text_target').val();

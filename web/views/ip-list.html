@@ -46,6 +46,8 @@
                                             class="fa fa-fw fa-lg fa-flag"></i>备忘录信息</a>
                                     <a class="dropdown-item" href="#" id="batch_delete"><i
                                             class="fa fa-fw fa-lg fa-remove"></i>删除</a>
+                                    <a class="dropdown-item" href="#" id="import_portscan"><i
+                                            class="fa fa-fw fa-lg fa-upload"></i>导入本地扫描</a>
                                 </div>
                             </div>
                             <button class="btn btn-secondary" type="button" data-toggle="collapse"
@@ -175,7 +177,8 @@
                                                                             href="#vulverify" title="对目标进行漏洞验证"><strong>漏洞验证</strong></a>
                                                     </li>
                                                     <li class="nav-item"><a class="nav-link" data-toggle="tab"
-                                                                            href="#batchscan" title="对目标先通过少量端口扫描，对存活IP的C段进行端口扫描"><strong>探测+扫描</strong></a>
+                                                                            href="#batchscan"
+                                                                            title="对目标先通过少量端口扫描，对存活IP的C段进行端口扫描"><strong>探测+扫描</strong></a>
                                                     </li>
                                                 </ul>
                                                 <div class="tab-content" id="myTabContent">
@@ -219,7 +222,10 @@
                                                                        values="">
                                                                 <div class="form-row">
                                                                     <div class="form-group col-md-4">
-                                                                        <label for="select_bin">扫描方法<i class="fa fa-question-circle" aria-hidden="true" title="端口扫描的方式：masscan、nmap及masscan+nmap（先通过masscan快速扫描开放端口，再对开放端口调用nmap的-sV进行端口扫描的方式）"></i></label>
+                                                                        <label for="select_bin">扫描方法<i
+                                                                                class="fa fa-question-circle"
+                                                                                aria-hidden="true"
+                                                                                title="端口扫描的方式：masscan、nmap及masscan+nmap（先通过masscan快速扫描开放端口，再对开放端口调用nmap的-sV进行端口扫描的方式）"></i></label>
                                                                         <select class="form-control" id="select_bin">
                                                                             <option value="nmap">nmap</option>
                                                                             <option value="masscan" selected="selected">
@@ -230,7 +236,10 @@
                                                                         </select>
                                                                     </div>
                                                                     <div class="form-group col-md-4">
-                                                                        <label for="select_tech">探测技术<i class="fa fa-question-circle" aria-hidden="true" title="使用nmap时的选项，masscan只使用SYN扫描"></i></label>
+                                                                        <label for="select_tech">探测技术<i
+                                                                                class="fa fa-question-circle"
+                                                                                aria-hidden="true"
+                                                                                title="使用nmap时的选项，masscan只使用SYN扫描"></i></label>
                                                                         <select class="form-control" id="select_tech">
                                                                             <option value="-sS" selected>-sS（默认）
                                                                             </option>
@@ -239,7 +248,10 @@
                                                                         </select>
                                                                     </div>
                                                                     <div class="form-group col-md-4">
-                                                                        <label for="input_rate">扫描速度<i class="fa fa-question-circle" aria-hidden="true" title="Send packets per second&#10;对应--min-rate(nmap)与--rate(masscan)参数"></i></label>
+                                                                        <label for="input_rate">扫描速度<i
+                                                                                class="fa fa-question-circle"
+                                                                                aria-hidden="true"
+                                                                                title="Send packets per second&#10;对应--min-rate(nmap)与--rate(masscan)参数"></i></label>
                                                                         <input class="form-control" id="input_rate"
                                                                                type="text" placeholder="1000（默认）"
                                                                                value="">
@@ -250,7 +262,10 @@
                                                                            for="checkbox_httpx">
                                                                         <input class="form-check-input"
                                                                                id="checkbox_httpx" type="checkbox"
-                                                                               checked>HTTPX指纹<i class="fa fa-question-circle" aria-hidden="true" title="通过内置的HTTPX模块，获取端口的HTTP/HTTPS信息"></i>
+                                                                               checked>HTTPX指纹<i
+                                                                            class="fa fa-question-circle"
+                                                                            aria-hidden="true"
+                                                                            title="通过内置的HTTPX模块，获取端口的HTTP/HTTPS信息"></i>
                                                                     </label>
                                                                 </div>
                                                                 <div class="form-check form-check-inline">
@@ -258,15 +273,21 @@
                                                                            for="checkbox_wappalyzer">
                                                                         <input class="form-check-input"
                                                                                id="checkbox_wappalyzer" type="checkbox"
-                                                                        >Wappalyzer<i class="fa fa-question-circle" aria-hidden="true" title="通过内置的Wappalyzer模块，获取网站的指纹信息；&#10;指纹信息来源于默认的technologies.json和自定义的technologies_custom.json；&#10;指纹的规则和信息参见：https://www.wappalyzer.com"></i>
+                                                                        >Wappalyzer<i class="fa fa-question-circle"
+                                                                                      aria-hidden="true"
+                                                                                      title="通过内置的Wappalyzer模块，获取网站的指纹信息；&#10;指纹信息来源于默认的technologies.json和自定义的technologies_custom.json；&#10;指纹的规则和信息参见：https://www.wappalyzer.com"></i>
                                                                     </label>
                                                                 </div>
                                                                 <div class="form-check form-check-inline">
                                                                     <label class="form-check-label"
                                                                            for="checkbox_fingerprinthub">
                                                                         <input class="form-check-input"
-                                                                               id="checkbox_fingerprinthub" type="checkbox"
-                                                                               checked>FingerprintHub<i class="fa fa-question-circle" aria-hidden="true" title="调用ObserverWard，获取应用系统的指纹信息；&#10;ObserverWard(https://github.com/0x727/ObserverWard_0x727)是一个基于社区的指纹识别工具；&#10;指纹信息来源于https://github.com/0x727/FingerprintHub"></i>
+                                                                               id="checkbox_fingerprinthub"
+                                                                               type="checkbox"
+                                                                               checked>FingerprintHub<i
+                                                                            class="fa fa-question-circle"
+                                                                            aria-hidden="true"
+                                                                            title="调用ObserverWard，获取应用系统的指纹信息；&#10;ObserverWard(https://github.com/0x727/ObserverWard_0x727)是一个基于社区的指纹识别工具；&#10;指纹信息来源于https://github.com/0x727/FingerprintHub"></i>
                                                                     </label>
                                                                 </div>
                                                                 <div class="form-check form-check-inline">
@@ -275,13 +296,18 @@
                                                                         <input class="form-check-input"
                                                                                id="checkbox_screenshot" type="checkbox"
                                                                                checked
-                                                                        >ScreenShot<i class="fa fa-question-circle" aria-hidden="true" title="通过调用chrome headless浏览器，获取网站的首页截图"></i>
+                                                                        >ScreenShot<i class="fa fa-question-circle"
+                                                                                      aria-hidden="true"
+                                                                                      title="通过调用chrome headless浏览器，获取网站的首页截图"></i>
                                                                     </label>
                                                                 </div>
                                                                 <div class="form-check form-check-inline">
                                                                     <label class="form-check-label" for="checkbox_ping">
                                                                         <input class="form-check-input"
-                                                                               id="checkbox_ping" type="checkbox">PING<i class="fa fa-question-circle" aria-hidden="true" title="使用nmap时默认-Pn，该选项取消该参数"></i>
+                                                                               id="checkbox_ping" type="checkbox">PING<i
+                                                                            class="fa fa-question-circle"
+                                                                            aria-hidden="true"
+                                                                            title="使用nmap时默认-Pn，该选项取消该参数"></i>
                                                                     </label>
                                                                 </div>
                                                             </div>
@@ -301,14 +327,18 @@
                                                                      for="checkbox_fofasearch">
                                                                     <label class="form-check-label">
                                                                         <input class="form-check-input"
-                                                                               id="checkbox_fofasearch" type="checkbox"><b>Fofa</b><i class="fa fa-info-circle" aria-hidden="true" title="调用FOFA API接口查询，需在worker.yml中配置KEY"></i>
+                                                                               id="checkbox_fofasearch" type="checkbox"><b>Fofa</b><i
+                                                                            class="fa fa-info-circle" aria-hidden="true"
+                                                                            title="调用FOFA API接口查询，需在worker.yml中配置KEY"></i>
                                                                     </label>
                                                                 </div>
                                                             </div>
                                                         </div>
                                                         <div class="form-group row bg-light ">
                                                             <div class="col-md-12 ">
-                                                                <label for="select_taskmode"><b>任务模式</b><i class="fa fa-info-circle" aria-hidden="true" title="任务执行模式&#10;默认为所有目标为一个单独任务；可将任务按目标的行、IP数、端口数进行切分为多个任务，均衡分配到多个worker上并发执行；&#10;每个任务的IP和端口切分的数量在系统设置-配置管理中定义。"></i></label>
+                                                                <label for="select_taskmode"><b>任务模式</b><i
+                                                                        class="fa fa-info-circle" aria-hidden="true"
+                                                                        title="任务执行模式&#10;默认为所有目标为一个单独任务；可将任务按目标的行、IP数、端口数进行切分为多个任务，均衡分配到多个worker上并发执行；&#10;每个任务的IP和端口切分的数量在系统设置-配置管理中定义。"></i></label>
                                                                 <select class="form-control" id="select_taskmode">
                                                                     <option value="0" selected>单任务（默认）</option>
                                                                     <option value="1">每一行目标单独任务</option>
@@ -408,7 +438,10 @@
                                                                        values="">
                                                                 <div class="form-row">
                                                                     <div class="form-group col-md-4">
-                                                                        <label for="select_batchscan_bin">扫描方法<i class="fa fa-question-circle" aria-hidden="true" title="端口扫描的方式：masscan、nmap"></i></label>
+                                                                        <label for="select_batchscan_bin">扫描方法<i
+                                                                                class="fa fa-question-circle"
+                                                                                aria-hidden="true"
+                                                                                title="端口扫描的方式：masscan、nmap"></i></label>
                                                                         <select class="form-control"
                                                                                 id="select_batchscan_bin">
                                                                             <option value="nmap">nmap</option>
@@ -418,7 +451,10 @@
                                                                         </select>
                                                                     </div>
                                                                     <div class="form-group col-md-4">
-                                                                        <label for="select_batchscan_tech">探测技术<i class="fa fa-question-circle" aria-hidden="true" title="使用nmap时的选项，masscan只使用SYN扫描"></i></label>
+                                                                        <label for="select_batchscan_tech">探测技术<i
+                                                                                class="fa fa-question-circle"
+                                                                                aria-hidden="true"
+                                                                                title="使用nmap时的选项，masscan只使用SYN扫描"></i></label>
                                                                         <select class="form-control"
                                                                                 id="select_batchscan_tech">
                                                                             <option value="-sS" selected>-sS（默认）
@@ -428,7 +464,10 @@
                                                                         </select>
                                                                     </div>
                                                                     <div class="form-group col-md-4">
-                                                                        <label for="input_batchscan_rate">扫描速度<i class="fa fa-question-circle" aria-hidden="true" title="Send packets per second&#10;对应--min-rate(nmap)与--rate(masscan)参数"></i></label>
+                                                                        <label for="input_batchscan_rate">扫描速度<i
+                                                                                class="fa fa-question-circle"
+                                                                                aria-hidden="true"
+                                                                                title="Send packets per second&#10;对应--min-rate(nmap)与--rate(masscan)参数"></i></label>
                                                                         <input class="form-control"
                                                                                id="input_batchscan_rate"
                                                                                type="text" placeholder="1000（默认）"
@@ -441,15 +480,22 @@
                                                                         <input class="form-check-input"
                                                                                id="checkbox_batchscan_httpx"
                                                                                type="checkbox"
-                                                                               checked>HTTPX指纹<i class="fa fa-question-circle" aria-hidden="true" title="通过内置的HTTPX模块，获取端口的HTTP/HTTPS信息"></i>
+                                                                               checked>HTTPX指纹<i
+                                                                            class="fa fa-question-circle"
+                                                                            aria-hidden="true"
+                                                                            title="通过内置的HTTPX模块，获取端口的HTTP/HTTPS信息"></i>
                                                                     </label>
                                                                 </div>
                                                                 <div class="form-check form-check-inline">
                                                                     <label class="form-check-label"
                                                                            for="checkbox_batchscan_fingerprinthub">
                                                                         <input class="form-check-input"
-                                                                               id="checkbox_batchscan_fingerprinthub" type="checkbox"
-                                                                               checked>FingerprintHub<i class="fa fa-question-circle" aria-hidden="true" title="调用ObserverWard，获取应用系统的指纹信息；&#10;ObserverWard(https://github.com/0x727/ObserverWard_0x727)是一个基于社区的指纹识别工具；&#10;指纹信息来源于https://github.com/0x727/FingerprintHub"></i>
+                                                                               id="checkbox_batchscan_fingerprinthub"
+                                                                               type="checkbox"
+                                                                               checked>FingerprintHub<i
+                                                                            class="fa fa-question-circle"
+                                                                            aria-hidden="true"
+                                                                            title="调用ObserverWard，获取应用系统的指纹信息；&#10;ObserverWard(https://github.com/0x727/ObserverWard_0x727)是一个基于社区的指纹识别工具；&#10;指纹信息来源于https://github.com/0x727/FingerprintHub"></i>
                                                                     </label>
                                                                 </div>
                                                                 <div class="form-check form-check-inline">
@@ -459,7 +505,9 @@
                                                                                id="checkbox_batchscan_screenshot"
                                                                                type="checkbox"
                                                                                checked
-                                                                        >ScreenShot<i class="fa fa-question-circle" aria-hidden="true" title="通过调用chrome headless浏览器，获取网站的首页截图"></i>
+                                                                        >ScreenShot<i class="fa fa-question-circle"
+                                                                                      aria-hidden="true"
+                                                                                      title="通过调用chrome headless浏览器，获取网站的首页截图"></i>
                                                                     </label>
                                                                 </div>
                                                                 <div class="form-check form-check-inline">
@@ -467,14 +515,19 @@
                                                                            for="checkbox_batchscan_ping">
                                                                         <input class="form-check-input"
                                                                                id="checkbox_batchscan_ping"
-                                                                               type="checkbox">PING<i class="fa fa-question-circle" aria-hidden="true" title="使用nmap时默认-Pn，该选项取消该参数"></i>
+                                                                               type="checkbox">PING<i
+                                                                            class="fa fa-question-circle"
+                                                                            aria-hidden="true"
+                                                                            title="使用nmap时默认-Pn，该选项取消该参数"></i>
                                                                     </label>
                                                                 </div>
                                                             </div>
                                                         </div>
                                                         <div class="form-group row bg-light ">
                                                             <div class="col-md-12 ">
-                                                                <label for="select_batchscan_taskmode"><b>任务模式</b><i class="fa fa-info-circle" aria-hidden="true" title="任务执行模式&#10;默认为所有目标为一个单独任务；可将任务按目标的行和IP切分为多个任务，均衡分配到多个worker上并发执行；&#10;每个任务的IP和端口切分的数量在系统设置-配置管理中定义。"></i></label>
+                                                                <label for="select_batchscan_taskmode"><b>任务模式</b><i
+                                                                        class="fa fa-info-circle" aria-hidden="true"
+                                                                        title="任务执行模式&#10;默认为所有目标为一个单独任务；可将任务按目标的行和IP切分为多个任务，均衡分配到多个worker上并发执行；&#10;每个任务的IP和端口切分的数量在系统设置-配置管理中定义。"></i></label>
                                                                 <select class="form-control"
                                                                         id="select_batchscan_taskmode">
                                                                     <option value="0" selected>单任务（默认）</option>
@@ -499,6 +552,48 @@
                                     </button>
                                     <button class="btn btn-primary org-update" type="button" id="start_task">
                                         开始任务
+                                    </button>
+                                </div>
+                            </div><!-- /.modal-content -->
+                        </div><!-- /.modal-dialog -->
+                    </div> <!-- table responsive-->
+                    <!-- 模态对话框：导入扫描结果-->
+                    <div class="modal fade" id="importPortscan" tabindex="-1" role="dialog"
+                         aria-labelledby="myModalLabel"
+                         aria-hidden="true">
+                        <div class="modal-dialog">
+                            <div class="modal-content">
+                                <div class="modal-header card-header bg-primary">
+                                    <h4 class="modal-title">
+                                        导入本地扫描结果
+                                    </h4>
+                                </div>
+                                <div class="modal-body ">
+                                    <form class="form-horizontal" role="form">
+                                        <div class="form-group">
+                                            <label for="select_bin">扫描使用方法<i class="fa fa-question-circle"
+                                                                             aria-hidden="true"
+                                                                             title="导入namp、masscan扫描输出的-oX格式的XML结果"></i></label>
+                                            <select class="form-control" id="select_portscan_bin">
+                                                <option value="nmap" selected>nmap</option>
+                                                <option value="masscan">masscan</option>
+                                                </option>
+                                            </select>
+                                            <label for="select_import_org_id_task"><b>资产归属组织</b></label>
+                                            <select class="form-control"
+                                                    id="select_import_org_id_task">
+                                            </select>
+                                            <p></p>
+                                            <input id="file" type="file"/>
+                                        </div>
+                                    </form>
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-secondary" data-dismiss="modal"
+                                            aria-hidden="true">取消
+                                    </button>
+                                    <button class="btn btn-primary org-update" type="button" id="start_import">
+                                        导入
                                     </button>
                                 </div>
                             </div><!-- /.modal-content -->

@@ -56,7 +56,7 @@ func (nmap *Nmap) Do() {
 		return
 	}
 	nmap.parseResult(resultTempFile)
-	filterIPHasTooMuchPort(nmap.Result)
+	FilterIPHasTooMuchPort(nmap.Result)
 }
 
 // parseResult 解析nmap结果
@@ -124,6 +124,11 @@ func (nmap *Nmap) ParseXMLResult(outputTempFile string) {
 	if err != nil {
 		return
 	}
+	nmap.ParseXMLContentResult(content)
+}
+
+// ParseXMLContentResult 解析nmap的XML文件
+func (nmap *Nmap) ParseXMLContentResult(content []byte) {
 	nmapRunner, err := gonmap.Parse(content)
 	if err != nil {
 		return
@@ -131,6 +136,7 @@ func (nmap *Nmap) ParseXMLResult(outputTempFile string) {
 	if nmap.Result.IPResult == nil {
 		nmap.Result.IPResult = make(map[string]*IPResult)
 	}
+	s := custom.NewService()
 	for _, host := range nmapRunner.Hosts {
 		if len(host.Ports) == 0 || len(host.Addresses) == 0 {
 			continue
@@ -153,13 +159,17 @@ func (nmap *Nmap) ParseXMLResult(outputTempFile string) {
 				if !nmap.Result.HasPort(ip, port.PortId) {
 					nmap.Result.SetPort(ip, port.PortId)
 				}
+				service := port.Service.Name
+				if service == "" {
+					service = s.FindService(port.PortId, ip)
+				}
 				nmap.Result.SetPortAttr(ip, port.PortId, PortAttrResult{
 					Source:  "portscan",
 					Tag:     "service",
-					Content: port.Service.Name,
+					Content: service,
 				})
 				banner := strings.Join([]string{port.Service.Product, port.Service.Version}, " ")
-				if strings.TrimSpace(banner)!="" {
+				if strings.TrimSpace(banner) != "" {
 					nmap.Result.SetPortAttr(ip, port.PortId, PortAttrResult{
 						Source:  "portscan",
 						Tag:     "banner",

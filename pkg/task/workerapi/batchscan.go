@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"github.com/hanc00l/nemo_go/pkg/comm"
 	"github.com/hanc00l/nemo_go/pkg/logging"
-	"github.com/hanc00l/nemo_go/pkg/task/fingerprint"
 	"github.com/hanc00l/nemo_go/pkg/task/portscan"
 	"strings"
 )
@@ -59,21 +58,12 @@ func BatchScan(taskId, configJSON string) (result string, err error) {
 			doLocation(&resultPortScan)
 		}
 		// 指纹识别
-		fpConfig := fingerprint.Config{OrgId: config.OrgId}
-		if config.IsHttpx {
-			httpx := fingerprint.NewHttpx(fpConfig)
-			httpx.ResultPortScan = resultPortScan
-			httpx.Do()
-		}
-		if config.IsFingerprintHub {
-			fp := fingerprint.NewFingerprintHub(fpConfig)
-			fp.ResultPortScan = resultPortScan
-			fp.Do()
-		}
+		DoIPFingerPrint(config, &resultPortScan)
 	}
 	// 保存结果
 	x := comm.NewXClient()
 	resultArgs := comm.ScanResultArgs{
+		TaskID:   taskId,
 		IPConfig: &config,
 		IPResult: resultPortScan.IPResult,
 	}
@@ -83,18 +73,8 @@ func BatchScan(taskId, configJSON string) (result string, err error) {
 		return FailedTask(err.Error()), err
 	}
 	if config.IsScreenshot {
-		ss := fingerprint.NewScreenShot()
-		ss.ResultPortScan = resultPortScan
-		ss.Do()
-		resultScreenshot := ss.LoadResult()
-		var result2 string
-		err = x.Call(context.Background(), "SaveScreenshotResult", &resultScreenshot, &result2)
-		if err != nil {
-			logging.RuntimeLog.Error(err)
-			return FailedTask(err.Error()), err
-		} else {
-			result = strings.Join([]string{result, result2}, ",")
-		}
+		result2 := DoScreenshotAndSave(&resultPortScan, nil)
+		result = strings.Join([]string{result, result2}, ",")
 	}
 
 	return SucceedTask(result), nil

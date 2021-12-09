@@ -13,9 +13,14 @@ import (
 )
 
 type FofaConfig struct {
-	Target       string `json:"target"`
-	OrgId        *int   `json:"orgId"`
-	IsIPLocation bool   `json:"ipLocation"`
+	Target           string `json:"target"`
+	OrgId            *int   `json:"orgId"`
+	IsIPLocation     bool   `json:"ipLocation"`
+	IsHttpx          bool   `json:"httpx"`
+	IsWhatWeb        bool   `json:"whatweb"`
+	IsScreenshot     bool   `json:"screenshot"`
+	IsWappalyzer     bool   `json:"wappalyzer"`
+	IsFingerprintHub bool   `json:"fingerprinthub"`
 }
 
 type ICPQueryConfig struct {

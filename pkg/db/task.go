@@ -44,6 +44,17 @@ func (t *Task) Add() (success bool) {
 	}
 }
 
+// Get 根据ID查询记录
+func (t *Task) Get() (success bool) {
+	db := GetDB()
+	defer CloseDB(db)
+
+	if result := db.First(t,t.Id); result.RowsAffected > 0 {
+		return true
+	} else {
+		return false
+	}
+}
 //GetByTaskId 根据TaskID（不是数据库ID）精确查询一条记录
 func (t *Task) GetByTaskId() (success bool) {
 	db := GetDB()

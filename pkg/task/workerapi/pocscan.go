@@ -34,8 +34,11 @@ func PocScan(taskId, configJSON string) (result string, err error) {
 	}
 	// 保存结果
 	x := comm.NewXClient()
-
-	err = x.Call(context.Background(), "SaveVulnerabilityResult", &scanResult, &result)
+	resultArgs := comm.ScanResultArgs{
+		TaskID: taskId,
+		VulnerabilityResult: scanResult,
+	}
+	err = x.Call(context.Background(), "SaveVulnerabilityResult", &resultArgs, &result)
 	if err != nil {
 		logging.RuntimeLog.Error(err)
 		return FailedTask(err.Error()), err

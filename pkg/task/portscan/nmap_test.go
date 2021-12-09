@@ -29,7 +29,7 @@ func TestNmap_Run(t *testing.T) {
 
 func TestNmap_ParseXMLResult(t *testing.T) {
 	nmap := NewNmap(Config{})
-	nmap.ParseXMLResult("/Users/user/Downloads/nmap.json")
+	nmap.ParseXMLResult("/Users/user/Downloads/nmap2.xml")
 	for ip,ipa := range nmap.Result.IPResult{
 		t.Log(ip,ipa)
 		for port,pa := range ipa.Ports{

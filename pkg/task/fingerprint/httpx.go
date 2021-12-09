@@ -15,7 +15,7 @@ import (
 )
 
 type Httpx struct {
-	Config           Config
+	//Config           Config
 	ResultPortScan   portscan.Result
 	ResultDomainScan domainscan.Result
 }
@@ -42,8 +42,8 @@ type TLS struct {
 }
 
 // NewHttpx 创建httpx对象
-func NewHttpx(config Config) *Httpx {
-	return &Httpx{Config: config}
+func NewHttpx() *Httpx {
+	return &Httpx{}
 }
 
 // Do 执行httpx

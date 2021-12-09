@@ -14,6 +14,7 @@ Nemo是用来进行自动化信息收集的一个简单平台，通过集成常�
 - Masscan、Nmap端口扫描
 - IP归属地（纯真离线数据）
 - 自定义IP归属地、Service、蜜罐
+- 导入本地的Masscan、Nmap端口扫描结果
 
 ### 2、域名资产
 
@@ -101,6 +102,7 @@ Tested on [ubuntu18.04/20.04 LTS](docs/install_linux.md)、[macOS](docs/install_
 
 ## 版本更新
 
+- 2.4.7：2021-12-9，增加导入本地扫描结果功能（支持nmap/masscan的XML文件），增加保存并查看任务执行结果的JSON格式的文件；优化FOFA查询后获取IP与域名的Web指纹信息；更新Xray版本为1.8.2；
 - 2.4.6：2021-12-8，更新指纹识别\"侦查守卫\"的JSON结果的解析；
 - 2.4.5：2021-12-7，增加调用ObserverWard获取应用系统的指纹信息，指纹信息来源于 [FingerprintHub](https://github.com/0x727/FingerprintHub)；
 - 2.4.4：2021-10-18，对新建任务增加部份提示信息，便于掌握任务执行的参数；状态信息可手动刷新和查看正在执行的任务；

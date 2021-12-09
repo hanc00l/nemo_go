@@ -13,7 +13,7 @@ func TestHttpx_Run(t *testing.T) {
 	subdomain.Do()
 	t.Log(subdomain.Result)
 
-	httpx := NewHttpx(Config{})
+	httpx := NewHttpx()
 	httpx.ResultDomainScan = subdomain.Result
 	httpx.Do()
 	t.Log(httpx.ResultDomainScan)
@@ -43,7 +43,7 @@ func TestHttpx_Run2(t *testing.T) {
 		}
 	}
 
-	httpx:= NewHttpx(Config{})
+	httpx:= NewHttpx()
 	httpx.ResultPortScan = nmap.Result
 	httpx.Do()
 	t.Log(httpx.ResultPortScan)

@@ -6,7 +6,7 @@ import (
 )
 
 func TestFingerprintHub_RunObserverWard(t *testing.T) {
-	f := NewFingerprintHub(Config{})
+	f := NewFingerprintHub()
 	rs := f.RunObserverWard("360.wintopgroup.com.cn")
 	for _,fp := range rs{
 		t.Log(fp)
@@ -29,7 +29,7 @@ func  TestFingerprintHub_Do(t *testing.T) {
 	nmap.Do()
 	t.Log(nmap.Result)
 
-	fp :=  NewFingerprintHub(Config{})
+	fp :=  NewFingerprintHub()
 	fp.ResultPortScan = nmap.Result
 	fp.Do()
 	for _,r := range fp.ResultPortScan.IPResult{

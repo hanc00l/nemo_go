@@ -139,8 +139,8 @@ func (r *Result) SaveResult(config Config) string {
 	return fmt.Sprintf("ip:%d,port:%d", resultIPCount, resultPortCount)
 }
 
-// filterIPHasTooMuchPort 过滤有安全防护、显示太多端口开放的IP
-func filterIPHasTooMuchPort(result Result) {
+// FilterIPHasTooMuchPort 过滤有安全防护、显示太多端口开放的IP
+func FilterIPHasTooMuchPort(result Result) {
 	for ipName, ipResult := range result.IPResult {
 		if len(ipResult.Ports) > IpOpenedPortFilterNumber {
 			logging.RuntimeLog.Infof("ip:%s has too much open port:%d,discard to save!", ipName, len(ipResult.Ports))

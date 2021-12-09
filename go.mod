@@ -48,6 +48,7 @@ require (
 	github.com/smallnest/quick v0.0.0-20210406061658-4bf95e372fbd // indirect
 	github.com/smallnest/rpcx v1.6.11
 	github.com/soheilhy/cmux v0.1.5 // indirect
+	github.com/tidwall/pretty v1.2.0 // indirect
 	github.com/tjfoc/gmsm v1.4.1 // indirect
 	github.com/valyala/fastrand v1.0.0 // indirect
 	go.opencensus.io v0.23.0 // indirect

@@ -43,6 +43,10 @@
                         <b><span class="btn btn-info">任务结果</span></b>
                         <span class="btn border-secondary text-left">
                             {{ .task_info.Result }}</span>
+                        {{ if .task_info.ResultFile }}
+                        <span class="btn border-secondary text-left">
+                            <a href="{{ .task_info.ResultFile }}">View JSON Result</a></span>
+                        {{ end }}
                         <br><br>
                         {{ end }}
                         {{ if .task_info.SucceededTime }}

@@ -16,7 +16,6 @@ import (
 )
 
 type FingerprintHub struct {
-	Config           Config
 	ResultPortScan   portscan.Result
 	ResultDomainScan domainscan.Result
 }
@@ -32,8 +31,8 @@ type FingerprintHubReult struct {
 }
 
 // NNewFingerprintHub 创建FingerprintHub对象
-func NewFingerprintHub(config Config) *FingerprintHub {
-	return &FingerprintHub{Config: config}
+func NewFingerprintHub() *FingerprintHub {
+	return &FingerprintHub{}
 }
 
 // Do 调用ObserverWard，获取指纹

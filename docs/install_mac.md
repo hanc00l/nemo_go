@@ -72,6 +72,7 @@ web:
   username: nemo
   password: 648ce596dba3b408b523d3d1189b15070123456789abcdef
   screenshotPath: /tmp/screenshot
+  taskresultPath: /tmp/taskresult
 rpc:
   host: 0.0.0.0
   port: 5001
@@ -121,7 +122,7 @@ domainscan:
 pocscan:
   xray:
     pocPath: thirdparty/xray/xray/pocs
-    latest: 1.7.1
+    latest: 1.8.2
   pocsuite:
     pocPath: thirdparty/pocsuite/some_pocsuite
     threads: 10

@@ -19,7 +19,7 @@ const (
 
 type Config struct {
 	Target string
-	OrgId  *int
+	//OrgId  *int
 }
 
 type FingerAttrResult struct {

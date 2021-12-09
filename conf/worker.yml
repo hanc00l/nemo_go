@@ -27,7 +27,7 @@ domainscan:
 pocscan:
   xray:
     pocPath: thirdparty/xray/xray/pocs
-    latest: 1.7.1
+    latest: 1.8.2
   pocsuite:
     pocPath: thirdparty/pocsuite/some_pocsuite
     threads: 10

@@ -3,9 +3,9 @@ package fingerprint
 import (
 	"fmt"
 	"github.com/hanc00l/nemo_go/pkg/logging"
-	"github.com/hanc00l/nemo_go/pkg/utils"
 	"github.com/hanc00l/nemo_go/pkg/task/domainscan"
 	"github.com/hanc00l/nemo_go/pkg/task/portscan"
+	"github.com/hanc00l/nemo_go/pkg/utils"
 	"github.com/remeh/sizedwaitgroup"
 	"os"
 	"os/exec"
@@ -20,8 +20,8 @@ type Whatweb struct {
 }
 
 // NewWhatweb 创建whatweb对象
-func NewWhatweb(config Config) *Whatweb {
-	return &Whatweb{Config: config}
+func NewWhatweb() *Whatweb {
+	return &Whatweb{}
 }
 
 // Do 执行whatweb

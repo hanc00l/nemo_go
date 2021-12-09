@@ -14,7 +14,7 @@ func TestWhatweb_Run(t *testing.T) {
 	subdomain.Do()
 	t.Log(subdomain.Result)
 
-	whatweb := Whatweb{Config: Config{}}
+	whatweb := Whatweb{}
 	whatweb.ResultDomainScan = subdomain.Result
 	whatweb.Do()
 	t.Log(whatweb.ResultDomainScan)
@@ -34,7 +34,7 @@ func TestWhatweb_Run2(t *testing.T) {
 	nmap.Do()
 	t.Log(nmap.Result)
 
-	whatweb := NewWhatweb(Config{})
+	whatweb := NewWhatweb()
 	whatweb.ResultPortScan = nmap.Result
 	whatweb.Do()
 	t.Log(whatweb.ResultPortScan)

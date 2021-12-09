@@ -7,8 +7,10 @@ import (
 	"github.com/hanc00l/nemo_go/pkg/logging"
 	"github.com/hanc00l/nemo_go/pkg/task/custom"
 	"github.com/hanc00l/nemo_go/pkg/task/fingerprint"
+	"github.com/hanc00l/nemo_go/pkg/task/portscan"
 	"github.com/hanc00l/nemo_go/pkg/utils"
 	"net/http"
+	"path"
 	"strconv"
 	"strings"
 	"time"
@@ -328,6 +330,54 @@ func (c *IPController) MarkColorTagAction() {
 	c.MakeStatusResponse(success)
 }
 
+// ImportPortscanResultAction 导入portscan扫描结果
+func (c *IPController) ImportPortscanResultAction() {
+	defer c.ServeJSON()
+
+	file, fileHeader, err := c.GetFile("file")
+	if err != nil {
+		c.FailedStatus(err.Error())
+		return
+	}
+	// 文件后缀检查
+	ext := path.Ext(fileHeader.Filename)
+	if ext != ".json" && ext != ".xml" {
+		c.FailedStatus("只允许.json或.xml文件")
+		return
+	}
+	// 读取文件内容
+	fileContent := make([]byte, fileHeader.Size)
+	_, err = file.Read(fileContent)
+	if err != nil {
+		c.FailedStatus(err.Error())
+		return
+	}
+	// 解析并保存
+	bin := c.GetString("bin", "nmap")
+	orgId, _ := c.GetInt("org_id", 0)
+	config := portscan.Config{OrgId: &orgId}
+	// 如果不指定所属于组织，将值为nil
+	if orgId == 0 {
+		config.OrgId = nil
+	}
+	var result string
+	if bin == "nmap" {
+		nmap := portscan.NewNmap(config)
+		nmap.ParseXMLContentResult(fileContent)
+		portscan.FilterIPHasTooMuchPort(nmap.Result)
+		result = nmap.Result.SaveResult(config)
+	} else if bin == "masscan" {
+		m := portscan.NewMasscan(config)
+		m.ParseXMLContentResult(fileContent)
+		portscan.FilterIPHasTooMuchPort(m.Result)
+		result = m.Result.SaveResult(config)
+	} else {
+		c.FailedStatus("未知的扫描方法")
+		return
+	}
+	c.SucceededStatus(result)
+}
+
 //validateRequestParam 校验请求的参数
 func (c *IPController) validateRequestParam(req *ipRequestParam) {
 	if req.Length <= 0 {
@@ -477,7 +527,7 @@ func getPortInfo(ip string, ipId int, disableFofa bool) (r PortInfo) {
 				if _, ok := r.TitleSet[pad.Content]; !ok {
 					r.TitleSet[pad.Content] = struct{}{}
 				}
-			} else if pad.Tag == "banner" || pad.Tag == "server" || pad.Tag == "tag" ||  pad.Tag == "fingerprint"{
+			} else if pad.Tag == "banner" || pad.Tag == "server" || pad.Tag == "tag" || pad.Tag == "fingerprint" {
 				if pad.Content == "unknown" {
 					continue
 				}

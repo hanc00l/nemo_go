@@ -1,7 +1,9 @@
 package comm
 
 import (
+	"bytes"
 	"context"
+	"encoding/json"
 	"fmt"
 	"github.com/hanc00l/nemo_go/pkg/conf"
 	"github.com/hanc00l/nemo_go/pkg/db"
@@ -12,7 +14,11 @@ import (
 	"github.com/hanc00l/nemo_go/pkg/task/onlineapi"
 	"github.com/hanc00l/nemo_go/pkg/task/pocscan"
 	"github.com/hanc00l/nemo_go/pkg/task/portscan"
+	"github.com/hanc00l/nemo_go/pkg/utils"
 	"github.com/smallnest/rpcx/client"
+	"github.com/tidwall/pretty"
+	"os"
+	"path/filepath"
 	"strings"
 	"time"
 )
@@ -22,10 +28,12 @@ type Service struct{}
 
 // ScanResultArgs IP与域名扫描结果请求参数
 type ScanResultArgs struct {
-	IPConfig     *portscan.Config
-	DomainConfig *domainscan.Config
-	IPResult     map[string]*portscan.IPResult
-	DomainResult map[string]*domainscan.DomainResult
+	TaskID              string
+	IPConfig            *portscan.Config
+	DomainConfig        *domainscan.Config
+	IPResult            map[string]*portscan.IPResult
+	DomainResult        map[string]*domainscan.DomainResult
+	VulnerabilityResult []pocscan.Result
 }
 
 // TaskStatusArgs 任务状态请求与返回参数
@@ -63,12 +71,18 @@ func (s *Service) SaveScanResult(ctx context.Context, args *ScanResultArgs, repl
 			IPResult: args.IPResult,
 		}
 		msg = append(msg, r.SaveResult(*args.IPConfig))
+		if len(args.IPResult) > 0 {
+			saveTaskResult(args.TaskID, args.IPResult)
+		}
 	}
 	if args.DomainConfig != nil && args.DomainResult != nil {
 		r := domainscan.Result{
 			DomainResult: args.DomainResult,
 		}
 		msg = append(msg, r.SaveResult(*args.DomainConfig))
+		if len(args.DomainResult) > 0 {
+			saveTaskResult(args.TaskID, args.DomainResult)
+		}
 	}
 
 	*replay = strings.Join(msg, ",")
@@ -83,8 +97,11 @@ func (s *Service) SaveScreenshotResult(ctx context.Context, args *[]fingerprint.
 }
 
 // SaveVulnerabilityResult 保存漏洞结果
-func (s *Service) SaveVulnerabilityResult(ctx context.Context, args *[]pocscan.Result, replay *string) error {
-	*replay = pocscan.SaveResult(*args)
+func (s *Service) SaveVulnerabilityResult(ctx context.Context, args *ScanResultArgs, replay *string) error {
+	*replay = pocscan.SaveResult(args.VulnerabilityResult)
+	if len(args.VulnerabilityResult) > 0 {
+		saveTaskResult(args.TaskID, args.VulnerabilityResult)
+	}
 	return nil
 }
 
@@ -175,4 +192,44 @@ func (s *Service) KeepAlive(ctx context.Context, args *KeepAliveInfo, replay *ma
 
 	*replay = newKeepAliveResponseInfo(args.CustomFiles)
 	return nil
+}
+
+// saveTaskResult 将任务结果保存到本地文件
+func saveTaskResult(taskID string, result interface{}) {
+	if taskID == "" {
+		logging.RuntimeLog.Error("任务ID为空！")
+		return
+	}
+	//检查保存结果的路径
+	resultPath := conf.GlobalServerConfig().Web.TaskResultPath
+	if resultPath == "" {
+		return
+	}
+	if !utils.MakePath(resultPath) {
+		logging.RuntimeLog.Error("创建任务保存结果的目录失败！")
+		return
+	}
+	content, err := json.Marshal(result)
+	if err != nil {
+		logging.RuntimeLog.Error(err)
+		return
+	}
+	fileName := filepath.Join(resultPath, fmt.Sprintf("%s.json", taskID))
+	//读原来的任务保存结果
+	//主要是针对FOFA这种有IP同时也有Domain结果，防止覆盖
+	oldContent, err := os.ReadFile(fileName)
+	if err == nil {
+		var buff bytes.Buffer
+		buff.Write([]byte("["))
+		buff.Write(oldContent)
+		buff.Write([]byte(",\n"))
+		buff.Write(pretty.Pretty(content))
+		buff.Write([]byte("]"))
+		err = os.WriteFile(fileName, buff.Bytes(), 0666)
+	} else {
+		err = os.WriteFile(fileName, pretty.Pretty(content), 0666)
+	}
+	if err != nil {
+		logging.RuntimeLog.Error(err)
+	}
 }

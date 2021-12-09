@@ -14,6 +14,8 @@ import (
 	"github.com/hanc00l/nemo_go/pkg/task/portscan"
 	"github.com/hanc00l/nemo_go/pkg/task/serverapi"
 	"github.com/hanc00l/nemo_go/pkg/utils"
+	"os"
+	"path"
 	"strings"
 	"time"
 )
@@ -42,6 +44,7 @@ type TaskListData struct {
 	ReceivedTime string `json:"received"`
 	StartedTime  string `json:"started"`
 	Runtime      string `json:"runtime"`
+	ResultFile   string `json:"resultfile"`
 }
 
 type TaskInfo struct {
@@ -61,6 +64,7 @@ type TaskInfo struct {
 	Runtime       string
 	CreateTime    string
 	UpdateTime    string
+	ResultFile    string
 }
 
 type portscanRequestParam struct {
@@ -155,6 +159,11 @@ func (c *TaskController) DeleteAction() {
 		c.FailedStatus(err.Error())
 	} else {
 		task := db.Task{Id: id}
+		resultPath := conf.GlobalServerConfig().Web.TaskResultPath
+		if resultPath != "" && task.Get() {
+			filePath := path.Join(resultPath, fmt.Sprintf("%s.json", task.TaskId))
+			os.Remove(filePath)
+		}
 		c.MakeStatusResponse(task.Delete())
 	}
 }
@@ -217,7 +226,7 @@ func (c *TaskController) StartPortScanTaskAction() {
 			}
 			// FOFA
 			if req.IsFofa {
-				if taskId, err = c.doFofa(t, &req.OrgId, req.IsIPLocation); err != nil {
+				if taskId, err = c.doFofa(t, &req.OrgId, req.IsIPLocation, req.IsHttpx, req.IsWappalyzer, req.IsFingerprintHub, req.IsScreenshot); err != nil {
 					c.FailedStatus(err.Error())
 					return
 				}
@@ -326,7 +335,7 @@ func (c *TaskController) StartDomainScanTaskAction() {
 			}
 		}
 		if req.IsFofa {
-			if taskId, err = c.doFofa(t, &req.OrgId, true); err != nil {
+			if taskId, err = c.doFofa(t, &req.OrgId, true, req.IsHttpx, req.IsWappalyzer, req.IsFingerprintHub, req.IsScreenshot); err != nil {
 				c.FailedStatus(err.Error())
 				return
 			}
@@ -518,8 +527,16 @@ func (c *TaskController) doBatchScan(target string, port string, req portscanReq
 }
 
 // doFofa FOFA搜索
-func (c *TaskController) doFofa(target string, orgId *int, iplocation bool) (taskId string, err error) {
-	config := onlineapi.FofaConfig{Target: target, OrgId: orgId, IsIPLocation: iplocation}
+func (c *TaskController) doFofa(target string, orgId *int, isIplocation, isHttp, isWappalyzer, isFingerprintHub, isScreenshot bool) (taskId string, err error) {
+	config := onlineapi.FofaConfig{
+		Target:           target,
+		OrgId:            orgId,
+		IsIPLocation:     isIplocation,
+		IsHttpx:          isHttp,
+		IsWappalyzer:     isWappalyzer,
+		IsFingerprintHub: isFingerprintHub,
+		IsScreenshot:     isScreenshot,
+	}
 	// config.OrgId 为int，默认为0
 	// db.Organization.OrgId为指针，默认nil
 	if *config.OrgId == 0 {
@@ -532,7 +549,7 @@ func (c *TaskController) doFofa(target string, orgId *int, iplocation bool) (tas
 	}
 	taskId, err = serverapi.NewTask("fofa", string(configJSON))
 	if err != nil {
-		logging.RuntimeLog.Errorf("start iplocation fail:%s", err.Error())
+		logging.RuntimeLog.Errorf("start isIplocation fail:%s", err.Error())
 		return "", err
 	}
 	return taskId, nil
@@ -610,6 +627,7 @@ func (c *TaskController) getTaskListData(req taskRequestParam) (resp DataTableRe
 	searchMap := c.getSearchMap(req)
 	startPage := req.Start/req.Length + 1
 	results, total := vul.Gets(searchMap, startPage, req.Length)
+	resultPath := conf.GlobalServerConfig().Web.TaskResultPath
 	for i, taskRow := range results {
 		t := TaskListData{}
 		t.Id = taskRow.Id
@@ -627,7 +645,12 @@ func (c *TaskController) getTaskListData(req taskRequestParam) (resp DataTableRe
 			t.ReceivedTime = FormatDateTime(*taskRow.ReceivedTime)
 		}
 		t.Runtime = formatRuntime(&taskRow)
-
+		if resultPath != "" {
+			filePath := path.Join(resultPath, fmt.Sprintf("%s.json", taskRow.TaskId))
+			if utils.CheckFileExist(filePath) {
+				t.ResultFile = fmt.Sprintf("/taskresult/%s.json", taskRow.TaskId)
+			}
+		}
 		resp.Data = append(resp.Data, t)
 	}
 	resp.Draw = req.Draw
@@ -674,6 +697,13 @@ func getTaskInfo(taskId string) (r TaskInfo) {
 	r.CreateTime = FormatDateTime(task.CreateDatetime)
 	r.UpdateTime = FormatDateTime(task.UpdateDatetime)
 
+	resultPath := conf.GlobalServerConfig().Web.TaskResultPath
+	if resultPath != "" {
+		filePath := path.Join(resultPath, fmt.Sprintf("%s.json", taskId))
+		if utils.CheckFileExist(filePath) {
+			r.ResultFile = fmt.Sprintf("/taskresult/%s.json", taskId)
+		}
+	}
 	return
 }
 
