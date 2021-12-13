@@ -10,6 +10,10 @@ mkdir nemo;tar xvf nemo_darwin_amd64.tar -C nemo;cd nemo
 
   ```
 brew install rabbitmq
+
+配置rabbitmq：增加rabbitmq用户和密码
+sudo rabbitmqctl add_user nemo nemo2020
+sudo rabbitmqctl set_permissions -p "/" nemo ".*" ".*" ".*"
   ```
 
 ### **2、mysql**

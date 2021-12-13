@@ -9,8 +9,8 @@ services:
             MYSQL_USER: nemo
             MYSQL_PASSWORD: nemo2020
             MYSQL_ROOT_PASSWORD: root
-        ports:
-            - 3306:3306
+        #ports:
+            #- 3306:3306
         volumes: 
             - ./docker/mysql/initdb.d:/docker-entrypoint-initdb.d
             - ./docker/mysql/conf.d:/etc/mysql/conf.d
@@ -21,8 +21,8 @@ services:
         environment:
             RABBITMQ_DEFAULT_USER: guest
             RABBITMQ_DEFAULT_PASS: guest
-        ports:
-            - 5672:5672
+        #ports:
+            #- 5672:5672
 
     web:
         build: .
