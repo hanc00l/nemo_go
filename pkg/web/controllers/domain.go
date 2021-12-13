@@ -66,6 +66,8 @@ type DomainInfo struct {
 	Screenshot    []ScreenshotFileInfo
 	DomainAttr    []DomainAttrInfo
 	DisableFofa   bool
+	IconHash      []string
+	TlsData       []string
 }
 
 // DomainAttrInfo domain属性
@@ -79,10 +81,12 @@ type DomainAttrInfo struct {
 
 // DomainAttrFullInfo domain属性数据的聚合
 type DomainAttrFullInfo struct {
-	IP         map[string]struct{}
-	TitleSet   map[string]struct{}
-	BannerSet  map[string]struct{}
-	DomainAttr []DomainAttrInfo
+	IP          map[string]struct{}
+	TitleSet    map[string]struct{}
+	BannerSet   map[string]struct{}
+	DomainAttr  []DomainAttrInfo
+	IconHashSet map[string]struct{}
+	TlsData     map[string]struct{}
 }
 
 // DomainStatisticInfo domain统计信息
@@ -536,15 +540,21 @@ func getDomainInfo(domainName string, disableFofa bool) (r DomainInfo) {
 			UpdateTime: FormatDateTime(v.UpdateDatetime),
 		})
 	}
+	//
+	r.IconHash = utils.SetToSlice(domainAttrInfo.IconHashSet)
+	r.TlsData = utils.SetToSlice(domainAttrInfo.TlsData)
+
 	return
 }
 
 // getDomainAttrFullInfo 获取一个域名的属性集合
 func getDomainAttrFullInfo(id int, disableFofa bool) DomainAttrFullInfo {
 	r := DomainAttrFullInfo{
-		IP:        make(map[string]struct{}),
-		TitleSet:  make(map[string]struct{}),
-		BannerSet: make(map[string]struct{}),
+		IP:          make(map[string]struct{}),
+		TitleSet:    make(map[string]struct{}),
+		BannerSet:   make(map[string]struct{}),
+		IconHashSet: make(map[string]struct{}),
+		TlsData:     make(map[string]struct{}),
 	}
 	fofaInfo := make(map[string]string)
 	domainAttr := db.DomainAttr{RelatedId: id}
@@ -599,6 +609,33 @@ func getDomainAttrFullInfo(id int, disableFofa bool) DomainAttrFullInfo {
 					r.BannerSet[b] = struct{}{}
 				}
 			}
+		} else if da.Tag == "favicon" {
+			hashAndUrls := strings.Split(da.Content, "|")
+			if len(hashAndUrls) == 2 {
+				hash := strings.TrimSpace(hashAndUrls[0])
+				if _, ok := r.IconHashSet[hash]; !ok {
+					r.IconHashSet[hash] = struct{}{}
+				}
+				r.DomainAttr = append(r.DomainAttr, DomainAttrInfo{
+					Id:         da.Id,
+					Tag:        "favicon",
+					Content:    da.Content,
+					CreateTime: FormatDateTime(da.CreateDatetime),
+					UpdateTime: FormatDateTime(da.UpdateDatetime),
+				})
+
+			}
+		} else if da.Tag == "tlsdata" {
+			if _, ok := r.TlsData[da.Content]; !ok {
+				r.TlsData[da.Content] = struct{}{}
+			}
+			r.DomainAttr = append(r.DomainAttr, DomainAttrInfo{
+				Id:         da.Id,
+				Tag:        "tlsdata",
+				Content:    da.Content,
+				CreateTime: FormatDateTime(da.CreateDatetime),
+				UpdateTime: FormatDateTime(da.UpdateDatetime),
+			})
 		}
 	}
 	if len(fofaInfo) > 0 {

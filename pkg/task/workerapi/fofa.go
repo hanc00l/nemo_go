@@ -33,6 +33,7 @@ func Fofa(taskId, configJSON string) (result string, err error) {
 			IsWhatWeb:        config.IsWhatWeb,
 			IsWappalyzer:     config.IsWappalyzer,
 			IsFingerprintHub: config.IsFingerprintHub,
+			IsIconHash:       config.IsIconHash,
 		}
 		DoIPFingerPrint(portscanConfig, &fofa.IpResult)
 		if fofa.Config.IsScreenshot {
@@ -45,6 +46,7 @@ func Fofa(taskId, configJSON string) (result string, err error) {
 			IsWhatWeb:        config.IsWhatWeb,
 			IsWappalyzer:     config.IsWappalyzer,
 			IsFingerprintHub: config.IsFingerprintHub,
+			IsIconHash:       config.IsIconHash,
 		}
 		DoDomainFingerPrint(domainscanConfig, &fofa.DomainResult)
 		if fofa.Config.IsScreenshot {

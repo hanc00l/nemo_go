@@ -40,6 +40,7 @@ $(function () {
                     'icpquery': $('#checkbox_icpquery').is(":checked"),
                     'wappalyzer': $('#checkbox_wappalyzer').is(":checked"),
                     'fingerprinthub': $('#checkbox_fingerprinthub').is(":checked"),
+                    'iconhash': $('#checkbox_iconhash').is(":checked"),
                 }, function (data, e) {
                     if (e === "success" && data['status'] == 'success') {
                         swal({

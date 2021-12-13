@@ -84,6 +84,7 @@ type portscanRequestParam struct {
 	IsScreenshot     bool   `form:"screenshot"`
 	IsWappalyzer     bool   `form:"wappalyzer"`
 	IsFingerprintHub bool   `form:"fingerprinthub"`
+	IsIconHash       bool   `form:"iconhash"`
 	TaskMode         int    `form:"taskmode"`
 }
 
@@ -103,6 +104,7 @@ type domainscanRequestParam struct {
 	IsICPQuery       bool   `form:"icpquery"`
 	IsWappalyzer     bool   `form:"wappalyzer"`
 	IsFingerprintHub bool   `form:"fingerprinthub"`
+	IsIconHash       bool   `form:"iconhash"`
 	TaskMode         int    `form:"taskmode"`
 	PortTaskMode     int    `form:"porttaskmode"`
 }
@@ -226,7 +228,7 @@ func (c *TaskController) StartPortScanTaskAction() {
 			}
 			// FOFA
 			if req.IsFofa {
-				if taskId, err = c.doFofa(t, &req.OrgId, req.IsIPLocation, req.IsHttpx, req.IsWappalyzer, req.IsFingerprintHub, req.IsScreenshot); err != nil {
+				if taskId, err = c.doFofa(t, &req.OrgId, req.IsIPLocation, req.IsHttpx, req.IsWappalyzer, req.IsFingerprintHub, req.IsScreenshot, req.IsIconHash); err != nil {
 					c.FailedStatus(err.Error())
 					return
 				}
@@ -335,7 +337,7 @@ func (c *TaskController) StartDomainScanTaskAction() {
 			}
 		}
 		if req.IsFofa {
-			if taskId, err = c.doFofa(t, &req.OrgId, true, req.IsHttpx, req.IsWappalyzer, req.IsFingerprintHub, req.IsScreenshot); err != nil {
+			if taskId, err = c.doFofa(t, &req.OrgId, true, req.IsHttpx, req.IsWappalyzer, req.IsFingerprintHub, req.IsScreenshot, req.IsIconHash); err != nil {
 				c.FailedStatus(err.Error())
 				return
 			}
@@ -410,6 +412,7 @@ func (c *TaskController) doDomainscan(target string, req domainscanRequestParam)
 		IsScreenshot:       req.IsScreenshot,
 		IsWappalyzer:       req.IsWappalyzer,
 		IsFingerprintHub:   req.IsFingerprintHub,
+		IsIconHash:         req.IsIconHash,
 		PortTaskMode:       req.PortTaskMode,
 	}
 	// config.OrgId 为int，默认为0
@@ -446,6 +449,7 @@ func (c *TaskController) doPortscan(target string, port string, req portscanRequ
 		IsScreenshot:     req.IsScreenshot,
 		IsWappalyzer:     req.IsWappalyzer,
 		IsFingerprintHub: req.IsFingerprintHub,
+		IsIconHash:       req.IsIconHash,
 		CmdBin:           req.CmdBin,
 	}
 	if req.CmdBin == "" {
@@ -494,6 +498,7 @@ func (c *TaskController) doBatchScan(target string, port string, req portscanReq
 		IsScreenshot:     req.IsScreenshot,
 		IsWappalyzer:     req.IsWappalyzer,
 		IsFingerprintHub: req.IsFingerprintHub,
+		IsIconHash:       req.IsIconHash,
 		CmdBin:           "masscan",
 	}
 	if req.CmdBin == "nmap" {
@@ -527,7 +532,7 @@ func (c *TaskController) doBatchScan(target string, port string, req portscanReq
 }
 
 // doFofa FOFA搜索
-func (c *TaskController) doFofa(target string, orgId *int, isIplocation, isHttp, isWappalyzer, isFingerprintHub, isScreenshot bool) (taskId string, err error) {
+func (c *TaskController) doFofa(target string, orgId *int, isIplocation, isHttp, isWappalyzer, isFingerprintHub, isScreenshot bool, isIconHash bool) (taskId string, err error) {
 	config := onlineapi.FofaConfig{
 		Target:           target,
 		OrgId:            orgId,
@@ -536,6 +541,7 @@ func (c *TaskController) doFofa(target string, orgId *int, isIplocation, isHttp,
 		IsWappalyzer:     isWappalyzer,
 		IsFingerprintHub: isFingerprintHub,
 		IsScreenshot:     isScreenshot,
+		IsIconHash:       isIconHash,
 	}
 	// config.OrgId 为int，默认为0
 	// db.Organization.OrgId为指针，默认nil

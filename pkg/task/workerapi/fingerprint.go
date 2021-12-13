@@ -31,6 +31,11 @@ func DoIPFingerPrint(config portscan.Config, resultPortScan *portscan.Result) {
 		fp.ResultPortScan = *resultPortScan
 		fp.Do()
 	}
+	if config.IsIconHash {
+		hash := fingerprint.NewIconHash()
+		hash.ResultPortScan = *resultPortScan
+		hash.Do()
+	}
 }
 
 // DoDomainFingerPrint 对域名结果进行指纹识别
@@ -55,6 +60,11 @@ func DoDomainFingerPrint(config domainscan.Config, resultDomainScan *domainscan.
 		fp := fingerprint.NewFingerprintHub()
 		fp.ResultDomainScan = *resultDomainScan
 		fp.Do()
+	}
+	if config.IsIconHash {
+		hash := fingerprint.NewIconHash()
+		hash.ResultDomainScan = *resultDomainScan
+		hash.Do()
 	}
 }
 

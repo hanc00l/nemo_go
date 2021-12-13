@@ -21,6 +21,7 @@ type FofaConfig struct {
 	IsScreenshot     bool   `json:"screenshot"`
 	IsWappalyzer     bool   `json:"wappalyzer"`
 	IsFingerprintHub bool   `json:"fingerprinthub"`
+	IsIconHash       bool   `json:"iconhash"`
 }
 
 type ICPQueryConfig struct {

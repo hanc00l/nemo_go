@@ -14,7 +14,6 @@ import (
 )
 
 type Whatweb struct {
-	Config           Config
 	ResultPortScan   portscan.Result
 	ResultDomainScan domainscan.Result
 }

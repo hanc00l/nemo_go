@@ -72,6 +72,8 @@ type IPInfo struct {
 	UpdateTime    string
 	Screenshot    []ScreenshotFileInfo
 	DisableFofa   bool
+	IconHash      []string
+	TlsData       []string
 }
 
 // PortAttrInfo 每一个端口的详细数据
@@ -102,6 +104,8 @@ type PortInfo struct {
 	TitleSet    map[string]struct{}
 	BannerSet   map[string]struct{}
 	PortAttr    []PortAttrInfo
+	IconHashSet map[string]struct{}
+	TlsDataSet  map[string]struct{}
 }
 
 // IPStatisticInfo IP统计信息
@@ -487,6 +491,8 @@ func getPortInfo(ip string, ipId int, disableFofa bool) (r PortInfo) {
 	r.PortStatus = make(map[int]string)
 	r.BannerSet = make(map[string]struct{})
 	r.TitleSet = make(map[string]struct{})
+	r.IconHashSet = make(map[string]struct{})
+	r.TlsDataSet = make(map[string]struct{})
 
 	port := db.Port{IpId: ipId}
 	portData := port.GetsByIPId()
@@ -528,7 +534,7 @@ func getPortInfo(ip string, ipId int, disableFofa bool) (r PortInfo) {
 					r.TitleSet[pad.Content] = struct{}{}
 				}
 			} else if pad.Tag == "banner" || pad.Tag == "server" || pad.Tag == "tag" || pad.Tag == "fingerprint" {
-				if pad.Content == "unknown" {
+				if pad.Content == "unknown" || pad.Content == "" {
 					continue
 				}
 				if pad.Source == "wappalyzer" {
@@ -541,6 +547,18 @@ func getPortInfo(ip string, ipId int, disableFofa bool) (r PortInfo) {
 					if _, ok := r.BannerSet[pad.Content]; !ok {
 						r.BannerSet[pad.Content] = struct{}{}
 					}
+				}
+			} else if pad.Tag == "favicon" {
+				hashAndUrls := strings.Split(pad.Content, "|")
+				if len(hashAndUrls) == 2 {
+					hash := strings.TrimSpace(hashAndUrls[0])
+					if _, ok := r.IconHashSet[hash]; !ok {
+						r.IconHashSet[hash] = struct{}{}
+					}
+				}
+			} else if pad.Tag == "tlsdata" {
+				if _, ok := r.TlsDataSet[pad.Content]; !ok {
+					r.TlsDataSet[pad.Content] = struct{}{}
 				}
 			}
 		}
@@ -608,6 +626,10 @@ func getIPInfo(ipName string, disableFofa bool) (r IPInfo) {
 			UpdateTime: FormatDateTime(v.UpdateDatetime),
 		})
 	}
+	//
+	r.IconHash = utils.SetToSlice(portInfo.IconHashSet)
+	r.TlsData = utils.SetToSlice(portInfo.TlsDataSet)
+
 	return
 }
 

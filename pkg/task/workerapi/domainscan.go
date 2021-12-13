@@ -119,6 +119,7 @@ func doPortScan(config domainscan.Config, resultDomainScan *domainscan.Result) {
 				IsWhatWeb:        config.IsWhatWeb,
 				IsScreenshot:     config.IsScreenshot,
 				IsFingerprintHub: config.IsFingerprintHub,
+				IsIconHash:       config.IsIconHash,
 			}
 			configPortScanJSON, _ := json.Marshal(configPortScan)
 			serverapi.NewTask("portscan", string(configPortScanJSON))

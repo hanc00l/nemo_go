@@ -6,25 +6,33 @@ import (
 	"testing"
 )
 
-func TestHttpx_Run(t *testing.T) {
+func TestIconHash_RunFetchIconHashes(t *testing.T) {
+	url := "www.baidu.com"
+	iconHash := NewIconHash()
+	result := iconHash.RunFetchIconHashes(url)
+	for _,r := range result{
+		t.Log(r)
+	}
+}
+
+func TestIconHash_Do(t *testing.T) {
 	domainConfig := domainscan.Config{Target: "800best.com"}
 	subdomain := domainscan.NewSubFinder(domainConfig)
 	subdomain.Do()
 	t.Log(subdomain.Result)
 
-	httpx := NewHttpx()
-	httpx.ResultDomainScan = subdomain.Result
-	httpx.Do()
-	t.Log(httpx.ResultDomainScan)
-	for d,da := range httpx.ResultDomainScan.DomainResult{
+	ih  := NewIconHash()
+	ih.ResultDomainScan = subdomain.Result
+	ih.Do()
+	for d,da := range ih.ResultDomainScan.DomainResult{
 		t.Log(d,da)
 	}
 	subdomain.Result.SaveResult(subdomain.Config)
 }
 
-func TestHttpx_Run2(t *testing.T) {
+func TestIconHash_Do2(t *testing.T) {
 	nmapConfig := portscan.Config{
-		Target:       "47.98.181.116",
+		Target:       "124.90.39.51",
 		Port:         "80,443",
 		Rate:         1000,
 		IsPing:       false,
@@ -34,15 +42,13 @@ func TestHttpx_Run2(t *testing.T) {
 	nmap := portscan.NewNmap(nmapConfig)
 	nmap.Do()
 
-
-	httpx:= NewHttpx()
-	httpx.ResultPortScan = nmap.Result
-	httpx.Do()
-	for ip,r := range httpx.ResultPortScan.IPResult{
+	ih:= NewIconHash()
+	ih.ResultPortScan = nmap.Result
+	ih.Do()
+	for ip,r := range ih.ResultPortScan.IPResult{
 		t.Log(ip,r)
 		for port,p := range r.Ports{
 			t.Log(port,p)
 		}
 	}
-	httpx.ResultPortScan.SaveResult(nmap.Config)
 }

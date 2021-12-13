@@ -83,6 +83,7 @@ $(function () {
                     'screenshot': $('#checkbox_screenshot').is(":checked"),
                     'wappalyzer': $('#checkbox_wappalyzer').is(":checked"),
                     'fingerprinthub': $('#checkbox_fingerprinthub').is(":checked"),
+                    'iconhash': $('#checkbox_iconhash').is(":checked"),
                 }, function (data, e) {
                     if (e === "success" && data['status'] == 'success') {
                         swal({
@@ -170,6 +171,7 @@ $(function () {
                     'screenshot': $('#checkbox_batchscan_screenshot').is(":checked"),
                     'wappalyzer': false,
                     'fingerprinthub': $('#checkbox_batchscan_fingerprinthub').is(":checked"),
+                    'iconhash': $('#checkbox_batchscan_iconhash').is(":checked"),
                 }, function (data, e) {
                     if (e === "success" && data['status'] == 'success') {
                         swal({
@@ -202,6 +204,8 @@ $(function () {
             $("#input_exclude").prop("disabled", false);
             $("#checkbox_screenshot").prop("disabled", false);
             $("#checkbox_wappalyzer").prop("disabled", false);
+            $("#checkbox_fingerprinthub").prop("disabled", false);
+            $("#checkbox_iconhash").prop("disabled", false);
         } else {
             $("#input_port").prop("disabled", true);
             $("#select_tech").prop("disabled", true);
@@ -214,6 +218,8 @@ $(function () {
             $("#input_exclude").prop("disabled", true);
             $("#checkbox_screenshot").prop("disabled", true);
             $("#checkbox_wappalyzer").prop("disabled", true);
+            $("#checkbox_fingerprinthub").prop("disabled", true);
+            $("#checkbox_iconhash").prop("disabled", true);
         }
     })
 

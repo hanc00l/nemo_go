@@ -70,6 +70,14 @@
                         <span class="btn btn-info">Banner</span></b>
                         <span style="margin: 10px;"><strong>{{.domain_info.Banner }}</strong></span>
                         {{ end }}
+                        {{ if .domain_info.IconHash }}
+                        <span class="btn btn-info">IconHash</span>
+                        <span style="margin: 10px;"><strong>{{ .domain_info.IconHash }}</strong></span>
+                        {{ end }}
+                        {{ if .domain_info.TlsData }}
+                        <span class="btn btn-info">TLS</span>
+                        <span style="margin: 10px;"><strong>{{ .domain_info.TlsData }}</strong></span>
+                        {{ end }}
                         <br><br>
                         {{ if .domain_info.Organization }}
                         <span class="btn btn-info">所属组织</span></b>

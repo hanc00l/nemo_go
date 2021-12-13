@@ -14,7 +14,6 @@ import (
 )
 
 type Httpx struct {
-	//Config           Config
 	ResultPortScan   portscan.Result
 	ResultDomainScan domainscan.Result
 }
@@ -116,21 +115,21 @@ func (x *Httpx) RunHttpx(domain string) []FingerAttrResult {
 	}
 
 	options := &runner.Options{
-		CustomHeaders:       customheader.CustomHeaders{"User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) Chrome/52.0.2743.116 Safari/537.36 Edge/15.15063"},
-		Output:              resultTempFile,
-		InputFile:           inputTempFile,
-		Retries:             0,
-		Threads:             50,
-		Timeout:             5,
-		ExtractTitle:        true,
-		StatusCode:          true,
-		FollowRedirects:     true,
-		JSONOutput:          true,
-		Silent:              true,
-		NoColor:             true,
-		OutputServerHeader:  true,
-		OutputContentType:   true,
-		TLSGrab:             true,
+		CustomHeaders:      customheader.CustomHeaders{"User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) Chrome/52.0.2743.116 Safari/537.36 Edge/15.15063"},
+		Output:             resultTempFile,
+		InputFile:          inputTempFile,
+		Retries:            0,
+		Threads:            50,
+		Timeout:            5,
+		ExtractTitle:       true,
+		StatusCode:         true,
+		FollowRedirects:    true,
+		JSONOutput:         true,
+		Silent:             true,
+		NoColor:            true,
+		OutputServerHeader: true,
+		OutputContentType:  true,
+		TLSGrab:            true,
 	}
 	r, err := runner.New(options)
 	if err != nil {
@@ -179,6 +178,15 @@ func parseHttpxResult(outputTempFile string) (result []FingerAttrResult) {
 			Tag:     "status",
 			Content: fmt.Sprintf("%v", resultJSON.StatusCode),
 		})
+	}
+	if resultJSON.TLSData != nil {
+		tlsData, err := json.Marshal(resultJSON.TLSData)
+		if err == nil {
+			result = append(result, FingerAttrResult{
+				Tag:     "tlsdata",
+				Content: string(tlsData),
+			})
+		}
 	}
 	return result
 }

@@ -34,6 +34,7 @@ require (
 	github.com/klauspost/reedsolomon v1.9.13 // indirect
 	github.com/lair-framework/go-nmap v0.0.0-20191202052157-3507e0b03523
 	github.com/lib/pq v1.10.2 // indirect
+	github.com/mat/besticon v0.0.0-20210801190920-bdff7778a634 // indirect
 	github.com/mattn/go-isatty v0.0.13 // indirect
 	github.com/miekg/dns v1.1.43
 	github.com/peterbourgon/g2s v0.0.0-20170223122336-d4e7ad98afea // indirect
@@ -56,6 +57,7 @@ require (
 	github.com/soheilhy/cmux v0.1.5 // indirect
 	github.com/tidwall/pretty v1.2.0 // indirect
 	github.com/tjfoc/gmsm v1.4.1 // indirect
+	github.com/twmb/murmur3 v1.1.6 // indirect
 	github.com/valyala/fastrand v1.0.0 // indirect
 	go.opencensus.io v0.23.0 // indirect
 	golang.org/x/crypto v0.0.0-20210817164053-32db794688a5 // indirect

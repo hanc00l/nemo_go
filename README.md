@@ -28,6 +28,7 @@ Nemo是用来进行自动化信息收集的一个简单平台，通过集成常�
 - [ScreenShot](https://github.com/chromedp/chromedp) （调用chrome headless）
 - [Wappalyzer](https://github.com/AliasIO/Wappalyzer) （基于[webanalyze](https://github.com/rverton/webanalyze) 代码，可[自定义指纹规则](thirdparty/wappalyzer/technologies_custom.json)）
 - [ObserverWard](https://github.com/0x727/ObserverWard_0x727)  (指纹信息来源于https://github.com/0x727/FingerprintHub)
+- IconHash（基于[mat/besticon](github.com/mat/besticon)和[Becivells/iconhash](github.com/Becivells/iconhash)项目）
 
 
 ### 4、API接口 （需提供相应的Key)
@@ -102,6 +103,7 @@ Tested on [ubuntu18.04/20.04 LTS](docs/install_linux.md)、[macOS](docs/install_
 
 ## 版本更新
 
+- 2.4.8：2021-12-13，增加根据favicon.ico获取IconHash指纹功能；
 - 2.4.7：2021-12-9，增加导入本地扫描结果功能（支持nmap/masscan的XML文件），增加保存并查看任务执行结果的JSON格式的文件；优化FOFA查询后获取IP与域名的Web指纹信息；更新Xray版本为1.8.2；
 - 2.4.6：2021-12-8，更新指纹识别\"侦查守卫\"的JSON结果的解析；
 - 2.4.5：2021-12-7，增加调用ObserverWard获取应用系统的指纹信息，指纹信息来源于 [FingerprintHub](https://github.com/0x727/FingerprintHub)；
