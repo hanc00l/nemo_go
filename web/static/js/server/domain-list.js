@@ -161,7 +161,9 @@ $(function () {
                     data: "index", title: "序号", width: "5%",
                     "render": function (data, type, row, meta) {
                         let strData = data;
-                        if (row["honeypot"].length > 0) strData = "<span style='color:red;font-weight:bold' title='" + row["honeypot"] + "'>蜜罐</span>";
+                        if (row["honeypot"].length > 0) {
+                            strData = "<span style='color:red;font-weight:bold' title='" + row["honeypot"] + "'>蜜罐</span>";
+                        }
                         return strData;
                     }
                 },
@@ -180,6 +182,12 @@ $(function () {
                         if (row['vulnerability']) {
                             strData += '&nbsp;<span class="badge badge-danger" data-toggle="tooltip" data-html="true" title="' + html2Escape(row['vulnerability']) + '"><i class="fa fa-bolt"></span>';
                         }
+                        if (row["domaincdn"].length > 0) {
+                            strData += "&nbsp;<span class=\"badge badge-pill badge-warning\" title=\"" + row["domaincdn"] + "\">CDN</span>\n";
+                        }
+                        if (row["domaincname"].length > 0) {
+                            strData += "&nbsp;<span class=\"badge badge-pill badge-info\" title=\"" + row["domaincname"] + "\">CNAME</span>\n";
+                        }
                         return strData;
                     }
                 },
@@ -194,6 +202,9 @@ $(function () {
                             strData += pre_link
                             strData += '<a href="ip-info?ip=' + data[j] + '&&disable_fofa=' + disable_fofa + '" target="_blank">' + data[j] + '</a>';
                             pre_link = ",";
+                        }
+                        if (row["ipcdn"]) {
+                            strData += "&nbsp;<span class=\"badge badge-pill badge-warning\" title=\"IP可能使用了CDN\">CDN</span>\n";
                         }
                         strData += '</div>';
                         return strData;

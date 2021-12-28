@@ -46,6 +46,9 @@ type DomainListData struct {
 	Vulnerability  string   `json:"vulnerability"`
 	HoneyPot       string   `json:"honeypot"`
 	ScreenshotFile []string `json:"screenshot"`
+	DomainCDN      string   `json:"domaincdn"`
+	DomainCNAME    string   `json:"domaincname"`
+	IsIPCDN        bool     `json:"ipcdn"`
 }
 
 // DomainInfo domain详细数据聚合
@@ -68,6 +71,8 @@ type DomainInfo struct {
 	DisableFofa   bool
 	IconHash      []string
 	TlsData       []string
+	DomainCDN     string
+	DomainCNAME   string
 }
 
 // DomainAttrInfo domain属性
@@ -87,6 +92,8 @@ type DomainAttrFullInfo struct {
 	DomainAttr  []DomainAttrInfo
 	IconHashSet map[string]struct{}
 	TlsData     map[string]struct{}
+	DomainCDN   string
+	DomainCNAME string
 }
 
 // DomainStatisticInfo domain统计信息
@@ -388,6 +395,7 @@ func (c *DomainController) getDomainListData(req domainRequestParam) (resp DataT
 	results, total := domain.Gets(searchMap, req.Start/req.Length+1, req.Length)
 	hp := custom.NewHoneyPot()
 	ss := fingerprint.NewScreenShot()
+	cdn := custom.NewCDNCheck()
 	for i, domainRow := range results {
 		domainData := DomainListData{}
 		domainData.Id = domainRow.Id
@@ -424,7 +432,14 @@ func (c *DomainController) getDomainListData(req domainRequestParam) (resp DataT
 			vulSet = append(vulSet, fmt.Sprintf("%s/%s", v.PocFile, v.Source))
 		}
 		domainData.Vulnerability = strings.Join(vulSet, "\r\n")
-
+		domainData.DomainCDN = domainInfo.DomainCDN
+		domainData.DomainCNAME = domainInfo.DomainCNAME
+		for _, ip := range domainData.IP {
+			if cdn.CheckIP(ip) || cdn.CheckASN(ip) {
+				domainData.IsIPCDN = true
+				break
+			}
+		}
 		resp.Data = append(resp.Data, domainData)
 	}
 	resp.Draw = req.Draw
@@ -543,6 +558,8 @@ func getDomainInfo(domainName string, disableFofa bool) (r DomainInfo) {
 	//
 	r.IconHash = utils.SetToSlice(domainAttrInfo.IconHashSet)
 	r.TlsData = utils.SetToSlice(domainAttrInfo.TlsData)
+	r.DomainCDN = domainAttrInfo.DomainCDN
+	r.DomainCNAME = domainAttrInfo.DomainCNAME
 
 	return
 }
@@ -570,6 +587,10 @@ func getDomainAttrFullInfo(id int, disableFofa bool) DomainAttrFullInfo {
 			if _, ok := r.IP[da.Content]; !ok {
 				r.IP[da.Content] = struct{}{}
 			}
+		} else if da.Tag == "CDN" {
+			r.DomainCDN = da.Content
+		} else if da.Tag == "CNAME" {
+			r.DomainCNAME = da.Content
 		} else if da.Tag == "title" {
 			if _, ok := r.TitleSet[da.Content]; !ok {
 				r.TitleSet[da.Content] = struct{}{}

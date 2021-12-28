@@ -37,6 +37,7 @@ require (
 	github.com/mat/besticon v0.0.0-20210801190920-bdff7778a634 // indirect
 	github.com/mattn/go-isatty v0.0.13 // indirect
 	github.com/miekg/dns v1.1.43
+	github.com/oschwald/geoip2-golang v1.5.0 // indirect
 	github.com/peterbourgon/g2s v0.0.0-20170223122336-d4e7ad98afea // indirect
 	github.com/pkg/errors v0.9.1
 	github.com/projectdiscovery/blackrock v0.0.0-20210903102120-5a9d2412d21d // indirect
@@ -59,11 +60,12 @@ require (
 	github.com/tjfoc/gmsm v1.4.1 // indirect
 	github.com/twmb/murmur3 v1.1.6 // indirect
 	github.com/valyala/fastrand v1.0.0 // indirect
+	github.com/yl2chen/cidranger v1.0.2 // indirect
 	go.opencensus.io v0.23.0 // indirect
 	golang.org/x/crypto v0.0.0-20210817164053-32db794688a5 // indirect
 	golang.org/x/mod v0.5.0 // indirect
 	golang.org/x/net v0.0.0-20211208012354-db4efeb81f4b // indirect
-	golang.org/x/sys v0.0.0-20211205182925-97ca703d548d // indirect
+	golang.org/x/sys v0.0.0-20211216021012-1d35b9e2eb4e // indirect
 	golang.org/x/text v0.3.7
 	golang.org/x/tools v0.1.5 // indirect
 	google.golang.org/protobuf v1.27.1 // indirect

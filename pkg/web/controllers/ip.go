@@ -51,6 +51,7 @@ type IPListData struct {
 	Vulnerability  string   `json:"vulnerability"`
 	HoneyPot       string   `json:"honeypot"`
 	ScreenshotFile []string `json:"screenshot"`
+	IsCDN          bool     `json:"cdn"`
 }
 
 // IPInfo IP的详细数据的集合
@@ -438,6 +439,7 @@ func (c *IPController) getIPListData(req ipRequestParam) (resp DataTableResponse
 	results, total := ip.Gets(searchMap, req.Start/req.Length+1, req.Length)
 	hp := custom.NewHoneyPot()
 	ss := fingerprint.NewScreenShot()
+	cdn := custom.NewCDNCheck()
 	for i, ipRow := range results {
 		ipData := IPListData{}
 		ipData.Index = req.Start + i + 1
@@ -474,6 +476,9 @@ func (c *IPController) getIPListData(req ipRequestParam) (resp DataTableResponse
 		isHoneypot, systemList := hp.CheckHoneyPot(ipRow.IpName, strings.Join(ports, ","))
 		if isHoneypot && len(systemList) > 0 {
 			ipData.HoneyPot = strings.Join(systemList, "\n")
+		}
+		if cdn.CheckIP(ipRow.IpName) || cdn.CheckASN(ipRow.IpName){
+			ipData.IsCDN = true
 		}
 		resp.Data = append(resp.Data, ipData)
 	}

@@ -313,7 +313,16 @@ $(function () {
                         return strData;
                     }
                 },
-                {data: "location", title: "归属地", width: "12%"},
+                {
+                    data: "location", title: "归属地", width: "12%",
+                    render: function (data, type, row, meta) {
+                        let strData = data;
+                        if(row["cdn"]){
+                            strData += "&nbsp;<span class=\"badge badge-pill badge-warning\" title=\"IP可能使用了CDN\">CDN</span>\n";
+                        }
+                        return strData;
+                    }
+                },
                 {
                     data: "port", title: "开放端口", width: "15%",
                     "render": function (data, type, row, meta) {

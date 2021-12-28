@@ -1,6 +1,7 @@
 package domainscan
 
 import (
+	"github.com/hanc00l/nemo_go/pkg/task/custom"
 	"github.com/hanc00l/nemo_go/pkg/utils"
 	"github.com/remeh/sizedwaitgroup"
 	"net"
@@ -62,11 +63,28 @@ func (r *Resolve) RunResolve(domain string) {
 			})
 		}
 	}
+	//CDN检查
+	cdnCheck := custom.NewCDNCheck()
+	isCDN, cdnName, CName := cdnCheck.CheckCName(domain)
+	if isCDN {
+		r.Result.SetDomainAttr(domain, DomainAttrResult{
+			Source:  "domainscan",
+			Tag:     "CDN",
+			Content: cdnName,
+		})
+	}
+	if CName != "" {
+		r.Result.SetDomainAttr(domain, DomainAttrResult{
+			Source:  "domainscan",
+			Tag:     "CNAME",
+			Content: CName,
+		})
+	}
 }
 
 // ResolveDomain 解析一个域名的A记录和CNAME记录
 func ResolveDomain(domain string) (CName string, Host []string) {
-	//cname, _ := net.LookupCNAME(domain)
+	//CName, _ = net.LookupCNAME(domain)
 	host, _ := net.LookupHost(domain)
 	for _, h := range host {
 		if utils.CheckIPV4(h) {
