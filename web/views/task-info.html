@@ -36,7 +36,10 @@
                         <b><span class="btn btn-info">任务参数</span></b>
                         <br><br>
                         <span class="btn border-secondary text-left">
-                            {{ .task_info.KwArgs }}</span>
+                            <div style="width:100%;white-space:normal;word-wrap:break-word;word-break:break-all;">
+                            {{ .task_info.KwArgs }}
+                            </div>
+                        </span>
                         <br><br>
                         {{ end }}
                         {{ if .task_info.Result }}
