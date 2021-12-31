@@ -10,6 +10,7 @@ const (
 	resolveThreadNumber   = 100
 	subfinderThreadNumber = 4
 	massdnsThreadNumber   = 1
+	crawlerThreadNumber   = 2
 )
 
 // Config 端口扫描的参数配置
@@ -18,7 +19,7 @@ type Config struct {
 	OrgId              *int   `json:"orgId"`
 	IsSubDomainFinder  bool   `json:"subfinder"`
 	IsSubDomainBrute   bool   `json:"subdomainBrute"`
-	IsJSFinder         bool   `json:"jsfinder"`
+	IsCrawler          bool   `json:"crawler"`
 	IsHttpx            bool   `json:"httpx"`
 	IsWhatWeb          bool   `json:"whatweb"`
 	IsIPPortScan       bool   `json:"portscan"`

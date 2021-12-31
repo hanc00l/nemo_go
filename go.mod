@@ -23,6 +23,7 @@ require (
 	github.com/golang/snappy v0.0.4 // indirect
 	github.com/google/uuid v1.2.0
 	github.com/grandcat/zeroconf v1.0.0 // indirect
+	github.com/hanc00l/crawlergo v0.4.3
 	github.com/hashicorp/consul/api v1.10.1 // indirect
 	github.com/hashicorp/errwrap v1.1.0 // indirect
 	github.com/hashicorp/go-hclog v0.16.2 // indirect
@@ -37,7 +38,7 @@ require (
 	github.com/mat/besticon v0.0.0-20210801190920-bdff7778a634 // indirect
 	github.com/mattn/go-isatty v0.0.13 // indirect
 	github.com/miekg/dns v1.1.43
-	github.com/oschwald/geoip2-golang v1.5.0 // indirect
+	github.com/oschwald/geoip2-golang v1.5.0
 	github.com/peterbourgon/g2s v0.0.0-20170223122336-d4e7ad98afea // indirect
 	github.com/pkg/errors v0.9.1
 	github.com/projectdiscovery/blackrock v0.0.0-20210903102120-5a9d2412d21d // indirect
@@ -59,8 +60,9 @@ require (
 	github.com/tidwall/pretty v1.2.0 // indirect
 	github.com/tjfoc/gmsm v1.4.1 // indirect
 	github.com/twmb/murmur3 v1.1.6 // indirect
+	github.com/urfave/cli/v2 v2.0.0
 	github.com/valyala/fastrand v1.0.0 // indirect
-	github.com/yl2chen/cidranger v1.0.2 // indirect
+	github.com/yl2chen/cidranger v1.0.2
 	go.opencensus.io v0.23.0 // indirect
 	golang.org/x/crypto v0.0.0-20210817164053-32db794688a5 // indirect
 	golang.org/x/mod v0.5.0 // indirect

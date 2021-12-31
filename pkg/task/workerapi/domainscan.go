@@ -67,13 +67,15 @@ func doDomainScan(config domainscan.Config) (resultDomainScan domainscan.Result)
 		massdns.Do()
 		resultDomainScan = massdns.Result
 	}
-	//  JSFinder
-	if config.IsJSFinder {
-		// TODO
+	//  Crawler
+	if config.IsCrawler {
+		crawler := domainscan.NewCrawler(config)
+		crawler.Do()
+		resultDomainScan = crawler.Result
 	}
 	// 域名解析
 	resolve := domainscan.NewResolve(config)
-	if !config.IsSubDomainFinder && !config.IsSubDomainBrute && !config.IsJSFinder {
+	if !config.IsSubDomainFinder && !config.IsSubDomainBrute && !config.IsCrawler {
 		// 对config中Target进行域名解析
 		resolve.Do()
 		resultDomainScan = resolve.Result

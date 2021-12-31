@@ -21,7 +21,7 @@ Nemo是用来进行自动化信息收集的一个简单平台，通过集成常�
 
 - [Subfinder](https://github.com/projectdiscovery/subfinder) 子域名收集
 - [Massdns](https://github.com/blechschmidt/massdns) 子域名爆破
-- JSFinder [TODO]
+- [Crawlergo](https://github.com/Qianlitp/crawlergo) 子域名爬虫
 
 ### 3、指纹信息
 
@@ -104,6 +104,7 @@ Tested on [ubuntu18.04/20.04 LTS](docs/install_linux.md)、[macOS](docs/install_
 
 ## 版本更新
 
+- 2.4.10：2021-12-31，增加子域名爬虫功能（感谢https://github.com/Qianlitp/crawlergo开源的代码）；
 - 2.4.9：2021-12-28，增加域名和IP的CDN识别（借鉴 [github.com/timwhitez/Frog-checkCDN](https://www.github.com/timwhitez/Frog-checkCDN)）;
 - 2.4.8：2021-12-13，增加根据favicon.ico获取IconHash指纹功能；
 - 2.4.7：2021-12-9，增加导入本地扫描结果功能（支持nmap/masscan的XML文件），增加保存并查看任务执行结果的JSON格式的文件；优化FOFA查询后获取IP与域名的Web指纹信息；更新Xray版本为1.8.2；

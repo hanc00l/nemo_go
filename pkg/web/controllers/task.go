@@ -98,7 +98,7 @@ type domainscanRequestParam struct {
 	IsHttpx          bool   `form:"httpx"`
 	IsIPPortscan     bool   `form:"portscan"`
 	IsSubnetPortscan bool   `form:"networkscan"`
-	IsJSFinder       bool   `form:"jsfinder"`
+	IsCrawler        bool   `form:"crawler"`
 	IsFofa           bool   `form:"fofasearch"`
 	IsScreenshot     bool   `form:"screenshot"`
 	IsICPQuery       bool   `form:"icpquery"`
@@ -309,7 +309,7 @@ func (c *TaskController) StartDomainScanTaskAction() {
 		if req.IsSubfinder {
 			subConfig := req
 			subConfig.IsSubdomainBrute = false
-			subConfig.IsJSFinder = false
+			subConfig.IsCrawler = false
 			if taskId, err = c.doDomainscan(t, subConfig); err != nil {
 				c.FailedStatus(err.Error())
 				return
@@ -319,15 +319,22 @@ func (c *TaskController) StartDomainScanTaskAction() {
 		if req.IsSubdomainBrute {
 			subConfig := req
 			subConfig.IsSubfinder = false
-			subConfig.IsJSFinder = false
+			subConfig.IsCrawler = false
 			if taskId, err = c.doDomainscan(t, subConfig); err != nil {
 				c.FailedStatus(err.Error())
 				return
 			}
 			taskStarted = true
 		}
-		if req.IsJSFinder {
-			//TODO
+		if req.IsCrawler {
+			subConfig := req
+			subConfig.IsSubfinder = false
+			subConfig.IsSubdomainBrute = false
+			if taskId, err = c.doDomainscan(t, subConfig); err != nil {
+				c.FailedStatus(err.Error())
+				return
+			}
+			taskStarted = true
 		}
 		// 如果没有子域名任务，则至少启动一个域名解析任务
 		if !taskStarted {
@@ -404,7 +411,7 @@ func (c *TaskController) doDomainscan(target string, req domainscanRequestParam)
 		OrgId:              &req.OrgId,
 		IsSubDomainFinder:  req.IsSubfinder,
 		IsSubDomainBrute:   req.IsSubdomainBrute,
-		IsJSFinder:         req.IsJSFinder,
+		IsCrawler:          req.IsCrawler,
 		IsHttpx:            req.IsHttpx,
 		IsWhatWeb:          req.IsWhatweb,
 		IsIPPortScan:       req.IsIPPortscan,

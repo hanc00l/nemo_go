@@ -23,9 +23,28 @@ func TestDomainScan(t *testing.T) {
 		t.Log(err)
 	}
 	result, err := serverapi.NewTask("domainscan", string(configJSON))
-	t.Log(result,err)
+	t.Log(result, err)
 }
 
+func TestDomainScanCrawler(t *testing.T) {
+	config := domainscan.Config{
+		Target:             "appl.800best.com",
+		OrgId:              nil,
+		IsSubDomainFinder:  false,
+		IsSubDomainBrute:   false,
+		IsCrawler:          true,
+		IsHttpx:            true,
+		IsWhatWeb:          false,
+		IsIPPortScan:       true,
+		IsIPSubnetPortScan: false,
+	}
+	configJSON, err := json.Marshal(config)
+	if err != nil {
+		t.Log(err)
+	}
+	result, err := serverapi.NewTask("domainscan", string(configJSON))
+	t.Log(result, err)
+}
 func TestDomainWithPortScanScan(t *testing.T) {
 	config := domainscan.Config{
 		Target:             "appl.800best.com",
@@ -42,5 +61,5 @@ func TestDomainWithPortScanScan(t *testing.T) {
 		t.Log(err)
 	}
 	result, err := serverapi.NewTask("domainscan", string(configJSON))
-	t.Log(result,err)
+	t.Log(result, err)
 }

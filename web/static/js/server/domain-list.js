@@ -34,7 +34,7 @@ $(function () {
                     'taskmode': $('#select_taskmode').val(),
                     'porttaskmode': $('#select_porttaskmode').val(),
                     'subfinder': $('#checkbox_subfinder').is(":checked"),
-                    'jsfinder': $('#checkbox_jsfinder').is(":checked"),
+                    'crawler': $('#checkbox_crawler').is(":checked"),
                     'httpx': $('#checkbox_httpx').is(":checked"),
                     'screenshot': $('#checkbox_screenshot').is(":checked"),
                     'icpquery': $('#checkbox_icpquery').is(":checked"),
