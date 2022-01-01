@@ -38,10 +38,11 @@ Nemo是用来进行自动化信息收集的一个简单平台，通过集成常�
 - [ICP备案信息](http://icp.chinaz.com/) 
 - [Quake](https://quake.360.cn) [TODO]
 
-### 5、Poc验证
+### 5、Poc验证与目录扫描
 
 - [Pocsuite3](https://github.com/knownsec/pocsuite3)  && [some_pocsuite](https://github.com/hanc00l/some_pocsuite) 
 - [XRay](https://github.com/chaitin/xray)
+- [Dirsearch](https://github.com/evilsocket/dirsearch)
 
 ### 6、扫描任务
 
@@ -104,6 +105,7 @@ Tested on [ubuntu18.04/20.04 LTS](docs/install_linux.md)、[macOS](docs/install_
 
 ## 版本更新
 
+- 2.4.11：2022-1-1，增加目录遍历扫描（[dirsearch](https://github.com/evilsocket/dirsearch)，建议谨慎使用）；
 - 2.4.10：2021-12-31，增加子域名爬虫功能（感谢 [crawlergo](https://github.com/Qianlitp/crawlergo) 开源的代码）；
 - 2.4.9：2021-12-28，增加域名和IP的CDN识别（借鉴 [github.com/timwhitez/Frog-checkCDN](https://www.github.com/timwhitez/Frog-checkCDN)）;
 - 2.4.8：2021-12-13，增加根据favicon.ico获取IconHash指纹功能；

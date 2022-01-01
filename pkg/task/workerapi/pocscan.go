@@ -31,6 +31,10 @@ func PocScan(taskId, configJSON string) (result string, err error) {
 		}
 		x.Do()
 		scanResult = x.Result
+	}else if config.CmdBin == "dirsearch"{
+		d := pocscan.NewDirsearch(config)
+		d.Do()
+		scanResult = d.Result
 	}
 	// 保存结果
 	x := comm.NewXClient()

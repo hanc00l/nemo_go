@@ -19,9 +19,7 @@ type Pocsuite struct {
 
 // NewPocsuite 创建pocsuite对像
 func NewPocsuite(config Config) *Pocsuite {
-	p := &Pocsuite{Config: config}
-
-	return p
+	return &Pocsuite{Config: config}
 }
 
 // Do 调用poc.py运行pocsuite3

@@ -115,6 +115,8 @@ type pocscanRequestParam struct {
 	PocsuitePocFile  string `form:"pocsuite3_poc_file"`
 	IsXrayVerify     bool   `form:"xrayverify"`
 	XrayPocFile      string `form:"xray_poc_file"`
+	IsDirsearch      bool   `form:"dirsearch"`
+	DirsearchExtName string `form:"ext"`
 }
 
 func (c *TaskController) IndexAction() {
@@ -396,6 +398,15 @@ func (c *TaskController) StartPocScanTaskAction() {
 		config := pocscan.Config{Target: strings.Join(targetList, ","), PocFile: req.XrayPocFile, CmdBin: "xray"}
 		configJSON, _ := json.Marshal(config)
 		taskId, err = serverapi.NewTask("xray", string(configJSON))
+		if err != nil {
+			c.FailedStatus(err.Error())
+			return
+		}
+	}
+	if req.IsDirsearch && req.DirsearchExtName != "" {
+		config := pocscan.Config{Target: strings.Join(targetList, ","), PocFile: req.DirsearchExtName, CmdBin: "dirsearch"}
+		configJSON, _ := json.Marshal(config)
+		taskId, err = serverapi.NewTask("dirsearch", string(configJSON))
 		if err != nil {
 			c.FailedStatus(err.Error())
 			return

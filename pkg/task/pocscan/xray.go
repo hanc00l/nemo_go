@@ -20,9 +20,7 @@ type Xray struct {
 
 // NewXray 创建xray对象
 func NewXray(config Config) *Xray {
-	xray := &Xray{Config: config}
-
-	return xray
+	return &Xray{Config: config}
 }
 
 // Do 调用xray执行一次webscan

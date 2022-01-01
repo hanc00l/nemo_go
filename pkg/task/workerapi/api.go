@@ -23,12 +23,13 @@ var WStatus ampq.WorkerStatus
 // taskMaps 定义work执行的任务
 var taskMaps = map[string]interface{}{
 	"portscan":   PortScan,
-	"batchscan": BatchScan,
+	"batchscan":  BatchScan,
 	"domainscan": DomainScan,
 	"iplocation": IPLocation,
 	"fofa":       Fofa,
 	"xray":       PocScan,
 	"pocsuite":   PocScan,
+	"dirsearch":  PocScan,
 	"icpquery":   ICPQuery,
 	"test":       TaskTest,
 }

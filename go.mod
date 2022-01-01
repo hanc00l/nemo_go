@@ -14,6 +14,8 @@ require (
 	github.com/chromedp/chromedp v0.7.4
 	github.com/disintegration/imaging v1.6.2
 	github.com/edwingeng/doublejump v0.0.0-20210724020454-c82f1bcb3280 // indirect
+	github.com/evilsocket/brutemachine v0.0.0-20170703145059-0331ad6a82ce // indirect
+	github.com/evilsocket/dirsearch v0.0.0-20210927162954-fe7fffa39084 // indirect
 	github.com/fatih/color v1.12.0 // indirect
 	github.com/fsnotify/fsnotify v1.5.1 // indirect
 	github.com/go-ping/ping v0.0.0-20210506233800-ff8be3320020 // indirect

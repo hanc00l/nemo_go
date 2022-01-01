@@ -103,7 +103,7 @@ $(function () {
                 });
         }
         if (getCurrentTabIndex() == 1) {
-            if ($('#checkbox_pocsuite3').is(":checked") == false && $('#checkbox_xray').is(":checked") == false) {
+            if ($('#checkbox_pocsuite3').is(":checked") == false && $('#checkbox_xray').is(":checked") == false &&  $('#checkbox_dirsearch').is(":checked") == false) {
                 swal('Warning', '请选择要使用的验证工具！', 'error');
                 return;
             }
@@ -119,13 +119,21 @@ $(function () {
                     return;
                 }
             }
+            if ($('#checkbox_dirsearch').is(":checked")) {
+                if ($('#input_dirsearch_ext').val() == '') {
+                    swal('Warning', '请选择EXTENSIONS', 'error');
+                    return;
+                }
+            }
             $.post("/task-start-vulnerability",
                 {
                     "target": target,
                     'pocsuite3verify': $('#checkbox_pocsuite3').is(":checked"),
                     'pocsuite3_poc_file': $('#input_pocsuite3_poc_file').val(),
                     'xrayverify': $('#checkbox_xray').is(":checked"),
-                    'xray_poc_file': $('#input_xray_poc_file').val()
+                    'xray_poc_file': $('#input_xray_poc_file').val(),
+                    'dirsearch': $('#checkbox_dirsearch').is(":checked"),
+                    'ext': $('#input_dirsearch_ext').val(),
                 }, function (data, e) {
                     if (e === "success" && data['status'] == 'success') {
                         swal({
