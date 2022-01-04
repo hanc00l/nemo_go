@@ -9,7 +9,6 @@ import (
 	"github.com/hanc00l/nemo_go/pkg/logging"
 	"github.com/hanc00l/nemo_go/pkg/task/domainscan"
 	"github.com/hanc00l/nemo_go/pkg/task/portscan"
-	"github.com/hanc00l/nemo_go/pkg/task/serverapi"
 	"github.com/hanc00l/nemo_go/pkg/utils"
 	"strings"
 )
@@ -124,7 +123,20 @@ func doPortScan(config domainscan.Config, resultDomainScan *domainscan.Result) {
 				IsIconHash:       config.IsIconHash,
 			}
 			configPortScanJSON, _ := json.Marshal(configPortScan)
-			serverapi.NewTask("portscan", string(configPortScanJSON))
+			// 创建端口扫描任务
+			x := comm.NewXClient()
+			newTaskArgs := comm.NewTaskArgs{
+				TaskName:   "portscan",
+				ConfigJSON: string(configPortScanJSON),
+			}
+			var result string
+			err := x.Call(context.Background(), "NewTask", &newTaskArgs, &result)
+			if err != nil {
+				logging.RuntimeLog.Error("Start Portscan task fail:", err)
+				logging.CLILog.Error("Start Portscan task fail:", err)
+			} else {
+				logging.CLILog.Info("Start Portscan task...")
+			}
 		}
 	}
 }

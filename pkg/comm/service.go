@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"github.com/hanc00l/nemo_go/pkg/conf"
 	"github.com/hanc00l/nemo_go/pkg/db"
@@ -14,6 +15,7 @@ import (
 	"github.com/hanc00l/nemo_go/pkg/task/onlineapi"
 	"github.com/hanc00l/nemo_go/pkg/task/pocscan"
 	"github.com/hanc00l/nemo_go/pkg/task/portscan"
+	"github.com/hanc00l/nemo_go/pkg/task/serverapi"
 	"github.com/hanc00l/nemo_go/pkg/utils"
 	"github.com/smallnest/rpcx/client"
 	"github.com/tidwall/pretty"
@@ -44,6 +46,13 @@ type TaskStatusArgs struct {
 	State     string
 	Worker    string
 	Result    string
+}
+
+// NewTaskArgs 新建任务请求与返回参数
+type NewTaskArgs struct {
+	TaskName   string
+	ConfigJSON string
+	TaskID     string
 }
 
 // globalXClient 全局的RPC连接（长连接方式）
@@ -191,6 +200,22 @@ func (s *Service) KeepAlive(ctx context.Context, args *KeepAliveInfo, replay *ma
 	WorkerStatusMutex.Unlock()
 
 	*replay = newKeepAliveResponseInfo(args.CustomFiles)
+	return nil
+}
+
+// NewTask 创建一个新执行任务
+func (s *Service) NewTask(ctx context.Context, args *NewTaskArgs, replay *string) error {
+	if args.TaskName == "" || args.ConfigJSON == "" {
+		msg := "taskName or configJSON is empty!"
+		replay = &msg
+		return errors.New(msg)
+	}
+	taskId, err := serverapi.NewTask(args.TaskName, args.ConfigJSON)
+	if err != nil {
+		return err
+	}
+	replay = &taskId
+
 	return nil
 }
 
