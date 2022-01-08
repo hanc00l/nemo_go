@@ -346,8 +346,8 @@ func (c *IPController) ImportPortscanResultAction() {
 	}
 	// 文件后缀检查
 	ext := path.Ext(fileHeader.Filename)
-	if ext != ".json" && ext != ".xml" {
-		c.FailedStatus("只允许.json或.xml文件")
+	if ext != ".json" && ext != ".xml" && ext != ".txt" {
+		c.FailedStatus("只允许.json、.xml或.txt文件")
 		return
 	}
 	// 读取文件内容
@@ -376,6 +376,11 @@ func (c *IPController) ImportPortscanResultAction() {
 		m.ParseXMLContentResult(fileContent)
 		portscan.FilterIPHasTooMuchPort(m.Result)
 		result = m.Result.SaveResult(config)
+	} else if bin == "fscan" {
+		f := portscan.NewFScan(config)
+		f.ParseTxtContentResult(fileContent)
+		portscan.FilterIPHasTooMuchPort(f.Result)
+		result = f.Result.SaveResult(config)
 	} else {
 		c.FailedStatus("未知的扫描方法")
 		return
@@ -477,7 +482,7 @@ func (c *IPController) getIPListData(req ipRequestParam) (resp DataTableResponse
 		if isHoneypot && len(systemList) > 0 {
 			ipData.HoneyPot = strings.Join(systemList, "\n")
 		}
-		if cdn.CheckIP(ipRow.IpName) || cdn.CheckASN(ipRow.IpName){
+		if cdn.CheckIP(ipRow.IpName) || cdn.CheckASN(ipRow.IpName) {
 			ipData.IsCDN = true
 		}
 		resp.Data = append(resp.Data, ipData)

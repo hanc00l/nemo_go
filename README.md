@@ -15,6 +15,7 @@ Nemo是用来进行自动化信息收集的一个简单平台，通过集成常�
 - IP归属地（纯真离线数据）
 - 自定义IP归属地、Service、蜜罐
 - 导入本地的Masscan、Nmap端口扫描结果
+- 导入[fscan](https://github.com/shadow1ng/fscan)扫描结果（适用于内网渗透的资产信息收集）
 - CDN识别
 
 ### 2、域名资产
@@ -105,6 +106,7 @@ Tested on [ubuntu18.04/20.04 LTS](docs/install_linux.md)、[macOS](docs/install_
 
 ## 版本更新
 
+- 2.4.13：2022-1-8，增加导入fscan的扫描结果（由于只有txt方式，通过正则匹配提取IP、端口及一些重要信息，不保证百分百全部导入）；
 - 2.4.12：2022-1-4，修复域名扫描同时进端口扫描时不正确创建任务导致worker退出的Bug；
 - 2.4.11：2022-1-1，增加目录遍历扫描（[dirsearch](https://github.com/evilsocket/dirsearch)，建议谨慎使用）；
 - 2.4.10：2021-12-31，增加子域名爬虫功能（感谢 [crawlergo](https://github.com/Qianlitp/crawlergo) 开源的代码）；
