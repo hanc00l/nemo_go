@@ -53,8 +53,6 @@
     authKey: ZduibTKhcbb6Pi8W
   # 消息中间件配置
   rabbitmq: 
-    host: x.x.x.x（vps外网地址)
-    port: 5672
     username: nemo
     password: nemo2020
   ```
@@ -75,16 +73,14 @@
   # rpc配置
   rpc:
     host: x.x.x.x(server所在的vps地址）
-    port: 5001
     authKey: ZduibTKhcbb6Pi8W
   # 消息中间件配置
   rabbitmq:
     host: x.x.x.x(server所在的vps地址）
-    port: 5672
     username: nemo
     password: nemo2020
   ```
-
+  
 - **构建Docker并启动**
 
   ```bash
