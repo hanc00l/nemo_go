@@ -1,0 +1,11 @@
+version: '3.7'
+services:
+    worker:
+        build:
+            context: .
+            dockerfile: Dockerfile-worker
+        image: nemo/worker:v2
+        working_dir: /opt/nemo
+        entrypoint:
+            - /opt/nemo/docker_start.sh
+            - worker

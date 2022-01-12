@@ -68,7 +68,7 @@ mkdir nemo;tar xvf nemo_linux_amd64.tar -C nemo;cd nemo
 docker-compose up -d
 ```
 
-正式使用建议独立VPS分布式部署。
+[更多Docker使用方式](docs/docker.md)
 
 
 

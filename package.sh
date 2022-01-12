@@ -18,7 +18,7 @@ tar -cvzf release/nemo_darwin_amd64.tar \
 tar -cvzf release/nemo_linux_amd64.tar \
   --exclude=thirdparty/xray/xray_darwin_amd64 \
   server_linux_amd64 worker_linux_amd64 \
-  conf log thirdparty web docker* Dockerfile
+  conf log thirdparty web docker* Dockerfile*
 
 tar -cvzf release/worker_linux_amd64.tar \
   --exclude=thirdparty/xray/xray_darwin_amd64 --exclude=conf/app.conf --exclude=server.yml \

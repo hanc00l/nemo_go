@@ -1,0 +1,43 @@
+version: '3.7'
+services:
+    mysql:
+        image: mysql:5.7
+        container_name: mysql
+        restart: always
+        environment: 
+            MYSQL_DATABASE: nemo
+            MYSQL_USER: nemo
+            MYSQL_PASSWORD: nemo2020
+            MYSQL_ROOT_PASSWORD: root
+        volumes: 
+            - ./docker/mysql/initdb.d:/docker-entrypoint-initdb.d
+            - ./docker/mysql/conf.d:/etc/mysql/conf.d
+
+    rabbitmq:
+        image: rabbitmq:3-management-alpine
+        container_name: rabbitmq
+        environment:
+            # Docker构建server时，需要对外公开rabbitmq供worker连接，建议更改此默认密码
+            # 同时修改conf/server.yml和worker.yml
+            RABBITMQ_DEFAULT_USER: nemo
+            RABBITMQ_DEFAULT_PASS: nemo2020
+        ports:
+            - 5672:5672
+
+    web:
+        build:
+            context: .
+            dockerfile: Dockerfile-server
+        image: nemo/server:v2
+        container_name: nemo-server
+        ports:
+            - 5000:5000
+            - 5001:5001
+        working_dir: /opt/nemo
+        entrypoint:
+            - /opt/nemo/docker_start.sh
+            - server
+        links:
+            - mysql
+            - rabbitmq
+
