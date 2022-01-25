@@ -577,7 +577,7 @@ func getDomainAttrFullInfo(id int, disableFofa bool) DomainAttrFullInfo {
 	domainAttr := db.DomainAttr{RelatedId: id}
 	domainAttrData := domainAttr.GetsByRelatedId()
 	for _, da := range domainAttrData {
-		if disableFofa && da.Source == "fofa" {
+		if disableFofa && (da.Source == "fofa" || da.Source == "quake") {
 			continue
 		}
 		if da.Source == "fofa" {

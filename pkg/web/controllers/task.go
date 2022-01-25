@@ -72,6 +72,7 @@ type portscanRequestParam struct {
 	IsPortScan       bool   `form:"portscan"`
 	IsIPLocation     bool   `form:"iplocation"`
 	IsFofa           bool   `form:"fofasearch"`
+	IsQuake          bool   `form:"quakesearch"`
 	Port             string `form:"port"`
 	Rate             int    `form:"rate"`
 	NmapTech         string `form:"nmap_tech"`
@@ -100,6 +101,7 @@ type domainscanRequestParam struct {
 	IsSubnetPortscan bool   `form:"networkscan"`
 	IsCrawler        bool   `form:"crawler"`
 	IsFofa           bool   `form:"fofasearch"`
+	IsQuake          bool   `form:"quakesearch"`
 	IsScreenshot     bool   `form:"screenshot"`
 	IsICPQuery       bool   `form:"icpquery"`
 	IsWappalyzer     bool   `form:"wappalyzer"`
@@ -235,6 +237,13 @@ func (c *TaskController) StartPortScanTaskAction() {
 					return
 				}
 			}
+			// Quake
+			if req.IsQuake {
+				if taskId, err = c.doQuake(t, &req.OrgId, req.IsIPLocation, req.IsHttpx, req.IsWappalyzer, req.IsFingerprintHub, req.IsScreenshot, req.IsIconHash); err != nil {
+					c.FailedStatus(err.Error())
+					return
+				}
+			}
 		}
 	}
 	c.SucceededStatus(taskId)
@@ -347,6 +356,12 @@ func (c *TaskController) StartDomainScanTaskAction() {
 		}
 		if req.IsFofa {
 			if taskId, err = c.doFofa(t, &req.OrgId, true, req.IsHttpx, req.IsWappalyzer, req.IsFingerprintHub, req.IsScreenshot, req.IsIconHash); err != nil {
+				c.FailedStatus(err.Error())
+				return
+			}
+		}
+		if req.IsQuake {
+			if taskId, err = c.doQuake(t, &req.OrgId, true, req.IsHttpx, req.IsWappalyzer, req.IsFingerprintHub, req.IsScreenshot, req.IsIconHash); err != nil {
 				c.FailedStatus(err.Error())
 				return
 			}
@@ -538,7 +553,7 @@ func (c *TaskController) doBatchScan(target string, port string, req portscanReq
 	}
 	configJSON, err := json.Marshal(config)
 	if err != nil {
-		logging.RuntimeLog.Errorf("start portscan fail:%s", err.Error())
+		logging.RuntimeLog.Errorf("start batchscan fail:%s", err.Error())
 		return "", err
 	}
 	taskId, err = serverapi.NewTask("batchscan", string(configJSON))
@@ -573,7 +588,35 @@ func (c *TaskController) doFofa(target string, orgId *int, isIplocation, isHttp,
 	}
 	taskId, err = serverapi.NewTask("fofa", string(configJSON))
 	if err != nil {
-		logging.RuntimeLog.Errorf("start isIplocation fail:%s", err.Error())
+		logging.RuntimeLog.Errorf("start fofa fail:%s", err.Error())
+		return "", err
+	}
+	return taskId, nil
+}
+
+// doQuake Quake搜索
+func (c *TaskController) doQuake(target string, orgId *int, isIplocation, isHttp, isWappalyzer, isFingerprintHub, isScreenshot bool, isIconHash bool) (taskId string, err error) {
+	config := onlineapi.QuakeConfig{}
+	config.Target = target
+	config.OrgId = orgId
+	config.IsScreenshot = isScreenshot
+	config.IsHttpx = isHttp
+	config.IsIPLocation = isIplocation
+	config.IsWappalyzer = isWappalyzer
+	config.IsFingerprintHub = isFingerprintHub
+	// config.OrgId 为int，默认为0
+	// db.Organization.OrgId为指针，默认nil
+	if *config.OrgId == 0 {
+		config.OrgId = nil
+	}
+	configJSON, err := json.Marshal(config)
+	if err != nil {
+		logging.RuntimeLog.Errorf("quake fofa fail:%s", err.Error())
+		return "", err
+	}
+	taskId, err = serverapi.NewTask("quake", string(configJSON))
+	if err != nil {
+		logging.RuntimeLog.Errorf("start quake fail:%s", err.Error())
 		return "", err
 	}
 	return taskId, nil
@@ -589,7 +632,7 @@ func (c *TaskController) doICPQuery(target string) (taskId string, err error) {
 	}
 	taskId, err = serverapi.NewTask("icpquery", string(configJSON))
 	if err != nil {
-		logging.RuntimeLog.Errorf("start iplocation fail:%s", err.Error())
+		logging.RuntimeLog.Errorf("start icpquery fail:%s", err.Error())
 		return "", err
 	}
 	return taskId, nil

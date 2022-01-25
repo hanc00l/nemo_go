@@ -24,6 +24,10 @@ type FofaConfig struct {
 	IsIconHash       bool   `json:"iconhash"`
 }
 
+type QuakeConfig struct {
+	FofaConfig
+}
+
 type ICPQueryConfig struct {
 	Target string `json:"target"`
 }
@@ -83,91 +87,14 @@ func (ff *Fofa) parseFofaSearchResult(queryResult []byte) (result []fofaSearchRe
 	return result
 }
 
-// parseIpPort 解析搜索结果中的IP记录
-func (ff *Fofa) parseIpPort(fsr fofaSearchResult) {
-	if !utils.CheckIPV4(fsr.IP) {
-		return
-	}
-
-	if !ff.IpResult.HasIP(fsr.IP) {
-		ff.IpResult.SetIP(fsr.IP)
-	}
-	portNumber, _ := strconv.Atoi(fsr.Port)
-	if !ff.IpResult.HasPort(fsr.IP, portNumber) {
-		ff.IpResult.SetPort(fsr.IP, portNumber)
-	}
-	if fsr.Title != "" {
-		ff.IpResult.SetPortAttr(fsr.IP, portNumber, portscan.PortAttrResult{
-			Source:  "fofa",
-			Tag:     "title",
-			Content: fsr.Title,
-		})
-	}
-	if fsr.Server != "" {
-		ff.IpResult.SetPortAttr(fsr.IP, portNumber, portscan.PortAttrResult{
-			Source:  "fofa",
-			Tag:     "server",
-			Content: fsr.Server,
-		})
-	}
-	if fsr.Banner != "" {
-		ff.IpResult.SetPortAttr(fsr.IP, portNumber, portscan.PortAttrResult{
-			Source:  "fofa",
-			Tag:     "banner",
-			Content: fsr.Banner,
-		})
-	}
-}
-
-// parseDomainIP 解析搜索结果中的域名记录
-func (ff *Fofa) parseDomainIP(fsr fofaSearchResult) {
-	host := strings.Replace(fsr.Host, "https://", "", -1)
-	host = strings.Replace(host, "http://", "", -1)
-	host = strings.Replace(host, "/", "", -1)
-	domain := strings.Split(host, ":")[0]
-	if utils.CheckIPV4(domain) {
-		return
-	}
-
-	if !ff.DomainResult.HasDomain(domain) {
-		ff.DomainResult.SetDomain(domain)
-	}
-	ff.DomainResult.SetDomainAttr(domain, domainscan.DomainAttrResult{
-		Source:  "fofa",
-		Tag:     "A",
-		Content: fsr.IP,
-	})
-	if fsr.Title != "" {
-		ff.DomainResult.SetDomainAttr(domain, domainscan.DomainAttrResult{
-			Source:  "fofa",
-			Tag:     "title",
-			Content: fsr.Title,
-		})
-	}
-	if fsr.Server != "" {
-		ff.DomainResult.SetDomainAttr(domain, domainscan.DomainAttrResult{
-			Source:  "fofa",
-			Tag:     "server",
-			Content: fsr.Server,
-		})
-	}
-	if fsr.Banner != "" {
-		ff.DomainResult.SetDomainAttr(domain, domainscan.DomainAttrResult{
-			Source:  "fofa",
-			Tag:     "banner",
-			Content: fsr.Banner,
-		})
-	}
-}
-
 // parseResult 解析搜索结果
 func (ff *Fofa) parseResult() {
 	ff.IpResult = portscan.Result{IPResult: make(map[string]*portscan.IPResult)}
 	ff.DomainResult = domainscan.Result{DomainResult: make(map[string]*domainscan.DomainResult)}
 
 	for _, fsr := range ff.Result {
-		ff.parseIpPort(fsr)
-		ff.parseDomainIP(fsr)
+		parseIpPort(ff.IpResult, fsr, "fofa")
+		parseDomainIP(ff.DomainResult, fsr, "fofa")
 	}
 }
 
@@ -180,4 +107,135 @@ func (ff *Fofa) SaveResult() string {
 	domains := ff.DomainResult.SaveResult(domainscan.Config{OrgId: ff.Config.OrgId})
 
 	return fmt.Sprintf("%s,%s", ips, domains)
+}
+
+// parseQuakeSearchResult 解析Quake搜索结果
+func (q *Quake) parseQuakeSearchResult(queryResult []byte) (result []fofaSearchResult, finish bool) {
+	var serviceInfo ServiceInfo
+	err := json.Unmarshal(queryResult, &serviceInfo)
+	if err != nil {
+		//json数据反序列化失败
+		//如果是json: cannot unmarshal object into Go struct field ServiceInfo.data of type []struct { Time time.Time "json:\"time\""; Transport string "json:\"transport\""; Service struct { HTTP struct
+		//则基本上是API的key失效，或积分不足无法读取
+		logging.CLILog.Println(err)
+		return
+	}
+	if strings.HasPrefix(serviceInfo.Message, "Successful") == false {
+		logging.CLILog.Printf("Quake Search Error:%s", serviceInfo.Message)
+		return
+	}
+	for _, data := range serviceInfo.Data {
+		qsr := fofaSearchResult{
+			Host:   data.Service.HTTP.Host,
+			IP:     data.IP,
+			Port:   fmt.Sprintf("%d", data.Port),
+			Title:  data.Service.HTTP.Title,
+			Server: data.Service.HTTP.Server,
+		}
+		result = append(result, qsr)
+	}
+	// 如果是API有效、正确获取到数据，count为0，表示已是最后一页了
+	if serviceInfo.Meta.Pagination.Count == 0 {
+		finish = true
+	}
+	return
+}
+
+// parseResult 解析搜索结果
+func (q *Quake) parseResult() {
+	q.IpResult = portscan.Result{IPResult: make(map[string]*portscan.IPResult)}
+	q.DomainResult = domainscan.Result{DomainResult: make(map[string]*domainscan.DomainResult)}
+
+	for _, fsr := range q.Result {
+		parseIpPort(q.IpResult, fsr, "quake")
+		parseDomainIP(q.DomainResult, fsr, "quake")
+	}
+}
+
+// SaveResult 保存搜索结果
+func (q *Quake) SaveResult() string {
+	if conf.GlobalWorkerConfig().API.Quake.Key == "" {
+		return "no quake api"
+	}
+	ips := q.IpResult.SaveResult(portscan.Config{OrgId: q.Config.OrgId})
+	domains := q.DomainResult.SaveResult(domainscan.Config{OrgId: q.Config.OrgId})
+
+	return fmt.Sprintf("%s,%s", ips, domains)
+}
+
+// parseIpPort 解析搜索结果中的IP记录
+func parseIpPort(ipResult portscan.Result, fsr fofaSearchResult, source string) {
+	if fsr.IP == "" || !utils.CheckIPV4(fsr.IP) {
+		return
+	}
+
+	if !ipResult.HasIP(fsr.IP) {
+		ipResult.SetIP(fsr.IP)
+	}
+	portNumber, _ := strconv.Atoi(fsr.Port)
+	if !ipResult.HasPort(fsr.IP, portNumber) {
+		ipResult.SetPort(fsr.IP, portNumber)
+	}
+	if fsr.Title != "" {
+		ipResult.SetPortAttr(fsr.IP, portNumber, portscan.PortAttrResult{
+			Source:  source,
+			Tag:     "title",
+			Content: fsr.Title,
+		})
+	}
+	if fsr.Server != "" {
+		ipResult.SetPortAttr(fsr.IP, portNumber, portscan.PortAttrResult{
+			Source:  source,
+			Tag:     "server",
+			Content: fsr.Server,
+		})
+	}
+	if fsr.Banner != "" {
+		ipResult.SetPortAttr(fsr.IP, portNumber, portscan.PortAttrResult{
+			Source:  source,
+			Tag:     "banner",
+			Content: fsr.Banner,
+		})
+	}
+}
+
+// parseDomainIP 解析搜索结果中的域名记录
+func parseDomainIP(domainResult domainscan.Result, fsr fofaSearchResult, source string) {
+	host := strings.Replace(fsr.Host, "https://", "", -1)
+	host = strings.Replace(host, "http://", "", -1)
+	host = strings.Replace(host, "/", "", -1)
+	domain := strings.Split(host, ":")[0]
+	if domain == "" || utils.CheckIPV4(domain) || utils.CheckDomain(domain) == false {
+		return
+	}
+
+	if !domainResult.HasDomain(domain) {
+		domainResult.SetDomain(domain)
+	}
+	domainResult.SetDomainAttr(domain, domainscan.DomainAttrResult{
+		Source:  source,
+		Tag:     "A",
+		Content: fsr.IP,
+	})
+	if fsr.Title != "" {
+		domainResult.SetDomainAttr(domain, domainscan.DomainAttrResult{
+			Source:  source,
+			Tag:     "title",
+			Content: fsr.Title,
+		})
+	}
+	if fsr.Server != "" {
+		domainResult.SetDomainAttr(domain, domainscan.DomainAttrResult{
+			Source:  source,
+			Tag:     "server",
+			Content: fsr.Server,
+		})
+	}
+	if fsr.Banner != "" {
+		domainResult.SetDomainAttr(domain, domainscan.DomainAttrResult{
+			Source:  source,
+			Tag:     "banner",
+			Content: fsr.Banner,
+		})
+	}
 }

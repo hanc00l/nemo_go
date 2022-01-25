@@ -517,7 +517,7 @@ func getPortInfo(ip string, ipId int, disableFofa bool) (r PortInfo) {
 		portAttrData := portAttr.GetsByRelatedId()
 		FirstRow := true
 		for _, pad := range portAttrData {
-			if disableFofa && pad.Source == "fofa" {
+			if disableFofa && (pad.Source == "fofa" || pad.Source=="quake"){
 				continue
 			}
 			pai := PortAttrInfo{}

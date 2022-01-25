@@ -236,7 +236,7 @@ func NewFofa(config FofaConfig) *Fofa {
 // Do 执行fofa
 func (ff *Fofa) Do() {
 	if conf.GlobalWorkerConfig().API.Fofa.Key == "" || conf.GlobalWorkerConfig().API.Fofa.Name == "" {
-		logging.RuntimeLog.Error("no fofa api,exit fofa search")
+		logging.RuntimeLog.Error("no fofa api key,exit fofa search")
 		return
 	}
 	for _, line := range strings.Split(ff.Config.Target, ",") {
@@ -262,9 +262,9 @@ func (ff *Fofa) RunFofa(domain string) {
 	var query string
 	fields := "domain,host,ip,port,title,country,city,server,banner"
 	if utils.CheckIPV4(domain) || utils.CheckIPV4Subnet(domain) {
-		query = fmt.Sprintf("ip=\"%s\" || host=\"%s\"", ff.Config.Target, ff.Config.Target)
+		query = fmt.Sprintf("ip=\"%s\" || host=\"%s\"", domain, domain)
 	} else {
-		query = fmt.Sprintf("domain=\"%s\" || host=\"%s\" || cert=\"%s\"", ff.Config.Target, ff.Config.Target, ff.Config.Target)
+		query = fmt.Sprintf("domain=\"%s\" || host=\"%s\" || cert=\"%s\"", domain, domain,domain)
 	}
 	// 查询前10页总共1000条记录
 	for i := 1; i <= 10; i++ {

@@ -27,6 +27,7 @@ var taskMaps = map[string]interface{}{
 	"domainscan": DomainScan,
 	"iplocation": IPLocation,
 	"fofa":       Fofa,
+	"quake":      Quake,
 	"xray":       PocScan,
 	"pocsuite":   PocScan,
 	"dirsearch":  PocScan,

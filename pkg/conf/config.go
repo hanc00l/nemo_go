@@ -98,8 +98,9 @@ type Task struct {
 }
 
 type API struct {
-	Fofa APIKey `yaml:"fofa"`
-	ICP  APIKey `yaml:"icp"`
+	Fofa  APIKey `yaml:"fofa"`
+	ICP   APIKey `yaml:"icp"`
+	Quake APIKey `yaml:"quake"`
 }
 
 type APIKey struct {
