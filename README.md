@@ -35,7 +35,7 @@ Nemo是用来进行自动化信息收集的一个简单平台，通过集成常�
 
 ### 4、API接口 （需提供相应的Key)
 
-- [Fofa](https://fofa.so/) 
+- [Fofa](https://fofa.info/) 
 - [ICP备案信息](http://icp.chinaz.com/) 
 - [Quake](https://quake.360.cn)
 
@@ -106,6 +106,7 @@ Tested on [ubuntu18.04/20.04 LTS](docs/install_linux.md)、[macOS](docs/install_
 
 ## 版本更新
 
+- 2.4.16：2022-2-18，修改Fofa的API接口（fofa.so->fofa.info），去除只获取前1000条的限制（获取的记录数量由API的会员等级决定）；
 - 2.4.15：2022-1-25，增加[Quake](https://quake.360.cn/)资产接口（需要**“会员”**级别的API KEY；在worker.yml中增加quake的key）；
 - 2.4.14：2022-1-12，增加Server和Worker的Docker构建文件，提高worker部署的伸缩性；
 - 2.4.13：2022-1-8，增加导入fscan的扫描结果（由于只有txt方式，通过正则匹配提取IP、端口及一些重要信息，不保证百分百全部导入）；

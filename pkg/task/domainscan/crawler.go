@@ -2,7 +2,9 @@ package domainscan
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
+	"github.com/go-resty/resty/v2"
 	"github.com/hanc00l/crawlergo/pkg"
 	"github.com/hanc00l/crawlergo/pkg/config"
 	"github.com/hanc00l/crawlergo/pkg/logger"
@@ -22,6 +24,16 @@ import (
 type Crawler struct {
 	Config Config
 	Result Result
+}
+
+type UrlResponse struct {
+	URL              string
+	Method           string
+	Headers          map[string]interface{}
+	PostData         string
+	StatusCode       int
+	ContentLength    int64
+	RedirectLocation string
 }
 
 // NewCrawler 创建Crawler对象
@@ -224,4 +236,110 @@ func findExecPath() string {
 	// Fall back to something simple and sensible, to give a useful error
 	// message.
 	return ""
+}
+
+func (c *Crawler) CheckRequest(req model2.Request) (urlResp UrlResponse, err error) {
+	client := resty.New().
+		SetRedirectPolicy(resty.NoRedirectPolicy())
+		//.SetProxy("http://127.0.0.1:8080")
+	r := client.NewRequest()
+
+	if len(req.Headers) > 0 {
+		for k, v := range req.Headers {
+			r.SetHeader(k, fmt.Sprintf("%v", v))
+		}
+	}
+	if len(req.PostData) > 0 {
+		r.SetBody(req.PostData)
+	}
+	var resp *resty.Response
+	if req.Method == "POST" {
+		resp, err = r.Post(req.URL.String())
+	} else {
+		resp, err = r.Get(req.URL.String())
+	}
+	if err != nil {
+		//忽略 301、302跳转错误
+		if strings.Index(err.Error(), "auto redirect is disabled") >= 0 {
+			err = nil
+			urlResp.RedirectLocation = resp.Header().Get("Location")
+		} else {
+			return
+		}
+	}
+	if resp.StatusCode() >= 200 && resp.StatusCode() < 500 && resp.StatusCode() != 404 {
+		urlResp.StatusCode = resp.StatusCode()
+		urlResp.ContentLength = resp.Size()
+		urlResp.URL = req.URL.String()
+		urlResp.PostData = req.PostData
+		urlResp.Headers = req.Headers
+		urlResp.Method = req.Method
+	} else {
+		err = errors.New("ignore status")
+	}
+	return
+}
+
+// RunCrawler2 爬取一个网站
+func (c *Crawler) RunCrawler2(domainUrl string) {
+	taskConfig := initTaskConfig()
+	option := getOption(&taskConfig)
+	if taskConfig.ChromiumPath == "" {
+		logging.RuntimeLog.Error("no chrome or chromium-browser found in default path")
+		logging.CLILog.Error("no chrome or chromium-browser found in default path")
+		return
+	}
+	signalChan := make(chan os.Signal, 1)
+	signal.Notify(signalChan, os.Interrupt)
+	// 设置Crawler的日志输出级别
+	logger.Logger.SetLevel(logrus.InfoLevel)
+	logger.Logger.SetFormatter(logging.GetCustomLoggerFormatter())
+	// 格式化target
+	var targets []*model2.Request
+	url, err := model2.GetUrl(domainUrl)
+	if err != nil {
+		logging.CLILog.Error(err)
+		return
+	}
+	req := model2.GetRequest(config.GET, url, option)
+	targets = append(targets, &req)
+	// 开始爬虫任务
+	task, err := pkg.NewCrawlerTask(targets, taskConfig)
+	if err != nil {
+		logging.RuntimeLog.Error(fmt.Sprintf("create crawler task failed:%s.", domainUrl))
+		return
+	}
+	go handleExit(task, signalChan)
+	logging.CLILog.Info(fmt.Sprintf("Start crawling %s...", domainUrl))
+	task.Run()
+	result := task.Result
+	logging.CLILog.Info(fmt.Sprintf("Task finished, %d results, %d requests, %d subdomains, %d domains found.",
+		len(result.ReqList), len(result.AllReqList), len(result.SubDomainList), len(result.AllDomainList)))
+	// 结果解析
+	//c.parseResult(result.SubDomainList)
+	crawlerRequestCheckThreadNumber := 10
+	requestMaxFound := 500
+	swg := sizedwaitgroup.New(crawlerRequestCheckThreadNumber)
+	requestNum := len(result.ReqList)
+	if requestNum > requestMaxFound {
+		logging.CLILog.Infof("%s has found too many requests :%d,discard...", domainUrl, requestNum)
+		logging.RuntimeLog.Infof("%s has found too many requests :%d,discard...", domainUrl, requestNum)
+		return
+	}
+	for _, r := range result.ReqList {
+		if r.Source == "JavaScript" {
+			swg.Add()
+			go func(req model2.Request) {
+				defer swg.Done()
+				urlResponse, err := c.CheckRequest(req)
+				if err != nil {
+					return
+				}
+				c.Result.Lock()
+				c.Result.ReqResponseList = append(c.Result.ReqResponseList, urlResponse)
+				c.Result.Unlock()
+			}(*r)
+		}
+	}
+	swg.Wait()
 }

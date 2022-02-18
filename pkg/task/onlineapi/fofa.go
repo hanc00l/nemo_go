@@ -77,7 +77,9 @@ type User struct {
 type Results []result
 
 const (
-	defaultAPIUrl = "https://fofa.so/api/v1/search/all?"
+	//defaultAPIUrl = "https://fofa.so/api/v1/search/all?"
+	// fofa api changed:
+	defaultAPIUrl = "https://fofa.info/api/v1/search/all?"
 )
 
 var (
@@ -118,7 +120,7 @@ func (ff *Fofa) Get(u string) ([]byte, error) {
 
 // QueryAsJSON make a fofa query and return json data as result
 // echo 'domain="nosec.org"' | base64 - | xargs -I{}
-// curl "https://fofa.so/api/v1/search/all?email=${FOFA_EMAIL}&key=${FOFA_KEY}&qbase64={}"
+// curl "https://fofa.info/api/v1/search/all?email=${FOFA_EMAIL}&key=${FOFA_KEY}&qbase64={}"
 // host title ip domain port country city
 func (ff *Fofa) QueryAsJSON(page uint, args ...[]byte) ([]byte, error) {
 	var (
@@ -159,7 +161,7 @@ func (ff *Fofa) QueryAsJSON(page uint, args ...[]byte) ([]byte, error) {
 // QueryAsArray make a fofa query and
 // return array data as result
 // echo 'domain="nosec.org"' | base64 - | xargs -I{}
-// curl "https://fofa.so/api/v1/search/all?email=${FOFA_EMAIL}&key=${FOFA_KEY}&qbase64={}"
+// curl "https://fofa.info/api/v1/search/all?email=${FOFA_EMAIL}&key=${FOFA_KEY}&qbase64={}"
 func (ff *Fofa) QueryAsArray(page uint, args ...[]byte) (result Results, err error) {
 
 	var content []byte
@@ -182,7 +184,8 @@ func (ff *Fofa) QueryAsArray(page uint, args ...[]byte) (result Results, err err
 // UserInfo get user information
 func (ff *Fofa) UserInfo() (user *User, err error) {
 	user = new(User)
-	queryStr := strings.Join([]string{"https://fofa.so/api/v1/info/my?email=", string(ff.email), "&key=", string(ff.key)}, "")
+	//queryStr := strings.Join([]string{"https://fofa.so/api/v1/info/my?email=", string(ff.email), "&key=", string(ff.key)}, "")
+	queryStr := strings.Join([]string{"https://fofa.info/api/v1/info/my?email=", string(ff.email), "&key=", string(ff.key)}, "")
 
 	content, err := ff.Get(queryStr)
 
@@ -264,22 +267,37 @@ func (ff *Fofa) RunFofa(domain string) {
 	if utils.CheckIPV4(domain) || utils.CheckIPV4Subnet(domain) {
 		query = fmt.Sprintf("ip=\"%s\" || host=\"%s\"", domain, domain)
 	} else {
-		query = fmt.Sprintf("domain=\"%s\" || host=\"%s\" || cert=\"%s\"", domain, domain,domain)
+		query = fmt.Sprintf("domain=\"%s\" || host=\"%s\" || cert=\"%s\"", domain, domain, domain)
 	}
-	// 查询前10页总共1000条记录
-	for i := 1; i <= 10; i++ {
-		ret, err := clt.QueryAsJSON(uint(i), []byte(query), []byte(fields))
-		//fmt.Println(string(ret))
-		if err != nil {
-			logging.RuntimeLog.Error(err.Error())
-			break
-		}
-		pageResult := ff.parseFofaSearchResult(ret)
-		if len(pageResult) <= 0 {
-			break
-		}
+	// 查询第1页，并获取总共记录数量
+	pageResult, sizeTotal := ff.retriedFofaSearch(clt, 1, query, fields)
+	ff.Result = append(ff.Result, pageResult...)
+	// 计算需要查询的页数
+	pageTotalNum := sizeTotal / 100
+	if sizeTotal%100 > 0 {
+		pageTotalNum++
+	}
+	for i := 2; i <= pageTotalNum; i++ {
+		pageResult, _ = ff.retriedFofaSearch(clt, i, query, fields)
 		ff.Result = append(ff.Result, pageResult...)
 	}
+
 	// 解析结果
 	ff.parseResult()
+}
+
+func (ff *Fofa) retriedFofaSearch(clt *Fofa, page int, query string, fields string) (pageResult []fofaSearchResult, sizeTotal int) {
+	RETRIED := 3
+	for j := 0; j < RETRIED; j++ {
+		ret, err := clt.QueryAsJSON(uint(page), []byte(query), []byte(fields))
+		if err != nil {
+			logging.RuntimeLog.Error(err.Error())
+			continue
+		}
+		pageResult, sizeTotal = ff.parseFofaSearchResult(ret)
+		if len(pageResult) > 0 {
+			break
+		}
+	}
+	return
 }

@@ -9,11 +9,11 @@ func TestFofa_Run(t *testing.T) {
 	fofa1.SaveResult()
 }
 func TestFofa_Run2(t *testing.T) {
-
 	config2 := FofaConfig{Target: "800best.com"}
+	//config2 := FofaConfig{Target: "10086.cn"}
 	fofa2 := NewFofa(config2)
 	fofa2.Do()
-	t.Log(fofa2.SaveResult())
+	//t.Log(fofa2.SaveResult())
 	t.Log(fofa2.Result)
 	t.Log(fofa2.IpResult)
 

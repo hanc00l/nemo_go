@@ -46,6 +46,9 @@ type fofaSearchResult struct {
 
 type fofaQueryResult struct {
 	Results [][]string `json:"results"`
+	Size    int        `json:"size"`
+	Page    int        `json:"page"`
+	Mode    string     `json:"mode"`
 }
 
 type icpQueryResult struct {
@@ -66,13 +69,14 @@ type ICPInfo struct {
 }
 
 // parseFofaSearchResult 转换FOFA搜索结果
-func (ff *Fofa) parseFofaSearchResult(queryResult []byte) (result []fofaSearchResult) {
+func (ff *Fofa) parseFofaSearchResult(queryResult []byte) (result []fofaSearchResult,sizeTotal int) {
 	r := fofaQueryResult{}
 	err := json.Unmarshal(queryResult, &r)
 	if err != nil {
 		logging.RuntimeLog.Error(err.Error())
-		return result
+		return
 	}
+	sizeTotal = r.Size
 	for _, line := range r.Results {
 		fsr := fofaSearchResult{
 			Domain: line[0], Host: line[1], IP: line[2], Port: line[3], Title: line[4],
@@ -84,7 +88,7 @@ func (ff *Fofa) parseFofaSearchResult(queryResult []byte) (result []fofaSearchRe
 		result = append(result, fsr)
 	}
 
-	return result
+	return
 }
 
 // parseResult 解析搜索结果

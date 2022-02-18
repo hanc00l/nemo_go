@@ -48,7 +48,8 @@ type DomainResult struct {
 //Result 域名结果
 type Result struct {
 	sync.RWMutex
-	DomainResult map[string]*DomainResult
+	DomainResult    map[string]*DomainResult
+	ReqResponseList []UrlResponse
 }
 
 func (r *Result) HasDomain(domain string) bool {
