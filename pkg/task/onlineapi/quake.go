@@ -18,21 +18,14 @@ import (
 
 type Quake struct {
 	//Config 配置参数：查询的目标、关联的组织
-	Config QuakeConfig
+	Config OnlineAPIConfig
 	//Result quake api查询后的结果
-	Result []fofaSearchResult
+	Result []onlineSearchResult
 	//DomainResult 整理后的域名结果
 	DomainResult domainscan.Result
 	//IpResult 整理后的IP结果
 	IpResult portscan.Result
 }
-
-var (
-	userAgent        = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/84.0.4147.125 Safari/537.36"
-	serviceSearchUrl = "https://quake.360.cn/api/v3/search/quake_service"
-	pageSize         = 100
-	maxPage          = 10
-)
 
 type quakePostData struct {
 	Query       string   `json:"query"`
@@ -44,8 +37,8 @@ type quakePostData struct {
 	Include     []string `json:"include"`
 }
 
-// ServiceInfo Quake查询返回数据 from https://github.com/YetClass/QuakeAPI
-type ServiceInfo struct {
+// QuakeServiceInfo Quake查询返回数据 from https://github.com/YetClass/QuakeAPI
+type QuakeServiceInfo struct {
 	//Code:在查询成功时为0（整形），在失败时为p00XX为字符串，因此无法保证正确unmarshal，因此取消code，用Message来判断
 	//Code    int    `json:"code"`
 	Message string `json:"message"`
@@ -120,7 +113,7 @@ type ServiceInfo struct {
 }
 
 // NewQuake 创建Quake对象
-func NewQuake(config QuakeConfig) *Quake {
+func NewQuake(config OnlineAPIConfig) *Quake {
 	return &Quake{Config: config}
 }
 
@@ -155,6 +148,7 @@ func (q *Quake) RunQuake(domain string) {
 			//Proxy:           http.ProxyURL(proxy),
 		}}
 	// 分页查询
+	maxPage := 10
 	for i := 0; i < maxPage; i++ {
 		pageResult, finish := q.retriedPageSearch(client, query, i)
 		if len(pageResult) > 0 {
@@ -167,7 +161,7 @@ func (q *Quake) RunQuake(domain string) {
 	q.parseResult()
 }
 
-func (q *Quake) retriedPageSearch(client *http.Client, query string, page int) (result []fofaSearchResult, finish bool) {
+func (q *Quake) retriedPageSearch(client *http.Client, query string, page int) (result []onlineSearchResult, finish bool) {
 	RetryNumber := 3
 	for i := 0; i < RetryNumber; i++ {
 		data := quakePostData{
@@ -211,7 +205,7 @@ func (q *Quake) retriedPageSearch(client *http.Client, query string, page int) (
 
 // sendRequest 发送查询的HTTP请求
 func (q *Quake) sendRequest(client *http.Client, dataBytes []byte) ([]byte, error) {
-	request, err := http.NewRequest("POST", serviceSearchUrl, bytes.NewBuffer(dataBytes))
+	request, err := http.NewRequest("POST", "https://quake.360.cn/api/v3/search/quake_service", bytes.NewBuffer(dataBytes))
 	defer request.Body.Close()
 	if err != nil {
 		return nil, err

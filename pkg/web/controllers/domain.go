@@ -196,8 +196,8 @@ func (c *DomainController) DeleteDomainAttrAction() {
 	c.MakeStatusResponse(domainAttr.Delete())
 }
 
-// DeleteDomainFofaAttrAction 删除fofa属性
-func (c *DomainController) DeleteDomainFofaAttrAction() {
+// DeleteDomainOnlineAPIAttrAction 删除fofa等属性
+func (c *DomainController) DeleteDomainOnlineAPIAttrAction() {
 	defer c.ServeJSON()
 
 	id, err := c.GetInt("id")
@@ -206,8 +206,10 @@ func (c *DomainController) DeleteDomainFofaAttrAction() {
 		c.MakeStatusResponse(false)
 		return
 	}
-	domainAttr := db.DomainAttr{RelatedId: id, Source: "fofa"}
-	c.MakeStatusResponse(domainAttr.DeleteByRelatedIDAndSource())
+	for _, source := range []string{"fofa", "hunter", "quake"} {
+		domainAttr := db.DomainAttr{RelatedId: id, Source: source}
+		c.MakeStatusResponse(domainAttr.DeleteByRelatedIDAndSource())
+	}
 }
 
 // ExportMemoAction 导出备忘录信息
@@ -577,10 +579,10 @@ func getDomainAttrFullInfo(id int, disableFofa bool) DomainAttrFullInfo {
 	domainAttr := db.DomainAttr{RelatedId: id}
 	domainAttrData := domainAttr.GetsByRelatedId()
 	for _, da := range domainAttrData {
-		if disableFofa && (da.Source == "fofa" || da.Source == "quake") {
+		if disableFofa && (da.Source == "fofa" || da.Source == "quake" || da.Source == "hunter") {
 			continue
 		}
-		if da.Source == "fofa" {
+		if da.Source == "fofa" || da.Source == "quake" || da.Source == "hunter" {
 			fofaInfo[da.Tag] = da.Content
 		}
 		if da.Tag == "A" {
@@ -663,7 +665,7 @@ func getDomainAttrFullInfo(id int, disableFofa bool) DomainAttrFullInfo {
 		fofaContent, _ := json.Marshal(fofaInfo)
 		r.DomainAttr = append(r.DomainAttr, DomainAttrInfo{
 			Id:      id,
-			Tag:     "fofa",
+			Tag:     "OnlineAPI",
 			Content: string(fofaContent),
 		})
 	}

@@ -69,15 +69,6 @@ func (i *ICPQuery) LookupICP(domain string) *ICPInfo {
 	return nil
 }
 
-//// UploadICPInfo 上传查询到的ICP备案信息到server
-//func (i *ICPQuery) UploadICPInfo() string {
-//	if i.QueriedICPInfo != nil && len(i.QueriedICPInfo) > 0 {
-//		data, _ := json.Marshal(i.QueriedICPInfo)
-//		comm.DoUploadICPInfo(data)
-//	}
-//	return fmt.Sprintf("icp:%d", i.cachedICpInfoNum)
-//}
-
 // SaveLocalICPInfo 保存icp信息
 func (i *ICPQuery) SaveLocalICPInfo() bool {
 	data, _ := json.Marshal(i.ICPMap)

@@ -3,14 +3,26 @@ package onlineapi
 import "testing"
 
 func TestFofa_Run(t *testing.T) {
-	config1 := FofaConfig{Target: "47.98.181.116"}
+	config1 := OnlineAPIConfig{Target: "47.98.181.116"}
 	fofa1 := NewFofa(config1)
 	fofa1.Do()
-	fofa1.SaveResult()
+	//fofa1.SaveResult()
+	for ip, ipr := range fofa1.IpResult.IPResult {
+		t.Log(ip, ipr)
+		for port, pat := range ipr.Ports {
+			t.Log(port, pat)
+		}
+	}
+	for domain, dar := range fofa1.DomainResult.DomainResult {
+		t.Log(domain, dar)
+		//for _, a := range dar.DomainAttrs {
+		//	t.Log(a)
+		//}
+	}
 }
 func TestFofa_Run2(t *testing.T) {
-	config2 := FofaConfig{Target: "800best.com"}
-	//config2 := FofaConfig{Target: "10086.cn"}
+	config2 := OnlineAPIConfig{Target: "800best.com"}
+	//config2 := OnlineAPIConfig{Target: "10086.cn"}
 	fofa2 := NewFofa(config2)
 	fofa2.Do()
 	//t.Log(fofa2.SaveResult())

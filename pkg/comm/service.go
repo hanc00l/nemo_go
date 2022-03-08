@@ -22,6 +22,7 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+	"sync"
 	"time"
 )
 
@@ -57,6 +58,9 @@ type NewTaskArgs struct {
 
 // globalXClient 全局的RPC连接（长连接方式）
 var globalXClient client.XClient
+// 数据库操作的同步锁
+var saveIPMutex sync.RWMutex
+var saveDomainMutex sync.RWMutex
 
 // NewXClient 获取一个RPC连接
 func NewXClient() client.XClient {
@@ -79,7 +83,11 @@ func (s *Service) SaveScanResult(ctx context.Context, args *ScanResultArgs, repl
 		r := portscan.Result{
 			IPResult: args.IPResult,
 		}
+
+		saveIPMutex.Lock()
 		msg = append(msg, r.SaveResult(*args.IPConfig))
+		saveIPMutex.Unlock()
+
 		if len(args.IPResult) > 0 {
 			saveTaskResult(args.TaskID, args.IPResult)
 		}
@@ -88,7 +96,11 @@ func (s *Service) SaveScanResult(ctx context.Context, args *ScanResultArgs, repl
 		r := domainscan.Result{
 			DomainResult: args.DomainResult,
 		}
+
+		saveDomainMutex.Lock()
 		msg = append(msg, r.SaveResult(*args.DomainConfig))
+		saveDomainMutex.Unlock()
+
 		if len(args.DomainResult) > 0 {
 			saveTaskResult(args.TaskID, args.DomainResult)
 		}

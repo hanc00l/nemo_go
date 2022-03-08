@@ -160,7 +160,7 @@ func (c *IPController) InfoAction() {
 		// 修改背景色为交叉显示
 		if len(ipInfo.PortAttr) > 0 {
 			tableBackgroundSet := false
-			for i, _ := range ipInfo.PortAttr {
+			for i := range ipInfo.PortAttr {
 				if ipInfo.PortAttr[i].IP != "" && ipInfo.PortAttr[i].Port != "" {
 					tableBackgroundSet = !tableBackgroundSet
 				}
@@ -517,7 +517,7 @@ func getPortInfo(ip string, ipId int, disableFofa bool) (r PortInfo) {
 		portAttrData := portAttr.GetsByRelatedId()
 		FirstRow := true
 		for _, pad := range portAttrData {
-			if disableFofa && (pad.Source == "fofa" || pad.Source=="quake"){
+			if disableFofa && (pad.Source == "fofa" || pad.Source == "quake" || pad.Source == "hunter") {
 				continue
 			}
 			pai := PortAttrInfo{}
@@ -536,7 +536,7 @@ func getPortInfo(ip string, ipId int, disableFofa bool) (r PortInfo) {
 			}
 			if pad.Source == "fofa" {
 				fofaSearch := fmt.Sprintf(`ip="%s" && port="%d"`, ip, pd.PortNum)
-				pai.FofaLink = fmt.Sprintf("https://fofa.so/result?qbase64=%s", base64.URLEncoding.EncodeToString([]byte(fofaSearch)))
+				pai.FofaLink = fmt.Sprintf("https://fofa.info/result?qbase64=%s", base64.URLEncoding.EncodeToString([]byte(fofaSearch)))
 			}
 			r.PortAttr = append(r.PortAttr, pai)
 			if pad.Tag == "title" {
@@ -639,7 +639,8 @@ func getIPInfo(ipName string, disableFofa bool) (r IPInfo) {
 	//
 	r.IconHash = utils.SetToSlice(portInfo.IconHashSet)
 	r.TlsData = utils.SetToSlice(portInfo.TlsDataSet)
-
+	//
+	r.Domain = getIpRelatedDomain(ipName)
 	return
 }
 
@@ -705,4 +706,19 @@ func (c *IPController) getMemoData(req ipRequestParam) (r []string) {
 		r = append(r, fmt.Sprintf("%s\n", memo.Content))
 	}
 	return
+}
+
+// getIpRelatedDomain 获取IP关联的域名
+func getIpRelatedDomain(ipName string) []string {
+	domain := db.Domain{}
+	searchMap := make(map[string]interface{})
+	searchMap["ip"] = ipName
+	rows, _ := domain.Gets(searchMap, -1, -1)
+	domains := make(map[string]struct{})
+	for _, r := range rows {
+		if _, ok := domains[r.DomainName]; !ok {
+			domains[r.DomainName] = struct{}{}
+		}
+	}
+	return utils.SetToSlice(domains)
 }

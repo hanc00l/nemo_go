@@ -31,6 +31,7 @@ $(function () {
                     'portscan': $('#checkbox_portscan').is(":checked"),
                     'fofasearch': $('#checkbox_fofasearch').is(":checked"),
                     'quakesearch': $('#checkbox_quakesearch').is(":checked"),
+                    'huntersearch': $('#checkbox_huntersearch').is(":checked"),
                     'networkscan': $('#checkbox_networkscan').is(":checked"),
                     'taskmode': $('#select_taskmode').val(),
                     'porttaskmode': $('#select_porttaskmode').val(),

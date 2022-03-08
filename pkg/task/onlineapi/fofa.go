@@ -43,9 +43,9 @@ type Fofa struct {
 	*http.Client
 
 	//Config 配置参数：查询的目标、关联的组织
-	Config FofaConfig
+	Config OnlineAPIConfig
 	//Result 查询结果
-	Result []fofaSearchResult
+	Result []onlineSearchResult
 	//DomainResult 整理后的域名结果
 	DomainResult domainscan.Result
 	//IpResult 整理后的IP结果
@@ -232,7 +232,7 @@ func (r *Results) String() string {
 }
 
 // NewFofa 创建Fofa对象
-func NewFofa(config FofaConfig) *Fofa {
+func NewFofa(config OnlineAPIConfig) *Fofa {
 	return &Fofa{Config: config}
 }
 
@@ -273,20 +273,19 @@ func (ff *Fofa) RunFofa(domain string) {
 	pageResult, sizeTotal := ff.retriedFofaSearch(clt, 1, query, fields)
 	ff.Result = append(ff.Result, pageResult...)
 	// 计算需要查询的页数
-	pageTotalNum := sizeTotal / 100
-	if sizeTotal%100 > 0 {
+	pageTotalNum := sizeTotal / pageSize
+	if sizeTotal%pageSize > 0 {
 		pageTotalNum++
 	}
 	for i := 2; i <= pageTotalNum; i++ {
 		pageResult, _ = ff.retriedFofaSearch(clt, i, query, fields)
 		ff.Result = append(ff.Result, pageResult...)
 	}
-
 	// 解析结果
 	ff.parseResult()
 }
 
-func (ff *Fofa) retriedFofaSearch(clt *Fofa, page int, query string, fields string) (pageResult []fofaSearchResult, sizeTotal int) {
+func (ff *Fofa) retriedFofaSearch(clt *Fofa, page int, query string, fields string) (pageResult []onlineSearchResult, sizeTotal int) {
 	RETRIED := 3
 	for j := 0; j < RETRIED; j++ {
 		ret, err := clt.QueryAsJSON(uint(page), []byte(query), []byte(fields))

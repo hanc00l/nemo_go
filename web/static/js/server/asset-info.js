@@ -40,8 +40,8 @@ function delete_domain_attr(id) {
     delete_op('/domain-attr-delete', id);
 }
 
-function delete_domain_fofa_attr(id) {
-    delete_op('/domain-fofa-attr-delete', id);
+function delete_domain_onlineapi_attr(id) {
+    delete_op('/domain-onlineapi-attr-delete', id);
 }
 
 

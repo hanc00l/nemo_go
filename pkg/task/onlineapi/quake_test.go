@@ -48,7 +48,7 @@ func TestQuake_RunQuake2(t *testing.T) {
 }
 
 func TestQuake_Do(t *testing.T) {
-	config := QuakeConfig{}
+	config := OnlineAPIConfig{}
 	config.Target = "47.98.181.116"
 	q := NewQuake(config)
 	q.Do()
@@ -56,7 +56,7 @@ func TestQuake_Do(t *testing.T) {
 }
 
 func TestQuake_Do2(t *testing.T) {
-	config := QuakeConfig{}
+	config := OnlineAPIConfig{}
 	config.Target = "10086.cn"
 	q := NewQuake(config)
 	q.Do()

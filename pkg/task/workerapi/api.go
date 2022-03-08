@@ -28,6 +28,7 @@ var taskMaps = map[string]interface{}{
 	"iplocation": IPLocation,
 	"fofa":       Fofa,
 	"quake":      Quake,
+	"hunter":     Hunter,
 	"xray":       PocScan,
 	"pocsuite":   PocScan,
 	"dirsearch":  PocScan,

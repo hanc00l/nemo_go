@@ -12,7 +12,7 @@ import (
 	"strings"
 )
 
-type FofaConfig struct {
+type OnlineAPIConfig struct {
 	Target           string `json:"target"`
 	OrgId            *int   `json:"orgId"`
 	IsIPLocation     bool   `json:"ipLocation"`
@@ -24,15 +24,11 @@ type FofaConfig struct {
 	IsIconHash       bool   `json:"iconhash"`
 }
 
-type QuakeConfig struct {
-	FofaConfig
-}
-
 type ICPQueryConfig struct {
 	Target string `json:"target"`
 }
 
-type fofaSearchResult struct {
+type onlineSearchResult struct {
 	Domain  string
 	Host    string
 	IP      string
@@ -68,8 +64,13 @@ type ICPInfo struct {
 	VerifyTime  string `json:"VerifyTime"`
 }
 
+var (
+	userAgent             = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/84.0.4147.125 Safari/537.36"
+	pageSize              = 100
+)
+
 // parseFofaSearchResult 转换FOFA搜索结果
-func (ff *Fofa) parseFofaSearchResult(queryResult []byte) (result []fofaSearchResult,sizeTotal int) {
+func (ff *Fofa) parseFofaSearchResult(queryResult []byte) (result []onlineSearchResult, sizeTotal int) {
 	r := fofaQueryResult{}
 	err := json.Unmarshal(queryResult, &r)
 	if err != nil {
@@ -78,7 +79,7 @@ func (ff *Fofa) parseFofaSearchResult(queryResult []byte) (result []fofaSearchRe
 	}
 	sizeTotal = r.Size
 	for _, line := range r.Results {
-		fsr := fofaSearchResult{
+		fsr := onlineSearchResult{
 			Domain: line[0], Host: line[1], IP: line[2], Port: line[3], Title: line[4],
 			Country: line[5], City: line[6], Server: line[7], Banner: line[8],
 		}
@@ -114,12 +115,12 @@ func (ff *Fofa) SaveResult() string {
 }
 
 // parseQuakeSearchResult 解析Quake搜索结果
-func (q *Quake) parseQuakeSearchResult(queryResult []byte) (result []fofaSearchResult, finish bool) {
-	var serviceInfo ServiceInfo
+func (q *Quake) parseQuakeSearchResult(queryResult []byte) (result []onlineSearchResult, finish bool) {
+	var serviceInfo QuakeServiceInfo
 	err := json.Unmarshal(queryResult, &serviceInfo)
 	if err != nil {
 		//json数据反序列化失败
-		//如果是json: cannot unmarshal object into Go struct field ServiceInfo.data of type []struct { Time time.Time "json:\"time\""; Transport string "json:\"transport\""; Service struct { HTTP struct
+		//如果是json: cannot unmarshal object into Go struct field QuakeServiceInfo.data of type []struct { Time time.Time "json:\"time\""; Transport string "json:\"transport\""; Service struct { HTTP struct
 		//则基本上是API的key失效，或积分不足无法读取
 		logging.CLILog.Println(err)
 		return
@@ -129,7 +130,7 @@ func (q *Quake) parseQuakeSearchResult(queryResult []byte) (result []fofaSearchR
 		return
 	}
 	for _, data := range serviceInfo.Data {
-		qsr := fofaSearchResult{
+		qsr := onlineSearchResult{
 			Host:   data.Service.HTTP.Host,
 			IP:     data.IP,
 			Port:   fmt.Sprintf("%d", data.Port),
@@ -167,8 +168,30 @@ func (q *Quake) SaveResult() string {
 	return fmt.Sprintf("%s,%s", ips, domains)
 }
 
+// parseResult
+func (h *Hunter) parseResult() {
+	h.IpResult = portscan.Result{IPResult: make(map[string]*portscan.IPResult)}
+	h.DomainResult = domainscan.Result{DomainResult: make(map[string]*domainscan.DomainResult)}
+
+	for _, fsr := range h.Result {
+		parseIpPort(h.IpResult, fsr, "hunter")
+		parseDomainIP(h.DomainResult, fsr, "hunter")
+	}
+}
+
+// SaveResult 保存搜索结果
+func (h *Hunter) SaveResult() string {
+	if conf.GlobalWorkerConfig().API.Hunter.Key == "" {
+		return "no hunter api"
+	}
+	ips := h.IpResult.SaveResult(portscan.Config{OrgId: h.Config.OrgId})
+	domains := h.DomainResult.SaveResult(domainscan.Config{OrgId: h.Config.OrgId})
+
+	return fmt.Sprintf("%s,%s", ips, domains)
+}
+
 // parseIpPort 解析搜索结果中的IP记录
-func parseIpPort(ipResult portscan.Result, fsr fofaSearchResult, source string) {
+func parseIpPort(ipResult portscan.Result, fsr onlineSearchResult, source string) {
 	if fsr.IP == "" || !utils.CheckIPV4(fsr.IP) {
 		return
 	}
@@ -204,7 +227,7 @@ func parseIpPort(ipResult portscan.Result, fsr fofaSearchResult, source string) 
 }
 
 // parseDomainIP 解析搜索结果中的域名记录
-func parseDomainIP(domainResult domainscan.Result, fsr fofaSearchResult, source string) {
+func parseDomainIP(domainResult domainscan.Result, fsr onlineSearchResult, source string) {
 	host := strings.Replace(fsr.Host, "https://", "", -1)
 	host = strings.Replace(host, "http://", "", -1)
 	host = strings.Replace(host, "/", "", -1)

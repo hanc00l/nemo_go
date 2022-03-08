@@ -9,7 +9,7 @@ import (
 
 func TestFofa(t *testing.T) {
 	orgId := 5
-	config := onlineapi.FofaConfig{
+	config := onlineapi.OnlineAPIConfig{
 		Target: "800best.com",
 		OrgId:  &orgId,
 		IsIPLocation: true,

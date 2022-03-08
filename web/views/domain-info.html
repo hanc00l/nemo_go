@@ -9,9 +9,9 @@
                         <div class="form-check-inline">
                             <button type="button" id="btn_switchShowFofa" class="btn btn-secondary" onclick="refresh_info('domain','{{ .domain_info.Domain }}',{{ .domain_info.DisableFofa }})">
                                 <i class="fa fa-info-circle"></i>{{ if .domain_info.DisableFofa }}
-                                显示FOFA/Quake信息
+                                显示FOFA/Quake/Hunter信息
                                 {{ else }}
-                                不看FOFA/Quake信息
+                                不看FOFA/Quake/Hunter信息
                                 {{ end }}
                             </button>&nbsp;
                             <button type="button" id="btn_editDomainMemo" class="btn btn-secondary"><i
@@ -193,8 +193,8 @@
                         </td>
                         <td>{{ .CreateTime }}</td>
                         <td>{{ .UpdateTime }}</td>
-                        {{ if eq .Tag "fofa" }}
-                        <td><a class="btn btn-sm btn-danger" href="javascript:delete_domain_fofa_attr({{ .Id }})"
+                        {{ if eq .Tag "OnlineAPI" }}
+                        <td><a class="btn btn-sm btn-danger" href="javascript:delete_domain_onlineapi_attr({{ .Id }})"
                                role="button" title="Delete"><i class="fa fa-trash-o"></i></a>
                         </td>
                         {{ else if eq .Tag "ICP" }}

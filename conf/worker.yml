@@ -16,6 +16,8 @@ api:
     key:
   quake:
     key:
+  hunter:
+    key:
 portscan:
   ping: false
   port: --top-ports 1000

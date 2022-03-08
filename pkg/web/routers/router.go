@@ -42,7 +42,7 @@ func init() {
 	web.Router("/domain-info", domain, "get:InfoAction")
 	web.Router("/domain-delete", domain, "post:DeleteDomainAction")
 	web.Router("/domain-attr-delete", domain, "post:DeleteDomainAttrAction")
-	web.Router("/domain-fofa-attr-delete", domain, "post:DeleteDomainFofaAttrAction")
+	web.Router("/domain-onlineapi-attr-delete", domain, "post:DeleteDomainOnlineAPIAttrAction")
 	web.Router("/domain-statistics", domain, "get:StatisticsAction")
 
 	web.Router("/domain-memo-get", domain, "get:GetMemoAction")
