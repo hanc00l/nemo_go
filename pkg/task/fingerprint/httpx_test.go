@@ -44,5 +44,5 @@ func TestHttpx_Run2(t *testing.T) {
 			t.Log(port,p)
 		}
 	}
-	httpx.ResultPortScan.SaveResult(nmap.Config)
+	//httpx.ResultPortScan.SaveResult(nmap.Config)
 }

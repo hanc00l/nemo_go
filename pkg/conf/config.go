@@ -132,6 +132,7 @@ type Domainscan struct {
 	Resolver       string `yaml:"resolver"`
 	Wordlist       string `yaml:"wordlist"`
 	MassdnsThreads int    `yaml:"massdnsThreads"`
+	ProviderConfig string `yaml:"providerConfig"`
 }
 
 // WriteConfig 写配置到yaml文件中
