@@ -107,6 +107,7 @@ Tested on [ubuntu18.04/20.04 LTS](docs/install_linux.md)、[macOS](docs/install_
 
 ## 版本更新
 
+- 2.4.18：2022-4-27，更新httpx与subfinder，subfinder增加provider-config配置文件（thirdpary/dict/provider-config.yml，对应worker.yml配置文件增加了 providerConfig: provider-config.yml字段，可增加被动收集平台的key）；更新xray pocs、fingperprinthub指纹与observer程序；
 - 2.4.17：2022-3-8，增加[Hunter](https://hunter.qianxin.com/)资产接口（在worker.yml中增加hunter的key）；
 - 2.4.16：2022-2-18，修改Fofa的API接口（fofa.so->fofa.info），去除只获取前1000条的限制（获取的记录数量由API的会员等级决定）；
 - 2.4.15：2022-1-25，增加[Quake](https://quake.360.cn/)资产接口（需要“会员”级别的API KEY；在worker.yml中增加quake的key）；
