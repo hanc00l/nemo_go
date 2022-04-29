@@ -18,7 +18,16 @@ func PocScan(taskId, configJSON string) (result string, err error) {
 	if err = ParseConfig(configJSON, &config); err != nil {
 		return FailedTask(err.Error()), err
 	}
-
+	x := comm.NewXClient()
+	//读取资产开放端口
+	if config.LoadOpenedPort {
+		err = x.Call(context.Background(), "LoadOpenedPort", &config.Target, &result)
+		if err == nil {
+			config.Target = result
+		} else {
+			logging.RuntimeLog.Error(err)
+		}
+	}
 	var scanResult []pocscan.Result
 	if config.CmdBin == "pocsuite" {
 		p := pocscan.NewPocsuite(config)
@@ -31,15 +40,18 @@ func PocScan(taskId, configJSON string) (result string, err error) {
 		}
 		x.Do()
 		scanResult = x.Result
-	}else if config.CmdBin == "dirsearch"{
+	} else if config.CmdBin == "dirsearch" {
 		d := pocscan.NewDirsearch(config)
 		d.Do()
 		scanResult = d.Result
+	} else if config.CmdBin == "nuclei" {
+		n := pocscan.NewNuclei(config)
+		n.Do()
+		scanResult = n.Result
 	}
 	// 保存结果
-	x := comm.NewXClient()
 	resultArgs := comm.ScanResultArgs{
-		TaskID: taskId,
+		TaskID:              taskId,
 		VulnerabilityResult: scanResult,
 	}
 	err = x.Call(context.Background(), "SaveVulnerabilityResult", &resultArgs, &result)

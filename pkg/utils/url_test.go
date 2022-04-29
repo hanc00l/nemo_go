@@ -3,7 +3,7 @@ package utils
 import "testing"
 
 func TestHostStrip(t *testing.T) {
-	urls := []string{"http://www.sina.com.cn/","china.gov.cn","https://api.baidu.com:8080/user","114.114.114.114"}
+	urls := []string{"http://www.sina.com.cn/","china.gov.cn","https://api.baidu.com:8080/user","114.114.114.114","3.4.5.6:8080"}
 	for _,u := range urls{
 		t.Log(HostStrip(u))
 	}

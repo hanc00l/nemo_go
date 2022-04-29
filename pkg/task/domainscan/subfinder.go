@@ -125,6 +125,7 @@ func loadDefaultResolver(){
 		logging.RuntimeLog.Errorf("Could not read default resolver: %s\n", err)
 		return
 	}
+	inputFile.Close()
 	scanner := bufio.NewScanner(inputFile)
 	for scanner.Scan() {
 		text := strings.ToLower(scanner.Text())
@@ -133,5 +134,4 @@ func loadDefaultResolver(){
 		}
 		defaultResolvers = append(defaultResolvers, text)
 	}
-	inputFile.Close()
 }

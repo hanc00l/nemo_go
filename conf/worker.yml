@@ -36,3 +36,6 @@ pocscan:
   pocsuite:
     pocPath: thirdparty/pocsuite/some_pocsuite
     threads: 10
+  nuclei:
+    pocPath: thirdparty/nuclei/nuclei-templates
+    threads: 25

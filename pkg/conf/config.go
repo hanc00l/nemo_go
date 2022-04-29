@@ -126,6 +126,10 @@ type Pocscan struct {
 		PocPath string `yaml:"pocPath"`
 		Threads int    `yaml:"threads"`
 	} `yaml:"pocsuite"`
+	Nuclei struct {
+		PocPath string `yaml:"pocPath"`
+		Threads int    `yaml:"threads"`
+	} `yaml:"nuclei"`
 }
 
 type Domainscan struct {

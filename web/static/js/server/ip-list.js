@@ -105,7 +105,7 @@ $(function () {
                 });
         }
         if (getCurrentTabIndex() == 1) {
-            if ($('#checkbox_pocsuite3').is(":checked") == false && $('#checkbox_xray').is(":checked") == false &&  $('#checkbox_dirsearch').is(":checked") == false) {
+            if ($('#checkbox_pocsuite3').is(":checked") == false && $('#checkbox_xray').is(":checked") == false && $('#checkbox_dirsearch').is(":checked") == false && $('#checkbox_nuclei').is(":checked") == false) {
                 swal('Warning', '请选择要使用的验证工具！', 'error');
                 return;
             }
@@ -117,6 +117,12 @@ $(function () {
             }
             if ($('#checkbox_xray').is(":checked")) {
                 if ($('#input_xray_poc_file').val() == '') {
+                    swal('Warning', '请选择poc file', 'error');
+                    return;
+                }
+            }
+            if ($('#checkbox_nuclei').is(":checked")) {
+                if ($('#input_nuclei_poc_file').val() == '') {
                     swal('Warning', '请选择poc file', 'error');
                     return;
                 }
@@ -134,8 +140,11 @@ $(function () {
                     'pocsuite3_poc_file': $('#input_pocsuite3_poc_file').val(),
                     'xrayverify': $('#checkbox_xray').is(":checked"),
                     'xray_poc_file': $('#input_xray_poc_file').val(),
+                    'nucleiverify': $('#checkbox_nuclei').is(":checked"),
+                    'nuclei_poc_file': $('#input_nuclei_poc_file').val(),
                     'dirsearch': $('#checkbox_dirsearch').is(":checked"),
                     'ext': $('#input_dirsearch_ext').val(),
+                    'load_opened_port': $('#checkbox_load_opened_port').is(":checked"),
                 }, function (data, e) {
                     if (e === "success" && data['status'] == 'success') {
                         swal({
@@ -329,7 +338,7 @@ $(function () {
                     data: "location", title: "归属地", width: "12%",
                     render: function (data, type, row, meta) {
                         let strData = data;
-                        if(row["cdn"]){
+                        if (row["cdn"]) {
                             strData += "&nbsp;<span class=\"badge badge-pill badge-warning\" title=\"IP可能使用了CDN\">CDN</span>\n";
                         }
                         return strData;

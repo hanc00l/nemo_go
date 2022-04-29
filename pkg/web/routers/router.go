@@ -56,6 +56,7 @@ func init() {
 	web.Router("/vulnerability-delete", vulnerability, "post:DeleteAction")
 	web.Router("/vulnerability-load-pocsuite-pocfile", vulnerability, "post:LoadPocsuitePocFileAction")
 	web.Router("/vulnerability-load-xray-pocfile", vulnerability, "post:LoadXrayPocFileAction")
+	web.Router("/vulnerability-load-nuclei-pocfile", vulnerability, "post:LoadNucleiPocFileAction")
 
 	org := &controllers.OrganizationController{}
 	web.Router("/org-list", org, "get:IndexAction;post:ListAction")

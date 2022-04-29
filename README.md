@@ -44,6 +44,7 @@ Nemo是用来进行自动化信息收集的一个简单平台，通过集成常�
 
 - [Pocsuite3](https://github.com/knownsec/pocsuite3)  && [some_pocsuite](https://github.com/hanc00l/some_pocsuite) 
 - [XRay](https://github.com/chaitin/xray)
+- [Nuclei](https://github.com/projectdiscovery/nuclei) && [Nuclei-Templates](https://github.com/projectdiscovery/nuclei-templates)
 - [Dirsearch](https://github.com/evilsocket/dirsearch)
 
 ### 6、分布式任务
@@ -107,6 +108,7 @@ Tested on [ubuntu18.04/20.04 LTS](docs/install_linux.md)、[macOS](docs/install_
 
 ## 版本更新
 
+- 2.4.19：2022-4-29，增加[Nuclei](https://github.com/projectdiscovery/nuclei) 漏洞验证方式，默认poc使用[Nuclei-Templates](https://github.com/projectdiscovery/nuclei-templates)，worker.yml增加了相关配置选项；增加验证漏洞时读取指定IP已探测的开放端口作为目标的功能；
 - 2.4.18：2022-4-27，更新httpx与subfinder，subfinder增加provider-config配置文件（thirdpary/dict/provider-config.yml，对应worker.yml配置文件增加了 providerConfig: provider-config.yml字段，可增加被动收集平台的key）；更新xray pocs、fingperprinthub指纹与observer程序；
 - 2.4.17：2022-3-8，增加[Hunter](https://hunter.qianxin.com/)资产接口（在worker.yml中增加hunter的key）；
 - 2.4.16：2022-2-18，修改Fofa的API接口（fofa.so->fofa.info），去除只获取前1000条的限制（获取的记录数量由API的会员等级决定）；

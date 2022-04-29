@@ -350,7 +350,8 @@
                                                                      for="checkbox_quakesearch">
                                                                     <label class="form-check-label">
                                                                         <input class="form-check-input"
-                                                                               id="checkbox_quakesearch" type="checkbox"><b>Quake</b><i
+                                                                               id="checkbox_quakesearch"
+                                                                               type="checkbox"><b>Quake</b><i
                                                                             class="fa fa-info-circle" aria-hidden="true"
                                                                             title="调用Quake API接口查询，需在worker.yml中配置KEY"></i>
                                                                     </label>
@@ -359,7 +360,8 @@
                                                                      for="checkbox_quakesearch">
                                                                     <label class="form-check-label">
                                                                         <input class="form-check-input"
-                                                                               id="checkbox_huntersearch" type="checkbox"><b>Hunter</b><i
+                                                                               id="checkbox_huntersearch"
+                                                                               type="checkbox"><b>Hunter</b><i
                                                                             class="fa fa-info-circle" aria-hidden="true"
                                                                             title="调用Hunter API接口查询，需在worker.yml中配置KEY"></i>
                                                                     </label>
@@ -390,6 +392,17 @@
                                                                 <p></p>
                                                                 <div class="form-check form-check-inline">
                                                                     <label class="form-check-label"
+                                                                           for="checkbox_load_opened_port">
+                                                                        <input class="form-check-input"
+                                                                               id="checkbox_load_opened_port"
+                                                                               type="checkbox"><b>目标资产所有开放端口</b><i
+                                                                            class="fa fa-info-circle" aria-hidden="true"
+                                                                            title="读取输入目标的资产IP已探测到的所有开放端口，按ip:port格式生成漏洞验证的目标。"></i></label>
+                                                                    </label>
+                                                                </div>
+                                                                <p></p>
+                                                                <div class="form-check form-check-inline">
+                                                                    <label class="form-check-label"
                                                                            for="checkbox_pocsuite3">
                                                                         <input class="form-check-input"
                                                                                id="checkbox_pocsuite3"
@@ -415,6 +428,21 @@
                                                                        placeholder="--选择poc文件--" values=""
                                                                        list="datalist_xray_poc_file">
                                                                 <datalist id="datalist_xray_poc_file"
+                                                                          style="display:none;">
+                                                                </datalist>
+                                                                <p></p>
+                                                                <div class="form-check form-check-inline">
+                                                                    <label class="form-check-label"
+                                                                           for="checkbox_nuclei">
+                                                                        <input class="form-check-input"
+                                                                               id="checkbox_nuclei" type="checkbox"><b>Nuclei</b>
+                                                                    </label>
+                                                                </div>
+                                                                <input class="form-control" id="input_nuclei_poc_file"
+                                                                       type="text"
+                                                                       placeholder="--选择poc文件--" values=""
+                                                                       list="datalist_nuclei_poc_file">
+                                                                <datalist id="datalist_nuclei_poc_file"
                                                                           style="display:none;">
                                                                 </datalist>
                                                                 <p></p>

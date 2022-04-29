@@ -58,6 +58,7 @@ type NewTaskArgs struct {
 
 // globalXClient 全局的RPC连接（长连接方式）
 var globalXClient client.XClient
+
 // 数据库操作的同步锁
 var saveIPMutex sync.RWMutex
 var saveDomainMutex sync.RWMutex
@@ -228,6 +229,41 @@ func (s *Service) NewTask(ctx context.Context, args *NewTaskArgs, replay *string
 	}
 	replay = &taskId
 
+	return nil
+}
+
+// LoadOpenedPort 读取指定IP已开放的全部端口
+func (s *Service) LoadOpenedPort(ctx context.Context, args *string, replay *string) error {
+	var resultIPAndPort []string
+	ipDb := db.Ip{}
+	portDb := db.Port{}
+	ips := strings.Split(*args, ",")
+	for _, ip := range ips {
+		host := utils.HostStrip(ip)
+		// 如果不是有效的IP（可能是域名）则直接返回原来的目标）
+		if utils.CheckIPV4(host) == false {
+			resultIPAndPort = append(resultIPAndPort, ip)
+			continue
+		}
+		ipDb.IpName = host
+		// 如果数据库中无IP记录，则直接返回原来的目标
+		if ipDb.GetByIp() == false {
+			resultIPAndPort = append(resultIPAndPort, ip)
+			continue
+		}
+		portDb.IpId = ipDb.Id
+		ports := portDb.GetsByIPId()
+		// 如果该IP无已扫描到的开放端口，则直接返回原来的目标
+		if len(ports) == 0 {
+			resultIPAndPort = append(resultIPAndPort, ip)
+		} else {
+			for _, port := range ports {
+				resultIPAndPort = append(resultIPAndPort, fmt.Sprintf("%s:%d", host, port.PortNum))
+			}
+		}
+	}
+
+	*replay = strings.Join(resultIPAndPort, ",")
 	return nil
 }
 

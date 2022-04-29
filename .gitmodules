@@ -4,3 +4,6 @@
 [submodule "thirdparty/xray/xray"]
 	path = thirdparty/xray/xray
 	url = https://github.com/chaitin/xray
+[submodule "thirdparty/nuclei/nuclei-templates"]
+	path = thirdparty/nuclei/nuclei-templates
+	url = https://github.com/projectdiscovery/nuclei-templates

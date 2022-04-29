@@ -15,13 +15,14 @@ require (
 	github.com/edwingeng/doublejump v0.0.0-20210724020454-c82f1bcb3280 // indirect
 	github.com/evilsocket/brutemachine v0.0.0-20170703145059-0331ad6a82ce
 	github.com/evilsocket/dirsearch v0.0.0-20210927162954-fe7fffa39084
+	github.com/fatih/color v1.12.0 // indirect
 	github.com/fsnotify/fsnotify v1.5.1 // indirect
 	github.com/go-ping/ping v0.0.0-20210506233800-ff8be3320020 // indirect
 	github.com/go-redis/redis/v8 v8.11.3 // indirect
 	github.com/go-resty/resty/v2 v2.7.0
 	github.com/gogo/protobuf v1.3.2 // indirect
 	github.com/golang/groupcache v0.0.0-20210331224755-41bb18bfe9da // indirect
-	github.com/google/uuid v1.2.0
+	github.com/google/uuid v1.3.0
 	github.com/grandcat/zeroconf v1.0.0 // indirect
 	github.com/hanc00l/crawlergo v0.4.3
 	github.com/hashicorp/consul/api v1.10.1 // indirect
@@ -35,8 +36,7 @@ require (
 	github.com/lair-framework/go-nmap v0.0.0-20191202052157-3507e0b03523
 	github.com/lib/pq v1.10.2 // indirect
 	github.com/mat/besticon v0.0.0-20210801190920-bdff7778a634
-	github.com/mattn/go-isatty v0.0.13 // indirect
-	github.com/miekg/dns v1.1.46
+	github.com/miekg/dns v1.1.48
 	github.com/oschwald/geoip2-golang v1.5.0
 	github.com/peterbourgon/g2s v0.0.0-20170223122336-d4e7ad98afea // indirect
 	github.com/pkg/errors v0.9.1
@@ -59,9 +59,7 @@ require (
 	github.com/valyala/fastrand v1.0.0 // indirect
 	github.com/yl2chen/cidranger v1.0.2
 	go.opencensus.io v0.23.0 // indirect
-	golang.org/x/crypto v0.0.0-20210817164053-32db794688a5 // indirect
 	golang.org/x/mod v0.5.0 // indirect
-	golang.org/x/net v0.0.0-20220127200216-cd36cc0744dd // indirect
 	golang.org/x/text v0.3.7
 	gopkg.in/ini.v1 v1.66.2 // indirect
 	gopkg.in/yaml.v2 v2.4.0

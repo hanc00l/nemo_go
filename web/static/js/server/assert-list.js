@@ -118,6 +118,13 @@ function load_pocfile_list() {
             }
         }
     });
+    $.post("/vulnerability-load-nuclei-pocfile", {}, function (data, e) {
+        if (e === "success") {
+            for (let i = 0; i < data.length; i++) {
+                $("#datalist_nuclei_poc_file").append("<option value='" + data[i] + "'>" + data[i] + "</option>")
+            }
+        }
+    });
 }
 
 /**

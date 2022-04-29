@@ -119,8 +119,11 @@ type pocscanRequestParam struct {
 	PocsuitePocFile  string `form:"pocsuite3_poc_file"`
 	IsXrayVerify     bool   `form:"xrayverify"`
 	XrayPocFile      string `form:"xray_poc_file"`
+	IsNucleiVerify   bool   `form:"nucleiverify"`
+	NucleiPocFile    string `form:"nuclei_poc_file"`
 	IsDirsearch      bool   `form:"dirsearch"`
 	DirsearchExtName string `form:"ext"`
+	LoadOpenedPort   bool   `form:"load_opened_port"`
 }
 
 func (c *TaskController) IndexAction() {
@@ -417,7 +420,7 @@ func (c *TaskController) StartPocScanTaskAction() {
 	}
 	var taskId string
 	if req.IsPocsuiteVerify && req.PocsuitePocFile != "" {
-		config := pocscan.Config{Target: strings.Join(targetList, ","), PocFile: req.PocsuitePocFile, CmdBin: "pocsuite"}
+		config := pocscan.Config{Target: strings.Join(targetList, ","), PocFile: req.PocsuitePocFile, CmdBin: "pocsuite",LoadOpenedPort: req.LoadOpenedPort}
 		configJSON, _ := json.Marshal(config)
 		taskId, err = serverapi.NewTask("pocsuite", string(configJSON))
 		if err != nil {
@@ -426,7 +429,7 @@ func (c *TaskController) StartPocScanTaskAction() {
 		}
 	}
 	if req.IsXrayVerify && req.XrayPocFile != "" {
-		config := pocscan.Config{Target: strings.Join(targetList, ","), PocFile: req.XrayPocFile, CmdBin: "xray"}
+		config := pocscan.Config{Target: strings.Join(targetList, ","), PocFile: req.XrayPocFile, CmdBin: "xray",LoadOpenedPort: req.LoadOpenedPort}
 		configJSON, _ := json.Marshal(config)
 		taskId, err = serverapi.NewTask("xray", string(configJSON))
 		if err != nil {
@@ -434,8 +437,17 @@ func (c *TaskController) StartPocScanTaskAction() {
 			return
 		}
 	}
+	if req.IsNucleiVerify && req.NucleiPocFile != "" {
+		config := pocscan.Config{Target: strings.Join(targetList, ","), PocFile: req.NucleiPocFile, CmdBin: "nuclei",LoadOpenedPort: req.LoadOpenedPort}
+		configJSON, _ := json.Marshal(config)
+		taskId, err = serverapi.NewTask("nuclei", string(configJSON))
+		if err != nil {
+			c.FailedStatus(err.Error())
+			return
+		}
+	}
 	if req.IsDirsearch && req.DirsearchExtName != "" {
-		config := pocscan.Config{Target: strings.Join(targetList, ","), PocFile: req.DirsearchExtName, CmdBin: "dirsearch"}
+		config := pocscan.Config{Target: strings.Join(targetList, ","), PocFile: req.DirsearchExtName, CmdBin: "dirsearch",LoadOpenedPort: req.LoadOpenedPort}
 		configJSON, _ := json.Marshal(config)
 		taskId, err = serverapi.NewTask("dirsearch", string(configJSON))
 		if err != nil {
