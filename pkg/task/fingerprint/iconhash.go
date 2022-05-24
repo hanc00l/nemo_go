@@ -5,24 +5,42 @@ import (
 	"crypto/sha1"
 	"encoding/base64"
 	"fmt"
+	"github.com/hanc00l/nemo_go/pkg/logging"
 	"github.com/hanc00l/nemo_go/pkg/task/domainscan"
 	"github.com/hanc00l/nemo_go/pkg/task/portscan"
+	"github.com/hanc00l/nemo_go/pkg/utils"
 	"github.com/mat/besticon/besticon"
 	"github.com/remeh/sizedwaitgroup"
 	"github.com/twmb/murmur3"
 	"hash"
 	"image"
+	"os"
+	"path/filepath"
 	"strings"
+	"sync"
 )
 
 type IconHash struct {
-	ResultPortScan   portscan.Result
-	ResultDomainScan domainscan.Result
+	ResultPortScan     portscan.Result
+	ResultDomainScan   domainscan.Result
+	IconHashInfoResult IconHashInfoResult
 }
 
 type IconHashResult struct {
-	Url  string
-	Hash string
+	Url       string
+	Hash      string
+	ImageData []byte
+}
+
+type IconHashInfo struct {
+	Url       string
+	Hash      string
+	ImageData []byte
+}
+
+type IconHashInfoResult struct {
+	sync.RWMutex
+	Result []IconHashInfo
 }
 
 var (
@@ -62,6 +80,15 @@ func (i *IconHash) Do() {
 								Content: fmt.Sprintf("%s | %s", r.Hash, r.Url),
 							}
 							i.ResultPortScan.SetPortAttr(ip, port, par)
+							if len(r.ImageData) > 0 {
+								i.IconHashInfoResult.Lock()
+								i.IconHashInfoResult.Result = append(i.IconHashInfoResult.Result, IconHashInfo{
+									Url:       r.Url,
+									Hash:      r.Hash,
+									ImageData: r.ImageData,
+								})
+								i.IconHashInfoResult.Unlock()
+							}
 						}
 					}
 					swg.Done()
@@ -82,6 +109,15 @@ func (i *IconHash) Do() {
 							Content: fmt.Sprintf("%s | %s", r.Hash, r.Url),
 						}
 						i.ResultDomainScan.SetDomainAttr(d, dar)
+						if len(r.ImageData) > 0 {
+							i.IconHashInfoResult.Lock()
+							i.IconHashInfoResult.Result = append(i.IconHashInfoResult.Result, IconHashInfo{
+								Url:       r.Url,
+								Hash:      r.Hash,
+								ImageData: r.ImageData,
+							})
+							i.IconHashInfoResult.Unlock()
+						}
 					}
 				}
 				swg.Done()
@@ -113,10 +149,33 @@ func (i *IconHash) RunFetchIconHashes(url string) (hashResult []IconHashResult) 
 	for _, icon := range icons {
 		hash := mmh3Hash32(standBase64(icon.ImageData))
 		if isContainString(hashResult, hash) == false {
-			hashResult = append(hashResult, IconHashResult{Url: icon.URL, Hash: hash})
+			hashResult = append(hashResult, IconHashResult{Url: icon.URL, Hash: hash, ImageData: icon.ImageData})
 		}
 	}
 	return
+}
+
+// SaveFile 保存icon Image文件
+func (i *IconHash) SaveFile(localSavePath string, result []IconHashInfo) string {
+	count := 0
+	for _, ihf := range result {
+		if ihf.Url == "" || ihf.Hash == "" || len(ihf.ImageData) <= 0 {
+			continue
+		}
+		fileSuffix := utils.GetFaviconSuffixUrl(ihf.Url)
+		if fileSuffix == "" {
+			continue
+		}
+		//文件名为md5(iconHash).后缀
+		filePathName := filepath.Join(localSavePath, fmt.Sprintf("%s.%s", utils.MD5(ihf.Hash), fileSuffix))
+		err := os.WriteFile(filePathName, ihf.ImageData, 0666)
+		if err != nil {
+			logging.RuntimeLog.Errorf("write file %s fail:%v", filePathName, err)
+			continue
+		}
+		count++
+	}
+	return fmt.Sprintf("iconimage:%d", count)
 }
 
 // fetchIconDetails 根据URL获取并校验icon文件

@@ -1,8 +1,1 @@
 
-{"file":"main.go","func":"main.startRPCServer","level":"info","msg":"rpc server running on tcp@0.0.0.0:5001...","time":"2022-04-29 12:12:56"}
-{"file":"main.go","func":"main.startWebServer","level":"info","msg":"Nemo Server started...","time":"2022-04-29 12:12:56"}
-{"file":"api.go","func":"workerapi.StartWorker","level":"info","msg":"Starting Worker: NoteBookPro2.local@192.168.120.201#95286","time":"2022-04-29 12:12:56"}
-{"file":"login.go","func":"controllers.(*LoginController).LoginAction","level":"info","msg":"login from ip:127.0.0.1","time":"2022-04-29 12:12:56"}
-{"file":"login.go","func":"controllers.(*LoginController).LoginAction","level":"info","msg":"login from ip:127.0.0.1","time":"2022-04-29 12:12:56"}
-{"file":"login.go","func":"controllers.(*LoginController).LoginAction","level":"info","msg":"login from ip:127.0.0.1","time":"2022-04-29 12:12:56"}
-{"file":"main.go","func":"main.main","level":"fatal","msg":"Worker quit gracefully","time":"2022-04-29 12:12:59"}

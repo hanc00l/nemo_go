@@ -5,6 +5,7 @@ web:
   password: 648ce596dba3b408b523d3d1189b15070123456789abcdef
   screenshotPath: /tmp/screenshot
   taskresultPath: /tmp/taskresult
+  iconimagePath: /tmp/iconimage
 rpc:
   host: 0.0.0.0
   port: 5001

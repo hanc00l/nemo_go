@@ -369,11 +369,16 @@ $(function () {
                     }
                 },
                 {
-                    data: "banner", title: "Title && Banner", width: "25%",
+                    data: "banner", title: "Icon && Title && Banner", width: "25%",
                     "render": function (data, type, row, meta) {
+                        let icons = '';
+                        for (let i in row['iconimage']) {
+                            icons += '<img src=iconimage/' + row['iconimage'][i] + ' width="24px" height="24px"/>&nbsp;';
+                        }
+                        if (icons!="") icons += "<br>";
                         let title = data.substr(0, 300);
                         if (data.length > 300) title += '......';
-                        const strData = '<div style="width:100%;white-space:normal;word-wrap:break-word;word-break:break-all;">' + title + '</div>';
+                        const strData = '<div style="width:100%;white-space:normal;word-wrap:break-word;word-break:break-all;">' + icons + title + '</div>';
                         return strData;
                     }
                 },

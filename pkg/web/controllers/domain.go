@@ -3,6 +3,7 @@ package controllers
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/hanc00l/nemo_go/pkg/conf"
 	"github.com/hanc00l/nemo_go/pkg/db"
 	"github.com/hanc00l/nemo_go/pkg/logging"
 	"github.com/hanc00l/nemo_go/pkg/task/custom"
@@ -11,6 +12,7 @@ import (
 	"github.com/hanc00l/nemo_go/pkg/task/onlineapi"
 	"github.com/hanc00l/nemo_go/pkg/utils"
 	"net/http"
+	"path/filepath"
 	"sort"
 	"strings"
 	"time"
@@ -49,6 +51,7 @@ type DomainListData struct {
 	DomainCDN      string   `json:"domaincdn"`
 	DomainCNAME    string   `json:"domaincname"`
 	IsIPCDN        bool     `json:"ipcdn"`
+	IconImage      []string `json:"iconimage"`
 }
 
 // DomainInfo domain详细数据聚合
@@ -70,6 +73,7 @@ type DomainInfo struct {
 	DomainAttr    []DomainAttrInfo
 	DisableFofa   bool
 	IconHash      []string
+	IconImage     []string
 	TlsData       []string
 	DomainCDN     string
 	DomainCNAME   string
@@ -86,14 +90,15 @@ type DomainAttrInfo struct {
 
 // DomainAttrFullInfo domain属性数据的聚合
 type DomainAttrFullInfo struct {
-	IP          map[string]struct{}
-	TitleSet    map[string]struct{}
-	BannerSet   map[string]struct{}
-	DomainAttr  []DomainAttrInfo
-	IconHashSet map[string]struct{}
-	TlsData     map[string]struct{}
-	DomainCDN   string
-	DomainCNAME string
+	IP           map[string]struct{}
+	TitleSet     map[string]struct{}
+	BannerSet    map[string]struct{}
+	DomainAttr   []DomainAttrInfo
+	IconHashSet  map[string]struct{}
+	IconImageSet map[string]struct{}
+	TlsData      map[string]struct{}
+	DomainCDN    string
+	DomainCNAME  string
 }
 
 // DomainStatisticInfo domain统计信息
@@ -442,6 +447,7 @@ func (c *DomainController) getDomainListData(req domainRequestParam) (resp DataT
 				break
 			}
 		}
+		domainData.IconImage = domainInfo.IconImage
 		resp.Data = append(resp.Data, domainData)
 	}
 	resp.Draw = req.Draw
@@ -562,6 +568,7 @@ func getDomainInfo(domainName string, disableFofa bool) (r DomainInfo) {
 	r.TlsData = utils.SetToSlice(domainAttrInfo.TlsData)
 	r.DomainCDN = domainAttrInfo.DomainCDN
 	r.DomainCNAME = domainAttrInfo.DomainCNAME
+	r.IconImage = utils.SetToSlice(domainAttrInfo.IconImageSet)
 
 	return
 }
@@ -569,11 +576,12 @@ func getDomainInfo(domainName string, disableFofa bool) (r DomainInfo) {
 // getDomainAttrFullInfo 获取一个域名的属性集合
 func getDomainAttrFullInfo(id int, disableFofa bool) DomainAttrFullInfo {
 	r := DomainAttrFullInfo{
-		IP:          make(map[string]struct{}),
-		TitleSet:    make(map[string]struct{}),
-		BannerSet:   make(map[string]struct{}),
-		IconHashSet: make(map[string]struct{}),
-		TlsData:     make(map[string]struct{}),
+		IP:           make(map[string]struct{}),
+		TitleSet:     make(map[string]struct{}),
+		BannerSet:    make(map[string]struct{}),
+		IconHashSet:  make(map[string]struct{}),
+		TlsData:      make(map[string]struct{}),
+		IconImageSet: make(map[string]struct{}),
 	}
 	fofaInfo := make(map[string]string)
 	domainAttr := db.DomainAttr{RelatedId: id}
@@ -646,7 +654,16 @@ func getDomainAttrFullInfo(id int, disableFofa bool) DomainAttrFullInfo {
 					CreateTime: FormatDateTime(da.CreateDatetime),
 					UpdateTime: FormatDateTime(da.UpdateDatetime),
 				})
-
+				// icon hash image
+				fileSuffix := utils.GetFaviconSuffixUrl(strings.TrimSpace(hashAndUrls[1]))
+				if fileSuffix != "" {
+					imageFile := fmt.Sprintf("%s.%s", utils.MD5(hash), fileSuffix)
+					if utils.CheckFileExist(filepath.Join(conf.GlobalServerConfig().Web.IconImagePath, imageFile)) {
+						if _, ok := r.IconImageSet[imageFile]; !ok {
+							r.IconImageSet[imageFile] = struct{}{}
+						}
+					}
+				}
 			}
 		} else if da.Tag == "tlsdata" {
 			if _, ok := r.TlsData[da.Content]; !ok {

@@ -118,6 +118,23 @@ func (s *Service) SaveScreenshotResult(ctx context.Context, args *[]fingerprint.
 	return nil
 }
 
+// SaveIconImageResult 保存IconImage结果到Server
+func (s *Service) SaveIconImageResult(ctx context.Context, args *[]fingerprint.IconHashInfo, replay *string) error {
+	if conf.GlobalServerConfig().Web.IconImagePath == "" {
+		*replay = "not config image path"
+		return nil
+	}
+	if !utils.MakePath(conf.GlobalServerConfig().Web.IconImagePath) {
+		*replay = "fail to mkdir"
+		logging.RuntimeLog.Error("创建任务保存Image的目录失败！")
+		return nil
+	}
+	hash := fingerprint.NewIconHash()
+	*replay = hash.SaveFile(conf.GlobalServerConfig().Web.IconImagePath, *args)
+
+	return nil
+}
+
 // SaveVulnerabilityResult 保存漏洞结果
 func (s *Service) SaveVulnerabilityResult(ctx context.Context, args *ScanResultArgs, replay *string) error {
 	*replay = pocscan.SaveResult(args.VulnerabilityResult)

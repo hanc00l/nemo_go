@@ -68,6 +68,7 @@ type Web struct {
 	Username       string `yaml:"username"`
 	Password       string `yaml:"password"`
 	ScreenshotPath string `yaml:"screenshotPath"`
+	IconImagePath  string `yaml:"iconimagePath"`
 	TaskResultPath string `yaml:"taskresultPath"`
 }
 

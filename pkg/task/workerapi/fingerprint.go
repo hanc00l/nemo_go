@@ -32,9 +32,7 @@ func DoIPFingerPrint(config portscan.Config, resultPortScan *portscan.Result) {
 		fp.Do()
 	}
 	if config.IsIconHash {
-		hash := fingerprint.NewIconHash()
-		hash.ResultPortScan = *resultPortScan
-		hash.Do()
+		DoIconHashAndSave(resultPortScan, nil)
 	}
 }
 
@@ -62,9 +60,7 @@ func DoDomainFingerPrint(config domainscan.Config, resultDomainScan *domainscan.
 		fp.Do()
 	}
 	if config.IsIconHash {
-		hash := fingerprint.NewIconHash()
-		hash.ResultDomainScan = *resultDomainScan
-		hash.Do()
+		DoIconHashAndSave(nil, resultDomainScan)
 	}
 }
 
@@ -83,6 +79,30 @@ func DoScreenshotAndSave(resultIPScan *portscan.Result, resultDomainScan *domain
 	x := comm.NewXClient()
 	var result2 string
 	err := x.Call(context.Background(), "SaveScreenshotResult", &resultScreenshot, &result2)
+	if err != nil {
+		logging.RuntimeLog.Error(err)
+		return err.Error()
+	}
+	return result2
+}
+
+// DoIconHashAndSave 获取icon，并将icon image保存到服务端
+func DoIconHashAndSave(resultIPScan *portscan.Result, resultDomainScan *domainscan.Result) string {
+	hash := fingerprint.NewIconHash()
+	if resultIPScan != nil {
+		hash.ResultPortScan = *resultIPScan
+	}
+	if resultDomainScan != nil {
+		hash.ResultDomainScan = *resultDomainScan
+	}
+	hash.Do()
+
+	if len(hash.IconHashInfoResult.Result) <= 0 {
+		return ""
+	}
+	x := comm.NewXClient()
+	var result2 string
+	err := x.Call(context.Background(), "SaveIconImageResult", &hash.IconHashInfoResult.Result, &result2)
 	if err != nil {
 		logging.RuntimeLog.Error(err)
 		return err.Error()

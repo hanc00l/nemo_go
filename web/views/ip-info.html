@@ -7,7 +7,8 @@
                 <div class="card">
                     <h2 class="card-header">
                         <div class="form-check-inline">
-                            <button type="button" id="btn_switchShowFofa" class="btn btn-secondary" onclick="refresh_info('ip','{{ .ip_info.IP }}',{{ .ip_info.DisableFofa }})">
+                            <button type="button" id="btn_switchShowFofa" class="btn btn-secondary"
+                                    onclick="refresh_info('ip','{{ .ip_info.IP }}',{{ .ip_info.DisableFofa }})">
                                 <i class="fa fa-info-circle"></i>{{ if .ip_info.DisableFofa }}
                                 显示FOFA/Quake/Hunter信息
                                 {{ else }}
@@ -74,6 +75,9 @@
                         {{ if .ip_info.IconHash }}
                         <span class="btn btn-info">IconHash</span>
                         <span style="margin: 10px;"><strong>{{ .ip_info.IconHash }}</strong></span>
+                        {{ range .ip_info.IconImage }}
+                        <img src="iconimage/{{ . }}" height="24px" width="24px"/>&nbsp;
+                        {{ end }}
                         {{ end }}
                         {{ if .ip_info.TlsData }}
                         <span class="btn btn-info">TLS</span>

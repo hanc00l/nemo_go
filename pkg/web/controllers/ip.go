@@ -3,6 +3,7 @@ package controllers
 import (
 	"encoding/base64"
 	"fmt"
+	"github.com/hanc00l/nemo_go/pkg/conf"
 	"github.com/hanc00l/nemo_go/pkg/db"
 	"github.com/hanc00l/nemo_go/pkg/logging"
 	"github.com/hanc00l/nemo_go/pkg/task/custom"
@@ -11,6 +12,7 @@ import (
 	"github.com/hanc00l/nemo_go/pkg/utils"
 	"net/http"
 	"path"
+	"path/filepath"
 	"strconv"
 	"strings"
 	"time"
@@ -52,6 +54,7 @@ type IPListData struct {
 	HoneyPot       string   `json:"honeypot"`
 	ScreenshotFile []string `json:"screenshot"`
 	IsCDN          bool     `json:"cdn"`
+	IconImage      []string `json:"iconimage"`
 }
 
 // IPInfo IP的详细数据的集合
@@ -74,6 +77,7 @@ type IPInfo struct {
 	Screenshot    []ScreenshotFileInfo
 	DisableFofa   bool
 	IconHash      []string
+	IconImage     []string
 	TlsData       []string
 }
 
@@ -100,13 +104,14 @@ type ScreenshotFileInfo struct {
 
 // PortInfo 端口详细数据的集合
 type PortInfo struct {
-	PortNumbers []int
-	PortStatus  map[int]string
-	TitleSet    map[string]struct{}
-	BannerSet   map[string]struct{}
-	PortAttr    []PortAttrInfo
-	IconHashSet map[string]struct{}
-	TlsDataSet  map[string]struct{}
+	PortNumbers  []int
+	PortStatus   map[int]string
+	TitleSet     map[string]struct{}
+	BannerSet    map[string]struct{}
+	PortAttr     []PortAttrInfo
+	IconHashSet  map[string]struct{}
+	IconImageSet map[string]struct{}
+	TlsDataSet   map[string]struct{}
 }
 
 // IPStatisticInfo IP统计信息
@@ -456,6 +461,7 @@ func (c *IPController) getIPListData(req ipRequestParam) (resp DataTableResponse
 		ipData.MemoContent = ipInfo.Memo
 		ipData.Banner = strings.Join(utils.RemoveDuplicationElement(append(ipInfo.Title, ipInfo.Banner...)), ", ")
 		ipData.ScreenshotFile = ss.LoadScreenshotFile(ipRow.IpName)
+		ipData.IconImage = ipInfo.IconImage
 		if ipData.ScreenshotFile == nil {
 			ipData.ScreenshotFile = make([]string, 0)
 		}
@@ -503,6 +509,7 @@ func getPortInfo(ip string, ipId int, disableFofa bool) (r PortInfo) {
 	r.TitleSet = make(map[string]struct{})
 	r.IconHashSet = make(map[string]struct{})
 	r.TlsDataSet = make(map[string]struct{})
+	r.IconImageSet = make(map[string]struct{})
 
 	port := db.Port{IpId: ipId}
 	portData := port.GetsByIPId()
@@ -561,9 +568,20 @@ func getPortInfo(ip string, ipId int, disableFofa bool) (r PortInfo) {
 			} else if pad.Tag == "favicon" {
 				hashAndUrls := strings.Split(pad.Content, "|")
 				if len(hashAndUrls) == 2 {
+					// icon hash
 					hash := strings.TrimSpace(hashAndUrls[0])
 					if _, ok := r.IconHashSet[hash]; !ok {
 						r.IconHashSet[hash] = struct{}{}
+					}
+					// icon hash image
+					fileSuffix := utils.GetFaviconSuffixUrl(strings.TrimSpace(hashAndUrls[1]))
+					if fileSuffix != "" {
+						imageFile := fmt.Sprintf("%s.%s", utils.MD5(hash), fileSuffix)
+						if utils.CheckFileExist(filepath.Join(conf.GlobalServerConfig().Web.IconImagePath, imageFile)) {
+							if _, ok := r.IconImageSet[imageFile]; !ok {
+								r.IconImageSet[imageFile] = struct{}{}
+							}
+						}
 					}
 				}
 			} else if pad.Tag == "tlsdata" {
@@ -639,6 +657,7 @@ func getIPInfo(ipName string, disableFofa bool) (r IPInfo) {
 	//
 	r.IconHash = utils.SetToSlice(portInfo.IconHashSet)
 	r.TlsData = utils.SetToSlice(portInfo.TlsDataSet)
+	r.IconImage = utils.SetToSlice(portInfo.IconImageSet)
 	//
 	r.Domain = getIpRelatedDomain(ipName)
 	return

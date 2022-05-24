@@ -25,3 +25,29 @@ func CheckDomain(domain string) bool {
 	reg := regexp.MustCompile(strings.TrimSpace(domainPattern))
 	return reg.MatchString(domain)
 }
+
+// GetFaviconSuffixUrl 获取favicon文件的后缀名称
+func GetFaviconSuffixUrl(u string) string {
+	p, err := url.Parse(u)
+	if err != nil {
+		return ""
+	}
+	suffixes := strings.Split(p.Path, ".")
+	if len(suffixes) < 2 {
+		return ""
+	}
+	fileSuffix := strings.ToLower(suffixes[len(suffixes)-1])
+	if !in(fileSuffix, []string{"ico", "gif", "jpg", "jpeg", "gif", "png", "bmp"}) {
+		return ""
+	}
+	return fileSuffix
+}
+
+func in(target string, strArray []string) bool {
+	for _, element := range strArray {
+		if target == element {
+			return true
+		}
+	}
+	return false
+}
