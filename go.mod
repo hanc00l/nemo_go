@@ -30,6 +30,7 @@ require (
 	github.com/hashicorp/go-hclog v0.16.2 // indirect
 	github.com/hashicorp/go-immutable-radix v1.3.1 // indirect
 	github.com/hashicorp/go-multierror v1.1.1 // indirect
+	github.com/jinzhu/now v1.1.5 // indirect
 	github.com/joeguo/tldextract v0.0.0-20210326083850-1ec7be2de68a
 	github.com/klauspost/cpuid/v2 v2.0.9 // indirect
 	github.com/klauspost/reedsolomon v1.9.13 // indirect
@@ -63,6 +64,6 @@ require (
 	golang.org/x/text v0.3.7
 	gopkg.in/ini.v1 v1.66.2 // indirect
 	gopkg.in/yaml.v2 v2.4.0
-	gorm.io/driver/mysql v1.1.0
-	gorm.io/gorm v1.21.10
+	gorm.io/driver/mysql v1.3.3
+	gorm.io/gorm v1.23.5
 )

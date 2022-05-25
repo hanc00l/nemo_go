@@ -135,6 +135,7 @@ func (domain *Domain) Gets(searchMap map[string]interface{}, page, rowsPerPage i
 	orderBy := "domain"
 
 	db := domain.makeWhere(searchMap).Model(domain)
+	defer CloseDB(db)
 	//统计满足条件的总记录数
 	var total int64
 	db.Count(&total)
