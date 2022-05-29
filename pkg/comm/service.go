@@ -20,6 +20,7 @@ import (
 	"github.com/smallnest/rpcx/client"
 	"github.com/tidwall/pretty"
 	"os"
+	"path"
 	"path/filepath"
 	"strings"
 	"sync"
@@ -114,23 +115,26 @@ func (s *Service) SaveScanResult(ctx context.Context, args *ScanResultArgs, repl
 // SaveScreenshotResult 保存Screenshot的结果到Server
 func (s *Service) SaveScreenshotResult(ctx context.Context, args *[]fingerprint.ScreenshotFileInfo, replay *string) error {
 	ss := fingerprint.NewScreenShot()
-	*replay = ss.SaveFile(conf.GlobalServerConfig().Web.ScreenshotPath, *args)
+	//检查保存结果的路径
+	screenshotPath := path.Join(conf.GlobalServerConfig().Web.WebFiles, "screenshot")
+	if !utils.MakePath(screenshotPath) {
+		logging.RuntimeLog.Error("创建保存screenshot的目录失败！")
+		return errors.New("创建保存screenshot的目录失败！")
+	}
+	*replay = ss.SaveFile(screenshotPath, *args)
 	return nil
 }
 
 // SaveIconImageResult 保存IconImage结果到Server
 func (s *Service) SaveIconImageResult(ctx context.Context, args *[]fingerprint.IconHashInfo, replay *string) error {
-	if conf.GlobalServerConfig().Web.IconImagePath == "" {
-		*replay = "not config image path"
-		return nil
-	}
-	if !utils.MakePath(conf.GlobalServerConfig().Web.IconImagePath) {
+	iconImagePath := path.Join(conf.GlobalServerConfig().Web.WebFiles, "iconimage")
+	if !utils.MakePath(iconImagePath) {
 		*replay = "fail to mkdir"
 		logging.RuntimeLog.Error("创建任务保存Image的目录失败！")
-		return nil
+		return errors.New("创建任务保存Image的目录失败！")
 	}
 	hash := fingerprint.NewIconHash()
-	*replay = hash.SaveFile(conf.GlobalServerConfig().Web.IconImagePath, *args)
+	*replay = hash.SaveFile(iconImagePath, *args)
 
 	return nil
 }
@@ -240,7 +244,7 @@ func (s *Service) NewTask(ctx context.Context, args *NewTaskArgs, replay *string
 		replay = &msg
 		return errors.New(msg)
 	}
-	taskId, err := serverapi.NewTask(args.TaskName, args.ConfigJSON,"")
+	taskId, err := serverapi.NewTask(args.TaskName, args.ConfigJSON, "")
 	if err != nil {
 		return err
 	}
@@ -291,10 +295,7 @@ func saveTaskResult(taskID string, result interface{}) {
 		return
 	}
 	//检查保存结果的路径
-	resultPath := conf.GlobalServerConfig().Web.TaskResultPath
-	if resultPath == "" {
-		return
-	}
+	resultPath := path.Join(conf.GlobalServerConfig().Web.WebFiles, "taskresult")
 	if !utils.MakePath(resultPath) {
 		logging.RuntimeLog.Error("创建任务保存结果的目录失败！")
 		return
@@ -312,7 +313,7 @@ func saveTaskResult(taskID string, result interface{}) {
 		var buff bytes.Buffer
 		buff.Write([]byte("["))
 		buff.Write(oldContent)
-		buff.Write([]byte(",\n"))
+		buff.Write([]byte(","))
 		buff.Write(pretty.Pretty(content))
 		buff.Write([]byte("]"))
 		err = os.WriteFile(fileName, buff.Bytes(), 0666)

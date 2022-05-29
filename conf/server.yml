@@ -3,9 +3,7 @@ web:
   port: 5000
   username: nemo
   password: 648ce596dba3b408b523d3d1189b15070123456789abcdef
-  screenshotPath: /tmp/screenshot
-  taskresultPath: /tmp/taskresult
-  iconimagePath: /tmp/iconimage
+  webfiles: /tmp/webfiles
 rpc:
   host: 0.0.0.0
   port: 5001

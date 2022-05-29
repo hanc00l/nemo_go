@@ -63,13 +63,14 @@ type Worker struct {
 }
 
 type Web struct {
-	Host           string `yaml:"host"`
-	Port           int    `yaml:"port"`
-	Username       string `yaml:"username"`
-	Password       string `yaml:"password"`
-	ScreenshotPath string `yaml:"screenshotPath"`
-	IconImagePath  string `yaml:"iconimagePath"`
-	TaskResultPath string `yaml:"taskresultPath"`
+	Host     string `yaml:"host"`
+	Port     int    `yaml:"port"`
+	Username string `yaml:"username"`
+	Password string `yaml:"password"`
+	WebFiles string `yaml:"webfiles"`
+	//ScreenshotPath string `yaml:"screenshotPath"`
+	//IconImagePath  string `yaml:"iconimagePath"`
+	//TaskResultPath string `yaml:"taskresultPath"`
 }
 
 type RPC struct {

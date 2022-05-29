@@ -253,7 +253,7 @@ $(function () {
                     "render": function (data, type, row, meta) {
                         let icons = '';
                         for (let i in row['iconimage']) {
-                            icons += '<img src=iconimage/' + row['iconimage'][i] + ' width="24px" height="24px"/>&nbsp;';
+                            icons += '<img src=/webfiles/iconimage/' + row['iconimage'][i] + ' width="24px" height="24px"/>&nbsp;';
                         }
                         if (icons != "") icons += "<br>";
                         let title = data.substr(0, 300);
@@ -269,7 +269,7 @@ $(function () {
                         for (let i in data) {
                             let thumbnailFile = data[i].replace('.png', '_thumbnail.png');
                             let imgTitle = data[i].replace(".png", "").replace("_", ":");
-                            title += '<img src="screenshot/' + row['domain'] + '/' + thumbnailFile + '" class="img"  style="margin-bottom: 5px;margin-left: 5px;" title="' + imgTitle + '" onclick="show_bigpic(\'screenshot/' + row['domain'] + '/' + data[i] + '\')"/>'
+                            title += '<img src="/webfiles/screenshot/' + row['domain'] + '/' + thumbnailFile + '" class="img"  style="margin-bottom: 5px;margin-left: 5px;" title="' + imgTitle + '" onclick="show_bigpic(\'/webfiles/screenshot/' + row['domain'] + '/' + data[i] + '\')"/>'
                         }
                         const strData = '<div style="width:100%;white-space:normal;word-wrap:break-word;word-break:break-all;">' + title + '</div>';
                         return strData;

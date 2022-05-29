@@ -3,21 +3,19 @@
 
  Source Server         : localhost
  Source Server Type    : MySQL
- Source Server Version : 50734
+ Source Server Version : 50738
  Source Host           : localhost:3306
  Source Schema         : nemo
 
  Target Server Type    : MySQL
- Target Server Version : 50734
+ Target Server Version : 50738
  File Encoding         : 65001
 
- Date: 05/08/2021 08:45:21
+ Date: 29/05/2022 21:05:20
 */
 
 SET NAMES utf8mb4;
 SET FOREIGN_KEY_CHECKS = 0;
-
-CREATE DATABASE IF NOT EXISTS nemo;
 
 -- ----------------------------
 -- Table structure for domain
@@ -33,7 +31,7 @@ CREATE TABLE `domain` (
   UNIQUE KEY `index_domain_domain` (`domain`) USING BTREE,
   KEY `fk_domain_org_id` (`org_id`),
   CONSTRAINT `fk_domain_org_id` FOREIGN KEY (`org_id`) REFERENCES `organization` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=5273 DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB AUTO_INCREMENT=15 DEFAULT CHARSET=utf8;
 
 -- ----------------------------
 -- Table structure for domain_attr
@@ -44,7 +42,7 @@ CREATE TABLE `domain_attr` (
   `r_id` int(10) unsigned NOT NULL,
   `source` varchar(40) DEFAULT NULL,
   `tag` varchar(40) NOT NULL,
-  `content` varchar(4000) DEFAULT NULL,
+  `content` varchar(1000) DEFAULT NULL,
   `hash` char(32) DEFAULT NULL,
   `create_datetime` datetime NOT NULL,
   `update_datetime` datetime NOT NULL,
@@ -52,7 +50,7 @@ CREATE TABLE `domain_attr` (
   UNIQUE KEY `index_domain_attr_hash` (`hash`) USING BTREE,
   KEY `index_domain_attr_ip_id` (`r_id`),
   CONSTRAINT `domain_attr_ibfk_1` FOREIGN KEY (`r_id`) REFERENCES `domain` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=7116 DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB AUTO_INCREMENT=54 DEFAULT CHARSET=utf8;
 
 -- ----------------------------
 -- Table structure for domain_color_tag
@@ -68,7 +66,7 @@ CREATE TABLE `domain_color_tag` (
   UNIQUE KEY `fk_domain_color_tag_rid_unique` (`r_id`),
   KEY `fk_domain_color_tag_rid` (`r_id`) USING BTREE,
   CONSTRAINT `fk_domain_color_tag_rid` FOREIGN KEY (`r_id`) REFERENCES `domain` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 -- ----------------------------
 -- Table structure for domain_memo
@@ -83,7 +81,7 @@ CREATE TABLE `domain_memo` (
   PRIMARY KEY (`id`),
   UNIQUE KEY `fk_domain_memo_rid_unique` (`r_id`),
   CONSTRAINT `fk_domain_memo_rid` FOREIGN KEY (`r_id`) REFERENCES `domain` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 -- ----------------------------
 -- Table structure for ip
@@ -91,11 +89,11 @@ CREATE TABLE `domain_memo` (
 DROP TABLE IF EXISTS `ip`;
 CREATE TABLE `ip` (
   `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
-  `ip` varchar(128) CHARACTER SET utf8 NOT NULL,
-  `ip_int` bigint(11) NOT NULL,
+  `ip` varchar(128) NOT NULL,
+  `ip_int` bigint(20) NOT NULL,
   `org_id` int(10) unsigned DEFAULT NULL,
-  `location` varchar(200) CHARACTER SET utf8 DEFAULT NULL,
-  `status` varchar(20) CHARACTER SET utf8 DEFAULT NULL,
+  `location` varchar(200) DEFAULT NULL,
+  `status` varchar(20) DEFAULT NULL,
   `create_datetime` datetime NOT NULL,
   `update_datetime` datetime NOT NULL,
   PRIMARY KEY (`id`),
@@ -103,7 +101,7 @@ CREATE TABLE `ip` (
   UNIQUE KEY `index_ip_ip_int` (`ip_int`) USING BTREE,
   KEY `index_ip_org_id` (`org_id`),
   CONSTRAINT `fk_ip_org_id` FOREIGN KEY (`org_id`) REFERENCES `organization` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=1777 DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB AUTO_INCREMENT=106530 DEFAULT CHARSET=utf8;
 
 -- ----------------------------
 -- Table structure for ip_attr
@@ -114,7 +112,7 @@ CREATE TABLE `ip_attr` (
   `r_id` int(10) unsigned NOT NULL,
   `source` varchar(40) DEFAULT NULL,
   `tag` varchar(40) NOT NULL,
-  `content` varchar(4000) DEFAULT NULL,
+  `content` varchar(1000) DEFAULT NULL,
   `hash` char(32) DEFAULT NULL,
   `create_datetime` datetime NOT NULL,
   `update_datetime` datetime NOT NULL,
@@ -122,7 +120,7 @@ CREATE TABLE `ip_attr` (
   UNIQUE KEY `index_ip_attr_hash` (`hash`) USING BTREE,
   KEY `index_ip_attr_ip_id` (`r_id`),
   CONSTRAINT `fk_ip_attr_ip_id` FOREIGN KEY (`r_id`) REFERENCES `ip` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 -- ----------------------------
 -- Table structure for ip_color_tag
@@ -138,7 +136,7 @@ CREATE TABLE `ip_color_tag` (
   UNIQUE KEY `fk_ip_color_tag_rid_unique` (`r_id`),
   KEY `fk_ip_color_tag_rid` (`r_id`),
   CONSTRAINT `ip_color_tag_ibfk_1` FOREIGN KEY (`r_id`) REFERENCES `ip` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB AUTO_INCREMENT=272 DEFAULT CHARSET=utf8;
 
 -- ----------------------------
 -- Table structure for ip_memo
@@ -153,7 +151,7 @@ CREATE TABLE `ip_memo` (
   PRIMARY KEY (`id`),
   UNIQUE KEY `fk_ip_memo_rid_unqie` (`r_id`),
   CONSTRAINT `fk_ip_memo_rid` FOREIGN KEY (`r_id`) REFERENCES `ip` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB AUTO_INCREMENT=218 DEFAULT CHARSET=utf8;
 
 -- ----------------------------
 -- Table structure for organization
@@ -161,13 +159,13 @@ CREATE TABLE `ip_memo` (
 DROP TABLE IF EXISTS `organization`;
 CREATE TABLE `organization` (
   `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
-  `org_name` varchar(200) CHARACTER SET utf8 NOT NULL,
-  `status` varchar(20) CHARACTER SET utf8 NOT NULL,
+  `org_name` varchar(200) NOT NULL,
+  `status` varchar(20) NOT NULL,
   `sort_order` int(10) unsigned NOT NULL DEFAULT '100',
   `create_datetime` datetime NOT NULL,
   `update_datetime` datetime NOT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=10 DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB AUTO_INCREMENT=57 DEFAULT CHARSET=utf8;
 
 -- ----------------------------
 -- Table structure for port
@@ -176,14 +174,14 @@ DROP TABLE IF EXISTS `port`;
 CREATE TABLE `port` (
   `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
   `ip_id` int(10) unsigned NOT NULL,
-  `port` int(10) NOT NULL,
+  `port` int(11) NOT NULL,
   `status` varchar(20) NOT NULL,
   `create_datetime` datetime NOT NULL,
   `update_datetime` datetime NOT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `index_port_ip_port` (`ip_id`,`port`),
   CONSTRAINT `fk_port_ip` FOREIGN KEY (`ip_id`) REFERENCES `ip` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=2185 DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB AUTO_INCREMENT=532013 DEFAULT CHARSET=utf8;
 
 -- ----------------------------
 -- Table structure for port_attr
@@ -194,7 +192,7 @@ CREATE TABLE `port_attr` (
   `r_id` int(10) unsigned NOT NULL,
   `source` varchar(40) DEFAULT NULL,
   `tag` varchar(40) NOT NULL,
-  `content` varchar(4000) DEFAULT NULL,
+  `content` varchar(1000) DEFAULT NULL,
   `hash` char(32) DEFAULT NULL,
   `create_datetime` datetime NOT NULL,
   `update_datetime` datetime NOT NULL,
@@ -202,7 +200,7 @@ CREATE TABLE `port_attr` (
   UNIQUE KEY `index_port_attr_hash` (`hash`),
   KEY `fk_port_attr_r_id` (`r_id`),
   CONSTRAINT `fk_port_attr_r_id` FOREIGN KEY (`r_id`) REFERENCES `port` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=2620 DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB AUTO_INCREMENT=669849 DEFAULT CHARSET=utf8;
 
 -- ----------------------------
 -- Table structure for task
@@ -226,8 +224,28 @@ CREATE TABLE `task` (
   `progress_message` varchar(100) DEFAULT NULL,
   `create_datetime` datetime NOT NULL,
   `update_datetime` datetime NOT NULL,
+  `cron_id` char(36) DEFAULT NULL COMMENT 'the id for cron task',
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=545 DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB AUTO_INCREMENT=3212 DEFAULT CHARSET=utf8;
+
+-- ----------------------------
+-- Table structure for task_cron
+-- ----------------------------
+DROP TABLE IF EXISTS `task_cron`;
+CREATE TABLE `task_cron` (
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `task_id` char(36) NOT NULL,
+  `task_name` varchar(100) NOT NULL,
+  `args` varchar(2000) DEFAULT NULL,
+  `kwargs` varchar(8000) DEFAULT NULL,
+  `create_datetime` datetime NOT NULL,
+  `update_datetime` datetime NOT NULL,
+  `cron_rule` varchar(200) NOT NULL COMMENT '定时规则',
+  `lastrun_datetime` datetime DEFAULT NULL COMMENT '上次运行时间',
+  `status` varchar(10) NOT NULL COMMENT '状态enable or disable',
+  `run_count` int(10) DEFAULT NULL COMMENT '启动次数',
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=3160 DEFAULT CHARSET=utf8;
 
 -- ----------------------------
 -- Table structure for vulnerability
@@ -244,6 +262,6 @@ CREATE TABLE `vulnerability` (
   `create_datetime` datetime NOT NULL,
   `update_datetime` datetime NOT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=15 DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB AUTO_INCREMENT=27 DEFAULT CHARSET=utf8;
 
 SET FOREIGN_KEY_CHECKS = 1;

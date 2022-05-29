@@ -486,8 +486,8 @@ func getDomainInfo(domainName string, disableFofa bool) (r DomainInfo) {
 	r.CreateTime = FormatDateTime(domain.CreateDatetime)
 	r.UpdateTime = FormatDateTime(domain.UpdateDatetime)
 	for _, v := range fingerprint.NewScreenShot().LoadScreenshotFile(domainName) {
-		filepath := fmt.Sprintf("/screenshot/%s/%s", domainName, v)
-		filepathThumbnail := fmt.Sprintf("/screenshot/%s/%s", domainName, strings.ReplaceAll(v, ".png", "_thumbnail.png"))
+		filepath := fmt.Sprintf("/webfiles/screenshot/%s/%s", domainName, v)
+		filepathThumbnail := fmt.Sprintf("/webfiles/screenshot/%s/%s", domainName, strings.ReplaceAll(v, ".png", "_thumbnail.png"))
 		r.Screenshot = append(r.Screenshot, ScreenshotFileInfo{
 			ScreenShotFile:          filepath,
 			ScreenShotThumbnailFile: filepathThumbnail,
@@ -658,7 +658,7 @@ func getDomainAttrFullInfo(id int, disableFofa bool) DomainAttrFullInfo {
 				fileSuffix := utils.GetFaviconSuffixUrl(strings.TrimSpace(hashAndUrls[1]))
 				if fileSuffix != "" {
 					imageFile := fmt.Sprintf("%s.%s", utils.MD5(hash), fileSuffix)
-					if utils.CheckFileExist(filepath.Join(conf.GlobalServerConfig().Web.IconImagePath, imageFile)) {
+					if utils.CheckFileExist(filepath.Join(conf.GlobalServerConfig().Web.WebFiles,"iconimage", imageFile)) {
 						if _, ok := r.IconImageSet[imageFile]; !ok {
 							r.IconImageSet[imageFile] = struct{}{}
 						}

@@ -577,7 +577,7 @@ func getPortInfo(ip string, ipId int, disableFofa bool) (r PortInfo) {
 					fileSuffix := utils.GetFaviconSuffixUrl(strings.TrimSpace(hashAndUrls[1]))
 					if fileSuffix != "" {
 						imageFile := fmt.Sprintf("%s.%s", utils.MD5(hash), fileSuffix)
-						if utils.CheckFileExist(filepath.Join(conf.GlobalServerConfig().Web.IconImagePath, imageFile)) {
+						if utils.CheckFileExist(filepath.Join(conf.GlobalServerConfig().Web.WebFiles,"iconimage", imageFile)) {
 							if _, ok := r.IconImageSet[imageFile]; !ok {
 								r.IconImageSet[imageFile] = struct{}{}
 							}
@@ -608,8 +608,8 @@ func getIPInfo(ipName string, disableFofa bool) (r IPInfo) {
 	r.UpdateTime = FormatDateTime(ip.UpdateDatetime)
 	//screenshot
 	for _, v := range fingerprint.NewScreenShot().LoadScreenshotFile(ipName) {
-		filepath := fmt.Sprintf("/screenshot/%s/%s", ipName, v)
-		filepathThumbnail := fmt.Sprintf("/screenshot/%s/%s", ipName, strings.ReplaceAll(v, ".png", "_thumbnail.png"))
+		filepath := fmt.Sprintf("/webfiles/screenshot/%s/%s", ipName, v)
+		filepathThumbnail := fmt.Sprintf("/webfiles/screenshot/%s/%s", ipName, strings.ReplaceAll(v, ".png", "_thumbnail.png"))
 		r.Screenshot = append(r.Screenshot, ScreenshotFileInfo{
 			ScreenShotFile:          filepath,
 			ScreenShotThumbnailFile: filepathThumbnail,

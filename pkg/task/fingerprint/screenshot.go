@@ -152,7 +152,7 @@ func (s *ScreenShot) LoadScreenshotFile(domain string) (r []string) {
 	if !utils.CheckDomain(domain) && !utils.CheckIPV4(domain) {
 		return
 	}
-	files, _ := filepath.Glob(filepath.Join(conf.GlobalServerConfig().Web.ScreenshotPath, domain, "*.png"))
+	files, _ := filepath.Glob(filepath.Join(conf.GlobalServerConfig().Web.WebFiles,"screenshot", domain, "*.png"))
 	for _, file := range files {
 		_, f := filepath.Split(file)
 		if !strings.HasSuffix(f, "_thumbnail.png") {
@@ -188,7 +188,7 @@ func (s *ScreenShot) Delete(domain string) bool {
 		logging.RuntimeLog.Errorf("invalid domain:%s", domain)
 		return false
 	}
-	domainPath := filepath.Join(conf.GlobalServerConfig().Web.ScreenshotPath, domain)
+	domainPath := filepath.Join(conf.GlobalServerConfig().Web.WebFiles,"screenshot", domain)
 	if err := os.RemoveAll(domainPath); err != nil {
 		return false
 	}

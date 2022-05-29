@@ -176,7 +176,7 @@ func (c *TaskController) DeleteAction() {
 		c.FailedStatus(err.Error())
 	} else {
 		task := db.Task{Id: id}
-		resultPath := conf.GlobalServerConfig().Web.TaskResultPath
+		resultPath := path.Join(conf.GlobalServerConfig().Web.WebFiles,"taskresult")
 		if resultPath != "" && task.Get() {
 			filePath := path.Join(resultPath, fmt.Sprintf("%s.json", task.TaskId))
 			os.Remove(filePath)
@@ -459,7 +459,7 @@ func (c *TaskController) getTaskListData(req taskRequestParam) (resp DataTableRe
 	searchMap := c.getSearchMap(req)
 	startPage := req.Start/req.Length + 1
 	results, total := task.Gets(searchMap, startPage, req.Length)
-	resultPath := conf.GlobalServerConfig().Web.TaskResultPath
+	resultPath := path.Join(conf.GlobalServerConfig().Web.WebFiles,"taskresult")
 	for i, taskRow := range results {
 		t := TaskListData{}
 		t.Id = taskRow.Id
@@ -480,7 +480,7 @@ func (c *TaskController) getTaskListData(req taskRequestParam) (resp DataTableRe
 		if resultPath != "" {
 			filePath := path.Join(resultPath, fmt.Sprintf("%s.json", taskRow.TaskId))
 			if utils.CheckFileExist(filePath) {
-				t.ResultFile = fmt.Sprintf("/taskresult/%s.json", taskRow.TaskId)
+				t.ResultFile = fmt.Sprintf("/webfiles/taskresult/%s.json", taskRow.TaskId)
 			}
 		}
 		resp.Data = append(resp.Data, t)
@@ -563,11 +563,11 @@ func getTaskInfo(taskId string) (r TaskInfo) {
 	r.CreateTime = FormatDateTime(task.CreateDatetime)
 	r.UpdateTime = FormatDateTime(task.UpdateDatetime)
 
-	resultPath := conf.GlobalServerConfig().Web.TaskResultPath
+	resultPath := path.Join(conf.GlobalServerConfig().Web.WebFiles,"taskresult")
 	if resultPath != "" {
 		filePath := path.Join(resultPath, fmt.Sprintf("%s.json", taskId))
 		if utils.CheckFileExist(filePath) {
-			r.ResultFile = fmt.Sprintf("/taskresult/%s.json", taskId)
+			r.ResultFile = fmt.Sprintf("/webfiles/taskresult/%s.json", taskId)
 		}
 	}
 	return
