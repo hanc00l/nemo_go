@@ -1,0 +1,62 @@
+<main class="app-content">
+    <div class="row">
+        <div class="col-md-12">
+            <div class="tile">
+                <div class="tile-body">
+                    <form class="row">
+                        <div class="form-group col-md-2">
+                            <label class="control-label" for="task_name">名称</label>
+                            <input class="form-control" type="text" id="task_name" placeholder="任务名称">
+                        </div>
+                        <div class="form-group col-md-2">
+                            <label class="control-label" for="task_args">参数</label>
+                            <input class="form-control" type="text" id="task_args" placeholder="任务参数">
+                        </div>
+                        <div class="form-group col-md-2">
+                            <label class="control-label" for="task_status">状态</label>
+                            <select class="form-control" title="任务状态" id="task_status">
+                                <option value="">--STATUS--</option>
+                                <option value="enable">Enable</option>
+                                <option value="disable">Disable</option>
+                            </select>
+                        </div>
+                        <div class="form-group col-md-4 align-self-end">
+                            <button class="btn btn-primary" type="button" id="search"><i
+                                    class="fa fa-fw fa-lg fa-search"></i>搜索
+                            </button>
+                            <div class="btn-group" role="group">
+                                <button id="btnGroupDrop1" type="button" class="btn btn-secondary dropdown-toggle"
+                                        data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                    <i class="fa fa-angle-double-down"></i>其它
+                                </button>
+                                <div class="dropdown-menu" aria-labelledby="btnGroupDrop1">
+                                    <a class="dropdown-item" href="#" id="batch_delete"><i
+                                            class="fa fa-fw fa-lg fa-remove"></i>删除任务</a>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+            <div class="tile">
+                <div class="tile-body">
+                    <table class="table table-hover table-bordered" id="task_table" width="100%">
+                    </table>
+                </div>
+                <!----tile body-->
+            </div> <!-- tile -->
+        </div> <!-- col md-12 -->
+    </div>
+    <!--row-->
+</main>
+<script src="static/js/jquery/jquery-3.3.1.min.js"></script>
+<script src="static/js/bootstrap/popper.min.js"></script>
+<script src="static/js/bootstrap/bootstrap.min.js"></script>
+<script src="static/js/main.js"></script>
+<script src="static/js/plugins/pace.min.js"></script>
+<!-- Data table plugin-->
+<script src="static/js/plugins/jquery.dataTables.min.js"></script>
+<script src="static/js/plugins/dataTables.bootstrap.min.js"></script>
+<script src="static/js/sweetalert/sweetalert.min.js"></script>
+<script src="static/js/jquery/jquery.bootstrap-duallistbox.js"></script>
+<script src="static/js/server/task-cron-list.js"></script>

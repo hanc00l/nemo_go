@@ -12,7 +12,7 @@ import (
 )
 
 // NewTask 创建一个新执行任务
-func NewTask(taskName string, configJSON string) (taskId string, err error) {
+func NewTask(taskName, configJSON, cronTaskId string) (taskId string, err error) {
 	server := ampq.GetServerTaskAMPQSrever()
 	// 延迟5秒后执行
 	eta := time.Now().Add(time.Second * 5)
@@ -31,7 +31,7 @@ func NewTask(taskName string, configJSON string) (taskId string, err error) {
 		logging.RuntimeLog.Error(err)
 		return "", err
 	}
-	addTask(taskId, taskName, configJSON)
+	addTask(taskId, taskName, configJSON, cronTaskId)
 
 	return taskId, nil
 }
@@ -53,7 +53,7 @@ func RevokeUnexcusedTask(taskId string) (isRevoked bool, err error) {
 }
 
 // addTask 将任务写入到数据库中
-func addTask(taskId, taskName, kwArgs string) {
+func addTask(taskId, taskName, kwArgs, cronTaskId string) {
 	dt := time.Now()
 	task := &db.Task{
 		TaskId:       taskId,
@@ -61,6 +61,7 @@ func addTask(taskId, taskName, kwArgs string) {
 		KwArgs:       kwArgs,
 		State:        ampq.CREATED,
 		ReceivedTime: &dt,
+		CronTaskId:   cronTaskId,
 	}
 	//kwargs可能因为target很多导致超过数据库中的字段设计长度，因此作一个长度截取
 	const argsLength = 2000

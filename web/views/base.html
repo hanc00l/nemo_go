@@ -98,11 +98,16 @@
                     <span class="app-menu__label">Vulnerability</span>
                 </a>
             </li>
-            <li>
-                <a class="app-menu__item" href="task-list">
-                    <i class="app-menu__icon fa fa-star-o"></i>
-                    <span class="app-menu__label">任务管理</span>
+            <li class="treeview">
+                <a class="app-menu__item" href="#" data-toggle="treeview">
+                    <i class="app-menu__icon fa fa-cogs"></i>
+                    <span class="app-menu__label">Task</span>
+                    <i class="treeview-indicator fa fa-angle-right"></i>
                 </a>
+                <ul class="treeview-menu">
+                    <li><a class="treeview-item" href="task-list">任务</a></li>
+                    <li><a class="treeview-item" href="task-cron-list">定时任务</a></li>
+                </ul>
             </li>
             <li>
                 <a class="app-menu__item" href="org-list">

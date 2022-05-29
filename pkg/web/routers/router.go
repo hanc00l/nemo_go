@@ -75,4 +75,11 @@ func init() {
 	web.Router("/task-start-batchscan", task, "post:StartBatchScanTaskAction")
 	web.Router("/task-start-domainscan", task, "post:StartDomainScanTaskAction")
 	web.Router("/task-start-vulnerability", task, "post:StartPocScanTaskAction")
+	//cron task
+	web.Router("/task-cron-list", task, "get:IndexCronAction;post:ListCronAction")
+	web.Router("/task-cron-info", task, "get:InfoCronAction")
+	web.Router("/task-cron-delete", task, "post:DeleteCronAction")
+	web.Router("/task-cron-disable", task, "post:DisableCronTaskAction")
+	web.Router("/task-cron-enable", task, "post:EnableCronTaskAction")
+
 }

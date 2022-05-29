@@ -240,7 +240,7 @@ func (s *Service) NewTask(ctx context.Context, args *NewTaskArgs, replay *string
 		replay = &msg
 		return errors.New(msg)
 	}
-	taskId, err := serverapi.NewTask(args.TaskName, args.ConfigJSON)
+	taskId, err := serverapi.NewTask(args.TaskName, args.ConfigJSON,"")
 	if err != nil {
 		return err
 	}

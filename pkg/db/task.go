@@ -24,6 +24,7 @@ type Task struct {
 	ProgressMessage string     `gorm:"column:progress_message"`
 	CreateDatetime  time.Time  `gorm:"column:create_datetime"`
 	UpdateDatetime  time.Time  `gorm:"column:update_datetime"`
+	CronTaskId      string     `gorm:"column:cron_id"`
 }
 
 func (Task) TableName() string {
@@ -49,12 +50,13 @@ func (t *Task) Get() (success bool) {
 	db := GetDB()
 	defer CloseDB(db)
 
-	if result := db.First(t,t.Id); result.RowsAffected > 0 {
+	if result := db.First(t, t.Id); result.RowsAffected > 0 {
 		return true
 	} else {
 		return false
 	}
 }
+
 //GetByTaskId 根据TaskID（不是数据库ID）精确查询一条记录
 func (t *Task) GetByTaskId() (success bool) {
 	db := GetDB()
@@ -120,6 +122,8 @@ func (t *Task) makeWhere(searchMap map[string]interface{}) *gorm.DB {
 			if err == nil {
 				db = db.Where("update_datetime between ? and ?", time.Now().Add(dayDelta), time.Now())
 			}
+		case "cron_id":
+			db = db.Where("cron_id", value)
 		default:
 			db = db.Where(column, value)
 		}

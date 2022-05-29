@@ -10,6 +10,7 @@ import (
 	"github.com/hanc00l/nemo_go/pkg/comm"
 	"github.com/hanc00l/nemo_go/pkg/conf"
 	"github.com/hanc00l/nemo_go/pkg/logging"
+	"github.com/hanc00l/nemo_go/pkg/task/execute"
 	_ "github.com/hanc00l/nemo_go/pkg/web/routers"
 	"github.com/smallnest/rpcx/protocol"
 	"github.com/smallnest/rpcx/server"
@@ -58,6 +59,13 @@ func startRPCServer() {
 	s.Serve("tcp", fmt.Sprintf("%s:%d", rpc.Host, rpc.Port))
 }
 
+// startCronTask 启动定时任务
+func startCronTask(){
+	num := execute.StartCronTask()
+	logging.CLILog.Infof("cron task total:%d",num)
+	logging.RuntimeLog.Infof("cron task total:%d",num)
+}
+
 // auth RPC调用认证
 func auth(ctx context.Context, req *protocol.Message, token string) error {
 	if token == conf.GlobalServerConfig().Rpc.AuthKey {
@@ -70,5 +78,6 @@ func auth(ctx context.Context, req *protocol.Message, token string) error {
 func main() {
 	go startRPCServer()
 	time.Sleep(time.Second*1)
+	startCronTask()
 	startWebServer()
 }

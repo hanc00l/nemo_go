@@ -470,7 +470,6 @@
                                                                 </datalist>
                                                             </div>
                                                         </div>
-                                                        <div style="height:50px"><p></p></div>
                                                     </div>
                                                     <div class="tab-pane fade" id="batchscan">
                                                         <div class="form-group row bg-light">
@@ -637,6 +636,22 @@
                                                                 </select>
                                                             </div>
                                                         </div>
+                                                    </div>
+                                                </div>
+                                                <div class="form-group row bg-light">
+                                                    <div class="col-md-12">
+                                                        <div class="form-check form-check-inline">
+                                                            <label class="form-check-label"
+                                                                   for="checkbox_cron_task">
+                                                                <input class="form-check-input"
+                                                                       id="checkbox_cron_task" type="checkbox"
+                                                                       ><b>定时任务</b><i
+                                                                    class="fa fa-info-circle" aria-hidden="true"
+                                                                    title="定时任务&#10;任务在指定时间启动并周期执行，执行规则同Linux Crontab任务计划格式&#10;任务格式：“分钟 小时 天 周 月”，可使用*、/、,、-等特殊符号&#10;例：0 8-16/2 * * *表示在每天8-16点的整点，每隔2小时启动&#10;参见：https://www.runoob.com/w3cnote/linux-crontab-tasks.html"></i>
+                                                            </label>
+                                                        </div>
+                                                        <input class="form-control" id="input_cron_rule" type="text"
+                                                               placeholder="0 8 * * *" disabled value="0 8 * * *" >
                                                     </div>
                                                 </div>
                                             </div>

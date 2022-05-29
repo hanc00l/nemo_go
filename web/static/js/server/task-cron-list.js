@@ -10,16 +10,14 @@ $(function () {
             'iDisplayLength': 50,
             "dom": '<i><t><"bottom"lp>',
             "ajax": {
-                "url": "/task-list",
+                "url": "/task-cron-list",
                 "type": "post",
                 "data": function (d) {
                     init_dataTables_defaultParam(d);
                     return $.extend({}, d, {
-                        "task_state": $('#task_state').val(),
+                        "task_status": $('#task_status').val(),
                         "task_name": $('#task_name').val(),
                         "task_args": $('#task_args').val(),
-                        "task_worker": $('#task_worker').val(),
-                        "cron_id": getUrlParam("cron_id"),
                     });
                 }
             },
@@ -45,16 +43,18 @@ $(function () {
                     width: "8%",
                     render: function (data, type, row, meta) {
                         let strData;
-                        strData = '<a href="/task-info?task_id=' + row['task_id'] + '" target="_blank">' + data + '</a>';
+                        strData = '<a href="/task-cron-info?task_id=' + row['task_id'] + '" target="_blank">' + data + '</a>';
                         return strData;
                     }
                 },
                 {
-                    data: "state", title: "状态", width: "8%",
+                    data: 'status', title: '状态', width: '8%',
                     "render": function (data, type, row) {
-                        if (data == 'CREATED') {
-                            return data + '<button class="btn btn-sm btn-danger" type="button" onclick="stop_task(\'' + row['task_id'] + '\')" >&nbsp;中止&nbsp;</button>';
-                        } else return data;
+                        if (data == 'enable') {
+                            return 'Enabled' + '<button class="btn btn-sm btn-danger" type="button" onclick="disable_task(\'' + row['task_id'] + '\')" >&nbsp;禁用&nbsp;</button>';
+                        } else {
+                            return 'Disabled' + '<button class="btn btn-sm btn-success" type="button" onclick="enable_task(\'' + row['task_id'] + '\')" >&nbsp;启用&nbsp;</button>';
+                        }
                     }
                 },
                 {
@@ -65,30 +65,27 @@ $(function () {
                     }
                 },
                 {
-                    data: 'result', title: '结果', width: '10%',
-                    "render": function (data, type, row) {
-                        let strData = '<div style="width:100%;white-space:normal;word-wrap:break-word;word-break:break-all;">';
-                        if (row['resultfile'] != "") {
-                            strData += '<a href=' + row['resultfile'] + ' target="_blank">' + data + '</a>';
-                        } else {
-                            strData += data;
-                        }
-                        strData += '</div>';
-                        return strData;
-                    }
-                },
-                {data: 'received', title: '接收时间', width: '8%'},
-                {data: 'started', title: '启动时间', width: '8%'},
-                {data: 'runtime', title: '执行时长', width: '8%'},
-                {
-                    data: 'worker',
-                    title: 'worker',
-                    width: '10%',
+                    data: 'cron_rule', title: '任务定时规则', width: '10%',
                     "render": function (data, type, row) {
                         const strData = '<div style="width:100%;white-space:normal;word-wrap:break-word;word-break:break-all;">' + data + '</div>';
                         return strData;
                     }
                 },
+                {data: 'create_time', title: '创建时间', width: '8%'},
+                {data: 'lastrun_time', title: '最近执行时间', width: '8%'},
+                {
+                    data: 'run_count', title: '执行次数', width: '8%',
+                    "render": function (data, type, row, meta) {
+                        let strData;
+                        if (data > 0) {
+                            strData = '<a href="/task-list?cron_id=' + row['task_id'] + '" target="_blank">' + data + '</a>';
+                            return strData;
+                        } else {
+                            return "";
+                        }
+                    }
+                },
+                {data: 'nextrun_time', title: '下次执行时间', width: '8%'},
                 {
                     title: "操作",
                     width: "8%",
@@ -141,7 +138,7 @@ $(function () {
     });
     //批量删除
     $("#batch_delete").click(function () {
-        batch_delete('#task_table', '/task-delete');
+        batch_delete('#task_table', '/task-cron-delete');
     });
 });
 
@@ -160,22 +157,49 @@ function init_dataTables_defaultParam(param) {
 }
 
 /**
- * 中止一个任务
+ * 禁用一个任务
  * @param task_id
  */
-function stop_task(task_id) {
+function disable_task(task_id) {
     swal({
-            title: "确定要中止任务?",
-            text: "中止任务！",
+            title: "确定要禁用任务?",
+            text: "禁用任务！",
             type: "warning",
             showCancelButton: true,
             confirmButtonColor: "#DD6B55",
-            confirmButtonText: "确认中止",
+            confirmButtonText: "确认禁用",
             cancelButtonText: "取消",
             closeOnConfirm: true
         },
         function () {
-            $.post("/task-stop",
+            $.post("/task-cron-disable",
+                {
+                    "task_id": task_id,
+                }, function (data, e) {
+                    if (e === "success") {
+                        $('#task_table').DataTable().draw(false);
+                    }
+                });
+        });
+}
+
+/**
+ * 启用一个任务
+ * @param task_id
+ */
+function enable_task(task_id) {
+    swal({
+            title: "确定要启用任务?",
+            text: "启用任务！",
+            type: "warning",
+            showCancelButton: true,
+            confirmButtonColor: "#DD6B55",
+            confirmButtonText: "确认启用",
+            cancelButtonText: "取消",
+            closeOnConfirm: true
+        },
+        function () {
+            $.post("/task-cron-enable",
                 {
                     "task_id": task_id,
                 }, function (data, e) {
@@ -202,7 +226,7 @@ function delete_task(id) {
             closeOnConfirm: true
         },
         function () {
-            $.post("/task-delete",
+            $.post("/task-cron-delete",
                 {
                     "id": id,
                 }, function (data, e) {
@@ -239,12 +263,4 @@ function batch_delete(dataTableId, url) {
             });
             $(dataTableId).DataTable().draw(false);
         });
-}
-
-//获取url中的参数
-function getUrlParam(name) {
-    var reg = new RegExp("(^|&)" + name + "=([^&]*)(&|$)"); //构造一个含有目标参数的正则表达式对象
-    var r = window.location.search.substr(1).match(reg);  //匹配目标参数
-    if (r != null) return unescape(r[2]);
-    return null; //返回参数值
 }

@@ -20,6 +20,14 @@ $(function () {
             swal('Warning', '请至少输入一个Target', 'error');
             return;
         }
+        let cron_rule = "";
+        if ($('#checkbox_cron_task').is(":checked")) {
+            cron_rule = $('#input_cron_rule').val();
+            if(!cron_rule){
+                swal('Warning', '请输入定时任务规则', 'error');
+                return;
+            }
+        }
         if (getCurrentTabIndex() == 0) {
             $.post("/task-start-domainscan",
                 {
@@ -43,6 +51,8 @@ $(function () {
                     'wappalyzer': $('#checkbox_wappalyzer').is(":checked"),
                     'fingerprinthub': $('#checkbox_fingerprinthub').is(":checked"),
                     'iconhash': $('#checkbox_iconhash').is(":checked"),
+                    'taskcron': $('#checkbox_cron_task').is(":checked"),
+                    'cronrule': cron_rule,
                 }, function (data, e) {
                     if (e === "success" && data['status'] == 'success') {
                         swal({
@@ -100,6 +110,8 @@ $(function () {
                 'dirsearch': $('#checkbox_dirsearch').is(":checked"),
                 'ext': $('#input_dirsearch_ext').val(),
                 'load_opened_port': false,
+                'taskcron': $('#checkbox_cron_task').is(":checked"),
+                'cronrule': cron_rule,
             }, function (data, e) {
                 if (e === "success" && data['status'] == 'success') {
                     swal({
@@ -119,6 +131,13 @@ $(function () {
             });
         }
     });
+    $("#checkbox_cron_task").click(function () {
+        if (this.checked) {
+            $("#input_cron_rule").prop("disabled", false);
+        } else {
+            $("#input_cron_rule").prop("disabled", true);
+        }
+    })
     $("#domain_statistics").click(function () {
         let url = 'domain-statistics?';
         url += get_export_options();
