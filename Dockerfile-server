@@ -1,20 +1,13 @@
-FROM ubuntu:18.04
+FROM ubuntu:20.04
 
 ENV LC_ALL C.UTF-8
-
-# Init
-RUN set -x \
-    # You may need this if you're in Mainland China
-    && sed -i 's/archive.ubuntu.com/mirrors.ustc.edu.cn/g' /etc/apt/sources.list \
-    ###
-    && apt-get update \
-    && apt-get install -y wget curl vim net-tools  iputils-ping git unzip --fix-missing
-
 # Docker timezone
 ENV TZ=Asia/Shanghai \
     DEBIAN_FRONTEND=noninteractive
-# Ubuntu 基础镜像中没有安装了 tzdata 包，因此我们需要先安装 tzdata 包
+# Install tzdata
 RUN set -x \
+    && sed -i 's/archive.ubuntu.com/mirrors.ustc.edu.cn/g' /etc/apt/sources.list \
+    && sed -i 's/security.ubuntu.com/mirrors.ustc.edu.cn/g' /etc/apt/sources.list \
     && apt update \
     && apt install -y tzdata \
     && ln -fs /usr/share/zoneinfo/${TZ} /etc/localtime \
@@ -22,9 +15,15 @@ RUN set -x \
     && dpkg-reconfigure --frontend noninteractive tzdata \
     && rm -rf /var/lib/apt/lists/*
 
+# Init
+RUN set -x \
+    # You may need this if you're in Mainland China \
+    && apt update \
+    && apt install -y wget curl vim net-tools  iputils-ping git unzip --fix-missing
+
 COPY . /opt/nemo
 
 #link to mysql and rabbitmq
 RUN set -x \
     && sed -i 's/host: 127.0.0.1/host: mysql/g' /opt/nemo/conf/server.yml \
-    && sed -i 's/host: localhost/host: rabbitmq/g' /opt/nemo/conf/server.yml \
+    && sed -i 's/host: localhost/host: rabbitmq/g' /opt/nemo/conf/server.yml
