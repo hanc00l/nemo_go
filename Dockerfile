@@ -12,6 +12,18 @@ RUN set -x \
     wget curl vim net-tools  iputils-ping git unzip \
     nmap masscan chromium-browser --fix-missing
 
+# Docker timezone
+ENV TZ=Asia/Shanghai \
+    DEBIAN_FRONTEND=noninteractive
+# Ubuntu 基础镜像中没有安装了 tzdata 包，因此我们需要先安装 tzdata 包
+RUN set -x \
+    && apt update \
+    && apt install -y tzdata \
+    && ln -fs /usr/share/zoneinfo/${TZ} /etc/localtime \
+    && echo ${TZ} > /etc/timezone \
+    && dpkg-reconfigure --frontend noninteractive tzdata \
+    && rm -rf /var/lib/apt/lists/*
+
 # pip package
 RUN set -x \
     # You may need this if you're in Mainland China
