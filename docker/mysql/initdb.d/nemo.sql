@@ -11,7 +11,7 @@
  Target Server Version : 50738
  File Encoding         : 65001
 
- Date: 29/05/2022 21:05:20
+ Date: 30/05/2022 11:28:14
 */
 
 SET NAMES utf8mb4;
@@ -31,7 +31,7 @@ CREATE TABLE `domain` (
   UNIQUE KEY `index_domain_domain` (`domain`) USING BTREE,
   KEY `fk_domain_org_id` (`org_id`),
   CONSTRAINT `fk_domain_org_id` FOREIGN KEY (`org_id`) REFERENCES `organization` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=15 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=6 DEFAULT CHARSET=utf8;
 
 -- ----------------------------
 -- Table structure for domain_attr
@@ -50,7 +50,7 @@ CREATE TABLE `domain_attr` (
   UNIQUE KEY `index_domain_attr_hash` (`hash`) USING BTREE,
   KEY `index_domain_attr_ip_id` (`r_id`),
   CONSTRAINT `domain_attr_ibfk_1` FOREIGN KEY (`r_id`) REFERENCES `domain` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=54 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=23 DEFAULT CHARSET=utf8;
 
 -- ----------------------------
 -- Table structure for domain_color_tag
@@ -101,7 +101,7 @@ CREATE TABLE `ip` (
   UNIQUE KEY `index_ip_ip_int` (`ip_int`) USING BTREE,
   KEY `index_ip_org_id` (`org_id`),
   CONSTRAINT `fk_ip_org_id` FOREIGN KEY (`org_id`) REFERENCES `organization` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=106530 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=106525 DEFAULT CHARSET=utf8;
 
 -- ----------------------------
 -- Table structure for ip_attr
@@ -181,7 +181,7 @@ CREATE TABLE `port` (
   PRIMARY KEY (`id`),
   UNIQUE KEY `index_port_ip_port` (`ip_id`,`port`),
   CONSTRAINT `fk_port_ip` FOREIGN KEY (`ip_id`) REFERENCES `ip` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=532013 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=531997 DEFAULT CHARSET=utf8;
 
 -- ----------------------------
 -- Table structure for port_attr
@@ -200,7 +200,7 @@ CREATE TABLE `port_attr` (
   UNIQUE KEY `index_port_attr_hash` (`hash`),
   KEY `fk_port_attr_r_id` (`r_id`),
   CONSTRAINT `fk_port_attr_r_id` FOREIGN KEY (`r_id`) REFERENCES `port` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=669849 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=669820 DEFAULT CHARSET=utf8;
 
 -- ----------------------------
 -- Table structure for task
@@ -226,7 +226,7 @@ CREATE TABLE `task` (
   `update_datetime` datetime NOT NULL,
   `cron_id` char(36) DEFAULT NULL COMMENT 'the id for cron task',
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=3212 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=3220 DEFAULT CHARSET=utf8;
 
 -- ----------------------------
 -- Table structure for task_cron
@@ -244,8 +244,9 @@ CREATE TABLE `task_cron` (
   `lastrun_datetime` datetime DEFAULT NULL COMMENT '上次运行时间',
   `status` varchar(10) NOT NULL COMMENT '状态enable or disable',
   `run_count` int(10) DEFAULT NULL COMMENT '启动次数',
+  `comment` varchar(200) DEFAULT NULL COMMENT '定时任务说明',
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=3160 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=3166 DEFAULT CHARSET=utf8;
 
 -- ----------------------------
 -- Table structure for vulnerability
