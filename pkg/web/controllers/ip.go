@@ -57,6 +57,12 @@ type IPListData struct {
 	IconImage      []string `json:"iconimage"`
 }
 
+type IconHashWithFofa struct {
+	IconHash  string
+	IconImage string
+	FofaUrl   string
+}
+
 // IPInfo IP的详细数据的集合
 type IPInfo struct {
 	Id            int
@@ -76,8 +82,7 @@ type IPInfo struct {
 	UpdateTime    string
 	Screenshot    []ScreenshotFileInfo
 	DisableFofa   bool
-	IconHash      []string
-	IconImage     []string
+	IconHashes    []IconHashWithFofa
 	TlsData       []string
 }
 
@@ -104,14 +109,13 @@ type ScreenshotFileInfo struct {
 
 // PortInfo 端口详细数据的集合
 type PortInfo struct {
-	PortNumbers  []int
-	PortStatus   map[int]string
-	TitleSet     map[string]struct{}
-	BannerSet    map[string]struct{}
-	PortAttr     []PortAttrInfo
-	IconHashSet  map[string]struct{}
-	IconImageSet map[string]struct{}
-	TlsDataSet   map[string]struct{}
+	PortNumbers      []int
+	PortStatus       map[int]string
+	TitleSet         map[string]struct{}
+	BannerSet        map[string]struct{}
+	PortAttr         []PortAttrInfo
+	IconHashImageSet map[string]string
+	TlsDataSet       map[string]struct{}
 }
 
 // IPStatisticInfo IP统计信息
@@ -463,7 +467,9 @@ func (c *IPController) getIPListData(req ipRequestParam) (resp DataTableResponse
 		ipData.Title = strings.Join(ipInfo.Title, ", ")
 		ipData.Banner = strings.Join(ipInfo.Banner, ", ")
 		ipData.ScreenshotFile = ss.LoadScreenshotFile(ipRow.IpName)
-		ipData.IconImage = ipInfo.IconImage
+		for _, ihm := range ipInfo.IconHashes {
+			ipData.IconImage = append(ipData.IconImage, ihm.IconImage)
+		}
 		if ipData.ScreenshotFile == nil {
 			ipData.ScreenshotFile = make([]string, 0)
 		}
@@ -509,9 +515,8 @@ func getPortInfo(ip string, ipId int, disableFofa bool) (r PortInfo) {
 	r.PortStatus = make(map[int]string)
 	r.BannerSet = make(map[string]struct{})
 	r.TitleSet = make(map[string]struct{})
-	r.IconHashSet = make(map[string]struct{})
 	r.TlsDataSet = make(map[string]struct{})
-	r.IconImageSet = make(map[string]struct{})
+	r.IconHashImageSet = make(map[string]string)
 
 	port := db.Port{IpId: ipId}
 	portData := port.GetsByIPId()
@@ -572,16 +577,13 @@ func getPortInfo(ip string, ipId int, disableFofa bool) (r PortInfo) {
 				if len(hashAndUrls) == 2 {
 					// icon hash
 					hash := strings.TrimSpace(hashAndUrls[0])
-					if _, ok := r.IconHashSet[hash]; !ok {
-						r.IconHashSet[hash] = struct{}{}
-					}
 					// icon hash image
 					fileSuffix := utils.GetFaviconSuffixUrl(strings.TrimSpace(hashAndUrls[1]))
 					if fileSuffix != "" {
 						imageFile := fmt.Sprintf("%s.%s", utils.MD5(hash), fileSuffix)
 						if utils.CheckFileExist(filepath.Join(conf.GlobalServerConfig().Web.WebFiles, "iconimage", imageFile)) {
-							if _, ok := r.IconImageSet[imageFile]; !ok {
-								r.IconImageSet[imageFile] = struct{}{}
+							if _, ok := r.IconHashImageSet[hash]; !ok {
+								r.IconHashImageSet[hash] = imageFile
 							}
 						}
 					}
@@ -656,11 +658,15 @@ func getIPInfo(ipName string, disableFofa bool) (r IPInfo) {
 			UpdateTime: FormatDateTime(v.UpdateDatetime),
 		})
 	}
-	//
-	r.IconHash = utils.SetToSlice(portInfo.IconHashSet)
+	for hash, image := range portInfo.IconHashImageSet {
+		r.IconHashes = append(r.IconHashes, IconHashWithFofa{
+			IconHash:  hash,
+			IconImage: image,
+			FofaUrl: fmt.Sprintf("https://fofa.info/result?qbase64=%s",
+				base64.URLEncoding.EncodeToString([]byte(fmt.Sprintf("icon_hash=%s", hash)))),
+		})
+	}
 	r.TlsData = utils.SetToSlice(portInfo.TlsDataSet)
-	r.IconImage = utils.SetToSlice(portInfo.IconImageSet)
-	//
 	r.Domain = getIpRelatedDomain(ipName)
 	return
 }

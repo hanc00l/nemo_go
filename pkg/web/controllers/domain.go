@@ -1,6 +1,7 @@
 package controllers
 
 import (
+	"encoding/base64"
 	"encoding/json"
 	"fmt"
 	"github.com/hanc00l/nemo_go/pkg/conf"
@@ -73,8 +74,7 @@ type DomainInfo struct {
 	Screenshot    []ScreenshotFileInfo
 	DomainAttr    []DomainAttrInfo
 	DisableFofa   bool
-	IconHash      []string
-	IconImage     []string
+	IconHashes    []IconHashWithFofa
 	TlsData       []string
 	DomainCDN     string
 	DomainCNAME   string
@@ -95,8 +95,7 @@ type DomainAttrFullInfo struct {
 	TitleSet     map[string]struct{}
 	BannerSet    map[string]struct{}
 	DomainAttr   []DomainAttrInfo
-	IconHashSet  map[string]struct{}
-	IconImageSet map[string]struct{}
+	IconImageSet map[string]string
 	TlsData      map[string]struct{}
 	DomainCDN    string
 	DomainCNAME  string
@@ -453,7 +452,9 @@ func (c *DomainController) getDomainListData(req domainRequestParam) (resp DataT
 				break
 			}
 		}
-		domainData.IconImage = domainInfo.IconImage
+		for _, ihm := range domainInfo.IconHashes {
+			domainData.IconImage = append(domainData.IconImage, ihm.IconImage)
+		}
 		resp.Data = append(resp.Data, domainData)
 	}
 	resp.Draw = req.Draw
@@ -570,12 +571,17 @@ func getDomainInfo(domainName string, disableFofa bool) (r DomainInfo) {
 		})
 	}
 	//
-	r.IconHash = utils.SetToSlice(domainAttrInfo.IconHashSet)
 	r.TlsData = utils.SetToSlice(domainAttrInfo.TlsData)
 	r.DomainCDN = domainAttrInfo.DomainCDN
 	r.DomainCNAME = domainAttrInfo.DomainCNAME
-	r.IconImage = utils.SetToSlice(domainAttrInfo.IconImageSet)
-
+	for hash, image := range domainAttrInfo.IconImageSet {
+		r.IconHashes = append(r.IconHashes, IconHashWithFofa{
+			IconHash:  hash,
+			IconImage: image,
+			FofaUrl: fmt.Sprintf("https://fofa.info/result?qbase64=%s",
+				base64.URLEncoding.EncodeToString([]byte(fmt.Sprintf("icon_hash=%s", hash)))),
+		})
+	}
 	return
 }
 
@@ -585,9 +591,8 @@ func getDomainAttrFullInfo(id int, disableFofa bool) DomainAttrFullInfo {
 		IP:           make(map[string]struct{}),
 		TitleSet:     make(map[string]struct{}),
 		BannerSet:    make(map[string]struct{}),
-		IconHashSet:  make(map[string]struct{}),
 		TlsData:      make(map[string]struct{}),
-		IconImageSet: make(map[string]struct{}),
+		IconImageSet: make(map[string]string),
 	}
 	fofaInfo := make(map[string]string)
 	domainAttr := db.DomainAttr{RelatedId: id}
@@ -650,9 +655,6 @@ func getDomainAttrFullInfo(id int, disableFofa bool) DomainAttrFullInfo {
 			hashAndUrls := strings.Split(da.Content, "|")
 			if len(hashAndUrls) == 2 {
 				hash := strings.TrimSpace(hashAndUrls[0])
-				if _, ok := r.IconHashSet[hash]; !ok {
-					r.IconHashSet[hash] = struct{}{}
-				}
 				r.DomainAttr = append(r.DomainAttr, DomainAttrInfo{
 					Id:         da.Id,
 					Tag:        "favicon",
@@ -665,8 +667,8 @@ func getDomainAttrFullInfo(id int, disableFofa bool) DomainAttrFullInfo {
 				if fileSuffix != "" {
 					imageFile := fmt.Sprintf("%s.%s", utils.MD5(hash), fileSuffix)
 					if utils.CheckFileExist(filepath.Join(conf.GlobalServerConfig().Web.WebFiles, "iconimage", imageFile)) {
-						if _, ok := r.IconImageSet[imageFile]; !ok {
-							r.IconImageSet[imageFile] = struct{}{}
+						if _, ok := r.IconImageSet[hash]; !ok {
+							r.IconImageSet[hash] = imageFile
 						}
 					}
 				}

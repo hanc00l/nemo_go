@@ -7,7 +7,8 @@
                 <div class="card">
                     <h2 class="card-header">
                         <div class="form-check-inline">
-                            <button type="button" id="btn_switchShowFofa" class="btn btn-secondary" onclick="refresh_info('domain','{{ .domain_info.Domain }}',{{ .domain_info.DisableFofa }})">
+                            <button type="button" id="btn_switchShowFofa" class="btn btn-secondary"
+                                    onclick="refresh_info('domain','{{ .domain_info.Domain }}',{{ .domain_info.DisableFofa }})">
                                 <i class="fa fa-info-circle"></i>{{ if .domain_info.DisableFofa }}
                                 显示FOFA/Quake/Hunter信息
                                 {{ else }}
@@ -70,11 +71,12 @@
                         <span class="btn btn-info">Banner</span></b>
                         <span style="margin: 10px;"><strong>{{.domain_info.Banner }}</strong></span>
                         {{ end }}
-                        {{ if .domain_info.IconHash }}
+                        {{ if .domain_info.IconHashes }}
                         <span class="btn btn-info">IconHash</span>
-                        <span style="margin: 10px;"><strong>{{ .domain_info.IconHash }}</strong></span>
-                        {{ range .domain_info.IconImage }}
-                        <img src="/webfiles/iconimage/{{ . }}" height="24px" width="24px"/>&nbsp;
+                        {{ range .domain_info.IconHashes }}
+                        <a href="{{ .FofaUrl }}" target="_blank"><img src="/webfiles/iconimage/{{ .IconImage }}"
+                                                                      height="24px" width="24px"
+                                                                      title="{{ .IconHash }}"/></a>&nbsp;
                         {{ end }}
                         {{ end }}
                         {{ if .domain_info.TlsData }}

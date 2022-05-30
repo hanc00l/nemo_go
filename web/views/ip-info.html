@@ -72,11 +72,12 @@
                         <span class="btn btn-info">Banner</span>
                         <span style="margin: 10px;"><strong>{{ .ip_info.Banner }}</strong></span>
                         {{ end }}
-                        {{ if .ip_info.IconHash }}
+                        {{ if .ip_info.IconHashes }}
                         <span class="btn btn-info">IconHash</span>
-                        <span style="margin: 10px;"><strong>{{ .ip_info.IconHash }}</strong></span>
-                        {{ range .ip_info.IconImage }}
-                        <img src="/webfiles/iconimage/{{ . }}" height="24px" width="24px"/>&nbsp;
+                        {{ range .ip_info.IconHashes }}
+                        <a href="{{ .FofaUrl }}" target="_blank"><img src="/webfiles/iconimage/{{ .IconImage }}"
+                                                                      height="24px" width="24px"
+                                                                      title="{{ .IconHash }}"/></a>&nbsp;
                         {{ end }}
                         {{ end }}
                         {{ if .ip_info.TlsData }}
