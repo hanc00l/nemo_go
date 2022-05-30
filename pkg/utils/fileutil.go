@@ -121,7 +121,7 @@ func MakePath(filepath string) bool {
 		return true
 	}
 	if os.IsNotExist(err) {
-		if err = os.Mkdir(filepath, 0777); err == nil {
+		if err = os.MkdirAll(filepath, 0777); err == nil {
 			return true
 		}
 	}

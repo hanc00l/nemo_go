@@ -123,6 +123,10 @@ func (domain *Domain) makeWhere(searchMap map[string]interface{}) *gorm.DB {
 			if err == nil {
 				db = db.Where("create_datetime between ? and ?", time.Now().Add(dayDelta), time.Now())
 			}
+		case "content":
+			domainAttr := GetDB().Model(&DomainAttr{}).Select("r_id").Where("content like ?", fmt.Sprintf("%%%s%%", value))
+			db = db.Where("id in (?)", domainAttr)
+			CloseDB(domainAttr)
 		default:
 			db = db.Where(column, value)
 		}

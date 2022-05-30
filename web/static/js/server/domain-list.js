@@ -23,7 +23,7 @@ $(function () {
         let cron_rule = "";
         if ($('#checkbox_cron_task').is(":checked")) {
             cron_rule = $('#input_cron_rule').val();
-            if(!cron_rule){
+            if (!cron_rule) {
                 swal('Warning', '请输入定时任务规则', 'error');
                 return;
             }
@@ -184,6 +184,7 @@ $(function () {
                         "date_delta": $('#date_delta').val(),
                         "create_date_delta": $('#create_date_delta').val(),
                         'disable_fofa': $('#checkbox_disable_fofa').is(":checked"),
+                        'content': $('#content').val(),
                     });
                 }
             },

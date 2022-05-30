@@ -33,6 +33,7 @@ type domainRequestParam struct {
 	DateDelta       int    `form:"date_delta"`
 	CreateDateDelta int    `form:"create_date_delta"`
 	DisableFofa     bool   `form:"disable_fofa"`
+	Content         string `form:"content"`
 }
 
 // DomainListData datable显示的每一行数据
@@ -391,6 +392,9 @@ func (c *DomainController) getSearchMap(req domainRequestParam) (searchMap map[s
 	}
 	if req.CreateDateDelta > 0 {
 		searchMap["create_date_delta"] = req.CreateDateDelta
+	}
+	if req.Content != "" {
+		searchMap["content"] = req.Content
 	}
 	return
 }
