@@ -433,7 +433,9 @@ func (c *DomainController) getDomainListData(req domainRequestParam) (resp DataT
 		}
 		domainData.MemoContent = domainInfo.Memo
 		domainData.ColorTag = domainInfo.ColorTag
-		domainData.Banner = strings.Join(utils.RemoveDuplicationElement(append(domainInfo.Title, domainInfo.Banner...)), ", ")
+		//domainData.Banner = strings.Join(utils.RemoveDuplicationElement(append(domainInfo.Title, domainInfo.Banner...)), ", ")
+		domainData.Title = strings.Join(domainInfo.Title, ", ")
+		domainData.Banner = strings.Join(domainInfo.Banner, ", ")
 		var vulSet []string
 		for _, v := range domainInfo.Vulnerability {
 			vulSet = append(vulSet, fmt.Sprintf("%s/%s", v.PocFile, v.Source))
@@ -658,7 +660,7 @@ func getDomainAttrFullInfo(id int, disableFofa bool) DomainAttrFullInfo {
 				fileSuffix := utils.GetFaviconSuffixUrl(strings.TrimSpace(hashAndUrls[1]))
 				if fileSuffix != "" {
 					imageFile := fmt.Sprintf("%s.%s", utils.MD5(hash), fileSuffix)
-					if utils.CheckFileExist(filepath.Join(conf.GlobalServerConfig().Web.WebFiles,"iconimage", imageFile)) {
+					if utils.CheckFileExist(filepath.Join(conf.GlobalServerConfig().Web.WebFiles, "iconimage", imageFile)) {
 						if _, ok := r.IconImageSet[imageFile]; !ok {
 							r.IconImageSet[imageFile] = struct{}{}
 						}

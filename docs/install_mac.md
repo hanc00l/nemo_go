@@ -71,41 +71,56 @@ make install
 
 ```yaml
 web:
+  # web server 监听IP和地址
   host: 0.0.0.0
   port: 5000
+  # 登录用户名密码
   username: nemo
   password: 648ce596dba3b408b523d3d1189b15070123456789abcdef
-  screenshotPath: /tmp/screenshot
-  taskresultPath: /tmp/taskresult
-rpc:
+  # webfiles 在用于保存屏幕截图、Icon、任务执行结果等本地保存位置，需与app.conf中与staticdir映射地址保持一致
+  webfiles: /tmp/webfiles
+# rpc监听地址和端口、auth
+rpc: 
   host: 0.0.0.0
   port: 5001
   authKey: ZduibTKhcbb6Pi8W
+# 数据库配置
 database:
   host: 127.0.0.1
   port: 3306
   name: nemo
   username: nemo
   password: nemo2020
-rabbitmq:
+# 消息中间件配置
+rabbitmq: 
   host: localhost
   port: 5672
   username: guest
   password: guest
 ```
 
+**conf/app.conf：**
+
+```yaml
+#screenshot默认保存位置，与server.yml保持一致
+staticdir = static:web/static webfiles:/tmp/webfiles
+```
+
 ### 6、conf/worker.yml
 
 ```yaml
+ # RPC 调用的server监听地址和端口、auth
 rpc:
   host: 0.0.0.0
   port: 5001
   authKey: ZduibTKhcbb6Pi8W
-rabbitmq:
+# 消息中间件
+rabbitmq: 
   host: localhost
   port: 5672
   username: guest
   password: guest
+# 使用的API接口用户、密码，如果为空则该api不无使用
 api:
   fofa:
     name:
@@ -113,6 +128,11 @@ api:
   icp:
     name: chinaz
     key:
+  quake:
+    key:
+  hunter:
+    key:
+# 任务使用的参数
 portscan:
   ping: false
   port: --top-ports 1000
@@ -123,6 +143,7 @@ domainscan:
   resolver: resolver.txt
   wordlist: subnames.txt
   massdnsThreads: 600
+  providerConfig: provider-config.yml
 pocscan:
   xray:
     pocPath: thirdparty/xray/xray/pocs
@@ -130,6 +151,9 @@ pocscan:
   pocsuite:
     pocPath: thirdparty/pocsuite/some_pocsuite
     threads: 10
+  nuclei:
+    pocPath: thirdparty/nuclei/nuclei-templates
+    threads: 25
 ```
 
 ### 7、安装pocsuite3 （可选）

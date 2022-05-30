@@ -459,7 +459,9 @@ func (c *IPController) getIPListData(req ipRequestParam) (resp DataTableResponse
 		ipInfo := getIPInfo(ipRow.IpName, req.DisableFofa)
 		ipData.ColorTag = ipInfo.ColorTag
 		ipData.MemoContent = ipInfo.Memo
-		ipData.Banner = strings.Join(utils.RemoveDuplicationElement(append(ipInfo.Title, ipInfo.Banner...)), ", ")
+		//ipData.Banner = strings.Join(utils.RemoveDuplicationElement(append(ipInfo.Title, ipInfo.Banner...)), ", ")
+		ipData.Title = strings.Join(ipInfo.Title, ", ")
+		ipData.Banner = strings.Join(ipInfo.Banner, ", ")
 		ipData.ScreenshotFile = ss.LoadScreenshotFile(ipRow.IpName)
 		ipData.IconImage = ipInfo.IconImage
 		if ipData.ScreenshotFile == nil {
@@ -577,7 +579,7 @@ func getPortInfo(ip string, ipId int, disableFofa bool) (r PortInfo) {
 					fileSuffix := utils.GetFaviconSuffixUrl(strings.TrimSpace(hashAndUrls[1]))
 					if fileSuffix != "" {
 						imageFile := fmt.Sprintf("%s.%s", utils.MD5(hash), fileSuffix)
-						if utils.CheckFileExist(filepath.Join(conf.GlobalServerConfig().Web.WebFiles,"iconimage", imageFile)) {
+						if utils.CheckFileExist(filepath.Join(conf.GlobalServerConfig().Web.WebFiles, "iconimage", imageFile)) {
 							if _, ok := r.IconImageSet[imageFile]; !ok {
 								r.IconImageSet[imageFile] = struct{}{}
 							}

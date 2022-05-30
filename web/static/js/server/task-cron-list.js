@@ -39,11 +39,14 @@ $(function () {
                 },
                 {
                     data: "task_name",
-                    title: "任务名称",
-                    width: "8%",
+                    title: "任务名称/说明",
+                    width: "12%",
                     render: function (data, type, row, meta) {
                         let strData;
                         strData = '<a href="/task-cron-info?task_id=' + row['task_id'] + '" target="_blank">' + data + '</a>';
+                        if (row['comment']) {
+                            strData += "<br>" + row['comment'];
+                        }
                         return strData;
                     }
                 },
@@ -58,7 +61,7 @@ $(function () {
                     }
                 },
                 {
-                    data: 'kwargs', title: '参数', width: '20%',
+                    data: 'kwargs', title: '参数', width: '16%',
                     "render": function (data, type, row) {
                         const strData = '<div style="width:100%;white-space:normal;word-wrap:break-word;word-break:break-all;">' + data + '</div>';
                         return strData;
@@ -74,7 +77,7 @@ $(function () {
                 {data: 'create_time', title: '创建时间', width: '8%'},
                 {data: 'lastrun_time', title: '最近执行时间', width: '8%'},
                 {
-                    data: 'run_count', title: '执行次数', width: '8%',
+                    data: 'run_count', title: '次数', width: '6%',
                     "render": function (data, type, row, meta) {
                         let strData;
                         if (data > 0) {
@@ -90,8 +93,9 @@ $(function () {
                     title: "操作",
                     width: "8%",
                     "render": function (data, type, row, meta) {
-                        const strDelete = "<a class=\"btn btn-sm btn-danger\" href=javascript:delete_task(\"" + row["id"] + "\") role=\"button\" title=\"Delete\"><i class=\"fa fa-trash-o\"></i></a>";
-                        return strDelete;
+                        const strRun = "<a class=\"btn btn-sm btn-primary\" href=javascript:run_task(\"" + row["task_id"] + "\") role=\"button\" title=\"立即执行一次\"><i class=\"fa fa-play\"></i></a>";
+                        const strDelete = "&nbsp;<a class=\"btn btn-sm btn-danger\" href=javascript:delete_task(\"" + row["id"] + "\") role=\"button\" title=\"Delete\"><i class=\"fa fa-trash-o\"></i></a>";
+                        return strRun + strDelete;
                     }
                 }
             ],
@@ -262,5 +266,32 @@ function batch_delete(dataTableId, url) {
                 });
             });
             $(dataTableId).DataTable().draw(false);
+        });
+}
+
+/**
+ * 立即执行一次任务
+ * @param task_id
+ */
+function run_task(task_id) {
+    swal({
+            title: "确定要立即执行一次该任务?",
+            text: "立即执行任务！",
+            type: "warning",
+            showCancelButton: true,
+            confirmButtonColor: "#DD6B55",
+            confirmButtonText: "确认执行",
+            cancelButtonText: "取消",
+            closeOnConfirm: true
+        },
+        function () {
+            $.post("/task-cron-run",
+                {
+                    "task_id": task_id,
+                }, function (data, e) {
+                    if (e === "success") {
+                        $('#task_table').DataTable().draw(false);
+                    }
+                });
         });
 }

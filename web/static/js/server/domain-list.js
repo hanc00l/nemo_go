@@ -53,6 +53,7 @@ $(function () {
                     'iconhash': $('#checkbox_iconhash').is(":checked"),
                     'taskcron': $('#checkbox_cron_task').is(":checked"),
                     'cronrule': cron_rule,
+                    'croncomment': $('#input_cron_comment').val(),
                 }, function (data, e) {
                     if (e === "success" && data['status'] == 'success') {
                         swal({
@@ -112,6 +113,7 @@ $(function () {
                 'load_opened_port': false,
                 'taskcron': $('#checkbox_cron_task').is(":checked"),
                 'cronrule': cron_rule,
+                'croncomment': $('#input_cron_comment').val(),
             }, function (data, e) {
                 if (e === "success" && data['status'] == 'success') {
                     swal({
@@ -134,8 +136,12 @@ $(function () {
     $("#checkbox_cron_task").click(function () {
         if (this.checked) {
             $("#input_cron_rule").prop("disabled", false);
+            $("#input_cron_comment").prop("disabled", false);
+            $("#label_cron_rule").prop("disabled", false);
         } else {
             $("#input_cron_rule").prop("disabled", true);
+            $("#input_cron_comment").prop("disabled", true);
+            $("#label_cron_rule").prop("disabled", true);
         }
     })
     $("#domain_statistics").click(function () {
@@ -256,9 +262,12 @@ $(function () {
                             icons += '<img src=/webfiles/iconimage/' + row['iconimage'][i] + ' width="24px" height="24px"/>&nbsp;';
                         }
                         if (icons != "") icons += "<br>";
-                        let title = data.substr(0, 300);
-                        if (data.length > 300) title += '......';
-                        const strData = '<div style="width:100%;white-space:normal;word-wrap:break-word;word-break:break-all;">' + icons + title + '</div>';
+                        let title = row['title'].substr(0, 200);
+                        if (row['title'].length > 200) title += '......';
+                        if (title != "") title += "<br>";
+                        let banner = row['banner'].substr(0, 200);
+                        if (row['banner'].length > 200) banner += '......';
+                        const strData = '<div style="width:100%;white-space:normal;word-wrap:break-word;word-break:break-all;">' + icons + title + banner + '</div>';
                         return strData;
                     }
                 },

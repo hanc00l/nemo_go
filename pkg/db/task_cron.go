@@ -18,6 +18,7 @@ type TaskCron struct {
 	LastRunDatetime time.Time `gorm:"column:lastrun_datetime"`
 	Status          string    `gorm:"column:status"`
 	RunCount        int       `gorm:"column:run_count"`
+	Comment         string    `gorm:"column:comment"`
 }
 
 func (TaskCron) TableName() string {

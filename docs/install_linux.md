@@ -1,6 +1,6 @@
 ## Nemo安装
 
-**Tested on ubuntu18.04 LTS**
+**Tested on ubuntu18.04/20.04 LTS**
 
 ### 1、Server 
 
@@ -20,7 +20,7 @@
 
 - **导入并配置mysql数据库**：
 
-  由于mysql5.7新版本默认安装后不能使用root和空密码在本机登录，系统自动生成的用户名密码位于/etc/mysql/debian.cnf，请替换并使用配置文件中的user和password：
+  由于mysql5.7版本后默认安装后不能使用root和空密码在本机登录，系统自动生成的用户名密码位于/etc/mysql/debian.cnf，请替换并使用配置文件中的user和password：
 
   ```
   user@localhost:/etc/mysql$ sudo cat debian.cnf
@@ -59,10 +59,8 @@
     # 登录用户名密码
     username: nemo
     password: 648ce596dba3b408b523d3d1189b15070123456789abcdef
-    # screenshot 在本地保存位置，需与app.conf中与static映射地址保持一致
-    screenshotPath: /tmp/screenshot
-    # taskresultPath 任务结果本地保存路径，需与app.conf中的taskresult路径保存一致
-    taskresultPath: /tmp/taskresult
+    # webfiles 在用于保存屏幕截图、Icon、任务执行结果等本地保存位置，需与app.conf中与staticdir映射地址保持一致
+    webfiles: /tmp/webfiles
   # rpc监听地址和端口、auth
   rpc: 
     host: 0.0.0.0
@@ -84,13 +82,13 @@
   ```
   
   
-    **重要：记得要修改默认的authKey。**
-
-    **conf/app.conf：**
+    **重要：记得要修改默认的RPC authKey和Rabbitmq消息中间件密码。**
   
+    **conf/app.conf：**
+
     ```yaml
     #screenshot默认保存位置，与server.yml保持一致
-    staticdir = static:web/static screenshot:/tmp/screenshot taskresult:/tmp/taskresult
+    staticdir = static:web/static webfiles:/tmp/webfiles
     ```
 
 
@@ -128,7 +126,7 @@
 
 - **配置文件**
 
-  **conf/worker.yml** ：
+  **conf/worker.yml** ：（RPC、Rabbitmq用户名和密码应与服务端保持一致）
 
   ```yaml
    # RPC 调用的server监听地址和端口、auth
@@ -150,6 +148,10 @@
     icp:
       name: chinaz
       key:
+    quake:
+      key:
+    hunter:
+      key:
   # 任务使用的参数
   portscan:
     ping: false
@@ -161,6 +163,7 @@
     resolver: resolver.txt
     wordlist: subnames.txt
     massdnsThreads: 600
+    providerConfig: provider-config.yml
   pocscan:
     xray:
       pocPath: thirdparty/xray/xray/pocs
@@ -168,5 +171,8 @@
     pocsuite:
       pocPath: thirdparty/pocsuite/some_pocsuite
       threads: 10
+    nuclei:
+      pocPath: thirdparty/nuclei/nuclei-templates
+      threads: 25
   ```
 

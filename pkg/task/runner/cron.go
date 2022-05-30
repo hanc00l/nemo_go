@@ -1,4 +1,4 @@
-package execute
+package runner
 
 import (
 	"encoding/json"
@@ -21,13 +21,14 @@ var (
 )
 
 // SaveCronTask 保存定时任务
-func SaveCronTask(taskName, kwArgs, cronRule string) (taskId string) {
+func SaveCronTask(taskName, kwArgs, cronRule, comment string) (taskId string) {
 	tc := db.TaskCron{
 		TaskId:   uuid.New().String(),
 		TaskName: taskName,
 		KwArgs:   kwArgs,
 		CronRule: cronRule,
 		Status:   "enable",
+		Comment:  comment,
 	}
 	if !tc.Add() {
 		logging.RuntimeLog.Errorf("save cron task to databse fail:%s", tc.TaskId)
@@ -55,6 +56,13 @@ func ChangeTaskCronStatus(taskId, status string) bool {
 	} else if status == "enable" {
 		AddCronTask(ct.TaskId, ct.CronRule)
 	}
+	return true
+}
+
+// RunOnceTaskCron 立即执行一次任务
+func RunOnceTaskCron(taskId string) bool {
+	job := CronTaskJob{TaskId: taskId}
+	job.Run()
 	return true
 }
 
@@ -86,14 +94,14 @@ func AddCronTask(taskId string, cronRule string) {
 }
 
 // GetCronTaskNextRunDatetime  获取任务的下一次执行时间
-func GetCronTaskNextRunDatetime(taskId string)(jobExist bool,nextRunDatetime time.Time){
+func GetCronTaskNextRunDatetime(taskId string) (jobExist bool, nextRunDatetime time.Time) {
 	jobEntriesMux.Lock()
 	defer jobEntriesMux.Unlock()
 
 	if _, ok := jobEntries[taskId]; !ok {
-		return false,time.Now()
+		return false, time.Now()
 	}
-	return true,cronApp.Entry(jobEntries[taskId]).Next
+	return true, cronApp.Entry(jobEntries[taskId]).Next
 }
 
 // Run 当定时任务启动时，创建任务执行并发送到消息队列中
@@ -188,11 +196,11 @@ func StartCronTask() (cronTaskNum int) {
 	return
 }
 
-func getCronTaskList(){
-	for _,e := range cronApp.Entries(){
+func getCronTaskList() {
+	for _, e := range cronApp.Entries() {
 		logging.CLILog.Info(e)
 	}
-	for _,eid := range jobEntries{
+	for _, eid := range jobEntries {
 		logging.CLILog.Info(eid)
 	}
 }

@@ -10,7 +10,7 @@ import (
 	"github.com/hanc00l/nemo_go/pkg/comm"
 	"github.com/hanc00l/nemo_go/pkg/conf"
 	"github.com/hanc00l/nemo_go/pkg/logging"
-	"github.com/hanc00l/nemo_go/pkg/task/execute"
+	"github.com/hanc00l/nemo_go/pkg/task/runner"
 	_ "github.com/hanc00l/nemo_go/pkg/web/routers"
 	"github.com/smallnest/rpcx/protocol"
 	"github.com/smallnest/rpcx/server"
@@ -61,7 +61,7 @@ func startRPCServer() {
 
 // startCronTask 启动定时任务
 func startCronTask(){
-	num := execute.StartCronTask()
+	num := runner.StartCronTask()
 	logging.CLILog.Infof("cron task total:%d",num)
 	logging.RuntimeLog.Infof("cron task total:%d",num)
 }

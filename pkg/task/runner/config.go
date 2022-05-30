@@ -1,4 +1,4 @@
-package execute
+package runner
 
 type PortscanRequestParam struct {
 	Target           string `form:"target"`
@@ -23,6 +23,7 @@ type PortscanRequestParam struct {
 	TaskMode         int    `form:"taskmode"`
 	IsTaskCron       bool   `form:"taskcron" json:"-"`
 	TaskCronRule     string `form:"cronrule" json:"-"`
+	TaskCronComment  string `form:"croncomment" json:"-"`
 }
 
 type DomainscanRequestParam struct {
@@ -48,6 +49,7 @@ type DomainscanRequestParam struct {
 	PortTaskMode     int    `form:"porttaskmode"`
 	IsTaskCron       bool   `form:"taskcron" json:"-"`
 	TaskCronRule     string `form:"cronrule" json:"-"`
+	TaskCronComment  string `form:"croncomment" json:"-"`
 }
 
 type PocscanRequestParam struct {
@@ -63,4 +65,5 @@ type PocscanRequestParam struct {
 	LoadOpenedPort   bool   `form:"load_opened_port"`
 	IsTaskCron       bool   `form:"taskcron" json:"-"`
 	TaskCronRule     string `form:"cronrule" json:"-"`
+	TaskCronComment  string `form:"croncomment" json:"-"`
 }

@@ -7,7 +7,7 @@ import (
 	"github.com/hanc00l/nemo_go/pkg/db"
 	"github.com/hanc00l/nemo_go/pkg/logging"
 	"github.com/hanc00l/nemo_go/pkg/task/ampq"
-	"github.com/hanc00l/nemo_go/pkg/task/execute"
+	"github.com/hanc00l/nemo_go/pkg/task/runner"
 	"github.com/hanc00l/nemo_go/pkg/task/serverapi"
 	"github.com/hanc00l/nemo_go/pkg/utils"
 	"os"
@@ -63,6 +63,7 @@ type TaskCronListData struct {
 	LastRunTime string `json:"lastrun_time"`
 	NextRunTime string `json:"nextrun_time"`
 	RunCount    int    `json:"run_count"`
+	Comment     string `json:"comment"`
 }
 
 type TaskInfo struct {
@@ -96,6 +97,7 @@ type TaskCronInfo struct {
 	CreateTime  string
 	UpdateTime  string
 	RunCount    int
+	Comment     string
 }
 
 func (c *TaskController) IndexAction() {
@@ -176,7 +178,7 @@ func (c *TaskController) DeleteAction() {
 		c.FailedStatus(err.Error())
 	} else {
 		task := db.Task{Id: id}
-		resultPath := path.Join(conf.GlobalServerConfig().Web.WebFiles,"taskresult")
+		resultPath := path.Join(conf.GlobalServerConfig().Web.WebFiles, "taskresult")
 		if resultPath != "" && task.Get() {
 			filePath := path.Join(resultPath, fmt.Sprintf("%s.json", task.TaskId))
 			os.Remove(filePath)
@@ -196,7 +198,7 @@ func (c *TaskController) DeleteCronAction() {
 	} else {
 		task := db.TaskCron{Id: id}
 		if task.Get() {
-			execute.DeleteCronTask(task.TaskId)
+			runner.DeleteCronTask(task.TaskId)
 			c.MakeStatusResponse(task.Delete())
 		} else {
 			c.FailedStatus("任务不存在")
@@ -223,7 +225,7 @@ func (c *TaskController) DisableCronTaskAction() {
 
 	taskId := c.GetString("task_id")
 	if taskId != "" {
-		c.MakeStatusResponse(execute.ChangeTaskCronStatus(taskId, "disable"))
+		c.MakeStatusResponse(runner.ChangeTaskCronStatus(taskId, "disable"))
 		return
 	}
 	c.MakeStatusResponse(false)
@@ -235,7 +237,19 @@ func (c *TaskController) EnableCronTaskAction() {
 
 	taskId := c.GetString("task_id")
 	if taskId != "" {
-		c.MakeStatusResponse(execute.ChangeTaskCronStatus(taskId, "enable"))
+		c.MakeStatusResponse(runner.ChangeTaskCronStatus(taskId, "enable"))
+		return
+	}
+	c.MakeStatusResponse(false)
+}
+
+// RunCronTaskAction 立即执行一个任务
+func (c *TaskController) RunCronTaskAction() {
+	defer c.ServeJSON()
+
+	taskId := c.GetString("task_id")
+	if taskId != "" {
+		c.MakeStatusResponse(runner.RunOnceTaskCron(taskId))
 		return
 	}
 	c.MakeStatusResponse(false)
@@ -245,7 +259,7 @@ func (c *TaskController) EnableCronTaskAction() {
 func (c *TaskController) StartPortScanTaskAction() {
 	defer c.ServeJSON()
 	// 解析参数
-	var req execute.PortscanRequestParam
+	var req runner.PortscanRequestParam
 	err := c.ParseForm(&req)
 	if err != nil {
 		logging.RuntimeLog.Error(err.Error())
@@ -265,14 +279,14 @@ func (c *TaskController) StartPortScanTaskAction() {
 			c.FailedStatus(err.Error())
 			return
 		}
-		taskId := execute.SaveCronTask("portscan", string(kwargs), req.TaskCronRule)
+		taskId := runner.SaveCronTask("portscan", string(kwargs), req.TaskCronRule, req.TaskCronComment)
 		if taskId == "" {
 			c.FailedStatus("save to db fail")
 			return
 		}
 		c.SucceededStatus(taskId)
 	} else {
-		taskId, err := execute.StartPortScanTask(req, "")
+		taskId, err := runner.StartPortScanTask(req, "")
 		if err != nil {
 			c.FailedStatus(err.Error())
 			return
@@ -285,7 +299,7 @@ func (c *TaskController) StartPortScanTaskAction() {
 func (c *TaskController) StartBatchScanTaskAction() {
 	defer c.ServeJSON()
 	// 解析参数
-	var req execute.PortscanRequestParam
+	var req runner.PortscanRequestParam
 	err := c.ParseForm(&req)
 	if err != nil {
 		logging.RuntimeLog.Error(err.Error())
@@ -302,14 +316,14 @@ func (c *TaskController) StartBatchScanTaskAction() {
 			c.FailedStatus(err.Error())
 			return
 		}
-		taskId := execute.SaveCronTask("batchscan", string(kwargs), req.TaskCronRule)
+		taskId := runner.SaveCronTask("batchscan", string(kwargs), req.TaskCronRule, req.TaskCronComment)
 		if taskId == "" {
 			c.FailedStatus("save to db fail")
 			return
 		}
 		c.SucceededStatus(taskId)
 	} else {
-		taskId, err := execute.StartBatchScanTask(req, "")
+		taskId, err := runner.StartBatchScanTask(req, "")
 		if err != nil {
 			c.FailedStatus(err.Error())
 			return
@@ -323,7 +337,7 @@ func (c *TaskController) StartDomainScanTaskAction() {
 	defer c.ServeJSON()
 
 	// 解析参数
-	var req execute.DomainscanRequestParam
+	var req runner.DomainscanRequestParam
 	err := c.ParseForm(&req)
 	if err != nil {
 		logging.RuntimeLog.Error(err.Error())
@@ -340,14 +354,14 @@ func (c *TaskController) StartDomainScanTaskAction() {
 			c.FailedStatus(err.Error())
 			return
 		}
-		taskId := execute.SaveCronTask("domainscan", string(kwargs), req.TaskCronRule)
+		taskId := runner.SaveCronTask("domainscan", string(kwargs), req.TaskCronRule, req.TaskCronComment)
 		if taskId == "" {
 			c.FailedStatus("save to db fail")
 			return
 		}
 		c.SucceededStatus(taskId)
 	} else {
-		taskId, err := execute.StartDomainScanTask(req, "")
+		taskId, err := runner.StartDomainScanTask(req, "")
 		if err != nil {
 			c.FailedStatus(err.Error())
 			return
@@ -361,7 +375,7 @@ func (c *TaskController) StartPocScanTaskAction() {
 	defer c.ServeJSON()
 
 	// 解析参数
-	var req execute.PocscanRequestParam
+	var req runner.PocscanRequestParam
 	err := c.ParseForm(&req)
 	if err != nil {
 		logging.RuntimeLog.Error(err.Error())
@@ -379,14 +393,14 @@ func (c *TaskController) StartPocScanTaskAction() {
 			c.FailedStatus(err.Error())
 			return
 		}
-		taskId := execute.SaveCronTask("pocscan", string(kwargs), req.TaskCronRule)
+		taskId := runner.SaveCronTask("pocscan", string(kwargs), req.TaskCronRule, req.TaskCronComment)
 		if taskId == "" {
 			c.FailedStatus("save to db fail")
 			return
 		}
 		c.SucceededStatus(taskId)
 	} else {
-		taskId, err := execute.StartPocScanTask(req, "")
+		taskId, err := runner.StartPocScanTask(req, "")
 		if err != nil {
 			c.FailedStatus(err.Error())
 			return
@@ -459,7 +473,7 @@ func (c *TaskController) getTaskListData(req taskRequestParam) (resp DataTableRe
 	searchMap := c.getSearchMap(req)
 	startPage := req.Start/req.Length + 1
 	results, total := task.Gets(searchMap, startPage, req.Length)
-	resultPath := path.Join(conf.GlobalServerConfig().Web.WebFiles,"taskresult")
+	resultPath := path.Join(conf.GlobalServerConfig().Web.WebFiles, "taskresult")
 	for i, taskRow := range results {
 		t := TaskListData{}
 		t.Id = taskRow.Id
@@ -510,11 +524,12 @@ func (c *TaskController) getTaskCronListData(req taskCronRequestParam) (resp Dat
 		t.CronRule = taskRow.CronRule
 		t.RunCount = taskRow.RunCount
 		t.Status = taskRow.Status
+		t.Comment = taskRow.Comment
 		t.CreateTime = FormatDateTime(taskRow.CreateDatetime)
 		if taskRow.LastRunDatetime != taskRow.CreateDatetime {
 			t.LastRunTime = FormatDateTime(taskRow.LastRunDatetime)
 		}
-		if jobExist, dt := execute.GetCronTaskNextRunDatetime(taskRow.TaskId); jobExist {
+		if jobExist, dt := runner.GetCronTaskNextRunDatetime(taskRow.TaskId); jobExist {
 			t.NextRunTime = FormatDateTime(dt)
 		}
 		resp.Data = append(resp.Data, t)
@@ -563,7 +578,7 @@ func getTaskInfo(taskId string) (r TaskInfo) {
 	r.CreateTime = FormatDateTime(task.CreateDatetime)
 	r.UpdateTime = FormatDateTime(task.UpdateDatetime)
 
-	resultPath := path.Join(conf.GlobalServerConfig().Web.WebFiles,"taskresult")
+	resultPath := path.Join(conf.GlobalServerConfig().Web.WebFiles, "taskresult")
 	if resultPath != "" {
 		filePath := path.Join(resultPath, fmt.Sprintf("%s.json", taskId))
 		if utils.CheckFileExist(filePath) {
@@ -586,6 +601,7 @@ func getTaskCronInfo(taskId string) (r TaskCronInfo) {
 	r.CronRule = task.CronRule
 	r.RunCount = task.RunCount
 	r.Status = task.Status
+	r.Comment = task.Comment
 	r.CreateTime = FormatDateTime(task.CreateDatetime)
 	r.UpdateTime = FormatDateTime(task.UpdateDatetime)
 	if task.LastRunDatetime != task.CreateDatetime {

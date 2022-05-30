@@ -13,6 +13,11 @@
                         <span class="btn btn-warning text-left">
                             {{ .task_info.TaskName }}
                         </span>
+                        {{ if .task_info.Comment }}
+                        <b><span class="btn btn-info">任务说明</span></b>
+                        <span class="btn border-success text-left">
+                           {{ .task_info.Comment }}</span>
+                        {{ end }}
                         <br><br>
                         <b><span class="btn btn-info">任务状态</span></b>
                         <span class="btn btn-warning  text-left">{{ .task_info.Status }}</span>

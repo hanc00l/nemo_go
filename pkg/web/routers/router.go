@@ -81,5 +81,5 @@ func init() {
 	web.Router("/task-cron-delete", task, "post:DeleteCronAction")
 	web.Router("/task-cron-disable", task, "post:DisableCronTaskAction")
 	web.Router("/task-cron-enable", task, "post:EnableCronTaskAction")
-
+	web.Router("/task-cron-run", task, "post:RunCronTaskAction")
 }
