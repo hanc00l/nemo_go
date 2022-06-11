@@ -13,9 +13,9 @@ const (
 )
 
 // RunMode 运行模式
-//var RunMode = Release
+var RunMode = Release
 
-var RunMode = Debug
+//var RunMode = Debug
 
 // Nemo 系统运行全局配置参数
 var serverConfig *Server
