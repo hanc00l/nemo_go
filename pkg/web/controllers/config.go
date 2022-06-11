@@ -27,6 +27,7 @@ type DefaultConfig struct {
 	IsPing          bool   `json:"ping"`
 	IpSliceNumber   int    `json:"ipslicenumber"`
 	PortSliceNumber int    `json:"portslicenumber"`
+	Version         string `json:"version"`
 }
 
 func (c *ConfigController) IndexAction() {
@@ -54,6 +55,10 @@ func (c *ConfigController) LoadDefaultConfigAction() {
 		IsPing:          portscan.IsPing,
 		IpSliceNumber:   task.IpSliceNumber,
 		PortSliceNumber: task.PortSliceNumber,
+	}
+	fileContent, err := os.ReadFile(filepath.Join(conf.GetRootPath(), "version.txt"))
+	if err == nil {
+		data.Version = string(fileContent)
 	}
 	c.Data["json"] = data
 	c.ServeJSON()

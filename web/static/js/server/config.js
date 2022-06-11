@@ -92,8 +92,9 @@ function load_config() {
         $('#select_tech').val(data['tech']);
         $('#input_rate').val(data['rate']);
         $('#checkbox_ping').prop("checked", data['ping']);
-        $('#input_ipslicenumber').val(data['ipslicenumber'])
-        $('#input_portslicenumber').val(data['portslicenumber'])
+        $('#input_ipslicenumber').val(data['ipslicenumber']);
+        $('#input_portslicenumber').val(data['portslicenumber']);
+        $('#nemo_version').html(data['version']);
     });
 }
 
