@@ -106,7 +106,11 @@
   ```bash
   sudo apt-get update \
       && sudo apt-get install vim git python3-pip python3-setuptools \
-      nmap masscan chromium-browser --fix-missing
+      nmap masscan google-chrome-stable --fix-missing
+  #docker ubuntu
+  curl -LO https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb \
+      && sudo apt install -y ./google-chrome-stable_current_amd64.deb \
+      && rm google-chrome-stable_current_amd64.deb
   ```
 
 

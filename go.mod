@@ -10,12 +10,16 @@ require (
 	github.com/apache/thrift v0.14.2 // indirect
 	github.com/armon/go-metrics v0.3.9 // indirect
 	github.com/aws/aws-sdk-go v1.44.24 // indirect
-	github.com/beego/beego/v2 v2.0.1
+	github.com/beego/beego/v2 v2.0.3
+	github.com/beego/goyaml2 v0.0.0-20130207012346-5545475820dd // indirect
 	github.com/bradfitz/gomemcache v0.0.0-20190913173617-a41fca850d0b // indirect
 	github.com/buger/jsonparser v1.1.1
 	github.com/cespare/xxhash/v2 v2.1.2 // indirect
-	github.com/chromedp/cdproto v0.0.0-20210713064928-7d28b402946a
-	github.com/chromedp/chromedp v0.7.4
+	github.com/chromedp/cdproto v0.0.0-20220530001853-c0f376d894d1
+	github.com/chromedp/chromedp v0.8.2
+	github.com/coreos/etcd v3.3.25+incompatible // indirect
+	github.com/coreos/go-systemd v0.0.0-20191104093116-d3cd4ed1dbcf // indirect
+	github.com/coreos/pkg v0.0.0-20180928190104-399ea9e2e55f // indirect
 	github.com/disintegration/imaging v1.6.2
 	github.com/edwingeng/doublejump v0.0.0-20210724020454-c82f1bcb3280 // indirect
 	github.com/evilsocket/brutemachine v0.0.0-20170703145059-0331ad6a82ce
@@ -45,8 +49,8 @@ require (
 	github.com/klauspost/cpuid/v2 v2.0.9 // indirect
 	github.com/klauspost/reedsolomon v1.9.13 // indirect
 	github.com/lair-framework/go-nmap v0.0.0-20191202052157-3507e0b03523
-	github.com/lib/pq v1.10.2 // indirect
 	github.com/mat/besticon v0.0.0-20210801190920-bdff7778a634
+	github.com/mattn/go-sqlite3 v2.0.3+incompatible // indirect
 	github.com/miekg/dns v1.1.48
 	github.com/oschwald/geoip2-golang v1.5.0
 	github.com/peterbourgon/g2s v0.0.0-20170223122336-d4e7ad98afea // indirect
@@ -56,7 +60,6 @@ require (
 	github.com/projectdiscovery/httpx v1.2.1
 	github.com/projectdiscovery/mapcidr v0.0.8
 	github.com/projectdiscovery/subfinder/v2 v2.5.1
-	github.com/prometheus/client_golang v1.9.0 // indirect
 	github.com/remeh/sizedwaitgroup v1.0.0
 	github.com/robfig/cron/v3 v3.0.1 // indirect
 	github.com/rs/cors v1.8.0 // indirect
@@ -72,16 +75,19 @@ require (
 	github.com/twmb/murmur3 v1.1.6
 	github.com/urfave/cli v1.22.5 // indirect
 	github.com/valyala/fastrand v1.0.0 // indirect
+	github.com/wendal/errors v0.0.0-20130201093226-f66c77a7882b // indirect
 	github.com/xdg-go/scram v1.1.1 // indirect
 	github.com/xdg/scram v1.0.5 // indirect
 	github.com/xdg/stringprep v1.0.3 // indirect
 	github.com/yl2chen/cidranger v1.0.2
 	github.com/youmark/pkcs8 v0.0.0-20201027041543-1326539a0a0a // indirect
+	go.etcd.io/etcd v3.3.25+incompatible // indirect
 	go.mongodb.org/mongo-driver v1.9.1 // indirect
 	go.opencensus.io v0.23.0 // indirect
 	golang.org/x/crypto v0.0.0-20220525230936-793ad666bf5e // indirect
 	golang.org/x/net v0.0.0-20220526153639-5463443f8c37 // indirect
 	golang.org/x/oauth2 v0.0.0-20220524215830-622c5d57e401 // indirect
+	golang.org/x/sys v0.0.0-20220610221304-9f5ed59c137d // indirect
 	golang.org/x/text v0.3.7
 	golang.org/x/tools v0.1.10 // indirect
 	google.golang.org/api v0.81.0 // indirect
@@ -90,4 +96,5 @@ require (
 	gopkg.in/yaml.v2 v2.4.0
 	gorm.io/driver/mysql v1.3.3
 	gorm.io/gorm v1.23.5
+	honnef.co/go/tools v0.0.1-2020.1.5 // indirect
 )

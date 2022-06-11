@@ -6,9 +6,12 @@ import (
 )
 
 func init() {
-	login := &controllers.LoginController{}
-	web.Router("/", login, "get:IndexAction;post:LoginAction")
-	web.Router("/logout", login, "get:LogoutAction")
+	//login := &controllers.LoginController{}
+	//web.Router("/", login, "get:IndexAction;post:LoginAction")
+	//web.Router("/logout", login, "get:LogoutAction")
+	//beego v2.0.2后手工注册路由风格：
+	web.CtrlGet("/",(*controllers.LoginController).IndexAction)
+	web.CtrlPost("/",(*controllers.LoginController).LoginAction)
 
 	config := &controllers.ConfigController{}
 	web.Router("/config-list", config, "get:IndexAction;post:LoadDefaultConfigAction")

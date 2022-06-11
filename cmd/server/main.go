@@ -19,9 +19,6 @@ import (
 
 // startWebServer 启动web server
 func startWebServer() {
-	web.BConfig.WebConfig.Session.SessionOn = true
-	web.BConfig.WebConfig.Session.SessionName = "sessionID"
-	web.BConfig.CopyRequestBody = true
 	logs.SetLogger("file", `{"filename":"log/access.log"}`)
 
 	UrlFilterWhiteList := []string{
@@ -60,10 +57,10 @@ func startRPCServer() {
 }
 
 // startCronTask 启动定时任务
-func startCronTask(){
+func startCronTask() {
 	num := runner.StartCronTask()
-	logging.CLILog.Infof("cron task total:%d",num)
-	logging.RuntimeLog.Infof("cron task total:%d",num)
+	logging.CLILog.Infof("cron task total:%d", num)
+	logging.RuntimeLog.Infof("cron task total:%d", num)
 }
 
 // auth RPC调用认证
@@ -77,7 +74,7 @@ func auth(ctx context.Context, req *protocol.Message, token string) error {
 
 func main() {
 	go startRPCServer()
-	time.Sleep(time.Second*1)
+	time.Sleep(time.Second * 1)
 	startCronTask()
 	startWebServer()
 }
