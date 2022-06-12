@@ -8,6 +8,7 @@ import (
 	"github.com/hanc00l/nemo_go/pkg/logging"
 	"github.com/hanc00l/nemo_go/pkg/task/custom"
 	"github.com/hanc00l/nemo_go/pkg/task/fingerprint"
+	"github.com/hanc00l/nemo_go/pkg/task/pocscan"
 	"github.com/hanc00l/nemo_go/pkg/task/portscan"
 	"github.com/hanc00l/nemo_go/pkg/utils"
 	"net/http"
@@ -389,7 +390,9 @@ func (c *IPController) ImportPortscanResultAction() {
 		f := portscan.NewFScan(config)
 		f.ParseTxtContentResult(fileContent)
 		portscan.FilterIPHasTooMuchPort(f.Result)
-		result = f.Result.SaveResult(config)
+		resultIpPort := f.Result.SaveResult(config)
+		resultVul := pocscan.SaveResult(f.VulResult)
+		result = fmt.Sprintf("%s,%s", resultIpPort, resultVul)
 	} else {
 		c.FailedStatus("未知的扫描方法")
 		return

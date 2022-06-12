@@ -3,6 +3,7 @@ package portscan
 import (
 	"fmt"
 	"github.com/hanc00l/nemo_go/pkg/task/custom"
+	"github.com/hanc00l/nemo_go/pkg/task/pocscan"
 	"github.com/hanc00l/nemo_go/pkg/utils"
 	"net/url"
 	"regexp"
@@ -12,8 +13,9 @@ import (
 
 // FScan 导入fscan的扫描结果
 type FScan struct {
-	Config Config
-	Result Result
+	Config    Config
+	Result    Result
+	VulResult []pocscan.Result
 }
 
 // NewFScan 创建FScan对象
@@ -96,6 +98,16 @@ func (f *FScan) ParseTxtContentResult(content []byte) {
 					Tag:     "banner",
 					Content: strings.TrimLeft(line, "[+] "),
 				})
+				lineSeps := strings.Split(line, " ")
+				if len(lineSeps) >= 3 && strings.HasPrefix(lineSeps[2], "poc-yaml") {
+					f.VulResult = append(f.VulResult, pocscan.Result{
+						Target:  ip,
+						Url:     lineSeps[1],
+						PocFile: lineSeps[2],
+						Source:  "fscan",
+						Extra:   line,
+					})
+				}
 			}
 		} else {
 			//192.168.3.242:80 open
