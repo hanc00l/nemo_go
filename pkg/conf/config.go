@@ -186,7 +186,7 @@ func (config *Worker) ReloadConfig() error {
 // GetRootPath 获取运行时系统的root位置，解决调试时无法使用相对位置的困扰
 func GetRootPath() string {
 	if RunMode == Debug {
-		return "/Users/user/golang/nemo_go"
+		return "/Users/user/GolandProjects/nemo_go"
 	}
 	return "."
 }

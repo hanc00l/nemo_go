@@ -403,10 +403,10 @@ $(function () {
                             icons += '<img src=/webfiles/iconimage/' + row['iconimage'][i] + ' width="24px" height="24px"/>&nbsp;';
                         }
                         if (icons != "") icons += "<br>";
-                        let title = row['title'].substr(0, 200);
+                        let title = encodeHtml(row['title'].substr(0, 200));
                         if (row['title'].length > 200) title += '......';
                         if (title != "") title += "<br>";
-                        let banner = row['banner'].substr(0, 200);
+                        let banner = encodeHtml(row['banner'].substr(0, 200));
                         if (row['banner'].length > 200) banner += '......';
                         const strData = '<div style="width:100%;white-space:normal;word-wrap:break-word;word-break:break-all;">' + icons + title + banner + '</div>';
                         return strData;

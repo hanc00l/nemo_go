@@ -8,6 +8,7 @@ import (
 	"github.com/hanc00l/nemo_go/pkg/task/domainscan"
 	"github.com/hanc00l/nemo_go/pkg/task/portscan"
 	"github.com/hanc00l/nemo_go/pkg/utils"
+	"regexp"
 	"strconv"
 	"strings"
 )
@@ -83,9 +84,14 @@ func (ff *Fofa) parseFofaSearchResult(queryResult []byte) (result []onlineSearch
 			Domain: line[0], Host: line[1], IP: line[2], Port: line[3], Title: line[4],
 			Country: line[5], City: line[6], Server: line[7], Banner: line[8],
 		}
-		if strings.HasPrefix(fsr.Banner, "HTTP/1") {
+		lowerBanner := strings.ToLower(fsr.Banner)
+		//过滤部份无意义的banner
+		if strings.HasPrefix(fsr.Banner, "HTTP/") || strings.HasPrefix(lowerBanner,"<html>") || strings.HasPrefix(lowerBanner,"<!doctype html>")  {
 			fsr.Banner = ""
 		}
+		//过滤所有的\x00 \x15等不可见字符
+		re := regexp.MustCompile("\\\\x[0-9a-f]{2}")
+		fsr.Banner = re.ReplaceAllString(fsr.Banner,"")
 		result = append(result, fsr)
 	}
 
