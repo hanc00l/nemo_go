@@ -18,6 +18,6 @@ func TestFofa(t *testing.T) {
 	if err != nil {
 		t.Log(err)
 	}
-	result, err := serverapi.NewTask("fofa", string(configJSON))
+	result, err := serverapi.NewTask("fofa", string(configJSON),"")
 	t.Log(result,err)
 }

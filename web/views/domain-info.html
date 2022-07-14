@@ -204,6 +204,8 @@
                         </td>
                         {{ else if eq .Tag "ICP" }}
                         <td></td>
+                        {{ else if eq .Tag "Whois" }}
+                        <td></td>
                         {{ else }}
                         <td><a class="btn btn-sm btn-danger" href="javascript:delete_domain_attr({{ .Id }})"
                                role="button" title="Delete"><i class="fa fa-trash-o"></i></a>

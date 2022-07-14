@@ -42,6 +42,7 @@ type DomainscanRequestParam struct {
 	IsHunter         bool   `form:"huntersearch"`
 	IsScreenshot     bool   `form:"screenshot"`
 	IsICPQuery       bool   `form:"icpquery"`
+	IsWhoisQuery     bool   `form:"whoisquery"`
 	IsWappalyzer     bool   `form:"wappalyzer"`
 	IsFingerprintHub bool   `form:"fingerprinthub"`
 	IsIconHash       bool   `form:"iconhash"`

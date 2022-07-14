@@ -16,8 +16,8 @@ import (
 type ICPQuery struct {
 	Config           ICPQueryConfig
 	ICPMap           map[string]*ICPInfo
-	cachedICpInfoNum int
 	QueriedICPInfo   map[string]*ICPInfo
+	cachedICpInfoNum int
 }
 
 // NewICPQuery 创建ICP备案查询对象
@@ -39,11 +39,13 @@ func (i *ICPQuery) Do() {
 		if fldDomain == "" {
 			continue
 		}
-		if i.LookupICP(fldDomain) != nil {
+		icpInfo := i.LookupICP(fldDomain)
+		if icpInfo != nil {
+			i.QueriedICPInfo[fldDomain] = icpInfo
 			i.cachedICpInfoNum++
 			continue
 		}
-		icpInfo := i.runICPQuery(fldDomain)
+		icpInfo = i.runICPQuery(fldDomain)
 		if icpInfo != nil {
 			i.QueriedICPInfo[fldDomain] = icpInfo
 			i.ICPMap[fldDomain] = icpInfo

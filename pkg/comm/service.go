@@ -17,6 +17,7 @@ import (
 	"github.com/hanc00l/nemo_go/pkg/task/portscan"
 	"github.com/hanc00l/nemo_go/pkg/task/serverapi"
 	"github.com/hanc00l/nemo_go/pkg/utils"
+	whoisparser "github.com/likexian/whois-parser"
 	"github.com/smallnest/rpcx/client"
 	"github.com/tidwall/pretty"
 	"os"
@@ -163,6 +164,26 @@ func (s *Service) SaveICPResult(ctx context.Context, args *map[string]*onlineapi
 	} else {
 		logging.RuntimeLog.Error("save icp fail")
 		*replay = "save icp fail"
+	}
+
+	return nil
+}
+
+// SaveWhoisResult 保存whois查询结果到服务器的查询缓存文件中
+func (s *Service) SaveWhoisResult(ctx context.Context, args *map[string]*whoisparser.WhoisInfo, replay *string) error {
+	if *args == nil || len(*args) <= 0 {
+		*replay = "whois:0"
+		return nil
+	}
+	w := onlineapi.NewWhois(onlineapi.WhoisQueryConfig{})
+	for k, v := range *args {
+		w.WhoisMap[k] = v
+	}
+	if w.SaveLocalWhoisInfo() {
+		*replay = fmt.Sprintf("whois:%d", len(*args))
+	} else {
+		logging.RuntimeLog.Error("save whois fail")
+		*replay = "save whois fail"
 	}
 
 	return nil

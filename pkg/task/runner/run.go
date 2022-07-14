@@ -143,7 +143,6 @@ func StartDomainScanTask(req DomainscanRequestParam, cronTaskId string) (taskId 
 				return
 			}
 		}
-		// Hunter
 		if req.IsHunter {
 			if taskId, err = doOnlineAPISearch(cronTaskId, "hunter", t, &req.OrgId, true, req.IsHttpx, req.IsWappalyzer, req.IsFingerprintHub, req.IsScreenshot, req.IsIconHash); err != nil {
 				return
@@ -151,6 +150,11 @@ func StartDomainScanTask(req DomainscanRequestParam, cronTaskId string) (taskId 
 		}
 		if req.IsICPQuery {
 			if taskId, err = doICPQuery(cronTaskId, t); err != nil {
+				return
+			}
+		}
+		if req.IsWhoisQuery {
+			if taskId, err = doWhoisQuery(cronTaskId, t); err != nil {
 				return
 			}
 		}
@@ -335,7 +339,7 @@ func doDomainscan(cronTaskId string, target string, req DomainscanRequestParam) 
 	return taskId, nil
 }
 
-// doFofa FOFA搜索
+// doOnlineAPISearch Fofa,hunter,quaker的查询
 func doOnlineAPISearch(cronTaskId string, apiName string, target string, orgId *int, isIplocation, isHttp, isWappalyzer, isFingerprintHub, isScreenshot bool, isIconHash bool) (taskId string, err error) {
 	config := onlineapi.OnlineAPIConfig{
 		Target:           target,
@@ -376,6 +380,22 @@ func doICPQuery(cronTaskId string, target string) (taskId string, err error) {
 	taskId, err = serverapi.NewTask("icpquery", string(configJSON), cronTaskId)
 	if err != nil {
 		logging.RuntimeLog.Errorf("start icpquery fail:%s", err.Error())
+		return "", err
+	}
+	return taskId, nil
+}
+
+// doWhoisQuery Whois信息查询
+func doWhoisQuery(cronTaskId string, target string) (taskId string, err error) {
+	config := onlineapi.WhoisQueryConfig{Target: target}
+	configJSON, err := json.Marshal(config)
+	if err != nil {
+		logging.RuntimeLog.Errorf("start whoisquery fail:%s", err.Error())
+		return "", err
+	}
+	taskId, err = serverapi.NewTask("whoisquery", string(configJSON), cronTaskId)
+	if err != nil {
+		logging.RuntimeLog.Errorf("start whoisquery fail:%s", err.Error())
 		return "", err
 	}
 	return taskId, nil

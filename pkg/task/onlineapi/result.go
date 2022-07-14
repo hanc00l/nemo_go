@@ -29,6 +29,10 @@ type ICPQueryConfig struct {
 	Target string `json:"target"`
 }
 
+type WhoisQueryConfig struct {
+	Target string `json:"target"`
+}
+
 type onlineSearchResult struct {
 	Domain  string
 	Host    string

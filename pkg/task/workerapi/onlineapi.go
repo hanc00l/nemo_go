@@ -129,3 +129,55 @@ func doFingerAndSave(taskId string, portScanResult *portscan.Result, domainScanR
 
 	return result, err
 }
+
+// ICPQuery ICP备案查询任务
+func ICPQuery(taskId, configJSON string) (result string, err error) {
+	var ok bool
+	if ok, result, err = CheckTaskStatus(taskId); !ok {
+		return result, err
+	}
+
+	config := onlineapi.ICPQueryConfig{}
+	if err = ParseConfig(configJSON, &config); err != nil {
+		return FailedTask(err.Error()), err
+	}
+
+	icp := onlineapi.NewICPQuery(config)
+	icp.Do()
+	// 保存结果
+	x := comm.NewXClient()
+
+	err = x.Call(context.Background(), "SaveICPResult", &icp.QueriedICPInfo, &result)
+	if err != nil {
+		logging.RuntimeLog.Error(err)
+		return FailedTask(err.Error()), err
+	}
+
+	return SucceedTask(result), nil
+}
+
+// WhoisQuery Whois查询任务
+func WhoisQuery(taskId, configJSON string) (result string, err error) {
+	var ok bool
+	if ok, result, err = CheckTaskStatus(taskId); !ok {
+		return result, err
+	}
+
+	config := onlineapi.WhoisQueryConfig{}
+	if err = ParseConfig(configJSON, &config); err != nil {
+		return FailedTask(err.Error()), err
+	}
+
+	whois := onlineapi.NewWhois(config)
+	whois.Do()
+	// 保存结果
+	x := comm.NewXClient()
+
+	err = x.Call(context.Background(), "SaveWhoisResult", &whois.QueriedWhoisInfo, &result)
+	if err != nil {
+		logging.RuntimeLog.Error(err)
+		return FailedTask(err.Error()), err
+	}
+
+	return SucceedTask(result), nil
+}

@@ -32,8 +32,9 @@ var taskMaps = map[string]interface{}{
 	"xray":       PocScan,
 	"pocsuite":   PocScan,
 	"dirsearch":  PocScan,
-	"nuclei":	PocScan,
+	"nuclei":     PocScan,
 	"icpquery":   ICPQuery,
+	"whoisquery": WhoisQuery,
 	"test":       TaskTest,
 }
 

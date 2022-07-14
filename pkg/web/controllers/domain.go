@@ -550,6 +550,14 @@ func getDomainInfo(domainName string, disableFofa bool) (r DomainInfo) {
 			Content: string(icpContent),
 		})
 	}
+	whois := onlineapi.NewWhois(onlineapi.WhoisQueryConfig{})
+	if whoisInfo := whois.LookupWhois(domainName); whoisInfo != nil {
+		whoisContent, _ := json.Marshal(*whoisInfo)
+		r.DomainAttr = append(r.DomainAttr, DomainAttrInfo{
+			Tag:     "Whois",
+			Content: string(whoisContent),
+		})
+	}
 	colorTag := db.DomainColorTag{RelatedId: domain.Id}
 	if colorTag.GetByRelatedId() {
 		r.ColorTag = colorTag.Color

@@ -37,6 +37,9 @@ require (
 	github.com/klauspost/cpuid/v2 v2.0.9 // indirect
 	github.com/klauspost/reedsolomon v1.9.13 // indirect
 	github.com/lair-framework/go-nmap v0.0.0-20191202052157-3507e0b03523
+	github.com/likexian/gokit v0.25.9
+	github.com/likexian/whois v1.14.2
+	github.com/likexian/whois-parser v1.24.1
 	github.com/mat/besticon v0.0.0-20210801190920-bdff7778a634
 	github.com/miekg/dns v1.1.48
 	github.com/oschwald/geoip2-golang v1.5.0
@@ -65,7 +68,7 @@ require (
 	github.com/youmark/pkcs8 v0.0.0-20201027041543-1326539a0a0a // indirect
 	go.mongodb.org/mongo-driver v1.9.1 // indirect
 	golang.org/x/crypto v0.0.0-20220525230936-793ad666bf5e // indirect
-	golang.org/x/net v0.0.0-20220526153639-5463443f8c37 // indirect
+	golang.org/x/net v0.0.0-20220708220712-1185a9018129
 	golang.org/x/oauth2 v0.0.0-20220524215830-622c5d57e401 // indirect
 	golang.org/x/sys v0.0.0-20220610221304-9f5ed59c137d // indirect
 	golang.org/x/text v0.3.7

@@ -48,6 +48,7 @@ $(function () {
                     'httpx': $('#checkbox_httpx').is(":checked"),
                     'screenshot': $('#checkbox_screenshot').is(":checked"),
                     'icpquery': $('#checkbox_icpquery').is(":checked"),
+                    'whoisquery': $('#checkbox_whoisquery').is(":checked"),
                     'wappalyzer': $('#checkbox_wappalyzer').is(":checked"),
                     'fingerprinthub': $('#checkbox_fingerprinthub').is(":checked"),
                     'iconhash': $('#checkbox_iconhash').is(":checked"),
