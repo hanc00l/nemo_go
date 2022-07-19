@@ -9,7 +9,7 @@ func TestMassdns_Do(t *testing.T) {
 	resolve := NewResolve(Config{})
 	resolve.Result.DomainResult = m.Result.DomainResult
 	resolve.Do()
-	for k,v :=range m.Result.DomainResult{
+	for k, v := range m.Result.DomainResult {
 		t.Log(k)
 		t.Log(v)
 	}
