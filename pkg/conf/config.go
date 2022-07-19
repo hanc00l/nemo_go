@@ -12,7 +12,7 @@ const (
 	Debug   = "Debug"   //开发模式
 )
 
-// RunMode 运行模式
+// RunMode 运行模式：正式运行请使用Release模式，Debug模式只用于开发调试过程
 var RunMode = Release
 
 //var RunMode = Debug

@@ -647,7 +647,7 @@
                                                                        id="checkbox_cron_task" type="checkbox"
                                                                 ><b>定时任务</b><i
                                                                     class="fa fa-info-circle" aria-hidden="true"
-                                                                    title="定时任务&#10;任务在指定时间启动并周期执行，执行规则同Linux Crontab任务计划格式&#10;任务格式：“分钟 小时 天 周 月”，可使用*、/、,、-等特殊符号&#10;例：0 8-16/2 * * *表示在每天8-16点的整点，每隔2小时启动&#10;参见：https://www.runoob.com/w3cnote/linux-crontab-tasks.html"></i>
+                                                                    title="定时任务&#10;任务在指定时间启动并周期执行，执行规则同Linux Crontab任务计划格式&#10;任务格式：“分钟 小时 日 月 周”，可使用*、/、,、-等特殊符号&#10;例：0 8-16/2 * * *表示在每天8-16点的整点，每隔2小时启动&#10;参见：https://www.runoob.com/w3cnote/linux-crontab-tasks.html"></i>
                                                             </label>
                                                         </div>
                                                         <input class="form-control" id="input_cron_comment" type="text"
@@ -694,11 +694,13 @@
                                         <div class="form-group">
                                             <label for="select_bin">扫描使用方法<i class="fa fa-question-circle"
                                                                              aria-hidden="true"
-                                                                             title="导入namp、masscan扫描输出的-oX格式的XML结果以及fscan的results.txt结果"></i></label>
+                                                                             title="支持导入namp、masscan扫描输出的-oX格式的XML结果；&#10;fscan的results.txt结果；&#10;naabu的普通text结果；&#10;httpx的-json结果"></i></label>
                                             <select class="form-control" id="select_portscan_bin">
                                                 <option value="nmap" selected>nmap</option>
                                                 <option value="masscan">masscan</option>
                                                 <option value="fscan">fscan</option>
+                                                <option value="naabu">naabu</option>
+                                                <option value="httpx">httpx</option>
                                                 </option>
                                             </select>
                                             <label for="select_import_org_id_task"><b>资产归属组织</b></label>

@@ -393,6 +393,18 @@ func (c *IPController) ImportPortscanResultAction() {
 		resultIpPort := f.Result.SaveResult(config)
 		resultVul := pocscan.SaveResult(f.VulResult)
 		result = fmt.Sprintf("%s,%s", resultIpPort, resultVul)
+	} else if bin == "naabu" {
+		n := portscan.NewNaabu(config)
+		n.ParseTxtContentResult(fileContent)
+		portscan.FilterIPHasTooMuchPort(n.Result)
+		resultIpPort := n.Result.SaveResult(config)
+		result = fmt.Sprintf("%s", resultIpPort)
+	} else if bin == "httpx" {
+		n := fingerprint.NewHttpx()
+		n.ParseJSONContentResult(fileContent)
+		portscan.FilterIPHasTooMuchPort(n.ResultPortScan)
+		resultIpPort := n.ResultPortScan.SaveResult(config)
+		result = fmt.Sprintf("%s", resultIpPort)
 	} else {
 		c.FailedStatus("未知的扫描方法")
 		return

@@ -1,9 +1,12 @@
 package fingerprint
 
 import (
+	"bufio"
+	"bytes"
 	"encoding/json"
 	"fmt"
 	"github.com/hanc00l/nemo_go/pkg/logging"
+	"github.com/hanc00l/nemo_go/pkg/task/custom"
 	"github.com/hanc00l/nemo_go/pkg/task/domainscan"
 	"github.com/hanc00l/nemo_go/pkg/task/portscan"
 	"github.com/hanc00l/nemo_go/pkg/utils"
@@ -11,6 +14,7 @@ import (
 	"github.com/projectdiscovery/httpx/runner"
 	"github.com/remeh/sizedwaitgroup"
 	"os"
+	"strconv"
 )
 
 type Httpx struct {
@@ -23,6 +27,7 @@ type HttpxResult struct {
 	CNames      []string `json:"cnames,omitempty"`
 	Url         string   `json:"url,omitempty"`
 	Host        string   `json:"host,omitempty"`
+	Port        string   `json:"port,omitempty"`
 	Title       string   `json:"title,omitempty"`
 	WebServer   string   `json:"webserver,omitempty"`
 	ContentType string   `json:"content-type,omitempty"`
@@ -138,22 +143,24 @@ func (x *Httpx) RunHttpx(domain string) []FingerAttrResult {
 	}
 	r.RunEnumeration()
 	r.Close()
-	result := parseHttpxResult(resultTempFile)
+	result := x.parseHttpxResult(resultTempFile)
 	return result
 }
 
-// parseHttpxResult 解析httpx执行结果
-func parseHttpxResult(outputTempFile string) (result []FingerAttrResult) {
-	content, err := os.ReadFile(outputTempFile)
-	if err != nil || len(content) == 0 {
-		return result
-	}
-
+// ParseHttpxJson 解析一条httpx的JSON记录
+func (x *Httpx) ParseHttpxJson(content []byte) (host string, port int, result []FingerAttrResult) {
 	resultJSON := HttpxResult{}
-	err = json.Unmarshal(content, &resultJSON)
+	err := json.Unmarshal(content, &resultJSON)
 	if err != nil {
-		return result
+		return
 	}
+	// 获取host与port
+	host = resultJSON.Host
+	port, err = strconv.Atoi(resultJSON.Port)
+	if err != nil {
+		return
+	}
+	// 获取全部的Httpx信息
 	httpxResultMarshaled, err := json.Marshal(resultJSON)
 	if err == nil {
 		result = append(result, FingerAttrResult{
@@ -161,6 +168,7 @@ func parseHttpxResult(outputTempFile string) (result []FingerAttrResult) {
 			Content: string(httpxResultMarshaled),
 		})
 	}
+	// 解析字段
 	if resultJSON.Title != "" {
 		result = append(result, FingerAttrResult{
 			Tag:     "title",
@@ -188,5 +196,57 @@ func parseHttpxResult(outputTempFile string) (result []FingerAttrResult) {
 			})
 		}
 	}
-	return result
+	return
+}
+
+// parseHttpxResult 解析httpx执行结果
+func (x *Httpx) parseHttpxResult(outputTempFile string) (result []FingerAttrResult) {
+	content, err := os.ReadFile(outputTempFile)
+	if err != nil || len(content) == 0 {
+		return result
+	}
+	// host与port这里不需要
+	_, _, result = x.ParseHttpxJson(content)
+
+	return
+}
+
+// ParseJSONContentResult 解析httpx扫描的JSON格式文件结果
+func (x *Httpx) ParseJSONContentResult(content []byte) {
+	s := custom.NewService()
+	if x.ResultPortScan.IPResult == nil {
+		x.ResultPortScan.IPResult = make(map[string]*portscan.IPResult)
+	}
+	scanner := bufio.NewScanner(bytes.NewReader(content))
+	for scanner.Scan() {
+		data := scanner.Bytes()
+		host, port, fas := x.ParseHttpxJson(data)
+		if host == "" || port == 0 || len(fas) == 0 || utils.CheckIPV4(host) == false {
+			continue
+		}
+		if !x.ResultPortScan.HasIP(host) {
+			x.ResultPortScan.SetIP(host)
+		}
+		if !x.ResultPortScan.HasPort(host, port) {
+			x.ResultPortScan.SetPort(host, port)
+		}
+		service := s.FindService(port, "")
+		x.ResultPortScan.SetPortAttr(host, port, portscan.PortAttrResult{
+			Source:  "httpx",
+			Tag:     "service",
+			Content: service,
+		})
+		for _, fa := range fas {
+			par := portscan.PortAttrResult{
+				RelatedId: 0,
+				Source:    "httpx",
+				Tag:       fa.Tag,
+				Content:   fa.Content,
+			}
+			x.ResultPortScan.SetPortAttr(host, port, par)
+			if fa.Tag == "status" {
+				x.ResultPortScan.IPResult[host].Ports[port].Status = fa.Content
+			}
+		}
+	}
 }
