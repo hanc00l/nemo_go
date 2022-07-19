@@ -37,7 +37,6 @@ require (
 	github.com/klauspost/cpuid/v2 v2.0.9 // indirect
 	github.com/klauspost/reedsolomon v1.9.13 // indirect
 	github.com/lair-framework/go-nmap v0.0.0-20191202052157-3507e0b03523
-	github.com/likexian/gokit v0.25.9
 	github.com/likexian/whois v1.14.2
 	github.com/likexian/whois-parser v1.24.1
 	github.com/mat/besticon v0.0.0-20210801190920-bdff7778a634

@@ -6,6 +6,7 @@ import (
 	"github.com/hanc00l/nemo_go/pkg/db"
 	"github.com/hanc00l/nemo_go/pkg/logging"
 	"github.com/hanc00l/nemo_go/pkg/task/ampq"
+	"github.com/hanc00l/nemo_go/pkg/task/custom"
 	"time"
 )
 
@@ -159,15 +160,20 @@ func (c *DashboardController) OnlineUserListAction() {
 	resp := DataTableResponseData{}
 	OnlineUserMutex.Lock()
 	defer OnlineUserMutex.Unlock()
+	ipLocation := custom.NewIPLocation()
 
 	for _, v := range OnlineUser {
 		if time.Now().Sub(v.UpdateTime).Hours() > 24 {
 			delete(OnlineUser, v.IP)
 			continue
 		}
+		ipl := ipLocation.FindCustomIP(v.IP)
+		if ipl == "" {
+			ipl = ipLocation.FindPublicIP(v.IP)
+		}
 		resp.Data = append(resp.Data, OnlineUserInfoData{
 			Index:        index,
-			IP:           v.IP,
+			IP:           fmt.Sprintf("%s (%s)", v.IP, ipl),
 			LoginTime:    FormatDateTime(v.LoginTime),
 			UpdateTime:   fmt.Sprintf("%s前", time.Now().Sub(v.UpdateTime).Truncate(time.Second).String()),
 			UpdateNumber: v.UpdateNumber,
