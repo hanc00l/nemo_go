@@ -17,13 +17,13 @@ type PortscanRequestParam struct {
 	IsPing           bool   `form:"ping"`
 	ExcludeIP        string `form:"exclude"`
 	IsScreenshot     bool   `form:"screenshot"`
-	IsWappalyzer     bool   `form:"wappalyzer"`
 	IsFingerprintHub bool   `form:"fingerprinthub"`
 	IsIconHash       bool   `form:"iconhash"`
 	TaskMode         int    `form:"taskmode"`
 	IsTaskCron       bool   `form:"taskcron" json:"-"`
 	TaskCronRule     string `form:"cronrule" json:"-"`
 	TaskCronComment  string `form:"croncomment" json:"-"`
+	IsLoadOpenedPort bool   `form:"load_opened_port"`
 }
 
 type DomainscanRequestParam struct {
@@ -43,7 +43,6 @@ type DomainscanRequestParam struct {
 	IsScreenshot     bool   `form:"screenshot"`
 	IsICPQuery       bool   `form:"icpquery"`
 	IsWhoisQuery     bool   `form:"whoisquery"`
-	IsWappalyzer     bool   `form:"wappalyzer"`
 	IsFingerprintHub bool   `form:"fingerprinthub"`
 	IsIconHash       bool   `form:"iconhash"`
 	TaskMode         int    `form:"taskmode"`
@@ -63,7 +62,7 @@ type PocscanRequestParam struct {
 	NucleiPocFile    string `form:"nuclei_poc_file"`
 	IsDirsearch      bool   `form:"dirsearch"`
 	DirsearchExtName string `form:"ext"`
-	LoadOpenedPort   bool   `form:"load_opened_port"`
+	IsLoadOpenedPort bool   `form:"load_opened_port"`
 	IsTaskCron       bool   `form:"taskcron" json:"-"`
 	TaskCronRule     string `form:"cronrule" json:"-"`
 	TaskCronComment  string `form:"croncomment" json:"-"`

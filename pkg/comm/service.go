@@ -277,10 +277,13 @@ func (s *Service) NewTask(ctx context.Context, args *NewTaskArgs, replay *string
 // LoadOpenedPort 读取指定IP已开放的全部端口
 func (s *Service) LoadOpenedPort(ctx context.Context, args *string, replay *string) error {
 	var resultIPAndPort []string
-	ipDb := db.Ip{}
-	portDb := db.Port{}
+
 	ips := strings.Split(*args, ",")
 	for _, ip := range ips {
+		//Fix Bug：
+		//每次重新初始化数据库对象
+		ipDb := db.Ip{}
+		portDb := db.Port{}
 		host := utils.HostStrip(ip)
 		// 如果不是有效的IP（可能是域名）则直接返回原来的目标）
 		if utils.CheckIPV4(host) == false {

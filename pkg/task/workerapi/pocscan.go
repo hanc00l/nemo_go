@@ -20,7 +20,7 @@ func PocScan(taskId, configJSON string) (result string, err error) {
 	}
 	x := comm.NewXClient()
 	//读取资产开放端口
-	if config.LoadOpenedPort {
+	if config.IsLoadOpenedPort {
 		err = x.Call(context.Background(), "LoadOpenedPort", &config.Target, &result)
 		if err == nil {
 			config.Target = result

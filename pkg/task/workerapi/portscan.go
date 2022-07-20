@@ -6,7 +6,9 @@ import (
 	"github.com/hanc00l/nemo_go/pkg/comm"
 	"github.com/hanc00l/nemo_go/pkg/logging"
 	"github.com/hanc00l/nemo_go/pkg/task/portscan"
+	"github.com/hanc00l/nemo_go/pkg/utils"
 	"github.com/remeh/sizedwaitgroup"
+	"strconv"
 	"strings"
 )
 
@@ -25,31 +27,62 @@ func PortScan(taskId, configJSON string) (result string, err error) {
 		return FailedTask(err.Error()), err
 	}
 	var resultPortScan portscan.Result
-	// 端口扫描
-	if config.CmdBin == "masnmap" {
-		resultPortScan = doMasscanPlusNmap(config)
-	} else if config.CmdBin == "nmap" {
-		nmap := portscan.NewNmap(config)
-		nmap.Do()
-		resultPortScan = nmap.Result
+	x := comm.NewXClient()
+	//端口扫描：
+	if config.IsPortscan {
+		if config.CmdBin == "masnmap" {
+			resultPortScan = doMasscanPlusNmap(config)
+		} else if config.CmdBin == "nmap" {
+			nmap := portscan.NewNmap(config)
+			nmap.Do()
+			resultPortScan = nmap.Result
+		} else {
+			masscan := portscan.NewMasscan(config)
+			masscan.Do()
+			resultPortScan = masscan.Result
+		}
 	} else {
-		masscan := portscan.NewMasscan(config)
-		masscan.Do()
-		resultPortScan = masscan.Result
+		resultPortScan.IPResult = make(map[string]*portscan.IPResult)
+	}
+	// 读取目标的数据库中已保存的开放端口
+	if config.IsLoadOpenedPort {
+		err = x.Call(context.Background(), "LoadOpenedPort", &config.Target, &result)
+		if err == nil && result != "" {
+			allTargets := strings.Split(result, ",")
+			for _, target := range allTargets {
+				// 必须是ip:port格式
+				dataArray := strings.Split(target, ":")
+				if len(dataArray) != 2 {
+					continue
+				}
+				ip := dataArray[0]
+				port, err := strconv.Atoi(dataArray[1])
+				if utils.CheckIPV4(ip) == false || err != nil {
+					continue
+				}
+				if !resultPortScan.HasIP(ip) {
+					resultPortScan.SetIP(ip)
+				}
+				if !resultPortScan.HasPort(ip, port) {
+					resultPortScan.SetPort(ip, port)
+				}
+			}
+		} else {
+			logging.RuntimeLog.Error(err)
+		}
 	}
 	// IP位置
 	if config.IsIpLocation {
 		doLocation(&resultPortScan)
 	}
 	// 指纹识别
-	DoIPFingerPrint(config,&resultPortScan)
+	DoIPFingerPrint(config, &resultPortScan)
 	// 保存结果
 	resultArgs := comm.ScanResultArgs{
-		TaskID: taskId,
+		TaskID:   taskId,
 		IPConfig: &config,
 		IPResult: resultPortScan.IPResult,
 	}
-	x := comm.NewXClient()
 	err = x.Call(context.Background(), "SaveScanResult", &resultArgs, &result)
 	if err != nil {
 		logging.RuntimeLog.Error(err)
@@ -57,7 +90,7 @@ func PortScan(taskId, configJSON string) (result string, err error) {
 	}
 	// screenshot
 	if config.IsScreenshot {
-		result2 := DoScreenshotAndSave(&resultPortScan,nil)
+		result2 := DoScreenshotAndSave(&resultPortScan, nil)
 		result = strings.Join([]string{result, result2}, ",")
 	}
 

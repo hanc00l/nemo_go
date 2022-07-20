@@ -21,11 +21,6 @@ func DoIPFingerPrint(config portscan.Config, resultPortScan *portscan.Result) {
 		httpx.ResultPortScan = *resultPortScan
 		httpx.Do()
 	}
-	if config.IsWappalyzer {
-		wappalyzer := fingerprint.NewWappalyzer()
-		wappalyzer.ResultPortScan = *resultPortScan
-		wappalyzer.Do()
-	}
 	if config.IsFingerprintHub {
 		fp := fingerprint.NewFingerprintHub()
 		fp.ResultPortScan = *resultPortScan
@@ -48,11 +43,6 @@ func DoDomainFingerPrint(config domainscan.Config, resultDomainScan *domainscan.
 		whatweb := fingerprint.NewWhatweb()
 		whatweb.ResultDomainScan = *resultDomainScan
 		whatweb.Do()
-	}
-	if config.IsWappalyzer {
-		wappalyzer := fingerprint.NewWappalyzer()
-		wappalyzer.ResultDomainScan = *resultDomainScan
-		wappalyzer.Do()
 	}
 	if config.IsFingerprintHub {
 		fp := fingerprint.NewFingerprintHub()

@@ -8,10 +8,10 @@ import (
 )
 
 type Config struct {
-	Target         string `json:"target"`
-	PocFile        string `json:"pocFile"`
-	CmdBin         string `json:"cmdBin"`
-	LoadOpenedPort bool   `json:"loadOpenedPort"`
+	Target           string `json:"target"`
+	PocFile          string `json:"pocFile"`
+	CmdBin           string `json:"cmdBin"`
+	IsLoadOpenedPort bool   `json:"loadOpenedPort"`
 }
 
 type Result struct {

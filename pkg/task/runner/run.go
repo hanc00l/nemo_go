@@ -28,10 +28,8 @@ func StartPortScanTask(req PortscanRequestParam, cronTaskId string) (taskId stri
 	for _, t := range targets {
 		for _, p := range ports {
 			// 端口扫描
-			if req.IsPortScan {
-				if taskId, err = doPortscan(cronTaskId, t, p, req); err != nil {
-					return
-				}
+			if taskId, err = doPortscan(cronTaskId, t, p, req); err != nil {
+				return
 			}
 			// IP归属地：如果有端口执行任务，则IP归属地任务在端口扫描中执行，否则单独执行
 			if !req.IsPortScan && req.IsIPLocation {
@@ -41,19 +39,19 @@ func StartPortScanTask(req PortscanRequestParam, cronTaskId string) (taskId stri
 			}
 			// FOFA
 			if req.IsFofa {
-				if taskId, err = doOnlineAPISearch(cronTaskId, "fofa", t, &req.OrgId, req.IsIPLocation, req.IsHttpx, req.IsWappalyzer, req.IsFingerprintHub, req.IsScreenshot, req.IsIconHash); err != nil {
+				if taskId, err = doOnlineAPISearch(cronTaskId, "fofa", t, &req.OrgId, req.IsIPLocation, req.IsHttpx, req.IsFingerprintHub, req.IsScreenshot, req.IsIconHash); err != nil {
 					return
 				}
 			}
 			// Quake
 			if req.IsQuake {
-				if taskId, err = doOnlineAPISearch(cronTaskId, "quake", t, &req.OrgId, req.IsIPLocation, req.IsHttpx, req.IsWappalyzer, req.IsFingerprintHub, req.IsScreenshot, req.IsIconHash); err != nil {
+				if taskId, err = doOnlineAPISearch(cronTaskId, "quake", t, &req.OrgId, req.IsIPLocation, req.IsHttpx, req.IsFingerprintHub, req.IsScreenshot, req.IsIconHash); err != nil {
 					return
 				}
 			}
 			// Hunter
 			if req.IsHunter {
-				if taskId, err = doOnlineAPISearch(cronTaskId, "hunter", t, &req.OrgId, req.IsIPLocation, req.IsHttpx, req.IsWappalyzer, req.IsFingerprintHub, req.IsScreenshot, req.IsIconHash); err != nil {
+				if taskId, err = doOnlineAPISearch(cronTaskId, "hunter", t, &req.OrgId, req.IsIPLocation, req.IsHttpx, req.IsFingerprintHub, req.IsScreenshot, req.IsIconHash); err != nil {
 					return
 				}
 			}
@@ -134,17 +132,17 @@ func StartDomainScanTask(req DomainscanRequestParam, cronTaskId string) (taskId 
 			}
 		}
 		if req.IsFofa {
-			if taskId, err = doOnlineAPISearch(cronTaskId, "fofa", t, &req.OrgId, true, req.IsHttpx, req.IsWappalyzer, req.IsFingerprintHub, req.IsScreenshot, req.IsIconHash); err != nil {
+			if taskId, err = doOnlineAPISearch(cronTaskId, "fofa", t, &req.OrgId, true, req.IsHttpx, req.IsFingerprintHub, req.IsScreenshot, req.IsIconHash); err != nil {
 				return
 			}
 		}
 		if req.IsQuake {
-			if taskId, err = doOnlineAPISearch(cronTaskId, "quake", t, &req.OrgId, true, req.IsHttpx, req.IsWappalyzer, req.IsFingerprintHub, req.IsScreenshot, req.IsIconHash); err != nil {
+			if taskId, err = doOnlineAPISearch(cronTaskId, "quake", t, &req.OrgId, true, req.IsHttpx, req.IsFingerprintHub, req.IsScreenshot, req.IsIconHash); err != nil {
 				return
 			}
 		}
 		if req.IsHunter {
-			if taskId, err = doOnlineAPISearch(cronTaskId, "hunter", t, &req.OrgId, true, req.IsHttpx, req.IsWappalyzer, req.IsFingerprintHub, req.IsScreenshot, req.IsIconHash); err != nil {
+			if taskId, err = doOnlineAPISearch(cronTaskId, "hunter", t, &req.OrgId, true, req.IsHttpx, req.IsFingerprintHub, req.IsScreenshot, req.IsIconHash); err != nil {
 				return
 			}
 		}
@@ -171,7 +169,7 @@ func StartPocScanTask(req PocscanRequestParam, cronTaskId string) (taskId string
 		}
 	}
 	if req.IsPocsuiteVerify && req.PocsuitePocFile != "" {
-		config := pocscan.Config{Target: strings.Join(targetList, ","), PocFile: req.PocsuitePocFile, CmdBin: "pocsuite", LoadOpenedPort: req.LoadOpenedPort}
+		config := pocscan.Config{Target: strings.Join(targetList, ","), PocFile: req.PocsuitePocFile, CmdBin: "pocsuite", IsLoadOpenedPort: req.IsLoadOpenedPort}
 		configJSON, _ := json.Marshal(config)
 		taskId, err = serverapi.NewTask("pocsuite", string(configJSON), cronTaskId)
 		if err != nil {
@@ -179,7 +177,7 @@ func StartPocScanTask(req PocscanRequestParam, cronTaskId string) (taskId string
 		}
 	}
 	if req.IsXrayVerify && req.XrayPocFile != "" {
-		config := pocscan.Config{Target: strings.Join(targetList, ","), PocFile: req.XrayPocFile, CmdBin: "xray", LoadOpenedPort: req.LoadOpenedPort}
+		config := pocscan.Config{Target: strings.Join(targetList, ","), PocFile: req.XrayPocFile, CmdBin: "xray", IsLoadOpenedPort: req.IsLoadOpenedPort}
 		configJSON, _ := json.Marshal(config)
 		taskId, err = serverapi.NewTask("xray", string(configJSON), cronTaskId)
 		if err != nil {
@@ -187,7 +185,7 @@ func StartPocScanTask(req PocscanRequestParam, cronTaskId string) (taskId string
 		}
 	}
 	if req.IsNucleiVerify && req.NucleiPocFile != "" {
-		config := pocscan.Config{Target: strings.Join(targetList, ","), PocFile: req.NucleiPocFile, CmdBin: "nuclei", LoadOpenedPort: req.LoadOpenedPort}
+		config := pocscan.Config{Target: strings.Join(targetList, ","), PocFile: req.NucleiPocFile, CmdBin: "nuclei", IsLoadOpenedPort: req.IsLoadOpenedPort}
 		configJSON, _ := json.Marshal(config)
 		taskId, err = serverapi.NewTask("nuclei", string(configJSON), cronTaskId)
 		if err != nil {
@@ -195,7 +193,7 @@ func StartPocScanTask(req PocscanRequestParam, cronTaskId string) (taskId string
 		}
 	}
 	if req.IsDirsearch && req.DirsearchExtName != "" {
-		config := pocscan.Config{Target: strings.Join(targetList, ","), PocFile: req.DirsearchExtName, CmdBin: "dirsearch", LoadOpenedPort: req.LoadOpenedPort}
+		config := pocscan.Config{Target: strings.Join(targetList, ","), PocFile: req.DirsearchExtName, CmdBin: "dirsearch", IsLoadOpenedPort: req.IsLoadOpenedPort}
 		configJSON, _ := json.Marshal(config)
 		taskId, err = serverapi.NewTask("dirsearch", string(configJSON), cronTaskId)
 		if err != nil {
@@ -219,10 +217,11 @@ func doPortscan(cronTaskId string, target string, port string, req PortscanReque
 		IsHttpx:          req.IsHttpx,
 		IsWhatWeb:        req.IsWhatweb,
 		IsScreenshot:     req.IsScreenshot,
-		IsWappalyzer:     req.IsWappalyzer,
 		IsFingerprintHub: req.IsFingerprintHub,
 		IsIconHash:       req.IsIconHash,
 		CmdBin:           req.CmdBin,
+		IsPortscan:       req.IsPortScan,
+		IsLoadOpenedPort: req.IsLoadOpenedPort,
 	}
 	if req.CmdBin == "" {
 		config.CmdBin = conf.GlobalWorkerConfig().Portscan.Cmdbin
@@ -268,7 +267,6 @@ func doBatchScan(cronTaskId string, target string, port string, req PortscanRequ
 		IsHttpx:          req.IsHttpx,
 		IsWhatWeb:        req.IsWhatweb,
 		IsScreenshot:     req.IsScreenshot,
-		IsWappalyzer:     req.IsWappalyzer,
 		IsFingerprintHub: req.IsFingerprintHub,
 		IsIconHash:       req.IsIconHash,
 		CmdBin:           "masscan",
@@ -316,7 +314,6 @@ func doDomainscan(cronTaskId string, target string, req DomainscanRequestParam) 
 		IsIPPortScan:       req.IsIPPortscan,
 		IsIPSubnetPortScan: req.IsSubnetPortscan,
 		IsScreenshot:       req.IsScreenshot,
-		IsWappalyzer:       req.IsWappalyzer,
 		IsFingerprintHub:   req.IsFingerprintHub,
 		IsIconHash:         req.IsIconHash,
 		PortTaskMode:       req.PortTaskMode,
@@ -340,13 +337,12 @@ func doDomainscan(cronTaskId string, target string, req DomainscanRequestParam) 
 }
 
 // doOnlineAPISearch Fofa,hunter,quaker的查询
-func doOnlineAPISearch(cronTaskId string, apiName string, target string, orgId *int, isIplocation, isHttp, isWappalyzer, isFingerprintHub, isScreenshot bool, isIconHash bool) (taskId string, err error) {
+func doOnlineAPISearch(cronTaskId string, apiName string, target string, orgId *int, isIplocation, isHttp, isFingerprintHub, isScreenshot bool, isIconHash bool) (taskId string, err error) {
 	config := onlineapi.OnlineAPIConfig{
 		Target:           target,
 		OrgId:            orgId,
 		IsIPLocation:     isIplocation,
 		IsHttpx:          isHttp,
-		IsWappalyzer:     isWappalyzer,
 		IsFingerprintHub: isFingerprintHub,
 		IsScreenshot:     isScreenshot,
 		IsIconHash:       isIconHash,

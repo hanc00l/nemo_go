@@ -260,6 +260,32 @@
                                                                                value="">
                                                                     </div>
                                                                 </div>
+                                                                <div class="form-group row">
+                                                                    <div class="col-md-12">
+                                                                        <div class="form-check form-check-inline">
+                                                                            <label class="form-check-label"
+                                                                                   for="checkbox_ping">
+                                                                                <input class="form-check-input"
+                                                                                       id="checkbox_ping"
+                                                                                       type="checkbox">PING<i
+                                                                                    class="fa fa-question-circle"
+                                                                                    aria-hidden="true"
+                                                                                    title="使用nmap时默认-Pn，该选项取消该参数"></i>
+                                                                            </label>
+                                                                        </div>
+                                                                        <div class="form-check form-check-inline">
+                                                                            <label class="form-check-label"
+                                                                                   for="checkbox_ip_load_opened_port">
+                                                                                <input class="form-check-input"
+                                                                                       id="checkbox_ip_load_opened_port"
+                                                                                       type="checkbox"><b>目标资产所有开放端口</b><i
+                                                                                    class="fa fa-info-circle"
+                                                                                    aria-hidden="true"
+                                                                                    title="读取输入目标的资产IP已探测到的所有开放端口，进行指纹和信息收集；可以和主动扫描同时进行，也可以单独进行。"></i></label>
+                                                                            </label>
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
                                                                 <div class="form-check form-check-inline">
                                                                     <label class="form-check-label"
                                                                            for="checkbox_httpx">
@@ -269,16 +295,6 @@
                                                                             class="fa fa-question-circle"
                                                                             aria-hidden="true"
                                                                             title="通过内置的HTTPX模块，获取端口的HTTP/HTTPS信息"></i>
-                                                                    </label>
-                                                                </div>
-                                                                <div class="form-check form-check-inline">
-                                                                    <label class="form-check-label"
-                                                                           for="checkbox_wappalyzer">
-                                                                        <input class="form-check-input"
-                                                                               id="checkbox_wappalyzer" type="checkbox"
-                                                                        >Wappalyzer<i class="fa fa-question-circle"
-                                                                                      aria-hidden="true"
-                                                                                      title="通过内置的Wappalyzer模块，获取网站的指纹信息；&#10;指纹信息来源于默认的technologies.json和自定义的technologies_custom.json；&#10;指纹的规则和信息参见：https://www.wappalyzer.com"></i>
                                                                     </label>
                                                                 </div>
                                                                 <div class="form-check form-check-inline">
@@ -313,15 +329,6 @@
                                                                         >IconHash<i class="fa fa-question-circle"
                                                                                     aria-hidden="true"
                                                                                     title="请求并获取应用的favicon.ico的Hash值"></i>
-                                                                    </label>
-                                                                </div>
-                                                                <div class="form-check form-check-inline">
-                                                                    <label class="form-check-label" for="checkbox_ping">
-                                                                        <input class="form-check-input"
-                                                                               id="checkbox_ping" type="checkbox">PING<i
-                                                                            class="fa fa-question-circle"
-                                                                            aria-hidden="true"
-                                                                            title="使用nmap时默认-Pn，该选项取消该参数"></i>
                                                                     </label>
                                                                 </div>
                                                             </div>
@@ -654,7 +661,8 @@
                                                                placeholder="定时任务简要说明" disabled
                                                                value="">
                                                         <div class="form-check form-check-inline">
-                                                            <label class="form-check-label" id="label_cron_rule" disabled
+                                                            <label class="form-check-label" id="label_cron_rule"
+                                                                   disabled
                                                                    for="input_cron_rule">
                                                                 定时执行规则
                                                             </label>

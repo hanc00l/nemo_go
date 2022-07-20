@@ -91,12 +91,12 @@ $(function () {
                     'httpx': $('#checkbox_httpx').is(":checked"),
                     'exclude': exclude_ip,
                     'screenshot': $('#checkbox_screenshot').is(":checked"),
-                    'wappalyzer': $('#checkbox_wappalyzer').is(":checked"),
                     'fingerprinthub': $('#checkbox_fingerprinthub').is(":checked"),
                     'iconhash': $('#checkbox_iconhash').is(":checked"),
                     'taskcron': $('#checkbox_cron_task').is(":checked"),
                     'cronrule': cron_rule,
                     'croncomment': $('#input_cron_comment').val(),
+                    'load_opened_port':$('#checkbox_ip_load_opened_port').is(":checked"),
                 }, function (data, e) {
                     if (e === "success" && data['status'] == 'success') {
                         swal({
@@ -204,7 +204,6 @@ $(function () {
                     'httpx': $('#checkbox_batchscan_httpx').is(":checked"),
                     'exclude': exclude_ip,
                     'screenshot': $('#checkbox_batchscan_screenshot').is(":checked"),
-                    'wappalyzer': false,
                     'fingerprinthub': $('#checkbox_batchscan_fingerprinthub').is(":checked"),
                     'iconhash': $('#checkbox_batchscan_iconhash').is(":checked"),
                     'taskcron': $('#checkbox_cron_task').is(":checked"),
@@ -235,29 +234,22 @@ $(function () {
             $("#select_tech").prop("disabled", false);
             $("#select_bin").prop("disabled", false);
             $("#input_rate").prop("disabled", false);
-            $("#checkbox_whatweb").prop("disabled", false);
-            $("#checkbox_httpx").prop("disabled", false);
             $("#checkbox_ping").prop("disabled", false);
             $("#checkbox_exclude").prop("disabled", false);
             $("#input_exclude").prop("disabled", false);
-            $("#checkbox_screenshot").prop("disabled", false);
-            $("#checkbox_wappalyzer").prop("disabled", false);
-            $("#checkbox_fingerprinthub").prop("disabled", false);
-            $("#checkbox_iconhash").prop("disabled", false);
         } else {
             $("#input_port").prop("disabled", true);
             $("#select_tech").prop("disabled", true);
             $("#select_bin").prop("disabled", true);
             $("#input_rate").prop("disabled", true);
-            $("#checkbox_whatweb").prop("disabled", true);
-            $("#checkbox_httpx").prop("disabled", true);
+            // $("#checkbox_whatweb").prop("disabled", true);
+            // $("#checkbox_httpx").prop("disabled", true);
             $("#checkbox_ping").prop("disabled", true);
             $("#checkbox_exclude").prop("disabled", true);
             $("#input_exclude").prop("disabled", true);
-            $("#checkbox_screenshot").prop("disabled", true);
-            $("#checkbox_wappalyzer").prop("disabled", true);
-            $("#checkbox_fingerprinthub").prop("disabled", true);
-            $("#checkbox_iconhash").prop("disabled", true);
+            // $("#checkbox_screenshot").prop("disabled", true);
+            // $("#checkbox_fingerprinthub").prop("disabled", true);
+            // $("#checkbox_iconhash").prop("disabled", true);
         }
     })
     $("#checkbox_cron_task").click(function () {

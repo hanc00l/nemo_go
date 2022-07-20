@@ -121,6 +121,8 @@ func doPortScan(config domainscan.Config, resultDomainScan *domainscan.Result) {
 				IsScreenshot:     config.IsScreenshot,
 				IsFingerprintHub: config.IsFingerprintHub,
 				IsIconHash:       config.IsIconHash,
+				IsLoadOpenedPort: false, //只扫描当前结果
+				IsPortscan:       true,
 			}
 			configPortScanJSON, _ := json.Marshal(configPortScan)
 			// 创建端口扫描任务

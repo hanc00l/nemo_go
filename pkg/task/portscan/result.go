@@ -24,10 +24,11 @@ type Config struct {
 	IsHttpx          bool   `json:"httpx"`
 	IsWhatWeb        bool   `json:"whatweb"`
 	IsScreenshot     bool   `json:"screenshot"`
-	IsWappalyzer     bool   `json:"wappalyzer"`
 	IsFingerprintHub bool   `json:"fingerprinthub"`
 	IsIconHash       bool   `json:"iconhash"`
 	CmdBin           string `json:"cmdBin"`
+	IsLoadOpenedPort bool   `json:"loadOpenedPort"`
+	IsPortscan       bool   `json:"isPortscan"`
 }
 
 // PortAttrResult 端口属性结果

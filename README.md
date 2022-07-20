@@ -15,7 +15,7 @@ Nemo是用来进行自动化信息收集的一个简单平台，通过集成常�
 - IP归属地（纯真离线数据）
 - 自定义IP归属地、Service、蜜罐
 - 导入本地的Masscan、Nmap端口扫描结果
-- 导入[fscan](https://github.com/shadow1ng/fscan)扫描结果（适用于内网渗透的资产信息收集）
+- 导入[fscan](https://github.com/shadow1ng/fscan)、[Naabu]( https://github.com/projectdiscovery/naabu)、[Httpx]( https://github.com/projectdiscovery/httpx)扫描结果（适用于内网渗透的资产信息收集）
 - CDN识别
 
 ### 2、域名资产
@@ -29,7 +29,7 @@ Nemo是用来进行自动化信息收集的一个简单平台，通过集成常�
 
 - [HTTPX](https://github.com/projectdiscovery/httpx) 
 - [ScreenShot](https://github.com/chromedp/chromedp) （调用chrome headless）
-- [Wappalyzer](https://github.com/AliasIO/Wappalyzer) （基于[webanalyze](https://github.com/rverton/webanalyze) 代码，可[自定义指纹规则](thirdparty/wappalyzer/technologies_custom.json)）
+- ~~[Wappalyzer](https://github.com/AliasIO/Wappalyzer) （基于[webanalyze](https://github.com/rverton/webanalyze) 代码，可[自定义指纹规则](thirdparty/wappalyzer/technologies_custom.json)）~~
 - [ObserverWard](https://github.com/0x727/ObserverWard_0x727)  (指纹信息来源于https://github.com/0x727/FingerprintHub)
 - IconHash（基于[mat/besticon](github.com/mat/besticon)和[Becivells/iconhash](github.com/Becivells/iconhash)项目）
 
@@ -110,6 +110,7 @@ Tested on [ubuntu18.04/20.04 LTS](docs/install_linux.md)、[macOS](docs/install_
 
 ## 版本更新
 
+- 2.5.3：2022-7-20，增加导入Naabu和Httpx扫描结果导入到平台，以方便在内网渗透时的信息收集和协同；支持IP任务时跳过端口扫描，读取资产已探测的全部端口进行指纹和信息收集；去除效果不太用好的Wappalyzer功能；修复ObserverWard设置工作目录以正确加载指纹库，升级到2022年7月最新版本。
 - 2.5.2：2022-7-14，增加域名的Whois查询。注意：由2.5.1版本升级时，需在thirdparty中增加whois目录用于存放whois查询的缓存信息。
 - 2.5.1：2022-6-12，更新beego框架至v2.0.3，sessionOn属性修改至app.conf中，更新chromedp至v0.8.2；增加version.txt，记录每次更新后的版本号并在web的“系统设置”-“配置管理”中显示当前的version；导入fscan扫描结果时将结果中的poc-yaml-*漏洞加入到vulnerability中。注意：由2.5.0版本升级时，需在conf/app.conf中增加对应的sessionOn属性。
 - 2.5.0：2022-5-30，新增定时任务执行；Docker的Ubuntun升级为20.04LTS、调整Docker时区；新增webfiles路径映射，统一处理server的web目录访问，取消原screenshot、taskresult与imageicon目录映射；注意：本次累积升级有较大的改动，由v2.4.21升级需导入task.sql与task_cron.sql，并修改app.conf与server.yml中staticdir字段。

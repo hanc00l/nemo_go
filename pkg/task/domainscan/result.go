@@ -25,7 +25,6 @@ type Config struct {
 	IsIPPortScan       bool   `json:"portscan"`
 	IsIPSubnetPortScan bool   `json:"subnetPortscan"`
 	IsScreenshot       bool   `json:"screenshot"`
-	IsWappalyzer       bool   `json:"wappalyzer"`
 	IsFingerprintHub   bool   `json:"fingerprinthub"`
 	IsIconHash         bool   `json:"iconhash"`
 	PortTaskMode       int    `json:"portTaskMode"`
