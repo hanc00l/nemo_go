@@ -30,7 +30,7 @@ type FingerprintHubReult struct {
 	Plugins    []string `json:"plugins"`
 }
 
-// NNewFingerprintHub 创建FingerprintHub对象
+// NewFingerprintHub NNewFingerprintHub 创建FingerprintHub对象
 func NewFingerprintHub() *FingerprintHub {
 	return &FingerprintHub{}
 }
@@ -106,6 +106,8 @@ func (f *FingerprintHub) RunObserverWard(url string) []FingerprintHubReult {
 	var cmdArgs []string
 	cmdArgs = append(cmdArgs, "-t", url, "-j", resultTempFile)
 	cmd := exec.Command(observerWardBinPath, cmdArgs...)
+	//Fix:指定当前路径，这样才会正确调用web_fingerprint_v3.json
+	cmd.Dir = filepath.Join(conf.GetRootPath(), "thirdparty/fingerprinthub")
 	_, err := cmd.CombinedOutput()
 	if err != nil {
 		logging.RuntimeLog.Error(err.Error())
