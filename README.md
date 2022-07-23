@@ -110,6 +110,7 @@ Tested on [ubuntu18.04/20.04 LTS](docs/install_linux.md)、[macOS](docs/install_
 
 ## 版本更新
 
+- 2.5.4：2022-7-23，修复ObserverWard不能正确被调用的Bug（2.5.3只需要替换worker_linux_amd64即可）。
 - 2.5.3：2022-7-20，增加导入Naabu和Httpx扫描结果导入到平台，以方便在内网渗透时的信息收集和协同；支持IP任务时跳过端口扫描，读取资产已探测的全部端口进行指纹和信息收集；去除效果不太用好的Wappalyzer功能；修复ObserverWard设置工作目录以正确加载指纹库，升级到2022年7月最新版本。
 - 2.5.2：2022-7-14，增加域名的Whois查询。注意：由2.5.1版本升级时，需在thirdparty中增加whois目录用于存放whois查询的缓存信息。
 - 2.5.1：2022-6-12，更新beego框架至v2.0.3，sessionOn属性修改至app.conf中，更新chromedp至v0.8.2；增加version.txt，记录每次更新后的版本号并在web的“系统设置”-“配置管理”中显示当前的version；导入fscan扫描结果时将结果中的poc-yaml-*漏洞加入到vulnerability中。注意：由2.5.0版本升级时，需在conf/app.conf中增加对应的sessionOn属性。
