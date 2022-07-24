@@ -310,6 +310,7 @@ $(function () {
                         "date_delta": $('#date_delta').val(),
                         "create_date_delta": $('#create_date_delta').val(),
                         'disable_fofa': $('#checkbox_disable_fofa').is(":checked"),
+                        'disable_banner': $('#checkbox_disable_banner').is(":checked"),
                     });
                 }
             },

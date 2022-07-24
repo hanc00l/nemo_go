@@ -38,6 +38,7 @@ type ipRequestParam struct {
 	DateDelta             int    `form:"date_delta"`
 	AssertCreateDateDelta int    `form:"create_date_delta"`
 	DisableFofa           bool   `form:"disable_fofa"`
+	DisableBanner         bool   `form:"disable_banner"`
 }
 
 // IPListData 列表中每一行显示的IP数据
@@ -166,7 +167,7 @@ func (c *IPController) InfoAction() {
 	ipName := c.GetString("ip")
 	disableFofa, _ := c.GetBool("disable_fofa", false)
 	if ipName != "" {
-		ipInfo = getIPInfo(ipName, disableFofa)
+		ipInfo = getIPInfo(ipName, disableFofa, false)
 		// 修改背景色为交叉显示
 		if len(ipInfo.PortAttr) > 0 {
 			tableBackgroundSet := false
@@ -481,7 +482,7 @@ func (c *IPController) getIPListData(req ipRequestParam) (resp DataTableResponse
 		ipData.Id = ipRow.Id
 		ipData.IP = ipRow.IpName
 		ipData.Location = ipRow.Location
-		ipInfo := getIPInfo(ipRow.IpName, req.DisableFofa)
+		ipInfo := getIPInfo(ipRow.IpName, req.DisableFofa, req.DisableBanner)
 		ipData.ColorTag = ipInfo.ColorTag
 		ipData.MemoContent = ipInfo.Memo
 		//ipData.Banner = strings.Join(utils.RemoveDuplicationElement(append(ipInfo.Title, ipInfo.Banner...)), ", ")
@@ -500,7 +501,7 @@ func (c *IPController) getIPListData(req ipRequestParam) (resp DataTableResponse
 		}
 		ipData.Vulnerability = strings.Join(vulSet, "\r\n")
 
-		ipPortInfo := getPortInfo(ipRow.IpName, ipRow.Id, req.DisableFofa)
+		ipPortInfo := getPortInfo(ipRow.IpName, ipRow.Id, req.DisableFofa, req.DisableBanner)
 		var ports []string
 		for _, p := range ipPortInfo.PortNumbers {
 			ports = append(ports, fmt.Sprintf("%d", p))
@@ -532,7 +533,7 @@ func (c *IPController) getIPListData(req ipRequestParam) (resp DataTableResponse
 }
 
 // getPortInfo 获取一个IP的所有端口信息集合
-func getPortInfo(ip string, ipId int, disableFofa bool) (r PortInfo) {
+func getPortInfo(ip string, ipId int, disableFofa, disableBanner bool) (r PortInfo) {
 	r.PortStatus = make(map[int]string)
 	r.BannerSet = make(map[string]struct{})
 	r.TitleSet = make(map[string]struct{})
@@ -579,6 +580,9 @@ func getPortInfo(ip string, ipId int, disableFofa bool) (r PortInfo) {
 					r.TitleSet[pad.Content] = struct{}{}
 				}
 			} else if pad.Tag == "banner" || pad.Tag == "server" || pad.Tag == "tag" || pad.Tag == "fingerprint" {
+				if pad.Tag == "banner" && disableBanner {
+					continue
+				}
 				if pad.Content == "unknown" || pad.Content == "" {
 					continue
 				}
@@ -620,7 +624,7 @@ func getPortInfo(ip string, ipId int, disableFofa bool) (r PortInfo) {
 }
 
 //getIPInfo 获取一个IP的信息集合
-func getIPInfo(ipName string, disableFofa bool) (r IPInfo) {
+func getIPInfo(ipName string, disableFofa, disableBanner bool) (r IPInfo) {
 	ip := db.Ip{IpName: ipName}
 	if !ip.GetByIp() {
 		return r
@@ -652,7 +656,7 @@ func getIPInfo(ipName string, disableFofa bool) (r IPInfo) {
 		}
 	}
 	// port
-	portInfo := getPortInfo(ipName, ip.Id, disableFofa)
+	portInfo := getPortInfo(ipName, ip.Id, disableFofa, disableBanner)
 	r.PortAttr = portInfo.PortAttr
 	r.Title = utils.SetToSlice(portInfo.TitleSet)
 	r.Banner = utils.SetToSlice(portInfo.BannerSet)

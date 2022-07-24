@@ -34,6 +34,7 @@ type domainRequestParam struct {
 	DateDelta       int    `form:"date_delta"`
 	CreateDateDelta int    `form:"create_date_delta"`
 	DisableFofa     bool   `form:"disable_fofa"`
+	DisableBanner   bool   `form:"disable_banner"`
 	Content         string `form:"content"`
 }
 
@@ -149,7 +150,7 @@ func (c *DomainController) InfoAction() {
 	domainName := c.GetString("domain")
 	disableFofa, _ := c.GetBool("disable_fofa", false)
 	if domainName != "" {
-		domainInfo = getDomainInfo(domainName, disableFofa)
+		domainInfo = getDomainInfo(domainName, disableFofa, false)
 		if len(domainInfo.PortAttr) > 0 {
 			tableBackgroundSet := false
 			for i, _ := range domainInfo.PortAttr {
@@ -415,7 +416,7 @@ func (c *DomainController) getDomainListData(req domainRequestParam) (resp DataT
 		if domainData.ScreenshotFile == nil {
 			domainData.ScreenshotFile = make([]string, 0)
 		}
-		domainInfo := getDomainInfo(domainRow.DomainName, req.DisableFofa)
+		domainInfo := getDomainInfo(domainRow.DomainName, req.DisableFofa, req.DisableBanner)
 		domainData.IP = domainInfo.IP
 		if domainData.IP == nil {
 			domainData.IP = make([]string, 0)
@@ -483,7 +484,7 @@ func (c *DomainController) getMemoData(req domainRequestParam) (r []string) {
 }
 
 // getDomainInfo获取一个域名的数据集合
-func getDomainInfo(domainName string, disableFofa bool) (r DomainInfo) {
+func getDomainInfo(domainName string, disableFofa, disableBanner bool) (r DomainInfo) {
 	domain := db.Domain{DomainName: domainName}
 	if !domain.GetByDomain() {
 		return
@@ -512,14 +513,14 @@ func getDomainInfo(domainName string, disableFofa bool) (r DomainInfo) {
 	}
 	portSet := make(map[int]struct{})
 	//域名的属性
-	domainAttrInfo := getDomainAttrFullInfo(domain.Id, disableFofa)
+	domainAttrInfo := getDomainAttrFullInfo(domain.Id, disableFofa, disableBanner)
 	//遍历域名关联的每一个IP，获取port,title,banner和PortAttrInfo
 	for ipName, _ := range domainAttrInfo.IP {
 		ip := db.Ip{IpName: ipName}
 		if !ip.GetByIp() {
 			continue
 		}
-		pi := getPortInfo(ipName, ip.Id, disableFofa)
+		pi := getPortInfo(ipName, ip.Id, disableFofa, disableBanner)
 		for _, portNumber := range pi.PortNumbers {
 			if _, ok := portSet[portNumber]; !ok {
 				portSet[portNumber] = struct{}{}
@@ -594,7 +595,7 @@ func getDomainInfo(domainName string, disableFofa bool) (r DomainInfo) {
 }
 
 // getDomainAttrFullInfo 获取一个域名的属性集合
-func getDomainAttrFullInfo(id int, disableFofa bool) DomainAttrFullInfo {
+func getDomainAttrFullInfo(id int, disableFofa, disableBanner bool) DomainAttrFullInfo {
 	r := DomainAttrFullInfo{
 		IP:           make(map[string]struct{}),
 		TitleSet:     make(map[string]struct{}),
