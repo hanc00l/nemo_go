@@ -405,6 +405,12 @@ func (c *IPController) ImportPortscanResultAction() {
 		portscan.FilterIPHasTooMuchPort(n.ResultPortScan)
 		resultIpPort := n.ResultPortScan.SaveResult(config)
 		result = fmt.Sprintf("%s", resultIpPort)
+	} else if bin == "txportmap" {
+		tx := portscan.NewTXPortMap(config)
+		tx.ParseTxtContentResult(fileContent)
+		portscan.FilterIPHasTooMuchPort(tx.Result)
+		resultIpPort := tx.Result.SaveResult(config)
+		result = fmt.Sprintf("%s", resultIpPort)
 	} else {
 		c.FailedStatus("未知的扫描方法")
 		return
