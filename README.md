@@ -110,6 +110,7 @@ Tested on [ubuntu18.04/20.04 LTS](docs/install_linux.md)、[macOS](docs/install_
 
 ## 版本更新
 
+- 2.5.5：2022-7-24，修复IP扫描和漏洞扫描时，读取目标资产所有开放端口时不能正确读取子网掩码目标的bug（2.5.4版本只需替换server_linux_amd64文件）。
 - 2.5.4：2022-7-23，修复ObserverWard不能正确被调用的Bug（2.5.3只需要替换worker_linux_amd64即可）。
 - 2.5.3：2022-7-20，增加导入Naabu和Httpx扫描结果导入到平台，以方便在内网渗透时的信息收集和协同；支持IP任务时跳过端口扫描，读取资产已探测的全部端口进行指纹和信息收集；去除效果不太用好的Wappalyzer功能；修复ObserverWard设置工作目录以正确加载指纹库，升级到2022年7月最新版本。
 - 2.5.2：2022-7-14，增加域名的Whois查询。注意：由2.5.1版本升级时，需在thirdparty中增加whois目录用于存放whois查询的缓存信息。
