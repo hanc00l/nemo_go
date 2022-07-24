@@ -280,30 +280,30 @@ func (s *Service) LoadOpenedPort(ctx context.Context, args *string, replay *stri
 
 	ips := strings.Split(*args, ",")
 	for _, ip := range ips {
-		//Fix Bug：
-		//每次重新初始化数据库对象
-		ipDb := db.Ip{}
-		portDb := db.Port{}
-		host := utils.HostStrip(ip)
-		// 如果不是有效的IP（可能是域名）则直接返回原来的目标）
-		if utils.CheckIPV4(host) == false {
-			resultIPAndPort = append(resultIPAndPort, ip)
+		// 如果不是有效的IP（可能是域名）
+		if utils.CheckIPV4(ip) == false && utils.CheckIPV4Subnet(ip) == false {
 			continue
 		}
-		ipDb.IpName = host
-		// 如果数据库中无IP记录，则直接返回原来的目标
-		if ipDb.GetByIp() == false {
-			resultIPAndPort = append(resultIPAndPort, ip)
-			continue
-		}
-		portDb.IpId = ipDb.Id
-		ports := portDb.GetsByIPId()
-		// 如果该IP无已扫描到的开放端口，则直接返回原来的目标
-		if len(ports) == 0 {
-			resultIPAndPort = append(resultIPAndPort, ip)
-		} else {
+		//解析原始输入，可能是ip，也可能是ip/掩码
+		ipAllByParse := utils.ParseIP(ip)
+		for _, ipOneByOne := range ipAllByParse {
+			//Fix Bug：
+			//每次重新初始化数据库对象
+			ipDb := db.Ip{}
+			portDb := db.Port{}
+			ipDb.IpName = ipOneByOne
+			// 如果数据库中无IP记录
+			if ipDb.GetByIp() == false {
+				continue
+			}
+			portDb.IpId = ipDb.Id
+			ports := portDb.GetsByIPId()
+			// 如果该IP无已扫描到的开放端口
+			if len(ports) == 0 {
+				continue
+			}
 			for _, port := range ports {
-				resultIPAndPort = append(resultIPAndPort, fmt.Sprintf("%s:%d", host, port.PortNum))
+				resultIPAndPort = append(resultIPAndPort, fmt.Sprintf("%s:%d", ipOneByOne, port.PortNum))
 			}
 		}
 	}
