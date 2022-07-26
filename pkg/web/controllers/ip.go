@@ -39,6 +39,7 @@ type ipRequestParam struct {
 	AssertCreateDateDelta int    `form:"create_date_delta"`
 	DisableFofa           bool   `form:"disable_fofa"`
 	DisableBanner         bool   `form:"disable_banner"`
+	DisableOutofChina     bool   `form:"disable_outof_china"`
 }
 
 // IPListData 列表中每一行显示的IP数据
@@ -477,6 +478,9 @@ func (c *IPController) getIPListData(req ipRequestParam) (resp DataTableResponse
 	ss := fingerprint.NewScreenShot()
 	cdn := custom.NewCDNCheck()
 	for i, ipRow := range results {
+		if req.DisableOutofChina && utils.CheckIPLocationInChinaMainLand(ipRow.Location) == false {
+			continue
+		}
 		ipData := IPListData{}
 		ipData.Index = req.Start + i + 1
 		ipData.Id = ipRow.Id
@@ -485,7 +489,6 @@ func (c *IPController) getIPListData(req ipRequestParam) (resp DataTableResponse
 		ipInfo := getIPInfo(ipRow.IpName, req.DisableFofa, req.DisableBanner)
 		ipData.ColorTag = ipInfo.ColorTag
 		ipData.MemoContent = ipInfo.Memo
-		//ipData.Banner = strings.Join(utils.RemoveDuplicationElement(append(ipInfo.Title, ipInfo.Banner...)), ", ")
 		ipData.Title = strings.Join(ipInfo.Title, ", ")
 		ipData.Banner = strings.Join(ipInfo.Banner, ", ")
 		ipData.ScreenshotFile = ss.LoadScreenshotFile(ipRow.IpName)

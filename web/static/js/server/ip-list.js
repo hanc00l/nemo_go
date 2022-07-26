@@ -311,6 +311,7 @@ $(function () {
                         "create_date_delta": $('#create_date_delta').val(),
                         'disable_fofa': $('#checkbox_disable_fofa').is(":checked"),
                         'disable_banner': $('#checkbox_disable_banner').is(":checked"),
+                        'disable_outof_china': $('#checkbox_disable_outof_china').is(":checked"),
                     });
                 }
             },

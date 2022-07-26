@@ -105,3 +105,33 @@ func ParseIP(ip string) (ipResults []string) {
 
 	return
 }
+
+// CheckIPLocationInChinaMainLand 根据IP归属地判断是否是属于中国大陆的IP地区
+func CheckIPLocationInChinaMainLand(ipLocation string) bool {
+	//如果无IP定位，无法判断返回true
+	if ipLocation == "" {
+		return true
+	}
+	//检查：香港 台湾 澳门地区
+	pattern2 := `香港|台湾|澳门`
+	r2 := regexp.MustCompile(pattern2)
+	result2 := r2.FindStringSubmatch(ipLocation)
+	if len(result2) >= 1 {
+		return false
+	}
+	//检查：X国
+	pattern1 := `(.+?)国`
+	r1 := regexp.MustCompile(pattern1)
+	result1 := r1.FindStringSubmatch(ipLocation)
+	if len(result1) >= 2 && result1[1] != "中" {
+		return false
+	}
+	//检查：带有省、市及自治区
+	pattern3 := `省|市|内蒙古|广西|西藏|宁夏|新疆`
+	r3 := regexp.MustCompile(pattern3)
+	result3 := r3.FindStringSubmatch(ipLocation)
+	if len(result3) >= 1 {
+		return true
+	}
+	return false
+}
