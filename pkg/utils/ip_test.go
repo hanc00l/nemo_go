@@ -38,7 +38,7 @@ func TestParseIP(t *testing.T) {
 func TestCheckIPLocationInChinaMainLand(t *testing.T) {
 	data1 := "香x港 台湾 澳门"
 	data2 := "德国 香港"
-	data3 := "中国 香港"
+	data3 := "中国"
 	data4 := "江苏省"
 	data5 := "上海市 浦东"
 	data6 := "阿根廷"

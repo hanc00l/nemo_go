@@ -123,8 +123,12 @@ func CheckIPLocationInChinaMainLand(ipLocation string) bool {
 	pattern1 := `(.+?)国`
 	r1 := regexp.MustCompile(pattern1)
 	result1 := r1.FindStringSubmatch(ipLocation)
-	if len(result1) >= 2 && result1[1] != "中" {
-		return false
+	if len(result1) >= 2 {
+		if result1[1] != "中" {
+			return false
+		} else {
+			return true
+		}
 	}
 	//检查：带有省、市及自治区
 	pattern3 := `省|市|内蒙古|广西|西藏|宁夏|新疆`
