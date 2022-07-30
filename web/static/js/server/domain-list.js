@@ -185,6 +185,7 @@ $(function () {
                         "create_date_delta": $('#create_date_delta').val(),
                         'disable_fofa': $('#checkbox_disable_fofa').is(":checked"),
                         'disable_banner': $('#checkbox_disable_banner').is(":checked"),
+                        'select_no_ip': $('#checkbox_select_no_ip').is(":checked"),
                         'content': $('#content').val(),
                     });
                 }

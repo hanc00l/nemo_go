@@ -40,6 +40,8 @@ type ipRequestParam struct {
 	DisableFofa           bool   `form:"disable_fofa"`
 	DisableBanner         bool   `form:"disable_banner"`
 	DisableOutofChina     bool   `form:"disable_outof_china"`
+	SelectOutofChina      bool   `form:"select_outof_china"`
+	SelectNoOpenedPort    bool   `form:"select_no_openedport"`
 }
 
 // IPListData 列表中每一行显示的IP数据
@@ -478,6 +480,12 @@ func (c *IPController) getIPListData(req ipRequestParam) (resp DataTableResponse
 	ss := fingerprint.NewScreenShot()
 	cdn := custom.NewCDNCheck()
 	for i, ipRow := range results {
+		// 筛选满足指定条件的IP
+		// 只看国外的IP：
+		if req.SelectOutofChina && (len(ipRow.Location) > 0 && utils.CheckIPLocationInChinaMainLand(ipRow.Location)) {
+			continue
+		}
+		// 只看国内的IP：
 		if req.DisableOutofChina && utils.CheckIPLocationInChinaMainLand(ipRow.Location) == false {
 			continue
 		}
@@ -487,6 +495,11 @@ func (c *IPController) getIPListData(req ipRequestParam) (resp DataTableResponse
 		ipData.IP = ipRow.IpName
 		ipData.Location = ipRow.Location
 		ipInfo := getIPInfo(ipRow.IpName, req.DisableFofa, req.DisableBanner)
+		// 筛选满足指定条件的IP
+		// 只看没有开放端口的IP：
+		if req.SelectNoOpenedPort && len(ipInfo.Port) > 0 {
+			continue
+		}
 		ipData.ColorTag = ipInfo.ColorTag
 		ipData.MemoContent = ipInfo.Memo
 		ipData.Title = strings.Join(ipInfo.Title, ", ")
