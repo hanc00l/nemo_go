@@ -39,6 +39,7 @@ func (z *ZeroZone) ParseCSVContentResult(content []byte) {
 		if err == io.EOF {
 			break
 		}
+		//忽略第一行的标题行
 		if err != nil || index == 0 {
 			continue
 		}
@@ -48,7 +49,7 @@ func (z *ZeroZone) ParseCSVContentResult(content []byte) {
 		title := strings.TrimSpace(row[5])
 		service := strings.TrimSpace(row[7])
 		//域名属性：
-		if utils.CheckIPV4(domain) == false {
+		if len(domain) > 0 && utils.CheckIPV4(domain) == false {
 			if z.DomainResult.HasDomain(domain) == false {
 				z.DomainResult.SetDomain(domain)
 			}
@@ -68,7 +69,7 @@ func (z *ZeroZone) ParseCSVContentResult(content []byte) {
 			}
 		}
 		//IP属性（由于不是主动扫描，忽略导入StatusCode）
-		if utils.CheckIPV4(ip) == false || portErr != nil {
+		if len(ip) == 0 || utils.CheckIPV4(ip) == false || portErr != nil {
 			continue
 		}
 		if z.IpResult.HasIP(ip) == false {
