@@ -213,7 +213,7 @@ func (c *DomainController) DeleteDomainOnlineAPIAttrAction() {
 		c.MakeStatusResponse(false)
 		return
 	}
-	for _, source := range []string{"fofa", "hunter", "quake"} {
+	for _, source := range []string{"fofa", "hunter", "quake", "0zone"} {
 		domainAttr := db.DomainAttr{RelatedId: id, Source: source}
 		c.MakeStatusResponse(domainAttr.DeleteByRelatedIDAndSource())
 	}
@@ -612,10 +612,10 @@ func getDomainAttrFullInfo(id int, disableFofa, disableBanner bool) DomainAttrFu
 	domainAttr := db.DomainAttr{RelatedId: id}
 	domainAttrData := domainAttr.GetsByRelatedId()
 	for _, da := range domainAttrData {
-		if disableFofa && (da.Source == "fofa" || da.Source == "quake" || da.Source == "hunter") {
+		if disableFofa && (da.Source == "fofa" || da.Source == "quake" || da.Source == "hunter" || da.Source == "0zone") {
 			continue
 		}
-		if da.Source == "fofa" || da.Source == "quake" || da.Source == "hunter" {
+		if da.Source == "fofa" || da.Source == "quake" || da.Source == "hunter" || da.Source == "0zone" {
 			fofaInfo[da.Tag] = da.Content
 		}
 		if da.Tag == "A" {

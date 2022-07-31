@@ -7,7 +7,9 @@ import (
 	"github.com/hanc00l/nemo_go/pkg/db"
 	"github.com/hanc00l/nemo_go/pkg/logging"
 	"github.com/hanc00l/nemo_go/pkg/task/custom"
+	"github.com/hanc00l/nemo_go/pkg/task/domainscan"
 	"github.com/hanc00l/nemo_go/pkg/task/fingerprint"
+	"github.com/hanc00l/nemo_go/pkg/task/onlineapi"
 	"github.com/hanc00l/nemo_go/pkg/task/pocscan"
 	"github.com/hanc00l/nemo_go/pkg/task/portscan"
 	"github.com/hanc00l/nemo_go/pkg/utils"
@@ -360,8 +362,8 @@ func (c *IPController) ImportPortscanResultAction() {
 	}
 	// 文件后缀检查
 	ext := path.Ext(fileHeader.Filename)
-	if ext != ".json" && ext != ".xml" && ext != ".txt" {
-		c.FailedStatus("只允许.json、.xml或.txt文件")
+	if ext != ".json" && ext != ".xml" && ext != ".txt" && ext != ".csv" {
+		c.FailedStatus("只允许.json、.xml、.csv或.txt文件")
 		return
 	}
 	// 读取文件内容
@@ -415,6 +417,12 @@ func (c *IPController) ImportPortscanResultAction() {
 		portscan.FilterIPHasTooMuchPort(tx.Result)
 		resultIpPort := tx.Result.SaveResult(config)
 		result = fmt.Sprintf("%s", resultIpPort)
+	} else if bin == "0zone" {
+		z := onlineapi.NewZeroZone(onlineapi.OnlineAPIConfig{})
+		z.ParseCSVContentResult(fileContent)
+		resultIpPort := z.IpResult.SaveResult(config)
+		resultDomain := z.DomainResult.SaveResult(domainscan.Config{OrgId: config.OrgId})
+		result = fmt.Sprintf("%s,%s", resultDomain, resultIpPort)
 	} else {
 		c.FailedStatus("未知的扫描方法")
 		return
@@ -569,7 +577,7 @@ func getPortInfo(ip string, ipId int, disableFofa, disableBanner bool) (r PortIn
 		portAttrData := portAttr.GetsByRelatedId()
 		FirstRow := true
 		for _, pad := range portAttrData {
-			if disableFofa && (pad.Source == "fofa" || pad.Source == "quake" || pad.Source == "hunter") {
+			if disableFofa && (pad.Source == "fofa" || pad.Source == "quake" || pad.Source == "hunter" || pad.Source == "0zone") {
 				continue
 			}
 			pai := PortAttrInfo{}
