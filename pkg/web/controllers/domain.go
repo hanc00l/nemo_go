@@ -26,16 +26,17 @@ type DomainController struct {
 // domainRequestParam domain的请求参数
 type domainRequestParam struct {
 	DatableRequestParam
-	OrgId           int    `form:"org_id"`
-	IPAddress       string `form:"ip_address"`
-	DomainAddress   string `form:"domain_address"`
-	ColorTag        string `form:"color_tag"`
-	MemoContent     string `form:"memo_content"`
-	DateDelta       int    `form:"date_delta"`
-	CreateDateDelta int    `form:"create_date_delta"`
-	DisableFofa     bool   `form:"disable_fofa"`
-	DisableBanner   bool   `form:"disable_banner"`
-	Content         string `form:"content"`
+	OrgId              int    `form:"org_id"`
+	IPAddress          string `form:"ip_address"`
+	DomainAddress      string `form:"domain_address"`
+	ColorTag           string `form:"color_tag"`
+	MemoContent        string `form:"memo_content"`
+	DateDelta          int    `form:"date_delta"`
+	CreateDateDelta    int    `form:"create_date_delta"`
+	DisableFofa        bool   `form:"disable_fofa"`
+	DisableBanner      bool   `form:"disable_banner"`
+	Content            string `form:"content"`
+	SelectNoResolvedIP bool   `form:"select_no_ip"`
 }
 
 // DomainListData datable显示的每一行数据
@@ -212,7 +213,7 @@ func (c *DomainController) DeleteDomainOnlineAPIAttrAction() {
 		c.MakeStatusResponse(false)
 		return
 	}
-	for _, source := range []string{"fofa", "hunter", "quake"} {
+	for _, source := range []string{"fofa", "hunter", "quake", "0zone"} {
 		domainAttr := db.DomainAttr{RelatedId: id, Source: source}
 		c.MakeStatusResponse(domainAttr.DeleteByRelatedIDAndSource())
 	}
@@ -412,11 +413,11 @@ func (c *DomainController) getDomainListData(req domainRequestParam) (resp DataT
 		domainData.Id = domainRow.Id
 		domainData.Index = req.Start + i + 1
 		domainData.Domain = domainRow.DomainName
-		domainData.ScreenshotFile = ss.LoadScreenshotFile(domainRow.DomainName)
-		if domainData.ScreenshotFile == nil {
-			domainData.ScreenshotFile = make([]string, 0)
-		}
 		domainInfo := getDomainInfo(domainRow.DomainName, req.DisableFofa, req.DisableBanner)
+		// 筛选没有域名的解析IP的记录：
+		if req.SelectNoResolvedIP && len(domainInfo.IP) > 0 {
+			continue
+		}
 		domainData.IP = domainInfo.IP
 		if domainData.IP == nil {
 			domainData.IP = make([]string, 0)
@@ -440,6 +441,10 @@ func (c *DomainController) getDomainListData(req domainRequestParam) (resp DataT
 		//domainData.Banner = strings.Join(utils.RemoveDuplicationElement(append(domainInfo.Title, domainInfo.Banner...)), ", ")
 		domainData.Title = strings.Join(domainInfo.Title, ", ")
 		domainData.Banner = strings.Join(domainInfo.Banner, ", ")
+		domainData.ScreenshotFile = ss.LoadScreenshotFile(domainRow.DomainName)
+		if domainData.ScreenshotFile == nil {
+			domainData.ScreenshotFile = make([]string, 0)
+		}
 		var vulSet []string
 		for _, v := range domainInfo.Vulnerability {
 			vulSet = append(vulSet, fmt.Sprintf("%s/%s", v.PocFile, v.Source))
@@ -607,10 +612,10 @@ func getDomainAttrFullInfo(id int, disableFofa, disableBanner bool) DomainAttrFu
 	domainAttr := db.DomainAttr{RelatedId: id}
 	domainAttrData := domainAttr.GetsByRelatedId()
 	for _, da := range domainAttrData {
-		if disableFofa && (da.Source == "fofa" || da.Source == "quake" || da.Source == "hunter") {
+		if disableFofa && (da.Source == "fofa" || da.Source == "quake" || da.Source == "hunter" || da.Source == "0zone") {
 			continue
 		}
-		if da.Source == "fofa" || da.Source == "quake" || da.Source == "hunter" {
+		if da.Source == "fofa" || da.Source == "quake" || da.Source == "hunter" || da.Source == "0zone" {
 			fofaInfo[da.Tag] = da.Content
 		}
 		if da.Tag == "A" {

@@ -312,6 +312,8 @@ $(function () {
                         'disable_fofa': $('#checkbox_disable_fofa').is(":checked"),
                         'disable_banner': $('#checkbox_disable_banner').is(":checked"),
                         'disable_outof_china': $('#checkbox_disable_outof_china').is(":checked"),
+                        'select_outof_china': $('#checkbox_select_outof_china').is(":checked"),
+                        'select_no_openedport': $('#checkbox_select_no_openedport').is(":checked"),
                     });
                 }
             },

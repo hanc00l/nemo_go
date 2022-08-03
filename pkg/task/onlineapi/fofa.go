@@ -76,6 +76,8 @@ type User struct {
 // Results fofa result set
 type Results []result
 
+//
+
 const (
 	//defaultAPIUrl = "https://fofa.so/api/v1/search/all?"
 	// fofa api changed:
@@ -267,10 +269,13 @@ func (ff *Fofa) RunFofa(domain string) {
 	if utils.CheckIPV4(domain) || utils.CheckIPV4Subnet(domain) {
 		query = fmt.Sprintf("ip=\"%s\" || host=\"%s\"", domain, domain)
 	} else {
+		// cert.subject相比更精准，但信息量更少；cert="xxx.com"干扰太多，暂时不用（没想法好优的方案）
+		// query = fmt.Sprintf("domain=\"%s\" || host=\"%s\" || cert=\"%s\"", domain, domain, domain)
 		query = fmt.Sprintf("domain=\"%s\" || host=\"%s\" || cert=\"%s\"", domain, domain, domain)
 	}
 	// 查询第1页，并获取总共记录数量
 	pageResult, sizeTotal := ff.retriedFofaSearch(clt, 1, query, fields)
+	//fmt.Println(sizeTotal)
 	ff.Result = append(ff.Result, pageResult...)
 	// 计算需要查询的页数
 	pageTotalNum := sizeTotal / pageSize
