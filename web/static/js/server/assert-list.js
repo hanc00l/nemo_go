@@ -1,7 +1,6 @@
 $(function () {
     $('#btnsiderbar').click();
     load_org_list();
-    load_pocfile_list();
     // //获取任务的状态信息
     get_task_status();
     setInterval(function () {
@@ -37,6 +36,11 @@ $(function () {
             }
         }, 100);
     });
+    $('#nav_tabs').on('shown.bs.tab', function (event) {
+        if (event.target.innerText === "漏洞验证") {
+            load_pocfile_list();
+        }
+    })
 });
 
 /**
@@ -106,6 +110,7 @@ function load_org_list() {
 function load_pocfile_list() {
     $.post("/vulnerability-load-pocsuite-pocfile", {}, function (data, e) {
         if (e === "success") {
+            $("#datalist_pocsuite3_poc_file").empty();
             for (let i = 0; i < data.length; i++) {
                 $("#datalist_pocsuite3_poc_file").append("<option value='" + data[i] + "'>" + data[i] + "</option>")
             }
@@ -113,6 +118,7 @@ function load_pocfile_list() {
     });
     $.post("/vulnerability-load-xray-pocfile", {}, function (data, e) {
         if (e === "success") {
+            $("#datalist_xray_poc_file").empty();
             for (let i = 0; i < data.length; i++) {
                 $("#datalist_xray_poc_file").append("<option value='" + data[i] + "'>" + data[i] + "</option>")
             }
@@ -120,6 +126,7 @@ function load_pocfile_list() {
     });
     $.post("/vulnerability-load-nuclei-pocfile", {}, function (data, e) {
         if (e === "success") {
+            $("#datalist_nuclei_poc_file").empty();
             for (let i = 0; i < data.length; i++) {
                 $("#datalist_nuclei_poc_file").append("<option value='" + data[i] + "'>" + data[i] + "</option>")
             }
@@ -209,15 +216,16 @@ function batch_delete(dataTableId, url) {
 }
 
 
-this.encodeHtml = function(s){
+this.encodeHtml = function (s) {
     let REGX_HTML_ENCODE = /"|&|'|<|>|[\x00-\x20]|[\x7F-\xFF]|[\u0100-\u2700]/g;
     s = (s != undefined) ? s : this.toString();
     return (typeof s != "string") ? s :
         s.replace(REGX_HTML_ENCODE,
-            function($0){
+            function ($0) {
                 var c = $0.charCodeAt(0), r = ["&#"];
                 c = (c == 0x20) ? 0xA0 : c;
-                r.push(c); r.push(";");
+                r.push(c);
+                r.push(";");
                 return r.join("");
             });
 };
