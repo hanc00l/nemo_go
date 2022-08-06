@@ -7,6 +7,7 @@ import (
 	"github.com/hanc00l/nemo_go/pkg/comm"
 	"github.com/hanc00l/nemo_go/pkg/conf"
 	"github.com/hanc00l/nemo_go/pkg/logging"
+	"github.com/hanc00l/nemo_go/pkg/task/custom"
 	"github.com/hanc00l/nemo_go/pkg/task/domainscan"
 	"github.com/hanc00l/nemo_go/pkg/task/portscan"
 	"github.com/hanc00l/nemo_go/pkg/utils"
@@ -147,11 +148,19 @@ func doPortScan(config domainscan.Config, resultDomainScan *domainscan.Result) {
 func getResultIPList(resultDomainScan *domainscan.Result) (ipResult, ipSubnetResult string) {
 	ips := make(map[string]struct{})
 	ipSubnets := make(map[string]struct{})
-	for _, da := range resultDomainScan.DomainResult {
+	cdnCheck := custom.NewCDNCheck()
+	for domain, da := range resultDomainScan.DomainResult {
+		isCdn, cdnName, CName := cdnCheck.CheckCName(domain)
+		if isCdn || cdnName != "" || CName != "" {
+			continue
+		}
 		for _, dar := range da.DomainAttrs {
 			if dar.Tag == "A" {
 				ipArray := strings.Split(dar.Content, ".")
 				if len(ipArray) != 4 {
+					continue
+				}
+				if cdnCheck.CheckIP(dar.Content) {
 					continue
 				}
 				if _, ok := ips[dar.Content]; !ok {
