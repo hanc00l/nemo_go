@@ -32,7 +32,8 @@ func StartPortScanTask(req PortscanRequestParam, cronTaskId string) (taskId stri
 				return
 			}
 			// IP归属地：如果有端口执行任务，则IP归属地任务在端口扫描中执行，否则单独执行
-			if !req.IsPortScan && req.IsIPLocation {
+			// 如果IP地址是带掩码的子网（如192.168.1.0/24）则不进行归属地查询（在实际中容易出现误操作，导致整段IP地址无意义地进行归属地查询）
+			if !req.IsPortScan && req.IsIPLocation && utils.CheckIPV4Subnet(t) == false {
 				if taskId, err = doIPLocation(cronTaskId, t, &req.OrgId); err != nil {
 					return
 				}

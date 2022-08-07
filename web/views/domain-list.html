@@ -359,8 +359,8 @@
                                                                 <div class="form-check form-check-inline">
                                                                     <select class="form-control"
                                                                             id="select_porttaskmode">
-                                                                        <option value="0" selected>--默认单任务--</option>
-                                                                        <option value="2">按IP切分任务</option>
+                                                                        <option value="0">--默认单任务--</option>
+                                                                        <option value="2" selected>按IP切分任务</option>
                                                                         <option value="3">按端口切分任务</option>
                                                                         <option value="4">按IP和端口交叉切分任务</option>
                                                                     </select>
@@ -371,10 +371,10 @@
                                                             <div class="col-md-12">
                                                                 <label for="select_taskmode"><b>任务模式</b><i
                                                                         class="fa fa-info-circle" aria-hidden="true"
-                                                                        title="任务执行模式&#10;默认为所有目标为一个单独任务；可将任务按目标的行进行切分为多个任务，均衡分配到多个worker上并发执行；"></i></label>
+                                                                        title="任务执行模式&#10;默认为每一行为一个单独任务；可将任务按目标的行进行切分为多个任务，均衡分配到多个worker上并发执行；"></i></label>
                                                                 <select class="form-control" id="select_taskmode">
-                                                                    <option value="0" selected>单任务（默认）</option>
-                                                                    <option value="1">每一行目标单独任务</option>
+                                                                    <option value="0">单任务（默认）</option>
+                                                                    <option value="1" selected>每一行目标单独任务</option>
                                                                 </select>
                                                                 <label for="select_org_id_task"><b>资产归属组织</b></label>
                                                                 <select class="form-control"
