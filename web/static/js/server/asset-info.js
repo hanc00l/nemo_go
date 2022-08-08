@@ -32,6 +32,30 @@ function delete_op(url, id) {
         });
 }
 
+// 删除关关闭当前网页窗口
+function delete_and_close(url,id){
+    swal({
+            title: "确定要删除?",
+            type: "warning",
+            showCancelButton: true,
+            confirmButtonColor: "#DD6B55",
+            confirmButtonText: "确认删除",
+            cancelButtonText: "取消",
+            closeOnConfirm: true
+        },
+        function () {
+            $.ajax({
+                type: 'post',
+                url: url + '?id=' + id,
+                success: function (data) {
+                    window.close();
+                },
+                error: function (xhr, type) {
+                }
+            });
+        });
+}
+
 function delete_port_attr(id) {
     delete_op('/port-attr-delete', id);
 }

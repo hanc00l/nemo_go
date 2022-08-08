@@ -7,6 +7,10 @@
                 <div class="card">
                     <h2 class="card-header">
                         <div class="form-check-inline">
+                            <button type="button" class="btn btn-danger"
+                                    onclick="delete_and_close('/ip-delete','{{ .ip_info.Id }}')"><i
+                                    class="fa fa fa-trash-o"></i>
+                            </button>&nbsp;
                             <button type="button" id="btn_switchShowFofa" class="btn btn-secondary"
                                     onclick="refresh_info('ip','{{ .ip_info.IP }}',{{ .ip_info.DisableFofa }})">
                                 <i class="fa fa-info-circle"></i>{{ if .ip_info.DisableFofa }}

@@ -7,6 +7,10 @@
                 <div class="card">
                     <h2 class="card-header">
                         <div class="form-check-inline">
+                            <button type="button" class="btn btn-danger"
+                                    onclick="delete_and_close('/domain-delete','{{ .domain_info.Id }}')"><i
+                                    class="fa fa fa-trash-o"></i>
+                            </button>&nbsp;
                             <button type="button" id="btn_switchShowFofa" class="btn btn-secondary"
                                     onclick="refresh_info('domain','{{ .domain_info.Domain }}',{{ .domain_info.DisableFofa }})">
                                 <i class="fa fa-info-circle"></i>{{ if .domain_info.DisableFofa }}
