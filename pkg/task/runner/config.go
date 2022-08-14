@@ -1,55 +1,59 @@
 package runner
 
 type PortscanRequestParam struct {
-	Target           string `form:"target"`
-	IsPortScan       bool   `form:"portscan"`
-	IsIPLocation     bool   `form:"iplocation"`
-	IsFofa           bool   `form:"fofasearch"`
-	IsQuake          bool   `form:"quakesearch"`
-	IsHunter         bool   `form:"huntersearch"`
-	Port             string `form:"port"`
-	Rate             int    `form:"rate"`
-	NmapTech         string `form:"nmap_tech"`
-	CmdBin           string `form:"bin"`
-	OrgId            int    `form:"org_id"`
-	IsWhatweb        bool   `form:"whatweb"`
-	IsHttpx          bool   `form:"httpx"`
-	IsPing           bool   `form:"ping"`
-	ExcludeIP        string `form:"exclude"`
-	IsScreenshot     bool   `form:"screenshot"`
-	IsFingerprintHub bool   `form:"fingerprinthub"`
-	IsIconHash       bool   `form:"iconhash"`
-	TaskMode         int    `form:"taskmode"`
-	IsTaskCron       bool   `form:"taskcron" json:"-"`
-	TaskCronRule     string `form:"cronrule" json:"-"`
-	TaskCronComment  string `form:"croncomment" json:"-"`
-	IsLoadOpenedPort bool   `form:"load_opened_port"`
+	Target             string `form:"target"`
+	IsPortScan         bool   `form:"portscan"`
+	IsIPLocation       bool   `form:"iplocation"`
+	IsFofa             bool   `form:"fofasearch"`
+	IsQuake            bool   `form:"quakesearch"`
+	IsHunter           bool   `form:"huntersearch"`
+	Port               string `form:"port"`
+	Rate               int    `form:"rate"`
+	NmapTech           string `form:"nmap_tech"`
+	CmdBin             string `form:"bin"`
+	OrgId              int    `form:"org_id"`
+	IsWhatweb          bool   `form:"whatweb"`
+	IsHttpx            bool   `form:"httpx"`
+	IsPing             bool   `form:"ping"`
+	ExcludeIP          string `form:"exclude"`
+	IsScreenshot       bool   `form:"screenshot"`
+	IsFingerprintHub   bool   `form:"fingerprinthub"`
+	IsIconHash         bool   `form:"iconhash"`
+	TaskMode           int    `form:"taskmode"`
+	IsTaskCron         bool   `form:"taskcron" json:"-"`
+	TaskCronRule       string `form:"cronrule" json:"-"`
+	TaskCronComment    string `form:"croncomment" json:"-"`
+	IsLoadOpenedPort   bool   `form:"load_opened_port"`
+	IsIgnoreOutofChina bool   `form:"ignoreoutofchina"`
+	IsIgnoreCDN        bool   `form:"ignorecdn"`
 }
 
 type DomainscanRequestParam struct {
-	Target           string `form:"target"`
-	OrgId            int    `form:"org_id"`
-	IsSubfinder      bool   `form:"subfinder"`
-	IsSubdomainBrute bool   `form:"subdomainbrute"`
-	IsFldDomain      bool   `form:"fld_domain"`
-	IsWhatweb        bool   `form:"whatweb"`
-	IsHttpx          bool   `form:"httpx"`
-	IsIPPortscan     bool   `form:"portscan"`
-	IsSubnetPortscan bool   `form:"networkscan"`
-	IsCrawler        bool   `form:"crawler"`
-	IsFofa           bool   `form:"fofasearch"`
-	IsQuake          bool   `form:"quakesearch"`
-	IsHunter         bool   `form:"huntersearch"`
-	IsScreenshot     bool   `form:"screenshot"`
-	IsICPQuery       bool   `form:"icpquery"`
-	IsWhoisQuery     bool   `form:"whoisquery"`
-	IsFingerprintHub bool   `form:"fingerprinthub"`
-	IsIconHash       bool   `form:"iconhash"`
-	TaskMode         int    `form:"taskmode"`
-	PortTaskMode     int    `form:"porttaskmode"`
-	IsTaskCron       bool   `form:"taskcron" json:"-"`
-	TaskCronRule     string `form:"cronrule" json:"-"`
-	TaskCronComment  string `form:"croncomment" json:"-"`
+	Target             string `form:"target"`
+	OrgId              int    `form:"org_id"`
+	IsSubfinder        bool   `form:"subfinder"`
+	IsSubdomainBrute   bool   `form:"subdomainbrute"`
+	IsFldDomain        bool   `form:"fld_domain"`
+	IsWhatweb          bool   `form:"whatweb"`
+	IsHttpx            bool   `form:"httpx"`
+	IsIPPortscan       bool   `form:"portscan"`
+	IsSubnetPortscan   bool   `form:"networkscan"`
+	IsCrawler          bool   `form:"crawler"`
+	IsFofa             bool   `form:"fofasearch"`
+	IsQuake            bool   `form:"quakesearch"`
+	IsHunter           bool   `form:"huntersearch"`
+	IsScreenshot       bool   `form:"screenshot"`
+	IsICPQuery         bool   `form:"icpquery"`
+	IsWhoisQuery       bool   `form:"whoisquery"`
+	IsFingerprintHub   bool   `form:"fingerprinthub"`
+	IsIconHash         bool   `form:"iconhash"`
+	TaskMode           int    `form:"taskmode"`
+	PortTaskMode       int    `form:"porttaskmode"`
+	IsTaskCron         bool   `form:"taskcron" json:"-"`
+	TaskCronRule       string `form:"cronrule" json:"-"`
+	TaskCronComment    string `form:"croncomment" json:"-"`
+	IsIgnoreOutofChina bool   `form:"ignoreoutofchina"`
+	IsIgnoreCDN        bool   `form:"ignorecdn"`
 }
 
 type PocscanRequestParam struct {

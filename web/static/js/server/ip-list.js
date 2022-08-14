@@ -97,6 +97,8 @@ $(function () {
                     'cronrule': cron_rule,
                     'croncomment': $('#input_cron_comment').val(),
                     'load_opened_port':$('#checkbox_ip_load_opened_port').is(":checked"),
+                    'ignoreoutofchina': $('#checkbox_ignorecdn_outofchina').is(":checked"),
+                    'ignorecdn': $('#checkbox_ignorecdn_outofchina').is(":checked"),
                 }, function (data, e) {
                     if (e === "success" && data['status'] == 'success') {
                         swal({

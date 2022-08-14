@@ -4,9 +4,11 @@ import (
 	"context"
 	"github.com/hanc00l/nemo_go/pkg/comm"
 	"github.com/hanc00l/nemo_go/pkg/logging"
+	"github.com/hanc00l/nemo_go/pkg/task/custom"
 	"github.com/hanc00l/nemo_go/pkg/task/domainscan"
 	"github.com/hanc00l/nemo_go/pkg/task/onlineapi"
 	"github.com/hanc00l/nemo_go/pkg/task/portscan"
+	"github.com/hanc00l/nemo_go/pkg/utils"
 )
 
 // Fofa Fofa任务
@@ -23,6 +25,7 @@ func Fofa(taskId, configJSON string) (result string, err error) {
 
 	fofa := onlineapi.NewFofa(config)
 	fofa.Do()
+	checkIgnoreResult(&fofa.IpResult, &fofa.DomainResult, config)
 	if config.IsIPLocation {
 		doLocation(&fofa.IpResult)
 	}
@@ -49,6 +52,7 @@ func Quake(taskId, configJSON string) (result string, err error) {
 
 	quake := onlineapi.NewQuake(config)
 	quake.Do()
+	checkIgnoreResult(&quake.IpResult, &quake.DomainResult, config)
 	if config.IsIPLocation {
 		doLocation(&quake.IpResult)
 	}
@@ -75,6 +79,7 @@ func Hunter(taskId, configJSON string) (result string, err error) {
 
 	hunter := onlineapi.NewHunter(config)
 	hunter.Do()
+	checkIgnoreResult(&hunter.IpResult, &hunter.DomainResult, config)
 	if config.IsIPLocation {
 		doLocation(&hunter.IpResult)
 	}
@@ -178,4 +183,31 @@ func WhoisQuery(taskId, configJSON string) (result string, err error) {
 	}
 
 	return SucceedTask(result), nil
+}
+
+// checkIgnoreResult 检查资产查询API中的IP资产，非中国IP或CDN，则不保存该结果
+func checkIgnoreResult(portScanResult *portscan.Result, domainScanResult *domainscan.Result, config onlineapi.OnlineAPIConfig) {
+	iplocation := custom.NewIPLocation()
+	cdnCheck := custom.NewCDNCheck()
+	if len(portScanResult.IPResult) > 0 && (config.IsIgnoreOutofChina || config.IsIgnoreCDN) {
+		for ip := range portScanResult.IPResult {
+			ipl := iplocation.FindPublicIP(ip)
+			if config.IsIgnoreOutofChina && utils.CheckIPLocationInChinaMainLand(ipl) == false {
+				delete(portScanResult.IPResult, ip)
+				continue
+			}
+			if config.IsIgnoreCDN && (cdnCheck.CheckIP(ip) || cdnCheck.CheckASN(ip)) {
+				delete(portScanResult.IPResult, ip)
+			}
+		}
+	}
+	/*
+		if len(domainScanResult.DomainResult) > 0 && config.IsIgnoreCDN {
+			for domain := range domainScanResult.DomainResult {
+				iscdn, _, _ := cdnCheck.CheckCName(domain)
+				if iscdn {
+					delete(domainScanResult.DomainResult, domain)
+				}
+			}
+		}*/
 }

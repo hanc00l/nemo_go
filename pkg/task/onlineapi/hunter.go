@@ -73,7 +73,7 @@ func (h *Hunter) RunHunter(domain string) {
 	if utils.CheckIPV4(domain) || utils.CheckIPV4Subnet(domain) {
 		query = fmt.Sprintf("ip=\"%s\"", domain)
 	} else {
-		query = fmt.Sprintf("domain=\"%s\" or cert=\"%s\"", domain, domain)
+		query = fmt.Sprintf("domain=\"%s\" or cert.subject=\"%s\"", domain, domain)
 	}
 	// 查询第1页，并获取总共记录数量
 	pageResult, sizeTotal := h.retriedPageSearch(query, 1)
@@ -84,7 +84,7 @@ func (h *Hunter) RunHunter(domain string) {
 		pageTotalNum++
 	}
 	for i := 2; i <= pageTotalNum; i++ {
-		time.Sleep(1*time.Second)
+		time.Sleep(1 * time.Second)
 		pageResult, _ = h.retriedPageSearch(query, i)
 		h.Result = append(h.Result, pageResult...)
 	}
@@ -105,7 +105,7 @@ func (h *Hunter) retriedPageSearch(query string, page int) (pageResult []onlineS
 				"search":     base64.URLEncoding.EncodeToString([]byte(query)),
 				"page":       fmt.Sprintf("%d", page),
 				"page_size":  fmt.Sprintf("%d", pageSize),
-				"is_web":     "3",//资产类型，1代表”web资产“，2代表”非web资产“，3代表”全部“
+				"is_web":     "3", //资产类型，1代表”web资产“，2代表”非web资产“，3代表”全部“
 				"start_time": startTime.Format("2006-01-02 15:04:05"),
 				"end_time":   endTime.Format("2006-01-02 15:04:05"),
 			}).

@@ -14,15 +14,17 @@ import (
 )
 
 type OnlineAPIConfig struct {
-	Target           string `json:"target"`
-	OrgId            *int   `json:"orgId"`
-	IsIPLocation     bool   `json:"ipLocation"`
-	IsHttpx          bool   `json:"httpx"`
-	IsWhatWeb        bool   `json:"whatweb"`
-	IsScreenshot     bool   `json:"screenshot"`
-	IsWappalyzer     bool   `json:"wappalyzer"`
-	IsFingerprintHub bool   `json:"fingerprinthub"`
-	IsIconHash       bool   `json:"iconhash"`
+	Target             string `json:"target"`
+	OrgId              *int   `json:"orgId"`
+	IsIPLocation       bool   `json:"ipLocation"`
+	IsHttpx            bool   `json:"httpx"`
+	IsWhatWeb          bool   `json:"whatweb"`
+	IsScreenshot       bool   `json:"screenshot"`
+	IsWappalyzer       bool   `json:"wappalyzer"`
+	IsFingerprintHub   bool   `json:"fingerprinthub"`
+	IsIconHash         bool   `json:"iconhash"`
+	IsIgnoreCDN        bool   `json:"ignorecdn"`
+	IsIgnoreOutofChina bool   `json:"ignoreoutofchina"`
 }
 
 type ICPQueryConfig struct {
@@ -70,8 +72,8 @@ type ICPInfo struct {
 }
 
 var (
-	userAgent             = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/84.0.4147.125 Safari/537.36"
-	pageSize              = 100
+	userAgent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/84.0.4147.125 Safari/537.36"
+	pageSize  = 100
 )
 
 // parseFofaSearchResult 转换FOFA搜索结果
@@ -90,12 +92,12 @@ func (ff *Fofa) parseFofaSearchResult(queryResult []byte) (result []onlineSearch
 		}
 		lowerBanner := strings.ToLower(fsr.Banner)
 		//过滤部份无意义的banner
-		if strings.HasPrefix(fsr.Banner, "HTTP/") || strings.HasPrefix(lowerBanner,"<html>") || strings.HasPrefix(lowerBanner,"<!doctype html>")  {
+		if strings.HasPrefix(fsr.Banner, "HTTP/") || strings.HasPrefix(lowerBanner, "<html>") || strings.HasPrefix(lowerBanner, "<!doctype html>") {
 			fsr.Banner = ""
 		}
 		//过滤所有的\x00 \x15等不可见字符
 		re := regexp.MustCompile("\\\\x[0-9a-f]{2}")
-		fsr.Banner = re.ReplaceAllString(fsr.Banner,"")
+		fsr.Banner = re.ReplaceAllString(fsr.Banner, "")
 		result = append(result, fsr)
 	}
 
@@ -205,7 +207,10 @@ func parseIpPort(ipResult portscan.Result, fsr onlineSearchResult, source string
 	if fsr.IP == "" || !utils.CheckIPV4(fsr.IP) {
 		return
 	}
-
+	if fsr.IP == "0.0.0.0" {
+		//Protected data, Please contact (service@baimaohui.net)
+		return
+	}
 	if !ipResult.HasIP(fsr.IP) {
 		ipResult.SetIP(fsr.IP)
 	}

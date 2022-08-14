@@ -28,6 +28,8 @@ type Config struct {
 	IsFingerprintHub   bool   `json:"fingerprinthub"`
 	IsIconHash         bool   `json:"iconhash"`
 	PortTaskMode       int    `json:"portTaskMode"`
+	IsIgnoreCDN        bool   `json:"ignorecdn"`
+	IsIgnoreOutofChina bool   `json:"ignoreoutofchina"`
 }
 
 // DomainAttrResult 域名属性结果

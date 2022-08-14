@@ -54,6 +54,8 @@ $(function () {
                     'taskcron': $('#checkbox_cron_task').is(":checked"),
                     'cronrule': cron_rule,
                     'croncomment': $('#input_cron_comment').val(),
+                    'ignoreoutofchina': $('#checkbox_ignorecdn_outofchina').is(":checked"),
+                    'ignorecdn': $('#checkbox_ignorecdn_outofchina').is(":checked"),
                 }, function (data, e) {
                     if (e === "success" && data['status'] == 'success') {
                         swal({

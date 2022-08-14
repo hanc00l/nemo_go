@@ -263,9 +263,8 @@
                                                                     <b>其它：</b>
                                                                 </label>
                                                                 <br>
-                                                                <div class="form-check form-check-inline"
-                                                                     for="checkbox_fofasearch">
-                                                                    <label class="form-check-label">
+                                                                <div class="form-check form-check-inline">
+                                                                    <label class="form-check-label"  for="checkbox_fofasearch">
                                                                         <input class="form-check-input"
                                                                                id="checkbox_fofasearch"
                                                                                type="checkbox">FOFA<i
@@ -273,9 +272,8 @@
                                                                             title="调用FOFA API接口查询，需在worker.yml中配置KEY"></i>
                                                                     </label>
                                                                 </div>
-                                                                <div class="form-check form-check-inline"
-                                                                     for="checkbox_quakesearch">
-                                                                    <label class="form-check-label">
+                                                                <div class="form-check form-check-inline">
+                                                                    <label class="form-check-label" for="checkbox_quakesearch">
                                                                         <input class="form-check-input"
                                                                                id="checkbox_quakesearch"
                                                                                type="checkbox">Quake<i
@@ -283,9 +281,8 @@
                                                                             title="调用Quake API接口查询，需在worker.yml中配置KEY"></i>
                                                                     </label>
                                                                 </div>
-                                                                <div class="form-check form-check-inline"
-                                                                     for="checkbox_quakesearch">
-                                                                    <label class="form-check-label">
+                                                                <div class="form-check form-check-inline">
+                                                                    <label class="form-check-label" for="checkbox_huntersearch">
                                                                         <input class="form-check-input"
                                                                                id="checkbox_huntersearch"
                                                                                type="checkbox">Hunter<i
@@ -293,9 +290,8 @@
                                                                             title="调用Hunter API接口查询，需在worker.yml中配置KEY"></i>
                                                                     </label>
                                                                 </div>
-                                                                <div class="form-check form-check-inline"
-                                                                     for="checkbox_icpquery">
-                                                                    <label class="form-check-label">
+                                                                <div class="form-check form-check-inline">
+                                                                    <label class="form-check-label" for="checkbox_icpquery">
                                                                         <input class="form-check-input"
                                                                                id="checkbox_icpquery"
                                                                                type="checkbox">ICP备案<i
@@ -303,9 +299,8 @@
                                                                             title="调用chinaz接口查询ICP备案信息，需在worker.yml中配置KEY"></i>
                                                                     </label>
                                                                 </div>
-                                                                <div class="form-check form-check-inline"
-                                                                     for="checkbox_whoisquery">
-                                                                    <label class="form-check-label">
+                                                                <div class="form-check form-check-inline">
+                                                                    <label class="form-check-label" for="checkbox_whoisquery">
                                                                         <input class="form-check-input"
                                                                                id="checkbox_whoisquery"
                                                                                type="checkbox" checked>Whois<i
@@ -313,15 +308,24 @@
                                                                             title="查询域名的Whois信息"></i>
                                                                     </label>
                                                                 </div>
-                                                                <div class="form-check form-check-inline"
-                                                                     for="checkbox_fld_domain">
-                                                                    <label class="form-check-label">
+                                                                <div class="form-check form-check-inline">
+                                                                    <label class="form-check-label" for="checkbox_fld_domain">
                                                                         <input class="form-check-input"
                                                                                id="checkbox_fld_domain"
                                                                                type="checkbox">提取顶级域名<i
                                                                             class="fa fa-question-circle"
                                                                             aria-hidden="true"
                                                                             title="提取目标的顶级域名（比如将api.10086.cn中的顶级域名10086.cn）并追加到目标中"></i>
+                                                                    </label>
+                                                                </div>
+                                                                <div class="form-check form-check-inline">
+                                                                    <label class="form-check-label"  for="checkbox_ignorecdn_outofchina">
+                                                                        <input class="form-check-input"
+                                                                               id="checkbox_ignorecdn_outofchina"
+                                                                               type="checkbox" checked>忽略CDN与中国大陆以外IP<i
+                                                                            class="fa fa-question-circle"
+                                                                            aria-hidden="true"
+                                                                            title="对通过FOFA、Hunter及Quake资产管理平台API接口查询到的结果，检查IP是否采用了CDN，以及是否是中国大陆以外的IP"></i>
                                                                     </label>
                                                                 </div>
                                                             </div>

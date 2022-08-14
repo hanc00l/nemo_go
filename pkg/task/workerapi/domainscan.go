@@ -150,8 +150,7 @@ func getResultIPList(resultDomainScan *domainscan.Result) (ipResult, ipSubnetRes
 	ipSubnets := make(map[string]struct{})
 	cdnCheck := custom.NewCDNCheck()
 	for domain, da := range resultDomainScan.DomainResult {
-		isCdn, cdnName, CName := cdnCheck.CheckCName(domain)
-		if isCdn || cdnName != "" || CName != "" {
+		if isCdn, _, _ := cdnCheck.CheckCName(domain); isCdn {
 			continue
 		}
 		for _, dar := range da.DomainAttrs {
@@ -160,7 +159,7 @@ func getResultIPList(resultDomainScan *domainscan.Result) (ipResult, ipSubnetRes
 				if len(ipArray) != 4 {
 					continue
 				}
-				if cdnCheck.CheckIP(dar.Content) {
+				if cdnCheck.CheckIP(dar.Content) || cdnCheck.CheckASN(dar.Content) {
 					continue
 				}
 				if _, ok := ips[dar.Content]; !ok {

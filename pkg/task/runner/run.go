@@ -40,19 +40,19 @@ func StartPortScanTask(req PortscanRequestParam, cronTaskId string) (taskId stri
 			}
 			// FOFA
 			if req.IsFofa {
-				if taskId, err = doOnlineAPISearch(cronTaskId, "fofa", t, &req.OrgId, req.IsIPLocation, req.IsHttpx, req.IsFingerprintHub, req.IsScreenshot, req.IsIconHash); err != nil {
+				if taskId, err = doOnlineAPISearch(cronTaskId, "fofa", t, &req.OrgId, req.IsIPLocation, req.IsHttpx, req.IsFingerprintHub, req.IsScreenshot, req.IsIconHash, req.IsIgnoreCDN, req.IsIgnoreOutofChina); err != nil {
 					return
 				}
 			}
 			// Quake
 			if req.IsQuake {
-				if taskId, err = doOnlineAPISearch(cronTaskId, "quake", t, &req.OrgId, req.IsIPLocation, req.IsHttpx, req.IsFingerprintHub, req.IsScreenshot, req.IsIconHash); err != nil {
+				if taskId, err = doOnlineAPISearch(cronTaskId, "quake", t, &req.OrgId, req.IsIPLocation, req.IsHttpx, req.IsFingerprintHub, req.IsScreenshot, req.IsIconHash, req.IsIgnoreCDN, req.IsIgnoreOutofChina); err != nil {
 					return
 				}
 			}
 			// Hunter
 			if req.IsHunter {
-				if taskId, err = doOnlineAPISearch(cronTaskId, "hunter", t, &req.OrgId, req.IsIPLocation, req.IsHttpx, req.IsFingerprintHub, req.IsScreenshot, req.IsIconHash); err != nil {
+				if taskId, err = doOnlineAPISearch(cronTaskId, "hunter", t, &req.OrgId, req.IsIPLocation, req.IsHttpx, req.IsFingerprintHub, req.IsScreenshot, req.IsIconHash, req.IsIgnoreCDN, req.IsIgnoreOutofChina); err != nil {
 					return
 				}
 			}
@@ -133,17 +133,17 @@ func StartDomainScanTask(req DomainscanRequestParam, cronTaskId string) (taskId 
 			}
 		}
 		if req.IsFofa {
-			if taskId, err = doOnlineAPISearch(cronTaskId, "fofa", t, &req.OrgId, true, req.IsHttpx, req.IsFingerprintHub, req.IsScreenshot, req.IsIconHash); err != nil {
+			if taskId, err = doOnlineAPISearch(cronTaskId, "fofa", t, &req.OrgId, true, req.IsHttpx, req.IsFingerprintHub, req.IsScreenshot, req.IsIconHash, req.IsIgnoreCDN, req.IsIgnoreOutofChina); err != nil {
 				return
 			}
 		}
 		if req.IsQuake {
-			if taskId, err = doOnlineAPISearch(cronTaskId, "quake", t, &req.OrgId, true, req.IsHttpx, req.IsFingerprintHub, req.IsScreenshot, req.IsIconHash); err != nil {
+			if taskId, err = doOnlineAPISearch(cronTaskId, "quake", t, &req.OrgId, true, req.IsHttpx, req.IsFingerprintHub, req.IsScreenshot, req.IsIconHash, req.IsIgnoreCDN, req.IsIgnoreOutofChina); err != nil {
 				return
 			}
 		}
 		if req.IsHunter {
-			if taskId, err = doOnlineAPISearch(cronTaskId, "hunter", t, &req.OrgId, true, req.IsHttpx, req.IsFingerprintHub, req.IsScreenshot, req.IsIconHash); err != nil {
+			if taskId, err = doOnlineAPISearch(cronTaskId, "hunter", t, &req.OrgId, true, req.IsHttpx, req.IsFingerprintHub, req.IsScreenshot, req.IsIconHash, req.IsIgnoreCDN, req.IsIgnoreOutofChina); err != nil {
 				return
 			}
 		}
@@ -338,15 +338,17 @@ func doDomainscan(cronTaskId string, target string, req DomainscanRequestParam) 
 }
 
 // doOnlineAPISearch Fofa,hunter,quaker的查询
-func doOnlineAPISearch(cronTaskId string, apiName string, target string, orgId *int, isIplocation, isHttp, isFingerprintHub, isScreenshot bool, isIconHash bool) (taskId string, err error) {
+func doOnlineAPISearch(cronTaskId string, apiName string, target string, orgId *int, isIplocation, isHttp, isFingerprintHub, isScreenshot, isIconHash, isIgnoreCDN, isIgnorOutofChina bool) (taskId string, err error) {
 	config := onlineapi.OnlineAPIConfig{
-		Target:           target,
-		OrgId:            orgId,
-		IsIPLocation:     isIplocation,
-		IsHttpx:          isHttp,
-		IsFingerprintHub: isFingerprintHub,
-		IsScreenshot:     isScreenshot,
-		IsIconHash:       isIconHash,
+		Target:             target,
+		OrgId:              orgId,
+		IsIPLocation:       isIplocation,
+		IsHttpx:            isHttp,
+		IsFingerprintHub:   isFingerprintHub,
+		IsScreenshot:       isScreenshot,
+		IsIconHash:         isIconHash,
+		IsIgnoreCDN:        isIgnoreCDN,
+		IsIgnoreOutofChina: isIgnorOutofChina,
 	}
 	// config.OrgId 为int，默认为0
 	// db.Organization.OrgId为指针，默认nil

@@ -136,9 +136,9 @@ func (q *Quake) Do() {
 func (q *Quake) RunQuake(domain string) {
 	var query string
 	if utils.CheckIPV4(domain) || utils.CheckIPV4Subnet(domain) {
-		query = fmt.Sprintf("ip:\"%s\" OR hostname:\"%s\"", domain, domain)
+		query = fmt.Sprintf("ip:\"%s\"", domain)
 	} else {
-		query = fmt.Sprintf("domain:\"%s\" OR hostname:\"%s\" OR cert:\"%s\"", domain, domain, domain)
+		query = fmt.Sprintf("domain:\"%s\" OR cert:\"%s\"", domain, domain)
 	}
 	//proxy, _ := url.Parse("http://127.0.0.1:8080")
 	client := &http.Client{
