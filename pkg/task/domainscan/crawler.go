@@ -2,13 +2,11 @@ package domainscan
 
 import (
 	"encoding/json"
-	"errors"
 	"fmt"
-	"github.com/go-resty/resty/v2"
-	"github.com/hanc00l/crawlergo/pkg"
-	"github.com/hanc00l/crawlergo/pkg/config"
-	"github.com/hanc00l/crawlergo/pkg/logger"
-	model2 "github.com/hanc00l/crawlergo/pkg/model"
+	"github.com/Qianlitp/crawlergo/pkg"
+	"github.com/Qianlitp/crawlergo/pkg/config"
+	"github.com/Qianlitp/crawlergo/pkg/logger"
+	model2 "github.com/Qianlitp/crawlergo/pkg/model"
 	"github.com/hanc00l/nemo_go/pkg/logging"
 	"github.com/hanc00l/nemo_go/pkg/utils"
 	"github.com/remeh/sizedwaitgroup"
@@ -126,13 +124,36 @@ func getOption(taskConfig *pkg.TaskConfig) model2.Options {
 
 // initTaskConfig 初始化爬虫参数
 func initTaskConfig() pkg.TaskConfig {
+	/*	type TaskConfig struct {
+		MaxCrawlCount           int    // 最大爬取的数量
+		FilterMode              string // simple、smart、strict
+		ExtraHeaders            map[string]interface{}
+		ExtraHeadersString      string
+		AllDomainReturn         bool // 全部域名收集
+		SubDomainReturn         bool // 子域名收集
+		NoHeadless              bool // headless模式
+		DomContentLoadedTimeout time.Duration
+		TabRunTimeout           time.Duration     // 单个标签页超时
+		PathByFuzz              bool              // 通过字典进行Path Fuzz
+		FuzzDictPath            string            //Fuzz目录字典
+		PathFromRobots          bool              // 解析Robots文件找出路径
+		MaxTabsCount            int               // 允许开启的最大标签页数量 即同时爬取的数量
+		ChromiumPath            string            // Chromium的程序路径  `/home/zhusiyu1/chrome-linux/chrome`
+		EventTriggerMode        string            // 事件触发的调用方式： 异步 或 顺序
+		EventTriggerInterval    time.Duration     // 事件触发的间隔
+		BeforeExitDelay         time.Duration     // 退出前的等待时间，等待DOM渲染，等待XHR发出捕获
+		EncodeURLWithCharset    bool              // 使用检测到的字符集自动编码URL
+		IgnoreKeywords          []string          // 忽略的关键字，匹配上之后将不再扫描且不发送请求
+		Proxy                   string            // 请求代理
+		CustomFormValues        map[string]string // 自定义表单填充参数
+		CustomFormKeywordValues map[string]string // 自定义表单关键词填充内容
+	}*/
 	taskConfig := pkg.TaskConfig{}
 	taskConfig.ChromiumPath = findExecPath()
 	taskConfig.ExtraHeadersString = fmt.Sprintf(`{"User-Agent": "%s"}`, config.DefaultUA)
 	taskConfig.MaxTabsCount = config.MaxCrawlCount
-	taskConfig.FilterMode = "smart"
-	taskConfig.IncognitoContext = true
-	taskConfig.MaxTabsCount = 8
+	taskConfig.FilterMode = config.SmartFilterMode
+	taskConfig.MaxTabsCount = config.MaxTabsCount
 	taskConfig.PathByFuzz = false
 	taskConfig.TabRunTimeout = config.TabRunTimeout
 	taskConfig.DomContentLoadedTimeout = config.DomContentLoadedTimeout
@@ -156,30 +177,6 @@ func handleExit(t *pkg.CrawlerTask, signalChan chan os.Signal) {
 		t.Pool.Release()
 		t.Browser.Close()
 	}
-}
-
-// getDefaultChromePath 获取默认安装的chrome路径
-func getDefaultChromePath() (path string) {
-	chromeDarwin := []string{"/Applications/Google Chrome.app/Contents/MacOS/Google Chrome"}
-	chromeLinux := []string{
-		"/usr/lib/chromium-browser/chromium-browser",             //ubuntu 18.04LTS
-		"/snap/chromium/current/usr/lib/chromium-browser/chrome", //ubuntu 20.04LTS
-		"/opt/google/chrome",                                     //kali 2021.3
-	}
-	if runtime.GOOS == "darwin" {
-		for _, p := range chromeDarwin {
-			if utils.CheckFileExist(p) {
-				return p
-			}
-		}
-	} else if runtime.GOOS == "linux" {
-		for _, p := range chromeLinux {
-			if utils.CheckFileExist(p) {
-				return p
-			}
-		}
-	}
-	return
 }
 
 // findExecPath tries to find the Chrome browser somewhere in the current
@@ -236,110 +233,4 @@ func findExecPath() string {
 	// Fall back to something simple and sensible, to give a useful error
 	// message.
 	return ""
-}
-
-func (c *Crawler) CheckRequest(req model2.Request) (urlResp UrlResponse, err error) {
-	client := resty.New().
-		SetRedirectPolicy(resty.NoRedirectPolicy())
-		//.SetProxy("http://127.0.0.1:8080")
-	r := client.NewRequest()
-
-	if len(req.Headers) > 0 {
-		for k, v := range req.Headers {
-			r.SetHeader(k, fmt.Sprintf("%v", v))
-		}
-	}
-	if len(req.PostData) > 0 {
-		r.SetBody(req.PostData)
-	}
-	var resp *resty.Response
-	if req.Method == "POST" {
-		resp, err = r.Post(req.URL.String())
-	} else {
-		resp, err = r.Get(req.URL.String())
-	}
-	if err != nil {
-		//忽略 301、302跳转错误
-		if strings.Index(err.Error(), "auto redirect is disabled") >= 0 {
-			err = nil
-			urlResp.RedirectLocation = resp.Header().Get("Location")
-		} else {
-			return
-		}
-	}
-	if resp.StatusCode() >= 200 && resp.StatusCode() < 500 && resp.StatusCode() != 404 {
-		urlResp.StatusCode = resp.StatusCode()
-		urlResp.ContentLength = resp.Size()
-		urlResp.URL = req.URL.String()
-		urlResp.PostData = req.PostData
-		urlResp.Headers = req.Headers
-		urlResp.Method = req.Method
-	} else {
-		err = errors.New("ignore status")
-	}
-	return
-}
-
-// RunCrawler2 爬取一个网站
-func (c *Crawler) RunCrawler2(domainUrl string) {
-	taskConfig := initTaskConfig()
-	option := getOption(&taskConfig)
-	if taskConfig.ChromiumPath == "" {
-		logging.RuntimeLog.Error("no chrome or chromium-browser found in default path")
-		logging.CLILog.Error("no chrome or chromium-browser found in default path")
-		return
-	}
-	signalChan := make(chan os.Signal, 1)
-	signal.Notify(signalChan, os.Interrupt)
-	// 设置Crawler的日志输出级别
-	logger.Logger.SetLevel(logrus.InfoLevel)
-	logger.Logger.SetFormatter(logging.GetCustomLoggerFormatter())
-	// 格式化target
-	var targets []*model2.Request
-	url, err := model2.GetUrl(domainUrl)
-	if err != nil {
-		logging.CLILog.Error(err)
-		return
-	}
-	req := model2.GetRequest(config.GET, url, option)
-	targets = append(targets, &req)
-	// 开始爬虫任务
-	task, err := pkg.NewCrawlerTask(targets, taskConfig)
-	if err != nil {
-		logging.RuntimeLog.Error(fmt.Sprintf("create crawler task failed:%s.", domainUrl))
-		return
-	}
-	go handleExit(task, signalChan)
-	logging.CLILog.Info(fmt.Sprintf("Start crawling %s...", domainUrl))
-	task.Run()
-	result := task.Result
-	logging.CLILog.Info(fmt.Sprintf("Task finished, %d results, %d requests, %d subdomains, %d domains found.",
-		len(result.ReqList), len(result.AllReqList), len(result.SubDomainList), len(result.AllDomainList)))
-	// 结果解析
-	//c.parseResult(result.SubDomainList)
-	crawlerRequestCheckThreadNumber := 10
-	requestMaxFound := 500
-	swg := sizedwaitgroup.New(crawlerRequestCheckThreadNumber)
-	requestNum := len(result.ReqList)
-	if requestNum > requestMaxFound {
-		logging.CLILog.Infof("%s has found too many requests :%d,discard...", domainUrl, requestNum)
-		logging.RuntimeLog.Infof("%s has found too many requests :%d,discard...", domainUrl, requestNum)
-		return
-	}
-	for _, r := range result.ReqList {
-		if r.Source == "JavaScript" {
-			swg.Add()
-			go func(req model2.Request) {
-				defer swg.Done()
-				urlResponse, err := c.CheckRequest(req)
-				if err != nil {
-					return
-				}
-				c.Result.Lock()
-				c.Result.ReqResponseList = append(c.Result.ReqResponseList, urlResponse)
-				c.Result.Unlock()
-			}(*r)
-		}
-	}
-	swg.Wait()
 }

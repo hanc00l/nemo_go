@@ -21,7 +21,6 @@ type Config struct {
 	IsSubDomainBrute   bool   `json:"subdomainBrute"`
 	IsCrawler          bool   `json:"crawler"`
 	IsHttpx            bool   `json:"httpx"`
-	IsWhatWeb          bool   `json:"whatweb"`
 	IsIPPortScan       bool   `json:"portscan"`
 	IsIPSubnetPortScan bool   `json:"subnetPortscan"`
 	IsScreenshot       bool   `json:"screenshot"`

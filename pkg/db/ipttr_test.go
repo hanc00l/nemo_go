@@ -7,7 +7,7 @@ import (
 func TestIpAttr_Add(t *testing.T) {
 	obj := IpAttr{
 		RelatedId: 10,
-		Source:    "whatweb",
+		Source:    "httpx",
 		Tag:       "httpx",
 		Content:   "cms test",
 	}

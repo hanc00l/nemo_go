@@ -14,7 +14,6 @@ func TestDomainScan(t *testing.T) {
 		IsSubDomainFinder:  true,
 		IsSubDomainBrute:   false,
 		IsHttpx:            true,
-		IsWhatWeb:          false,
 		IsIPPortScan:       true,
 		IsIPSubnetPortScan: false,
 	}
@@ -22,7 +21,7 @@ func TestDomainScan(t *testing.T) {
 	if err != nil {
 		t.Log(err)
 	}
-	result, err := serverapi.NewTask("domainscan", string(configJSON))
+	result, err := serverapi.NewTask("domainscan", string(configJSON), "")
 	t.Log(result, err)
 }
 
@@ -34,7 +33,6 @@ func TestDomainScanCrawler(t *testing.T) {
 		IsSubDomainBrute:   false,
 		IsCrawler:          true,
 		IsHttpx:            true,
-		IsWhatWeb:          false,
 		IsIPPortScan:       true,
 		IsIPSubnetPortScan: false,
 	}
@@ -42,7 +40,7 @@ func TestDomainScanCrawler(t *testing.T) {
 	if err != nil {
 		t.Log(err)
 	}
-	result, err := serverapi.NewTask("domainscan", string(configJSON))
+	result, err := serverapi.NewTask("domainscan", string(configJSON), "")
 	t.Log(result, err)
 }
 func TestDomainWithPortScanScan(t *testing.T) {
@@ -52,7 +50,6 @@ func TestDomainWithPortScanScan(t *testing.T) {
 		IsSubDomainFinder:  true,
 		IsSubDomainBrute:   false,
 		IsHttpx:            true,
-		IsWhatWeb:          false,
 		IsIPPortScan:       true,
 		IsIPSubnetPortScan: false,
 	}
@@ -60,6 +57,6 @@ func TestDomainWithPortScanScan(t *testing.T) {
 	if err != nil {
 		t.Log(err)
 	}
-	result, err := serverapi.NewTask("domainscan", string(configJSON))
+	result, err := serverapi.NewTask("domainscan", string(configJSON), "")
 	t.Log(result, err)
 }

@@ -34,7 +34,6 @@ $(function () {
                     "target": target,
                     'org_id': $('#select_org_id_task').val(),
                     'subdomainbrute': $('#checkbox_subdomainbrute').is(":checked"),
-                    'whatweb': false,
                     'fld_domain': $('#checkbox_fld_domain').is(":checked"),
                     'portscan': $('#checkbox_portscan').is(":checked"),
                     'fofasearch': $('#checkbox_fofasearch').is(":checked"),

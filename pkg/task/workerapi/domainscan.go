@@ -118,7 +118,6 @@ func doPortScan(config domainscan.Config, resultDomainScan *domainscan.Result) {
 				Tech:             portsConfig.Tech,
 				IsIpLocation:     true,
 				IsHttpx:          config.IsHttpx,
-				IsWhatWeb:        config.IsWhatWeb,
 				IsScreenshot:     config.IsScreenshot,
 				IsFingerprintHub: config.IsFingerprintHub,
 				IsIconHash:       config.IsIconHash,

@@ -29,7 +29,6 @@ Nemo是用来进行自动化信息收集的一个简单平台，通过集成常�
 
 - [HTTPX](https://github.com/projectdiscovery/httpx) 
 - [ScreenShot](https://github.com/chromedp/chromedp) （调用chrome headless）
-- ~~[Wappalyzer](https://github.com/AliasIO/Wappalyzer) （基于[webanalyze](https://github.com/rverton/webanalyze) 代码，可[自定义指纹规则](thirdparty/wappalyzer/technologies_custom.json)）~~
 - [ObserverWard](https://github.com/0x727/ObserverWard_0x727)  (指纹信息来源于https://github.com/0x727/FingerprintHub)
 - IconHash（基于[mat/besticon](github.com/mat/besticon)和[Becivells/iconhash](github.com/Becivells/iconhash)项目）
 
@@ -43,7 +42,7 @@ Nemo是用来进行自动化信息收集的一个简单平台，通过集成常�
 
 ### 5、Poc验证与目录扫描
 
-- [Pocsuite3](https://github.com/knownsec/pocsuite3)  && [some_pocsuite](https://github.com/hanc00l/some_pocsuite) 
+- [Pocsuite3](https://github.com/knownsec/pocsuite3)  && [some_pocsuite](https://github.com/hanc00l/some_pocsuite) （近期将移除）
 - [XRay](https://github.com/chaitin/xray)
 - [Nuclei](https://github.com/projectdiscovery/nuclei) && [Nuclei-Templates](https://github.com/projectdiscovery/nuclei-templates)
 - [Dirsearch](https://github.com/evilsocket/dirsearch)

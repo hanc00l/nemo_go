@@ -3,17 +3,17 @@ module github.com/hanc00l/nemo_go
 go 1.18
 
 require (
+	github.com/Qianlitp/crawlergo v0.4.3
 	github.com/RichardKnop/machinery/v2 v2.0.11
 	github.com/beego/beego/v2 v2.0.3
 	github.com/buger/jsonparser v1.1.1
-	github.com/chromedp/cdproto v0.0.0-20220530001853-c0f376d894d1
+	github.com/chromedp/cdproto v0.0.0-20220629234738-4cfc9cdeeb92
 	github.com/chromedp/chromedp v0.8.2
 	github.com/disintegration/imaging v1.6.2
 	github.com/evilsocket/brutemachine v0.0.0-20170703145059-0331ad6a82ce
 	github.com/evilsocket/dirsearch v0.0.0-20210927162954-fe7fffa39084
 	github.com/go-resty/resty/v2 v2.7.0
 	github.com/google/uuid v1.3.0
-	github.com/hanc00l/crawlergo v0.4.3
 	github.com/joeguo/tldextract v0.0.0-20210326083850-1ec7be2de68a
 	github.com/lair-framework/go-nmap v0.0.0-20191202052157-3507e0b03523
 	github.com/likexian/whois v1.14.2
@@ -27,7 +27,6 @@ require (
 	github.com/projectdiscovery/subfinder/v2 v2.5.2
 	github.com/remeh/sizedwaitgroup v1.0.0
 	github.com/robfig/cron/v3 v3.0.1
-	github.com/rverton/webanalyze v0.3.3
 	github.com/sirupsen/logrus v1.7.0
 	github.com/smallnest/rpcx v1.6.11
 	github.com/tidwall/pretty v1.2.0
@@ -60,7 +59,6 @@ require (
 	github.com/aymerick/douceur v0.2.0 // indirect
 	github.com/beorn7/perks v1.0.1 // indirect
 	github.com/bluele/gcache v0.0.2 // indirect
-	github.com/bobesa/go-domain-util v0.0.0-20190911083921-4033b5f7dd89 // indirect
 	github.com/cenk/backoff v2.2.1+incompatible // indirect
 	github.com/cenkalti/backoff v2.2.1+incompatible // indirect
 	github.com/cespare/xxhash/v2 v2.1.2 // indirect
@@ -208,7 +206,7 @@ require (
 	golang.org/x/mod v0.6.0-dev.0.20220106191415-9b9b3d81d5e3 // indirect
 	golang.org/x/oauth2 v0.0.0-20220524215830-622c5d57e401 // indirect
 	golang.org/x/sync v0.0.0-20220513210516-0976fa681c29 // indirect
-	golang.org/x/sys v0.0.0-20220610221304-9f5ed59c137d // indirect
+	golang.org/x/sys v0.0.0-20220627191245-f75cf1eec38b // indirect
 	golang.org/x/tools v0.1.10 // indirect
 	golang.org/x/xerrors v0.0.0-20220517211312-f3a8303e98df // indirect
 	google.golang.org/api v0.81.0 // indirect

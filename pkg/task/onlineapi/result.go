@@ -18,9 +18,7 @@ type OnlineAPIConfig struct {
 	OrgId              *int   `json:"orgId"`
 	IsIPLocation       bool   `json:"ipLocation"`
 	IsHttpx            bool   `json:"httpx"`
-	IsWhatWeb          bool   `json:"whatweb"`
 	IsScreenshot       bool   `json:"screenshot"`
-	IsWappalyzer       bool   `json:"wappalyzer"`
 	IsFingerprintHub   bool   `json:"fingerprinthub"`
 	IsIconHash         bool   `json:"iconhash"`
 	IsIgnoreCDN        bool   `json:"ignorecdn"`

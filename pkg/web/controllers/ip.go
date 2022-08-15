@@ -610,17 +610,10 @@ func getPortInfo(ip string, ipId int, disableFofa, disableBanner bool) (r PortIn
 				if pad.Content == "unknown" || pad.Content == "" {
 					continue
 				}
-				if pad.Source == "wappalyzer" {
-					for _, b := range strings.Split(pad.Content, ",") {
-						if _, ok := r.BannerSet[b]; !ok {
-							r.BannerSet[b] = struct{}{}
-						}
-					}
-				} else {
-					if _, ok := r.BannerSet[pad.Content]; !ok {
-						r.BannerSet[pad.Content] = struct{}{}
-					}
+				if _, ok := r.BannerSet[pad.Content]; !ok {
+					r.BannerSet[pad.Content] = struct{}{}
 				}
+
 			} else if pad.Tag == "favicon" {
 				hashAndUrls := strings.Split(pad.Content, "|")
 				if len(hashAndUrls) == 2 {

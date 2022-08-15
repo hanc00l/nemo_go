@@ -22,7 +22,6 @@ type Config struct {
 	Tech             string `json:"tech"`
 	IsIpLocation     bool   `json:"ipLocation"`
 	IsHttpx          bool   `json:"httpx"`
-	IsWhatWeb        bool   `json:"whatweb"`
 	IsScreenshot     bool   `json:"screenshot"`
 	IsFingerprintHub bool   `json:"fingerprinthub"`
 	IsIconHash       bool   `json:"iconhash"`

@@ -11,11 +11,6 @@ import (
 
 // DoIPFingerPrint 对 IP结果进行指纹识别
 func DoIPFingerPrint(config portscan.Config, resultPortScan *portscan.Result) {
-	if config.IsWhatWeb {
-		whatweb := fingerprint.NewWhatweb()
-		whatweb.ResultPortScan = *resultPortScan
-		whatweb.Do()
-	}
 	if config.IsHttpx {
 		httpx := fingerprint.NewHttpx()
 		httpx.ResultPortScan = *resultPortScan
@@ -38,11 +33,6 @@ func DoDomainFingerPrint(config domainscan.Config, resultDomainScan *domainscan.
 		httpx := fingerprint.NewHttpx()
 		httpx.ResultDomainScan = *resultDomainScan
 		httpx.Do()
-	}
-	if config.IsWhatWeb {
-		whatweb := fingerprint.NewWhatweb()
-		whatweb.ResultDomainScan = *resultDomainScan
-		whatweb.Do()
 	}
 	if config.IsFingerprintHub {
 		fp := fingerprint.NewFingerprintHub()

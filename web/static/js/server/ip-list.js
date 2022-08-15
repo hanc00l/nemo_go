@@ -82,7 +82,6 @@ $(function () {
                     'bin': $('#select_bin').val(),
                     'org_id': $('#select_org_id_task').val(),
                     'iplocation': $('#checkbox_iplocation').is(":checked"),
-                    'whatweb': false,
                     'ping': $('#checkbox_ping').is(":checked"),
                     'fofasearch': $('#checkbox_fofasearch').is(":checked"),
                     'quakesearch': $('#checkbox_quakesearch').is(":checked"),
@@ -197,7 +196,6 @@ $(function () {
                     'bin': $('#select_batchscan_bin').val(),
                     'org_id': $('#select_batchscan_org_id_task').val(),
                     'iplocation': true,
-                    'whatweb': false,
                     'ping': $('#checkbox_batchscan_ping').is(":checked"),
                     'fofasearch': false,
                     'quakesearch': false,
@@ -244,7 +242,6 @@ $(function () {
             $("#select_tech").prop("disabled", true);
             $("#select_bin").prop("disabled", true);
             $("#input_rate").prop("disabled", true);
-            // $("#checkbox_whatweb").prop("disabled", true);
             // $("#checkbox_httpx").prop("disabled", true);
             $("#checkbox_ping").prop("disabled", true);
             $("#checkbox_exclude").prop("disabled", true);

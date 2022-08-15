@@ -644,7 +644,7 @@ func getDomainAttrFullInfo(id int, disableFofa, disableBanner bool) DomainAttrFu
 					UpdateTime: FormatDateTime(da.UpdateDatetime),
 				})
 			}
-		} else if da.Tag == "whatweb" || da.Tag == "httpx" {
+		} else if da.Tag == "httpx" {
 			r.DomainAttr = append(r.DomainAttr, DomainAttrInfo{
 				Id:         da.Id,
 				Tag:        da.Tag,
@@ -652,19 +652,6 @@ func getDomainAttrFullInfo(id int, disableFofa, disableBanner bool) DomainAttrFu
 				CreateTime: FormatDateTime(da.CreateDatetime),
 				UpdateTime: FormatDateTime(da.UpdateDatetime),
 			})
-		} else if da.Source == "wappalyzer" && da.Tag == "banner" {
-			r.DomainAttr = append(r.DomainAttr, DomainAttrInfo{
-				Id:         da.Id,
-				Tag:        "wappalyzer",
-				Content:    da.Content,
-				CreateTime: FormatDateTime(da.CreateDatetime),
-				UpdateTime: FormatDateTime(da.UpdateDatetime),
-			})
-			for _, b := range strings.Split(da.Content, ",") {
-				if _, ok := r.BannerSet[b]; !ok {
-					r.BannerSet[b] = struct{}{}
-				}
-			}
 		} else if da.Tag == "favicon" {
 			hashAndUrls := strings.Split(da.Content, "|")
 			if len(hashAndUrls) == 2 {

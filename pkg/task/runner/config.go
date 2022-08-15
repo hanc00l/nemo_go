@@ -12,7 +12,6 @@ type PortscanRequestParam struct {
 	NmapTech           string `form:"nmap_tech"`
 	CmdBin             string `form:"bin"`
 	OrgId              int    `form:"org_id"`
-	IsWhatweb          bool   `form:"whatweb"`
 	IsHttpx            bool   `form:"httpx"`
 	IsPing             bool   `form:"ping"`
 	ExcludeIP          string `form:"exclude"`
@@ -34,7 +33,6 @@ type DomainscanRequestParam struct {
 	IsSubfinder        bool   `form:"subfinder"`
 	IsSubdomainBrute   bool   `form:"subdomainbrute"`
 	IsFldDomain        bool   `form:"fld_domain"`
-	IsWhatweb          bool   `form:"whatweb"`
 	IsHttpx            bool   `form:"httpx"`
 	IsIPPortscan       bool   `form:"portscan"`
 	IsSubnetPortscan   bool   `form:"networkscan"`

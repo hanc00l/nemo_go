@@ -98,7 +98,6 @@ func doFingerAndSave(taskId string, portScanResult *portscan.Result, domainScanR
 	if len(portScanResult.IPResult) > 0 {
 		portscanConfig := portscan.Config{
 			IsHttpx:          config.IsHttpx,
-			IsWhatWeb:        config.IsWhatWeb,
 			IsFingerprintHub: config.IsFingerprintHub,
 			IsIconHash:       config.IsIconHash,
 		}
@@ -110,7 +109,6 @@ func doFingerAndSave(taskId string, portScanResult *portscan.Result, domainScanR
 	if len(domainScanResult.DomainResult) > 0 {
 		domainscanConfig := domainscan.Config{
 			IsHttpx:          config.IsHttpx,
-			IsWhatWeb:        config.IsWhatWeb,
 			IsFingerprintHub: config.IsFingerprintHub,
 			IsIconHash:       config.IsIconHash,
 		}

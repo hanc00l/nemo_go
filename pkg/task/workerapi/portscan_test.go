@@ -18,7 +18,6 @@ func TestPortScan(t *testing.T) {
 		Tech:          "-sS",
 		IsIpLocation:  true,
 		IsHttpx:       true,
-		IsWhatWeb:     false,
 		CmdBin:        "masnmap",
 	}
 
@@ -27,7 +26,7 @@ func TestPortScan(t *testing.T) {
 		t.Log(err)
 	}
 
-	result, err := serverapi.NewTask("portscan", string(configJSON))
+	result, err := serverapi.NewTask("portscan", string(configJSON), "")
 	if err != nil {
 		t.Log(err)
 	}
