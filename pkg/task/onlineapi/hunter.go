@@ -1,14 +1,19 @@
 package onlineapi
 
 import (
+	"bytes"
 	"encoding/base64"
+	"encoding/csv"
 	"fmt"
 	"github.com/go-resty/resty/v2"
 	"github.com/hanc00l/nemo_go/pkg/conf"
 	"github.com/hanc00l/nemo_go/pkg/logging"
+	"github.com/hanc00l/nemo_go/pkg/task/custom"
 	"github.com/hanc00l/nemo_go/pkg/task/domainscan"
 	"github.com/hanc00l/nemo_go/pkg/task/portscan"
 	"github.com/hanc00l/nemo_go/pkg/utils"
+	"io"
+	"strconv"
 	"strings"
 	"time"
 )
@@ -136,4 +141,102 @@ func (h *Hunter) retriedPageSearch(query string, page int) (pageResult []onlineS
 		}
 	}
 	return
+}
+
+// ParseCSVContentResult 解析零零信安中导出的CSV文本结果
+func (h *Hunter) ParseCSVContentResult(content []byte) {
+	s := custom.NewService()
+	if h.IpResult.IPResult == nil {
+		h.IpResult.IPResult = make(map[string]*portscan.IPResult)
+	}
+	if h.DomainResult.DomainResult == nil {
+		h.DomainResult.DomainResult = make(map[string]*domainscan.DomainResult)
+	}
+	r := csv.NewReader(bytes.NewReader(content))
+	for index := 0; ; index++ {
+		row, err := r.Read()
+		if err == io.EOF {
+			break
+		}
+		//忽略第一行的标题行
+		if err != nil || index == 0 {
+			continue
+		}
+		domain := strings.TrimSpace(row[6])
+		ip := strings.TrimSpace(row[2])
+		port, portErr := strconv.Atoi(row[4])
+		title := strings.TrimSpace(row[5])
+		service := strings.TrimSpace(row[8])
+		banners := strings.Split(strings.TrimSpace(row[11]), ",")
+
+		//域名属性：
+		if len(domain) > 0 && utils.CheckIPV4(domain) == false {
+			if h.DomainResult.HasDomain(domain) == false {
+				h.DomainResult.SetDomain(domain)
+			}
+			if len(ip) > 0 {
+				h.DomainResult.SetDomainAttr(domain, domainscan.DomainAttrResult{
+					Source:  "hunter",
+					Tag:     "A",
+					Content: ip,
+				})
+			}
+			if len(title) > 0 {
+				h.DomainResult.SetDomainAttr(domain, domainscan.DomainAttrResult{
+					Source:  "hunter",
+					Tag:     "title",
+					Content: title,
+				})
+			}
+			if len(banners) > 0 {
+				for _, banner := range banners {
+					if len(banner) > 0 {
+						h.DomainResult.SetDomainAttr(domain, domainscan.DomainAttrResult{
+							Source:  "hunter",
+							Tag:     "banner",
+							Content: banner,
+						})
+					}
+				}
+			}
+		}
+		//IP属性（由于不是主动扫描，忽略导入StatusCode）
+		if len(ip) == 0 || utils.CheckIPV4(ip) == false || portErr != nil {
+			continue
+		}
+		if h.IpResult.HasIP(ip) == false {
+			h.IpResult.SetIP(ip)
+		}
+		if h.IpResult.HasPort(ip, port) == false {
+			h.IpResult.SetPort(ip, port)
+		}
+		if len(title) > 0 {
+			h.IpResult.SetPortAttr(ip, port, portscan.PortAttrResult{
+				Source:  "hunter",
+				Tag:     "title",
+				Content: title,
+			})
+		}
+		if len(service) <= 0 || service == "unknown" {
+			service = s.FindService(port, "")
+		}
+		if len(service) > 0 {
+			h.IpResult.SetPortAttr(ip, port, portscan.PortAttrResult{
+				Source:  "hunter",
+				Tag:     "service",
+				Content: service,
+			})
+		}
+		if len(banners) > 0 {
+			for _, banner := range banners {
+				if len(banner) > 0 {
+					h.IpResult.SetPortAttr(ip, port, portscan.PortAttrResult{
+						Source:  "hunter",
+						Tag:     "banner",
+						Content: banner,
+					})
+				}
+			}
+		}
+	}
 }

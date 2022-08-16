@@ -15,7 +15,8 @@ Nemo是用来进行自动化信息收集的一个简单平台，通过集成常�
 - IP归属地（纯真离线数据）
 - 自定义IP归属地、Service、蜜罐
 - 导入本地的Masscan、Nmap端口扫描结果
-- 导入[fscan](https://github.com/shadow1ng/fscan)、[Naabu]( https://github.com/projectdiscovery/naabu)、[Httpx]( https://github.com/projectdiscovery/httpx)扫描结果（适用于内网渗透的资产信息收集）
+- 导入[fscan](https://github.com/shadow1ng/fscan)、[Naabu]( https://github.com/projectdiscovery/naabu)、[Httpx]( https://github.com/projectdiscovery/httpx)及TXPortmap的扫描结果（适用于内网渗透的资产信息收集）
+- 导入FOFA、Hunter及0Zone的查询结果导出的资产文件
 - CDN识别
 
 ### 2、域名资产
@@ -42,7 +43,7 @@ Nemo是用来进行自动化信息收集的一个简单平台，通过集成常�
 
 ### 5、Poc验证与目录扫描
 
-- [Pocsuite3](https://github.com/knownsec/pocsuite3)  && [some_pocsuite](https://github.com/hanc00l/some_pocsuite) （近期将移除）
+- ~~[Pocsuite3](https://github.com/knownsec/pocsuite3)  && [some_pocsuite](https://github.com/hanc00l/some_pocsuite)~~ 
 - [XRay](https://github.com/chaitin/xray)
 - [Nuclei](https://github.com/projectdiscovery/nuclei) && [Nuclei-Templates](https://github.com/projectdiscovery/nuclei-templates)
 - [Dirsearch](https://github.com/evilsocket/dirsearch)

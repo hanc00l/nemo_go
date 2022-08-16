@@ -423,6 +423,18 @@ func (c *IPController) ImportPortscanResultAction() {
 		resultIpPort := z.IpResult.SaveResult(config)
 		resultDomain := z.DomainResult.SaveResult(domainscan.Config{OrgId: config.OrgId})
 		result = fmt.Sprintf("%s,%s", resultDomain, resultIpPort)
+	} else if bin == "fofa" {
+		z := onlineapi.NewFofa(onlineapi.OnlineAPIConfig{})
+		z.ParseCSVContentResult(fileContent)
+		resultIpPort := z.IpResult.SaveResult(config)
+		resultDomain := z.DomainResult.SaveResult(domainscan.Config{OrgId: config.OrgId})
+		result = fmt.Sprintf("%s,%s", resultDomain, resultIpPort)
+	} else if bin == "hunter" {
+		z := onlineapi.NewHunter(onlineapi.OnlineAPIConfig{})
+		z.ParseCSVContentResult(fileContent)
+		resultIpPort := z.IpResult.SaveResult(config)
+		resultDomain := z.DomainResult.SaveResult(domainscan.Config{OrgId: config.OrgId})
+		result = fmt.Sprintf("%s,%s", resultDomain, resultIpPort)
 	} else {
 		c.FailedStatus("未知的扫描方法")
 		return
