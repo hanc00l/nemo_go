@@ -110,6 +110,7 @@ Tested on [ubuntu18.04/20.04 LTS](docs/install_linux.md)、[macOS](docs/install_
 
 ## 版本更新
 
+- 2.5.7：2022-8-16，更新crawlergo的代码；移除部份未用的旧代码；增加导入FOFA、Hunter的查询结果的导出文件；
 - 2.5.6：2022-8-4，增加导入TXPortMap扫描的文本结果及零零信安（0.zone）导出的csv格式资产；增加资产列表查询时"不看Banner信息"的选项，可以减少无效信息的干扰；在IP资产列表显示增加不看中国大地以外地区信息的选项，以及方便ip和domain列表查询筛选一些需要删除的信息；fofa查询将cert修改为cert.subject以减少干扰信息；
 - 2.5.5：2022-7-24，修复IP扫描和漏洞扫描时，读取目标资产所有开放端口时不能正确读取子网掩码目标的bug（2.5.4版本只需替换server_linux_amd64文件）。
 - 2.5.4：2022-7-23，修复ObserverWard不能正确被调用的Bug（2.5.3只需要替换worker_linux_amd64即可）。
