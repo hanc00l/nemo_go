@@ -17,8 +17,13 @@ type KeepAliveInfo struct {
 	CustomFiles  map[string]string
 }
 
+type WorkerDaemonManualInfo struct {
+	ManualReloadFlag   bool `json:"manual_reload_flag"`
+	ManualFileSyncFlag bool `json:"manual_file_sync_flag"`
+}
+
 var WorkerStatusMutex sync.Mutex
-var WorkerStatus = make(map[string]*ampq.WorkerStatus )
+var WorkerStatus = make(map[string]*ampq.WorkerStatus)
 
 // asynFiles 需要同步的自定义配置文件
 var asynFiles = []string{
@@ -46,6 +51,17 @@ func DoKeepAlive(ws ampq.WorkerStatus) bool {
 	return true
 }
 
+// DoDaemonKeepAlive worker请求keepAlive
+func DoDaemonKeepAlive() (replay WorkerDaemonManualInfo, err error) {
+	x := NewXClient()
+	err = x.Call(context.Background(), "KeepDaemonAlive", &WorkerName, &replay)
+	if err != nil {
+		logging.CLILog.Errorf("keep daemon alive fail:%v", err)
+		return
+	}
+	return
+}
+
 // newKeepAliveRequestInfo worker请求的keepAlive数据
 func newKeepAliveRequestInfo(ws ampq.WorkerStatus) KeepAliveInfo {
 	kai := KeepAliveInfo{
@@ -67,7 +83,7 @@ func newKeepAliveRequestInfo(ws ampq.WorkerStatus) KeepAliveInfo {
 
 // newKeepAliveResponseInfo server响应的keepAlive数据
 func newKeepAliveResponseInfo(req map[string]string) map[string]string {
-	syncCustomFiles := make(map[string]string)
+	syncCustomFileList := make(map[string]string)
 	for _, file := range asynFiles {
 		if _, ok := req[file]; !ok || req[file] == "" {
 			continue
@@ -81,9 +97,9 @@ func newKeepAliveResponseInfo(req map[string]string) map[string]string {
 		if fileHash == req[file] {
 			continue
 		}
-		syncCustomFiles[file] = string(content)
+		syncCustomFileList[file] = string(content)
 	}
-	return syncCustomFiles
+	return syncCustomFileList
 }
 
 // syncCustomFiles 同步自定义配置文件

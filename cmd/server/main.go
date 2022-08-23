@@ -9,6 +9,7 @@ import (
 	beegoContext "github.com/beego/beego/v2/server/web/context"
 	"github.com/hanc00l/nemo_go/pkg/comm"
 	"github.com/hanc00l/nemo_go/pkg/conf"
+	"github.com/hanc00l/nemo_go/pkg/filesync"
 	"github.com/hanc00l/nemo_go/pkg/logging"
 	"github.com/hanc00l/nemo_go/pkg/task/runner"
 	_ "github.com/hanc00l/nemo_go/pkg/web/routers"
@@ -72,8 +73,21 @@ func auth(ctx context.Context, req *protocol.Message, token string) error {
 	return errors.New("invalid token")
 }
 
+// startFileSyncServer 启动文件同步服务
+func startFileSyncServer() {
+	fileSyncServer := conf.GlobalServerConfig().FileSync
+	logging.RuntimeLog.Infof("filesync server running on tcp@%s:%d...", fileSyncServer.Host, fileSyncServer.Port)
+	logging.CLILog.Infof("filesync server running on tcp@%s:%d...", fileSyncServer.Host, fileSyncServer.Port)
+
+	filesync.StartFileSyncServer(fileSyncServer.Host, fmt.Sprintf("%d", fileSyncServer.Port), fileSyncServer.AuthKey)
+}
+
 func main() {
 	go startRPCServer()
+	time.Sleep(time.Second * 1)
+	if conf.RunMode == conf.Release {
+		go startFileSyncServer()
+	}
 	time.Sleep(time.Second * 1)
 	startCronTask()
 	startWebServer()

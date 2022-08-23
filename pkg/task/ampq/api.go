@@ -30,11 +30,14 @@ type TaskResult struct {
 }
 
 type WorkerStatus struct {
-	sync.Mutex         `json:"-"`
-	WorkerName         string    `json:"worker_name"'`
-	CreateTime         time.Time `json:"create_time"`
-	UpdateTime         time.Time `json:"update_time"`
-	TaskExecutedNumber int       `json:"task_number"`
+	sync.Mutex             `json:"-"`
+	WorkerName             string    `json:"worker_name"`
+	CreateTime             time.Time `json:"create_time"`
+	UpdateTime             time.Time `json:"update_time"`
+	TaskExecutedNumber     int       `json:"task_number"`
+	ManualReloadFlag       bool      `json:"manual_reload_flag"`
+	ManualFileSyncFlag     bool      `json:"manual_file_sync_flag"`
+	WorkerDaemonUpdateTime time.Time `json:"worker_daemon_update_time"`
 }
 
 // GetServerTaskAMPQSrever 根据server配置文件，获取到消息中心的连接

@@ -2,6 +2,10 @@ rpc:
   host: 127.0.0.1
   port: 5001
   authKey: ZduibTKhcbb6Pi8W
+fileSync:
+  host: 127.0.0.1
+  port: 5002
+  authKey: ZduibTKhcbb6Pi8W
 rabbitmq:
   host: localhost
   port: 5672

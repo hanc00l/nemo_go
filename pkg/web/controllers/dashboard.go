@@ -22,11 +22,14 @@ type DashboardStatisticData struct {
 }
 
 type WorkerStatusData struct {
-	Index              int    `json:"index"`
-	WorkName           string `json:"worker_name"`
-	CreateTime         string `json:"create_time"`
-	UpdateTime         string `json:"update_time"`
-	TaskExecutedNumber int    `json:"task_number"`
+	Index                    int    `json:"index"`
+	WorkName                 string `json:"worker_name"`
+	CreateTime               string `json:"create_time"`
+	UpdateTime               string `json:"update_time"`
+	TaskExecutedNumber       int    `json:"task_number"`
+	EnableManualReloadFlag   bool   `json:"enable_manual_reload_flag"`
+	EnableManualFileSyncFlag bool   `json:"enable_manual_file_sync_flag"`
+	HeartColor               string `json:"heart_color"`
 }
 
 type TaskInfoData struct {
@@ -130,13 +133,28 @@ func (c *DashboardController) WorkerAliveListAction() {
 			delete(comm.WorkerStatus, v.WorkerName)
 			continue
 		}
-		resp.Data = append(resp.Data, WorkerStatusData{
+		wsd := WorkerStatusData{
 			Index:              index,
 			WorkName:           v.WorkerName,
 			CreateTime:         FormatDateTime(v.CreateTime),
 			UpdateTime:         fmt.Sprintf("%s前", time.Now().Sub(v.UpdateTime).Truncate(time.Second).String()),
 			TaskExecutedNumber: v.TaskExecutedNumber,
-		})
+			HeartColor:         "green",
+		}
+		workerHeartDt := time.Now().Sub(v.UpdateTime).Minutes()
+		daemonHeartDt := time.Now().Sub(v.WorkerDaemonUpdateTime).Minutes()
+		if v.ManualReloadFlag == false && workerHeartDt < 1 && daemonHeartDt < 1 {
+			wsd.EnableManualReloadFlag = true
+		}
+		if v.ManualFileSyncFlag == false && v.ManualReloadFlag == false && workerHeartDt < 1 && daemonHeartDt < 1 {
+			wsd.EnableManualFileSyncFlag = true
+		}
+		if workerHeartDt >= 1 && workerHeartDt < 3 {
+			wsd.HeartColor = "yellow"
+		} else if workerHeartDt >= 3 {
+			wsd.HeartColor = "red"
+		}
+		resp.Data = append(resp.Data, wsd)
 		index++
 	}
 	comm.WorkerStatusMutex.Unlock()
@@ -145,6 +163,44 @@ func (c *DashboardController) WorkerAliveListAction() {
 	resp.RecordsTotal = len(comm.WorkerStatus)
 	resp.RecordsFiltered = len(comm.WorkerStatus)
 	c.Data["json"] = resp
+}
+
+// ManualReloadWorkerAction 重启worker
+func (c *DashboardController) ManualReloadWorkerAction() {
+	defer c.ServeJSON()
+
+	worker := c.GetString("worker_name")
+	if worker == "" {
+		c.FailedStatus("worker name is empty")
+		return
+	}
+	comm.WorkerStatusMutex.Lock()
+	if _, ok := comm.WorkerStatus[worker]; ok {
+		comm.WorkerStatus[worker].ManualReloadFlag = true
+		c.SucceededStatus("已设置worker重启标志，等待worker的daemon进程执行！")
+	} else {
+		c.FailedStatus("无效的worker name")
+	}
+	comm.WorkerStatusMutex.Unlock()
+}
+
+// ManualWorkerFileSyncAction 同步worker
+func (c *DashboardController) ManualWorkerFileSyncAction() {
+	defer c.ServeJSON()
+
+	worker := c.GetString("worker_name")
+	if worker == "" {
+		c.FailedStatus("worker name is empty")
+		return
+	}
+	comm.WorkerStatusMutex.Lock()
+	if _, ok := comm.WorkerStatus[worker]; ok {
+		comm.WorkerStatus[worker].ManualFileSyncFlag = true
+		c.SucceededStatus("已设置worker同步标志，等待worker的daemon进程执行！")
+	} else {
+		c.FailedStatus("无效的worker name")
+	}
+	comm.WorkerStatusMutex.Unlock()
 }
 
 // OnlineUserListAction 获取在线用户数据，用于Dashboard表表显示

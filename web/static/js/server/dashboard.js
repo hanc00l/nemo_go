@@ -72,10 +72,32 @@ $(function () {
             },
             columns: [
                 {data: "index", title: "序号", width: "5%"},
-                {data: "worker_name", title: "Worker", width: "35%"},
+                {data: "worker_name", title: "Worker", width: "30%"},
                 {data: 'create_time', title: '启动时间', width: '20%',},
-                {data: 'update_time', title: '心跳时间', width: '20%'},
-                {data: 'task_number', title: '已执行任务数', width: '15%'},
+                {
+                    data: 'update_time', title: '心跳时间', width: '20%',
+                    render: function (data, type, row, meta) {
+                        if (row["heart_color"] === "green") {
+                            return '<span class="text-primary">' + data + '</span>';
+                        } else if (row["heart_color"] === "yellow") {
+                            return '<span class="text-warning">' + data + '</span>';
+                        } else return '<span class="text-danger">' + data + '</span>';
+                    }
+                },
+                {data: 'task_number', title: '已执行任务数', width: '10%'},
+                {
+                    title: "操作", width: '15%',
+                    render: function (data, type, row, meta) {
+                        let str = "";
+                        if (row["enable_manual_file_sync_flag"] === true) {
+                            str += '&nbsp;<button class="btn btn-sm btn-primary" type="button" onclick="filesync_worker(\'' + row['worker_name'] + '\')" ><i class="fa fa-retweet"></i>文件同步</button>';
+                        }
+                        if (row["enable_manual_reload_flag"] === true) {
+                            str += '&nbsp;<button class="btn btn-sm btn-primary" type="button" onclick="reload_worker(\'' + row['worker_name'] + '\')" ><i class="fa fa-refresh"></i>重启</button>';
+                        }
+                        return str
+                    }
+                }
             ]
         }
     );//end datatable
@@ -122,4 +144,59 @@ function get_count_data() {
         $("#domain_count").html(data['domain_count']);
         $("#ip_count").html(data['ip_count']);
     });
+}
+
+/**
+ * 重启worker
+ * @param worker_name
+ */
+function reload_worker(worker_name) {
+    swal({
+            title: "确定要重启worker吗?",
+            text: "将重启worker命令发送至守护进程，由守护进程结束当前正在运行的worker进程，并执行一次文件同步后，启动新的worker进程！",
+            type: "warning",
+            showCancelButton: true,
+            confirmButtonColor: "#DD6B55",
+            confirmButtonText: "确认重启",
+            cancelButtonText: "取消",
+            closeOnConfirm: true
+        },
+        function () {
+            $.post("/worker-reload",
+                {
+                    "worker_name": worker_name,
+                }, function (data, e) {
+                    if (e === "success" && data['status'] == 'success') {
+                        $('#worker-table').DataTable().draw(false);
+                    }
+                })
+        })
+}
+
+
+/**
+ * worker的文件同步
+ * @param worker_name
+ */
+function filesync_worker(worker_name) {
+    swal({
+            title: "确定要同步worker吗?",
+            text: "将同步worker文件的命令发送至守护进程，由守护进程执行与server的文件同步！",
+            type: "warning",
+            showCancelButton: true,
+            confirmButtonColor: "#DD6B55",
+            confirmButtonText: "确认同步",
+            cancelButtonText: "取消",
+            closeOnConfirm: true
+        },
+        function () {
+            $.post("/worker-filesync",
+                {
+                    "worker_name": worker_name,
+                }, function (data, e) {
+                    if (e === "success" && data['status'] == 'success') {
+                        $('#worker-table').DataTable().draw(false);
+                    }
+                })
+        })
 }

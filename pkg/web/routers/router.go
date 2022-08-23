@@ -10,8 +10,8 @@ func init() {
 	//web.Router("/", login, "get:IndexAction;post:LoginAction")
 	//web.Router("/logout", login, "get:LogoutAction")
 	//beego v2.0.2后手工注册路由风格：
-	web.CtrlGet("/",(*controllers.LoginController).IndexAction)
-	web.CtrlPost("/",(*controllers.LoginController).LoginAction)
+	web.CtrlGet("/", (*controllers.LoginController).IndexAction)
+	web.CtrlPost("/", (*controllers.LoginController).LoginAction)
 
 	config := &controllers.ConfigController{}
 	web.Router("/config-list", config, "get:IndexAction;post:LoadDefaultConfigAction")
@@ -27,6 +27,8 @@ func init() {
 	web.Router("/worker-list", dashboard, "post:WorkerAliveListAction")
 	web.Router("/onlineuser-list", dashboard, "post:OnlineUserListAction")
 	web.Router("/dashboard-task-started-info", dashboard, "post:GetStartedTaskInfoAction")
+	web.Router("/worker-reload", dashboard, "post:ManualReloadWorkerAction")
+	web.Router("/worker-filesync", dashboard, "post:ManualWorkerFileSyncAction")
 
 	ip := &controllers.IPController{}
 	web.Router("/ip-list", ip, "get:IndexAction;post:ListAction")

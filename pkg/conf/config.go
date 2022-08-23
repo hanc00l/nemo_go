@@ -48,6 +48,7 @@ func GlobalWorkerConfig() *Worker {
 type Server struct {
 	Web      Web      `yaml:"web"`
 	Rpc      RPC      `yaml:"rpc"`
+	FileSync RPC      `yaml:"fileSync"`
 	Database Database `yaml:"database"`
 	Rabbitmq Rabbitmq `yaml:"rabbitmq"`
 	Task     Task     `yaml:"task"`
@@ -55,6 +56,7 @@ type Server struct {
 
 type Worker struct {
 	Rpc        RPC        `yaml:"rpc"`
+	FileSync   RPC        `yaml:"fileSync"`
 	Rabbitmq   Rabbitmq   `yaml:"rabbitmq"`
 	API        API        `yaml:"api"`
 	Portscan   Portscan   `yaml:"portscan"`

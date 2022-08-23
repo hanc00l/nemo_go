@@ -8,6 +8,10 @@ rpc:
   host: 0.0.0.0
   port: 5001
   authKey: ZduibTKhcbb6Pi8W
+fileSync:
+  host: 0.0.0.0
+  port: 5002
+  authKey: ZduibTKhcbb6Pi8W
 database:
   host: 127.0.0.1
   port: 3306

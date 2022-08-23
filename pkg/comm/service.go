@@ -258,6 +258,29 @@ func (s *Service) KeepAlive(ctx context.Context, args *KeepAliveInfo, replay *ma
 	return nil
 }
 
+// KeepDaemonAlive worker的daemon通过RPC，保持与server的心跳与同步
+func (s *Service) KeepDaemonAlive(ctx context.Context, args *string, replay *WorkerDaemonManualInfo) error {
+	// args -> WorkName
+	wdm := WorkerDaemonManualInfo{}
+	if *args == "" {
+		logging.RuntimeLog.Error("no worker name")
+		*replay = wdm
+		return nil
+	}
+	WorkerStatusMutex.Lock()
+	if _, ok := WorkerStatus[*args]; ok {
+		wdm.ManualReloadFlag = WorkerStatus[*args].ManualReloadFlag
+		wdm.ManualFileSyncFlag = WorkerStatus[*args].ManualFileSyncFlag
+		//
+		WorkerStatus[*args].WorkerDaemonUpdateTime = time.Now()
+		WorkerStatus[*args].ManualFileSyncFlag = false //重置文件同步请求标志
+	}
+	WorkerStatusMutex.Unlock()
+
+	*replay = wdm
+	return nil
+}
+
 // NewTask 创建一个新执行任务
 func (s *Service) NewTask(ctx context.Context, args *NewTaskArgs, replay *string) error {
 	if args.TaskName == "" || args.ConfigJSON == "" {
