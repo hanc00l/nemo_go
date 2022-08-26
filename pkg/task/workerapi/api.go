@@ -22,20 +22,21 @@ var WStatus ampq.WorkerStatus
 
 // taskMaps 定义work执行的任务
 var taskMaps = map[string]interface{}{
-	"portscan":   PortScan,
-	"batchscan":  BatchScan,
-	"domainscan": DomainScan,
-	"iplocation": IPLocation,
-	"fofa":       Fofa,
-	"quake":      Quake,
-	"hunter":     Hunter,
-	"xray":       PocScan,
-	"pocsuite":   PocScan,
-	"dirsearch":  PocScan,
-	"nuclei":     PocScan,
-	"icpquery":   ICPQuery,
-	"whoisquery": WhoisQuery,
-	"test":       TaskTest,
+	"portscan":    PortScan,
+	"batchscan":   BatchScan,
+	"domainscan":  DomainScan,
+	"iplocation":  IPLocation,
+	"fofa":        Fofa,
+	"quake":       Quake,
+	"hunter":      Hunter,
+	"xray":        PocScan,
+	"pocsuite":    PocScan,
+	"dirsearch":   PocScan,
+	"nuclei":      PocScan,
+	"icpquery":    ICPQuery,
+	"whoisquery":  WhoisQuery,
+	"fingerprint": Fingerprint,
+	"test":        TaskTest,
 }
 
 // SucceedTask 任务执行成功的状态的结果

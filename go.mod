@@ -23,7 +23,7 @@ require (
 	github.com/pkg/errors v0.9.1
 	github.com/projectdiscovery/httpx v1.2.1
 	github.com/projectdiscovery/mapcidr v0.0.9
-	github.com/projectdiscovery/shuffledns v1.0.7
+	github.com/projectdiscovery/shuffledns v1.0.8
 	github.com/projectdiscovery/subfinder/v2 v2.5.2
 	github.com/remeh/sizedwaitgroup v1.0.0
 	github.com/robfig/cron/v3 v3.0.1
@@ -32,7 +32,7 @@ require (
 	github.com/tidwall/pretty v1.2.0
 	github.com/twmb/murmur3 v1.1.6
 	github.com/yl2chen/cidranger v1.0.2
-	golang.org/x/net v0.0.0-20220708220712-1185a9018129
+	golang.org/x/net v0.0.0-20220822230855-b0a4917ee28c
 	golang.org/x/text v0.3.7
 	gopkg.in/yaml.v2 v2.4.0
 	gorm.io/driver/mysql v1.3.3
@@ -128,7 +128,7 @@ require (
 	github.com/matttproud/golang_protobuf_extensions v1.0.1 // indirect
 	github.com/mfonda/simhash v0.0.0-20151007195837-79f94a1100d6 // indirect
 	github.com/microcosm-cc/bluemonday v1.0.19 // indirect
-	github.com/miekg/dns v1.1.48 // indirect
+	github.com/miekg/dns v1.1.50 // indirect
 	github.com/mitchellh/go-homedir v1.1.0 // indirect
 	github.com/mitchellh/mapstructure v1.4.3 // indirect
 	github.com/modern-go/concurrent v0.0.0-20180306012644-bacd9c7ef1dd // indirect
@@ -204,12 +204,11 @@ require (
 	go.uber.org/ratelimit v0.2.0 // indirect
 	golang.org/x/crypto v0.0.0-20220525230936-793ad666bf5e // indirect
 	golang.org/x/image v0.0.0-20210220032944-ac19c3e999fb // indirect
-	golang.org/x/mod v0.6.0-dev.0.20220106191415-9b9b3d81d5e3 // indirect
+	golang.org/x/mod v0.6.0-dev.0.20220419223038-86c51ed26bb4 // indirect
 	golang.org/x/oauth2 v0.0.0-20220524215830-622c5d57e401 // indirect
-	golang.org/x/sync v0.0.0-20220513210516-0976fa681c29 // indirect
-	golang.org/x/sys v0.0.0-20220627191245-f75cf1eec38b // indirect
-	golang.org/x/tools v0.1.10 // indirect
-	golang.org/x/xerrors v0.0.0-20220517211312-f3a8303e98df // indirect
+	golang.org/x/sync v0.0.0-20220722155255-886fb9371eb4 // indirect
+	golang.org/x/sys v0.0.0-20220823224334-20c2bfdbfe24 // indirect
+	golang.org/x/tools v0.1.12 // indirect
 	google.golang.org/api v0.81.0 // indirect
 	google.golang.org/appengine v1.6.7 // indirect
 	google.golang.org/genproto v0.0.0-20220527130721-00d5c0f3be58 // indirect

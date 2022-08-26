@@ -29,7 +29,27 @@ func Fofa(taskId, configJSON string) (result string, err error) {
 	if config.IsIPLocation {
 		doLocation(&fofa.IpResult)
 	}
-	result, err = doFingerAndSave(taskId, &fofa.IpResult, &fofa.DomainResult, config)
+	// 保存结果
+	x := comm.NewXClient()
+	args := comm.ScanResultArgs{
+		TaskID:       taskId,
+		IPConfig:     &portscan.Config{OrgId: config.OrgId},
+		DomainConfig: &domainscan.Config{OrgId: config.OrgId},
+		IPResult:     fofa.IpResult.IPResult,
+		DomainResult: fofa.DomainResult.DomainResult,
+	}
+	err = x.Call(context.Background(), "SaveScanResult", &args, &result)
+	if err != nil {
+		logging.RuntimeLog.Error(err)
+		return FailedTask(err.Error()), err
+	}
+	//fingerprint
+	result, err = NewFingerprintTask(&fofa.IpResult, &fofa.DomainResult, FingerprintTaskConfig{
+		IsHttpx:          config.IsHttpx,
+		IsFingerprintHub: config.IsFingerprintHub,
+		IsIconHash:       config.IsIconHash,
+		IsScreenshot:     config.IsScreenshot,
+	})
 	if err != nil {
 		logging.RuntimeLog.Error(err)
 		return FailedTask(err.Error()), err
@@ -56,7 +76,27 @@ func Quake(taskId, configJSON string) (result string, err error) {
 	if config.IsIPLocation {
 		doLocation(&quake.IpResult)
 	}
-	result, err = doFingerAndSave(taskId, &quake.IpResult, &quake.DomainResult, config)
+	// 保存结果
+	x := comm.NewXClient()
+	args := comm.ScanResultArgs{
+		TaskID:       taskId,
+		IPConfig:     &portscan.Config{OrgId: config.OrgId},
+		DomainConfig: &domainscan.Config{OrgId: config.OrgId},
+		IPResult:     quake.IpResult.IPResult,
+		DomainResult: quake.DomainResult.DomainResult,
+	}
+	err = x.Call(context.Background(), "SaveScanResult", &args, &result)
+	if err != nil {
+		logging.RuntimeLog.Error(err)
+		return FailedTask(err.Error()), err
+	}
+	//fingerprint
+	result, err = NewFingerprintTask(&quake.IpResult, &quake.DomainResult, FingerprintTaskConfig{
+		IsHttpx:          config.IsHttpx,
+		IsFingerprintHub: config.IsFingerprintHub,
+		IsIconHash:       config.IsIconHash,
+		IsScreenshot:     config.IsScreenshot,
+	})
 	if err != nil {
 		logging.RuntimeLog.Error(err)
 		return FailedTask(err.Error()), err
@@ -83,52 +123,33 @@ func Hunter(taskId, configJSON string) (result string, err error) {
 	if config.IsIPLocation {
 		doLocation(&hunter.IpResult)
 	}
-	result, err = doFingerAndSave(taskId, &hunter.IpResult, &hunter.DomainResult, config)
-	if err != nil {
-		logging.RuntimeLog.Error(err)
-		return FailedTask(err.Error()), err
-	}
-
-	return SucceedTask(result), nil
-}
-
-// doFingerAndSave 主动探测、指纹识别及保存结果
-func doFingerAndSave(taskId string, portScanResult *portscan.Result, domainScanResult *domainscan.Result, config onlineapi.OnlineAPIConfig) (result string, err error) {
-	//指纹识别：
-	if len(portScanResult.IPResult) > 0 {
-		portscanConfig := portscan.Config{
-			IsHttpx:          config.IsHttpx,
-			IsFingerprintHub: config.IsFingerprintHub,
-			IsIconHash:       config.IsIconHash,
-		}
-		DoIPFingerPrint(portscanConfig, portScanResult)
-		if config.IsScreenshot {
-			DoScreenshotAndSave(portScanResult, nil)
-		}
-	}
-	if len(domainScanResult.DomainResult) > 0 {
-		domainscanConfig := domainscan.Config{
-			IsHttpx:          config.IsHttpx,
-			IsFingerprintHub: config.IsFingerprintHub,
-			IsIconHash:       config.IsIconHash,
-		}
-		DoDomainFingerPrint(domainscanConfig, domainScanResult)
-		if config.IsScreenshot {
-			DoScreenshotAndSave(nil, domainScanResult)
-		}
-	}
 	// 保存结果
 	x := comm.NewXClient()
 	args := comm.ScanResultArgs{
 		TaskID:       taskId,
 		IPConfig:     &portscan.Config{OrgId: config.OrgId},
 		DomainConfig: &domainscan.Config{OrgId: config.OrgId},
-		IPResult:     portScanResult.IPResult,
-		DomainResult: domainScanResult.DomainResult,
+		IPResult:     hunter.IpResult.IPResult,
+		DomainResult: hunter.DomainResult.DomainResult,
 	}
 	err = x.Call(context.Background(), "SaveScanResult", &args, &result)
+	if err != nil {
+		logging.RuntimeLog.Error(err)
+		return FailedTask(err.Error()), err
+	}
+	//fingerprint
+	result, err = NewFingerprintTask(&hunter.IpResult, &hunter.DomainResult, FingerprintTaskConfig{
+		IsHttpx:          config.IsHttpx,
+		IsFingerprintHub: config.IsFingerprintHub,
+		IsIconHash:       config.IsIconHash,
+		IsScreenshot:     config.IsScreenshot,
+	})
+	if err != nil {
+		logging.RuntimeLog.Error(err)
+		return FailedTask(err.Error()), err
+	}
 
-	return result, err
+	return SucceedTask(result), nil
 }
 
 // ICPQuery ICP备案查询任务
@@ -199,13 +220,4 @@ func checkIgnoreResult(portScanResult *portscan.Result, domainScanResult *domain
 			}
 		}
 	}
-	/*
-		if len(domainScanResult.DomainResult) > 0 && config.IsIgnoreCDN {
-			for domain := range domainScanResult.DomainResult {
-				iscdn, _, _ := cdnCheck.CheckCName(domain)
-				if iscdn {
-					delete(domainScanResult.DomainResult, domain)
-				}
-			}
-		}*/
 }

@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"github.com/hanc00l/nemo_go/pkg/task/custom"
 	"github.com/hanc00l/nemo_go/pkg/task/serverapi"
+	"strings"
 	"testing"
 )
 
@@ -16,7 +17,21 @@ func TestIPLocation(t *testing.T) {
 	if err != nil {
 		t.Log(err)
 	}
-	result, err := serverapi.NewTask("iplocation", string(configJSON))
+	result, err := serverapi.NewTask("iplocation", string(configJSON), "")
 	t.Log(result, err)
 
+}
+
+func TestIPLocation2(t *testing.T) {
+	result1 := ""
+	result2 := "ip:10"
+	result3 := ""
+	result4 := "screenshot:0"
+
+	result := strings.Join([]string{result1, result2, result3, result4}, ",")
+
+	t.Log(result)
+	var m map[string]int
+	m = nil
+	t.Log(len(m))
 }

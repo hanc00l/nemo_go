@@ -57,8 +57,6 @@ func BatchScan(taskId, configJSON string) (result string, err error) {
 		if config.IsIpLocation {
 			doLocation(&resultPortScan)
 		}
-		// 指纹识别
-		DoIPFingerPrint(config, &resultPortScan)
 	}
 	// 保存结果
 	x := comm.NewXClient()
@@ -72,9 +70,15 @@ func BatchScan(taskId, configJSON string) (result string, err error) {
 		logging.RuntimeLog.Error(err)
 		return FailedTask(err.Error()), err
 	}
-	if config.IsScreenshot {
-		result2 := DoScreenshotAndSave(&resultPortScan, nil)
-		result = strings.Join([]string{result, result2}, ",")
+	//指纹识别任务
+	_, err = NewFingerprintTask(&resultPortScan, nil, FingerprintTaskConfig{
+		IsHttpx:          config.IsHttpx,
+		IsFingerprintHub: config.IsFingerprintHub,
+		IsIconHash:       config.IsIconHash,
+		IsScreenshot:     config.IsScreenshot,
+	})
+	if err != nil {
+		return FailedTask(err.Error()), err
 	}
 
 	return SucceedTask(result), nil

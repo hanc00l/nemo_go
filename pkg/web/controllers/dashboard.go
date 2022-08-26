@@ -107,7 +107,7 @@ func (c *DashboardController) GetStartedTaskInfoAction() {
 	for _, row := range rows {
 		ti := StartedTaskInfo{
 			TaskName:     row.TaskName,
-			TaskArgs:     ParseTargetFromKwArgs(row.KwArgs),
+			TaskArgs:     ParseTargetFromKwArgs(row.TaskName, row.KwArgs),
 			TaskStarting: fmt.Sprintf("%s前", time.Now().Sub(*row.StartedTime).Truncate(time.Second).String()),
 		}
 		tis = append(tis, ti)

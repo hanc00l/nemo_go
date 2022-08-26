@@ -64,7 +64,7 @@ func addTask(taskId, taskName, kwArgs, cronTaskId string) {
 		CronTaskId:   cronTaskId,
 	}
 	//kwargs可能因为target很多导致超过数据库中的字段设计长度，因此作一个长度截取
-	const argsLength = 2000
+	const argsLength = 6000
 	if len(kwArgs) > argsLength {
 		task.KwArgs = fmt.Sprintf("%s...", kwArgs[:argsLength])
 	}

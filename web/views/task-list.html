@@ -41,7 +41,13 @@
                                 </button>
                                 <div class="dropdown-menu" aria-labelledby="btnGroupDrop1">
                                     <a class="dropdown-item" href="#" id="batch_delete"><i
-                                            class="fa fa-fw fa-lg fa-remove"></i>删除任务</a>
+                                            class="fa fa-fw fa-lg fa-remove"></i>删除选择的任务</a>
+                                    <a class="dropdown-item" href="javascript:batch_delete_task('created')"><i
+                                            class="fa fa-fw fa-lg fa-ban"></i>删除未开始的任务</a>
+                                    <a class="dropdown-item" href="javascript:batch_delete_task('unfinished')" ><i
+                                            class="fa fa-fw fa-lg fa-trash-o"></i>删除未完成的任务</a>
+                                    <a class="dropdown-item" href="javascript:batch_delete_task('finished')"><i
+                                            class="fa fa-fw fa-lg fa-trash"></i>删除已完成的任务</a>
                                 </div>
                             </div>
                         </div>

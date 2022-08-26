@@ -187,6 +187,25 @@ func (c *TaskController) DeleteAction() {
 	}
 }
 
+// DeleteBatchAction 批量删除任务
+func (c *TaskController) DeleteBatchAction() {
+	defer c.ServeJSON()
+
+	taskType := c.GetString("type", "")
+	taskTotal := 0
+	if taskType == "created" {
+		taskTotal += batchDeleteTaskByState(ampq.CREATED)
+	} else if taskType == "unfinished" {
+		taskTotal += batchDeleteTaskByState(ampq.CREATED)
+		taskTotal += batchDeleteTaskByState(ampq.STARTED)
+	} else if taskType == "finished" {
+		taskTotal += batchDeleteTaskByState(ampq.REVOKED)
+		taskTotal += batchDeleteTaskByState(ampq.FAILURE)
+		taskTotal += batchDeleteTaskByState(ampq.SUCCESS)
+	}
+	c.SucceededStatus(fmt.Sprintf("共删除任务:%d", taskTotal))
+}
+
 // DeleteCronAction 删除一个记录
 func (c *TaskController) DeleteCronAction() {
 	defer c.ServeJSON()
@@ -483,7 +502,7 @@ func (c *TaskController) getTaskListData(req taskRequestParam) (resp DataTableRe
 		t.Worker = taskRow.Worker
 		t.State = taskRow.State
 		t.Result = getResultMsg(taskRow.Result)
-		t.KwArgs = ParseTargetFromKwArgs(taskRow.KwArgs)
+		t.KwArgs = ParseTargetFromKwArgs(taskRow.TaskName, taskRow.KwArgs)
 		if taskRow.StartedTime != nil {
 			t.StartedTime = FormatDateTime(*taskRow.StartedTime)
 		}
@@ -520,7 +539,7 @@ func (c *TaskController) getTaskCronListData(req taskCronRequestParam) (resp Dat
 		t.Index = req.Start + i + 1
 		t.TaskId = taskRow.TaskId
 		t.TaskName = taskRow.TaskName
-		t.KwArgs = strings.ReplaceAll(ParseTargetFromKwArgs(taskRow.KwArgs), "\n", ",")
+		t.KwArgs = strings.ReplaceAll(ParseTargetFromKwArgs(taskRow.TaskName, taskRow.KwArgs), "\n", ",")
 		t.CronRule = taskRow.CronRule
 		t.RunCount = taskRow.RunCount
 		t.Status = taskRow.Status
@@ -644,20 +663,64 @@ func getResultMsg(resultJSON string) (msg string) {
 }
 
 // ParseTargetFromKwArgs 从经过JSON序列化的参数中单独提取出target
-func ParseTargetFromKwArgs(args string) (target string) {
+func ParseTargetFromKwArgs(taskName, args string) (target string) {
 	const displayedLength = 100
 	type TargetStrut struct {
 		Target string `json:"target"`
 	}
-	var t TargetStrut
-	err := json.Unmarshal([]byte(args), &t)
-	if err != nil {
-		target = args
+	type FingerTargetStrut struct {
+		IPTargetMap     *map[string][]int    `json:"IPTargetMap"`
+		DomainTargetMap *map[string]struct{} `json:"DomainTargetMap"`
+	}
+	if taskName == "fingerprint" {
+		var t FingerTargetStrut
+		err := json.Unmarshal([]byte(args), &t)
+		if err != nil {
+			target = args
+		} else {
+			var allTarget []string
+			if t.IPTargetMap != nil {
+				for ip := range *t.IPTargetMap {
+					allTarget = append(allTarget, ip)
+				}
+			}
+			if t.DomainTargetMap != nil {
+				for domain := range *t.DomainTargetMap {
+					allTarget = append(allTarget, domain)
+				}
+			}
+			target = strings.Join(allTarget, ",")
+		}
 	} else {
-		target = t.Target
+		var t TargetStrut
+		err := json.Unmarshal([]byte(args), &t)
+		if err != nil {
+			target = args
+		} else {
+			target = t.Target
+		}
 	}
 	if len(target) > displayedLength {
 		return fmt.Sprintf("%s...", target[:displayedLength])
+	}
+
+	return
+}
+
+// batchDeleteTaskByState 批量删除指定状态的任务
+func batchDeleteTaskByState(taskState string) (total int) {
+	task := db.Task{}
+	searchMap := make(map[string]interface{})
+	searchMap["state"] = taskState
+	results, _ := task.Gets(searchMap, -1, -1)
+	resultPath := path.Join(conf.GlobalServerConfig().Web.WebFiles, "taskresult")
+	for _, taskRow := range results {
+		taskDelete := db.Task{Id: taskRow.Id}
+		if taskDelete.Delete() && resultPath != "" {
+			filePath := path.Join(resultPath, fmt.Sprintf("%s.json", task.TaskId))
+			os.Remove(filePath)
+			total++
+		}
 	}
 	return
 }

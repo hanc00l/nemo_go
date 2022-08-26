@@ -30,8 +30,6 @@ func DomainScan(taskId, configJSON string) (result string, err error) {
 	if config.IsIPPortScan || config.IsIPSubnetPortScan {
 		doPortScan(config, &resultDomainScan)
 	}
-	// 指纹识别
-	DoDomainFingerPrint(config, &resultDomainScan)
 	// 保存结果
 	x := comm.NewXClient()
 	resultArgs := comm.ScanResultArgs{
@@ -44,12 +42,16 @@ func DomainScan(taskId, configJSON string) (result string, err error) {
 		logging.RuntimeLog.Error(err)
 		return FailedTask(err.Error()), err
 	}
-	// Screenshot
-	if config.IsScreenshot {
-		result2 := DoScreenshotAndSave(nil, &resultDomainScan)
-		result = strings.Join([]string{result, result2}, ",")
+	_, err = NewFingerprintTask(nil, &resultDomainScan, FingerprintTaskConfig{
+		IsHttpx:          config.IsHttpx,
+		IsFingerprintHub: config.IsFingerprintHub,
+		IsIconHash:       config.IsIconHash,
+		IsScreenshot:     config.IsIconHash,
+	})
+	if err != nil {
+		logging.RuntimeLog.Error(err)
+		return FailedTask(err.Error()), err
 	}
-
 	return SucceedTask(result), nil
 }
 
@@ -84,6 +86,8 @@ func doDomainScan(config domainscan.Config) (resultDomainScan domainscan.Result)
 		resolve.Result.DomainResult = resultDomainScan.DomainResult
 		resolve.Do()
 	}
+	//去除结果中无域名解析A或CNAME记录的域名
+	checkDomainResolveResult(&resultDomainScan)
 
 	return resultDomainScan
 }
@@ -180,4 +184,29 @@ func getResultIPList(resultDomainScan *domainscan.Result) (ipResult, ipSubnetRes
 	}
 
 	return strings.Join(ipList, "\n"), strings.Join(ipSubnetList, "\n")
+}
+
+// checkDomainResolveResult 检查域名结果，去除没有解析记录的无效域名
+func checkDomainResolveResult(resultDomainScan *domainscan.Result) {
+	var removedDomain []string
+	for domain, domainResult := range resultDomainScan.DomainResult {
+		if isHaveResolveRecord(&domainResult.DomainAttrs) == false {
+			removedDomain = append(removedDomain, domain)
+		}
+	}
+	for _, domain := range removedDomain {
+		delete(resultDomainScan.DomainResult, domain)
+	}
+}
+
+func isHaveResolveRecord(domainAttrs *[]domainscan.DomainAttrResult) bool {
+	if len(*domainAttrs) == 0 {
+		return false
+	}
+	for _, dar := range *domainAttrs {
+		if dar.Tag == "A" || dar.Tag == "CNAME" {
+			return true
+		}
+	}
+	return false
 }

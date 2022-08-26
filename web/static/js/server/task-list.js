@@ -213,11 +213,48 @@ function delete_task(id) {
         });
 }
 
+/**
+ * 批量删除指定状态的任务
+ * @param state
+ */
+function batch_delete_task(state) {
+    let warn_msg = "";
+    if (state === "created") {
+        warn_msg = "该操作会删除当前任务状态为CREATED的任务！";
+    } else if (state === "unfinished") {
+        warn_msg = "该操作会删除当前未开始执行（CREATED）以及正在执行（STARTED）的任务！如果需要中断正在执行的任务，请删除后立即重启正在执行任务的worker！";
+    } else if (state === "finished") {
+        warn_msg = "该操作会删除当前已执行完成（SUCCESS、FAILURE)的任务，包括被取消的任务（REVOKED）！";
+    } else {
+        return
+    }
+    swal({
+            title: "确定要批量删任务?",
+            text: warn_msg,
+            type: "warning",
+            showCancelButton: true,
+            confirmButtonColor: "#DD6B55",
+            confirmButtonText: "确认删除",
+            cancelButtonText: "取消",
+            closeOnConfirm: true
+        },
+        function () {
+            $.post("/task-batch-delete",
+                {
+                    "type": state,
+                }, function (data, e) {
+                    if (e === "success") {
+                        $('#task_table').DataTable().draw(false);
+                    }
+                });
+        });
+}
+
 //批量删除
 function batch_delete(dataTableId, url) {
     swal({
-            title: "确定要批量删除选定的目标?",
-            text: "该操作会删除所有选定目标的所有信息！",
+            title: "确定要批量删除选定的任务?",
+            text: "该操作会删除所有选定任务！",
             type: "warning",
             showCancelButton: true,
             confirmButtonColor: "#DD6B55",
