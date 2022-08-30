@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"errors"
+	"flag"
 	"fmt"
 	"github.com/beego/beego/v2/core/logs"
 	"github.com/beego/beego/v2/server/web"
@@ -82,11 +83,34 @@ func startFileSyncServer() {
 	filesync.StartFileSyncServer(fileSyncServer.Host, fmt.Sprintf("%d", fileSyncServer.Port), fileSyncServer.AuthKey)
 }
 
+// startFileSyncMonitor server文件变化检测并同步worker
+func startFileSyncMonitor() {
+	w := filesync.NewNotifyFile()
+	w.WatchDir()
+	for {
+		select {
+		case fileName := <-w.ChNeedWorkerSync:
+			logging.CLILog.Infof("monitor file changed:%s", fileName)
+			// 设置worker同步标志
+			comm.WorkerStatusMutex.Lock()
+			for k := range comm.WorkerStatus {
+				comm.WorkerStatus[k].ManualFileSyncFlag = true
+			}
+			comm.WorkerStatusMutex.Unlock()
+		}
+	}
+}
+
 func main() {
+	var noFilesync bool
+	flag.BoolVar(&noFilesync, "nf", false, "disable file sync")
+	flag.Parse()
+
 	go startRPCServer()
-	time.Sleep(time.Second * 1)
-	if conf.RunMode == conf.Release {
+	if noFilesync == false {
+		time.Sleep(time.Second * 1)
 		go startFileSyncServer()
+		go startFileSyncMonitor()
 	}
 	time.Sleep(time.Second * 1)
 	startCronTask()

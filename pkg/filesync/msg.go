@@ -1,7 +1,10 @@
+// forked from https://github.com/ren-zc/gosync
+
 package filesync
 
 import "os"
 
+// Message 文件同步交互消息
 type Message struct {
 	MgAuthKey  string
 	MgType     string //

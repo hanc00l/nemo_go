@@ -58,16 +58,7 @@ sudo chown root masscan
 sudo chmod u+s masscan
 ```
 
-### 4、whatweb（可选）
-
-```
-git clone https://github.com/urbanadventurer/WhatWeb
-cd WhatWeb
-# whatwebf需要编译和安装ruby，通过make install自动安装相关的ruby依赖
-make install
-```
-
-### 5、conf/server.yml（根据实际情况修改）
+### 4、conf/server.yml（根据实际情况修改）
 
 ```yaml
 web:
@@ -83,6 +74,11 @@ web:
 rpc: 
   host: 0.0.0.0
   port: 5001
+  authKey: ZduibTKhcbb6Pi8W
+# 文件同步
+fileSync:
+  host: 0.0.0.0
+  port: 5002
   authKey: ZduibTKhcbb6Pi8W
 # 数据库配置
 database:
@@ -102,17 +98,32 @@ rabbitmq:
 **conf/app.conf：**
 
 ```yaml
-#screenshot默认保存位置，与server.yml保持一致
+# beego配置文件不区别大小写
+appname = nemo
+runmode = prod
+# web映射的目录，static请勿修改；webfiles需和server.yml保持一致
 staticdir = static:web/static webfiles:/tmp/webfiles
+viewspath = web/views
+accesslogs = true
+filelinenum = false
+CopyRequestBody = true
+# beego v2.0.3后在配置文件里启用session，在代码里死活不行，暂不明确原因
+SessionOn = true
+SessionName = "sessionID"
 ```
 
-### 6、conf/worker.yml
+### 5、conf/worker.yml
 
 ```yaml
  # RPC 调用的server监听地址和端口、auth
 rpc:
-  host: 0.0.0.0
+  host: 127.0.0.1
   port: 5001
+  authKey: ZduibTKhcbb6Pi8W
+# 文件同步
+fileSync:
+  host: 127.0.0.1
+  port: 5002
   authKey: ZduibTKhcbb6Pi8W
 # 消息中间件
 rabbitmq: 
@@ -156,13 +167,13 @@ pocscan:
     threads: 25
 ```
 
-### 7、安装pocsuite3 （可选）
+### 6、安装pocsuite3 （可选）
 
   ```
 pip3 install pocsuite3
   ```
 
-### 
+
 
 ## 运行
 
@@ -173,15 +184,15 @@ pip3 install pocsuite3
    brew services run rabbitmq
    ```
 
+### 2. web app
+
+   ```
+./server_darwin_amd64
+   ```
+
 ### 2. worker
 
    ```bash
-   ./worker_darwin_amd64
-   ```
-
-### 3. web app
-
-   ```
-   ./server_darwin_amd64
+   ./daemon_worker_darwin_amd64
    ```
 

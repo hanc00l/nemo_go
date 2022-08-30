@@ -1,3 +1,5 @@
+// forked from https://github.com/ren-zc/gosync
+
 package filesync
 
 import (
@@ -115,11 +117,9 @@ func doFileMd5List(mg *Message) (transFiles []string, err error) {
 	}
 	// 整理
 	for k, _ := range diffaddM {
-		DebugInfor(k)
 		v2, ok := diffrmM[k]
 		if ok {
 			if !mg.Overwrite {
-				DebugInfor(k, " will not be trans-ed.")
 				delete(diffrmM, k)
 			}
 			if mg.Overwrite {
@@ -127,12 +127,10 @@ func doFileMd5List(mg *Message) (transFiles []string, err error) {
 					slinkNeedChange[k] = strings.TrimPrefix(v2, "symbolLink&&")
 					delete(diffrmM, k)
 				}
-				DebugInfor(k, " will be deleted.")
 				needDelete = append(needDelete, k)
 			}
 		}
 		if !ok && mg.Del {
-			DebugInfor(k, " will be deleted.")
 			needDelete = append(needDelete, k)
 		}
 

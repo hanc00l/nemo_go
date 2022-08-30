@@ -1,6 +1,12 @@
+// forked from https://github.com/ren-zc/gosync
+
 package filesync
 
 import (
+	"bufio"
+	"crypto/md5"
+	"fmt"
+	"io"
 	"os"
 	"path/filepath"
 )
@@ -41,7 +47,6 @@ func Traverse(path string) ([]string, error) {
 			// if !info.IsDir() {
 			md5Str, fErr = Md5OfAFile(path)
 			if fErr != nil {
-				PrintInfor(fErr)
 				return fErr
 			}
 			md5Str = path + ",," + md5Str
@@ -60,7 +65,6 @@ func Traverse(path string) ([]string, error) {
 	}
 	fErr = filepath.Walk(base, WalkFunc)
 	if fErr != nil {
-		PrintInfor(fErr)
 		return nil, fErr
 	}
 	// DebugInfor(md5List)
@@ -76,4 +80,31 @@ func Traverse(path string) ([]string, error) {
 		return []string{}, nil
 	}
 	return md5List, nil
+}
+
+func Md5OfAFile(f string) (string, error) {
+	fi, fiErr := os.Open(f)
+	if fiErr != nil {
+		// lg.Println(fiErr)
+		return "", fiErr
+	}
+	defer fi.Close()
+	r := bufio.NewReader(fi)
+	h := md5.New()
+	var s string
+	var e error
+	for {
+		s, e = r.ReadString('\n')
+		// lg.Println(e)
+		io.WriteString(h, s)
+		if e != nil {
+			if e == io.EOF {
+				break
+			} else {
+				return "", e
+			}
+		}
+	}
+	s = fmt.Sprintf("%x", h.Sum(nil))
+	return s, nil
 }

@@ -1,3 +1,5 @@
+// forked from https://github.com/ren-zc/gosync
+
 package filesync
 
 import (

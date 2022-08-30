@@ -1,3 +1,5 @@
+// forked from https://github.com/ren-zc/gosync
+
 package filesync
 
 import (
@@ -9,14 +11,12 @@ func localOP(slinkNeedCreat map[string]string, slinkNeedChange map[string]string
 	for _, v := range needDelete {
 		err = os.RemoveAll(v)
 		if err != nil {
-			DebugInfor(err)
 			return err
 		}
 	}
 	for _, v := range needCreDir {
 		err = os.MkdirAll(v, 0755)
 		if err != nil {
-			DebugInfor(err)
 			return err
 		}
 	}
@@ -24,20 +24,17 @@ func localOP(slinkNeedCreat map[string]string, slinkNeedChange map[string]string
 		// err = os.Symlink(k, v)
 		err = os.Symlink(v, k)
 		if err != nil {
-			DebugInfor(err)
 			return err
 		}
 	}
 	for k, v := range slinkNeedChange {
 		err = os.Remove(k)
 		if err != nil {
-			DebugInfor(err)
 			return err
 		}
 		// err = os.Symlink(k, v)
 		err = os.Symlink(v, k)
 		if err != nil {
-			DebugInfor(err)
 			return err
 		}
 	}

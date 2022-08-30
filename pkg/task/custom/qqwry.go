@@ -8,7 +8,6 @@ import (
 	"encoding/binary"
 	"github.com/hanc00l/nemo_go/pkg/logging"
 	"io"
-	"io/ioutil"
 	"net"
 	"net/http"
 	"os"
@@ -116,7 +115,7 @@ func (f *fileData) InitIPData() (rs interface{}) {
 			rs = err
 			return
 		} else {
-			if err := ioutil.WriteFile(f.FilePath, tmpData, 0644); err == nil {
+			if err := os.WriteFile(f.FilePath, tmpData, 0644); err == nil {
 				logging.RuntimeLog.Infof("已将最新的纯真 Domain 库保存到本地 %s ", f.FilePath)
 			}
 		}

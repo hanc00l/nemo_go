@@ -45,16 +45,19 @@
           - 5672:5672
   ```
 
-- **修改conf/server.yml配置文件中，RPC的authkey（由worker认证）、rabbitmq的IP、用户和密码**
+- **修改conf/server.yml配置文件中，RPC与fileSync的authkey（由worker认证）、rabbitmq的IP、用户和密码**
 
   ```yaml
   # rpc配置
   rpc:
     authKey: ZduibTKhcbb6Pi8W
-  # 消息中间件配置
+  # 消息中间件配置，与docker-compose.server.yml一致
   rabbitmq: 
     username: nemo
     password: nemo2020
+  # 文件同步验证
+  fileSync:
+    authKey: ZduibTKhcbb6Pi8W
   ```
   
 
@@ -67,7 +70,7 @@
 
 #### 2、Worker
 
-- **修改conf/worker.yml配置文件中，RPC的IP、authkey与rabbitmq的IP、用户和密码**
+- **修改conf/worker.yml配置文件中，RPC与fileSync的IP、authkey与rabbitmq的IP、用户和密码**
 
   ```yaml
   # rpc配置
@@ -79,6 +82,10 @@
     host: x.x.x.x(server所在的vps地址）
     username: nemo
     password: nemo2020
+  # 文件同步验证
+  fileSync:
+    host: x.x.x.x(server所在的vps地址）
+    authKey: ZduibTKhcbb6Pi8W
   ```
   
 - **构建Docker并启动**

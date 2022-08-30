@@ -66,6 +66,11 @@
     host: 0.0.0.0
     port: 5001
     authKey: ZduibTKhcbb6Pi8W
+  # 文件同步
+  fileSync:
+    host: 0.0.0.0
+    port: 5002
+    authKey: ZduibTKhcbb6Pi8W
   # 数据库配置
   database:
     host: 127.0.0.1
@@ -80,15 +85,25 @@
     username: guest
     password: guest
   ```
-  
+
   
     **重要：记得要修改默认的RPC authKey和Rabbitmq消息中间件密码。**
   
     **conf/app.conf：**
-
+  
     ```yaml
-    #screenshot默认保存位置，与server.yml保持一致
+    # beego配置文件不区别大小写
+    appname = nemo
+    runmode = prod
+    # web映射的目录，static请勿修改；webfiles需和server.yml保持一致
     staticdir = static:web/static webfiles:/tmp/webfiles
+    viewspath = web/views
+    accesslogs = true
+    filelinenum = false
+    CopyRequestBody = true
+    # beego v2.0.3后在配置文件里启用session，在代码里死活不行，暂不明确原因
+    SessionOn = true
+    SessionName = "sessionID"
     ```
 
 
@@ -106,7 +121,7 @@
   ```bash
   sudo apt-get update \
       && sudo apt-get install vim git python3-pip python3-setuptools \
-      nmap masscan google-chrome-stable --fix-missing
+      nmap masscan --fix-missing
   #docker ubuntu
   curl -LO https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb \
       && sudo apt install -y ./google-chrome-stable_current_amd64.deb \
@@ -135,8 +150,13 @@
   ```yaml
    # RPC 调用的server监听地址和端口、auth
   rpc:
-    host: 0.0.0.0
+    host: 127.0.0.1
     port: 5001
+    authKey: ZduibTKhcbb6Pi8W
+  # 文件同步
+  fileSync:
+    host: 127.0.0.1
+    port: 5002
     authKey: ZduibTKhcbb6Pi8W
   # 消息中间件
   rabbitmq: 
@@ -179,4 +199,18 @@
       pocPath: thirdparty/nuclei/nuclei-templates
       threads: 25
   ```
+
+## 运行
+
+ ### 1. web app
+
+   ```
+./server_linux_amd64
+   ```
+
+### 2. worker
+
+   ```bash
+./daemon_worker_linux_amd64
+   ```
 

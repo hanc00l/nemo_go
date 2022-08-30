@@ -5,7 +5,7 @@ cd /opt/nemo
 if [ $# -eq 0 ]
     then
         nohup ./server_linux_amd64 &
-        nohup ./worker_linux_amd64 &
+        nohup ./daemon_worker_linux_amd64 &
 else
     if [ "$1" = "server" ]
         then
@@ -13,7 +13,7 @@ else
     fi
     if [ "$1" = "worker" ]
         then
-            nohup ./worker_linux_amd64 &
+            nohup ./daemon_worker_linux_amd64 &
     fi
 fi
 tail -f log/*.log

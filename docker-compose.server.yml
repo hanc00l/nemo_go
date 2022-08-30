@@ -33,6 +33,7 @@ services:
         ports:
             - 5000:5000
             - 5001:5001
+            - 5002:5002
         working_dir: /opt/nemo
         entrypoint:
             - /opt/nemo/docker_start.sh

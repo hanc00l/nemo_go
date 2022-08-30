@@ -17,15 +17,15 @@ var cmd *exec.Cmd
 var WorkerName string
 
 // StartWorkerDaemon 启动worker的daemon
-func StartWorkerDaemon() {
+func StartWorkerDaemon(concurrency int, noFilesync bool) {
 	// 1、worker与server文件同步
 	fileSyncServer := conf.GlobalWorkerConfig().FileSync
-	if conf.RunMode == conf.Release {
+	if noFilesync == false {
 		logging.CLILog.Info("开始文件同步...")
 		filesync.WorkerStartupSync(fileSyncServer.Host, fmt.Sprintf("%d", fileSyncServer.Port), fileSyncServer.AuthKey)
 	}
 	// 2、启动worker
-	if success := startWorker(); success == false {
+	if success := StartWorker(concurrency); success == false {
 		return
 	}
 	// 3、心跳并接收命令
@@ -39,30 +39,31 @@ func StartWorkerDaemon() {
 		}
 		// 收到server的手动重启worker命令，执行停止worker、文件同步、重启worker
 		if replay.ManualReloadFlag {
-			if killWorker() {
+			if KillWorker() {
 				//1、同步文件
-				if conf.RunMode == conf.Release {
+				if noFilesync == false {
 					logging.CLILog.Info("开始文件同步...")
 					filesync.WorkerStartupSync(fileSyncServer.Host, fmt.Sprintf("%d", fileSyncServer.Port), fileSyncServer.AuthKey)
 				}
 				//2、重新启动worker
-				startWorker()
+				StartWorker(concurrency)
 			}
 			// 忽略文件同步（如果有）
 			continue
 		}
-		if replay.ManualFileSyncFlag {
+		if noFilesync == false && replay.ManualFileSyncFlag {
 			//同步文件
-			if conf.RunMode == conf.Release {
-				logging.CLILog.Info("开始文件同步...")
-				filesync.WorkerStartupSync(fileSyncServer.Host, fmt.Sprintf("%d", fileSyncServer.Port), fileSyncServer.AuthKey)
-			}
+			logging.CLILog.Info("开始文件同步...")
+			filesync.WorkerStartupSync(fileSyncServer.Host, fmt.Sprintf("%d", fileSyncServer.Port), fileSyncServer.AuthKey)
 		}
 	}
 }
 
-// killWorker 停止当前worker进程
-func killWorker() bool {
+// KillWorker 停止当前worker进程
+func KillWorker() bool {
+	if cmd == nil {
+		return true
+	}
 	err := cmd.Process.Kill()
 	if err != nil {
 		logging.CLILog.Errorf("kill worker fail,pid:%d,%v", cmd.Process.Pid, err)
@@ -74,11 +75,12 @@ func killWorker() bool {
 	logging.CLILog.Infof("kill worker ok,pid:%d", cmd.Process.Pid)
 	logging.RuntimeLog.Infof("kill worker ok,pid:%d", cmd.Process.Pid)
 
+	cmd = nil
 	return true
 }
 
-// startWorker 启动worker进程
-func startWorker() bool {
+// StartWorker 启动worker进程
+func StartWorker(concurrency int) bool {
 	workerBin := "worker_darwin_amd64"
 	if runtime.GOOS == "linux" {
 		workerBin = "worker_linux_amd64"
@@ -89,7 +91,7 @@ func startWorker() bool {
 		logging.CLILog.Error(err.Error())
 		return false
 	}
-	cmd = exec.Command(workerPathName)
+	cmd = exec.Command(workerPathName, "-c", fmt.Sprintf("%d", concurrency))
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
 	if err = cmd.Start(); err != nil {

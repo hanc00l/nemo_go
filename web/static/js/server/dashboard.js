@@ -86,12 +86,9 @@ $(function () {
                 },
                 {data: 'task_number', title: '已执行任务数', width: '10%'},
                 {
-                    title: "操作", width: '15%',
+                    title: "操作", width: '10%',
                     render: function (data, type, row, meta) {
                         let str = "";
-                        if (row["enable_manual_file_sync_flag"] === true) {
-                            str += '&nbsp;<button class="btn btn-sm btn-primary" type="button" onclick="filesync_worker(\'' + row['worker_name'] + '\')" ><i class="fa fa-retweet"></i>文件同步</button>';
-                        }
                         if (row["enable_manual_reload_flag"] === true) {
                             str += '&nbsp;<button class="btn btn-sm btn-primary" type="button" onclick="reload_worker(\'' + row['worker_name'] + '\')" ><i class="fa fa-refresh"></i>重启</button>';
                         }

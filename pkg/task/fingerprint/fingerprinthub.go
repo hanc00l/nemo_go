@@ -99,9 +99,9 @@ func (f *FingerprintHub) RunObserverWard(url string) []FingerprintHubReult {
 	resultTempFile := utils.GetTempPathFileName()
 	defer os.Remove(resultTempFile)
 
-	observerWardBin := "observer_ward_darwin"
+	observerWardBin := "observer_ward_darwin_amd64"
 	if runtime.GOOS == "linux" {
-		observerWardBin = "observer_ward_amd64"
+		observerWardBin = "observer_ward_linux_amd64"
 	}
 	//Fix：要指定绝对路径
 	observerWardBinPath, err := filepath.Abs(filepath.Join(conf.GetRootPath(), "thirdparty/fingerprinthub", observerWardBin))
