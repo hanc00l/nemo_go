@@ -26,7 +26,7 @@ RUN set -x \
 # Install chrome instead of chromium-browser(can't do screenshot,why?)
 RUN set -x \
     && curl -LO https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb \
-    && apt install -y ./google-chrome-stable_current_amd64.deb \
+    && apt install -y ./google-chrome-stable_current_amd64.deb --fix-missing \
     && rm google-chrome-stable_current_amd64.deb
 
 # pip package

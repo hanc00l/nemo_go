@@ -3,7 +3,8 @@ package domainscan
 import "testing"
 
 func TestMassdns_Do(t *testing.T) {
-	config := Config{Target: "800best.com"}
+	//config := Config{Target: "800best.com"}
+	config := Config{Target: "cqpost.com"}
 	m := NewMassdns(config)
 	m.Do()
 	resolve := NewResolve(Config{})
