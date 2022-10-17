@@ -79,7 +79,7 @@ docker-compose up -d
 
 ## Install
 
-Tested on [ubuntu18.04/20.04 LTS](docs/install_linux.md)、[macOS](docs/install_mac.md)
+Tested on [ubuntu18.04/20.04 LTS](docs/install_linux.md)、[macOS](docs/install_mac.md)、Windows（Test In Win10）
 
 
 
@@ -109,6 +109,7 @@ Tested on [ubuntu18.04/20.04 LTS](docs/install_linux.md)、[macOS](docs/install_
 
 ## 版本更新
 
+- 2.6.1：2022-10-17，在Windows平台运行Nemo的Server与Worker（只测试在win10里代码及功能运行正常，server及worker的依赖环境的安装和配置请参考linux平台；子域名爆破使用的massdns暂不支持在windows平台上运行）；
 - 2.6.0：2022-8-30，增加Server与Worker之间的文件自动同步功能，重启worker进程（增加后台守护进程功能）；
 - 2.5.7：2022-8-16，更新crawlergo的代码；移除部份未用的旧代码；增加导入FOFA、Hunter的查询结果的导出文件；
 - 2.5.6：2022-8-4，增加导入TXPortMap扫描的文本结果及零零信安（0.zone）导出的csv格式资产；增加资产列表查询时"不看Banner信息"的选项，可以减少无效信息的干扰；在IP资产列表显示增加不看中国大地以外地区信息的选项，以及方便ip和domain列表查询筛选一些需要删除的信息；fofa查询将cert修改为cert.subject以减少干扰信息；
