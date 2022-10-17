@@ -2,7 +2,6 @@ package workerapi
 
 import (
 	"context"
-	"errors"
 	"github.com/hanc00l/nemo_go/pkg/comm"
 	"github.com/hanc00l/nemo_go/pkg/logging"
 	"github.com/hanc00l/nemo_go/pkg/task/pocscan"
@@ -35,9 +34,6 @@ func PocScan(taskId, configJSON string) (result string, err error) {
 		scanResult = p.Result
 	} else if config.CmdBin == "xray" {
 		x := pocscan.NewXray(config)
-		if !x.CheckXrayBinFile() {
-			return FailedTask("xray binfile not exist or download fail"), errors.New("xray binfile not exist or download fail")
-		}
 		x.Do()
 		scanResult = x.Result
 	} else if config.CmdBin == "dirsearch" {

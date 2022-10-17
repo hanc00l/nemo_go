@@ -38,6 +38,7 @@ plugins:
     enabled: true
     detect_cors_header_config: true     # 检查 cors 相关配置
     detect_server_error_page: true      # 检查服务器错误信息
+    detect_phpinfo: true                # 检查响应是否包含phpinfo
     detect_system_path_leak: false      # 检查响应是否包含系统路径泄露
     detect_outdated_ssl_version: false  # 检查 ssl 版本问题
     detect_http_header_config: false    # 检查 http 安全相关 header 是否配置
@@ -58,6 +59,7 @@ plugins:
     enabled: true
     depth: 1                            # 检测深度，定义 http://t.com/a/ 深度为 1, http://t.com/a 深度为 0
     dictionary: ""                      # 自定义检测字典, 配置后将与内置字典**合并**
+    exclude_dir: []                     # 想要排除的内部的扫描category，例如["sensitive/crossdomain","system/key"]
   fastjson:
     enabled: true
   jsonp:
@@ -73,12 +75,16 @@ plugins:
                                         # 也可使用 --poc 仅运行 指定的内置或本地 poc，进行测试。
                                         # 例如，可使用如下命令，仅运行当前目录下的 poc 且 不运行内置 poc 进行测试：
                                         # webscan -poc ./poc-* -url http://example.com
+    poc_tags:                           # 为POC添加tag, 然后就可以使用--tags来选择启动哪些POC。poc-yaml-test为poc的name，[]中的内容为该POC对应的标签
+      poc-yaml-test: ["HW", "ST"]
+      poc-yaml-test-1: ["ST"]                       
   redirect:
     enabled: true
   shiro:
     enabled: true
     cookie_name: rememberMe             # 默认使用哪个 shiro cookie name
-    aes_key: []                         # 自定义 shiro key，配置后将与内置 100 key 做合并
+    aes_key: []                         # 自定义 shiro key，配置后将与内置 116 key 做合并
+    aes_key_file:                       # 自定义存储 shiro key 的文件路径，配置后将自动加载文件中的key
   sqldet:
     enabled: true
     boolean_based_detection: true       # 是否检测布尔盲注
@@ -194,7 +200,7 @@ basic-crawler:
 # 子域名扫描配置，配置解释见 https://docs.xray.cool/#/configration/subdomain
 # 注意：该功能仅限高级版用户使用
 subdomain:
-  max_parallel: 30                      # 子域名探测的并发度
+  max_parallel: 500                     # 子域名探测的并发度
   allow_recursion: false                # 是否允许递归探测, 开启后，扫描完一级域名后，会自动将一级的每个域名作为新的目标
   max_recursion_depth: 3                # 最大允许的递归深度, 3 表示 3 级子域名 仅当 allow_recursion 开启时才有意义
   web_only: false                       # 结果中仅显示有 web 应用的, 没有 web 应用的将被丢弃
@@ -230,3 +236,40 @@ subdomain:
       enabled: true
     virusTotal:
       enabled: true
+    alienvault:
+      enabled: true
+    bufferover:
+      enabled: true
+    fofa:
+      enabled: false
+      email: ""
+      key: ""
+    ip138:
+      enabled: true
+    myssl:
+      enabled: true
+    riskiq:
+      enabled: false
+      user: ""
+      key: ""
+    quake:
+      enabled: false
+      key: ""
+    baidu:
+      enabled: true
+      page_limit: 12
+    yahoo:
+      enabled: true
+      page_limit: 12
+    sogou:
+      enabled: true
+      page_limit: 12
+    google:
+      enabled: true
+      page_limit: 12
+    bing:
+      enabled: true
+      page_limit: 12
+    ask:
+      enabled: true
+      page_limit: 12

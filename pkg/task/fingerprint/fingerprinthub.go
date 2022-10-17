@@ -102,24 +102,18 @@ func (f *FingerprintHub) RunObserverWard(url string) []FingerprintHubReult {
 	observerWardBin := "observer_ward_darwin_amd64"
 	if runtime.GOOS == "linux" {
 		observerWardBin = "observer_ward_linux_amd64"
+	} else if runtime.GOOS == "windows" {
+		observerWardBin = "observer_ward_windows_amd64.exe"
 	}
 	//Fix：要指定绝对路径
-	observerWardBinPath, err := filepath.Abs(filepath.Join(conf.GetRootPath(), "thirdparty/fingerprinthub", observerWardBin))
-	if err != nil {
-		logging.RuntimeLog.Error(err.Error())
-		return nil
-	}
+	observerWardBinPath := filepath.Join(conf.GetAbsRootPath(), "thirdparty/fingerprinthub", observerWardBin)
 	var cmdArgs []string
 	cmdArgs = append(cmdArgs, "-t", url, "-j", resultTempFile)
 	cmd := exec.Command(observerWardBinPath, cmdArgs...)
 	//Fix:指定当前路径，这样才会正确调用web_fingerprint_v3.json
 	//Fix:必须指定绝对路径
-	cmd.Dir, err = filepath.Abs(filepath.Join(conf.GetRootPath(), "thirdparty/fingerprinthub"))
-	if err != nil {
-		logging.RuntimeLog.Error(err.Error())
-		return nil
-	}
-	_, err = cmd.CombinedOutput()
+	cmd.Dir = filepath.Join(conf.GetAbsRootPath(), "thirdparty/fingerprinthub")
+	_, err := cmd.CombinedOutput()
 	if err != nil {
 		logging.RuntimeLog.Error(err.Error())
 		return nil

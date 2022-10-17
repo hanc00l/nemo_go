@@ -189,3 +189,13 @@ func GetRootPath() string {
 	}
 	return "."
 }
+
+// GetAbsRootPath 获取运行时系统的root绝对位置，解决调试时无法使用相对位置的困扰
+func GetAbsRootPath() string {
+	rootPath, err := filepath.Abs(GetRootPath())
+	if err != nil {
+		fmt.Println(err)
+		return ""
+	}
+	return rootPath
+}

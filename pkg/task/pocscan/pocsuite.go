@@ -9,6 +9,7 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"runtime"
 	"strings"
 )
 
@@ -38,6 +39,11 @@ func (p *Pocsuite) Do() {
 	pocPathPfile := filepath.Join(conf.GetRootPath(), conf.GlobalWorkerConfig().Pocscan.Pocsuite.PocPath, p.Config.PocFile)
 	cmdBin := filepath.Join(conf.GetRootPath(), "thirdparty/pocsuite/poc.py")
 	var cmdArgs []string
+	// winddows操作系统调用方式为 python3.exe xxx/poc.py -r xxx -f xxx -o xxx
+	if runtime.GOOS == "windows" {
+		cmdArgs = append(cmdArgs, filepath.Join(conf.GetAbsRootPath(), "thirdparty/pocsuite/poc.py"))
+		cmdBin = "python3.exe"
+	}
 	cmdArgs = append(
 		cmdArgs,
 		"-r", pocPathPfile, "-f", inputTargetFile, "-o", resultTempFile,

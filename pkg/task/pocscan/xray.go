@@ -2,7 +2,6 @@ package pocscan
 
 import (
 	"encoding/json"
-	"fmt"
 	"github.com/hanc00l/nemo_go/pkg/conf"
 	"github.com/hanc00l/nemo_go/pkg/logging"
 	"github.com/hanc00l/nemo_go/pkg/utils"
@@ -36,15 +35,18 @@ func (x *Xray) Do() {
 		logging.RuntimeLog.Error(err.Error())
 		return
 	}
-	cmdBin := filepath.Join(conf.GetRootPath(), "thirdparty/xray", "xray_darwin_amd64")
+	cmdBin := filepath.Join(conf.GetAbsRootPath(), "thirdparty/xray", "xray_darwin_amd64")
 	if runtime.GOOS == "linux" {
-		cmdBin = filepath.Join(conf.GetRootPath(), "thirdparty/xray", "xray_linux_amd64")
+		cmdBin = filepath.Join(conf.GetAbsRootPath(), "thirdparty/xray", "xray_linux_amd64")
+	} else if runtime.GOOS == "windows" {
+		cmdBin = filepath.Join(conf.GetAbsRootPath(), "thirdparty/xray", "xray_windows_amd64.exe")
 	}
+
 	var cmdArgs []string
 	cmdArgs = append(
 		cmdArgs,
 		"--log-level", "error", "webscan", "--plugins", "phantasm", "--poc",
-		filepath.Join(conf.GetRootPath(), conf.GlobalWorkerConfig().Pocscan.Xray.PocPath, x.Config.PocFile),
+		filepath.Join(conf.GetAbsRootPath(), conf.GlobalWorkerConfig().Pocscan.Xray.PocPath, x.Config.PocFile),
 		"--json-output", resultTempFile, "--url-file", inputTargetFile,
 	)
 	cmd := exec.Command(cmdBin, cmdArgs...)
@@ -96,45 +98,4 @@ func (x *Xray) LoadPocFile() (pocs []string) {
 		pocs = append(pocs, pocFile)
 	}
 	return
-}
-
-// CheckXrayBinFile 检查xray可执行文件是否存在，如果不存在，尝试从网上下载
-// 由于xray持续更新中，下载的版本定义在config.yaml中
-func (x *Xray) CheckXrayBinFile() bool {
-	cmdBin := filepath.Join(conf.GetRootPath(), "thirdparty/xray", "xray_darwin_amd64")
-	if runtime.GOOS == "linux" {
-		cmdBin = filepath.Join(conf.GetRootPath(), "thirdparty/xray", "xray_linux_amd64")
-	}
-	_, err := os.Stat(cmdBin)
-	if err == nil {
-		return true
-	}
-	//download file
-	logging.RuntimeLog.Info("xray binfile not exist,try to download...")
-	tempDownloadPathFile := utils.GetTempPathFileName()
-	defer os.Remove(tempDownloadPathFile)
-
-	downloadUrl := fmt.Sprintf("https://github.com/chaitin/xray/releases/download/%s/xray_darwin_amd64.zip", conf.GlobalWorkerConfig().Pocscan.Xray.LatestVersion)
-	if runtime.GOOS == "linux" {
-		downloadUrl = fmt.Sprintf("https://github.com/chaitin/xray/releases/download/%s/xray_linux_amd64.zip", conf.GlobalWorkerConfig().Pocscan.Xray.LatestVersion)
-	}
-	isDownloadSuccess, err := utils.DownloadFile(downloadUrl, tempDownloadPathFile)
-	if !isDownloadSuccess {
-		logging.RuntimeLog.Errorf("download xray binfile fail: %s!", err)
-		return false
-	}
-	//unzip download file
-	logging.RuntimeLog.Info("xray download finish,try to unzip...")
-	err = utils.Unzip(tempDownloadPathFile, filepath.Join(conf.GetRootPath(), "thirdparty/xray"))
-	if err != nil {
-		logging.RuntimeLog.Errorf("unzip xray zip binfile fail: %s!", err)
-		return false
-	}
-	_, err = os.Stat(cmdBin)
-	if err == nil {
-		logging.RuntimeLog.Info("xray download success")
-		return true
-	}
-	logging.RuntimeLog.Info("xray download and check fail")
-	return false
 }

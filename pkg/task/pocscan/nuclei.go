@@ -47,9 +47,11 @@ func (n *Nuclei) Do() {
 		logging.RuntimeLog.Error(err.Error())
 		return
 	}
-	cmdBin := filepath.Join(conf.GetRootPath(), "thirdparty/nuclei", "nuclei_darwin_amd64")
+	cmdBin := filepath.Join(conf.GetAbsRootPath(), "thirdparty/nuclei", "nuclei_darwin_amd64")
 	if runtime.GOOS == "linux" {
-		cmdBin = filepath.Join(conf.GetRootPath(), "thirdparty/nuclei", "nuclei_linux_amd64")
+		cmdBin = filepath.Join(conf.GetAbsRootPath(), "thirdparty/nuclei", "nuclei_linux_amd64")
+	} else if runtime.GOOS == "windows" {
+		cmdBin = filepath.Join(conf.GetAbsRootPath(), "thirdparty/nuclei", "nuclei_windows_amd64.exe")
 	}
 	var cmdArgs []string
 	/*RATE-LIMIT:
@@ -66,7 +68,7 @@ func (n *Nuclei) Do() {
 		"-c", fmt.Sprintf("%d", conf.GlobalWorkerConfig().Pocscan.Nuclei.Threads),
 		"-bs", fmt.Sprintf("%d", conf.GlobalWorkerConfig().Pocscan.Nuclei.Threads),
 		"-rl", fmt.Sprintf("%d", conf.GlobalWorkerConfig().Pocscan.Nuclei.Threads*6),
-		"-t", filepath.Join(conf.GetRootPath(), conf.GlobalWorkerConfig().Pocscan.Nuclei.PocPath, n.Config.PocFile),
+		"-t", filepath.Join(conf.GetAbsRootPath(), conf.GlobalWorkerConfig().Pocscan.Nuclei.PocPath, n.Config.PocFile),
 		"-json", "-o", resultTempFile, "-l", inputTargetFile,
 	)
 	cmd := exec.Command(cmdBin, cmdArgs...)
@@ -116,10 +118,18 @@ func (n *Nuclei) parseNucleiResult(outputTempFile string) {
 // LoadPocFile 加载poc文件列表
 func (n *Nuclei) LoadPocFile() (pocs []string) {
 	pocBase := filepath.Join(conf.GetRootPath(), conf.GlobalWorkerConfig().Pocscan.Nuclei.PocPath)
+	//统一路径为“/”
+	if runtime.GOOS == "windows" {
+		pocBase = strings.ReplaceAll(pocBase, "\\", "/")
+	}
 	err := filepath.Walk(pocBase,
 		func(path string, info os.FileInfo, err error) error {
 			if err != nil {
 				return err
+			}
+			//统一路径为“/”
+			if runtime.GOOS == "windows" {
+				path = strings.ReplaceAll(path, "\\", "/")
 			}
 			if path == pocBase {
 				return nil

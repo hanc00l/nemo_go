@@ -7,6 +7,7 @@ import (
 	gonmap "github.com/lair-framework/go-nmap"
 	"os"
 	"os/exec"
+	"runtime"
 	"strconv"
 	"strings"
 )
@@ -19,6 +20,9 @@ type Masscan struct {
 // NewMasscan 创建masscan对象
 func NewMasscan(config Config) *Masscan {
 	config.CmdBin = "masscan"
+	if runtime.GOOS == "windows" {
+		config.CmdBin = "masscan.exe"
+	}
 	return &Masscan{Config: config}
 }
 

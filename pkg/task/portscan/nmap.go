@@ -6,6 +6,7 @@ import (
 	"os"
 	"os/exec"
 	"regexp"
+	"runtime"
 	"strconv"
 	"strings"
 
@@ -18,9 +19,12 @@ type Nmap struct {
 	Result Result
 }
 
-//NewNmap 创建nmap对象
+// NewNmap 创建nmap对象
 func NewNmap(config Config) *Nmap {
 	config.CmdBin = "nmap"
+	if runtime.GOOS == "windows" {
+		config.CmdBin = "nmap.exe"
+	}
 	return &Nmap{Config: config}
 }
 

@@ -84,6 +84,8 @@ func StartWorker(concurrency int) bool {
 	workerBin := "worker_darwin_amd64"
 	if runtime.GOOS == "linux" {
 		workerBin = "worker_linux_amd64"
+	} else if runtime.GOOS == "windows" {
+		workerBin = "worker_windows_amd64.exe"
 	}
 	//绝对路径
 	workerPathName, err := filepath.Abs(filepath.Join(conf.GetRootPath(), workerBin))

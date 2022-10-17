@@ -62,6 +62,11 @@ func (m *Massdns) parseResult(outputTempFile string) {
 
 // RunMassdns runs the massdns tool on the list of inputs
 func (m *Massdns) RunMassdns(domain string) {
+	//massdns不支持windows平台
+	if runtime.GOOS == "windows" {
+		logging.RuntimeLog.Error("Widnows don't support to run massdns!")
+		return
+	}
 	tempOutputFile := utils.GetTempPathFileName()
 	defer os.Remove(tempOutputFile)
 

@@ -9,6 +9,8 @@ import (
 	"io"
 	"os"
 	"path/filepath"
+	"runtime"
+	"strings"
 )
 
 // Traverse walk要同步的文件, 生成md5, 并返回列表
@@ -36,6 +38,10 @@ func Traverse(path string) ([]string, error) {
 	md5List := make([]string, 10)
 	var md5Str string
 	WalkFunc := func(path string, info os.FileInfo, err error) error {
+		//文件路径分隔符统一处理为 /
+		if runtime.GOOS == "windows" {
+			path = strings.ReplaceAll(path, "\\", "/")
+		}
 		if checkFileIsSyncWhileList(path) == false {
 			return nil
 		}
