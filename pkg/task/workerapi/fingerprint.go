@@ -93,9 +93,10 @@ func Fingerprint(taskId, configJSON string) (result string, err error) {
 // doIPFingerPrint 对 IP结果进行指纹识别
 func doIPFingerPrint(config portscan.Config, resultPortScan *portscan.Result) {
 	if config.IsHttpx {
-		httpx := fingerprint.NewHttpx()
+		//httpx := fingerprint.NewHttpx()
+		httpx := fingerprint.NewHttpxFinger()
 		httpx.ResultPortScan = *resultPortScan
-		httpx.Do()
+		httpx.DoHttpxAndFingerPrint()
 	}
 	if config.IsFingerprintHub {
 		fp := fingerprint.NewFingerprintHub()
@@ -111,9 +112,10 @@ func doIPFingerPrint(config portscan.Config, resultPortScan *portscan.Result) {
 func doDomainFingerPrint(config domainscan.Config, resultDomainScan *domainscan.Result) {
 	// 指纹识别
 	if config.IsHttpx {
-		httpx := fingerprint.NewHttpx()
+		//httpx := fingerprint.NewHttpx()
+		httpx := fingerprint.NewHttpxFinger()
 		httpx.ResultDomainScan = *resultDomainScan
-		httpx.Do()
+		httpx.DoHttpxAndFingerPrint()
 	}
 	if config.IsFingerprintHub {
 		fp := fingerprint.NewFingerprintHub()

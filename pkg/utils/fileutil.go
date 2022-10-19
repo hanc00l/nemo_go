@@ -35,8 +35,12 @@ func GetTempPNGPathFileName() (pathFileName string) {
 	return filepath.Join(os.TempDir(), fmt.Sprintf("%s.png", GetRandomString2(16)))
 }
 
+// GetTempPathDirName 获取一个临时目录
+func GetTempPathDirName() (pathDirName string) {
+	return filepath.Join(os.TempDir(), fmt.Sprintf("%s.dir", GetRandomString2(16)))
+}
 
-//Unzip 解压zip文件
+// Unzip 解压zip文件
 func Unzip(archiveFile, dstPath string) error {
 	reader, err := zip.OpenReader(archiveFile)
 	if err != nil {

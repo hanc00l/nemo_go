@@ -13,6 +13,7 @@ import (
 	"github.com/projectdiscovery/httpx/common/customheader"
 	"github.com/projectdiscovery/httpx/runner"
 	"github.com/remeh/sizedwaitgroup"
+	"math"
 	"os"
 	"strconv"
 )
@@ -20,6 +21,10 @@ import (
 type Httpx struct {
 	ResultPortScan   portscan.Result
 	ResultDomainScan domainscan.Result
+	//保存响应的数据，用于自定义指纹匹配
+	StoreResponse          bool
+	StoreResponseDirectory string
+	FingerPrintFunc        []func(domain string, ip string, port int, url string, result []FingerAttrResult) []string
 }
 
 type HttpxResult struct {
@@ -79,6 +84,22 @@ func (x *Httpx) Do() {
 								x.ResultPortScan.IPResult[ip].Ports[port].Status = fpa.Content
 							}
 						}
+						//处理自定义的finger
+						if x.StoreResponse && len(x.FingerPrintFunc) > 0 {
+							for _, f := range x.FingerPrintFunc {
+								xfars := f("", ip, port, u, fingerPrintResult)
+								if len(xfars) > 0 {
+									for _, fps := range xfars {
+										par := portscan.PortAttrResult{
+											Source:  "httpxfinger",
+											Tag:     "fingerprint",
+											Content: fps,
+										}
+										x.ResultPortScan.SetPortAttr(ip, port, par)
+									}
+								}
+							}
+						}
 					}
 					swg.Done()
 				}(ipName, portNumber, url)
@@ -98,6 +119,22 @@ func (x *Httpx) Do() {
 							Content: fpa.Content,
 						}
 						x.ResultDomainScan.SetDomainAttr(d, dar)
+					}
+					//处理自定义的finger
+					if x.StoreResponse && len(x.FingerPrintFunc) > 0 {
+						for _, f := range x.FingerPrintFunc {
+							xfars := f(d, "", 0, d, fingerPrintResult)
+							if len(xfars) > 0 {
+								for _, fps := range xfars {
+									dar := domainscan.DomainAttrResult{
+										Source:  "httpxfinger",
+										Tag:     "fingerprint",
+										Content: fps,
+									}
+									x.ResultDomainScan.SetDomainAttr(d, dar)
+								}
+							}
+						}
 					}
 				}
 				swg.Done()
@@ -120,21 +157,24 @@ func (x *Httpx) RunHttpx(domain string) []FingerAttrResult {
 	}
 
 	options := &runner.Options{
-		CustomHeaders:      customheader.CustomHeaders{"User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) Chrome/52.0.2743.116 Safari/537.36 Edge/15.15063"},
-		Output:             resultTempFile,
-		InputFile:          inputTempFile,
-		Retries:            0,
-		Threads:            50,
-		Timeout:            5,
-		ExtractTitle:       true,
-		StatusCode:         true,
-		FollowRedirects:    true,
-		JSONOutput:         true,
-		Silent:             true,
-		NoColor:            true,
-		OutputServerHeader: true,
-		OutputContentType:  true,
-		TLSGrab:            true,
+		CustomHeaders:             customheader.CustomHeaders{"User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) Chrome/52.0.2743.116 Safari/537.36 Edge/15.15063"},
+		Output:                    resultTempFile,
+		InputFile:                 inputTempFile,
+		Retries:                   0,
+		Threads:                   50,
+		Timeout:                   5,
+		ExtractTitle:              true,
+		StatusCode:                true,
+		FollowRedirects:           true,
+		JSONOutput:                true,
+		Silent:                    true,
+		NoColor:                   true,
+		OutputServerHeader:        true,
+		OutputContentType:         true,
+		TLSGrab:                   true,
+		StoreResponse:             x.StoreResponse,
+		StoreResponseDir:          x.StoreResponseDirectory,
+		MaxResponseBodySizeToSave: math.MaxInt32,
 	}
 	r, err := runner.New(options)
 	if err != nil {
