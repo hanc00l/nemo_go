@@ -1,4 +1,4 @@
-package fingerprint
+package poclib
 
 import "testing"
 

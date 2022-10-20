@@ -4,7 +4,15 @@ import (
 	"fmt"
 	"github.com/hanc00l/nemo_go/pkg/db"
 	"github.com/hanc00l/nemo_go/pkg/utils"
+	"sync"
 	"time"
+)
+
+const (
+	pocMaxThreadNumber      = 10
+	ipMaxPocForHoneypot     = 40
+	portMaxPocForHoneypot   = 10
+	domainMaxPocForHoneypot = 40
 )
 
 type Config struct {
@@ -17,7 +25,7 @@ type Config struct {
 type Result struct {
 	Target  string `json:"target"`
 	Url     string `json:"url"`
-	PocFile string `json:"pocFile""`
+	PocFile string `json:"pocFile"`
 	Source  string `json:"source"`
 	Extra   string `json:"extra"`
 }
@@ -60,6 +68,92 @@ type nucleiJSONResult struct {
 	// Timestamp is the time the result was found at.
 	Timestamp time.Time `json:"timestamp"`
 	// Interaction is the full details of interactsh interaction.
+}
+
+// PortResult 端口结果
+type PortResult struct {
+	Vuls []string
+}
+
+// IPResult IP的端口结果
+type IPResult struct {
+	Ports map[int]*PortResult
+}
+
+// PortscanVulResult ip结果
+type PortscanVulResult struct {
+	sync.RWMutex `json:"-"`
+	IPResult     map[string]*IPResult
+}
+
+func (r *PortscanVulResult) HasIP(ip string) bool {
+	r.RLock()
+	defer r.RUnlock()
+
+	_, ok := r.IPResult[ip]
+	return ok
+}
+
+func (r *PortscanVulResult) SetIP(ip string) {
+	r.Lock()
+	defer r.Unlock()
+
+	r.IPResult[ip] = &IPResult{Ports: make(map[int]*PortResult)}
+}
+
+func (r *PortscanVulResult) HasPort(ip string, port int) bool {
+	r.RLock()
+	defer r.RUnlock()
+
+	_, ok := r.IPResult[ip].Ports[port]
+	return ok
+}
+
+func (r *PortscanVulResult) SetPort(ip string, port int) {
+	r.Lock()
+	defer r.Unlock()
+
+	r.IPResult[ip].Ports[port] = &PortResult{}
+}
+
+func (r *PortscanVulResult) SetPortVul(ip string, port int, vul string) {
+	r.Lock()
+	defer r.Unlock()
+
+	r.IPResult[ip].Ports[port].Vuls = append(r.IPResult[ip].Ports[port].Vuls, vul)
+}
+
+// DomainResult 域名结果
+type DomainResult struct {
+	Vuls []string
+}
+
+// DomainscanVulResult 域名结果
+type DomainscanVulResult struct {
+	sync.RWMutex `json:"-"`
+	DomainResult map[string]*DomainResult
+}
+
+func (r *DomainscanVulResult) HasDomain(domain string) bool {
+	r.RLock()
+	defer r.RUnlock()
+
+	_, ok := r.DomainResult[domain]
+	return ok
+}
+
+func (r *DomainscanVulResult) SetDomain(domain string) {
+	r.Lock()
+	defer r.Unlock()
+
+	r.DomainResult[domain] = &DomainResult{}
+}
+
+func (r *DomainscanVulResult) SetDomainVul(domain string, vul string) {
+	r.Lock()
+	defer r.Unlock()
+
+	r.DomainResult[domain].Vuls = append(r.DomainResult[domain].Vuls, vul)
 }
 
 // SaveResult 保存结果

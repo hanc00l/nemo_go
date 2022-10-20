@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/hanc00l/nemo_go/pkg/conf"
 	"github.com/hanc00l/nemo_go/pkg/logging"
+	"github.com/hanc00l/nemo_go/pkg/poclib"
 	"github.com/hanc00l/nemo_go/pkg/utils"
 	"github.com/projectdiscovery/urlutil"
 	"os"
@@ -167,7 +168,7 @@ func (h *HttpxFinger) fingerPrintFuncForCustom(domain string, ip string, port in
 	if len(headerAndBodyArrays) == 2 {
 		data = headerAndBodyArrays[1]
 	}
-	content := Content{
+	content := poclib.Content{
 		Port:   fmt.Sprintf("%d", port),
 		Body:   data,
 		Header: headers,
@@ -183,8 +184,8 @@ func (h *HttpxFinger) fingerPrintFuncForCustom(domain string, ip string, port in
 	}
 	//fmt.Println(content)
 	for _, v := range h.fpCustom {
-		rule := ParseRules(v.Rule)
-		if MatchRules(*rule, content) {
+		rule := poclib.ParseRules(v.Rule)
+		if poclib.MatchRules(*rule, content) {
 			//fmt.Println(v)
 			fingers = append(fingers, v.App)
 		}

@@ -36,6 +36,7 @@ var taskMaps = map[string]interface{}{
 	"icpquery":    ICPQuery,
 	"whoisquery":  WhoisQuery,
 	"fingerprint": Fingerprint,
+	"xraypoc":     XrayPocScan,
 	"test":        TaskTest,
 }
 

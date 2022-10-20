@@ -12,8 +12,3 @@ func TestXray_RunXray(t *testing.T) {
 	t.Log(xray.Result)
 
 }
-
-func TestXray_CheckXrayBinFile(t *testing.T) {
-	xray := NewXray(Config{})
-	t.Log(xray.CheckXrayBinFile())
-}

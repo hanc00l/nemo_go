@@ -428,7 +428,7 @@ func (c *TaskController) StartPocScanTaskAction() {
 	}
 }
 
-//validateRequestParam 校验请求的参数
+// validateRequestParam 校验请求的参数
 func (c *TaskController) validateRequestParam(req *taskRequestParam) {
 	if req.Length <= 0 {
 		req.Length = 50
@@ -438,7 +438,7 @@ func (c *TaskController) validateRequestParam(req *taskRequestParam) {
 	}
 }
 
-//validateRequestParam 校验请求的参数
+// validateRequestParam 校验请求的参数
 func (c *TaskController) validateRequestParam2(req *taskCronRequestParam) {
 	if req.Length <= 0 {
 		req.Length = 50
@@ -672,6 +672,10 @@ func ParseTargetFromKwArgs(taskName, args string) (target string) {
 		IPTargetMap     *map[string][]int    `json:"IPTargetMap"`
 		DomainTargetMap *map[string]struct{} `json:"DomainTargetMap"`
 	}
+	type XrayPocStrut struct {
+		IPPortResult map[string][]int
+		DomainResult []string
+	}
 	if taskName == "fingerprint" {
 		var t FingerTargetStrut
 		err := json.Unmarshal([]byte(args), &t)
@@ -688,6 +692,23 @@ func ParseTargetFromKwArgs(taskName, args string) (target string) {
 				for domain := range *t.DomainTargetMap {
 					allTarget = append(allTarget, domain)
 				}
+			}
+			target = strings.Join(allTarget, ",")
+		}
+	} else if taskName == "xraypoc" {
+		var t XrayPocStrut
+		err := json.Unmarshal([]byte(args), &t)
+		if err != nil {
+			target = args
+		} else {
+			var allTarget []string
+			for ip, ports := range t.IPPortResult {
+				for _, port := range ports {
+					allTarget = append(allTarget, fmt.Sprintf("%s:%d", ip, port))
+				}
+			}
+			for _, domain := range t.DomainResult {
+				allTarget = append(allTarget, domain)
 			}
 			target = strings.Join(allTarget, ",")
 		}
