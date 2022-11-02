@@ -33,7 +33,7 @@ func TestIp_Gets(t *testing.T) {
 	//searchMap["port_status"] = "200"
 	//searchMap["date_delta"] = 2
 
-	ipLists, count := ipObj.Gets(searchMap, 1, 10)
+	ipLists, count := ipObj.Gets(searchMap, 1, 10, false)
 	t.Log(count)
 	for _, ip := range ipLists {
 		t.Log(ip)

@@ -13,7 +13,7 @@ func TestDomain_Add(t *testing.T) {
 		UpdateDatetime: time.Time{},
 	}
 	success := domain.Add()
-	t.Log(success,domain)
+	t.Log(success, domain)
 }
 
 func TestDomain_GetsBySearch(t *testing.T) {
@@ -21,8 +21,8 @@ func TestDomain_GetsBySearch(t *testing.T) {
 	searchMap["domain"] = "10086"
 
 	domain := &Domain{}
-	domainLists,_:= domain.Gets(searchMap,1,10)
-	for _,o := range domainLists{
+	domainLists, _ := domain.Gets(searchMap, 1, 10, false)
+	for _, o := range domainLists {
 		t.Log(o)
 	}
 }

@@ -8,9 +8,55 @@ $(function () {
     load_custom('iplocationC', $('#text_iplocationC'));
 
     $("#buttonSaveNmap").click(function () {
-        swal('Warning', "暂不支持保存配置，请手工修改配置文件!", 'error');
-        return;
+        $.post("/config-save-portscan",
+            {
+                "cmdbin": $('#select_cmdbin').val(),
+                "port": $('#input_port').val(),
+                "rate": $('#input_rate').val(),
+                "tech": $('#select_tech').val(),
+                "ping": $('#checkbox_ping').is(":checked"),
+            }, function (data, e) {
+                if (e === "success" && data['status'] == 'success') {
+                    swal({
+                        title: "保存成功！",
+                        text: "",
+                        type: "success",
+                        confirmButtonText: "确定",
+                        confirmButtonColor: "#41b883",
+                        closeOnConfirm: true,
+                        timer: 3000
+                    });
+                } else {
+                    swal('Warning', data['msg'], 'error');
+                }
+            });
     });
+
+    $("#buttonSaveFingerprint").click(function () {
+        $.post("/config-save-fingerprint",
+            {
+                "httpx": $('#checkbox_httpx').is(":checked"),
+                "fingerprinthub": $('#checkbox_fingerprinthub').is(":checked"),
+                "screenshot": $('#checkbox_screenshot').is(":checked"),
+                "iconhash": $('#checkbox_iconhash').is(":checked"),
+
+            }, function (data, e) {
+                if (e === "success" && data['status'] == 'success') {
+                    swal({
+                        title: "保存成功！",
+                        text: "",
+                        type: "success",
+                        confirmButtonText: "确定",
+                        confirmButtonColor: "#41b883",
+                        closeOnConfirm: true,
+                        timer: 3000
+                    });
+                } else {
+                    swal('Warning', data['msg'], 'error');
+                }
+            });
+    });
+
     $("#buttonSaveTaskSlice").click(function () {
         if ($('#input_ipslicenumber').val() === '' || $('#input_portslicenumber').val() === '') {
             swal('Warning', "请输入数量", 'error');
@@ -87,11 +133,15 @@ $("#buttonChangPassword").click(function () {
 
 function load_config() {
     $.post("/config-list", function (data) {
-        $('#input_cmdbin').val(data['cmdbin']);
+        $('#select_cmdbin').val(data['cmdbin']);
         $('#input_port').val(data['port']);
         $('#select_tech').val(data['tech']);
         $('#input_rate').val(data['rate']);
         $('#checkbox_ping').prop("checked", data['ping']);
+        $('#checkbox_httpx').prop("checked", data['httpx']);
+        $('#checkbox_fingerprinthub').prop("checked", data['fingerprinthub']);
+        $('#checkbox_screenshot').prop("checked", data['screenshot']);
+        $('#checkbox_iconhash').prop("checked", data['iconhash']);
         $('#input_ipslicenumber').val(data['ipslicenumber']);
         $('#input_portslicenumber').val(data['portslicenumber']);
         $('#nemo_version').html(data['version']);

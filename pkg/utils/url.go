@@ -1,9 +1,12 @@
 package utils
 
 import (
+	"crypto/tls"
+	"net"
 	"net/url"
 	"regexp"
 	"strings"
+	"time"
 )
 
 // HostStrip 将http://a.b.c:80/这种url去除不相关的字符，返回主机名
@@ -50,4 +53,28 @@ func in(target string, strArray []string) bool {
 		}
 	}
 	return false
+}
+
+// GetProtocol 检测URL协议
+func GetProtocol(host string, Timeout int64) (protocol string) {
+	protocol = "http"
+	//如果端口是80或443,跳过Protocol判断
+	if strings.HasSuffix(host, ":80") || !strings.Contains(host, ":") {
+		return
+	} else if strings.HasSuffix(host, ":443") {
+		protocol = "https"
+		return
+	}
+
+	conn, err := tls.DialWithDialer(&net.Dialer{Timeout: time.Duration(Timeout) * time.Second}, "tcp", host, &tls.Config{InsecureSkipVerify: true})
+	defer func() {
+		if conn != nil {
+			conn.Close()
+		}
+	}()
+
+	if err == nil || strings.Contains(err.Error(), "handshake failure") {
+		protocol = "https"
+	}
+	return protocol
 }

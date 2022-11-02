@@ -3,7 +3,6 @@
   <component name="VcsDirectoryMappings">
     <mapping directory="$PROJECT_DIR$" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/thirdparty/nuclei/nuclei-templates" vcs="Git" />
-    <mapping directory="$PROJECT_DIR$/thirdparty/pocsuite/some_pocsuite" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/thirdparty/xray/xray" vcs="Git" />
   </component>
 </project>

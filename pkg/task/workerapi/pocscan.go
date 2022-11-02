@@ -28,11 +28,7 @@ func PocScan(taskId, configJSON string) (result string, err error) {
 		}
 	}
 	var scanResult []pocscan.Result
-	if config.CmdBin == "pocsuite" {
-		p := pocscan.NewPocsuite(config)
-		p.Do()
-		scanResult = p.Result
-	} else if config.CmdBin == "xray" {
+	if config.CmdBin == "xray" {
 		x := pocscan.NewXray(config)
 		x.Do()
 		scanResult = x.Result
@@ -69,6 +65,17 @@ func XrayPocScan(taskId, configJSON string) (result string, err error) {
 	if err = ParseConfig(configJSON, &config); err != nil {
 		return FailedTask(err.Error()), err
 	}
+
+	result, err = doXrayPocScanAndSave(taskId, config)
+	if err != nil {
+		logging.RuntimeLog.Error(err)
+		return FailedTask(err.Error()), err
+	}
+
+	return SucceedTask(result), nil
+}
+
+func doXrayPocScanAndSave(taskId string, config pocscan.XrayPocConfig) (result string, err error) {
 	var scanResult []pocscan.Result
 	p := pocscan.NewXrayPoc(config)
 	p.Do()
@@ -80,10 +87,5 @@ func XrayPocScan(taskId, configJSON string) (result string, err error) {
 	}
 	x := comm.NewXClient()
 	err = x.Call(context.Background(), "SaveVulnerabilityResult", &resultArgs, &result)
-	if err != nil {
-		logging.RuntimeLog.Error(err)
-		return FailedTask(err.Error()), err
-	}
-
-	return SucceedTask(result), nil
+	return
 }

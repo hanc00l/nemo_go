@@ -141,9 +141,13 @@ func (r *Result) SaveResult(config Config) string {
 }
 
 // FilterIPHasTooMuchPort 过滤有安全防护、显示太多端口开放的IP
-func FilterIPHasTooMuchPort(result Result) {
+func FilterIPHasTooMuchPort(result *Result, isOnline bool) {
+	MaxNumber := IpOpenedPortFilterNumber
+	if isOnline {
+		MaxNumber *= 2
+	}
 	for ipName, ipResult := range result.IPResult {
-		if len(ipResult.Ports) > IpOpenedPortFilterNumber {
+		if len(ipResult.Ports) > MaxNumber {
 			logging.RuntimeLog.Infof("ip:%s has too much open port:%d,discard to save!", ipName, len(ipResult.Ports))
 			delete(result.IPResult, ipName)
 		}

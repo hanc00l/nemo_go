@@ -21,6 +21,7 @@ import (
 type Httpx struct {
 	ResultPortScan   portscan.Result
 	ResultDomainScan domainscan.Result
+	DomainTargetPort map[string]map[int]struct{}
 	//保存响应的数据，用于自定义指纹匹配
 	StoreResponse          bool
 	StoreResponseDirectory string
@@ -59,13 +60,9 @@ func (x *Httpx) Do() {
 	swg := sizedwaitgroup.New(fpHttpxThreadNumber)
 
 	if x.ResultPortScan.IPResult != nil {
-		bport := make(map[int]struct{})
-		for _, p := range IgnorePort {
-			bport[p] = struct{}{}
-		}
 		for ipName, ipResult := range x.ResultPortScan.IPResult {
 			for portNumber, _ := range ipResult.Ports {
-				if _, ok := bport[portNumber]; ok {
+				if _, ok := blankPort[portNumber]; ok {
 					continue
 				}
 				url := fmt.Sprintf("%v:%v", ipName, portNumber)
@@ -107,38 +104,53 @@ func (x *Httpx) Do() {
 		}
 	}
 	if x.ResultDomainScan.DomainResult != nil {
-		for domain, _ := range x.ResultDomainScan.DomainResult {
-			swg.Add()
-			go func(d string) {
-				fingerPrintResult := x.RunHttpx(d)
-				if len(fingerPrintResult) > 0 {
-					for _, fpa := range fingerPrintResult {
-						dar := domainscan.DomainAttrResult{
-							Source:  "httpx",
-							Tag:     fpa.Tag,
-							Content: fpa.Content,
+		if x.DomainTargetPort == nil {
+			x.DomainTargetPort = make(map[string]map[int]struct{})
+		}
+		for domain := range x.ResultDomainScan.DomainResult {
+			//如果无域名对应的端口，默认80和443
+			if _, ok := x.DomainTargetPort[domain]; !ok {
+				x.DomainTargetPort[domain] = make(map[int]struct{})
+				x.DomainTargetPort[domain][80] = struct{}{}
+				x.DomainTargetPort[domain][443] = struct{}{}
+			}
+			for port := range x.DomainTargetPort[domain] {
+				if _, ok := blankPort[port]; ok {
+					continue
+				}
+				url := fmt.Sprintf("%s:%d", domain, port)
+				swg.Add()
+				go func(d string, u string) {
+					fingerPrintResult := x.RunHttpx(u)
+					if len(fingerPrintResult) > 0 {
+						for _, fpa := range fingerPrintResult {
+							dar := domainscan.DomainAttrResult{
+								Source:  "httpx",
+								Tag:     fpa.Tag,
+								Content: fpa.Content,
+							}
+							x.ResultDomainScan.SetDomainAttr(d, dar)
 						}
-						x.ResultDomainScan.SetDomainAttr(d, dar)
-					}
-					//处理自定义的finger
-					if x.StoreResponse && len(x.FingerPrintFunc) > 0 {
-						for _, f := range x.FingerPrintFunc {
-							xfars := f(d, "", 0, d, fingerPrintResult)
-							if len(xfars) > 0 {
-								for _, fps := range xfars {
-									dar := domainscan.DomainAttrResult{
-										Source:  "httpxfinger",
-										Tag:     "fingerprint",
-										Content: fps,
+						//处理自定义的finger
+						if x.StoreResponse && len(x.FingerPrintFunc) > 0 {
+							for _, f := range x.FingerPrintFunc {
+								xfars := f(d, "", 0, u, fingerPrintResult)
+								if len(xfars) > 0 {
+									for _, fps := range xfars {
+										dar := domainscan.DomainAttrResult{
+											Source:  "httpxfinger",
+											Tag:     "fingerprint",
+											Content: fps,
+										}
+										x.ResultDomainScan.SetDomainAttr(d, dar)
 									}
-									x.ResultDomainScan.SetDomainAttr(d, dar)
 								}
 							}
 						}
 					}
-				}
-				swg.Done()
-			}(domain)
+					swg.Done()
+				}(domain, url)
+			}
 		}
 	}
 	swg.Wait()

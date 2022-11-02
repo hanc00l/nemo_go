@@ -19,15 +19,22 @@ api:
     name: chinaz
     key:
   quake:
+    name:
     key:
   hunter:
+    name:
     key:
 portscan:
   ping: false
   port: --top-ports 1000
   rate: 1000
   tech: -sS
-  cmdbin: masscan
+  cmdbin: nmap
+fingerprint:
+  httpx: true
+  screenshot: true
+  fingerprinthub: true
+  iconhash: true
 domainscan:
   resolver: resolver.txt
   wordlist: subnames.txt
@@ -37,9 +44,6 @@ pocscan:
   xray:
     pocPath: thirdparty/xray/xray/pocs
     latest: 1.8.2
-  pocsuite:
-    pocPath: thirdparty/pocsuite/some_pocsuite
-    threads: 10
   nuclei:
     pocPath: thirdparty/nuclei/nuclei-templates
     threads: 25

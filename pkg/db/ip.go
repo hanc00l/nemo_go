@@ -25,19 +25,19 @@ func (Ip) TableName() string {
 	return "ip"
 }
 
-
 // Get 根据ID查询记录
 func (ip *Ip) Get() (success bool) {
 	db := GetDB()
 	defer CloseDB(db)
 
-	if result := db.First(ip,ip.Id); result.RowsAffected > 0 {
+	if result := db.First(ip, ip.Id); result.RowsAffected > 0 {
 		return true
 	} else {
 		return false
 	}
 }
-//Add 插入一条新的记录
+
+// Add 插入一条新的记录
 func (ip *Ip) Add() (success bool) {
 	ip.CreateDatetime = time.Now()
 	ip.UpdateDatetime = time.Now()
@@ -98,9 +98,11 @@ func (ip *Ip) Count(searchMap map[string]interface{}) (count int) {
 }
 
 // Gets 根据指定的条件，查询满足要求的记录
-func (ip *Ip) Gets(searchMap map[string]interface{}, page, rowsPerPage int) (results []Ip, count int) {
+func (ip *Ip) Gets(searchMap map[string]interface{}, page, rowsPerPage int, orderByDate bool) (results []Ip, count int) {
 	orderBy := "ip_int"
-
+	if orderByDate {
+		orderBy = "update_datetime desc"
+	}
 	db := ip.makeWhere(searchMap).Model(ip)
 	defer CloseDB(db)
 	//统计满足条件的总记录数

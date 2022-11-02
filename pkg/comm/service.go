@@ -335,6 +335,45 @@ func (s *Service) LoadOpenedPort(ctx context.Context, args *string, replay *stri
 	return nil
 }
 
+// LoadDomainOpenedPort 获取域名关联的IP的端口
+func (s *Service) LoadDomainOpenedPort(ctx context.Context, args *map[string]struct{}, replay *map[string]map[int]struct{}) error {
+	result := make(map[string]map[int]struct{})
+
+	domainIP := make(map[string]map[string]struct{})
+	//获取域名关联的所有IP
+	for domainName := range *args {
+		domain := db.Domain{DomainName: domainName}
+		if !domain.GetByDomain() {
+			continue
+		}
+		domainIP[domainName] = make(map[string]struct{})
+		domainAttr := db.DomainAttr{RelatedId: domain.Id}
+		domainAttrData := domainAttr.GetsByRelatedId()
+		for _, da := range domainAttrData {
+			if da.Tag == "A" {
+				domainIP[domainName][da.Content] = struct{}{}
+			}
+		}
+	}
+	//获取IP的开放的端口
+	for domainName, ips := range domainIP {
+		ports := make(map[int]struct{})
+		for ip := range ips {
+			ipDb := db.Ip{IpName: ip}
+			if ipDb.GetByIp() {
+				portDb := db.Port{IpId: ipDb.Id}
+				pts := portDb.GetsByIPId()
+				for _, p := range pts {
+					ports[p.PortNum] = struct{}{}
+				}
+			}
+		}
+		result[domainName] = ports
+	}
+	*replay = result
+	return nil
+}
+
 // saveTaskResult 将任务结果保存到本地文件
 func saveTaskResult(taskID string, result interface{}) {
 	if taskID == "" {

@@ -428,6 +428,87 @@ func (c *TaskController) StartPocScanTaskAction() {
 	}
 }
 
+// StartXScanTaskAction 新建Xscan任务
+func (c *TaskController) StartXScanTaskAction() {
+	c.UpdateOnlineUser()
+	defer c.ServeJSON()
+	//校验参数
+	req := runner.XScanRequestParam{}
+	err := c.ParseForm(&req)
+	if err != nil {
+		logging.RuntimeLog.Error(err.Error())
+		c.FailedStatus(err.Error())
+		return
+	}
+	var taskName string
+	if req.XScanType == "xportscan" {
+		taskName = "xportscan"
+		if req.Target == "" {
+			c.FailedStatus("no target")
+			return
+		}
+		if req.Port == "" {
+			req.Port = conf.GlobalWorkerConfig().Portscan.Port
+		}
+	} else if req.XScanType == "xorgipscan" {
+		taskName = "xorgscan"
+		req.IsOrgIP = true
+		if req.OrgId == 0 {
+			c.FailedStatus("no org")
+			return
+		}
+	} else if req.XScanType == "xdomainscan" {
+		taskName = "xdomainscan"
+		if req.OrgId == 0 {
+			c.FailedStatus("no org")
+			return
+		}
+	} else if req.XScanType == "xorgdomainscan" {
+		taskName = "xorgscan"
+		req.IsOrgDomain = true
+		if req.OrgId == 0 {
+			c.FailedStatus("no org")
+			return
+		}
+	} else if req.XScanType == "xfofa" {
+		taskName = "xfofa"
+	} else {
+		c.FailedStatus("invalide xscan type")
+		return
+	}
+	var result string
+	// 计划任务
+	if req.IsTaskCron {
+		var kwargs []byte
+		kwargs, err = json.Marshal(req)
+		if err != nil {
+			c.FailedStatus(err.Error())
+			return
+		}
+		taskId := runner.SaveCronTask(taskName, string(kwargs), req.TaskCronRule, req.TaskCronComment)
+		if taskId == "" {
+			c.FailedStatus("save to db fail")
+			return
+		}
+	} else {
+		// 立即执行的任务
+		if req.XScanType == "xportscan" {
+			result, err = runner.StartXPortScanTask(req, "")
+		} else if req.XScanType == "xdomainscan" {
+			result, err = runner.StartXDomainScanTask(req, "")
+		} else if req.XScanType == "xorgipscan" || req.XScanType == "xorgdomainscan" {
+			result, err = runner.StartXOrgScanTask(req, "")
+		} else if req.XScanType == "xfofa" {
+			result, err = runner.StartXFofaKeywordTask(req, "")
+		}
+		if err != nil {
+			c.FailedStatus(err.Error())
+			return
+		}
+	}
+	c.SucceededStatus(result)
+}
+
 // validateRequestParam 校验请求的参数
 func (c *TaskController) validateRequestParam(req *taskRequestParam) {
 	if req.Length <= 0 {
@@ -676,6 +757,14 @@ func ParseTargetFromKwArgs(taskName, args string) (target string) {
 		IPPortResult map[string][]int
 		DomainResult []string
 	}
+	type XScanConfig struct {
+		OrgId        *int                `json:"orgid"`
+		FofaTarget   string              `json:"fofatarget"`
+		FofaKeyword  string              `json:"fofaKeyword"`
+		IPPort       map[string][]int    `json:"ipport"`
+		IPPortString map[string]string   `json:"ipportstring"`
+		Domain       map[string]struct{} `json:"domain"`
+	}
 	if taskName == "fingerprint" {
 		var t FingerTargetStrut
 		err := json.Unmarshal([]byte(args), &t)
@@ -709,6 +798,42 @@ func ParseTargetFromKwArgs(taskName, args string) (target string) {
 			}
 			for _, domain := range t.DomainResult {
 				allTarget = append(allTarget, domain)
+			}
+			target = strings.Join(allTarget, ",")
+		}
+	} else if taskName == "xportscan" || taskName == "xdomainscan" || taskName == "xfofa" || taskName == "xxraypoc" || taskName == "xfingerprint" || taskName == "xorgscan" {
+		var t XScanConfig
+		err := json.Unmarshal([]byte(args), &t)
+		if err != nil {
+			target = args
+		} else {
+			var allTarget []string
+			if len(t.FofaKeyword) > 0 {
+				allTarget = append(allTarget, t.FofaKeyword)
+			}
+			if len(t.FofaTarget) > 0 {
+				allTarget = append(allTarget, t.FofaTarget)
+			}
+			if len(t.IPPort) > 0 {
+				for tip := range t.IPPort {
+					allTarget = append(allTarget, tip)
+				}
+			}
+			if len(t.IPPortString) > 0 {
+				for tip := range t.IPPortString {
+					allTarget = append(allTarget, tip)
+				}
+			}
+			if len(t.Domain) > 0 {
+				for td := range t.Domain {
+					allTarget = append(allTarget, td)
+				}
+			}
+			if taskName == "xorgscan" {
+				orgDb := db.Organization{Id: *t.OrgId}
+				if orgDb.Get() {
+					allTarget = append(allTarget, orgDb.OrgName)
+				}
 			}
 			target = strings.Join(allTarget, ",")
 		}

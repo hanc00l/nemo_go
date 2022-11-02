@@ -4,7 +4,6 @@ web:
   username: nemo
   password: 648ce596dba3b408b523d3d1189b15070123456789abcdef
   webfiles: /tmp/webfiles
-  #webfiles: c:/test/webfiles
 rpc:
   host: 0.0.0.0
   port: 5001

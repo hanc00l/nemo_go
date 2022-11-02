@@ -31,6 +31,7 @@ type ScreenShot struct {
 	ResultPortScan   portscan.Result
 	ResultDomainScan domainscan.Result
 	ResultScreenShot ScreenshotResult
+	DomainTargetPort map[string]map[int]struct{}
 }
 
 type ScreenshotFileInfo struct {
@@ -53,13 +54,9 @@ func (s *ScreenShot) Do() {
 	swg := sizedwaitgroup.New(fpScreenshotThreadNum)
 
 	if s.ResultPortScan.IPResult != nil {
-		bport := make(map[int]struct{})
-		for _, p := range IgnorePort {
-			bport[p] = struct{}{}
-		}
 		for ipName, ipResult := range s.ResultPortScan.IPResult {
-			for portNumber, _ := range ipResult.Ports {
-				if _, ok := bport[portNumber]; ok {
+			for portNumber := range ipResult.Ports {
+				if _, ok := blankPort[portNumber]; ok {
 					continue
 				}
 				for _, protocol := range []string{"http", "https"} {
@@ -70,14 +67,24 @@ func (s *ScreenShot) Do() {
 		}
 	}
 	if s.ResultDomainScan.DomainResult != nil {
-		for domain, _ := range s.ResultDomainScan.DomainResult {
-			for _, protocol := range []string{"http", "https"} {
-				portNumber := 80
-				if protocol == "https" {
-					portNumber = 443
+		if s.DomainTargetPort == nil {
+			s.DomainTargetPort = make(map[string]map[int]struct{})
+		}
+		for domain := range s.ResultDomainScan.DomainResult {
+			//如果无域名对应的端口，默认80和443
+			if _, ok := s.DomainTargetPort[domain]; !ok {
+				s.DomainTargetPort[domain] = make(map[int]struct{})
+				s.DomainTargetPort[domain][80] = struct{}{}
+				s.DomainTargetPort[domain][443] = struct{}{}
+			}
+			for port := range s.DomainTargetPort[domain] {
+				if _, ok := blankPort[port]; ok {
+					continue
 				}
-				swg.Add()
-				go s.doScreenshotAndResize(&swg, domain, portNumber, protocol)
+				for _, protocol := range []string{"http", "https"} {
+					swg.Add()
+					go s.doScreenshotAndResize(&swg, domain, port, protocol)
+				}
 			}
 		}
 	}
@@ -152,7 +159,7 @@ func (s *ScreenShot) LoadScreenshotFile(domain string) (r []string) {
 	if !utils.CheckDomain(domain) && !utils.CheckIPV4(domain) {
 		return
 	}
-	files, _ := filepath.Glob(filepath.Join(conf.GlobalServerConfig().Web.WebFiles,"screenshot", domain, "*.png"))
+	files, _ := filepath.Glob(filepath.Join(conf.GlobalServerConfig().Web.WebFiles, "screenshot", domain, "*.png"))
 	for _, file := range files {
 		_, f := filepath.Split(file)
 		if !strings.HasSuffix(f, "_thumbnail.png") {
@@ -188,7 +195,7 @@ func (s *ScreenShot) Delete(domain string) bool {
 		logging.RuntimeLog.Errorf("invalid domain:%s", domain)
 		return false
 	}
-	domainPath := filepath.Join(conf.GlobalServerConfig().Web.WebFiles,"screenshot", domain)
+	domainPath := filepath.Join(conf.GlobalServerConfig().Web.WebFiles, "screenshot", domain)
 	if err := os.RemoveAll(domainPath); err != nil {
 		return false
 	}

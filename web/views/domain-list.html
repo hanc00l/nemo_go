@@ -38,7 +38,11 @@
                                     class="fa fa-fw fa-lg fa-search"></i>搜索
                             </button>
                             <button class="btn btn-primary" type="button" id="create_task"><i
-                                    class="fa fa-plus"></i>新建任务
+                                    class="fa fa-plus"></i>任务
+                            </button>
+                            </button>
+                            <button class="btn btn-primary" type="button" id="create_xscan_task"><i
+                                    class="fa fa-fighter-jet"></i>XScan
                             </button>
                             <div class="btn-group" role="group">
                                 <button id="btnGroupDrop1" type="button" class="btn btn-secondary dropdown-toggle"
@@ -69,7 +73,8 @@
                         <form class="row">
                             <div class="form-group col-md-2">
                                 <label class="control-label" for="content">属性</label>
-                                <input class="form-control" type="text" id="content" placeholder="属性内容(模糊搜索）" value="">
+                                <input class="form-control" type="text" id="content" placeholder="属性内容(模糊搜索）"
+                                       value="">
                             </div>
                             <div class="form-group col-md-2">
                                 <label class="control-label" for="select_color_tag">颜色标记</label>
@@ -85,7 +90,8 @@
                             </div>
                             <div class="form-group col-md-2">
                                 <label class="control-label" for="memo_content">备忘录信息</label>
-                                <input class="form-control" type="text" id="memo_content" placeholder="备忘录信息(模糊搜索）"
+                                <input class="form-control" type="text" id="memo_content"
+                                       placeholder="备忘录信息(模糊搜索）"
                                        value="">
                             </div>
                             <div class="form-group col-md-2">
@@ -115,11 +121,20 @@
                                                id="checkbox_disable_banner" type="checkbox">不看Banner信息
                                     </label>
                                 </div>
+                            </div>
+                            <div class="form-group col-md-2">
                                 <div class="form-check form-check-inline">
                                     <label class="form-check-label"
                                            for="checkbox_select_no_ip">
                                         <input class="form-check-input"
                                                id="checkbox_select_no_ip" type="checkbox">筛选没有IP解析的域名
+                                    </label>
+                                </div>
+                                <div class="form-check form-check-inline">
+                                    <label class="form-check-label"
+                                           for="checkbox_select_order_by_date">
+                                        <input class="form-check-input"
+                                               id="checkbox_select_order_by_date" type="checkbox">按更新时间排序
                                     </label>
                                 </div>
                             </div>
@@ -158,7 +173,8 @@
                                                                             title="对目标进行域名搜集和资产扫描"><strong>资产扫描</strong></a>
                                                     </li>
                                                     <li class="nav-item"><a class="nav-link" data-toggle="tab"
-                                                                            href="#vulverify" title="对目标进行漏洞验证"><strong>漏洞验证</strong></a>
+                                                                            href="#vulverify"
+                                                                            title="对目标进行漏洞验证"><strong>漏洞验证</strong></a>
                                                     </li>
                                                 </ul>
                                                 <div class="tab-content" id="myTabContent">
@@ -264,7 +280,8 @@
                                                                 </label>
                                                                 <br>
                                                                 <div class="form-check form-check-inline">
-                                                                    <label class="form-check-label"  for="checkbox_fofasearch">
+                                                                    <label class="form-check-label"
+                                                                           for="checkbox_fofasearch">
                                                                         <input class="form-check-input"
                                                                                id="checkbox_fofasearch"
                                                                                type="checkbox">FOFA<i
@@ -273,7 +290,8 @@
                                                                     </label>
                                                                 </div>
                                                                 <div class="form-check form-check-inline">
-                                                                    <label class="form-check-label" for="checkbox_quakesearch">
+                                                                    <label class="form-check-label"
+                                                                           for="checkbox_quakesearch">
                                                                         <input class="form-check-input"
                                                                                id="checkbox_quakesearch"
                                                                                type="checkbox">Quake<i
@@ -282,7 +300,8 @@
                                                                     </label>
                                                                 </div>
                                                                 <div class="form-check form-check-inline">
-                                                                    <label class="form-check-label" for="checkbox_huntersearch">
+                                                                    <label class="form-check-label"
+                                                                           for="checkbox_huntersearch">
                                                                         <input class="form-check-input"
                                                                                id="checkbox_huntersearch"
                                                                                type="checkbox">Hunter<i
@@ -291,7 +310,8 @@
                                                                     </label>
                                                                 </div>
                                                                 <div class="form-check form-check-inline">
-                                                                    <label class="form-check-label" for="checkbox_icpquery">
+                                                                    <label class="form-check-label"
+                                                                           for="checkbox_icpquery">
                                                                         <input class="form-check-input"
                                                                                id="checkbox_icpquery"
                                                                                type="checkbox">ICP备案<i
@@ -300,7 +320,8 @@
                                                                     </label>
                                                                 </div>
                                                                 <div class="form-check form-check-inline">
-                                                                    <label class="form-check-label" for="checkbox_whoisquery">
+                                                                    <label class="form-check-label"
+                                                                           for="checkbox_whoisquery">
                                                                         <input class="form-check-input"
                                                                                id="checkbox_whoisquery"
                                                                                type="checkbox" checked>Whois<i
@@ -309,7 +330,8 @@
                                                                     </label>
                                                                 </div>
                                                                 <div class="form-check form-check-inline">
-                                                                    <label class="form-check-label" for="checkbox_fld_domain">
+                                                                    <label class="form-check-label"
+                                                                           for="checkbox_fld_domain">
                                                                         <input class="form-check-input"
                                                                                id="checkbox_fld_domain"
                                                                                type="checkbox">提取顶级域名<i
@@ -319,7 +341,8 @@
                                                                     </label>
                                                                 </div>
                                                                 <div class="form-check form-check-inline">
-                                                                    <label class="form-check-label"  for="checkbox_ignorecdn_outofchina">
+                                                                    <label class="form-check-label"
+                                                                           for="checkbox_ignorecdn_outofchina">
                                                                         <input class="form-check-input"
                                                                                id="checkbox_ignorecdn_outofchina"
                                                                                type="checkbox" checked>忽略CDN与中国大陆以外IP<i
@@ -334,8 +357,8 @@
                                                             <div class="col-md-12">
                                                                 <label class="col-form-label">
                                                                     <b>端口扫描<i class="fa fa-info-circle"
-                                                                              aria-hidden="true"
-                                                                              title="提取本次任务结果中的IP作为新任务进行端口扫描，扫描的方法、探测技术和速度由系统设置中的端口扫描默认配置。"></i>：</b>
+                                                                                  aria-hidden="true"
+                                                                                  title="提取本次任务结果中的IP作为新任务进行端口扫描，扫描的方法、探测技术和速度由系统设置中的端口扫描默认配置。"></i>：</b>
                                                                 </label>
                                                                 <br>
                                                                 <div class="form-check form-check-inline">
@@ -366,7 +389,8 @@
                                                                         <option value="0">--默认单任务--</option>
                                                                         <option value="2" selected>按IP切分任务</option>
                                                                         <option value="3">按端口切分任务</option>
-                                                                        <option value="4">按IP和端口交叉切分任务</option>
+                                                                        <option value="4">按IP和端口交叉切分任务
+                                                                        </option>
                                                                     </select>
                                                                 </div>
                                                             </div>
@@ -378,7 +402,8 @@
                                                                         title="任务执行模式&#10;默认为每一行为一个单独任务；可将任务按目标的行进行切分为多个任务，均衡分配到多个worker上并发执行；"></i></label>
                                                                 <select class="form-control" id="select_taskmode">
                                                                     <option value="0">单任务（默认）</option>
-                                                                    <option value="1" selected>每一行目标单独任务</option>
+                                                                    <option value="1" selected>每一行目标单独任务
+                                                                    </option>
                                                                 </select>
                                                                 <label for="select_org_id_task"><b>资产归属组织</b></label>
                                                                 <select class="form-control"
@@ -390,22 +415,6 @@
                                                     <div class="tab-pane fade" id="vulverify">
                                                         <div class="form-group row bg-light">
                                                             <div class="col-md-12">
-                                                                <p></p>
-                                                                <div class="form-check form-check-inline">
-                                                                    <label class="form-check-label"
-                                                                           for="checkbox_pocsuite3">
-                                                                        <input class="form-check-input"
-                                                                               id="checkbox_pocsuite3"
-                                                                               type="checkbox"><b>Pocsuite3</b>
-                                                                    </label>
-                                                                </div>
-                                                                <input class="form-control"
-                                                                       id="input_pocsuite3_poc_file" type="text"
-                                                                       placeholder="--选择poc文件--" values=""
-                                                                       list="datalist_pocsuite3_poc_file">
-                                                                <datalist id="datalist_pocsuite3_poc_file"
-                                                                          style="display:none;">
-                                                                </datalist>
                                                                 <p></p>
                                                                 <div class="form-check form-check-inline">
                                                                     <label class="form-check-label"
@@ -504,7 +513,187 @@
                                 </div>
                             </div><!-- /.modal-content -->
                         </div><!-- /.modal-dialog -->
-                    </div> <!-- table responsive-->
+                    </div>
+                    <!-- 模态对话框：XSCAN-->
+                    <div class="modal fade" id="newXScan" tabindex="-1" role="dialog"
+                         aria-labelledby="myModalLabel"
+                         aria-hidden="true">
+                        <div class="modal-dialog">
+                            <div class="modal-content">
+                                <div class="modal-header card-header bg-primary">
+                                    <h4 class="modal-title">
+                                        新建XScan任务
+                                        <i class="fa fa-info-circle"
+                                           aria-hidden="true"
+                                           title="Xscan任务是一个综合性的任务&#10;任务可以通过指定Domain、组织关联的域名资产两种方式收集资产，然后自动化执行子域名枚举与爆破获取资产和Fofa在线搜索（只有Domain类型的任务），进行指纹识别、漏洞扫描。"></i>
+                                    </h4>
+                                </div>
+                                <div class="modal-body ">
+                                    <form class="form-horizontal" role="form">
+                                        <div class="form-group">
+                                            <div class="form-group row bg-lght">
+                                                <div class="col-md-12">
+                                                    <div class="bs-component">
+                                                        <ul class="nav nav-tabs" id="nav_tabs_xscan">
+                                                            <li class="nav-item"><a class="nav-link active"
+                                                                                    data-toggle="tab"
+                                                                                    href="#nav_ipdomain"
+                                                                                    title="对IP或Domain进行SXcan扫描"><strong>Domain</strong></a>
+                                                            </li>
+                                                            <li class="nav-item"><a class="nav-link" data-toggle="tab"
+                                                                                    href="#nav_organization"
+                                                                                    title="对数据库中已存在的的组织资产进行XScan扫描"><strong>组织</strong></a>
+                                                            </li>
+                                                        </ul>
+                                                        <div class="tab-content" id="myTabContentXscan">
+                                                            <div class="tab-pane fade active show" id="nav_ipdomain">
+                                                                <div class="form-group row ">
+                                                                    <div class="col-md-12">
+                                                                        <label for="text_target_xscan">
+                                                                            <b><span
+                                                                                    class="text-danger">*</span>Targets:</b>
+                                                                        </label>
+                                                                        <textarea class="form-control"
+                                                                                  id="text_target_xscan"
+                                                                                  rows="3"
+                                                                                  placeholder="10086.cn&#10;www.google.com"></textarea>
+                                                                    </div>
+                                                                </div>
+                                                                <div class="form-group row">
+                                                                    <div class="col-md-12 ">
+                                                                        <div class="form-check form-check-inline">
+                                                                            <label class="form-check-label"
+                                                                                   for="checkbox_fofasearch_xscan">
+                                                                                <input class="form-check-input"
+                                                                                       id="checkbox_fofasearch_xscan"
+                                                                                       type="checkbox"><b>Fofa</b><i
+                                                                                    class="fa fa-info-circle"
+                                                                                    aria-hidden="true"
+                                                                                    title="调用FOFA API接口查询，需在worker.yml中配置KEY"></i>
+                                                                            </label>
+                                                                        </div>
+                                                                        <br>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                            <div class="tab-pane fade" id="nav_organization">
+                                                                <br/>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+
+                                                    <div>
+                                                        <div class="form-group row">
+                                                            <div class="col-md-12">
+                                                                <label for="checkbox_fingerpint_xscan">
+                                                                    <b><span class="text-danger">*</span>指纹识别</b>
+                                                                </label>
+                                                            </div>
+                                                            <div class="col-md-12">
+                                                                <div class="form-check form-check-inline">
+                                                                    <label class="form-check-label"
+                                                                           for="checkbox_fingerpint_xscan">
+                                                                        <input class="form-check-input"
+                                                                               id="checkbox_fingerpint_xscan"
+                                                                               type="checkbox">默认指纹识别<i
+                                                                            class="fa fa-question-circle"
+                                                                            aria-hidden="true"
+                                                                            title="通过调用内置的指纹识别模块，对资产进行主动指纹扫描和识别；指纹识别技术选项在系统配置中"></i>
+                                                                    </label>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+
+                                                    <div>
+                                                        <div class="form-group row">
+                                                            <div class="col-md-12">
+                                                                <label for="checkbox_xraypocv1_xscan">
+                                                                    <b><span class="text-danger">*</span>漏洞扫描</b>
+                                                                </label>
+                                                            </div>
+                                                            <div class="col-md-12">
+                                                                <div class="form-check form-check-inline">
+                                                                    <label class="form-check-label"
+                                                                           for="checkbox_xraypocv1_xscan">
+                                                                        <input class="form-check-input"
+                                                                               id="checkbox_xraypocv1_xscan"
+                                                                               type="checkbox">XrayPocV1<i
+                                                                            class="fa fa-question-circle"
+                                                                            aria-hidden="true"
+                                                                            title="通过调用内置的XyraPoc，对获得的ip资产和域名资产进行漏洞验证；需要自定义的web_xraypoc_v1.json"></i>
+                                                                    </label>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <div>
+                                                        <div class="form-group row bg-light">
+                                                            <div class="col-md-12">
+                                                                <label for="select_org_id_task_xscan"><b><span
+                                                                        class="text-danger">*</span>组织</b></label>
+                                                                <select class="form-control"
+                                                                        id="select_org_id_task_xscan">
+                                                                </select>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <div class="form-group row">
+                                                        <div class="col-md-12">
+                                                            <div class="form-check form-check-inline">
+                                                                <label class="form-check-label"
+                                                                       for="checkbox_cron_task_xscan">
+                                                                    <input class="form-check-input"
+                                                                           id="checkbox_cron_task_xscan" type="checkbox"
+                                                                    ><b>定时任务</b><i
+                                                                        class="fa fa-info-circle" aria-hidden="true"
+                                                                        title="定时任务&#10;任务在指定时间启动并周期执行，执行规则同Linux Crontab任务计划格式&#10;任务格式：“分钟 小时 日 月 周”，可使用*、/、,、-等特殊符号&#10;例：0 8-16/2 * * *表示在每天8-16点的整点，每隔2小时启动&#10;参见：https://www.runoob.com/w3cnote/linux-crontab-tasks.html"></i>
+                                                                </label>
+                                                            </div>
+                                                            <input class="form-control" id="input_cron_comment_xscan" type="text"
+                                                                   placeholder="定时任务简要说明" disabled
+                                                                   value="">
+                                                            <div class="form-check form-check-inline">
+                                                                <label class="form-check-label" id="label_cron_rule_xscan"
+                                                                       disabled
+                                                                       for="input_cron_rule">
+                                                                    定时执行规则
+                                                                </label>
+                                                            </div>
+                                                            <input class="form-control" id="input_cron_rule_xscan" type="text"
+                                                                   placeholder="0 8 * * *" disabled value="0 8 * * *">
+                                                        </div>
+                                                    </div>
+                                                    <div class="form-check form-check-inline">
+                                                        <label class="form-check-label"
+                                                               for="checkbox_ignorecdn_outofchina_xscan">
+                                                            <input class="form-check-input"
+                                                                   id="checkbox_ignorecdn_outofchina_xscan"
+                                                                   type="checkbox" checked>忽略中国大陆以外IP<i
+                                                                class="fa fa-question-circle"
+                                                                aria-hidden="true"
+                                                                title="对通过FOFA、Hunter及Quake资产管理平台API接口查询到的结果，检查IP是否采用了CDN，以及是否是中国大陆以外的IP"></i>
+                                                        </label>
+                                                    </div>
+
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </form>
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-secondary" data-dismiss="modal"
+                                            aria-hidden="true">取消
+                                    </button>
+                                    <button class="btn btn-primary org-update" type="button"
+                                            id="start_xscan_task">
+                                        执行
+                                    </button>
+                                </div>
+                            </div><!-- /.modal-content -->
+                        </div><!-- /.modal-dialog -->
+                    </div>
+                    <!-- table responsive-->
                 </div>
                 <!----tile body-->
             </div> <!-- tile -->

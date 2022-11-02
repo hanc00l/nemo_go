@@ -19,7 +19,7 @@ RUN set -x \
 RUN set -x \
     # You may need this if you're in Mainland China \
     && apt update \
-    && apt install -y  python3-pip python3-setuptools \
+    && apt install -y \
     wget curl vim net-tools  iputils-ping git unzip \
     nmap masscan  --fix-missing
 
@@ -28,13 +28,6 @@ RUN set -x \
     && curl -LO https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb \
     && apt install -y ./google-chrome-stable_current_amd64.deb --fix-missing \
     && rm google-chrome-stable_current_amd64.deb
-
-# pip package
-RUN set -x \
-    # You may need this if you're in Mainland China
-    # && python3 -m pip config set global.index-url 'https://pypi.mirrors.ustc.edu.cn/simple/' \
-    && python3 -m pip install -U pip -i https://mirrors.aliyun.com/pypi/simple/ --user \
-    && python3 -m pip install -U requests pocsuite3 -i https://mirrors.aliyun.com/pypi/simple/
 
 COPY . /opt/nemo
 

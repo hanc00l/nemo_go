@@ -5,7 +5,8 @@ import (
 	"fmt"
 	"github.com/hanc00l/nemo_go/pkg/conf"
 	"github.com/hanc00l/nemo_go/pkg/logging"
-	"github.com/hanc00l/nemo_go/pkg/poclib"
+	"github.com/hanc00l/nemo_go/pkg/utils"
+	"github.com/hanc00l/nemo_go/pkg/xraypocv1"
 	"github.com/remeh/sizedwaitgroup"
 	"os"
 	"path"
@@ -19,8 +20,8 @@ type XrayPoc struct {
 }
 
 type XrayPocConfig struct {
-	IPPortResult map[string][]int
-	DomainResult []string
+	IPPort map[string][]int
+	Domain map[string]struct{}
 }
 
 type Poc struct {
@@ -34,13 +35,13 @@ func NewXrayPoc(config XrayPocConfig) *XrayPoc {
 		ResultPortScan:   PortscanVulResult{IPResult: make(map[string]*IPResult)},
 		ResultDomainScan: DomainscanVulResult{DomainResult: make(map[string]*DomainResult)},
 	}
-	for ip, ports := range config.IPPortResult {
+	for ip, ports := range config.IPPort {
 		p.ResultPortScan.SetIP(ip)
 		for _, port := range ports {
 			p.ResultPortScan.SetPort(ip, port)
 		}
 	}
-	for _, domain := range config.DomainResult {
+	for domain := range config.Domain {
 		p.ResultDomainScan.SetDomain(domain)
 	}
 	p.loadCustomPoc()
@@ -120,8 +121,8 @@ func (p *XrayPoc) Do() {
 
 // runXrayCheck 调用xray poc测试代码
 func (p *XrayPoc) runXrayCheck(url string, poc Poc) (status bool, name string) {
-	u := fmt.Sprintf("http://%s", url)
-	status, name = poclib.Execute(u, []byte(poc.PocString), poclib.Content{})
+	protocol := utils.GetProtocol(url, 5)
+	status, name = xraypocv1.Execute(fmt.Sprintf("%s://%s", protocol, url), []byte(poc.PocString), xraypocv1.Content{})
 	return
 }
 

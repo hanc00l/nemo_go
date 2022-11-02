@@ -140,6 +140,9 @@ func (q *Quake) RunQuake(domain string) {
 	} else {
 		query = fmt.Sprintf("domain:\"%s\" OR cert:\"%s\"", domain, domain)
 	}
+	if q.Config.IsIgnoreOutofChina {
+		query = fmt.Sprintf("(%s) AND country:\"CN\" AND NOT province:\"Hongkong\"", query)
+	}
 	//proxy, _ := url.Parse("http://127.0.0.1:8080")
 	client := &http.Client{
 		Timeout: time.Duration(30) * time.Second,

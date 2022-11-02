@@ -16,10 +16,13 @@
                 <div class="tile-body">
                     <form>
                         <div class="form-group">
-                            <label class="col-form-label" for="input_cmdbin">
+                            <label class="col-form-label" for="select_cmdbin">
                                 <b>默认扫描程序</b>
                             </label>
-                            <input class="form-control" id="input_cmdbin" type="text" value="">
+                            <select class="form-control" id="select_cmdbin">
+                                <option value="masscan">masscan</option>
+                                <option value="nmap">nmap</option>
+                            </select>
                             <label class="col-form-label" for="input_port">
                                 <b>默认扫描端口:</b>（支持Nmap格式的端口列表）
                             </label>
@@ -44,6 +47,38 @@
                 </div>
                 <div class="tile-footer">
                     <button class="btn btn-primary" type="button" id="buttonSaveNmap"><i
+                            class="fa fa-fw fa-lg fa-check-circle"></i>保存设置
+                    </button>&nbsp;&nbsp;&nbsp;
+                </div>
+            </div>
+            <div class="tile">
+                <h3 class="tile-title">指纹获取默认配置</h3>
+                <div class="tile-body">
+                    <form>
+                        <div class="form-check form-check-inline">
+                            <label class="form-check-label" for="checkbox_httpx">
+                                <input class="form-check-input" id="checkbox_httpx" type="checkbox">Httpx
+                            </label>
+                        </div>
+                        <div class="form-check form-check-inline">
+                            <label class="form-check-label" for="checkbox_fingerprinthub">
+                                <input class="form-check-input" id="checkbox_fingerprinthub" type="checkbox">FingerprintHub
+                            </label>
+                        </div>
+                        <div class="form-check form-check-inline">
+                            <label class="form-check-label" for="checkbox_screenshot">
+                                <input class="form-check-input" id="checkbox_screenshot" type="checkbox">Screenshot
+                            </label>
+                        </div>
+                        <div class="form-check form-check-inline">
+                            <label class="form-check-label" for="checkbox_iconhash">
+                                <input class="form-check-input" id="checkbox_iconhash" type="checkbox">IconHash
+                            </label>
+                        </div>
+                    </form>
+                </div>
+                <div class="tile-footer">
+                    <button class="btn btn-primary" type="button" id="buttonSaveFingerprint"><i
                             class="fa fa-fw fa-lg fa-check-circle"></i>保存设置
                     </button>&nbsp;&nbsp;&nbsp;
                 </div>
@@ -101,7 +136,7 @@
                 </div>
             </div>
             <div class="tile">
-                <h3 class="tile-title" >Version&nbsp;<span id="nemo_version"></span></h3>
+                <h3 class="tile-title">Version&nbsp;<span id="nemo_version"></span></h3>
                 <div class="tile-body">
                 </div>
                 <div class="tile-footer">

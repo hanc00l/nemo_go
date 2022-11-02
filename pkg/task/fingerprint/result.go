@@ -9,6 +9,8 @@ var IgnorePort = []int{7, 9, 13, 17, 19, 21, 22, 23, 25, 26, 37, 53, 100, 106, 1
 	49158, 49159, 49160, 49161, 49163, 49165, 49167, 49175, 49176,
 	13306, 11521, 15432, 11433, 13389, 15900, 15901}
 
+var blankPort = map[int]struct{}{}
+
 const (
 	fpHttpxThreadNumber        = 10
 	fpScreenshotThreadNum      = 5
@@ -60,4 +62,11 @@ func (r *ScreenshotResult) SetScreenshotInfo(domain string, si ScreenshotInfo) {
 		r.Result[domain] = []ScreenshotInfo{}
 	}
 	r.Result[domain] = append(r.Result[domain], si)
+}
+
+func init() {
+	blankPort = make(map[int]struct{})
+	for _, p := range IgnorePort {
+		blankPort[p] = struct{}{}
+	}
 }

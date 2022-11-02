@@ -27,6 +27,21 @@ func PortScan(taskId, configJSON string) (result string, err error) {
 		return FailedTask(err.Error()), err
 	}
 	var resultPortScan portscan.Result
+	resultPortScan, result, err = doPortScanAndSave(taskId, config)
+	//指纹识别任务
+	_, err = NewFingerprintTask(&resultPortScan, nil, FingerprintTaskConfig{
+		IsHttpx:          config.IsHttpx,
+		IsFingerprintHub: config.IsFingerprintHub,
+		IsIconHash:       config.IsIconHash,
+		IsScreenshot:     config.IsScreenshot,
+	})
+	if err != nil {
+		return FailedTask(err.Error()), err
+	}
+	return SucceedTask(result), nil
+}
+
+func doPortScanAndSave(taskId string, config portscan.Config) (resultPortScan portscan.Result, result string, err error) {
 	x := comm.NewXClient()
 	//端口扫描：
 	if config.IsPortscan {
@@ -43,6 +58,20 @@ func PortScan(taskId, configJSON string) (result string, err error) {
 		}
 	} else {
 		resultPortScan.IPResult = make(map[string]*portscan.IPResult)
+	}
+	// IP位置
+	if config.IsIpLocation {
+		doLocation(&resultPortScan)
+	}
+	// 保存结果
+	resultArgs := comm.ScanResultArgs{
+		TaskID:   taskId,
+		IPConfig: &config,
+		IPResult: resultPortScan.IPResult,
+	}
+	err = x.Call(context.Background(), "SaveScanResult", &resultArgs, &result)
+	if err != nil {
+		logging.RuntimeLog.Error(err)
 	}
 	// 读取目标的数据库中已保存的开放端口
 	if config.IsLoadOpenedPort {
@@ -71,32 +100,7 @@ func PortScan(taskId, configJSON string) (result string, err error) {
 			logging.RuntimeLog.Error(err)
 		}
 	}
-	// IP位置
-	if config.IsIpLocation {
-		doLocation(&resultPortScan)
-	}
-	// 保存结果
-	resultArgs := comm.ScanResultArgs{
-		TaskID:   taskId,
-		IPConfig: &config,
-		IPResult: resultPortScan.IPResult,
-	}
-	err = x.Call(context.Background(), "SaveScanResult", &resultArgs, &result)
-	if err != nil {
-		logging.RuntimeLog.Error(err)
-		return FailedTask(err.Error()), err
-	}
-	//指纹识别任务
-	_, err = NewFingerprintTask(&resultPortScan, nil, FingerprintTaskConfig{
-		IsHttpx:          config.IsHttpx,
-		IsFingerprintHub: config.IsFingerprintHub,
-		IsIconHash:       config.IsIconHash,
-		IsScreenshot:     config.IsScreenshot,
-	})
-	if err != nil {
-		return FailedTask(err.Error()), err
-	}
-	return SucceedTask(result), nil
+	return
 }
 
 // doMasscanPlusNmap masscan进行端口扫描，nmap -sV进行详细扫描

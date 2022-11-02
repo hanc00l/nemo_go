@@ -55,13 +55,14 @@ type Server struct {
 }
 
 type Worker struct {
-	Rpc        RPC        `yaml:"rpc"`
-	FileSync   RPC        `yaml:"fileSync"`
-	Rabbitmq   Rabbitmq   `yaml:"rabbitmq"`
-	API        API        `yaml:"api"`
-	Portscan   Portscan   `yaml:"portscan"`
-	Domainscan Domainscan `yaml:"domainscan"`
-	Pocscan    Pocscan    `yaml:"pocscan"`
+	Rpc         RPC         `yaml:"rpc"`
+	FileSync    RPC         `yaml:"fileSync"`
+	Rabbitmq    Rabbitmq    `yaml:"rabbitmq"`
+	API         API         `yaml:"api"`
+	Portscan    Portscan    `yaml:"portscan"`
+	Fingerprint Fingerprint `yaml:"fingerprint"`
+	Domainscan  Domainscan  `yaml:"domainscan"`
+	Pocscan     Pocscan     `yaml:"pocscan"`
 }
 
 type Web struct {
@@ -118,15 +119,18 @@ type Portscan struct {
 	Cmdbin string `yaml:"cmdbin"`
 }
 
+type Fingerprint struct {
+	IsHttpx          bool `yaml:"httpx"`
+	IsScreenshot     bool `yaml:"screenshot"`
+	IsFingerprintHub bool `yaml:"fingerprinthub"`
+	IsIconHash       bool `yaml:"iconhash"`
+}
+
 type Pocscan struct {
 	Xray struct {
 		PocPath       string `yaml:"pocPath"`
 		LatestVersion string `yaml:"latest"`
 	} `yaml:"xray"`
-	Pocsuite struct {
-		PocPath string `yaml:"pocPath"`
-		Threads int    `yaml:"threads"`
-	} `yaml:"pocsuite"`
 	Nuclei struct {
 		PocPath string `yaml:"pocPath"`
 		Threads int    `yaml:"threads"`
@@ -176,6 +180,20 @@ func (config *Worker) ReloadConfig() error {
 		return err
 	}
 	err = yaml.Unmarshal(fileContent, config)
+	if err != nil {
+		fmt.Println(err)
+	}
+	return err
+}
+
+// WriteConfig 写配置到yaml文件中
+func (config *Worker) WriteConfig() error {
+	content, err := yaml.Marshal(config)
+	if err != nil {
+		fmt.Println(err)
+		return err
+	}
+	err = os.WriteFile(filepath.Join(GetRootPath(), "conf/worker.yml"), content, 0666)
 	if err != nil {
 		fmt.Println(err)
 	}

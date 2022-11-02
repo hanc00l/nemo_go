@@ -4,16 +4,10 @@
 
 #apt-get
 #只有server需要安装 mysql-server和rabbitmq-server
-#只有worker需要安装 nmap masscan chromium-browser python及pocsuite
-sudo apt-get update \
+#只有worker需要安装 nmap masscan chromium-browser
     && sudo apt-get install wget curl vim net-tools git unzip \
     mysql-server rabbitmq-server \
-    python3-pip python3-setuptools nmap masscan chromium-browser --fix-missing
-
-# pip package
-# 只有worker需要安装python
-python3 -m pip install -U pip -i https://mirrors.aliyun.com/pypi/simple/ --user \
-    && python3 -m pip install -U requests pocsuite3 -i https://mirrors.aliyun.com/pypi/simple/
+    nmap masscan chromium-browser --fix-missing
 
 # init databse and rabbitmq
 # 只有server需要

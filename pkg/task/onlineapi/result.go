@@ -23,6 +23,8 @@ type OnlineAPIConfig struct {
 	IsIconHash         bool   `json:"iconhash"`
 	IsIgnoreCDN        bool   `json:"ignorecdn"`
 	IsIgnoreOutofChina bool   `json:"ignoreoutofchina"`
+	SearchByKeyWord    bool   `json:"keywordsearch"`
+	SearchLimitCount   int    `json:"searchlimitcount"`
 }
 
 type ICPQueryConfig struct {

@@ -164,6 +164,28 @@ func (j CronTaskJob) Run() {
 			return
 		}
 		logging.CLILog.Infof("start pocscan cron task:%s,running taskId:%s", j.TaskId, taskId)
+	} else if ct.TaskName == "xportscan" || ct.TaskName == "xdomainscan" || ct.TaskName == "xorgscan" || ct.TaskName == "xfofa" {
+		var req XScanRequestParam
+		err := json.Unmarshal([]byte(ct.KwArgs), &req)
+		if err != nil {
+			logging.RuntimeLog.Error(err)
+			return
+		}
+		var taskId string
+		if ct.TaskName == "xportscan" {
+			taskId, err = StartXPortScanTask(req, j.TaskId)
+		} else if ct.TaskName == "xdomainscan" {
+			taskId, err = StartXDomainScanTask(req, j.TaskId)
+		} else if ct.TaskName == "xfofa" {
+			taskId, err = StartXFofaKeywordTask(req, j.TaskId)
+		} else if ct.TaskName == "xorgscan" {
+			taskId, err = StartXOrgScanTask(req, j.TaskId)
+		}
+		if err != nil {
+			logging.RuntimeLog.Error(err)
+			return
+		}
+		logging.CLILog.Infof("start pocscan cron task:%s,running taskId:%s", j.TaskId, taskId)
 	} else {
 		logging.RuntimeLog.Errorf("invalid task name:%s in %s...", ct.TaskName, j.TaskId)
 	}

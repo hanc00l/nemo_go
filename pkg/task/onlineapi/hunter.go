@@ -80,6 +80,9 @@ func (h *Hunter) RunHunter(domain string) {
 	} else {
 		query = fmt.Sprintf("domain=\"%s\" or cert.subject=\"%s\"", domain, domain)
 	}
+	if h.Config.IsIgnoreOutofChina {
+		query = fmt.Sprintf("(%s) and ip.country=\"CN\" and ip.province!=\"香港\"", query)
+	}
 	// 查询第1页，并获取总共记录数量
 	pageResult, sizeTotal := h.retriedPageSearch(query, 1)
 	h.Result = append(h.Result, pageResult...)

@@ -25,8 +25,8 @@ const (
 
 // TaskSlice 任务切分
 type TaskSlice struct {
-	IpTarget        string
-	DomainTarget    string
+	IpTarget        []string
+	DomainTarget    []string
 	Port            string
 	TaskMode        int
 	IpSliceNumber   int
@@ -47,31 +47,25 @@ func (t *TaskSlice) DoIpSlice() (target []string, port []string) {
 	if t.PortSliceNumber == 0 {
 		t.PortSliceNumber = DefaultPortSliceNumber
 	}
-	var targetList []string
-	for _, t := range strings.Split(t.IpTarget, "\n") {
-		if tt := strings.TrimSpace(t); tt != "" {
-			targetList = append(targetList, tt)
-		}
-	}
 	switch t.TaskMode {
 	case SliceByLine:
-		target = targetList
+		target = t.IpTarget
 		port = []string{t.Port}
 	case SliceByIP:
-		ipIntMap := parseAllIP(targetList)
+		ipIntMap := parseAllIP(t.IpTarget)
 		target = sliceIP(ipIntMap, t.IpSliceNumber)
 		port = []string{t.Port}
 	case SliceByPort:
 		portIntMap := parseAllPort(t.Port)
 		port = slicePort(portIntMap, t.PortSliceNumber)
-		target = []string{strings.Join(targetList, ",")}
+		target = t.IpTarget
 	case SliceByIPAndPort:
-		ipIntMap := parseAllIP(targetList)
+		ipIntMap := parseAllIP(t.IpTarget)
 		target = sliceIP(ipIntMap, t.IpSliceNumber)
 		portIntMap := parseAllPort(t.Port)
 		port = slicePort(portIntMap, t.PortSliceNumber)
 	default:
-		target = []string{strings.Join(targetList, ",")}
+		target = []string{strings.Join(t.IpTarget, ",")}
 		port = []string{t.Port}
 	}
 	return
@@ -80,17 +74,11 @@ func (t *TaskSlice) DoIpSlice() (target []string, port []string) {
 // DoDomainSlice 对域名任务目标进行切分
 // 只支持0，1两种模式
 func (t *TaskSlice) DoDomainSlice() (target []string) {
-	var targetList []string
-	for _, t := range strings.Split(t.DomainTarget, "\n") {
-		if tt := strings.TrimSpace(t); tt != "" {
-			targetList = append(targetList, tt)
-		}
-	}
 	switch t.TaskMode {
 	case SliceByLine:
-		target = targetList
+		target = t.DomainTarget
 	default:
-		target = []string{strings.Join(targetList, ",")}
+		target = []string{strings.Join(t.DomainTarget, ",")}
 	}
 	return
 }

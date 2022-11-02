@@ -8,7 +8,7 @@ import (
 var syncFileList = []string{"worker_linux_amd64", "version.txt", "conf/worker.yml", "thirdparty"}
 
 // syncFileBlackList 不需要、禁止同步的文件黑名单
-var syncFileBlackList = []string{"thirdparty/massdns/temp", "thirdparty/pocsuite/some_pocsuite/PocsuiteV2"}
+var syncFileBlackList = []string{"thirdparty/massdns/temp"}
 
 // checkFileIsSyncWhileList 同步文件的白名单校验
 func checkFileIsSyncWhileList(filePathName string) bool {

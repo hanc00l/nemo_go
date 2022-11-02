@@ -44,6 +44,7 @@ type ipRequestParam struct {
 	DisableOutofChina     bool   `form:"disable_outof_china"`
 	SelectOutofChina      bool   `form:"select_outof_china"`
 	SelectNoOpenedPort    bool   `form:"select_no_openedport"`
+	OrderByDate           bool   `form:"select_order_by_date"`
 }
 
 // IPListData 列表中每一行显示的IP数据
@@ -385,53 +386,56 @@ func (c *IPController) ImportPortscanResultAction() {
 	if bin == "nmap" {
 		nmap := portscan.NewNmap(config)
 		nmap.ParseXMLContentResult(fileContent)
-		portscan.FilterIPHasTooMuchPort(nmap.Result)
+		portscan.FilterIPHasTooMuchPort(&nmap.Result, true)
 		result = nmap.Result.SaveResult(config)
 	} else if bin == "masscan" {
 		m := portscan.NewMasscan(config)
 		m.ParseXMLContentResult(fileContent)
-		portscan.FilterIPHasTooMuchPort(m.Result)
+		portscan.FilterIPHasTooMuchPort(&m.Result, true)
 		result = m.Result.SaveResult(config)
 	} else if bin == "fscan" {
 		f := portscan.NewFScan(config)
 		f.ParseTxtContentResult(fileContent)
-		portscan.FilterIPHasTooMuchPort(f.Result)
+		portscan.FilterIPHasTooMuchPort(&f.Result, true)
 		resultIpPort := f.Result.SaveResult(config)
 		resultVul := pocscan.SaveResult(f.VulResult)
 		result = fmt.Sprintf("%s,%s", resultIpPort, resultVul)
 	} else if bin == "naabu" {
 		n := portscan.NewNaabu(config)
 		n.ParseTxtContentResult(fileContent)
-		portscan.FilterIPHasTooMuchPort(n.Result)
+		portscan.FilterIPHasTooMuchPort(&n.Result, true)
 		resultIpPort := n.Result.SaveResult(config)
 		result = fmt.Sprintf("%s", resultIpPort)
 	} else if bin == "httpx" {
 		n := fingerprint.NewHttpx()
 		n.ParseJSONContentResult(fileContent)
-		portscan.FilterIPHasTooMuchPort(n.ResultPortScan)
+		portscan.FilterIPHasTooMuchPort(&n.ResultPortScan, true)
 		resultIpPort := n.ResultPortScan.SaveResult(config)
 		result = fmt.Sprintf("%s", resultIpPort)
 	} else if bin == "txportmap" {
 		tx := portscan.NewTXPortMap(config)
 		tx.ParseTxtContentResult(fileContent)
-		portscan.FilterIPHasTooMuchPort(tx.Result)
+		portscan.FilterIPHasTooMuchPort(&tx.Result, true)
 		resultIpPort := tx.Result.SaveResult(config)
 		result = fmt.Sprintf("%s", resultIpPort)
 	} else if bin == "0zone" {
 		z := onlineapi.NewZeroZone(onlineapi.OnlineAPIConfig{})
 		z.ParseCSVContentResult(fileContent)
+		portscan.FilterIPHasTooMuchPort(&z.IpResult, true)
 		resultIpPort := z.IpResult.SaveResult(config)
 		resultDomain := z.DomainResult.SaveResult(domainscan.Config{OrgId: config.OrgId})
 		result = fmt.Sprintf("%s,%s", resultDomain, resultIpPort)
 	} else if bin == "fofa" {
 		z := onlineapi.NewFofa(onlineapi.OnlineAPIConfig{})
 		z.ParseCSVContentResult(fileContent)
+		portscan.FilterIPHasTooMuchPort(&z.IpResult, true)
 		resultIpPort := z.IpResult.SaveResult(config)
 		resultDomain := z.DomainResult.SaveResult(domainscan.Config{OrgId: config.OrgId})
 		result = fmt.Sprintf("%s,%s", resultDomain, resultIpPort)
 	} else if bin == "hunter" {
 		z := onlineapi.NewHunter(onlineapi.OnlineAPIConfig{})
 		z.ParseCSVContentResult(fileContent)
+		portscan.FilterIPHasTooMuchPort(&z.IpResult, true)
 		resultIpPort := z.IpResult.SaveResult(config)
 		resultDomain := z.DomainResult.SaveResult(domainscan.Config{OrgId: config.OrgId})
 		result = fmt.Sprintf("%s,%s", resultDomain, resultIpPort)
@@ -442,7 +446,7 @@ func (c *IPController) ImportPortscanResultAction() {
 	c.SucceededStatus(result)
 }
 
-//validateRequestParam 校验请求的参数
+// validateRequestParam 校验请求的参数
 func (c *IPController) validateRequestParam(req *ipRequestParam) {
 	if req.Length <= 0 {
 		req.Length = 50
@@ -495,7 +499,7 @@ func (c *IPController) getSearchMap(req ipRequestParam) (searchMap map[string]in
 func (c *IPController) getIPListData(req ipRequestParam) (resp DataTableResponseData) {
 	ip := db.Ip{}
 	searchMap := c.getSearchMap(req)
-	results, total := ip.Gets(searchMap, req.Start/req.Length+1, req.Length)
+	results, total := ip.Gets(searchMap, req.Start/req.Length+1, req.Length, req.OrderByDate)
 	hp := custom.NewHoneyPot()
 	ss := fingerprint.NewScreenShot()
 	cdn := custom.NewCDNCheck()
@@ -652,7 +656,7 @@ func getPortInfo(ip string, ipId int, disableFofa, disableBanner bool) (r PortIn
 	return
 }
 
-//getIPInfo 获取一个IP的信息集合
+// getIPInfo 获取一个IP的信息集合
 func getIPInfo(ipName string, disableFofa, disableBanner bool) (r IPInfo) {
 	ip := db.Ip{IpName: ipName}
 	if !ip.GetByIp() {
@@ -735,7 +739,7 @@ func (c *IPController) getStatisticsData(req ipRequestParam) IPStatisticInfo {
 	}
 	ip := db.Ip{}
 	searchMap := c.getSearchMap(req)
-	ipResult, _ := ip.Gets(searchMap, -1, -1)
+	ipResult, _ := ip.Gets(searchMap, -1, -1, req.OrderByDate)
 	for _, ipRow := range ipResult {
 		// ip
 		if _, ok := r.IP[ipRow.IpName]; !ok {
@@ -777,7 +781,7 @@ func (c *IPController) getMemoData(req ipRequestParam) (r []string) {
 	ip := db.Ip{}
 
 	searchMap := c.getSearchMap(req)
-	ipResult, _ := ip.Gets(searchMap, -1, -1)
+	ipResult, _ := ip.Gets(searchMap, -1, -1, req.OrderByDate)
 	for _, ipRow := range ipResult {
 		memo := db.IpMemo{RelatedId: ipRow.Id}
 		if !memo.GetByRelatedId() || memo.Content == "" {
@@ -794,7 +798,7 @@ func getIpRelatedDomain(ipName string) []string {
 	domain := db.Domain{}
 	searchMap := make(map[string]interface{})
 	searchMap["ip"] = ipName
-	rows, _ := domain.Gets(searchMap, -1, -1)
+	rows, _ := domain.Gets(searchMap, -1, -1, false)
 	domains := make(map[string]struct{})
 	for _, r := range rows {
 		if _, ok := domains[r.DomainName]; !ok {

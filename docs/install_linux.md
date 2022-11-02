@@ -136,13 +136,6 @@
       && sudo chown root nmap masscan && sudo chmod u+s nmap masscan 
   ```
 
-- **python3与pocsuite**
-
-  ```
-  python3 -m pip install -U pip -i https://mirrors.aliyun.com/pypi/simple/ --user \
-      && python3 -m pip install -U requests pocsuite3 -i https://mirrors.aliyun.com/pypi/simple/
-  ```
-
 - **配置文件**
 
   **conf/worker.yml** ：（RPC、Rabbitmq用户名和密码应与服务端保持一致）
@@ -192,9 +185,6 @@
     xray:
       pocPath: thirdparty/xray/xray/pocs
       latest: 1.8.2
-    pocsuite:
-      pocPath: thirdparty/pocsuite/some_pocsuite
-      threads: 10
     nuclei:
       pocPath: thirdparty/nuclei/nuclei-templates
       threads: 25

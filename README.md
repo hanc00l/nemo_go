@@ -43,7 +43,6 @@ Nemo是用来进行自动化信息收集的一个简单平台，通过集成常�
 
 ### 5、Poc验证与目录扫描
 
-- [Pocsuite3](https://github.com/knownsec/pocsuite3)  && [some_pocsuite](https://github.com/hanc00l/some_pocsuite)
 - [XRay](https://github.com/chaitin/xray)
 - [Nuclei](https://github.com/projectdiscovery/nuclei) && [Nuclei-Templates](https://github.com/projectdiscovery/nuclei-templates)
 - [Dirsearch](https://github.com/evilsocket/dirsearch)

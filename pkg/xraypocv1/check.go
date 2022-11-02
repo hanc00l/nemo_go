@@ -1,4 +1,4 @@
-package poclib
+package xraypocv1
 
 import (
 	"fmt"

@@ -1,8 +1,10 @@
 package runner
 
 import (
+	"bufio"
 	"encoding/json"
 	"github.com/hanc00l/nemo_go/pkg/conf"
+	"github.com/hanc00l/nemo_go/pkg/db"
 	"github.com/hanc00l/nemo_go/pkg/logging"
 	"github.com/hanc00l/nemo_go/pkg/task/custom"
 	"github.com/hanc00l/nemo_go/pkg/task/domainscan"
@@ -10,8 +12,12 @@ import (
 	"github.com/hanc00l/nemo_go/pkg/task/pocscan"
 	"github.com/hanc00l/nemo_go/pkg/task/portscan"
 	"github.com/hanc00l/nemo_go/pkg/task/serverapi"
+	"github.com/hanc00l/nemo_go/pkg/task/workerapi"
 	"github.com/hanc00l/nemo_go/pkg/utils"
+	"os"
+	"path/filepath"
 	"strings"
+	"time"
 )
 
 // StartPortScanTask 端口扫描任务
@@ -19,7 +25,7 @@ func StartPortScanTask(req PortscanRequestParam, cronTaskId string) (taskId stri
 	// 解析参数
 	ts := utils.NewTaskSlice()
 	ts.TaskMode = req.TaskMode
-	ts.IpTarget = req.Target
+	ts.IpTarget = formatIpTarget(req.Target, req.OrgId)
 	ts.Port = req.Port
 	tc := conf.GlobalServerConfig().Task
 	ts.IpSliceNumber = tc.IpSliceNumber
@@ -65,7 +71,7 @@ func StartPortScanTask(req PortscanRequestParam, cronTaskId string) (taskId stri
 func StartBatchScanTask(req PortscanRequestParam, cronTaskId string) (taskId string, err error) {
 	ts := utils.NewTaskSlice()
 	ts.TaskMode = req.TaskMode
-	ts.IpTarget = req.Target
+	ts.IpTarget = formatIpTarget(req.Target, req.OrgId)
 	ts.Port = req.Port
 	tc := conf.GlobalServerConfig().Task
 	ts.IpSliceNumber = tc.IpSliceNumber
@@ -84,17 +90,15 @@ func StartBatchScanTask(req PortscanRequestParam, cronTaskId string) (taskId str
 
 // StartDomainScanTask 域名任务
 func StartDomainScanTask(req DomainscanRequestParam, cronTaskId string) (taskId string, err error) {
-	allTarget := req.Target
+	ts := utils.NewTaskSlice()
+	domainTargetList := formatDomainTarget(req.Target)
 	// 域名的FLD
 	if req.IsFldDomain {
-		fldList := getDomainFLD(req.Target)
-		if len(fldList) > 0 {
-			allTarget = req.Target + "," + strings.Join(fldList, ",")
-		}
+		ts.DomainTarget = getDomainFLD(domainTargetList)
+	} else {
+		ts.DomainTarget = domainTargetList
 	}
-	ts := utils.NewTaskSlice()
 	ts.TaskMode = req.TaskMode
-	ts.DomainTarget = allTarget
 	targets := ts.DoDomainSlice()
 	for _, t := range targets {
 		// 每个获取子域名的方式采用独立任务，以提高速度
@@ -169,14 +173,6 @@ func StartPocScanTask(req PocscanRequestParam, cronTaskId string) (taskId string
 			targetList = append(targetList, tt)
 		}
 	}
-	if req.IsPocsuiteVerify && req.PocsuitePocFile != "" {
-		config := pocscan.Config{Target: strings.Join(targetList, ","), PocFile: req.PocsuitePocFile, CmdBin: "pocsuite", IsLoadOpenedPort: req.IsLoadOpenedPort}
-		configJSON, _ := json.Marshal(config)
-		taskId, err = serverapi.NewTask("pocsuite", string(configJSON), cronTaskId)
-		if err != nil {
-			return
-		}
-	}
 	if req.IsXrayVerify && req.XrayPocFile != "" {
 		config := pocscan.Config{Target: strings.Join(targetList, ","), PocFile: req.XrayPocFile, CmdBin: "xray", IsLoadOpenedPort: req.IsLoadOpenedPort}
 		configJSON, _ := json.Marshal(config)
@@ -202,6 +198,183 @@ func StartPocScanTask(req PocscanRequestParam, cronTaskId string) (taskId string
 		}
 	}
 	return taskId, nil
+}
+
+// StartXFofaKeywordTask xscan任务，根据fofa关键字查询资产
+func StartXFofaKeywordTask(req XScanRequestParam, cronTaskId string) (taskId string, err error) {
+	config := workerapi.XScanConfig{
+		OrgId:              &req.OrgId,
+		IsIgnoreCDN:        false,
+		IsIgnoreOutofChina: req.IsCn,
+		IsXrayPocScan:      req.IsXrayPocscan,
+	}
+	// config.OrgId 为int，默认为0
+	// db.Organization.OrgId为指针，默认nil
+	if *config.OrgId == 0 {
+		config.OrgId = nil
+	}
+	if req.IsFingerprint {
+		config.IsHttpx = conf.GlobalWorkerConfig().Fingerprint.IsHttpx
+		config.IsFingerprintHub = conf.GlobalWorkerConfig().Fingerprint.IsFingerprintHub
+		config.IsScreenshot = conf.GlobalWorkerConfig().Fingerprint.IsScreenshot
+		config.IsIconHash = conf.GlobalWorkerConfig().Fingerprint.IsIconHash
+	}
+	// 生成查询语法
+	keywords := searchKeyword(req)
+	for keyword, count := range keywords {
+		configRun := config
+		configRun.FofaKeyword = keyword
+		configRun.FofaSearchLimit = count
+		configJSONRun, _ := json.Marshal(configRun)
+		taskId, err = serverapi.NewTask("xfofa", string(configJSONRun), cronTaskId)
+		if err != nil {
+			logging.RuntimeLog.Errorf("start xfofa fail:%s", err.Error())
+			return "", err
+		}
+	}
+	return
+}
+
+// StartXDomainScanTask xscan任务，域名任务
+func StartXDomainScanTask(req XScanRequestParam, cronTaskId string) (taskId string, err error) {
+	config := workerapi.XScanConfig{
+		OrgId:              &req.OrgId,
+		IsIgnoreCDN:        false,
+		IsIgnoreOutofChina: req.IsCn,
+		IsXrayPocScan:      req.IsXrayPocscan,
+	}
+	// config.OrgId 为int，默认为0
+	// db.Organization.OrgId为指针，默认nil
+	if *config.OrgId == 0 {
+		config.OrgId = nil
+	}
+	if req.IsFingerprint {
+		config.IsHttpx = conf.GlobalWorkerConfig().Fingerprint.IsHttpx
+		config.IsFingerprintHub = conf.GlobalWorkerConfig().Fingerprint.IsFingerprintHub
+		config.IsScreenshot = conf.GlobalWorkerConfig().Fingerprint.IsScreenshot
+		config.IsIconHash = conf.GlobalWorkerConfig().Fingerprint.IsIconHash
+	}
+	// config.OrgId 为int，默认为0
+	// db.Organization.OrgId为指针，默认nil
+	if *config.OrgId == 0 {
+		config.OrgId = nil
+	}
+	targetList := formatDomainTarget(req.Target)
+	for _, target := range targetList {
+		// 忽略IP
+		if utils.CheckIPV4(target) || utils.CheckIPV4Subnet(target) {
+			continue
+		}
+		configRun := config
+		configRun.Domain = make(map[string]struct{})
+		configRun.Domain[target] = struct{}{}
+		// 子域名枚举和爆破拆分成两个任务并行执行
+		configRun.IsSubDomainFinder = true
+		configRun.IsSubDomainBrute = false
+		configJSON, _ := json.Marshal(configRun)
+		taskId, err = serverapi.NewTask("xdomainscan", string(configJSON), cronTaskId)
+		if err != nil {
+			logging.RuntimeLog.Errorf("start xdomainscan fail:%s", err.Error())
+			return "", err
+		}
+		configRun.IsSubDomainFinder = false
+		configRun.IsSubDomainBrute = true
+		configJSON, _ = json.Marshal(configRun)
+		taskId, err = serverapi.NewTask("xdomainscan", string(configJSON), cronTaskId)
+		if err != nil {
+			logging.RuntimeLog.Errorf("start xdomainscan fail:%s", err.Error())
+			return "", err
+		}
+		if req.IsFofaSearch {
+			configRunFofa := config
+			configRunFofa.FofaTarget = target
+			configJSONFofa, _ := json.Marshal(configRunFofa)
+			taskId, err = serverapi.NewTask("xfofa", string(configJSONFofa), cronTaskId)
+			if err != nil {
+				logging.RuntimeLog.Errorf("start xfofa fail:%s", err.Error())
+				return "", err
+			}
+		}
+	}
+	return taskId, nil
+}
+
+// StartXPortScanTask xscan的IP任务
+func StartXPortScanTask(req XScanRequestParam, cronTaskId string) (taskId string, err error) {
+	config := workerapi.XScanConfig{
+		OrgId:              &req.OrgId,
+		IsIgnoreCDN:        false,
+		IsIgnoreOutofChina: req.IsCn,
+		IsXrayPocScan:      req.IsXrayPocscan,
+	}
+	// config.OrgId 为int，默认为0
+	// db.Organization.OrgId为指针，默认nil
+	if *config.OrgId == 0 {
+		config.OrgId = nil
+	}
+	if req.IsFingerprint {
+		config.IsHttpx = conf.GlobalWorkerConfig().Fingerprint.IsHttpx
+		config.IsFingerprintHub = conf.GlobalWorkerConfig().Fingerprint.IsFingerprintHub
+		config.IsScreenshot = conf.GlobalWorkerConfig().Fingerprint.IsScreenshot
+		config.IsIconHash = conf.GlobalWorkerConfig().Fingerprint.IsIconHash
+	}
+	ts := utils.NewTaskSlice()
+	ts.TaskMode = utils.SliceByIP
+	ts.IpTarget = formatIpTarget(req.Target, req.OrgId)
+	ts.Port = req.Port
+	tc := conf.GlobalServerConfig().Task
+	ts.IpSliceNumber = tc.IpSliceNumber
+	ts.PortSliceNumber = tc.PortSliceNumber
+	targets, _ := ts.DoIpSlice()
+	for _, target := range targets {
+		configRun := config
+		configRun.IPPortString = make(map[string]string)
+		configRun.IPPortString[target] = req.Port
+		configJSON, _ := json.Marshal(configRun)
+		taskId, err = serverapi.NewTask("xportscan", string(configJSON), cronTaskId)
+		if err != nil {
+			logging.RuntimeLog.Errorf("start xportscan fail:%s", err.Error())
+			return "", err
+		}
+		if req.IsFofaSearch {
+			configRunFofa := config
+			configRunFofa.FofaTarget = target
+			configJSONFofa, _ := json.Marshal(configRunFofa)
+			taskId, err = serverapi.NewTask("xfofa", string(configJSONFofa), cronTaskId)
+			if err != nil {
+				logging.RuntimeLog.Errorf("start xfofa fail:%s", err.Error())
+				return "", err
+			}
+		}
+	}
+	return taskId, nil
+}
+
+// StartXOrgScanTask xscan任务，获取指定组织的资产并开始扫描任务
+func StartXOrgScanTask(req XScanRequestParam, cronTaskId string) (taskId string, err error) {
+	config := workerapi.XScanConfig{
+		OrgId:              &req.OrgId,
+		IsOrgIP:            req.IsOrgIP,
+		IsOrgDomain:        req.IsOrgDomain,
+		OrgIPPort:          req.Port,
+		IsIgnoreCDN:        false,
+		IsIgnoreOutofChina: req.IsCn,
+		IsXrayPocScan:      req.IsXrayPocscan,
+		XrayPocFile:        req.PocFile,
+	}
+	if req.IsFingerprint {
+		config.IsHttpx = conf.GlobalWorkerConfig().Fingerprint.IsHttpx
+		config.IsFingerprintHub = conf.GlobalWorkerConfig().Fingerprint.IsFingerprintHub
+		config.IsScreenshot = conf.GlobalWorkerConfig().Fingerprint.IsScreenshot
+		config.IsIconHash = conf.GlobalWorkerConfig().Fingerprint.IsIconHash
+	}
+	configJSON, _ := json.Marshal(config)
+	taskId, err = serverapi.NewTask("xorgscan", string(configJSON), cronTaskId)
+	if err != nil {
+		logging.RuntimeLog.Errorf("start xorgscan fail:%s", err.Error())
+		return "", err
+	}
+	return
 }
 
 // doPortscan 端口扫描
@@ -419,11 +592,10 @@ func doIPLocation(cronTaskId string, target string, orgId *int) (taskId string, 
 }
 
 // getDomainFLD 提取域名的FLD
-func getDomainFLD(target string) (fldDomain []string) {
+func getDomainFLD(domainTargetList []string) (fldDomain []string) {
 	domains := make(map[string]struct{})
 	tld := domainscan.NewTldExtract()
-	for _, t := range strings.Split(target, "\n") {
-		domain := strings.TrimSpace(t)
+	for _, domain := range domainTargetList {
 		fld := tld.ExtractFLD(domain)
 		if fld == "" {
 			continue
@@ -433,5 +605,171 @@ func getDomainFLD(target string) (fldDomain []string) {
 		}
 	}
 	fldDomain = utils.SetToSlice(domains)
+	return
+}
+
+// formatIpTarget 将从web端传入的ip参数（以\n分隔）转换为ip列表，对域名进行解析转换为，并保存域名及A记录到数据库中
+func formatIpTarget(target string, orgId int) (ipTargetList []string) {
+	for _, t := range strings.Split(target, "\n") {
+		if tt := strings.TrimSpace(t); tt != "" {
+			//192.168.1.1  192.168.1.0/24
+			if utils.CheckIPV4(tt) || utils.CheckIPV4Subnet(tt) {
+				ipTargetList = append(ipTargetList, tt)
+				continue
+			}
+			//192.168.1.1-192.168.1.5
+			address := strings.Split(tt, "-")
+			if len(address) == 2 && utils.CheckIPV4(address[0]) && utils.CheckIPV4(address[1]) {
+				ipTargetList = append(ipTargetList, tt)
+				continue
+			}
+			//域名，将域名转成ip地址
+			_, hosts := domainscan.ResolveDomain(tt)
+			if len(hosts) > 0 {
+				domainResult := domainscan.Result{DomainResult: make(map[string]*domainscan.DomainResult)}
+				domainResult.SetDomain(tt)
+				for _, h := range hosts {
+					ipTargetList = append(ipTargetList, h)
+					domainResult.SetDomainAttr(tt, domainscan.DomainAttrResult{
+						Source:  "portscan",
+						Tag:     "A",
+						Content: h,
+					})
+				}
+				config := domainscan.Config{OrgId: &orgId}
+				// config.OrgId 为int，默认为0
+				// db.Organization.OrgId为指针，默认nil
+				if *config.OrgId == 0 {
+					config.OrgId = nil
+				}
+				domainResult.SaveResult(config)
+			}
+		}
+	}
+
+	return
+}
+
+// formatDomainTarget 将前端web的域名，转换为列表；同时去除非域名的IP地址
+func formatDomainTarget(target string) (domainTargetList []string) {
+	for _, t := range strings.Split(target, "\n") {
+		if tt := strings.TrimSpace(t); tt != "" {
+			//192.168.1.1  192.168.1.0/24
+			if utils.CheckIPV4(tt) || utils.CheckIPV4Subnet(tt) {
+				continue
+			}
+			//192.168.1.1-192.168.1.5
+			address := strings.Split(tt, "-")
+			if len(address) == 2 && utils.CheckIPV4(address[0]) && utils.CheckIPV4(address[1]) {
+				continue
+			}
+			domainTargetList = append(domainTargetList, tt)
+		}
+	}
+	return
+}
+
+func addGlobalFilterWord(rule string) string {
+	// 从custom目录中读取定义的过滤词，每一个关键词一行：
+	filterFile := filepath.Join(conf.GetRootPath(), "thirdparty/custom", "fofa_filter_keyword.txt")
+	if utils.CheckFileExist(filterFile) == false {
+		logging.RuntimeLog.Errorf("fofa filter file not exist:%s", filterFile)
+		return rule
+	}
+	inputFile, err := os.Open(filterFile)
+	if err != nil {
+		logging.RuntimeLog.Errorf("Could not read fofa filter file: %s\n", err)
+		return rule
+	}
+	defer inputFile.Close()
+	scanner := bufio.NewScanner(inputFile)
+	for scanner.Scan() {
+		text := strings.TrimSpace(scanner.Text())
+		if text == "" {
+			continue
+		}
+		rule = rule + "&& body !=\"" + text + "\""
+	}
+	//globalFilterWords := strings.Split(GlobalFilterWords, "||")
+	//if len(globalFilterWords) > 0 {
+	//	for _, globalFilterWord := range globalFilterWords {
+	//		rule = rule + "&& body !=\"" + globalFilterWord + "\""
+	//	}
+	//}
+	return rule
+}
+
+func addFoFaSearchRule(searchkey taskKeySearchParam) []string {
+	defaultCheckMod := "title"
+	var rules []string
+
+	if searchkey.CheckMod == "" {
+		searchkey.CheckMod = defaultCheckMod
+	}
+
+	CheckMods := strings.Split(searchkey.CheckMod, "&&")
+	for _, checkMod := range CheckMods {
+		rule := ""
+		if checkMod != "" {
+			if checkMod == "self" {
+				rule = searchkey.KeyWord
+			} else {
+				rule = searchkey.CheckMod + "=\"" + searchkey.KeyWord + "\""
+			}
+		}
+		//添加反向匹配词
+		if searchkey.ExcludeWords != "" {
+			exclude_words := strings.Split(searchkey.ExcludeWords, "||")
+			for _, exclude_word := range exclude_words {
+				rule += " && body!=\"" + exclude_word + "\""
+			}
+		}
+		//是否大陆地区
+		if searchkey.IsCN {
+			rule += "&& country=\"CN\" && region!=\"HK\" && region!=\"TW\"  && region!=\"MO\""
+		}
+		rule = addGlobalFilterWord(rule)
+
+		//判断检索日期
+		if searchkey.SearchTime == "" {
+
+		} else if searchkey.SearchTime == time.Now().Format("2006-01-02") {
+			break
+		} else {
+			rule += " && after=\"" + searchkey.SearchTime + "\""
+		}
+		rules = append(rules, rule)
+	}
+
+	return rules
+}
+
+func searchKeyword(req XScanRequestParam) (fofaKeyword map[string]int) {
+	fofaKeyword = make(map[string]int)
+	keyWords := db.KeyWord{}
+	//传入org_id
+	searchMap := make(map[string]interface{})
+	if req.OrgId > 0 {
+		searchMap["org_id"] = req.OrgId
+	}
+	results, _ := keyWords.Gets(searchMap, 0, 99999)
+	//fofa检索词拼接
+	for _, searchkey := range results {
+		taskSearchKey := taskKeySearchParam{}
+		taskSearchKey.IsCN = req.IsCn
+		taskSearchKey.KeyWord = searchkey.KeyWord
+		taskSearchKey.ExcludeWords = searchkey.ExcludeWords
+		taskSearchKey.ExcludeWords = searchkey.ExcludeWords
+		taskSearchKey.SearchTime = searchkey.SearchTime
+		taskSearchKey.CheckMod = searchkey.CheckMod
+		rules := addFoFaSearchRule(taskSearchKey)
+		for _, rule := range rules {
+			fofaKeyword[rule] = searchkey.Count
+		}
+		kw := db.KeyWord{Id: searchkey.Id}
+		updateMap := make(map[string]interface{})
+		updateMap["search_time"] = time.Now().Format("2006-01-02")
+		kw.Update(updateMap)
+	}
 	return
 }

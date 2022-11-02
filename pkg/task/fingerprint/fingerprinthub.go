@@ -18,6 +18,7 @@ import (
 type FingerprintHub struct {
 	ResultPortScan   portscan.Result
 	ResultDomainScan domainscan.Result
+	DomainTargetPort map[string]map[int]struct{}
 }
 
 type FingerprintHubReult struct {
@@ -40,13 +41,9 @@ func (f *FingerprintHub) Do() {
 	swg := sizedwaitgroup.New(fpObserverWardThreadNumber)
 
 	if f.ResultPortScan.IPResult != nil {
-		bport := make(map[int]struct{})
-		for _, p := range IgnorePort {
-			bport[p] = struct{}{}
-		}
 		for ipName, ipResult := range f.ResultPortScan.IPResult {
-			for portNumber, _ := range ipResult.Ports {
-				if _, ok := bport[portNumber]; ok {
+			for portNumber := range ipResult.Ports {
+				if _, ok := blankPort[portNumber]; ok {
 					continue
 				}
 				url := fmt.Sprintf("%v:%v", ipName, portNumber)
@@ -71,24 +68,39 @@ func (f *FingerprintHub) Do() {
 		}
 	}
 	if f.ResultDomainScan.DomainResult != nil {
-		for domain, _ := range f.ResultDomainScan.DomainResult {
-			swg.Add()
-			go func(d string) {
-				fingerPrintResult := f.RunObserverWard(d)
-				if len(fingerPrintResult) > 0 {
-					for _, fpa := range fingerPrintResult {
-						for _, name := range fpa.Name {
-							dar := domainscan.DomainAttrResult{
-								Source:  "ObserverWard",
-								Tag:     "fingerprint",
-								Content: name,
+		if f.DomainTargetPort == nil {
+			f.DomainTargetPort = make(map[string]map[int]struct{})
+		}
+		for domain := range f.ResultDomainScan.DomainResult {
+			//如果无域名对应的端口，默认80和443
+			if _, ok := f.DomainTargetPort[domain]; !ok {
+				f.DomainTargetPort[domain] = make(map[int]struct{})
+				f.DomainTargetPort[domain][80] = struct{}{}
+				f.DomainTargetPort[domain][443] = struct{}{}
+			}
+			for port := range f.DomainTargetPort[domain] {
+				if _, ok := blankPort[port]; ok {
+					continue
+				}
+				url := fmt.Sprintf("%s:%d", domain, port)
+				swg.Add()
+				go func(d string, u string) {
+					fingerPrintResult := f.RunObserverWard(u)
+					if len(fingerPrintResult) > 0 {
+						for _, fpa := range fingerPrintResult {
+							for _, name := range fpa.Name {
+								dar := domainscan.DomainAttrResult{
+									Source:  "ObserverWard",
+									Tag:     "fingerprint",
+									Content: name,
+								}
+								f.ResultDomainScan.SetDomainAttr(d, dar)
 							}
-							f.ResultDomainScan.SetDomainAttr(d, dar)
 						}
 					}
-				}
-				swg.Done()
-			}(domain)
+					swg.Done()
+				}(domain, url)
+			}
 		}
 	}
 	swg.Wait()

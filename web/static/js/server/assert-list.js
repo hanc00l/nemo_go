@@ -88,6 +88,7 @@ function load_org_list() {
     $("#select_org_id_task").append("<option value=''>--无--</option>")
     $("#select_batchscan_org_id_task").append("<option value=''>--无--</option>")
     $("#select_import_org_id_task").append("<option value=''>--无--</option>")
+    $("#select_org_id_task_xscan").append("<option value=''>--无--</option>")
     $.post("/org-getall", {}, function (data, e) {
         if (e === "success") {
             for (let i = 0; i < data.length; i++) {
@@ -95,11 +96,13 @@ function load_org_list() {
                 $("#select_org_id_task").append("<option value='" + data[i].id + "'>" + data[i].name + "</option>")
                 $("#select_batchscan_org_id_task").append("<option value='" + data[i].id + "'>" + data[i].name + "</option>")
                 $("#select_import_org_id_task").append("<option value='" + data[i].id + "'>" + data[i].name + "</option>")
+                $("#select_org_id_task_xscan").append("<option value='" + data[i].id + "'>" + data[i].name + "</option>")
             }
             $('#select_org_id_search').val($('#hidden_org_id').val());
             $('#select_org_id_task').val($('#hidden_org_id').val());
             $('#select_batchscan_org_id_task').val($('#hidden_org_id').val());
             $('#select_import_org_id_task').val($('#hidden_org_id').val());
+            $('#select_org_id_task_xscan').val($('#hidden_org_id').val());
         }
     });
 }
@@ -108,14 +111,6 @@ function load_org_list() {
  * 加载poc文件列表
  */
 function load_pocfile_list() {
-    $.post("/vulnerability-load-pocsuite-pocfile", {}, function (data, e) {
-        if (e === "success") {
-            $("#datalist_pocsuite3_poc_file").empty();
-            for (let i = 0; i < data.length; i++) {
-                $("#datalist_pocsuite3_poc_file").append("<option value='" + data[i] + "'>" + data[i] + "</option>")
-            }
-        }
-    });
     $.post("/vulnerability-load-xray-pocfile", {}, function (data, e) {
         if (e === "success") {
             $("#datalist_xray_poc_file").empty();
@@ -162,8 +157,8 @@ function html2Escape(sHtml) {
  * 0: portscan
  * 1: vulverify
  */
-function getCurrentTabIndex() {
-    var $tabs = $('#nav_tabs').children('li');
+function getCurrentTabIndex(tab_id) {
+    var $tabs = $(tab_id).children('li');
     var i = 0;
     $tabs.each(function () {
         var $tab = $(this);

@@ -159,20 +159,10 @@ pocscan:
   xray:
     pocPath: thirdparty/xray/xray/pocs
     latest: 1.8.2
-  pocsuite:
-    pocPath: thirdparty/pocsuite/some_pocsuite
-    threads: 10
   nuclei:
     pocPath: thirdparty/nuclei/nuclei-templates
     threads: 25
 ```
-
-### 6、安装pocsuite3 （可选）
-
-  ```
-pip3 install pocsuite3
-  ```
-
 
 
 ## 运行

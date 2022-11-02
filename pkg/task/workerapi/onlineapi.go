@@ -13,85 +13,37 @@ import (
 
 // Fofa Fofa任务
 func Fofa(taskId, configJSON string) (result string, err error) {
-	var ok bool
-	if ok, result, err = CheckTaskStatus(taskId); !ok {
-		return result, err
-	}
-
-	config := onlineapi.OnlineAPIConfig{}
-	if err = ParseConfig(configJSON, &config); err != nil {
-		return FailedTask(err.Error()), err
-	}
-
-	fofa := onlineapi.NewFofa(config)
-	fofa.Do()
-	checkIgnoreResult(&fofa.IpResult, &fofa.DomainResult, config)
-	if config.IsIPLocation {
-		doLocation(&fofa.IpResult)
-	}
-	// 保存结果
-	x := comm.NewXClient()
-	args := comm.ScanResultArgs{
-		TaskID:       taskId,
-		IPConfig:     &portscan.Config{OrgId: config.OrgId},
-		DomainConfig: &domainscan.Config{OrgId: config.OrgId},
-		IPResult:     fofa.IpResult.IPResult,
-		DomainResult: fofa.DomainResult.DomainResult,
-	}
-	err = x.Call(context.Background(), "SaveScanResult", &args, &result)
-	if err != nil {
-		logging.RuntimeLog.Error(err)
-		return FailedTask(err.Error()), err
-	}
-	//fingerprint
-	result, err = NewFingerprintTask(&fofa.IpResult, &fofa.DomainResult, FingerprintTaskConfig{
-		IsHttpx:          config.IsHttpx,
-		IsFingerprintHub: config.IsFingerprintHub,
-		IsIconHash:       config.IsIconHash,
-		IsScreenshot:     config.IsScreenshot,
-	})
-	if err != nil {
-		logging.RuntimeLog.Error(err)
-		return FailedTask(err.Error()), err
-	}
-
-	return SucceedTask(result), nil
+	return doFofaOnlineAPI(taskId, configJSON, "fofa")
 }
 
 // Quake Quake任务
 func Quake(taskId, configJSON string) (result string, err error) {
+	return doFofaOnlineAPI(taskId, configJSON, "quake")
+}
+
+// Hunter Hunter
+func Hunter(taskId, configJSON string) (result string, err error) {
+	return doFofaOnlineAPI(taskId, configJSON, "hunter")
+}
+
+// doFofaOnlineAPI 执行fofa、hunter及quake的资产搜索任务
+func doFofaOnlineAPI(taskId string, configJSON string, apiName string) (result string, err error) {
+	// 检查任务状态
 	var ok bool
 	if ok, result, err = CheckTaskStatus(taskId); !ok {
 		return result, err
 	}
-
+	// 解析任务参数
 	config := onlineapi.OnlineAPIConfig{}
 	if err = ParseConfig(configJSON, &config); err != nil {
 		return FailedTask(err.Error()), err
 	}
-
-	quake := onlineapi.NewQuake(config)
-	quake.Do()
-	checkIgnoreResult(&quake.IpResult, &quake.DomainResult, config)
-	if config.IsIPLocation {
-		doLocation(&quake.IpResult)
-	}
-	// 保存结果
-	x := comm.NewXClient()
-	args := comm.ScanResultArgs{
-		TaskID:       taskId,
-		IPConfig:     &portscan.Config{OrgId: config.OrgId},
-		DomainConfig: &domainscan.Config{OrgId: config.OrgId},
-		IPResult:     quake.IpResult.IPResult,
-		DomainResult: quake.DomainResult.DomainResult,
-	}
-	err = x.Call(context.Background(), "SaveScanResult", &args, &result)
-	if err != nil {
-		logging.RuntimeLog.Error(err)
-		return FailedTask(err.Error()), err
-	}
+	//执行任务
+	var ipResult portscan.Result
+	var domainResult domainscan.Result
+	ipResult, domainResult, result, err = doFofaAndSave(taskId, apiName, config)
 	//fingerprint
-	result, err = NewFingerprintTask(&quake.IpResult, &quake.DomainResult, FingerprintTaskConfig{
+	result, err = NewFingerprintTask(&ipResult, &domainResult, FingerprintTaskConfig{
 		IsHttpx:          config.IsHttpx,
 		IsFingerprintHub: config.IsFingerprintHub,
 		IsIconHash:       config.IsIconHash,
@@ -105,23 +57,29 @@ func Quake(taskId, configJSON string) (result string, err error) {
 	return SucceedTask(result), nil
 }
 
-// Hunter Hunter
-func Hunter(taskId, configJSON string) (result string, err error) {
-	var ok bool
-	if ok, result, err = CheckTaskStatus(taskId); !ok {
-		return result, err
+// doFofaAndSave 执行fofa、hunter及quake的资产搜索，并保存结果
+func doFofaAndSave(taskId string, apiName string, config onlineapi.OnlineAPIConfig) (ipResult portscan.Result, domainResult domainscan.Result, result string, err error) {
+	if apiName == "fofa" {
+		fofa := onlineapi.NewFofa(config)
+		fofa.Do()
+		ipResult = fofa.IpResult
+		domainResult = fofa.DomainResult
+	} else if apiName == "quake" {
+		quake := onlineapi.NewQuake(config)
+		quake.Do()
+		ipResult = quake.IpResult
+		domainResult = quake.DomainResult
+	} else if apiName == "hunter" {
+		hunter := onlineapi.NewHunter(config)
+		hunter.Do()
+		ipResult = hunter.IpResult
+		domainResult = hunter.DomainResult
 	}
+	portscan.FilterIPHasTooMuchPort(&ipResult, true)
+	checkIgnoreResult(&ipResult, &domainResult, config)
 
-	config := onlineapi.OnlineAPIConfig{}
-	if err = ParseConfig(configJSON, &config); err != nil {
-		return FailedTask(err.Error()), err
-	}
-
-	hunter := onlineapi.NewHunter(config)
-	hunter.Do()
-	checkIgnoreResult(&hunter.IpResult, &hunter.DomainResult, config)
 	if config.IsIPLocation {
-		doLocation(&hunter.IpResult)
+		doLocation(&ipResult)
 	}
 	// 保存结果
 	x := comm.NewXClient()
@@ -129,27 +87,14 @@ func Hunter(taskId, configJSON string) (result string, err error) {
 		TaskID:       taskId,
 		IPConfig:     &portscan.Config{OrgId: config.OrgId},
 		DomainConfig: &domainscan.Config{OrgId: config.OrgId},
-		IPResult:     hunter.IpResult.IPResult,
-		DomainResult: hunter.DomainResult.DomainResult,
+		IPResult:     ipResult.IPResult,
+		DomainResult: domainResult.DomainResult,
 	}
 	err = x.Call(context.Background(), "SaveScanResult", &args, &result)
 	if err != nil {
 		logging.RuntimeLog.Error(err)
-		return FailedTask(err.Error()), err
 	}
-	//fingerprint
-	result, err = NewFingerprintTask(&hunter.IpResult, &hunter.DomainResult, FingerprintTaskConfig{
-		IsHttpx:          config.IsHttpx,
-		IsFingerprintHub: config.IsFingerprintHub,
-		IsIconHash:       config.IsIconHash,
-		IsScreenshot:     config.IsScreenshot,
-	})
-	if err != nil {
-		logging.RuntimeLog.Error(err)
-		return FailedTask(err.Error()), err
-	}
-
-	return SucceedTask(result), nil
+	return
 }
 
 // ICPQuery ICP备案查询任务

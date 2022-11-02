@@ -30,14 +30,21 @@ var taskMaps = map[string]interface{}{
 	"quake":       Quake,
 	"hunter":      Hunter,
 	"xray":        PocScan,
-	"pocsuite":    PocScan,
 	"dirsearch":   PocScan,
 	"nuclei":      PocScan,
 	"icpquery":    ICPQuery,
 	"whoisquery":  WhoisQuery,
 	"fingerprint": Fingerprint,
-	"xraypoc":     XrayPocScan,
-	"test":        TaskTest,
+	//xscan:
+	"xraypoc":      XrayPocScan,
+	"xfofa":        XFofa,
+	"xportscan":    XPortScan,
+	"xdomainscan":  XDomainscan,
+	"xfingerprint": XFingerPrint,
+	"xxraypoc":     XXrayPocScan,
+	"xorgscan":     XOrganization,
+	//test:
+	"test": TaskTest,
 }
 
 // SucceedTask 任务执行成功的状态的结果

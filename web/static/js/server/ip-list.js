@@ -14,6 +14,15 @@ $(function () {
         $('#text_target').val(checkIP.join("\n"));
         $('#newTask').modal('toggle');
     });
+    //XSCAN窗口
+    $("#create_xscan_task").click(function () {
+        var checkIP = [];
+        $('#ip_table').DataTable().$('input[type=checkbox]:checked').each(function (i) {
+            checkIP[i] = $(this).val().split("|")[1];
+        });
+        $('#text_target_xscan').val(checkIP.join("\n"));
+        $('#newXScan').modal('toggle');
+    });
     //导入本地扫描结果窗口
     $("#import_portscan").click(function () {
         $('#importPortscan').modal('toggle');
@@ -65,7 +74,7 @@ $(function () {
                 return;
             }
         }
-        if (getCurrentTabIndex() == 0) {
+        if (getCurrentTabIndex('#nav_tabs') == 0) {
             const port = $('#input_port').val();
             const rate = $('#input_rate').val();
             let exclude_ip = "";
@@ -95,7 +104,7 @@ $(function () {
                     'taskcron': $('#checkbox_cron_task').is(":checked"),
                     'cronrule': cron_rule,
                     'croncomment': $('#input_cron_comment').val(),
-                    'load_opened_port':$('#checkbox_ip_load_opened_port').is(":checked"),
+                    'load_opened_port': $('#checkbox_ip_load_opened_port').is(":checked"),
                     'ignoreoutofchina': $('#checkbox_ignorecdn_outofchina').is(":checked"),
                     'ignorecdn': $('#checkbox_ignorecdn_outofchina').is(":checked"),
                 }, function (data, e) {
@@ -116,16 +125,10 @@ $(function () {
                     }
                 });
         }
-        if (getCurrentTabIndex() == 1) {
-            if ($('#checkbox_pocsuite3').is(":checked") == false && $('#checkbox_xray').is(":checked") == false && $('#checkbox_dirsearch').is(":checked") == false && $('#checkbox_nuclei').is(":checked") == false) {
+        if (getCurrentTabIndex('#nav_tabs') == 1) {
+            if ($('#checkbox_xray').is(":checked") == false && $('#checkbox_dirsearch').is(":checked") == false && $('#checkbox_nuclei').is(":checked") == false) {
                 swal('Warning', '请选择要使用的验证工具！', 'error');
                 return;
-            }
-            if ($('#checkbox_pocsuite3').is(":checked")) {
-                if ($('#input_pocsuite3_poc_file').val() == '') {
-                    swal('Warning', '请选择poc file', 'error');
-                    return;
-                }
             }
             if ($('#checkbox_xray').is(":checked")) {
                 if ($('#input_xray_poc_file').val() == '') {
@@ -148,8 +151,6 @@ $(function () {
             $.post("/task-start-vulnerability",
                 {
                     "target": target,
-                    'pocsuite3verify': $('#checkbox_pocsuite3').is(":checked"),
-                    'pocsuite3_poc_file': $('#input_pocsuite3_poc_file').val(),
                     'xrayverify': $('#checkbox_xray').is(":checked"),
                     'xray_poc_file': $('#input_xray_poc_file').val(),
                     'nucleiverify': $('#checkbox_nuclei').is(":checked"),
@@ -178,7 +179,7 @@ $(function () {
                     }
                 });
         }
-        if (getCurrentTabIndex() == 2) {
+        if (getCurrentTabIndex('#nav_tabs') == 2) {
             const port1 = $('#input_batchscan_port1').val();
             const port2 = $('#input_batchscan_port2').val();
             const rate = $('#input_batchscan_rate').val();
@@ -228,6 +229,72 @@ $(function () {
                 });
         }
     });
+
+
+    $("#start_xscan_task").click(function () {
+        const formData = new FormData();
+        let port = $('#input_port_xscan').val();
+        if (getCurrentTabIndex('#nav_tabs_xscan') === 0) {
+            const target = $('#text_target_xscan').val();
+            if (!target) {
+                swal('Warning', '请至少输入一个Target', 'error');
+                return;
+            }
+            formData.append("xscan_type", "xportscan");
+            formData.append("target", target)
+            formData.append("fofa", $('#checkbox_fofasearch_xscan').is(":checked"));
+        } else {
+            if ($('#select_org_id_task_xscan').val() === "") {
+                swal('Warning', '必须选择要执行任务的组织！', 'error');
+                return
+            }
+            formData.append("xscan_type", "xorgipscan");
+        }
+        let cron_rule = "";
+        if ($('#checkbox_cron_task_xscan').is(":checked")) {
+            cron_rule = $('#input_cron_rule_xscan').val();
+            if (!cron_rule) {
+                swal('Warning', '请输入定时任务规则', 'error');
+                return;
+            }
+        }
+        formData.append("port", port);
+        formData.append("org_id", $('#select_org_id_task_xscan').val());
+        formData.append("is_CN", $('#checkbox_ignorecdn_outofchina_xscan').is(":checked"));
+        formData.append("fingerprint", $('#checkbox_fingerpint_xscan').is(":checked"));
+        formData.append("xraypoc", $('#checkbox_xraypocv1_xscan').is(":checked"));
+        formData.append("taskcron", $('#checkbox_cron_task_xscan').is(":checked"));
+        formData.append("cronrule", cron_rule);
+        formData.append("croncomment", $('#input_cron_comment_xscan').val());
+
+        $.ajax({
+            url: '/task-start-xscan',
+            type: 'POST',
+            cache: false,
+            data: formData,
+            processData: false,
+            contentType: false
+        }).done(function (res) {
+            if (res['status'] == "success") {
+                swal({
+                        title: "新建任务成功！",
+                        text: res['msg'],
+                        type: "success",
+                        confirmButtonText: "确定",
+                        confirmButtonColor: "#41b883",
+                        closeOnConfirm: true,
+                    },
+                    function () {
+                        $('#newXScan').modal('hide');
+                    });
+            } else {
+                swal('Warning', '新建任务失败！' + res['msg'], 'error');
+            }
+        }).fail(function (res) {
+            swal('Warning', '新建任务失败！' + res['msg'], 'error');
+        });
+    });
+
     $("#checkbox_portscan").click(function () {
         if (this.checked) {
             $("#input_port").prop("disabled", false);
@@ -242,13 +309,10 @@ $(function () {
             $("#select_tech").prop("disabled", true);
             $("#select_bin").prop("disabled", true);
             $("#input_rate").prop("disabled", true);
-            // $("#checkbox_httpx").prop("disabled", true);
             $("#checkbox_ping").prop("disabled", true);
             $("#checkbox_exclude").prop("disabled", true);
             $("#input_exclude").prop("disabled", true);
-            // $("#checkbox_screenshot").prop("disabled", true);
-            // $("#checkbox_fingerprinthub").prop("disabled", true);
-            // $("#checkbox_iconhash").prop("disabled", true);
+
         }
     })
     $("#checkbox_cron_task").click(function () {
@@ -260,6 +324,17 @@ $(function () {
             $("#input_cron_rule").prop("disabled", true);
             $("#input_cron_comment").prop("disabled", true);
             $("#label_cron_rule").prop("disabled", true);
+        }
+    })
+    $("#checkbox_cron_task_xscan").click(function () {
+        if (this.checked) {
+            $("#input_cron_rule_xscan").prop("disabled", false);
+            $("#input_cron_comment_xscan").prop("disabled", false);
+            $("#label_cron_rule_xscan").prop("disabled", false);
+        } else {
+            $("#input_cron_rule_xscan").prop("disabled", true);
+            $("#input_cron_comment_xscan").prop("disabled", true);
+            $("#label_cron_rule_xscan").prop("disabled", true);
         }
     })
     $("#ip_statistics").click(function () {
@@ -313,6 +388,7 @@ $(function () {
                         'disable_outof_china': $('#checkbox_disable_outof_china').is(":checked"),
                         'select_outof_china': $('#checkbox_select_outof_china').is(":checked"),
                         'select_no_openedport': $('#checkbox_select_no_openedport').is(":checked"),
+                        'select_order_by_date': $('#checkbox_select_order_by_date').is(":checked"),
                     });
                 }
             },

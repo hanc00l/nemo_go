@@ -55,7 +55,7 @@ type Fofa struct {
 	IpResult portscan.Result
 }
 
-// DomainResult represents a record of the query results
+// Domain represents a record of the query results
 // contain domain host  ip  port title country city
 type result struct {
 	Domain  string `json:"domain,omitempty"`
@@ -260,15 +260,25 @@ func (f *Fofa) RunFofa(domain string) {
 	// QueryAsJSON
 	var query string
 	fields := "domain,host,ip,port,title,country,city,server,banner"
-	if utils.CheckIPV4(domain) || utils.CheckIPV4Subnet(domain) {
-		query = fmt.Sprintf("ip=\"%s\"", domain)
+	if f.Config.SearchByKeyWord {
+		query = f.Config.Target
 	} else {
-		// cert.subject相比更精准，但信息量更少；cert="xxx.com"干扰太多，暂时不用（没想法好优的方案）
-		// query = fmt.Sprintf("domain=\"%s\" || host=\"%s\" || cert=\"%s\"", domain, domain, domain)
-		query = fmt.Sprintf("domain=\"%s\" || cert.subject=\"%s\"", domain, domain)
+		if utils.CheckIPV4(domain) || utils.CheckIPV4Subnet(domain) {
+			query = fmt.Sprintf("ip=\"%s\"", domain)
+		} else {
+			// cert.subject相比更精准，但信息量更少；cert="xxx.com"干扰太多，暂时不用（没想法好优的方案）
+			// query = fmt.Sprintf("domain=\"%s\" || host=\"%s\" || cert=\"%s\"", domain, domain, domain)
+			query = fmt.Sprintf("domain=\"%s\" || cert.subject=\"%s\"", domain, domain)
+		}
+		if f.Config.IsIgnoreOutofChina {
+			query = fmt.Sprintf("(%s) && country=\"CN\" && region!=\"HK\" && region!=\"TW\"  && region!=\"MO\"", query)
+		}
 	}
 	// 查询第1页，并获取总共记录数量
 	pageResult, sizeTotal := f.retriedFofaSearch(clt, 1, query, fields)
+	if f.Config.SearchLimitCount > 0 && sizeTotal > f.Config.SearchLimitCount {
+		sizeTotal = f.Config.SearchLimitCount
+	}
 	//fmt.Println(sizeTotal)
 	f.Result = append(f.Result, pageResult...)
 	// 计算需要查询的页数

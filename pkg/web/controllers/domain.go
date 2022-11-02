@@ -37,6 +37,7 @@ type domainRequestParam struct {
 	DisableBanner      bool   `form:"disable_banner"`
 	Content            string `form:"content"`
 	SelectNoResolvedIP bool   `form:"select_no_ip"`
+	OrderByDate        bool   `form:"select_order_by_date"`
 }
 
 // DomainListData datable显示的每一行数据
@@ -360,7 +361,7 @@ func (c *DomainController) StatisticsAction() {
 	http.ServeContent(rw, c.Ctx.Request, "domain-statistics.txt", time.Now(), strings.NewReader(strings.Join(content, "\n")))
 }
 
-//validateRequestParam 校验请求的参数
+// validateRequestParam 校验请求的参数
 func (c *DomainController) validateRequestParam(req *domainRequestParam) {
 	if req.Length <= 0 {
 		req.Length = 50
@@ -404,7 +405,7 @@ func (c *DomainController) getSearchMap(req domainRequestParam) (searchMap map[s
 func (c *DomainController) getDomainListData(req domainRequestParam) (resp DataTableResponseData) {
 	domain := db.Domain{}
 	searchMap := c.getSearchMap(req)
-	results, total := domain.Gets(searchMap, req.Start/req.Length+1, req.Length)
+	results, total := domain.Gets(searchMap, req.Start/req.Length+1, req.Length, req.OrderByDate)
 	hp := custom.NewHoneyPot()
 	ss := fingerprint.NewScreenShot()
 	cdn := custom.NewCDNCheck()
@@ -476,7 +477,7 @@ func (c *DomainController) getDomainListData(req domainRequestParam) (resp DataT
 func (c *DomainController) getMemoData(req domainRequestParam) (r []string) {
 	domain := db.Domain{}
 	searchMap := c.getSearchMap(req)
-	domainResult, _ := domain.Gets(searchMap, -1, -1)
+	domainResult, _ := domain.Gets(searchMap, -1, -1, req.OrderByDate)
 	for _, domainRow := range domainResult {
 		memo := db.DomainMemo{RelatedId: domainRow.Id}
 		if !memo.GetByRelatedId() || memo.Content == "" {
@@ -709,7 +710,7 @@ func (c *DomainController) getDomainStatisticsData(req domainRequestParam) Domai
 	}
 	domain := db.Domain{}
 	searchMap := c.getSearchMap(req)
-	domainResult, _ := domain.Gets(searchMap, -1, -1)
+	domainResult, _ := domain.Gets(searchMap, -1, -1, req.OrderByDate)
 	for _, domainRow := range domainResult {
 		fldDomain, hostDomainReversed := reverseDomainHost(domainRow.DomainName)
 		if fldDomain == "" || len(hostDomainReversed) == 0 {

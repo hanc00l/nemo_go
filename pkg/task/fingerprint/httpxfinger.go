@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"github.com/hanc00l/nemo_go/pkg/conf"
 	"github.com/hanc00l/nemo_go/pkg/logging"
-	"github.com/hanc00l/nemo_go/pkg/poclib"
 	"github.com/hanc00l/nemo_go/pkg/utils"
+	"github.com/hanc00l/nemo_go/pkg/xraypocv1"
 	"github.com/projectdiscovery/urlutil"
 	"os"
 	"path"
@@ -168,7 +168,7 @@ func (h *HttpxFinger) fingerPrintFuncForCustom(domain string, ip string, port in
 	if len(headerAndBodyArrays) == 2 {
 		data = headerAndBodyArrays[1]
 	}
-	content := poclib.Content{
+	content := xraypocv1.Content{
 		Port:   fmt.Sprintf("%d", port),
 		Body:   data,
 		Header: headers,
@@ -184,8 +184,8 @@ func (h *HttpxFinger) fingerPrintFuncForCustom(domain string, ip string, port in
 	}
 	//fmt.Println(content)
 	for _, v := range h.fpCustom {
-		rule := poclib.ParseRules(v.Rule)
-		if poclib.MatchRules(*rule, content) {
+		rule := xraypocv1.ParseRules(v.Rule)
+		if xraypocv1.MatchRules(*rule, content) {
 			//fmt.Println(v)
 			fingers = append(fingers, v.App)
 		}

@@ -30,7 +30,7 @@ func (domain *Domain) Get() (success bool) {
 	}
 }
 
-//Add 插入一条新的记录
+// Add 插入一条新的记录
 func (domain *Domain) Add() (success bool) {
 	domain.CreateDatetime = time.Now()
 	domain.UpdateDatetime = time.Now()
@@ -135,8 +135,11 @@ func (domain *Domain) makeWhere(searchMap map[string]interface{}) *gorm.DB {
 }
 
 // Gets 根据指定的条件，查询满足要求的记录
-func (domain *Domain) Gets(searchMap map[string]interface{}, page, rowsPerPage int) (results []Domain, count int) {
+func (domain *Domain) Gets(searchMap map[string]interface{}, page, rowsPerPage int, orderByDate bool) (results []Domain, count int) {
 	orderBy := "domain"
+	if orderByDate {
+		orderBy = "update_datetime desc"
+	}
 
 	db := domain.makeWhere(searchMap).Model(domain)
 	defer CloseDB(db)

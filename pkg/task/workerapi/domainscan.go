@@ -28,7 +28,7 @@ func DomainScan(taskId, configJSON string) (result string, err error) {
 	resultDomainScan := doDomainScan(config)
 	// 如果有端口扫描的选项
 	if config.IsIPPortScan || config.IsIPSubnetPortScan {
-		doPortScan(config, &resultDomainScan)
+		doPortScanByDomainscan(config, &resultDomainScan)
 	}
 	// 保存结果
 	x := comm.NewXClient()
@@ -92,10 +92,10 @@ func doDomainScan(config domainscan.Config) (resultDomainScan domainscan.Result)
 	return resultDomainScan
 }
 
-// doPortScan 对IP进行端口扫描
-func doPortScan(config domainscan.Config, resultDomainScan *domainscan.Result) {
+// doPortScanByDomainscan 对IP进行端口扫描
+func doPortScanByDomainscan(config domainscan.Config, resultDomainScan *domainscan.Result) {
 	ipResult, ipSubnetResult := getResultIPList(resultDomainScan)
-	if ipResult == "" {
+	if len(ipResult) == 0 {
 		return
 	}
 	portsConfig := conf.GlobalWorkerConfig().Portscan
@@ -148,7 +148,7 @@ func doPortScan(config domainscan.Config, resultDomainScan *domainscan.Result) {
 }
 
 // getResultIPList 提取域名收集结果的IP
-func getResultIPList(resultDomainScan *domainscan.Result) (ipResult, ipSubnetResult string) {
+func getResultIPList(resultDomainScan *domainscan.Result) (ipResult, ipSubnetResult []string) {
 	ips := make(map[string]struct{})
 	ipSubnets := make(map[string]struct{})
 	cdnCheck := custom.NewCDNCheck()
@@ -182,8 +182,7 @@ func getResultIPList(resultDomainScan *domainscan.Result) (ipResult, ipSubnetRes
 	for k, _ := range ipSubnets {
 		ipSubnetList = append(ipSubnetList, k)
 	}
-
-	return strings.Join(ipList, "\n"), strings.Join(ipSubnetList, "\n")
+	return
 }
 
 // checkDomainResolveResult 检查域名结果，去除没有解析记录的无效域名

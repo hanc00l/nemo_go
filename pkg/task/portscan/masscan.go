@@ -63,7 +63,7 @@ func (m *Masscan) Do() {
 		return
 	}
 	m.parsResult(resultTempFile)
-	FilterIPHasTooMuchPort(m.Result)
+	FilterIPHasTooMuchPort(&m.Result, false)
 }
 
 // parsResult 解析结果

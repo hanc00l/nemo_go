@@ -13,21 +13,25 @@ type ConfigController struct {
 
 const (
 	HoneyPot    string = "honeypot"
-	IPLoation   string = "iplocation"
+	IPLocation  string = "iplocation"
 	IPLocationB string = "iplocationB"
 	IPLocationC string = "iplocationC"
 	Service     string = "service"
 )
 
 type DefaultConfig struct {
-	CmdBin          string `json:"cmdbin"`
-	Port            string `json:"port"`
-	Rate            int    `json:"rate"`
-	Tech            string `json:"tech"`
-	IsPing          bool   `json:"ping"`
-	IpSliceNumber   int    `json:"ipslicenumber"`
-	PortSliceNumber int    `json:"portslicenumber"`
-	Version         string `json:"version"`
+	CmdBin           string `json:"cmdbin"`
+	Port             string `json:"port"`
+	Rate             int    `json:"rate"`
+	Tech             string `json:"tech"`
+	IsPing           bool   `json:"ping"`
+	IpSliceNumber    int    `json:"ipslicenumber"`
+	PortSliceNumber  int    `json:"portslicenumber"`
+	Version          string `json:"version"`
+	IsHttpx          bool   `json:"httpx"`
+	IsScreenshot     bool   `json:"screenshot"`
+	IsFingerprintHub bool   `json:"fingerprinthub"`
+	IsIconHash       bool   `json:"iconhash"`
 }
 
 func (c *ConfigController) IndexAction() {
@@ -44,24 +48,34 @@ func (c *ConfigController) CustomAction() {
 
 // LoadDefaultConfigAction 获取默认的端口扫描配置参数
 func (c *ConfigController) LoadDefaultConfigAction() {
-	conf.GlobalWorkerConfig().ReloadConfig()
+	defer c.ServeJSON()
+
+	err := conf.GlobalWorkerConfig().ReloadConfig()
+	if err != nil {
+		c.FailedStatus(err.Error())
+		return
+	}
 	portscan := conf.GlobalWorkerConfig().Portscan
 	task := conf.GlobalServerConfig().Task
+	fingerprint := conf.GlobalWorkerConfig().Fingerprint
 	data := DefaultConfig{
-		CmdBin:          portscan.Cmdbin,
-		Port:            portscan.Port,
-		Rate:            portscan.Rate,
-		Tech:            portscan.Tech,
-		IsPing:          portscan.IsPing,
-		IpSliceNumber:   task.IpSliceNumber,
-		PortSliceNumber: task.PortSliceNumber,
+		CmdBin:           portscan.Cmdbin,
+		Port:             portscan.Port,
+		Rate:             portscan.Rate,
+		Tech:             portscan.Tech,
+		IsPing:           portscan.IsPing,
+		IpSliceNumber:    task.IpSliceNumber,
+		PortSliceNumber:  task.PortSliceNumber,
+		IsHttpx:          fingerprint.IsHttpx,
+		IsScreenshot:     fingerprint.IsScreenshot,
+		IsFingerprintHub: fingerprint.IsFingerprintHub,
+		IsIconHash:       fingerprint.IsIconHash,
 	}
-	fileContent, err := os.ReadFile(filepath.Join(conf.GetRootPath(), "version.txt"))
-	if err == nil {
+	fileContent, err1 := os.ReadFile(filepath.Join(conf.GetRootPath(), "version.txt"))
+	if err1 == nil {
 		data.Version = string(fileContent)
 	}
 	c.Data["json"] = data
-	c.ServeJSON()
 }
 
 // ChangePasswordAction 修改密码
@@ -110,6 +124,7 @@ func (c *ConfigController) LoadCustomConfigAction() {
 // SaveCustomConfigAction 保存一个自定义文件
 func (c *ConfigController) SaveCustomConfigAction() {
 	defer c.ServeJSON()
+
 	customType := c.GetString("type", "")
 	customContent := c.GetString("content", "")
 	if customType == "" || customContent == "" {
@@ -126,7 +141,7 @@ func (c *ConfigController) SaveCustomConfigAction() {
 		c.FailedStatus(err.Error())
 		return
 	}
-	c.SucceededStatus("")
+	c.SucceededStatus("保存配置成功")
 }
 
 // SaveTaskSliceNumberAction 保存任务切分设置
@@ -139,14 +154,82 @@ func (c *ConfigController) SaveTaskSliceNumberAction() {
 		c.FailedStatus("数量错误")
 		return
 	}
-	conf.GlobalServerConfig().ReloadConfig()
+	err := conf.GlobalServerConfig().ReloadConfig()
+	if err != nil {
+		c.FailedStatus(err.Error())
+		return
+	}
 	conf.GlobalServerConfig().Task.IpSliceNumber = ipSliceNumber
 	conf.GlobalServerConfig().Task.PortSliceNumber = portSliceNumber
-	err := conf.GlobalServerConfig().WriteConfig()
+	err = conf.GlobalServerConfig().WriteConfig()
 	if err != nil {
 		c.FailedStatus(err.Error())
 	}
-	c.SucceededStatus("")
+	c.SucceededStatus("保存配置成功")
+}
+
+// SaveFingerprintAction 保存默认指纹设置
+func (c *ConfigController) SaveFingerprintAction() {
+	defer c.ServeJSON()
+
+	httpx, err1 := c.GetBool("httpx", true)
+	fingerprinthub, err2 := c.GetBool("fingerprinthub", true)
+	screenshot, err3 := c.GetBool("screenshot", true)
+	iconhash, err4 := c.GetBool("iconhash", true)
+
+	if err1 != nil || err2 != nil || err3 != nil || err4 != nil {
+		c.FailedStatus("配置参数错误！")
+		return
+	}
+	err := conf.GlobalWorkerConfig().ReloadConfig()
+	if err != nil {
+		c.FailedStatus(err.Error())
+		return
+	}
+
+	conf.GlobalWorkerConfig().Fingerprint.IsHttpx = httpx
+	conf.GlobalWorkerConfig().Fingerprint.IsScreenshot = screenshot
+	conf.GlobalWorkerConfig().Fingerprint.IsFingerprintHub = fingerprinthub
+	conf.GlobalWorkerConfig().Fingerprint.IsIconHash = iconhash
+	err = conf.GlobalWorkerConfig().WriteConfig()
+	if err != nil {
+		c.FailedStatus(err.Error())
+	}
+	c.SucceededStatus("保存配置成功")
+}
+
+// SavePortscanAction 保存默认端口扫描设置
+func (c *ConfigController) SavePortscanAction() {
+	defer c.ServeJSON()
+
+	cmdbin := c.GetString("cmdbin", "masscan")
+	port := c.GetString("port", "--top-ports 1000")
+	rate, err1 := c.GetInt("rate", 1000)
+	tech := c.GetString("tech", "-sS")
+	ping, err2 := c.GetBool("ping", false)
+	if err1 != nil || err2 != nil {
+		c.FailedStatus("配置参数错误！")
+		return
+	}
+	err := conf.GlobalWorkerConfig().ReloadConfig()
+	if err != nil {
+		c.FailedStatus(err.Error())
+		return
+	}
+
+	conf.GlobalWorkerConfig().Portscan.Cmdbin = "masscan"
+	if cmdbin == "nmap" {
+		conf.GlobalWorkerConfig().Portscan.Cmdbin = "nmap"
+	}
+	conf.GlobalWorkerConfig().Portscan.Port = port
+	conf.GlobalWorkerConfig().Portscan.Rate = rate
+	conf.GlobalWorkerConfig().Portscan.Tech = tech
+	conf.GlobalWorkerConfig().Portscan.IsPing = ping
+	err = conf.GlobalWorkerConfig().WriteConfig()
+	if err != nil {
+		c.FailedStatus(err.Error())
+	}
+	c.SucceededStatus("保存配置成功")
 }
 
 // getCustomFilename  根据类型返回自定义文件名
@@ -154,7 +237,7 @@ func getCustomFilename(customType string) (customFile string) {
 	switch customType {
 	case HoneyPot:
 		customFile = "custom/honeypot.txt"
-	case IPLoation:
+	case IPLocation:
 		customFile = "custom/iplocation-custom.txt"
 	case IPLocationB:
 		customFile = "custom/iplocation-custom-B.txt"

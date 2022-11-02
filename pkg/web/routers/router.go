@@ -20,6 +20,8 @@ func init() {
 	web.Router("/custom-load", config, "post:LoadCustomConfigAction")
 	web.Router("/custom-save", config, "post:SaveCustomConfigAction")
 	web.Router("/config-save-taskslice", config, "post:SaveTaskSliceNumberAction")
+	web.Router("/config-save-portscan", config, "post:SavePortscanAction")
+	web.Router("/config-save-fingerprint", config, "post:SaveFingerprintAction")
 
 	dashboard := &controllers.DashboardController{}
 	web.Router("/dashboard", dashboard, "get:IndexAction;post:GetStatisticDataAction")
@@ -59,7 +61,6 @@ func init() {
 	web.Router("/vulnerability-list", vulnerability, "get:IndexAction;post:ListAction")
 	web.Router("/vulnerability-info", vulnerability, "get:InfoAction")
 	web.Router("/vulnerability-delete", vulnerability, "post:DeleteAction")
-	web.Router("/vulnerability-load-pocsuite-pocfile", vulnerability, "post:LoadPocsuitePocFileAction")
 	web.Router("/vulnerability-load-xray-pocfile", vulnerability, "post:LoadXrayPocFileAction")
 	web.Router("/vulnerability-load-nuclei-pocfile", vulnerability, "post:LoadNucleiPocFileAction")
 
@@ -81,6 +82,7 @@ func init() {
 	web.Router("/task-start-domainscan", task, "post:StartDomainScanTaskAction")
 	web.Router("/task-start-vulnerability", task, "post:StartPocScanTaskAction")
 	web.Router("/task-batch-delete", task, "post:DeleteBatchAction")
+	web.Router("/task-start-xscan", task, "post:StartXScanTaskAction")
 
 	//cron task
 	web.Router("/task-cron-list", task, "get:IndexCronAction;post:ListCronAction")
@@ -89,4 +91,9 @@ func init() {
 	web.Router("/task-cron-disable", task, "post:DisableCronTaskAction")
 	web.Router("/task-cron-enable", task, "post:EnableCronTaskAction")
 	web.Router("/task-cron-run", task, "post:RunCronTaskAction")
+
+	keyWord := &controllers.KeySearchController{}
+	web.Router("/key-word-list", keyWord, "get:IndexAction;post:ListAction")
+	web.Router("/key-word-add", keyWord, "post:AddSaveAction")
+	web.Router("/key-word-del", keyWord, "post:DeleteKeyWordAction")
 }

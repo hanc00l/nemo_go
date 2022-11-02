@@ -24,6 +24,7 @@ type IconHash struct {
 	ResultPortScan     portscan.Result
 	ResultDomainScan   domainscan.Result
 	IconHashInfoResult IconHashInfoResult
+	DomainTargetPort   map[string]map[int]struct{}
 }
 
 type IconHashResult struct {
@@ -59,13 +60,9 @@ func (i *IconHash) Do() {
 	swg := sizedwaitgroup.New(fpIconHashThreadNumber)
 
 	if i.ResultPortScan.IPResult != nil {
-		bport := make(map[int]struct{})
-		for _, p := range IgnorePort {
-			bport[p] = struct{}{}
-		}
 		for ipName, ipResult := range i.ResultPortScan.IPResult {
-			for portNumber, _ := range ipResult.Ports {
-				if _, ok := bport[portNumber]; ok {
+			for portNumber := range ipResult.Ports {
+				if _, ok := blankPort[portNumber]; ok {
 					continue
 				}
 				url := fmt.Sprintf("%v:%v", ipName, portNumber)
@@ -97,31 +94,46 @@ func (i *IconHash) Do() {
 		}
 	}
 	if i.ResultDomainScan.DomainResult != nil {
-		for domain, _ := range i.ResultDomainScan.DomainResult {
-			swg.Add()
-			go func(d string) {
-				iconHashes := i.RunFetchIconHashes(d)
-				if len(iconHashes) > 0 {
-					for _, r := range iconHashes {
-						dar := domainscan.DomainAttrResult{
-							Source:  "iconhash",
-							Tag:     "favicon",
-							Content: fmt.Sprintf("%s | %s", r.Hash, r.Url),
-						}
-						i.ResultDomainScan.SetDomainAttr(d, dar)
-						if len(r.ImageData) > 0 {
-							i.IconHashInfoResult.Lock()
-							i.IconHashInfoResult.Result = append(i.IconHashInfoResult.Result, IconHashInfo{
-								Url:       r.Url,
-								Hash:      r.Hash,
-								ImageData: r.ImageData,
-							})
-							i.IconHashInfoResult.Unlock()
+		if i.DomainTargetPort == nil {
+			i.DomainTargetPort = make(map[string]map[int]struct{})
+		}
+		for domain := range i.ResultDomainScan.DomainResult {
+			//如果无域名对应的端口，默认80和443
+			if _, ok := i.DomainTargetPort[domain]; !ok {
+				i.DomainTargetPort[domain] = make(map[int]struct{})
+				i.DomainTargetPort[domain][80] = struct{}{}
+				i.DomainTargetPort[domain][443] = struct{}{}
+			}
+			for port := range i.DomainTargetPort[domain] {
+				if _, ok := blankPort[port]; ok {
+					continue
+				}
+				url := fmt.Sprintf("%s:%d", domain, port)
+				swg.Add()
+				go func(d string, u string) {
+					iconHashes := i.RunFetchIconHashes(u)
+					if len(iconHashes) > 0 {
+						for _, r := range iconHashes {
+							dar := domainscan.DomainAttrResult{
+								Source:  "iconhash",
+								Tag:     "favicon",
+								Content: fmt.Sprintf("%s | %s", r.Hash, r.Url),
+							}
+							i.ResultDomainScan.SetDomainAttr(d, dar)
+							if len(r.ImageData) > 0 {
+								i.IconHashInfoResult.Lock()
+								i.IconHashInfoResult.Result = append(i.IconHashInfoResult.Result, IconHashInfo{
+									Url:       r.Url,
+									Hash:      r.Hash,
+									ImageData: r.ImageData,
+								})
+								i.IconHashInfoResult.Unlock()
+							}
 						}
 					}
-				}
-				swg.Done()
-			}(domain)
+					swg.Done()
+				}(domain, url)
+			}
 		}
 	}
 	swg.Wait()
