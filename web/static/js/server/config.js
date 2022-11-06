@@ -98,6 +98,38 @@ $("#buttonSaveIPLocationB").click(function () {
 $("#buttonSaveIPLocationC").click(function () {
     save_custom("iplocationC", $('#text_iplocationC').val())
 });
+$("#buttonUploadXrayPoc").click(function () {
+    let formData = new FormData();
+    formData.append('file', $('#file_xraypoc')[0].files[0]);
+    if (formData.get("file") === "undefined") {
+        swal('Warning', '请选择要上传的文件！', 'error');
+        return;
+    }
+    $.ajax({
+        url: "/config-upload-xraypoc",
+        type: "post",
+        data: formData,
+        //十分重要，不能省略
+        cache: false,
+        processData: false,
+        contentType: false,
+        success: function (data, e) {
+            if (e === "success" && data['status'] == 'success') {
+                swal({
+                    title: "保存成功！",
+                    text: data['msg'],
+                    type: "success",
+                    confirmButtonText: "确定",
+                    confirmButtonColor: "#41b883",
+                    closeOnConfirm: true,
+                    timer: 3000
+                });
+            } else {
+                swal('Warning', data['msg'], 'error');
+            }
+        }
+    });
+});
 $("#buttonChangPassword").click(function () {
     if ($('#input_oldpass').val() === '' || $('#input_password1').val() === '' || $('#input_password2').val() === '') {
         swal('Warning', "请输入密码！", 'error');

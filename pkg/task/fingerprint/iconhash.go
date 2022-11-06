@@ -99,7 +99,7 @@ func (i *IconHash) Do() {
 		}
 		for domain := range i.ResultDomainScan.DomainResult {
 			//如果无域名对应的端口，默认80和443
-			if _, ok := i.DomainTargetPort[domain]; !ok {
+			if _, ok := i.DomainTargetPort[domain]; !ok || len(i.DomainTargetPort[domain]) == 0 {
 				i.DomainTargetPort[domain] = make(map[int]struct{})
 				i.DomainTargetPort[domain][80] = struct{}{}
 				i.DomainTargetPort[domain][443] = struct{}{}
@@ -141,21 +141,19 @@ func (i *IconHash) Do() {
 
 func (i *IconHash) RunFetchIconHashes(url string) (hashResult []IconHashResult) {
 	var icons []besticon.Icon
-	//遍历http与https两种协议
-	for _, protol := range []string{"http", "https"} {
-		// 获取缺省的icon:
-		u1 := fmt.Sprintf("%s://%s/favicon.ico", protol, url)
-		icon1 := fetchIconDetails(u1)
-		if icon1.Error == nil {
-			icons = append(icons, icon1)
-		}
-		// 获取网页中定义的全部icon
-		u2 := fmt.Sprintf("%s://%s", protol, url)
-		finder := besticon.IconFinder{}
-		icons2, err := finder.FetchIcons(u2)
-		if err == nil {
-			icons = append(icons, icons2...)
-		}
+	protocoll := utils.GetProtocol(url, 5)
+	// 获取缺省的icon:
+	u1 := fmt.Sprintf("%s://%s/favicon.ico", protocoll, url)
+	icon1 := fetchIconDetails(u1)
+	if icon1.Error == nil {
+		icons = append(icons, icon1)
+	}
+	// 获取网页中定义的全部icon
+	u2 := fmt.Sprintf("%s://%s", protocoll, url)
+	finder := besticon.IconFinder{}
+	icons2, err := finder.FetchIcons(u2)
+	if err == nil {
+		icons = append(icons, icons2...)
 	}
 	//计算哈希值
 	for _, icon := range icons {

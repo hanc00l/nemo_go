@@ -69,24 +69,20 @@ type PocscanRequestParam struct {
 }
 
 type XScanRequestParam struct {
-	XScanType string `form:"xscan_type"`
-	Target    string `form:"target"`
-	Port      string `form:"port"`
-	OrgId     int    `form:"org_id"`
-	IsCn      bool   `form:"is_CN"`
-
-	IsXrayPocscan bool `form:"xraypoc"`
-	IsFofaSearch  bool `form:"fofa"`
-
+	XScanType       string `form:"xscan_type"`
+	Target          string `form:"target"`
+	Port            string `form:"port"`
+	OrgId           int    `form:"org_id"`
+	IsOrgIP         bool
+	IsOrgDomain     bool
+	IsFofaSearch    bool   `form:"fofa"`
 	IsFingerprint   bool   `form:"fingerprint"`
+	IsXrayPocscan   bool   `form:"xraypoc"`
+	XrayPocFile     string `form:"xraypocfile"`
 	IsTaskCron      bool   `form:"taskcron" json:"-"`
 	TaskCronRule    string `form:"cronrule" json:"-"`
 	TaskCronComment string `form:"croncomment" json:"-"`
-	IsXrayPoc       bool   `form:"xraypoc"`
-	PocFile         string `form:"pocfile"`
-
-	IsOrgIP     bool
-	IsOrgDomain bool
+	IsCn            bool   `form:"is_CN"`
 }
 
 type taskKeySearchParam struct {

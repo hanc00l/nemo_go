@@ -206,7 +206,8 @@ func StartXFofaKeywordTask(req XScanRequestParam, cronTaskId string) (taskId str
 		OrgId:              &req.OrgId,
 		IsIgnoreCDN:        false,
 		IsIgnoreOutofChina: req.IsCn,
-		IsXrayPocScan:      req.IsXrayPocscan,
+		IsXrayPoc:          req.IsXrayPocscan,
+		XrayPocFile:        req.XrayPocFile,
 	}
 	// config.OrgId 为int，默认为0
 	// db.Organization.OrgId为指针，默认nil
@@ -241,7 +242,8 @@ func StartXDomainScanTask(req XScanRequestParam, cronTaskId string) (taskId stri
 		OrgId:              &req.OrgId,
 		IsIgnoreCDN:        false,
 		IsIgnoreOutofChina: req.IsCn,
-		IsXrayPocScan:      req.IsXrayPocscan,
+		IsXrayPoc:          req.IsXrayPocscan,
+		XrayPocFile:        req.XrayPocFile,
 	}
 	// config.OrgId 为int，默认为0
 	// db.Organization.OrgId为指针，默认nil
@@ -253,11 +255,6 @@ func StartXDomainScanTask(req XScanRequestParam, cronTaskId string) (taskId stri
 		config.IsFingerprintHub = conf.GlobalWorkerConfig().Fingerprint.IsFingerprintHub
 		config.IsScreenshot = conf.GlobalWorkerConfig().Fingerprint.IsScreenshot
 		config.IsIconHash = conf.GlobalWorkerConfig().Fingerprint.IsIconHash
-	}
-	// config.OrgId 为int，默认为0
-	// db.Organization.OrgId为指针，默认nil
-	if *config.OrgId == 0 {
-		config.OrgId = nil
 	}
 	targetList := formatDomainTarget(req.Target)
 	for _, target := range targetList {
@@ -305,7 +302,8 @@ func StartXPortScanTask(req XScanRequestParam, cronTaskId string) (taskId string
 		OrgId:              &req.OrgId,
 		IsIgnoreCDN:        false,
 		IsIgnoreOutofChina: req.IsCn,
-		IsXrayPocScan:      req.IsXrayPocscan,
+		IsXrayPoc:          req.IsXrayPocscan,
+		XrayPocFile:        req.XrayPocFile,
 	}
 	// config.OrgId 为int，默认为0
 	// db.Organization.OrgId为指针，默认nil
@@ -359,8 +357,8 @@ func StartXOrgScanTask(req XScanRequestParam, cronTaskId string) (taskId string,
 		OrgIPPort:          req.Port,
 		IsIgnoreCDN:        false,
 		IsIgnoreOutofChina: req.IsCn,
-		IsXrayPocScan:      req.IsXrayPocscan,
-		XrayPocFile:        req.PocFile,
+		IsXrayPoc:          req.IsXrayPocscan,
+		XrayPocFile:        req.XrayPocFile,
 	}
 	if req.IsFingerprint {
 		config.IsHttpx = conf.GlobalWorkerConfig().Fingerprint.IsHttpx

@@ -9,7 +9,7 @@ import (
 )
 
 const (
-	pocMaxThreadNumber      = 10
+	pocMaxThreadNumber      = 2
 	ipMaxPocForHoneypot     = 40
 	portMaxPocForHoneypot   = 10
 	domainMaxPocForHoneypot = 40

@@ -73,7 +73,7 @@ func (f *FingerprintHub) Do() {
 		}
 		for domain := range f.ResultDomainScan.DomainResult {
 			//如果无域名对应的端口，默认80和443
-			if _, ok := f.DomainTargetPort[domain]; !ok {
+			if _, ok := f.DomainTargetPort[domain]; !ok || len(f.DomainTargetPort[domain]) == 0 {
 				f.DomainTargetPort[domain] = make(map[int]struct{})
 				f.DomainTargetPort[domain][80] = struct{}{}
 				f.DomainTargetPort[domain][443] = struct{}{}

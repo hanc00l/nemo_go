@@ -97,22 +97,28 @@
                                                 <div>
                                                     <div class="form-group row">
                                                         <div class="col-md-12">
-                                                            <label for="checkbox_xraypocv1_xscan">
+                                                            <label for="checkbox_xraypoc_xscan">
                                                                 <b><span class="text-danger">*</span>漏洞扫描</b>
                                                             </label>
                                                         </div>
                                                         <div class="col-md-12">
                                                             <div class="form-check form-check-inline">
                                                                 <label class="form-check-label"
-                                                                       for="checkbox_xraypocv1_xscan">
+                                                                       for="checkbox_xraypoc_xscan">
                                                                     <input class="form-check-input"
-                                                                           id="checkbox_xraypocv1_xscan"
-                                                                           type="checkbox">XrayPocV1<i
+                                                                           id="checkbox_xraypoc_xscan"
+                                                                           type="checkbox">XrayPocV2<i
                                                                         class="fa fa-question-circle"
                                                                         aria-hidden="true"
-                                                                        title="通过调用内置的XyraPoc，对获得的ip资产和域名资产进行漏洞验证；需要自定义的web_xraypoc_v1.json"></i>
+                                                                        title="通过调用xray，对获得的ip资产和域名资产进行漏洞验证；可以指定单个POC文件，或者*think*类的通配符；如果不选择poc文件，将使用全部poc进行测试"></i>
                                                                 </label>
                                                             </div>
+                                                            <input class="form-control" id="input_xray_poc_file_xscan"
+                                                                   type="text" placeholder="--选择POC文件--"
+                                                                   list="datalist_xray_poc_file_xscan">
+                                                            <datalist id="datalist_xray_poc_file_xscan"
+                                                                      style="display:none;">
+                                                            </datalist>
                                                         </div>
                                                     </div>
                                                 </div>

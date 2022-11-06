@@ -74,10 +74,11 @@ func doPortScanAndSave(taskId string, config portscan.Config) (resultPortScan po
 		logging.RuntimeLog.Error(err)
 	}
 	// 读取目标的数据库中已保存的开放端口
+	var resultIPPorts string
 	if config.IsLoadOpenedPort {
-		err = x.Call(context.Background(), "LoadOpenedPort", &config.Target, &result)
-		if err == nil && result != "" {
-			allTargets := strings.Split(result, ",")
+		err = x.Call(context.Background(), "LoadOpenedPort", &config.Target, &resultIPPorts)
+		if err == nil && resultIPPorts != "" {
+			allTargets := strings.Split(resultIPPorts, ",")
 			for _, target := range allTargets {
 				// 必须是ip:port格式
 				dataArray := strings.Split(target, ":")

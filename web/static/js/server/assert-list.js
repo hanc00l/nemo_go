@@ -110,23 +110,29 @@ function load_org_list() {
 /**
  * 加载poc文件列表
  */
-function load_pocfile_list() {
-    $.post("/vulnerability-load-xray-pocfile", {}, function (data, e) {
-        if (e === "success") {
-            $("#datalist_xray_poc_file").empty();
-            for (let i = 0; i < data.length; i++) {
-                $("#datalist_xray_poc_file").append("<option value='" + data[i] + "'>" + data[i] + "</option>")
+function load_pocfile_list(xray = true, nuclei = true) {
+    if (xray) {
+        $.post("/vulnerability-load-xray-pocfile", {}, function (data, e) {
+            if (e === "success") {
+                $("#datalist_xray_poc_file").empty();
+                $("#datalist_xray_poc_file_xscan").empty();
+                for (let i = 0; i < data.length; i++) {
+                    $("#datalist_xray_poc_file").append("<option value='" + data[i] + "'>" + data[i] + "</option>")
+                    $("#datalist_xray_poc_file_xscan").append("<option value='" + data[i] + "'>" + data[i] + "</option>")
+                }
             }
-        }
-    });
-    $.post("/vulnerability-load-nuclei-pocfile", {}, function (data, e) {
-        if (e === "success") {
-            $("#datalist_nuclei_poc_file").empty();
-            for (let i = 0; i < data.length; i++) {
-                $("#datalist_nuclei_poc_file").append("<option value='" + data[i] + "'>" + data[i] + "</option>")
+        });
+    }
+    if (nuclei) {
+        $.post("/vulnerability-load-nuclei-pocfile", {}, function (data, e) {
+            if (e === "success") {
+                $("#datalist_nuclei_poc_file").empty();
+                for (let i = 0; i < data.length; i++) {
+                    $("#datalist_nuclei_poc_file").append("<option value='" + data[i] + "'>" + data[i] + "</option>")
+                }
             }
-        }
-    });
+        });
+    }
 }
 
 /**

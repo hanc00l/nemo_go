@@ -12,3 +12,14 @@ func TestXray_RunXray(t *testing.T) {
 	t.Log(xray.Result)
 
 }
+
+func TestXray_RunXray2(t *testing.T) {
+	config := Config{
+		Target:  "172.16.222.1:8848",
+		PocFile: "*",
+	}
+	xray := NewXray(config)
+	xray.Do()
+	t.Log(xray.Result)
+
+}

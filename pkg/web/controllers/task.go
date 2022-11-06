@@ -459,8 +459,8 @@ func (c *TaskController) StartXScanTaskAction() {
 		}
 	} else if req.XScanType == "xdomainscan" {
 		taskName = "xdomainscan"
-		if req.OrgId == 0 {
-			c.FailedStatus("no org")
+		if req.Target == "" {
+			c.FailedStatus("no target")
 			return
 		}
 	} else if req.XScanType == "xorgdomainscan" {
@@ -801,7 +801,7 @@ func ParseTargetFromKwArgs(taskName, args string) (target string) {
 			}
 			target = strings.Join(allTarget, ",")
 		}
-	} else if taskName == "xportscan" || taskName == "xdomainscan" || taskName == "xfofa" || taskName == "xxraypoc" || taskName == "xfingerprint" || taskName == "xorgscan" {
+	} else if taskName == "xportscan" || taskName == "xdomainscan" || taskName == "xfofa" || taskName == "xxraypoc" || taskName == "xxray" || taskName == "xfingerprint" || taskName == "xorgscan" {
 		var t XScanConfig
 		err := json.Unmarshal([]byte(args), &t)
 		if err != nil {

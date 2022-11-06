@@ -1,17 +1,17 @@
 /*
  Navicat Premium Data Transfer
 
- Source Server         : localhost
+ Source Server         : nemo
  Source Server Type    : MySQL
- Source Server Version : 50738
+ Source Server Version : 50739
  Source Host           : localhost:3306
  Source Schema         : nemo
 
  Target Server Type    : MySQL
- Target Server Version : 50738
+ Target Server Version : 50739
  File Encoding         : 65001
 
- Date: 30/05/2022 11:28:14
+ Date: 04/11/2022 10:11:20
 */
 
 SET NAMES utf8mb4;
@@ -31,7 +31,7 @@ CREATE TABLE `domain` (
   UNIQUE KEY `index_domain_domain` (`domain`) USING BTREE,
   KEY `fk_domain_org_id` (`org_id`),
   CONSTRAINT `fk_domain_org_id` FOREIGN KEY (`org_id`) REFERENCES `organization` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=6 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=733 DEFAULT CHARSET=utf8;
 
 -- ----------------------------
 -- Table structure for domain_attr
@@ -42,7 +42,7 @@ CREATE TABLE `domain_attr` (
   `r_id` int(10) unsigned NOT NULL,
   `source` varchar(40) DEFAULT NULL,
   `tag` varchar(40) NOT NULL,
-  `content` varchar(1000) DEFAULT NULL,
+  `content` varchar(4000) DEFAULT NULL,
   `hash` char(32) DEFAULT NULL,
   `create_datetime` datetime NOT NULL,
   `update_datetime` datetime NOT NULL,
@@ -50,7 +50,7 @@ CREATE TABLE `domain_attr` (
   UNIQUE KEY `index_domain_attr_hash` (`hash`) USING BTREE,
   KEY `index_domain_attr_ip_id` (`r_id`),
   CONSTRAINT `domain_attr_ibfk_1` FOREIGN KEY (`r_id`) REFERENCES `domain` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=23 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=3461 DEFAULT CHARSET=utf8;
 
 -- ----------------------------
 -- Table structure for domain_color_tag
@@ -101,7 +101,7 @@ CREATE TABLE `ip` (
   UNIQUE KEY `index_ip_ip_int` (`ip_int`) USING BTREE,
   KEY `index_ip_org_id` (`org_id`),
   CONSTRAINT `fk_ip_org_id` FOREIGN KEY (`org_id`) REFERENCES `organization` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=106525 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=774 DEFAULT CHARSET=utf8;
 
 -- ----------------------------
 -- Table structure for ip_attr
@@ -112,7 +112,7 @@ CREATE TABLE `ip_attr` (
   `r_id` int(10) unsigned NOT NULL,
   `source` varchar(40) DEFAULT NULL,
   `tag` varchar(40) NOT NULL,
-  `content` varchar(1000) DEFAULT NULL,
+  `content` varchar(4000) DEFAULT NULL,
   `hash` char(32) DEFAULT NULL,
   `create_datetime` datetime NOT NULL,
   `update_datetime` datetime NOT NULL,
@@ -136,7 +136,7 @@ CREATE TABLE `ip_color_tag` (
   UNIQUE KEY `fk_ip_color_tag_rid_unique` (`r_id`),
   KEY `fk_ip_color_tag_rid` (`r_id`),
   CONSTRAINT `ip_color_tag_ibfk_1` FOREIGN KEY (`r_id`) REFERENCES `ip` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=272 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 -- ----------------------------
 -- Table structure for ip_memo
@@ -151,7 +151,25 @@ CREATE TABLE `ip_memo` (
   PRIMARY KEY (`id`),
   UNIQUE KEY `fk_ip_memo_rid_unqie` (`r_id`),
   CONSTRAINT `fk_ip_memo_rid` FOREIGN KEY (`r_id`) REFERENCES `ip` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=218 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+-- ----------------------------
+-- Table structure for key_word
+-- ----------------------------
+DROP TABLE IF EXISTS `key_word`;
+CREATE TABLE `key_word` (
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `org_id` int(11) NOT NULL,
+  `key_word` varchar(511) COLLATE utf8mb4_bin NOT NULL,
+  `search_time` varchar(63) COLLATE utf8mb4_bin DEFAULT NULL,
+  `exclude_words` varchar(2047) COLLATE utf8mb4_bin DEFAULT NULL,
+  `check_mod` varchar(255) COLLATE utf8mb4_bin DEFAULT NULL,
+  `is_delete` tinyint(4) NOT NULL DEFAULT '0',
+  `count` int(10) unsigned DEFAULT NULL,
+  `create_datetime` datetime DEFAULT NULL,
+  `update_datetime` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`) USING BTREE
+) ENGINE=InnoDB AUTO_INCREMENT=8 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin ROW_FORMAT=DYNAMIC;
 
 -- ----------------------------
 -- Table structure for organization
@@ -165,7 +183,7 @@ CREATE TABLE `organization` (
   `create_datetime` datetime NOT NULL,
   `update_datetime` datetime NOT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=57 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=47 DEFAULT CHARSET=utf8;
 
 -- ----------------------------
 -- Table structure for port
@@ -181,7 +199,7 @@ CREATE TABLE `port` (
   PRIMARY KEY (`id`),
   UNIQUE KEY `index_port_ip_port` (`ip_id`,`port`),
   CONSTRAINT `fk_port_ip` FOREIGN KEY (`ip_id`) REFERENCES `ip` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=531997 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=904 DEFAULT CHARSET=utf8;
 
 -- ----------------------------
 -- Table structure for port_attr
@@ -192,7 +210,7 @@ CREATE TABLE `port_attr` (
   `r_id` int(10) unsigned NOT NULL,
   `source` varchar(40) DEFAULT NULL,
   `tag` varchar(40) NOT NULL,
-  `content` varchar(1000) DEFAULT NULL,
+  `content` varchar(4000) DEFAULT NULL,
   `hash` char(32) DEFAULT NULL,
   `create_datetime` datetime NOT NULL,
   `update_datetime` datetime NOT NULL,
@@ -200,7 +218,7 @@ CREATE TABLE `port_attr` (
   UNIQUE KEY `index_port_attr_hash` (`hash`),
   KEY `fk_port_attr_r_id` (`r_id`),
   CONSTRAINT `fk_port_attr_r_id` FOREIGN KEY (`r_id`) REFERENCES `port` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=669820 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=3322 DEFAULT CHARSET=utf8;
 
 -- ----------------------------
 -- Table structure for task
@@ -211,7 +229,7 @@ CREATE TABLE `task` (
   `task_id` char(36) NOT NULL,
   `task_name` varchar(100) NOT NULL,
   `args` varchar(2000) DEFAULT NULL,
-  `kwargs` varchar(8000) DEFAULT NULL,
+  `kwargs` varchar(4000) DEFAULT NULL,
   `worker` varchar(100) DEFAULT NULL,
   `state` varchar(40) NOT NULL,
   `result` varchar(4000) DEFAULT NULL,
@@ -226,7 +244,7 @@ CREATE TABLE `task` (
   `update_datetime` datetime NOT NULL,
   `cron_id` char(36) DEFAULT NULL COMMENT 'the id for cron task',
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=3220 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=397 DEFAULT CHARSET=utf8;
 
 -- ----------------------------
 -- Table structure for task_cron
@@ -243,10 +261,10 @@ CREATE TABLE `task_cron` (
   `cron_rule` varchar(200) NOT NULL COMMENT '定时规则',
   `lastrun_datetime` datetime DEFAULT NULL COMMENT '上次运行时间',
   `status` varchar(10) NOT NULL COMMENT '状态enable or disable',
-  `run_count` int(10) DEFAULT NULL COMMENT '启动次数',
+  `run_count` int(11) DEFAULT NULL COMMENT '启动次数',
   `comment` varchar(200) DEFAULT NULL COMMENT '定时任务说明',
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=3166 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=9 DEFAULT CHARSET=utf8;
 
 -- ----------------------------
 -- Table structure for vulnerability
@@ -258,11 +276,11 @@ CREATE TABLE `vulnerability` (
   `url` varchar(200) NOT NULL,
   `poc_file` varchar(200) NOT NULL,
   `source` varchar(40) NOT NULL,
-  `extra` varchar(8000) DEFAULT NULL,
+  `extra` varchar(4000) DEFAULT NULL,
   `hash` char(32) NOT NULL,
   `create_datetime` datetime NOT NULL,
   `update_datetime` datetime NOT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=27 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=17 DEFAULT CHARSET=utf8;
 
 SET FOREIGN_KEY_CHECKS = 1;

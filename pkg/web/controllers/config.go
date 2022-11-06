@@ -2,8 +2,10 @@ package controllers
 
 import (
 	"github.com/hanc00l/nemo_go/pkg/conf"
+	"github.com/hanc00l/nemo_go/pkg/logging"
 	"github.com/hanc00l/nemo_go/pkg/utils"
 	"os"
+	"path"
 	"path/filepath"
 )
 
@@ -230,6 +232,34 @@ func (c *ConfigController) SavePortscanAction() {
 		c.FailedStatus(err.Error())
 	}
 	c.SucceededStatus("保存配置成功")
+}
+
+// UploadXrayPocAction xraypoc的上传
+func (c *ConfigController) UploadXrayPocAction() {
+	defer c.ServeJSON()
+	// 获取上传信息
+	f, h, err := c.GetFile("file")
+	if err != nil {
+		logging.RuntimeLog.Error("get file err ", err)
+		c.FailedStatus(err.Error())
+		return
+	}
+	defer f.Close()
+	// 检查文件后缀
+	if path.Ext(h.Filename) != ".yml" {
+		logging.RuntimeLog.Error("invalid file type!")
+		c.FailedStatus("invalid file type!")
+		return
+	}
+	// 保存到poc目录下
+	pocSavedPathName := filepath.Join(conf.GetRootPath(), conf.GlobalWorkerConfig().Pocscan.Xray.PocPath, h.Filename)
+	err = c.SaveToFile("file", pocSavedPathName)
+	if err != nil {
+		logging.RuntimeLog.Error("save file err ", err)
+		c.FailedStatus(err.Error())
+		return
+	}
+	c.SucceededStatus("上传成功")
 }
 
 // getCustomFilename  根据类型返回自定义文件名

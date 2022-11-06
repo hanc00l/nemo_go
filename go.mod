@@ -6,14 +6,20 @@ require (
 	github.com/Qianlitp/crawlergo v0.4.3
 	github.com/RichardKnop/machinery/v2 v2.0.11
 	github.com/beego/beego/v2 v2.0.3
+	github.com/bluele/gcache v0.0.2
 	github.com/buger/jsonparser v1.1.1
 	github.com/chromedp/cdproto v0.0.0-20220629234738-4cfc9cdeeb92
 	github.com/chromedp/chromedp v0.8.2
 	github.com/disintegration/imaging v1.6.2
+	github.com/dlclark/regexp2 v1.7.0
 	github.com/evilsocket/brutemachine v0.0.0-20170703145059-0331ad6a82ce
 	github.com/evilsocket/dirsearch v0.0.0-20210927162954-fe7fffa39084
+	github.com/fsnotify/fsnotify v1.5.4
 	github.com/go-resty/resty/v2 v2.7.0
+	github.com/golang/protobuf v1.5.2
+	github.com/google/cel-go v0.11.4
 	github.com/google/uuid v1.3.0
+	github.com/jacenr/filediff v0.0.0-20180211101743-12022ff612c0
 	github.com/joeguo/tldextract v0.0.0-20210326083850-1ec7be2de68a
 	github.com/lair-framework/go-nmap v0.0.0-20191202052157-3507e0b03523
 	github.com/likexian/whois v1.14.2
@@ -21,20 +27,26 @@ require (
 	github.com/mat/besticon v0.0.0-20210801190920-bdff7778a634
 	github.com/oschwald/geoip2-golang v1.5.0
 	github.com/pkg/errors v0.9.1
+	github.com/projectdiscovery/gologger v1.1.4
 	github.com/projectdiscovery/httpx v1.2.1
 	github.com/projectdiscovery/mapcidr v0.0.9
 	github.com/projectdiscovery/shuffledns v1.0.8
 	github.com/projectdiscovery/subfinder/v2 v2.5.2
+	github.com/projectdiscovery/urlutil v0.0.0-20220603144104-f4c60e5107b2
 	github.com/remeh/sizedwaitgroup v1.0.0
 	github.com/robfig/cron/v3 v3.0.1
 	github.com/sirupsen/logrus v1.7.0
 	github.com/smallnest/rpcx v1.6.11
+	github.com/spaolacci/murmur3 v1.1.0
 	github.com/tidwall/pretty v1.2.0
 	github.com/twmb/murmur3 v1.1.6
 	github.com/yl2chen/cidranger v1.0.2
 	golang.org/x/net v0.0.0-20220822230855-b0a4917ee28c
 	golang.org/x/text v0.3.7
+	google.golang.org/genproto v0.0.0-20220527130721-00d5c0f3be58
+	google.golang.org/protobuf v1.28.0
 	gopkg.in/yaml.v2 v2.4.0
+	gopkg.in/yaml.v3 v3.0.1
 	gorm.io/driver/mysql v1.3.3
 	gorm.io/gorm v1.23.5
 )
@@ -52,14 +64,13 @@ require (
 	github.com/ammario/ipisp/v2 v2.0.0 // indirect
 	github.com/andres-erbsen/clock v0.0.0-20160526145045-9e14626cd129 // indirect
 	github.com/andybalholm/cascadia v1.3.1 // indirect
-	github.com/antlr/antlr4 v0.0.0-20200503195918-621b933c7a7f // indirect
+	github.com/antlr/antlr4/runtime/Go/antlr v0.0.0-20220418222510-f25a4f6275ed // indirect
 	github.com/apache/thrift v0.14.2 // indirect
 	github.com/armon/go-metrics v0.3.9 // indirect
 	github.com/asaskevich/govalidator v0.0.0-20210307081110-f21760c49a8d // indirect
 	github.com/aws/aws-sdk-go v1.44.24 // indirect
 	github.com/aymerick/douceur v0.2.0 // indirect
 	github.com/beorn7/perks v1.0.1 // indirect
-	github.com/bluele/gcache v0.0.2 // indirect
 	github.com/cenk/backoff v2.2.1+incompatible // indirect
 	github.com/cenkalti/backoff v2.2.1+incompatible // indirect
 	github.com/cespare/xxhash/v2 v2.1.2 // indirect
@@ -74,7 +85,6 @@ require (
 	github.com/edwingeng/doublejump v0.0.0-20210724020454-c82f1bcb3280 // indirect
 	github.com/facebookgo/clock v0.0.0-20150410010913-600d898af40a // indirect
 	github.com/fatih/color v1.12.0 // indirect
-	github.com/fsnotify/fsnotify v1.5.4 // indirect
 	github.com/go-ping/ping v0.0.0-20210506233800-ff8be3320020 // indirect
 	github.com/go-redis/redis/v8 v8.11.3 // indirect
 	github.com/go-sql-driver/mysql v1.6.0 // indirect
@@ -86,10 +96,8 @@ require (
 	github.com/gogf/gf v1.16.6 // indirect
 	github.com/gogo/protobuf v1.3.2 // indirect
 	github.com/golang/groupcache v0.0.0-20210331224755-41bb18bfe9da // indirect
-	github.com/golang/protobuf v1.5.2 // indirect
 	github.com/golang/snappy v0.0.4 // indirect
 	github.com/gomodule/redigo v2.0.0+incompatible // indirect
-	github.com/google/cel-go v0.6.0 // indirect
 	github.com/google/go-cmp v0.5.8 // indirect
 	github.com/googleapis/gax-go/v2 v2.4.0 // indirect
 	github.com/gorilla/css v1.0.0 // indirect
@@ -105,7 +113,6 @@ require (
 	github.com/hashicorp/golang-lru v0.5.4 // indirect
 	github.com/hashicorp/serf v0.9.5 // indirect
 	github.com/hbakhtiyor/strsim v0.0.0-20190107154042-4d2bbb273edf // indirect
-	github.com/jacenr/filediff v0.0.0-20180211101743-12022ff612c0 // indirect
 	github.com/jinzhu/inflection v1.0.0 // indirect
 	github.com/jinzhu/now v1.1.5 // indirect
 	github.com/jmespath/go-jmespath v0.4.0 // indirect
@@ -152,7 +159,6 @@ require (
 	github.com/projectdiscovery/fileutil v0.0.0-20220705195237-01becc2a8963 // indirect
 	github.com/projectdiscovery/goconfig v0.0.0-20210804090219-f893ccd0c69c // indirect
 	github.com/projectdiscovery/goflags v0.0.8-0.20220328195035-cc76049ee216 //indirect
-	github.com/projectdiscovery/gologger v1.1.4 // indirect
 	github.com/projectdiscovery/hmap v0.0.2-0.20210917080408-0fd7bd286bfa // indirect
 	github.com/projectdiscovery/httputil v0.0.0-20210913064028-815c8db933ff // indirect
 	github.com/projectdiscovery/iputil v0.0.0-20210804143329-3a30fcde43f3 // indirect
@@ -164,7 +170,6 @@ require (
 	github.com/projectdiscovery/roundrobin v0.0.0-20220414090253-f09184199ebd // indirect
 	github.com/projectdiscovery/sliceutil v0.0.0-20220617151003-15892688e1d6 // indirect
 	github.com/projectdiscovery/stringsutil v0.0.0-20220712170325-48c50c332cb4 // indirect
-	github.com/projectdiscovery/urlutil v0.0.0-20220603144104-f4c60e5107b2 // indirect
 	github.com/projectdiscovery/wappalyzergo v0.0.50 // indirect
 	github.com/prometheus/client_golang v1.12.1 // indirect
 	github.com/prometheus/client_model v0.2.0 // indirect
@@ -179,7 +184,7 @@ require (
 	github.com/shiena/ansicolor v0.0.0-20200904210342-c7312218db18 // indirect
 	github.com/smallnest/quick v0.0.0-20210406061658-4bf95e372fbd // indirect
 	github.com/soheilhy/cmux v0.1.5 // indirect
-	github.com/spaolacci/murmur3 v1.1.0 // indirect
+	github.com/stoewer/go-strcase v1.2.0 // indirect
 	github.com/streadway/amqp v1.0.0 // indirect
 	github.com/syndtr/goleveldb v1.0.0 // indirect
 	github.com/templexxx/cpufeat v0.0.0-20180724012125-cef66df7f161 // indirect
@@ -213,10 +218,7 @@ require (
 	golang.org/x/tools v0.1.12 // indirect
 	google.golang.org/api v0.81.0 // indirect
 	google.golang.org/appengine v1.6.7 // indirect
-	google.golang.org/genproto v0.0.0-20220527130721-00d5c0f3be58 // indirect
 	google.golang.org/grpc v1.46.2 // indirect
-	google.golang.org/protobuf v1.28.0 // indirect
 	gopkg.in/ini.v1 v1.66.2 // indirect
 	gopkg.in/tomb.v1 v1.0.0-20141024135613-dd632973f1e7 // indirect
-	gopkg.in/yaml.v3 v3.0.1 // indirect
 )

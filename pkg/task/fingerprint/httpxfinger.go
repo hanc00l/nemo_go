@@ -72,8 +72,10 @@ func (h *HttpxFinger) loadFingerprintHub() {
 		logging.CLILog.Error(err)
 		return
 	}
-
-	h.FingerPrintFunc = append(h.FingerPrintFunc, h.fingerPrintFuncForFingerprintHub)
+	if len(h.fpWebFingerprintHub) > 0 {
+		h.FingerPrintFunc = append(h.FingerPrintFunc, h.fingerPrintFuncForFingerprintHub)
+		logging.CLILog.Infof("Load fingerprinthub total:%d", len(h.fpWebFingerprintHub))
+	}
 }
 
 // loadCustomFingerprint 加载自定义指纹
@@ -88,8 +90,10 @@ func (h *HttpxFinger) loadCustomFingerprint() {
 		logging.CLILog.Error(err)
 		return
 	}
-
-	h.FingerPrintFunc = append(h.FingerPrintFunc, h.fingerPrintFuncForCustom)
+	if len(h.fpCustom) > 0 {
+		h.FingerPrintFunc = append(h.FingerPrintFunc, h.fingerPrintFuncForCustom)
+		logging.CLILog.Infof("Load custom web finger total:%d", len(h.fpCustom))
+	}
 }
 
 // DoHttpxAndFingerPrint 执行指纹识别

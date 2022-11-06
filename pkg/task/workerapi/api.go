@@ -35,13 +35,13 @@ var taskMaps = map[string]interface{}{
 	"icpquery":    ICPQuery,
 	"whoisquery":  WhoisQuery,
 	"fingerprint": Fingerprint,
+	"xraypoc":     XrayPocScan,
 	//xscan:
-	"xraypoc":      XrayPocScan,
 	"xfofa":        XFofa,
 	"xportscan":    XPortScan,
 	"xdomainscan":  XDomainscan,
 	"xfingerprint": XFingerPrint,
-	"xxraypoc":     XXrayPocScan,
+	"xxray":        XXray,
 	"xorgscan":     XOrganization,
 	//test:
 	"test": TaskTest,

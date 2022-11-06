@@ -13,17 +13,17 @@ rabbitmq:
   password: guest
 api:
   fofa:
-    name:
-    key:
+    name: ""
+    key: ""
   icp:
     name: chinaz
-    key:
+    key: ""
   quake:
-    name:
-    key:
+    name: ""
+    key: ""
   hunter:
-    name:
-    key:
+    name: ""
+    key: ""
 portscan:
   ping: false
   port: --top-ports 1000

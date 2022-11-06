@@ -109,7 +109,7 @@ func (x *Httpx) Do() {
 		}
 		for domain := range x.ResultDomainScan.DomainResult {
 			//如果无域名对应的端口，默认80和443
-			if _, ok := x.DomainTargetPort[domain]; !ok {
+			if _, ok := x.DomainTargetPort[domain]; !ok || len(x.DomainTargetPort[domain]) == 0 {
 				x.DomainTargetPort[domain] = make(map[int]struct{})
 				x.DomainTargetPort[domain][80] = struct{}{}
 				x.DomainTargetPort[domain][443] = struct{}{}

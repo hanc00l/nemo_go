@@ -184,7 +184,7 @@
                                     <label class="form-check-label"
                                            for="checkbox_select_order_by_date">
                                         <input class="form-check-input"
-                                               id="checkbox_select_order_by_date" type="checkbox">按更新时间排序
+                                               id="checkbox_select_order_by_date" type="checkbox" checked>按更新时间排序
                                     </label>
                                 </div>
                             </div>
@@ -900,22 +900,29 @@
                                                     <div>
                                                         <div class="form-group row">
                                                             <div class="col-md-12">
-                                                                <label for="checkbox_xraypocv1_xscan">
+                                                                <label for="checkbox_xraypoc_xscan">
                                                                     <b><span class="text-danger">*</span>漏洞扫描</b>
                                                                 </label>
                                                             </div>
                                                             <div class="col-md-12">
                                                                 <div class="form-check form-check-inline">
                                                                     <label class="form-check-label"
-                                                                           for="checkbox_xraypocv1_xscan">
+                                                                           for="checkbox_xraypoc_xscan">
                                                                         <input class="form-check-input"
-                                                                               id="checkbox_xraypocv1_xscan"
-                                                                               type="checkbox">XrayPocV1<i
+                                                                               id="checkbox_xraypoc_xscan"
+                                                                               type="checkbox">XrayPocV2<i
                                                                             class="fa fa-question-circle"
                                                                             aria-hidden="true"
-                                                                            title="通过调用内置的XyraPoc，对获得的ip资产和域名资产进行漏洞验证；需要自定义的web_xraypoc_v1.json"></i>
+                                                                            title="通过调用xray，对获得的ip资产和域名资产进行漏洞验证；可以指定单个POC文件，或者*think*类的通配符；如果不选择poc文件，将使用全部poc进行测试。"></i>
                                                                     </label>
                                                                 </div>
+                                                                <input class="form-control"
+                                                                       id="input_xray_poc_file_xscan"
+                                                                       type="text" placeholder="--选择POC文件--"
+                                                                       list="datalist_xray_poc_file_xscan">
+                                                                <datalist id="datalist_xray_poc_file_xscan"
+                                                                          style="display:none;">
+                                                                </datalist>
                                                             </div>
                                                         </div>
                                                     </div>
@@ -942,17 +949,20 @@
                                                                         title="定时任务&#10;任务在指定时间启动并周期执行，执行规则同Linux Crontab任务计划格式&#10;任务格式：“分钟 小时 日 月 周”，可使用*、/、,、-等特殊符号&#10;例：0 8-16/2 * * *表示在每天8-16点的整点，每隔2小时启动&#10;参见：https://www.runoob.com/w3cnote/linux-crontab-tasks.html"></i>
                                                                 </label>
                                                             </div>
-                                                            <input class="form-control" id="input_cron_comment_xscan" type="text"
+                                                            <input class="form-control" id="input_cron_comment_xscan"
+                                                                   type="text"
                                                                    placeholder="定时任务简要说明" disabled
                                                                    value="">
                                                             <div class="form-check form-check-inline">
-                                                                <label class="form-check-label" id="label_cron_rule_xscan"
+                                                                <label class="form-check-label"
+                                                                       id="label_cron_rule_xscan"
                                                                        disabled
                                                                        for="input_cron_rule">
                                                                     定时执行规则
                                                                 </label>
                                                             </div>
-                                                            <input class="form-control" id="input_cron_rule_xscan" type="text"
+                                                            <input class="form-control" id="input_cron_rule_xscan"
+                                                                   type="text"
                                                                    placeholder="0 8 * * *" disabled value="0 8 * * *">
                                                         </div>
                                                     </div>

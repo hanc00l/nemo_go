@@ -2,12 +2,17 @@ package utils
 
 import (
 	"crypto/tls"
+	"errors"
+	"fmt"
+	"golang.org/x/net/proxy"
 	"net"
 	"net/url"
 	"regexp"
 	"strings"
 	"time"
 )
+
+var Socks5Proxy string
 
 // HostStrip 将http://a.b.c:80/这种url去除不相关的字符，返回主机名
 func HostStrip(u string) string {
@@ -55,6 +60,60 @@ func in(target string, strArray []string) bool {
 	return false
 }
 
+func WrapperTcpWithTimeout(network, address string, timeout time.Duration) (net.Conn, error) {
+	d := &net.Dialer{Timeout: timeout}
+	return WrapperTCP(network, address, d)
+}
+func WrapperTCP(network, address string, forward *net.Dialer) (net.Conn, error) {
+	//get conn
+	var conn net.Conn
+	if Socks5Proxy == "" {
+		var err error
+		conn, err = forward.Dial(network, address)
+		if err != nil {
+			return nil, err
+		}
+	} else {
+		dailer, err := Socks5Dailer(forward)
+		if err != nil {
+			return nil, err
+		}
+		conn, err = dailer.Dial(network, address)
+		if err != nil {
+			return nil, err
+		}
+	}
+	return conn, nil
+
+}
+
+func Socks5Dailer(forward *net.Dialer) (proxy.Dialer, error) {
+	u, err := url.Parse(Socks5Proxy)
+	if err != nil {
+		return nil, err
+	}
+	if strings.ToLower(u.Scheme) != "socks5" {
+		return nil, errors.New("Only support socks5")
+	}
+	address := u.Host
+	var auth proxy.Auth
+	var dailer proxy.Dialer
+	if u.User.String() != "" {
+		auth = proxy.Auth{}
+		auth.User = u.User.Username()
+		password, _ := u.User.Password()
+		auth.Password = password
+		dailer, err = proxy.SOCKS5("tcp", address, &auth, forward)
+	} else {
+		dailer, err = proxy.SOCKS5("tcp", address, nil, forward)
+	}
+
+	if err != nil {
+		return nil, err
+	}
+	return dailer, nil
+}
+
 // GetProtocol 检测URL协议
 func GetProtocol(host string, Timeout int64) (protocol string) {
 	protocol = "http"
@@ -66,13 +125,23 @@ func GetProtocol(host string, Timeout int64) (protocol string) {
 		return
 	}
 
-	conn, err := tls.DialWithDialer(&net.Dialer{Timeout: time.Duration(Timeout) * time.Second}, "tcp", host, &tls.Config{InsecureSkipVerify: true})
+	socksconn, err := WrapperTcpWithTimeout("tcp", host, time.Duration(Timeout)*time.Second)
+	if err != nil {
+		return
+	}
+	conn := tls.Client(socksconn, &tls.Config{InsecureSkipVerify: true})
 	defer func() {
 		if conn != nil {
+			defer func() {
+				if err := recover(); err != nil {
+					fmt.Println(err)
+				}
+			}()
 			conn.Close()
 		}
 	}()
-
+	conn.SetDeadline(time.Now().Add(time.Duration(Timeout) * time.Second))
+	err = conn.Handshake()
 	if err == nil || strings.Contains(err.Error(), "handshake failure") {
 		protocol = "https"
 	}

@@ -7,21 +7,30 @@ import (
 	"github.com/hanc00l/nemo_go/pkg/logging"
 	"github.com/hanc00l/nemo_go/pkg/utils"
 	"github.com/hanc00l/nemo_go/pkg/xraypocv1"
-	"github.com/remeh/sizedwaitgroup"
+	xv2 "github.com/hanc00l/nemo_go/pkg/xraypocv2"
 	"os"
 	"path"
+	"path/filepath"
+	"sync"
 )
+
+var singleMutex sync.Mutex
+
+// XrayPocV2版本多线程使用中解析POC和发送Payload会有冲突
+// 目前只能单线程使用
 
 type XrayPoc struct {
 	ResultPortScan   PortscanVulResult
 	ResultDomainScan DomainscanVulResult
 	VulResult        []Result
 	pocFiles         []Poc
+	pocV2Bytes       [][]byte
 }
 
 type XrayPocConfig struct {
-	IPPort map[string][]int
-	Domain map[string]struct{}
+	IPPort      map[string][]int
+	Domain      map[string]struct{}
+	XrayPocFile string
 }
 
 type Poc struct {
@@ -31,6 +40,9 @@ type Poc struct {
 
 // NewXrayPoc 创建xraypoc对象
 func NewXrayPoc(config XrayPocConfig) *XrayPoc {
+	singleMutex.Lock()
+	defer singleMutex.Unlock()
+
 	p := &XrayPoc{
 		ResultPortScan:   PortscanVulResult{IPResult: make(map[string]*IPResult)},
 		ResultDomainScan: DomainscanVulResult{DomainResult: make(map[string]*DomainResult)},
@@ -44,12 +56,16 @@ func NewXrayPoc(config XrayPocConfig) *XrayPoc {
 	for domain := range config.Domain {
 		p.ResultDomainScan.SetDomain(domain)
 	}
-	p.loadCustomPoc()
+	if len(config.XrayPocFile) > 0 {
+		p.loadOneXrayPocV2(config.XrayPocFile)
+	} else {
+		p.loadXrayPocV2()
+	}
 	return p
 }
 
-// loadCustomPocs 从本地加载Poc
-func (p *XrayPoc) loadCustomPoc() {
+// loadXrayPocV1 从本地加载Poc
+func (p *XrayPoc) loadXrayPocV1() {
 	pocJsonPathFile := path.Join(conf.GetRootPath(), "thirdparty/custom", "web_xraypoc_v1.json")
 	pocContent, err := os.ReadFile(pocJsonPathFile)
 	if err != nil {
@@ -63,33 +79,56 @@ func (p *XrayPoc) loadCustomPoc() {
 	logging.CLILog.Infof("Load xray poc total:%d", len(p.pocFiles))
 }
 
+// loadXrayPocV2 从本地加载Poc
+func (p *XrayPoc) loadXrayPocV2() {
+	files, _ := filepath.Glob(filepath.Join(conf.GetRootPath(), conf.GlobalWorkerConfig().Pocscan.Xray.PocPath, "*.yml"))
+	for _, file := range files {
+		pocContent, err := os.ReadFile(file)
+		if err != nil {
+			logging.CLILog.Error(err)
+			continue
+		}
+		p.pocV2Bytes = append(p.pocV2Bytes, pocContent)
+
+	}
+	logging.CLILog.Infof("Load xray poc v2 total:%d", len(p.pocV2Bytes))
+}
+
+// loadOneXrayPocV2 从本地加载一个Poc
+func (p *XrayPoc) loadOneXrayPocV2(pocFile string) {
+
+	filePathName := filepath.Join(conf.GetRootPath(), conf.GlobalWorkerConfig().Pocscan.Xray.PocPath, pocFile)
+	pocContent, err := os.ReadFile(filePathName)
+	if err != nil {
+		logging.CLILog.Error(err)
+		return
+	}
+	p.pocV2Bytes = append(p.pocV2Bytes, pocContent)
+	logging.CLILog.Infof("Load xray poc v2 total:%d", len(p.pocV2Bytes))
+}
+
 // Do 执行poc扫描任务
 func (p *XrayPoc) Do() {
-	swg := sizedwaitgroup.New(pocMaxThreadNumber)
+	singleMutex.Lock()
+	defer singleMutex.Unlock()
 
 	if p.ResultPortScan.IPResult != nil {
 		// 每一个IP
 		for ipName, ipResult := range p.ResultPortScan.IPResult {
 			// 每一个port
-			for portNumber, _ := range ipResult.Ports {
+			for portNumber := range ipResult.Ports {
 				//检查该IP已命中的poc数量是否honeyport
 				if p.checkPortscanVulResultForHoneyPort(ipName, 0) {
 					break
 				}
 				url := fmt.Sprintf("%v:%v", ipName, portNumber)
-				//测试每一个poc
-				for _, poc := range p.pocFiles {
-					//检查该端口命中的poc数量是否是honeyport
+				results := p.runXrayCheckV2(url)
+				for _, vul := range results {
+					//检查该IP的端口已命中的poc数量是否honeyport
 					if p.checkPortscanVulResultForHoneyPort(ipName, portNumber) {
 						break
 					}
-					swg.Add()
-					go func(ip string, port int, u string, poc Poc) {
-						if success, _ := p.runXrayCheck(u, poc); success {
-							p.ResultPortScan.SetPortVul(ip, port, poc.PocFileName)
-						}
-						swg.Done()
-					}(ipName, portNumber, url, poc)
+					p.ResultPortScan.SetPortVul(ipName, portNumber, vul)
 				}
 			}
 		}
@@ -98,31 +137,33 @@ func (p *XrayPoc) Do() {
 	if p.ResultDomainScan.DomainResult != nil {
 		// 每一个域名
 		for domain := range p.ResultDomainScan.DomainResult {
-			//测试每一个poc
-			for _, poc := range p.pocFiles {
-				//检查域名命中的poc数量是否是honeyport
+			results := p.runXrayCheckV2(domain)
+			for _, vul := range results {
+				//检查该域名已命中的poc数量是否honeyport
 				if p.checkDomainscanVulResultForHoneyPort(domain) {
 					break
 				}
-				swg.Add()
-				go func(u string, poc Poc) {
-					if success, _ := p.runXrayCheck(u, poc); success {
-						p.ResultDomainScan.SetDomainVul(u, poc.PocFileName)
-					}
-					swg.Done()
-				}(domain, poc)
+				p.ResultDomainScan.SetDomainVul(domain, vul)
 			}
 		}
 	}
-	swg.Wait()
 
 	p.exportVulResult()
 }
 
-// runXrayCheck 调用xray poc测试代码
-func (p *XrayPoc) runXrayCheck(url string, poc Poc) (status bool, name string) {
+// runXrayCheckV1 调用xray poc测试代码
+func (p *XrayPoc) runXrayCheckV1(url string, poc Poc) (status bool, name string) {
 	protocol := utils.GetProtocol(url, 5)
 	status, name = xraypocv1.Execute(fmt.Sprintf("%s://%s", protocol, url), []byte(poc.PocString), xraypocv1.Content{})
+	return
+}
+
+// runXrayCheckV2 调用xray poc测试代码
+func (p *XrayPoc) runXrayCheckV2(url string) (result []string) {
+	protocol := utils.GetProtocol(url, 5)
+	x := xv2.InitXrayV2Poc("", "", "")
+	result = x.RunXrayMultiPocByQuery(fmt.Sprintf("%s://%s", protocol, url), p.pocV2Bytes, []xv2.Content{})
+
 	return
 }
 

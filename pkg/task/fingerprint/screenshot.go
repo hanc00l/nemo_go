@@ -59,10 +59,10 @@ func (s *ScreenShot) Do() {
 				if _, ok := blankPort[portNumber]; ok {
 					continue
 				}
-				for _, protocol := range []string{"http", "https"} {
-					swg.Add()
-					go s.doScreenshotAndResize(&swg, ipName, portNumber, protocol)
-				}
+				protocol := utils.GetProtocol(fmt.Sprintf("%s:%d", ipName, portNumber), 5)
+				swg.Add()
+				go s.doScreenshotAndResize(&swg, ipName, portNumber, protocol)
+
 			}
 		}
 	}
@@ -72,7 +72,7 @@ func (s *ScreenShot) Do() {
 		}
 		for domain := range s.ResultDomainScan.DomainResult {
 			//如果无域名对应的端口，默认80和443
-			if _, ok := s.DomainTargetPort[domain]; !ok {
+			if _, ok := s.DomainTargetPort[domain]; !ok || len(s.DomainTargetPort[domain]) == 0 {
 				s.DomainTargetPort[domain] = make(map[int]struct{})
 				s.DomainTargetPort[domain][80] = struct{}{}
 				s.DomainTargetPort[domain][443] = struct{}{}
@@ -81,10 +81,10 @@ func (s *ScreenShot) Do() {
 				if _, ok := blankPort[port]; ok {
 					continue
 				}
-				for _, protocol := range []string{"http", "https"} {
-					swg.Add()
-					go s.doScreenshotAndResize(&swg, domain, port, protocol)
-				}
+				protocol := utils.GetProtocol(fmt.Sprintf("%s:%d", domain, port), 5)
+				swg.Add()
+				go s.doScreenshotAndResize(&swg, domain, port, protocol)
+
 			}
 		}
 	}

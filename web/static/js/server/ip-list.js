@@ -22,6 +22,7 @@ $(function () {
         });
         $('#text_target_xscan').val(checkIP.join("\n"));
         $('#newXScan').modal('toggle');
+        load_pocfile_list();
     });
     //导入本地扫描结果窗口
     $("#import_portscan").click(function () {
@@ -262,11 +263,15 @@ $(function () {
         formData.append("org_id", $('#select_org_id_task_xscan').val());
         formData.append("is_CN", $('#checkbox_ignorecdn_outofchina_xscan').is(":checked"));
         formData.append("fingerprint", $('#checkbox_fingerpint_xscan').is(":checked"));
-        formData.append("xraypoc", $('#checkbox_xraypocv1_xscan').is(":checked"));
+        formData.append("xraypoc", $('#checkbox_xraypoc_xscan').is(":checked"));
+        formData.append("xraypocfile", $('#input_xray_poc_file_xscan').val());
         formData.append("taskcron", $('#checkbox_cron_task_xscan').is(":checked"));
         formData.append("cronrule", cron_rule);
         formData.append("croncomment", $('#input_cron_comment_xscan').val());
-
+        if (formData.get("xraypoc") === "true" && formData.get("fingerprint") === "false") {
+            swal('Warning', '漏洞扫描需要开启指纹扫描步骤选项', 'error');
+            return;
+        }
         $.ajax({
             url: '/task-start-xscan',
             type: 'POST',
