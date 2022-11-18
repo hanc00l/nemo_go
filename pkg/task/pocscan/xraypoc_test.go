@@ -9,16 +9,19 @@ import (
 	"github.com/remeh/sizedwaitgroup"
 	"os"
 	"path/filepath"
+	"sync"
 	"testing"
 )
+
+var loadMutex sync.Mutex
 
 func Test1(t *testing.T) {
 	config := XrayPocConfig{
 		IPPort: make(map[string][]int),
 		Domain: make(map[string]struct{}),
 	}
-	config.IPPort["172.16.222.1"] = append(config.IPPort["172.16.222.1"], 8080)
-	config.IPPort["172.16.222.1"] = append(config.IPPort["172.16.222.1"], 8000)
+	config.IPPort["127.0.0.1"] = append(config.IPPort["127.0.0.1"], 8080)
+	config.IPPort["127.0.0.1"] = append(config.IPPort["127.0.0.1"], 8161)
 	config.Domain["localhost:8848"] = struct{}{}
 	p := NewXrayPoc(config)
 	p.Do()
@@ -37,47 +40,64 @@ func Test2(t *testing.T) {
 }
 
 func Test3(t *testing.T) {
-	swg := sizedwaitgroup.New(2)
+	swg := sizedwaitgroup.New(4)
 	swg.Add()
 	go testOne(&swg, "127.0.0.1:8080", t)
 	swg.Add()
 	go testOne(&swg, "127.0.0.1:8848", t)
-	//swg.Add()
-	//go testOne(&swg, "127.0.0.1:8000", t)
+	swg.Add()
+	go testOne(&swg, "127.0.0.1:8000", t)
+	swg.Add()
+	go testOne(&swg, "127.0.0.1:8161", t)
 
 	swg.Wait()
 }
 
 func Test4(t *testing.T) {
-	swg := sizedwaitgroup.New(3)
+	swg := sizedwaitgroup.New(4)
 
 	swg.Add()
-	go testOneOne(&swg, "172.16.222.1", 8848)
-	//time.Sleep(3 * time.Second)
-
+	go testOneOne(&swg)
 	swg.Add()
-	go testOneOne(&swg, "172.16.222.1", 8080)
-	//time.Sleep(3 * time.Second)
-
-	//swg.Add()
-	//go testOneOne(&swg, "172.16.222.1", 8080)
+	go testOneOne2(&swg)
+	swg.Add()
+	go testOneOne(&swg)
+	swg.Add()
+	go testOneOne2(&swg)
 
 	swg.Wait()
 }
 
-func testOneOne(swg *sizedwaitgroup.SizedWaitGroup, ip string, port int) {
+func testOneOne2(swg *sizedwaitgroup.SizedWaitGroup) {
 	defer swg.Done()
 	config := XrayPocConfig{
 		IPPort: make(map[string][]int),
 		Domain: make(map[string]struct{}),
 	}
-	config.IPPort[ip] = append(config.IPPort[ip], port)
+	config.IPPort["127.0.0.1"] = append(config.IPPort["127.0.0.1"], 8080)
+	config.IPPort["127.0.0.1"] = append(config.IPPort["127.0.0.1"], 8000)
+	config.Domain["localhost:8848"] = struct{}{}
+	p := NewXrayPoc(config)
+	p.Do()
+	fmt.Println(p.VulResult)
+}
+
+func testOneOne(swg *sizedwaitgroup.SizedWaitGroup) {
+	defer swg.Done()
+	config := XrayPocConfig{
+		IPPort: make(map[string][]int),
+		Domain: make(map[string]struct{}),
+	}
+	config.IPPort["127.0.0.1"] = append(config.IPPort["127.0.0.1"], 8080)
+	config.IPPort["127.0.0.1"] = append(config.IPPort["127.0.0.1"], 8161)
+	config.Domain["localhost:8848"] = struct{}{}
 	p := NewXrayPoc(config)
 	p.Do()
 	fmt.Println(p.VulResult)
 }
 
 func testOne(swg *sizedwaitgroup.SizedWaitGroup, url string, t *testing.T) {
+	loadMutex.Lock()
 	var pocAll [][]byte
 	files, _ := filepath.Glob(filepath.Join(conf.GetRootPath(), conf.GlobalWorkerConfig().Pocscan.Xray.PocPath, "*.yml"))
 	for _, file := range files {
@@ -88,11 +108,11 @@ func testOne(swg *sizedwaitgroup.SizedWaitGroup, url string, t *testing.T) {
 		}
 		pocAll = append(pocAll, pocContent)
 	}
+	loadMutex.Unlock()
+	fmt.Println(url)
 	protocol := utils.GetProtocol(url, 5)
 	x := xv2.InitXrayV2Poc("", "", "")
-	//p := x.LoadMultiPocs(pocAll)
 	aa := x.RunXrayMultiPocByQuery(fmt.Sprintf("%s://%s", protocol, url), pocAll, []xv2.Content{})
-	fmt.Println(url)
 	t.Log(aa)
 	swg.Done()
 }

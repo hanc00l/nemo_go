@@ -42,6 +42,30 @@ type RuleRequest struct {
 	ConnectionID    string            `yaml:"connection_id"`
 }
 
+// modified by IceMoon
+
+func cloneMap(tags map[string]string) map[string]string {
+	cloneTags := make(map[string]string)
+	for k, v := range tags {
+		cloneTags[k] = v
+	}
+	return cloneTags
+}
+
+func (p RuleRequest) Clone() RuleRequest {
+	r := RuleRequest{}
+	r.Path = p.Path
+	r.Cache = p.Cache
+	r.Method = p.Method
+	r.Body = p.Body
+	r.FollowRedirects = p.FollowRedirects
+	r.Content = p.Content
+	r.ReadTimeout = p.ReadTimeout
+	r.ConnectionID = p.ConnectionID
+	r.Headers = cloneMap(p.Headers)
+	return r
+}
+
 type Infos struct {
 	ID         string `yaml:"id"`
 	Name       string `yaml:"name"`

@@ -248,9 +248,10 @@ func executeXrayPoc(oReq *http.Request, target string, poc *xray_structs.Poc) (i
 	// transport=http: request处理
 	HttpRequestInvoke := func(rule xray_structs.Rule) error {
 		var (
-			ok               bool
-			err              error
-			ruleReq          = rule.Request
+			ok  bool
+			err error
+			// modified by IceMoon
+			ruleReq          = rule.Request.Clone()
 			rawHeaderBuilder strings.Builder
 		)
 
@@ -262,7 +263,8 @@ func executeXrayPoc(oReq *http.Request, target string, poc *xray_structs.Poc) (i
 		ruleReq.Body = render(strings.TrimSpace(ruleReq.Body))
 
 		// 尝试获取缓存
-		if request, protoRequest, protoResponse, ok = requests.XrayGetHttpRequestCache(&ruleReq); !ok || !rule.Request.Cache {
+		// modified by IceMoon
+		if request, protoRequest, protoResponse, ok = requests.XrayGetHttpRequestCache(&ruleReq); ok || true { //!rule.Request.Cache {
 			// 获取protoRequest
 			protoRequest, err = requests.ParseHttpRequest(oReq)
 			if err != nil {

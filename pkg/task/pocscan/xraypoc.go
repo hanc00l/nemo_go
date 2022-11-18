@@ -16,8 +16,8 @@ import (
 
 var singleMutex sync.Mutex
 
-// XrayPocV2版本多线程使用中解析POC和发送Payload会有冲突
-// 目前只能单线程使用
+// XrayPocV2版本，在加载POC时多线程使用存在冲突（具体原因无果）
+// 目前在加载时用锁控制
 
 type XrayPoc struct {
 	ResultPortScan   PortscanVulResult
@@ -109,9 +109,6 @@ func (p *XrayPoc) loadOneXrayPocV2(pocFile string) {
 
 // Do 执行poc扫描任务
 func (p *XrayPoc) Do() {
-	singleMutex.Lock()
-	defer singleMutex.Unlock()
-
 	if p.ResultPortScan.IPResult != nil {
 		// 每一个IP
 		for ipName, ipResult := range p.ResultPortScan.IPResult {
@@ -155,6 +152,7 @@ func (p *XrayPoc) Do() {
 func (p *XrayPoc) runXrayCheckV1(url string, poc Poc) (status bool, name string) {
 	protocol := utils.GetProtocol(url, 5)
 	status, name = xraypocv1.Execute(fmt.Sprintf("%s://%s", protocol, url), []byte(poc.PocString), xraypocv1.Content{})
+
 	return
 }
 
