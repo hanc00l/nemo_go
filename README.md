@@ -7,7 +7,7 @@ Nemo是用来进行自动化信息收集的一个简单平台，通过集成常�
 
 
 
-## 已实现的功能
+## 功能
 
 ### 1、IP资产
 
@@ -117,6 +117,7 @@ Tested on [ubuntu18.04/20.04/22.04 LTS](docs/install_linux.md)、[macOS](docs/in
 
 ## 版本更新
 
+- 2.7.1：2022-11-18，修复XrayPocV2多线程任务时，在POC加载及Request时共享变量冲突问题（目前默认是直接调用xray二进制文件进行漏洞验证，该代码功能目前未使用）；
 - 2.7.0：2022-11-4，增加资产流程化扫描（XSCAN）功能，支持对IP、域名（以及指定组织相关联的资产）及通过FOFA关键词，流程化进行端口扫描、子域名枚举及爆破，获取相关指纹并进行漏洞扫描（支持Xray）；增加自定义的web指纹功能；增加XrayPoc的上传功能；移除pocsuite3代码及功能；对部份模块代码进行重构；docker默认使用Ubuntu22.04LTS；增加FOFA关键词搜索及定义功能，从2.6.1升级需导key_word.sql，并且在worker.yml中增加fingerprint相关的参数；
 - 2.6.1：2022-10-17，在Windows平台运行Nemo的Server与Worker（只测试在win10里代码及功能运行正常，server及worker的依赖环境的安装和配置请参考linux平台；子域名爆破使用的massdns暂不支持在windows平台上运行）；
 - 2.6.0：2022-8-30，增加Server与Worker之间的文件自动同步功能，重启worker进程（增加后台守护进程功能）；
