@@ -4,8 +4,8 @@ import (
 	"bytes"
 	"encoding/base64"
 	"encoding/csv"
+	"encoding/json"
 	"fmt"
-	"github.com/go-resty/resty/v2"
 	"github.com/hanc00l/nemo_go/pkg/conf"
 	"github.com/hanc00l/nemo_go/pkg/logging"
 	"github.com/hanc00l/nemo_go/pkg/task/custom"
@@ -13,6 +13,8 @@ import (
 	"github.com/hanc00l/nemo_go/pkg/task/portscan"
 	"github.com/hanc00l/nemo_go/pkg/utils"
 	"io"
+	"net/http"
+	"net/url"
 	"strconv"
 	"strings"
 	"time"
@@ -73,7 +75,6 @@ func (h *Hunter) Do() {
 
 // RunHunter 调用API查询一个IP或域名
 func (h *Hunter) RunHunter(domain string) {
-	// Create a Resty Client
 	var query string
 	if utils.CheckIPV4(domain) || utils.CheckIPV4Subnet(domain) {
 		query = fmt.Sprintf("ip=\"%s\"", domain)
@@ -101,25 +102,36 @@ func (h *Hunter) RunHunter(domain string) {
 
 func (h *Hunter) retriedPageSearch(query string, page int) (pageResult []onlineSearchResult, sizeTotal int) {
 	RETRIED := 3
-	client := resty.New()
 	//查询的起始时间段：最近3个月数据
 	endTime := time.Now()
 	startTime := endTime.AddDate(0, -3, 0)
 	for i := 0; i < RETRIED; i++ {
 		var serviceInfo HunterServiceInfo
-		_, err := client.R().
-			SetQueryParams(map[string]string{
-				"api-key":    conf.GlobalWorkerConfig().API.Hunter.Key,
-				"search":     base64.URLEncoding.EncodeToString([]byte(query)),
-				"page":       fmt.Sprintf("%d", page),
-				"page_size":  fmt.Sprintf("%d", pageSize),
-				"is_web":     "3", //资产类型，1代表”web资产“，2代表”非web资产“，3代表”全部“
-				"start_time": startTime.Format("2006-01-02 15:04:05"),
-				"end_time":   endTime.Format("2006-01-02 15:04:05"),
-			}).
-			SetHeader("User-Agent", userAgent).
-			SetResult(&serviceInfo).
-			Get("https://hunter.qianxin.com/openApi/search")
+		request, err := http.NewRequest(http.MethodGet, "https://hunter.qianxin.com/openApi/search", nil)
+		if err != nil {
+			logging.CLILog.Printf("Hunter Search Error:%s", err.Error())
+		}
+		params := make(url.Values)
+		params.Add("api-key", conf.GlobalWorkerConfig().API.Hunter.Key)
+		params.Add("search", base64.URLEncoding.EncodeToString([]byte(query)))
+		params.Add("page", strconv.Itoa(page))
+		params.Add("page_size", strconv.Itoa(pageSize))
+		params.Add("is_web", "3") //资产类型，1代表”web资产“，2代表”非web资产“，3代表”全部“
+		params.Add("start_time", startTime.Format("2006-01-02 15:04:05"))
+		params.Add("end_time", endTime.Format("2006-01-02 15:04:05"))
+		request.URL.RawQuery = params.Encode()
+		resp, err := http.DefaultClient.Do(request)
+		if err != nil {
+			logging.CLILog.Printf("Hunter Search Error:%s", err.Error())
+			continue
+		}
+		content, err := io.ReadAll(resp.Body)
+		resp.Body.Close()
+		if err != nil {
+			logging.CLILog.Printf("Hunter Search Error:%s", err.Error())
+			continue
+		}
+		err = json.Unmarshal(content, &serviceInfo)
 		if err != nil {
 			logging.CLILog.Printf("Hunter Search Error:%s", err.Error())
 			continue
