@@ -1,7 +1,6 @@
 package workerapi
 
 import (
-	"context"
 	"errors"
 	"fmt"
 	"github.com/hanc00l/nemo_go/pkg/comm"
@@ -47,13 +46,11 @@ type XScanConfig struct {
 }
 
 type XScan struct {
-	Config XScanConfig
-
+	Config       XScanConfig
 	ResultIP     portscan.Result
 	ResultDomain domainscan.Result
-
-	ResultVul []pocscan.Result
-	vulMutex  sync.Mutex
+	ResultVul    []pocscan.Result
+	vulMutex     sync.Mutex
 }
 
 const (
@@ -64,12 +61,11 @@ const (
 
 func NewXScan(config XScanConfig) *XScan {
 	x := XScan{Config: config}
-
 	return &x
 }
 
 // XOrganization 根据组织ID获取资产，并进行IP和域名的任务
-func XOrganization(taskId, configJSON string) (result string, err error) {
+func XOrganization(taskId, mainTaskId, configJSON string) (result string, err error) {
 	// 检查任务状态
 	var ok bool
 	if ok, result, err = CheckTaskStatus(taskId); !ok {
@@ -110,9 +106,9 @@ func XOrganization(taskId, configJSON string) (result string, err error) {
 				}
 				ipPortMapString = append(ipPortMapString, ipp)
 			}
-			_, err = scan.NewPortScan(nil, ipPortMapString)
+			_, err = scan.NewPortScan(taskId, mainTaskId, nil, ipPortMapString)
 		} else {
-			_, err = scan.NewPortScan(ipPortMap, nil)
+			_, err = scan.NewPortScan(taskId, mainTaskId, ipPortMap, nil)
 		}
 		if err != nil {
 			logging.RuntimeLog.Error(err)
@@ -120,7 +116,7 @@ func XOrganization(taskId, configJSON string) (result string, err error) {
 		}
 	}
 	// 域名任务只执行解析不进行子域名任务
-	_, err = scan.NewDomainScan(domainMap, false, false)
+	_, err = scan.NewDomainScan(taskId, mainTaskId, domainMap, false, false)
 	if err != nil {
 		logging.RuntimeLog.Error(err)
 		return FailedTask(err.Error()), err
@@ -130,7 +126,7 @@ func XOrganization(taskId, configJSON string) (result string, err error) {
 }
 
 // XFofa Fofa任务
-func XFofa(taskId, configJSON string) (result string, err error) {
+func XFofa(taskId, mainTaskId, configJSON string) (result string, err error) {
 	// 检查任务状态
 	var ok bool
 	if ok, result, err = CheckTaskStatus(taskId); !ok {
@@ -143,20 +139,20 @@ func XFofa(taskId, configJSON string) (result string, err error) {
 	}
 	// 执行任务
 	scan := NewXScan(config)
-	result, err = scan.FofaSearch(taskId)
+	result, err = scan.FofaSearch(taskId, mainTaskId)
 	if err != nil {
 		logging.RuntimeLog.Error(err)
 		return FailedTask(err.Error()), err
 	}
 	// 执行portscan与domainscan
 	ipPortMap, domainMap := MakeSubTaskTarget(&scan.ResultIP, &scan.ResultDomain)
-	_, err = scan.NewPortScan(ipPortMap, nil)
+	_, err = scan.NewPortScan(taskId, mainTaskId, ipPortMap, nil)
 	if err != nil {
 		logging.RuntimeLog.Error(err)
 		return FailedTask(err.Error()), err
 	}
 	//域名任务只执行解析不进行子域名任务
-	_, err = scan.NewDomainScan(domainMap, false, false)
+	_, err = scan.NewDomainScan(taskId, mainTaskId, domainMap, false, false)
 	if err != nil {
 		logging.RuntimeLog.Error(err)
 		return FailedTask(err.Error()), err
@@ -166,7 +162,7 @@ func XFofa(taskId, configJSON string) (result string, err error) {
 }
 
 // XPortScan 端口扫描任务
-func XPortScan(taskId, configJSON string) (result string, err error) {
+func XPortScan(taskId, mainTaskId, configJSON string) (result string, err error) {
 	// 检查任务状态
 	var ok bool
 	if ok, result, err = CheckTaskStatus(taskId); !ok {
@@ -179,13 +175,13 @@ func XPortScan(taskId, configJSON string) (result string, err error) {
 	}
 	// 执行任务
 	scan := NewXScan(config)
-	result, err = scan.Portscan(taskId)
+	result, err = scan.Portscan(taskId, mainTaskId)
 	if err != nil {
 		logging.RuntimeLog.Error(err)
 		return FailedTask(err.Error()), err
 	}
 	// 启动指纹识别任务：
-	_, err = scan.NewFingerprintScan()
+	_, err = scan.NewFingerprintScan(taskId, mainTaskId)
 	if err != nil {
 		logging.RuntimeLog.Error(err)
 		return FailedTask(err.Error()), err
@@ -195,7 +191,7 @@ func XPortScan(taskId, configJSON string) (result string, err error) {
 }
 
 // XDomainscan 域名任务
-func XDomainscan(taskId, configJSON string) (result string, err error) {
+func XDomainscan(taskId, mainTaskId, configJSON string) (result string, err error) {
 	// 检查任务状态
 	var ok bool
 	if ok, result, err = CheckTaskStatus(taskId); !ok {
@@ -208,13 +204,13 @@ func XDomainscan(taskId, configJSON string) (result string, err error) {
 	}
 	// 执行任务
 	scan := NewXScan(config)
-	result, err = scan.Domainscan(taskId)
+	result, err = scan.Domainscan(taskId, mainTaskId)
 	if err != nil {
 		logging.RuntimeLog.Error(err)
 		return FailedTask(err.Error()), err
 	}
 	// 启动指纹识别任务：
-	_, err = scan.NewFingerprintScan()
+	_, err = scan.NewFingerprintScan(taskId, mainTaskId)
 	if err != nil {
 		logging.RuntimeLog.Error(err)
 		return FailedTask(err.Error()), err
@@ -223,7 +219,7 @@ func XDomainscan(taskId, configJSON string) (result string, err error) {
 }
 
 // XFingerPrint指纹识别任务
-func XFingerPrint(taskId, configJSON string) (result string, err error) {
+func XFingerPrint(taskId, mainTaskId, configJSON string) (result string, err error) {
 	// 检查任务状态
 	var ok bool
 	if ok, result, err = CheckTaskStatus(taskId); !ok {
@@ -236,14 +232,14 @@ func XFingerPrint(taskId, configJSON string) (result string, err error) {
 	}
 	// 执行任务
 	scan := NewXScan(config)
-	result, err = scan.FingerPrint(taskId)
+	result, err = scan.FingerPrint(taskId, mainTaskId)
 	if err != nil {
 		logging.RuntimeLog.Error(err)
 		return FailedTask(err.Error()), err
 	}
 	// 启动XrayPoc任务
 	if config.IsXrayPoc {
-		_, err = scan.NewXrayScan()
+		_, err = scan.NewXrayScan(taskId, mainTaskId)
 		if err != nil {
 			return FailedTask(err.Error()), err
 		}
@@ -252,7 +248,7 @@ func XFingerPrint(taskId, configJSON string) (result string, err error) {
 }
 
 // XXray Xray扫描任务（调用xray二进制程序）
-func XXray(taskId, configJSON string) (result string, err error) {
+func XXray(taskId, mainTaskId, configJSON string) (result string, err error) {
 	// 检查任务状态
 	var ok bool
 	if ok, result, err = CheckTaskStatus(taskId); !ok {
@@ -265,7 +261,7 @@ func XXray(taskId, configJSON string) (result string, err error) {
 	}
 	// 执行任务
 	scan := NewXScan(config)
-	result, err = scan.XrayScan(taskId)
+	result, err = scan.XrayScan(taskId, mainTaskId)
 	if err != nil {
 		logging.RuntimeLog.Error(err)
 		return FailedTask(err.Error()), err
@@ -274,7 +270,7 @@ func XXray(taskId, configJSON string) (result string, err error) {
 }
 
 // Portscan 执行端口扫描，通过协程并发执行
-func (x *XScan) Portscan(taskId string) (result string, err error) {
+func (x *XScan) Portscan(taskId string, mainTaskId string) (result string, err error) {
 	x.ResultIP.IPResult = make(map[string]*portscan.IPResult)
 
 	swg := sizedwaitgroup.New(portscanMaxThreadNum)
@@ -322,12 +318,12 @@ func (x *XScan) Portscan(taskId string) (result string, err error) {
 	swg.Wait()
 	// 保存结果
 	resultArgs := comm.ScanResultArgs{
-		TaskID:   taskId,
-		IPConfig: &portscan.Config{OrgId: config.OrgId},
-		IPResult: x.ResultIP.IPResult,
+		TaskID:     taskId,
+		MainTaskId: mainTaskId,
+		IPConfig:   &portscan.Config{OrgId: config.OrgId},
+		IPResult:   x.ResultIP.IPResult,
 	}
-	xc := comm.NewXClient()
-	err = xc.Call(context.Background(), "SaveScanResult", &resultArgs, &result)
+	err = comm.CallXClient("SaveScanResult", &resultArgs, &result)
 	if err != nil {
 		logging.RuntimeLog.Error(err)
 	}
@@ -386,7 +382,7 @@ func (x *XScan) doXrayscan(swg *sizedwaitgroup.SizedWaitGroup, config pocscan.Co
 }
 
 // FofaSearch 执行fofa搜索任务
-func (x *XScan) FofaSearch(taskId string) (result string, err error) {
+func (x *XScan) FofaSearch(taskId string, mainTaskId string) (result string, err error) {
 	config := onlineapi.OnlineAPIConfig{
 		OrgId:              x.Config.OrgId,
 		IsIPLocation:       true,
@@ -407,13 +403,13 @@ func (x *XScan) FofaSearch(taskId string) (result string, err error) {
 	} else if len(x.Config.FofaTarget) > 0 {
 		config.Target = x.Config.FofaTarget
 	}
-	x.ResultIP, x.ResultDomain, result, err = doFofaAndSave(taskId, "fofa", config)
+	x.ResultIP, x.ResultDomain, result, err = doFofaAndSave(taskId, mainTaskId, "fofa", config)
 
 	return
 }
 
 // Domainscan 执行域名任务
-func (x *XScan) Domainscan(taskId string) (result string, err error) {
+func (x *XScan) Domainscan(taskId string, mainTaskId string) (result string, err error) {
 	x.ResultDomain.DomainResult = make(map[string]*domainscan.DomainResult)
 	swg := sizedwaitgroup.New(domainscanMaxThreadNum)
 
@@ -434,24 +430,23 @@ func (x *XScan) Domainscan(taskId string) (result string, err error) {
 	swg.Wait()
 	// 如果有端口扫描的选项
 	if config.IsIPPortScan || config.IsIPSubnetPortScan {
-		doPortScanByDomainscan(config, &x.ResultDomain)
+		doPortScanByDomainscan(taskId, mainTaskId, config, &x.ResultDomain)
 	}
 	// 保存结果
-	xc := comm.NewXClient()
 	resultArgs := comm.ScanResultArgs{
 		TaskID:       taskId,
+		MainTaskId:   mainTaskId,
 		DomainConfig: &domainscan.Config{OrgId: config.OrgId},
 		DomainResult: x.ResultDomain.DomainResult,
 	}
-	err = xc.Call(context.Background(), "SaveScanResult", &resultArgs, &result)
-	if err != nil {
+	if err = comm.CallXClient("SaveScanResult", &resultArgs, &result); err != nil {
 		logging.RuntimeLog.Error(err)
 	}
 	return
 }
 
 // NewPortScan 根据IP/port列表，生成端口扫描任务
-func (x *XScan) NewPortScan(ipPortMap []map[string][]int, ipPortMapString []map[string]string) (result string, err error) {
+func (x *XScan) NewPortScan(taskId, mainTaskId string, ipPortMap []map[string][]int, ipPortMapString []map[string]string) (result string, err error) {
 	config := XScanConfig{
 		OrgId:              x.Config.OrgId,
 		IsIgnoreCDN:        x.Config.IsIgnoreCDN,
@@ -466,7 +461,7 @@ func (x *XScan) NewPortScan(ipPortMap []map[string][]int, ipPortMapString []map[
 	for _, t := range ipPortMap {
 		configRun := config
 		configRun.IPPort = t
-		result, err = sendTask(configRun, "xportscan")
+		result, err = sendTask(taskId, mainTaskId, configRun, "xportscan")
 		if err != nil {
 			logging.RuntimeLog.Error(err)
 			return
@@ -475,7 +470,7 @@ func (x *XScan) NewPortScan(ipPortMap []map[string][]int, ipPortMapString []map[
 	for _, t := range ipPortMapString {
 		configRun := config
 		configRun.IPPortString = t
-		result, err = sendTask(configRun, "xportscan")
+		result, err = sendTask(taskId, mainTaskId, configRun, "xportscan")
 		if err != nil {
 			logging.RuntimeLog.Error(err)
 			return
@@ -485,7 +480,7 @@ func (x *XScan) NewPortScan(ipPortMap []map[string][]int, ipPortMapString []map[
 }
 
 // NewDomainScan 根据域名列表，生成域名任务
-func (x *XScan) NewDomainScan(domainMap []map[string]struct{}, isSubDomainFinder, isSubDomainBrute bool) (result string, err error) {
+func (x *XScan) NewDomainScan(taskId, mainTaskId string, domainMap []map[string]struct{}, isSubDomainFinder, isSubDomainBrute bool) (result string, err error) {
 	config := XScanConfig{
 		OrgId:             x.Config.OrgId,
 		IsSubDomainFinder: isSubDomainFinder,
@@ -503,7 +498,7 @@ func (x *XScan) NewDomainScan(domainMap []map[string]struct{}, isSubDomainFinder
 	for _, t := range domainMap {
 		configRun := config
 		configRun.Domain = t
-		result, err = sendTask(configRun, "xdomainscan")
+		result, err = sendTask(taskId, mainTaskId, configRun, "xdomainscan")
 		if err != nil {
 			logging.RuntimeLog.Error(err)
 			return
@@ -513,7 +508,7 @@ func (x *XScan) NewDomainScan(domainMap []map[string]struct{}, isSubDomainFinder
 }
 
 // FingerPrint 执行指纹识别任务
-func (x *XScan) FingerPrint(taskId string) (result string, err error) {
+func (x *XScan) FingerPrint(taskId string, mainTaskId string) (result string, err error) {
 	config := FingerprintTaskConfig{
 		IsHttpx:          x.Config.IsHttpx,
 		IsFingerprintHub: x.Config.IsFingerprintHub,
@@ -522,13 +517,13 @@ func (x *XScan) FingerPrint(taskId string) (result string, err error) {
 		IPTargetMap:      x.Config.IPPort,
 		DomainTargetMap:  x.Config.Domain,
 	}
-	x.ResultIP, x.ResultDomain, result, err = doFingerPrintAndSave(taskId, config)
+	x.ResultIP, x.ResultDomain, result, err = doFingerPrintAndSave(taskId, mainTaskId, config)
 
 	return
 }
 
 // NewFingerprintScan 生成指纹识别任务
-func (x *XScan) NewFingerprintScan() (result string, err error) {
+func (x *XScan) NewFingerprintScan(taskId, mainTaskId string) (result string, err error) {
 	// 由于fingerprint会影响后续的pocscan，所以这里必须生成fingerprint任务
 	//if x.Config.IsHttpx == false && x.Config.IsFingerprintHub == false && x.Config.IsIconHash == false && x.Config.IsScreenshot == false {
 	//	return
@@ -547,7 +542,7 @@ func (x *XScan) NewFingerprintScan() (result string, err error) {
 	for _, t := range ipTarget {
 		newConfig := config
 		newConfig.IPPort = t
-		result, err = sendTask(newConfig, "xfingerprint")
+		result, err = sendTask(taskId, mainTaskId, newConfig, "xfingerprint")
 		if err != nil {
 			return
 		}
@@ -555,7 +550,7 @@ func (x *XScan) NewFingerprintScan() (result string, err error) {
 	for _, t := range domainTarget {
 		newConfig := config
 		newConfig.Domain = t
-		result, err = sendTask(newConfig, "xfingerprint")
+		result, err = sendTask(taskId, mainTaskId, newConfig, "xfingerprint")
 		if err != nil {
 			return
 		}
@@ -564,19 +559,19 @@ func (x *XScan) NewFingerprintScan() (result string, err error) {
 }
 
 // NewXrayScan 生成xraypoc任务
-func (x *XScan) NewXrayScan() (result string, err error) {
+func (x *XScan) NewXrayScan(taskId, mainTaskId string) (result string, err error) {
 	//拆分子任务
 	ipTarget, domainTarget := MakeSubTaskTarget(&x.ResultIP, &x.ResultDomain)
 	for _, t := range ipTarget {
 		newConfig := XScanConfig{IPPort: t, IsXrayPoc: true, XrayPocFile: x.Config.XrayPocFile}
-		result, err = sendTask(newConfig, "xxray")
+		result, err = sendTask(taskId, mainTaskId, newConfig, "xxray")
 		if err != nil {
 			return
 		}
 	}
 	for _, t := range domainTarget {
 		newConfig := XScanConfig{Domain: t, IsXrayPoc: true, XrayPocFile: x.Config.XrayPocFile}
-		result, err = sendTask(newConfig, "xxray")
+		result, err = sendTask(taskId, mainTaskId, newConfig, "xxray")
 		if err != nil {
 			return
 		}
@@ -585,7 +580,7 @@ func (x *XScan) NewXrayScan() (result string, err error) {
 }
 
 // XrayScan 调用执行xray扫描任务
-func (x *XScan) XrayScan(taskId string) (result string, err error) {
+func (x *XScan) XrayScan(taskId string, mainTaskId string) (result string, err error) {
 	// 生成扫描参数
 	config := pocscan.Config{PocFile: x.Config.XrayPocFile}
 	if x.Config.XrayPocFile == "" {
@@ -614,10 +609,10 @@ func (x *XScan) XrayScan(taskId string) (result string, err error) {
 	// 保存结果
 	resultArgs := comm.ScanResultArgs{
 		TaskID:              taskId,
+		MainTaskId:          mainTaskId,
 		VulnerabilityResult: x.ResultVul,
 	}
-	xc := comm.NewXClient()
-	err = xc.Call(context.Background(), "SaveVulnerabilityResult", &resultArgs, &result)
+	err = comm.CallXClient("SaveVulnerabilityResult", &resultArgs, &result)
 
 	return
 }

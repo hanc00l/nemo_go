@@ -34,6 +34,9 @@ type DefaultConfig struct {
 	IsScreenshot     bool   `json:"screenshot"`
 	IsFingerprintHub bool   `json:"fingerprinthub"`
 	IsIconHash       bool   `json:"iconhash"`
+	ServerChanToken  string `json:"serverchan"`
+	DingTalkToken    string `json:"dingtalk"`
+	FeishuToken      string `json:"feishu"`
 }
 
 func (c *ConfigController) IndexAction() {
@@ -60,6 +63,7 @@ func (c *ConfigController) LoadDefaultConfigAction() {
 	portscan := conf.GlobalWorkerConfig().Portscan
 	task := conf.GlobalServerConfig().Task
 	fingerprint := conf.GlobalWorkerConfig().Fingerprint
+	notify := conf.GlobalServerConfig().Notify
 	data := DefaultConfig{
 		CmdBin:           portscan.Cmdbin,
 		Port:             portscan.Port,
@@ -72,9 +76,11 @@ func (c *ConfigController) LoadDefaultConfigAction() {
 		IsScreenshot:     fingerprint.IsScreenshot,
 		IsFingerprintHub: fingerprint.IsFingerprintHub,
 		IsIconHash:       fingerprint.IsIconHash,
+		ServerChanToken:  notify["serverchan"].Token,
+		DingTalkToken:    notify["dingtalk"].Token,
+		FeishuToken:      notify["feishu"].Token,
 	}
-	fileContent, err1 := os.ReadFile(filepath.Join(conf.GetRootPath(), "version.txt"))
-	if err1 == nil {
+	if fileContent, err1 := os.ReadFile(filepath.Join(conf.GetRootPath(), "version.txt")); err1 == nil {
 		data.Version = string(fileContent)
 	}
 	c.Data["json"] = data
@@ -163,6 +169,33 @@ func (c *ConfigController) SaveTaskSliceNumberAction() {
 	}
 	conf.GlobalServerConfig().Task.IpSliceNumber = ipSliceNumber
 	conf.GlobalServerConfig().Task.PortSliceNumber = portSliceNumber
+	err = conf.GlobalServerConfig().WriteConfig()
+	if err != nil {
+		c.FailedStatus(err.Error())
+	}
+	c.SucceededStatus("保存配置成功")
+}
+
+// SaveTaskNotifyAction 保存任务通知的Token设置
+func (c *ConfigController) SaveTaskNotifyAction() {
+	defer c.ServeJSON()
+
+	serverChanToken := c.GetString("token_serverchan", "")
+	dingtalkToken := c.GetString("token_dingtalk", "")
+	feishuToken := c.GetString("token_feishu", "")
+
+	err := conf.GlobalServerConfig().ReloadConfig()
+	if err != nil {
+		c.FailedStatus(err.Error())
+		return
+	}
+	if conf.GlobalServerConfig().Notify == nil {
+		conf.GlobalServerConfig().Notify = make(map[string]conf.Notify)
+	}
+	conf.GlobalServerConfig().Notify["serverchan"] = conf.Notify{Token: serverChanToken}
+	conf.GlobalServerConfig().Notify["dingtalk"] = conf.Notify{Token: dingtalkToken}
+	conf.GlobalServerConfig().Notify["feishu"] = conf.Notify{Token: feishuToken}
+
 	err = conf.GlobalServerConfig().WriteConfig()
 	if err != nil {
 		c.FailedStatus(err.Error())

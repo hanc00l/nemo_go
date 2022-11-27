@@ -9,10 +9,10 @@ import (
 )
 
 const (
-	pocMaxThreadNumber      = 2
-	ipMaxPocForHoneypot     = 40
-	portMaxPocForHoneypot   = 10
-	domainMaxPocForHoneypot = 40
+	nucleiConcurrencyThreadNumber = 25
+	ipMaxPocForHoneypot           = 40
+	portMaxPocForHoneypot         = 10
+	domainMaxPocForHoneypot       = 40
 )
 
 type Config struct {

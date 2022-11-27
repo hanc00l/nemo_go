@@ -22,11 +22,13 @@ type TaskController struct {
 
 type taskRequestParam struct {
 	DatableRequestParam
-	State      string `form:"task_state"`
-	Name       string `form:"task_name"`
-	KwArgs     string `form:"task_args"`
-	Worker     string `form:"task_worker"`
-	CronTaskId string `form:"cron_id"`
+	State        string `form:"task_state"`
+	Name         string `form:"task_name"`
+	KwArgs       string `form:"task_args"`
+	Worker       string `form:"task_worker"`
+	CronTaskId   string `form:"cron_id"`
+	ShowRunTask  bool   `form:"show_runtask"`
+	RunTaskState string `form:"runtask_state"`
 }
 
 type taskCronRequestParam struct {
@@ -38,8 +40,8 @@ type taskCronRequestParam struct {
 
 type TaskListData struct {
 	Id           int    `json:"id"`
-	Index        int    `json:"index"`
-	TaskId       string `json:"task_id""`
+	Index        string `json:"index"`
+	TaskId       string `json:"task_id"`
 	Worker       string `json:"worker"`
 	TaskName     string `json:"task_name"`
 	State        string `json:"state"`
@@ -47,8 +49,11 @@ type TaskListData struct {
 	KwArgs       string `json:"kwargs"`
 	ReceivedTime string `json:"received"`
 	StartedTime  string `json:"started"`
+	CreateTime   string `json:"created"`
+	UpdateTime   string `json:"updated"`
 	Runtime      string `json:"runtime"`
 	ResultFile   string `json:"resultfile"`
+	TaskType     string `json:"tasktype"`
 }
 
 type TaskCronListData struct {
@@ -84,6 +89,7 @@ type TaskInfo struct {
 	CreateTime    string
 	UpdateTime    string
 	ResultFile    string
+	RunTaskInfo   []TaskListData
 }
 
 type TaskCronInfo struct {
@@ -148,11 +154,24 @@ func (c *TaskController) InfoAction() {
 
 	taskId := c.GetString("task_id")
 	if taskId != "" {
-		taskInfo = getTaskInfo(taskId)
+		taskInfo = c.getTaskInfo(taskId)
 	}
 	c.Data["task_info"] = taskInfo
 	c.Layout = "base.html"
 	c.TplName = "task-info.html"
+}
+
+// InfoMainAction 显示一个Main任务的详情
+func (c *TaskController) InfoMainAction() {
+	var taskInfo TaskInfo
+
+	taskId := c.GetString("task_id")
+	if taskId != "" {
+		taskInfo = c.getTaskMainInfo(taskId)
+	}
+	c.Data["task_info"] = taskInfo
+	c.Layout = "base.html"
+	c.TplName = "task-info-main.html"
 }
 
 // InfoCronAction 显示一个任务的详情
@@ -161,7 +180,7 @@ func (c *TaskController) InfoCronAction() {
 
 	taskId := c.GetString("task_id")
 	if taskId != "" {
-		taskInfo = getTaskCronInfo(taskId)
+		taskInfo = c.getTaskCronInfo(taskId)
 	}
 	c.Data["task_info"] = taskInfo
 	c.Layout = "base.html"
@@ -177,11 +196,29 @@ func (c *TaskController) DeleteAction() {
 		logging.RuntimeLog.Error(err.Error())
 		c.FailedStatus(err.Error())
 	} else {
-		task := db.Task{Id: id}
+		task := db.TaskRun{Id: id}
 		resultPath := path.Join(conf.GlobalServerConfig().Web.WebFiles, "taskresult")
-		if resultPath != "" && task.Get() {
+		if task.Get() {
 			filePath := path.Join(resultPath, fmt.Sprintf("%s.json", task.TaskId))
 			os.Remove(filePath)
+		}
+		c.MakeStatusResponse(task.Delete())
+	}
+}
+
+// DeleteMainAction 删除一个记录
+func (c *TaskController) DeleteMainAction() {
+	defer c.ServeJSON()
+
+	id, err := c.GetInt("id")
+	if err != nil {
+		logging.RuntimeLog.Error(err.Error())
+		c.FailedStatus(err.Error())
+	} else {
+		task := db.TaskMain{Id: id}
+		if task.Get() {
+			//同时删除相关的子任务
+			deleteRunTaskByMainTaskId(task.TaskId)
 		}
 		c.MakeStatusResponse(task.Delete())
 	}
@@ -292,20 +329,22 @@ func (c *TaskController) StartPortScanTaskAction() {
 	if req.Port == "" {
 		req.Port = conf.GlobalWorkerConfig().Portscan.Port
 	}
+	var kwArgs []byte
+	var taskId string
+	kwArgs, err = json.Marshal(req)
+	if err != nil {
+		c.FailedStatus(err.Error())
+		return
+	}
 	if req.IsTaskCron {
-		kwargs, err := json.Marshal(req)
-		if err != nil {
-			c.FailedStatus(err.Error())
-			return
-		}
-		taskId := runner.SaveCronTask("portscan", string(kwargs), req.TaskCronRule, req.TaskCronComment)
+		taskId = runner.SaveCronTask("portscan", string(kwArgs), req.TaskCronRule, req.TaskCronComment)
 		if taskId == "" {
 			c.FailedStatus("save to db fail")
 			return
 		}
 		c.SucceededStatus(taskId)
 	} else {
-		taskId, err := runner.StartPortScanTask(req, "")
+		taskId, err = runner.SaveMainTask("portscan", string(kwArgs), "")
 		if err != nil {
 			c.FailedStatus(err.Error())
 			return
@@ -329,20 +368,22 @@ func (c *TaskController) StartBatchScanTaskAction() {
 		c.FailedStatus("no target")
 		return
 	}
+	var kwArgs []byte
+	var taskId string
+	kwArgs, err = json.Marshal(req)
+	if err != nil {
+		c.FailedStatus(err.Error())
+		return
+	}
 	if req.IsTaskCron {
-		kwargs, err := json.Marshal(req)
-		if err != nil {
-			c.FailedStatus(err.Error())
-			return
-		}
-		taskId := runner.SaveCronTask("batchscan", string(kwargs), req.TaskCronRule, req.TaskCronComment)
+		taskId = runner.SaveCronTask("batchscan", string(kwArgs), req.TaskCronRule, req.TaskCronComment)
 		if taskId == "" {
 			c.FailedStatus("save to db fail")
 			return
 		}
 		c.SucceededStatus(taskId)
 	} else {
-		taskId, err := runner.StartBatchScanTask(req, "")
+		taskId, err = runner.SaveMainTask("batchscan", string(kwArgs), "")
 		if err != nil {
 			c.FailedStatus(err.Error())
 			return
@@ -367,20 +408,23 @@ func (c *TaskController) StartDomainScanTaskAction() {
 		c.FailedStatus("no target")
 		return
 	}
+	var kwArgs []byte
+	var taskId string
+	kwArgs, err = json.Marshal(req)
+	if err != nil {
+		c.FailedStatus(err.Error())
+		return
+	}
 	if req.IsTaskCron {
-		kwargs, err := json.Marshal(req)
-		if err != nil {
-			c.FailedStatus(err.Error())
-			return
-		}
-		taskId := runner.SaveCronTask("domainscan", string(kwargs), req.TaskCronRule, req.TaskCronComment)
+
+		taskId = runner.SaveCronTask("domainscan", string(kwArgs), req.TaskCronRule, req.TaskCronComment)
 		if taskId == "" {
 			c.FailedStatus("save to db fail")
 			return
 		}
 		c.SucceededStatus(taskId)
 	} else {
-		taskId, err := runner.StartDomainScanTask(req, "")
+		taskId, err = runner.SaveMainTask("domainscan", string(kwArgs), "")
 		if err != nil {
 			c.FailedStatus(err.Error())
 			return
@@ -406,20 +450,22 @@ func (c *TaskController) StartPocScanTaskAction() {
 		c.FailedStatus("no target")
 		return
 	}
+	var kwArgs []byte
+	var taskId string
+	kwArgs, err = json.Marshal(req)
+	if err != nil {
+		c.FailedStatus(err.Error())
+		return
+	}
 	if req.IsTaskCron {
-		kwargs, err := json.Marshal(req)
-		if err != nil {
-			c.FailedStatus(err.Error())
-			return
-		}
-		taskId := runner.SaveCronTask("pocscan", string(kwargs), req.TaskCronRule, req.TaskCronComment)
+		taskId = runner.SaveCronTask("pocscan", string(kwArgs), req.TaskCronRule, req.TaskCronComment)
 		if taskId == "" {
 			c.FailedStatus("save to db fail")
 			return
 		}
 		c.SucceededStatus(taskId)
 	} else {
-		taskId, err := runner.StartPocScanTask(req, "")
+		taskId, err = runner.SaveMainTask("pocscan", string(kwArgs), "")
 		if err != nil {
 			c.FailedStatus(err.Error())
 			return
@@ -476,31 +522,25 @@ func (c *TaskController) StartXScanTaskAction() {
 		c.FailedStatus("invalide xscan type")
 		return
 	}
+	var kwArgs []byte
+	var taskId string
+	kwArgs, err = json.Marshal(req)
+	if err != nil {
+		c.FailedStatus(err.Error())
+		return
+	}
+
 	var result string
 	// 计划任务
 	if req.IsTaskCron {
-		var kwargs []byte
-		kwargs, err = json.Marshal(req)
-		if err != nil {
-			c.FailedStatus(err.Error())
-			return
-		}
-		taskId := runner.SaveCronTask(taskName, string(kwargs), req.TaskCronRule, req.TaskCronComment)
+		taskId = runner.SaveCronTask(taskName, string(kwArgs), req.TaskCronRule, req.TaskCronComment)
 		if taskId == "" {
 			c.FailedStatus("save to db fail")
 			return
 		}
 	} else {
 		// 立即执行的任务
-		if req.XScanType == "xportscan" {
-			result, err = runner.StartXPortScanTask(req, "")
-		} else if req.XScanType == "xdomainscan" {
-			result, err = runner.StartXDomainScanTask(req, "")
-		} else if req.XScanType == "xorgipscan" || req.XScanType == "xorgdomainscan" {
-			result, err = runner.StartXOrgScanTask(req, "")
-		} else if req.XScanType == "xfofa" {
-			result, err = runner.StartXFofaKeywordTask(req, "")
-		}
+		taskId, err = runner.SaveMainTask(taskName, string(kwArgs), "")
 		if err != nil {
 			c.FailedStatus(err.Error())
 			return
@@ -530,9 +570,11 @@ func (c *TaskController) validateRequestParam2(req *taskCronRequestParam) {
 }
 
 // getSearchMap 根据查询参数生成查询条件
-func (c *TaskController) getSearchMap(req taskRequestParam) (searchMap map[string]interface{}) {
+func (c *TaskController) getSearchMap(req *taskRequestParam) (searchMap map[string]interface{}) {
 	searchMap = make(map[string]interface{})
-
+	if req == nil {
+		return
+	}
 	if req.Name != "" {
 		searchMap["task_name"] = req.Name
 	}
@@ -569,21 +611,73 @@ func (c *TaskController) getSearchMap2(req taskCronRequestParam) (searchMap map[
 
 // getTaskListData 获取列显示的数据
 func (c *TaskController) getTaskListData(req taskRequestParam) (resp DataTableResponseData) {
-	task := db.Task{}
-	searchMap := c.getSearchMap(req)
+	task := db.TaskMain{}
+	searchMap := c.getSearchMap(&req)
 	startPage := req.Start/req.Length + 1
 	results, total := task.Gets(searchMap, startPage, req.Length)
-	resultPath := path.Join(conf.GlobalServerConfig().Web.WebFiles, "taskresult")
 	for i, taskRow := range results {
 		t := TaskListData{}
 		t.Id = taskRow.Id
-		t.Index = req.Start + i + 1
+		t.Index = fmt.Sprintf("%d", req.Start+i+1)
+		t.TaskId = taskRow.TaskId
+		t.TaskName = taskRow.TaskName
+		t.Worker = taskRow.ProgressMessage
+		t.State = taskRow.State
+		t.Result = getResultMsg(taskRow.Result)
+		t.KwArgs = runner.ParseTargetFromKwArgs(taskRow.TaskName, taskRow.KwArgs)
+		t.ReceivedTime = FormatDateTime(taskRow.ReceivedTime)
+		if taskRow.StartedTime != nil {
+			t.StartedTime = FormatDateTime(*taskRow.StartedTime)
+		}
+		if taskRow.SucceededTime != nil && taskRow.StartedTime != nil {
+			t.Runtime = taskRow.SucceededTime.Sub(*taskRow.StartedTime).Truncate(time.Second).String()
+		}
+		t.TaskType = "MainTask"
+		resp.Data = append(resp.Data, t)
+		if req.ShowRunTask {
+			for _, rt := range c.getRunTaskListData(taskRow.TaskId, &req, false, false) {
+				resp.Data = append(resp.Data, rt)
+			}
+		}
+	}
+	resp.Draw = req.Draw
+	resp.RecordsTotal = total
+	resp.RecordsFiltered = total
+	if resp.Data == nil {
+		resp.Data = make([]interface{}, 0)
+	}
+	return
+}
+
+// getRunTaskListData 获取指定maintask的runtask数据
+func (c *TaskController) getRunTaskListData(mainTaskId string, req *taskRequestParam, showIndex, showAll bool) (runTaskList []TaskListData) {
+	task := db.TaskRun{}
+	searchMap := make(map[string]interface{})
+	searchMap["main_id"] = mainTaskId
+	if req != nil && req.RunTaskState != "" {
+		searchMap["state"] = req.RunTaskState
+	}
+	var results []db.TaskRun
+	if showAll {
+		results, _ = task.Gets(searchMap, -1, -1)
+	} else {
+		results, _ = task.Gets(searchMap, 1, 10)
+	}
+	resultPath := path.Join(conf.GlobalServerConfig().Web.WebFiles, "taskresult")
+	for index, taskRow := range results {
+		t := TaskListData{}
+		if showIndex {
+			t.Index = fmt.Sprintf("%d", index+1)
+		}
+		t.Id = taskRow.Id
 		t.TaskId = taskRow.TaskId
 		t.TaskName = taskRow.TaskName
 		t.Worker = taskRow.Worker
 		t.State = taskRow.State
 		t.Result = getResultMsg(taskRow.Result)
-		t.KwArgs = ParseTargetFromKwArgs(taskRow.TaskName, taskRow.KwArgs)
+		t.KwArgs = runner.ParseTargetFromKwArgs(taskRow.TaskName, taskRow.KwArgs)
+		t.CreateTime = FormatDateTime(taskRow.CreateDatetime)
+		t.UpdateTime = FormatDateTime(taskRow.UpdateDatetime)
 		if taskRow.StartedTime != nil {
 			t.StartedTime = FormatDateTime(*taskRow.StartedTime)
 		}
@@ -597,13 +691,8 @@ func (c *TaskController) getTaskListData(req taskRequestParam) (resp DataTableRe
 				t.ResultFile = fmt.Sprintf("/webfiles/taskresult/%s.json", taskRow.TaskId)
 			}
 		}
-		resp.Data = append(resp.Data, t)
-	}
-	resp.Draw = req.Draw
-	resp.RecordsTotal = total
-	resp.RecordsFiltered = total
-	if resp.Data == nil {
-		resp.Data = make([]interface{}, 0)
+		t.TaskType = "RunTask"
+		runTaskList = append(runTaskList, t)
 	}
 	return
 }
@@ -620,7 +709,7 @@ func (c *TaskController) getTaskCronListData(req taskCronRequestParam) (resp Dat
 		t.Index = req.Start + i + 1
 		t.TaskId = taskRow.TaskId
 		t.TaskName = taskRow.TaskName
-		t.KwArgs = strings.ReplaceAll(ParseTargetFromKwArgs(taskRow.TaskName, taskRow.KwArgs), "\n", ",")
+		t.KwArgs = strings.ReplaceAll(runner.ParseTargetFromKwArgs(taskRow.TaskName, taskRow.KwArgs), "\n", ",")
 		t.CronRule = taskRow.CronRule
 		t.RunCount = taskRow.RunCount
 		t.Status = taskRow.Status
@@ -644,8 +733,8 @@ func (c *TaskController) getTaskCronListData(req taskCronRequestParam) (resp Dat
 }
 
 // getTaskInfo 获取一个任务的详情
-func getTaskInfo(taskId string) (r TaskInfo) {
-	task := db.Task{TaskId: taskId}
+func (c *TaskController) getTaskInfo(taskId string) (r TaskInfo) {
+	task := db.TaskRun{TaskId: taskId}
 	if !task.GetByTaskId() {
 		return
 	}
@@ -689,7 +778,7 @@ func getTaskInfo(taskId string) (r TaskInfo) {
 }
 
 // getTaskCronInfo 获取一个任务的详情
-func getTaskCronInfo(taskId string) (r TaskCronInfo) {
+func (c *TaskController) getTaskCronInfo(taskId string) (r TaskCronInfo) {
 	task := db.TaskCron{TaskId: taskId}
 	if !task.GetByTaskId() {
 		return
@@ -710,8 +799,38 @@ func getTaskCronInfo(taskId string) (r TaskCronInfo) {
 	return
 }
 
+// getTaskMainInfo 获取一个任务的详情
+func (c *TaskController) getTaskMainInfo(taskId string) (r TaskInfo) {
+	task := db.TaskMain{TaskId: taskId}
+	if !task.GetByTaskId() {
+		return
+	}
+	r.Id = task.Id
+	r.TaskId = task.TaskId
+	r.TaskName = task.TaskName
+	r.Result = task.Result
+	r.State = task.State
+	r.KwArgs = task.KwArgs
+	r.ReceivedTime = FormatDateTime(task.ReceivedTime)
+	r.Worker = task.ProgressMessage
+	if task.StartedTime != nil {
+		r.StartedTime = FormatDateTime(*task.StartedTime)
+	}
+	if task.SucceededTime != nil {
+		r.SucceededTime = FormatDateTime(*task.SucceededTime)
+	}
+	if task.SucceededTime != nil && task.StartedTime != nil {
+		r.Runtime = task.SucceededTime.Sub(*task.StartedTime).Truncate(time.Second).String()
+	}
+	r.CreateTime = FormatDateTime(task.CreateDatetime)
+	r.UpdateTime = FormatDateTime(task.UpdateDatetime)
+	r.RunTaskInfo = c.getRunTaskListData(taskId, nil, true, true)
+
+	return
+}
+
 // formatRuntime 计算任务运行时间
-func formatRuntime(t *db.Task) (runtime string) {
+func formatRuntime(t *db.TaskRun) (runtime string) {
 	var endTime *time.Time
 	if t.SucceededTime != nil {
 		endTime = t.SucceededTime
@@ -743,127 +862,31 @@ func getResultMsg(resultJSON string) (msg string) {
 	return result.Msg
 }
 
-// ParseTargetFromKwArgs 从经过JSON序列化的参数中单独提取出target
-func ParseTargetFromKwArgs(taskName, args string) (target string) {
-	const displayedLength = 100
-	type TargetStrut struct {
-		Target string `json:"target"`
+// batchDeleteTaskByState 批量删除指定状态的任务
+func batchDeleteTaskByState(taskState string) (total int) {
+	searchMap := make(map[string]interface{})
+	searchMap["state"] = taskState
+	task := db.TaskMain{}
+	results, _ := task.Gets(searchMap, -1, -1)
+	for _, taskRow := range results {
+		taskDelete := db.TaskMain{Id: taskRow.Id}
+		taskDelete.Delete()
+		total += deleteRunTaskByMainTaskId(taskRow.TaskId)
 	}
-	type FingerTargetStrut struct {
-		IPTargetMap     *map[string][]int    `json:"IPTargetMap"`
-		DomainTargetMap *map[string]struct{} `json:"DomainTargetMap"`
-	}
-	type XrayPocStrut struct {
-		IPPortResult map[string][]int
-		DomainResult []string
-	}
-	type XScanConfig struct {
-		OrgId        *int                `json:"orgid"`
-		FofaTarget   string              `json:"fofatarget"`
-		FofaKeyword  string              `json:"fofaKeyword"`
-		IPPort       map[string][]int    `json:"ipport"`
-		IPPortString map[string]string   `json:"ipportstring"`
-		Domain       map[string]struct{} `json:"domain"`
-	}
-	if taskName == "fingerprint" {
-		var t FingerTargetStrut
-		err := json.Unmarshal([]byte(args), &t)
-		if err != nil {
-			target = args
-		} else {
-			var allTarget []string
-			if t.IPTargetMap != nil {
-				for ip := range *t.IPTargetMap {
-					allTarget = append(allTarget, ip)
-				}
-			}
-			if t.DomainTargetMap != nil {
-				for domain := range *t.DomainTargetMap {
-					allTarget = append(allTarget, domain)
-				}
-			}
-			target = strings.Join(allTarget, ",")
-		}
-	} else if taskName == "xraypoc" {
-		var t XrayPocStrut
-		err := json.Unmarshal([]byte(args), &t)
-		if err != nil {
-			target = args
-		} else {
-			var allTarget []string
-			for ip, ports := range t.IPPortResult {
-				for _, port := range ports {
-					allTarget = append(allTarget, fmt.Sprintf("%s:%d", ip, port))
-				}
-			}
-			for _, domain := range t.DomainResult {
-				allTarget = append(allTarget, domain)
-			}
-			target = strings.Join(allTarget, ",")
-		}
-	} else if taskName == "xportscan" || taskName == "xdomainscan" || taskName == "xfofa" || taskName == "xxraypoc" || taskName == "xxray" || taskName == "xfingerprint" || taskName == "xorgscan" {
-		var t XScanConfig
-		err := json.Unmarshal([]byte(args), &t)
-		if err != nil {
-			target = args
-		} else {
-			var allTarget []string
-			if len(t.FofaKeyword) > 0 {
-				allTarget = append(allTarget, t.FofaKeyword)
-			}
-			if len(t.FofaTarget) > 0 {
-				allTarget = append(allTarget, t.FofaTarget)
-			}
-			if len(t.IPPort) > 0 {
-				for tip := range t.IPPort {
-					allTarget = append(allTarget, tip)
-				}
-			}
-			if len(t.IPPortString) > 0 {
-				for tip := range t.IPPortString {
-					allTarget = append(allTarget, tip)
-				}
-			}
-			if len(t.Domain) > 0 {
-				for td := range t.Domain {
-					allTarget = append(allTarget, td)
-				}
-			}
-			if taskName == "xorgscan" {
-				orgDb := db.Organization{Id: *t.OrgId}
-				if orgDb.Get() {
-					allTarget = append(allTarget, orgDb.OrgName)
-				}
-			}
-			target = strings.Join(allTarget, ",")
-		}
-	} else {
-		var t TargetStrut
-		err := json.Unmarshal([]byte(args), &t)
-		if err != nil {
-			target = args
-		} else {
-			target = t.Target
-		}
-	}
-	if len(target) > displayedLength {
-		return fmt.Sprintf("%s...", target[:displayedLength])
-	}
-
 	return
 }
 
-// batchDeleteTaskByState 批量删除指定状态的任务
-func batchDeleteTaskByState(taskState string) (total int) {
-	task := db.Task{}
+// deleteRunTaskByMainTaskId 删除maintask下的所有rantask子任务
+func deleteRunTaskByMainTaskId(mainTaskId string) (total int) {
+	task := db.TaskRun{}
 	searchMap := make(map[string]interface{})
-	searchMap["state"] = taskState
+	searchMap["main_id"] = mainTaskId
 	results, _ := task.Gets(searchMap, -1, -1)
 	resultPath := path.Join(conf.GlobalServerConfig().Web.WebFiles, "taskresult")
 	for _, taskRow := range results {
-		taskDelete := db.Task{Id: taskRow.Id}
+		taskDelete := db.TaskRun{Id: taskRow.Id}
 		if taskDelete.Delete() && resultPath != "" {
-			filePath := path.Join(resultPath, fmt.Sprintf("%s.json", task.TaskId))
+			filePath := path.Join(resultPath, fmt.Sprintf("%s.json", taskRow.TaskId))
 			os.Remove(filePath)
 			total++
 		}

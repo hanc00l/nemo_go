@@ -97,7 +97,7 @@
 <script src="static/js/plugins/pace.min.js"></script>
 <script>
     $(function () {
-        $("title").html(" {{ .task_info.TaskId }}-taskinfo");
+        $("title").html("{{ .task_info.TaskName }}-{{ .task_info.TaskId }}-taskinfo");
         $('#btnsiderbar').click();
     });
 </script>

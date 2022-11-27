@@ -65,6 +65,10 @@ func startCronTask() {
 	logging.RuntimeLog.Infof("cron task total:%d", num)
 }
 
+func startMainTaskDemon() {
+	go runner.StartMainTaskDamon()
+}
+
 // auth RPC调用认证
 func auth(ctx context.Context, req *protocol.Message, token string) error {
 	if token == conf.GlobalServerConfig().Rpc.AuthKey {
@@ -106,13 +110,16 @@ func main() {
 	flag.BoolVar(&noFilesync, "nf", false, "disable file sync")
 	flag.Parse()
 
-	go startRPCServer()
 	if noFilesync == false {
-		time.Sleep(time.Second * 1)
 		go startFileSyncServer()
 		go startFileSyncMonitor()
 	}
 	time.Sleep(time.Second * 1)
+	go startRPCServer()
+	time.Sleep(time.Second * 1)
 	startCronTask()
+	time.Sleep(time.Second * 1)
+	startMainTaskDemon()
+
 	startWebServer()
 }

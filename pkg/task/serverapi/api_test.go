@@ -17,7 +17,7 @@ func TestNewTask(t *testing.T) {
 	config.Domain["localhost:8080"] = struct{}{}
 
 	configJSON, _ := json.Marshal(config)
-	taskId, err := NewTask(taskName, string(configJSON), "")
+	taskId, err := NewRunTask(taskName, string(configJSON), "", "")
 	if err != nil {
 		t.Log(err)
 	}

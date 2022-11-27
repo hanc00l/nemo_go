@@ -26,7 +26,7 @@ func TestPortScan(t *testing.T) {
 		t.Log(err)
 	}
 
-	result, err := serverapi.NewTask("portscan", string(configJSON), "")
+	result, err := serverapi.NewRunTask("portscan", string(configJSON), "", "")
 	if err != nil {
 		t.Log(err)
 	}

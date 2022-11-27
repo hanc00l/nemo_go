@@ -10,14 +10,14 @@ import (
 func TestFofa(t *testing.T) {
 	orgId := 5
 	config := onlineapi.OnlineAPIConfig{
-		Target: "800best.com",
-		OrgId:  &orgId,
+		Target:       "800best.com",
+		OrgId:        &orgId,
 		IsIPLocation: true,
 	}
 	configJSON, err := json.Marshal(config)
 	if err != nil {
 		t.Log(err)
 	}
-	result, err := serverapi.NewTask("fofa", string(configJSON),"")
-	t.Log(result,err)
+	result, err := serverapi.NewRunTask("fofa", string(configJSON), "", "")
+	t.Log(result, err)
 }

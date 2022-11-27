@@ -1,7 +1,6 @@
 package workerapi
 
 import (
-	"context"
 	"github.com/hanc00l/nemo_go/pkg/comm"
 	"github.com/hanc00l/nemo_go/pkg/logging"
 	"github.com/hanc00l/nemo_go/pkg/task/custom"
@@ -12,22 +11,22 @@ import (
 )
 
 // Fofa Fofa任务
-func Fofa(taskId, configJSON string) (result string, err error) {
-	return doFofaOnlineAPI(taskId, configJSON, "fofa")
+func Fofa(taskId, mainTaskId, configJSON string) (result string, err error) {
+	return doFofaOnlineAPI(taskId, mainTaskId, configJSON, "fofa")
 }
 
 // Quake Quake任务
-func Quake(taskId, configJSON string) (result string, err error) {
-	return doFofaOnlineAPI(taskId, configJSON, "quake")
+func Quake(taskId, mainTaskId, configJSON string) (result string, err error) {
+	return doFofaOnlineAPI(taskId, mainTaskId, configJSON, "quake")
 }
 
 // Hunter Hunter
-func Hunter(taskId, configJSON string) (result string, err error) {
-	return doFofaOnlineAPI(taskId, configJSON, "hunter")
+func Hunter(taskId, mainTaskId, configJSON string) (result string, err error) {
+	return doFofaOnlineAPI(taskId, mainTaskId, configJSON, "hunter")
 }
 
 // doFofaOnlineAPI 执行fofa、hunter及quake的资产搜索任务
-func doFofaOnlineAPI(taskId string, configJSON string, apiName string) (result string, err error) {
+func doFofaOnlineAPI(taskId string, mainTaskId string, configJSON string, apiName string) (result string, err error) {
 	// 检查任务状态
 	var ok bool
 	if ok, result, err = CheckTaskStatus(taskId); !ok {
@@ -41,9 +40,9 @@ func doFofaOnlineAPI(taskId string, configJSON string, apiName string) (result s
 	//执行任务
 	var ipResult portscan.Result
 	var domainResult domainscan.Result
-	ipResult, domainResult, result, err = doFofaAndSave(taskId, apiName, config)
+	ipResult, domainResult, result, err = doFofaAndSave(taskId, mainTaskId, apiName, config)
 	//fingerprint
-	result, err = NewFingerprintTask(&ipResult, &domainResult, FingerprintTaskConfig{
+	_, err = NewFingerprintTask(taskId, mainTaskId, &ipResult, &domainResult, FingerprintTaskConfig{
 		IsHttpx:          config.IsHttpx,
 		IsFingerprintHub: config.IsFingerprintHub,
 		IsIconHash:       config.IsIconHash,
@@ -58,7 +57,7 @@ func doFofaOnlineAPI(taskId string, configJSON string, apiName string) (result s
 }
 
 // doFofaAndSave 执行fofa、hunter及quake的资产搜索，并保存结果
-func doFofaAndSave(taskId string, apiName string, config onlineapi.OnlineAPIConfig) (ipResult portscan.Result, domainResult domainscan.Result, result string, err error) {
+func doFofaAndSave(taskId string, mainTaskId string, apiName string, config onlineapi.OnlineAPIConfig) (ipResult portscan.Result, domainResult domainscan.Result, result string, err error) {
 	if apiName == "fofa" {
 		fofa := onlineapi.NewFofa(config)
 		fofa.Do()
@@ -82,15 +81,15 @@ func doFofaAndSave(taskId string, apiName string, config onlineapi.OnlineAPIConf
 		doLocation(&ipResult)
 	}
 	// 保存结果
-	x := comm.NewXClient()
 	args := comm.ScanResultArgs{
 		TaskID:       taskId,
+		MainTaskId:   mainTaskId,
 		IPConfig:     &portscan.Config{OrgId: config.OrgId},
 		DomainConfig: &domainscan.Config{OrgId: config.OrgId},
 		IPResult:     ipResult.IPResult,
 		DomainResult: domainResult.DomainResult,
 	}
-	err = x.Call(context.Background(), "SaveScanResult", &args, &result)
+	err = comm.CallXClient("SaveScanResult", &args, &result)
 	if err != nil {
 		logging.RuntimeLog.Error(err)
 	}
@@ -98,7 +97,7 @@ func doFofaAndSave(taskId string, apiName string, config onlineapi.OnlineAPIConf
 }
 
 // ICPQuery ICP备案查询任务
-func ICPQuery(taskId, configJSON string) (result string, err error) {
+func ICPQuery(taskId, mainTaskId, configJSON string) (result string, err error) {
 	var ok bool
 	if ok, result, err = CheckTaskStatus(taskId); !ok {
 		return result, err
@@ -112,9 +111,7 @@ func ICPQuery(taskId, configJSON string) (result string, err error) {
 	icp := onlineapi.NewICPQuery(config)
 	icp.Do()
 	// 保存结果
-	x := comm.NewXClient()
-
-	err = x.Call(context.Background(), "SaveICPResult", &icp.QueriedICPInfo, &result)
+	err = comm.CallXClient("SaveICPResult", &icp.QueriedICPInfo, &result)
 	if err != nil {
 		logging.RuntimeLog.Error(err)
 		return FailedTask(err.Error()), err
@@ -124,7 +121,7 @@ func ICPQuery(taskId, configJSON string) (result string, err error) {
 }
 
 // WhoisQuery Whois查询任务
-func WhoisQuery(taskId, configJSON string) (result string, err error) {
+func WhoisQuery(taskId, mainTaskId, configJSON string) (result string, err error) {
 	var ok bool
 	if ok, result, err = CheckTaskStatus(taskId); !ok {
 		return result, err
@@ -138,9 +135,7 @@ func WhoisQuery(taskId, configJSON string) (result string, err error) {
 	whois := onlineapi.NewWhois(config)
 	whois.Do()
 	// 保存结果
-	x := comm.NewXClient()
-
-	err = x.Call(context.Background(), "SaveWhoisResult", &whois.QueriedWhoisInfo, &result)
+	err = comm.CallXClient("SaveWhoisResult", &whois.QueriedWhoisInfo, &result)
 	if err != nil {
 		logging.RuntimeLog.Error(err)
 		return FailedTask(err.Error()), err

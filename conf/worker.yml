@@ -43,7 +43,5 @@ domainscan:
 pocscan:
   xray:
     pocPath: thirdparty/xray/xray/pocs
-    latest: 1.8.2
   nuclei:
     pocPath: thirdparty/nuclei/nuclei-templates
-    threads: 25

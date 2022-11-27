@@ -18,7 +18,8 @@ $(function () {
                         "task_state": $('#task_state').val(),
                         "task_name": $('#task_name').val(),
                         "task_args": $('#task_args').val(),
-                        "task_worker": $('#task_worker').val(),
+                        "show_runtask": $('#checkbox_show_runtask').is(":checked"),
+                        "runtask_state": $('#runtask_state').val(),
                         "cron_id": getUrlParam("cron_id"),
                     });
                 }
@@ -30,14 +31,14 @@ $(function () {
                     className: "dt-body-center",
                     title: '<input  type="checkbox" class="checkall" />',
                     "render": function (data, type, row) {
-                        var strData = '<input type="checkbox" class="checkchild" value="' + row['id'] + '"/>';
-                        return strData;
+                        if (row["tasktype"] === "MainTask") return '<input type="checkbox" class="checkchild" value="' + row['id'] + '"/>';
+                        else return "";
                     }
                 },
                 {
                     data: "index",
                     title: "序号",
-                    width: "5%"
+                    width: "5%",
                 },
                 {
                     data: "task_name",
@@ -45,14 +46,15 @@ $(function () {
                     width: "8%",
                     render: function (data, type, row, meta) {
                         let strData;
-                        strData = '<a href="/task-info?task_id=' + row['task_id'] + '" target="_blank">' + data + '</a>';
+                        if (row['tasktype'] === "MainTask") strData = '<a href="/task-info-main?task_id=' + row['task_id'] + '" target="_blank">' + data + '</a>';
+                        else strData = '<a href="/task-info-run?task_id=' + row['task_id'] + '" target="_blank">' + data + '</a>';
                         return strData;
                     }
                 },
                 {
                     data: "state", title: "状态", width: "8%",
                     "render": function (data, type, row) {
-                        if (data == 'CREATED') {
+                        if (row["tasktype"] === "RunTask" && data === 'CREATED') {
                             return data + '<button class="btn btn-sm btn-danger" type="button" onclick="stop_task(\'' + row['task_id'] + '\')" >&nbsp;中止&nbsp;</button>';
                         } else return data;
                     }
@@ -68,7 +70,7 @@ $(function () {
                     data: 'result', title: '结果', width: '10%',
                     "render": function (data, type, row) {
                         let strData = '<div style="width:100%;white-space:normal;word-wrap:break-word;word-break:break-all;">';
-                        if (row['resultfile'] != "") {
+                        if (row['resultfile'] !== "") {
                             strData += '<a href=' + row['resultfile'] + ' target="_blank">' + data + '</a>';
                         } else {
                             strData += data;
@@ -82,7 +84,7 @@ $(function () {
                 {data: 'runtime', title: '执行时长', width: '8%'},
                 {
                     data: 'worker',
-                    title: 'worker',
+                    title: 'worker/runTask',
                     width: '10%',
                     "render": function (data, type, row) {
                         const strData = '<div style="width:100%;white-space:normal;word-wrap:break-word;word-break:break-all;">' + data + '</div>';
@@ -93,7 +95,9 @@ $(function () {
                     title: "操作",
                     width: "8%",
                     "render": function (data, type, row, meta) {
-                        const strDelete = "<a class=\"btn btn-sm btn-danger\" href=javascript:delete_task(\"" + row["id"] + "\") role=\"button\" title=\"Delete\"><i class=\"fa fa-trash-o\"></i></a>";
+                        let strDelete;
+                        if (row["tasktype"] === "MainTask") strDelete = "<a class=\"btn btn-sm btn-danger\" href=javascript:delete_main_task(\"" + row["id"] + "\") role=\"button\" title=\"Delete\"><i class=\"fa fa-trash-o\"></i></a>";
+                        else strDelete = "<a class=\"btn btn-sm btn-danger\" href=javascript:delete_task_run(\"" + row["id"] + "\") role=\"button\" title=\"Delete\"><i class=\"fa fa-trash-o\"></i></a>";
                         return strDelete;
                     }
                 }
@@ -141,7 +145,7 @@ $(function () {
     });
     //批量删除
     $("#batch_delete").click(function () {
-        batch_delete('#task_table', '/task-delete');
+        batch_delete('#task_table', '/task-delete-main');
     });
 });
 
@@ -175,7 +179,7 @@ function stop_task(task_id) {
             closeOnConfirm: true
         },
         function () {
-            $.post("/task-stop",
+            $.post("/task-stop-run",
                 {
                     "task_id": task_id,
                 }, function (data, e) {
@@ -190,7 +194,7 @@ function stop_task(task_id) {
  * 删除一个任务
  * @param id
  */
-function delete_task(id) {
+function delete_task_run(id) {
     swal({
             title: "确定要删除?",
             text: "该操作会删除当前任务，请确保当前任务已完成或中止！",
@@ -202,7 +206,34 @@ function delete_task(id) {
             closeOnConfirm: true
         },
         function () {
-            $.post("/task-delete",
+            $.post("/task-delete-run",
+                {
+                    "id": id,
+                }, function (data, e) {
+                    if (e === "success") {
+                        $('#task_table').DataTable().draw(false);
+                    }
+                });
+        });
+}
+
+/**
+ * 删除一个任务
+ * @param id
+ */
+function delete_main_task(id) {
+    swal({
+            title: "确定要删除?",
+            text: "该操作会删除当前任务，请确保当前任务已完成或中止！",
+            type: "warning",
+            showCancelButton: true,
+            confirmButtonColor: "#DD6B55",
+            confirmButtonText: "确认删除",
+            cancelButtonText: "取消",
+            closeOnConfirm: true
+        },
+        function () {
+            $.post("/task-delete-main",
                 {
                     "id": id,
                 }, function (data, e) {

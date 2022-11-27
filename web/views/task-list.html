@@ -13,22 +13,35 @@
                             <input class="form-control" type="text" id="task_args" placeholder="任务参数">
                         </div>
                         <div class="form-group col-md-2">
-                            <label class="control-label" for="task_worker">Worker</label>
-                            <input class="form-control" type="text" id="task_worker" placeholder="执行的worker">
-                        </div>
-                        <div class="form-group col-md-2">
                             <label class="control-label" for="task_state">状态</label>
                             <select class="form-control" title="任务状态" id="task_state">
-                                <option value="">--STATE--</option>
+                                <option value="">--全部--</option>
                                 <option value="CREATED">CREATED</option>
                                 <option value="STARTED">STARTED</option>
                                 <option value="SUCCESS">SUCCESS</option>
-                                <option value="FAILURE">FAILURE</option>
-                                <option value="RECEIVED">RECEIVED</option>
-                                <option value="PENDING">PENDING</option>
-                                <option value="REVOKED">REVOKED</option>
-                                <option value="RETRY">RETRY</option>
                             </select>
+                        </div>
+                        <div class="form-group col-md-2">
+                            <div class="form-check form-check-inline">
+                                <label class="form-check-label"
+                                       for="checkbox_show_runtask">
+                                    <input class="form-check-input"
+                                           id="checkbox_show_runtask" type="checkbox">运行子任务(TOP10)
+                                </label>
+                            </div>
+                            <div class="form-check form-check-inline">
+                                <select class="form-control" title="子任务状态" id="runtask_state">
+                                    <option value="">--子任务状态--</option>
+                                    <option value="CREATED">CREATED</option>
+                                    <option value="STARTED">STARTED</option>
+                                    <option value="SUCCESS">SUCCESS</option>
+                                    <option value="FAILURE">FAILURE</option>
+                                    <option value="RECEIVED">RECEIVED</option>
+                                    <option value="PENDING">PENDING</option>
+                                    <option value="REVOKED">REVOKED</option>
+                                    <option value="RETRY">RETRY</option>
+                                </select>
+                            </div>
                         </div>
                         <div class="form-group col-md-4 align-self-end">
                             <button class="btn btn-primary" type="button" id="search"><i
@@ -44,7 +57,7 @@
                                             class="fa fa-fw fa-lg fa-remove"></i>删除选择的任务</a>
                                     <a class="dropdown-item" href="javascript:batch_delete_task('created')"><i
                                             class="fa fa-fw fa-lg fa-ban"></i>删除未开始的任务</a>
-                                    <a class="dropdown-item" href="javascript:batch_delete_task('unfinished')" ><i
+                                    <a class="dropdown-item" href="javascript:batch_delete_task('unfinished')"><i
                                             class="fa fa-fw fa-lg fa-trash-o"></i>删除未完成的任务</a>
                                     <a class="dropdown-item" href="javascript:batch_delete_task('finished')"><i
                                             class="fa fa-fw fa-lg fa-trash"></i>删除已完成的任务</a>

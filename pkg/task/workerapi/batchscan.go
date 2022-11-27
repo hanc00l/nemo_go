@@ -1,7 +1,6 @@
 package workerapi
 
 import (
-	"context"
 	"errors"
 	"fmt"
 	"github.com/hanc00l/nemo_go/pkg/comm"
@@ -13,7 +12,7 @@ import (
 // BatchScan 批量扫描任务
 // 先对少量端口进行扫描（存活探测），提取扫描结果IP的C段作为，再进行详细扫描
 // 与portscan参数和过程相同；存活探测需扫描的port与资产详细扫描的port，用 “|” 进行分隔
-func BatchScan(taskId, configJSON string) (result string, err error) {
+func BatchScan(taskId, mainTaskId, configJSON string) (result string, err error) {
 	var ok bool
 	if ok, result, err = CheckTaskStatus(taskId); !ok {
 		return result, err
@@ -59,19 +58,19 @@ func BatchScan(taskId, configJSON string) (result string, err error) {
 		}
 	}
 	// 保存结果
-	x := comm.NewXClient()
 	resultArgs := comm.ScanResultArgs{
-		TaskID:   taskId,
-		IPConfig: &config,
-		IPResult: resultPortScan.IPResult,
+		TaskID:     taskId,
+		MainTaskId: mainTaskId,
+		IPConfig:   &config,
+		IPResult:   resultPortScan.IPResult,
 	}
-	err = x.Call(context.Background(), "SaveScanResult", &resultArgs, &result)
+	err = comm.CallXClient("SaveScanResult", &resultArgs, &result)
 	if err != nil {
 		logging.RuntimeLog.Error(err)
 		return FailedTask(err.Error()), err
 	}
 	//指纹识别任务
-	_, err = NewFingerprintTask(&resultPortScan, nil, FingerprintTaskConfig{
+	_, err = NewFingerprintTask(taskId, mainTaskId, &resultPortScan, nil, FingerprintTaskConfig{
 		IsHttpx:          config.IsHttpx,
 		IsFingerprintHub: config.IsFingerprintHub,
 		IsIconHash:       config.IsIconHash,

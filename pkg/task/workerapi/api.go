@@ -1,7 +1,6 @@
 package workerapi
 
 import (
-	"context"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -135,9 +134,7 @@ func preTaskHandler(signature *tasks.Signature) {
 	WStatus.Unlock()
 
 	var taskStatus comm.TaskStatusArgs
-	x := comm.NewXClient()
-	err := x.Call(context.Background(), "CheckTask", &signature.UUID, &taskStatus)
-	if err != nil {
+	if err := comm.CallXClient("CheckTask", &signature.UUID, &taskStatus); err != nil {
 		return
 	}
 	if !taskStatus.IsExist {
@@ -154,9 +151,7 @@ func preTaskHandler(signature *tasks.Signature) {
 // CheckTaskStatus 检查任务状态：是否不存在或取消
 func CheckTaskStatus(taskId string) (ok bool, result string, err error) {
 	var taskStatus comm.TaskStatusArgs
-	x := comm.NewXClient()
-	err = x.Call(context.Background(), "CheckTask", &taskId, &taskStatus)
-	if err != nil {
+	if err = comm.CallXClient("CheckTask", &taskId, &taskStatus); err != nil {
 		return false, FailedTask(err.Error()), err
 	}
 	if !taskStatus.IsExist {
@@ -178,9 +173,7 @@ func UpdateTaskStatus(taskId string, state string, worker string, result string)
 		Result: result,
 	}
 	var updateStatus bool
-	x := comm.NewXClient()
-	err := x.Call(context.Background(), "UpdateTask", &taskStatus, &updateStatus)
-	if err != nil {
+	if err := comm.CallXClient("UpdateTask", &taskStatus, &updateStatus); err != nil {
 		logging.RuntimeLog.Error(err)
 		return false
 	}

@@ -7,6 +7,7 @@ import (
 	"github.com/hanc00l/nemo_go/pkg/logging"
 	"github.com/hanc00l/nemo_go/pkg/task/ampq"
 	"github.com/hanc00l/nemo_go/pkg/task/custom"
+	"github.com/hanc00l/nemo_go/pkg/task/runner"
 	"time"
 )
 
@@ -65,7 +66,7 @@ func (c *DashboardController) GetStatisticDataAction() {
 	ip := &db.Ip{}
 	domain := &db.Domain{}
 	vul := &db.Vulnerability{}
-	task := &db.Task{}
+	task := &db.TaskRun{}
 	data := DashboardStatisticData{
 		IP:            ip.Count(searchMap),
 		Domain:        domain.Count(searchMap),
@@ -88,7 +89,7 @@ func (c *DashboardController) GetTaskInfoAction() {
 	searchMapCreated["state"] = ampq.CREATED
 	searchMapALL := make(map[string]interface{})
 	searchMapALL["date_delta"] = 7
-	task := &db.Task{}
+	task := &db.TaskRun{}
 	data := TaskInfoData{}
 	data.TaskInfo = fmt.Sprintf("%d/%d/%d", task.Count(searchMapActivated), task.Count(searchMapCreated), task.Count(searchMapALL))
 	c.Data["json"] = data
@@ -101,13 +102,13 @@ func (c *DashboardController) GetStartedTaskInfoAction() {
 
 	searchMapActivated := make(map[string]interface{})
 	searchMapActivated["state"] = ampq.STARTED
-	task := &db.Task{}
+	task := &db.TaskRun{}
 	var tis []StartedTaskInfo
 	rows, _ := task.Gets(searchMapActivated, 1, 10)
 	for _, row := range rows {
 		ti := StartedTaskInfo{
 			TaskName:     row.TaskName,
-			TaskArgs:     ParseTargetFromKwArgs(row.TaskName, row.KwArgs),
+			TaskArgs:     runner.ParseTargetFromKwArgs(row.TaskName, row.KwArgs),
 			TaskStarting: fmt.Sprintf("%s前", time.Now().Sub(*row.StartedTime).Truncate(time.Second).String()),
 		}
 		tis = append(tis, ti)

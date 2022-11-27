@@ -34,11 +34,18 @@ type Service struct{}
 // ScanResultArgs IP与域名扫描结果请求参数
 type ScanResultArgs struct {
 	TaskID              string
+	MainTaskId          string
 	IPConfig            *portscan.Config
 	DomainConfig        *domainscan.Config
 	IPResult            map[string]*portscan.IPResult
 	DomainResult        map[string]*domainscan.DomainResult
 	VulnerabilityResult []pocscan.Result
+}
+
+// ScreenshotResultArgs screenshot结果请求参数
+type ScreenshotResultArgs struct {
+	MainTaskId string
+	FileInfo   []fingerprint.ScreenshotFileInfo
 }
 
 // TaskStatusArgs 任务状态请求与返回参数
@@ -53,20 +60,36 @@ type TaskStatusArgs struct {
 
 // NewTaskArgs 新建任务请求与返回参数
 type NewTaskArgs struct {
-	TaskName   string
-	ConfigJSON string
-	TaskID     string
+	TaskName      string
+	ConfigJSON    string
+	MainTaskID    string
+	LastRunTaskId string
 }
 
-// globalXClient 全局的RPC连接（长连接方式）
-var globalXClient client.XClient
+type MainTaskResultMap struct {
+	IPResult         map[string]map[int]interface{}
+	DomainResult     map[string]interface{}
+	VulResult        map[string]map[string]interface{}
+	ScreenShotResult int
+}
 
-// 数据库操作的同步锁
-var saveIPMutex sync.RWMutex
-var saveDomainMutex sync.RWMutex
+var (
+	// globalXClient 全局的RPC连接（长连接方式）
+	globalXClient      client.XClient
+	globalXClientMutex sync.Mutex
+	// 数据库操作的同步锁
+	saveIPMutex     sync.RWMutex
+	saveDomainMutex sync.RWMutex
+	// MainTaskResult 缓存汇总各个子任务、保存任务的结果
+	MainTaskResult      map[string]MainTaskResultMap
+	MainTaskResultMutex sync.Mutex
+)
 
-// NewXClient 获取一个RPC连接
-func NewXClient() client.XClient {
+// CallXClient RPC远程调用
+func CallXClient(serviceMethod string, args interface{}, reply interface{}) error {
+	globalXClientMutex.Lock()
+	defer globalXClientMutex.Unlock()
+
 	if globalXClient == nil {
 		host := conf.GlobalWorkerConfig().Rpc.Host
 		if conf.RunMode == conf.Debug || host == "0.0.0.0" {
@@ -76,7 +99,8 @@ func NewXClient() client.XClient {
 		globalXClient = client.NewXClient("Service", client.Failtry, client.RandomSelect, d, client.DefaultOption)
 		globalXClient.Auth(conf.GlobalWorkerConfig().Rpc.AuthKey)
 	}
-	return globalXClient
+
+	return globalXClient.Call(context.Background(), serviceMethod, args, reply)
 }
 
 // SaveScanResult 保存IP与域名的扫描结果
@@ -108,13 +132,14 @@ func (s *Service) SaveScanResult(ctx context.Context, args *ScanResultArgs, repl
 			saveTaskResult(args.TaskID, args.DomainResult)
 		}
 	}
+	saveMainTaskResult(args.MainTaskId, args.IPResult, args.DomainResult, args.VulnerabilityResult, 0)
 
 	*replay = strings.Join(msg, ",")
 	return nil
 }
 
 // SaveScreenshotResult 保存Screenshot的结果到Server
-func (s *Service) SaveScreenshotResult(ctx context.Context, args *[]fingerprint.ScreenshotFileInfo, replay *string) error {
+func (s *Service) SaveScreenshotResult(ctx context.Context, args *ScreenshotResultArgs, replay *string) error {
 	ss := fingerprint.NewScreenShot()
 	//检查保存结果的路径
 	screenshotPath := path.Join(conf.GlobalServerConfig().Web.WebFiles, "screenshot")
@@ -122,7 +147,9 @@ func (s *Service) SaveScreenshotResult(ctx context.Context, args *[]fingerprint.
 		logging.RuntimeLog.Error("创建保存screenshot的目录失败！")
 		return errors.New("创建保存screenshot的目录失败！")
 	}
-	*replay = ss.SaveFile(screenshotPath, *args)
+	count := ss.SaveFile(screenshotPath, args.FileInfo)
+	saveMainTaskResult(args.MainTaskId, nil, nil, nil, count)
+	*replay = fmt.Sprintf("screenshot:%d", count)
 	return nil
 }
 
@@ -191,31 +218,35 @@ func (s *Service) SaveWhoisResult(ctx context.Context, args *map[string]*whoispa
 
 // CheckTask 检查任务在数据库中的状态：任务是否存在、是否被取消，任务状态、结果
 func (s *Service) CheckTask(ctx context.Context, args *string, replay *TaskStatusArgs) error {
-	task := &db.Task{TaskId: *args}
-	if !task.GetByTaskId() {
+	taskRun := &db.TaskRun{TaskId: *args}
+	if !taskRun.GetByTaskId() {
+		return nil
+	}
+	taskMain := &db.TaskMain{TaskId: taskRun.MainTaskId}
+	if !taskMain.GetByTaskId() {
 		return nil
 	}
 	replay.IsExist = true
-	if task.State == ampq.REVOKED {
+	if taskRun.State == ampq.REVOKED || taskMain.State == ampq.REVOKED {
 		replay.IsRevoked = true
 	}
-	replay.TaskID = task.TaskId
-	replay.State = task.State
-	replay.Worker = task.Worker
-	replay.Result = task.Result
+	replay.TaskID = taskRun.TaskId
+	replay.State = taskRun.State
+	replay.Worker = taskRun.Worker
+	replay.Result = taskRun.Result
 
 	return nil
 }
 
 // UpdateTask 更新任务状态到数据库中
 func (s *Service) UpdateTask(ctx context.Context, args *TaskStatusArgs, replay *bool) error {
-	taskCheck := &db.Task{TaskId: args.TaskID}
+	taskCheck := &db.TaskRun{TaskId: args.TaskID}
 	if !taskCheck.GetByTaskId() {
 		logging.RuntimeLog.Errorf("task not exists: %s", args.TaskID)
 		return nil
 	}
 	dt := time.Now()
-	task := &db.Task{
+	task := &db.TaskRun{
 		TaskId: args.TaskID,
 		State:  args.State,
 		Worker: args.Worker,
@@ -288,7 +319,7 @@ func (s *Service) NewTask(ctx context.Context, args *NewTaskArgs, replay *string
 		replay = &msg
 		return errors.New(msg)
 	}
-	taskId, err := serverapi.NewTask(args.TaskName, args.ConfigJSON, "")
+	taskId, err := serverapi.NewRunTask(args.TaskName, args.ConfigJSON, args.MainTaskID, args.LastRunTaskId)
 	if err != nil {
 		return err
 	}
@@ -409,4 +440,45 @@ func saveTaskResult(taskID string, result interface{}) {
 	if err != nil {
 		logging.RuntimeLog.Error(err)
 	}
+}
+
+// saveMainTaskResult 保存runtask的任务结果到maintask的缓存中
+func saveMainTaskResult(taskId string, ipResult map[string]*portscan.IPResult, domainResult map[string]*domainscan.DomainResult, vulResult []pocscan.Result, screenshotResult int) {
+	MainTaskResultMutex.Lock()
+	defer MainTaskResultMutex.Unlock()
+
+	if _, ok := MainTaskResult[taskId]; !ok {
+		return
+	}
+	taskObj := MainTaskResult[taskId]
+	if ipResult != nil {
+		for ip, ipr := range ipResult {
+			if _, ok := taskObj.IPResult[ip]; !ok {
+				taskObj.IPResult[ip] = make(map[int]interface{})
+			}
+			for port := range ipr.Ports {
+				taskObj.IPResult[ip][port] = struct{}{}
+			}
+		}
+	}
+	if domainResult != nil {
+		for domain := range domainResult {
+			if _, ok := taskObj.DomainResult[domain]; !ok {
+				taskObj.DomainResult[domain] = struct{}{}
+			}
+		}
+	}
+	if vulResult != nil {
+		for _, poc := range vulResult {
+			if _, ok := taskObj.VulResult[poc.Target]; !ok {
+				taskObj.VulResult[poc.Target] = make(map[string]interface{})
+			}
+			taskObj.VulResult[poc.Target][poc.PocFile] = struct{}{}
+		}
+	}
+	taskObj.ScreenShotResult += screenshotResult
+	// 小坑：重新将value传递给map对应的key
+	MainTaskResult[taskId] = taskObj
+
+	return
 }

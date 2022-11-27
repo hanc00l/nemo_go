@@ -1,7 +1,6 @@
 package workerapi
 
 import (
-	"context"
 	"encoding/json"
 	"github.com/hanc00l/nemo_go/pkg/comm"
 	"github.com/hanc00l/nemo_go/pkg/logging"
@@ -26,7 +25,7 @@ type FingerprintTaskConfig struct {
 }
 
 // Fingerprint 指纹识别任务，将所有指纹识别任务整合后，可由worker将端口扫描与域名收集后的结果进行二次拆分为多个任务，提高指纹识别效率
-func Fingerprint(taskId, configJSON string) (result string, err error) {
+func Fingerprint(taskId, mainTaskId, configJSON string) (result string, err error) {
 	var ok bool
 	if ok, result, err = CheckTaskStatus(taskId); !ok {
 		return result, err
@@ -36,7 +35,7 @@ func Fingerprint(taskId, configJSON string) (result string, err error) {
 		return FailedTask(err.Error()), err
 	}
 	//
-	_, _, result, err = doFingerPrintAndSave(taskId, config)
+	_, _, result, err = doFingerPrintAndSave(taskId, mainTaskId, config)
 	if err != nil {
 		logging.RuntimeLog.Error(err)
 		return FailedTask(err.Error()), err
@@ -46,16 +45,16 @@ func Fingerprint(taskId, configJSON string) (result string, err error) {
 }
 
 // doFingerPrintAndSave 指纹的综合任务，包括IP与domain
-func doFingerPrintAndSave(taskId string, config FingerprintTaskConfig) (resultPortScan portscan.Result, resultDomainScan domainscan.Result, result string, err error) {
+func doFingerPrintAndSave(taskId string, mainTaskId string, config FingerprintTaskConfig) (resultPortScan portscan.Result, resultDomainScan domainscan.Result, result string, err error) {
 	var domainPort map[string]map[int]struct{}
 	// 返回的结果
 	resultPortScan.IPResult = make(map[string]*portscan.IPResult)
 	resultDomainScan.DomainResult = make(map[string]*domainscan.DomainResult)
 	// 通过RPC调用保存结果
 	// 保存结果
-	x := comm.NewXClient()
 	resultArgs := comm.ScanResultArgs{
-		TaskID: taskId,
+		TaskID:     taskId,
+		MainTaskId: mainTaskId,
 	}
 	// IP的指纹任务
 	if len(config.IPTargetMap) > 0 {
@@ -77,7 +76,7 @@ func doFingerPrintAndSave(taskId string, config FingerprintTaskConfig) (resultPo
 	// 域名的指纹任务
 	if len(config.DomainTargetMap) > 0 {
 		// 读取目标的数据库中已保存的开放端口
-		err = x.Call(context.Background(), "LoadDomainOpenedPort", &config.DomainTargetMap, &domainPort)
+		err = comm.CallXClient("LoadDomainOpenedPort", &config.DomainTargetMap, &domainPort)
 		if err != nil {
 			logging.RuntimeLog.Error(err)
 		}
@@ -94,14 +93,14 @@ func doFingerPrintAndSave(taskId string, config FingerprintTaskConfig) (resultPo
 		resultArgs.DomainResult = resultDomainScan.DomainResult
 	}
 	// 保存结果
-	err = x.Call(context.Background(), "SaveScanResult", &resultArgs, &result)
+	err = comm.CallXClient("SaveScanResult", &resultArgs, &result)
 	if err != nil {
 		logging.RuntimeLog.Error(err)
 		return
 	}
 	// screenshot任务
 	if config.IsScreenshot {
-		resultScreenshot := doScreenshotAndSave(&resultPortScan, &resultDomainScan, domainPort)
+		resultScreenshot := doScreenshotAndSave(mainTaskId, &resultPortScan, &resultDomainScan, domainPort)
 		result = strings.Join([]string{result, resultScreenshot}, ",")
 	}
 
@@ -148,7 +147,7 @@ func doDomainFingerPrint(config domainscan.Config, resultDomainScan *domainscan.
 }
 
 // doScreenshotAndSave 执行Screenshot并保存
-func doScreenshotAndSave(resultIPScan *portscan.Result, resultDomainScan *domainscan.Result, domainPort map[string]map[int]struct{}) (result string) {
+func doScreenshotAndSave(mainTaskId string, resultIPScan *portscan.Result, resultDomainScan *domainscan.Result, domainPort map[string]map[int]struct{}) (result string) {
 	ss := fingerprint.NewScreenShot()
 	if resultIPScan != nil {
 		ss.ResultPortScan = *resultIPScan
@@ -158,9 +157,11 @@ func doScreenshotAndSave(resultIPScan *portscan.Result, resultDomainScan *domain
 		ss.DomainTargetPort = domainPort
 	}
 	ss.Do()
-	resultScreenshot := ss.LoadResult()
-	x := comm.NewXClient()
-	err := x.Call(context.Background(), "SaveScreenshotResult", &resultScreenshot, &result)
+	args := comm.ScreenshotResultArgs{
+		MainTaskId: mainTaskId,
+		FileInfo:   ss.LoadResult(),
+	}
+	err := comm.CallXClient("SaveScreenshotResult", &args, &result)
 	if err != nil {
 		logging.RuntimeLog.Error(err)
 		return err.Error()
@@ -183,8 +184,7 @@ func doIconHashAndSave(resultIPScan *portscan.Result, resultDomainScan *domainsc
 	if len(hash.IconHashInfoResult.Result) <= 0 {
 		return ""
 	}
-	x := comm.NewXClient()
-	err := x.Call(context.Background(), "SaveIconImageResult", &hash.IconHashInfoResult.Result, &result)
+	err := comm.CallXClient("SaveIconImageResult", &hash.IconHashInfoResult.Result, &result)
 	if err != nil {
 		logging.RuntimeLog.Error(err)
 		return err.Error()
@@ -193,13 +193,13 @@ func doIconHashAndSave(resultIPScan *portscan.Result, resultDomainScan *domainsc
 }
 
 // NewFingerprintTask 根据端口及域名扫描结果，根据设置的拆分规模，生成指纹识别子任务
-func NewFingerprintTask(portScanResult *portscan.Result, domainScanResult *domainscan.Result, config FingerprintTaskConfig) (result string, err error) {
-	result, err = newFingerprintTask(portScanResult, domainScanResult, config, "fingerprint")
+func NewFingerprintTask(taskId string, mainTaskId string, portScanResult *portscan.Result, domainScanResult *domainscan.Result, config FingerprintTaskConfig) (result string, err error) {
+	result, err = newFingerprintTask(taskId, mainTaskId, portScanResult, domainScanResult, config, "fingerprint")
 	return
 }
 
 // newFingerprintTask 根据端口及域名扫描结果，根据设置的拆分规模，生成指纹识别子任务
-func newFingerprintTask(portScanResult *portscan.Result, domainScanResult *domainscan.Result, config FingerprintTaskConfig, taskName string) (result string, err error) {
+func newFingerprintTask(taskId, mainTaskId string, portScanResult *portscan.Result, domainScanResult *domainscan.Result, config FingerprintTaskConfig, taskName string) (result string, err error) {
 	if config.IsHttpx == false && config.IsFingerprintHub == false && config.IsIconHash == false && config.IsScreenshot == false {
 		return
 	}
@@ -209,7 +209,7 @@ func newFingerprintTask(portScanResult *portscan.Result, domainScanResult *domai
 	for _, t := range ipTarget {
 		newConfig := config
 		newConfig.IPTargetMap = t
-		result, err = sendTask(newConfig, taskName)
+		result, err = sendTask(taskId, mainTaskId, newConfig, taskName)
 		if err != nil {
 			return
 		}
@@ -217,7 +217,7 @@ func newFingerprintTask(portScanResult *portscan.Result, domainScanResult *domai
 	for _, t := range domainTarget {
 		newConfig := config
 		newConfig.DomainTargetMap = t
-		result, err = sendTask(newConfig, taskName)
+		result, err = sendTask(taskId, mainTaskId, newConfig, taskName)
 		if err != nil {
 			return
 		}
@@ -258,17 +258,18 @@ func MakeSubTaskTarget(portScanResult *portscan.Result, domainScanResult *domain
 }
 
 // sendTask 调用api发送任务
-func sendTask(config interface{}, taskName string) (result string, err error) {
+func sendTask(taskId string, mainTaskId string, config interface{}, taskName string) (result string, err error) {
 	configMarshal, err := json.Marshal(config)
 	if err != nil {
 		return
 	}
 	newTaskArgs := comm.NewTaskArgs{
-		TaskName:   taskName,
-		ConfigJSON: string(configMarshal),
+		MainTaskID:    mainTaskId,
+		LastRunTaskId: taskId,
+		TaskName:      taskName,
+		ConfigJSON:    string(configMarshal),
 	}
-	x := comm.NewXClient()
-	err = x.Call(context.Background(), "NewTask", &newTaskArgs, &result)
+	err = comm.CallXClient("NewTask", &newTaskArgs, &result)
 	if err != nil {
 		logging.RuntimeLog.Errorf("Start %s task fail:%v", taskName, err)
 		logging.CLILog.Errorf("Start %s task fail:%v", taskName, err)

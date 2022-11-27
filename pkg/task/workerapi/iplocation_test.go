@@ -17,7 +17,7 @@ func TestIPLocation(t *testing.T) {
 	if err != nil {
 		t.Log(err)
 	}
-	result, err := serverapi.NewTask("iplocation", string(configJSON), "")
+	result, err := serverapi.NewRunTask("iplocation", string(configJSON), "", "")
 	t.Log(result, err)
 
 }

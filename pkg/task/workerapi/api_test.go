@@ -24,7 +24,7 @@ func TestXScan(t *testing.T) {
 		IsXrayPoc:          true,
 	}
 	config.IPPort["172.16.222.1"] = []int{8080, 8448, 8000, 3306}
-	result, err := sendTask(config, taskName)
+	result, err := sendTask("", "", config, taskName)
 	if err != nil {
 		t.Log(err)
 	}

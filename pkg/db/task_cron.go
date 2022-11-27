@@ -10,7 +10,6 @@ type TaskCron struct {
 	Id              int       `gorm:"primaryKey"`
 	TaskId          string    `gorm:"column:task_id"`
 	TaskName        string    `gorm:"column:task_name"`
-	Args            string    `gorm:"column:args"`
 	KwArgs          string    `gorm:"column:kwargs"`
 	CreateDatetime  time.Time `gorm:"column:create_datetime"`
 	UpdateDatetime  time.Time `gorm:"column:update_datetime"`
@@ -25,7 +24,7 @@ func (TaskCron) TableName() string {
 	return "task_cron"
 }
 
-//Add 插入一条新的记录，返回主键ID及成功标志
+// Add 插入一条新的记录，返回主键ID及成功标志
 func (t *TaskCron) Add() (success bool) {
 	now := time.Now()
 	t.CreateDatetime = now
@@ -54,7 +53,7 @@ func (t *TaskCron) Get() (success bool) {
 	}
 }
 
-//GetByTaskId 根据TaskID（不是数据库ID）精确查询一条记录
+// GetByTaskId 根据TaskID（不是数据库ID）精确查询一条记录
 func (t *TaskCron) GetByTaskId() (success bool) {
 	db := GetDB()
 	defer CloseDB(db)

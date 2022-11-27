@@ -46,12 +46,13 @@ func GlobalWorkerConfig() *Worker {
 }
 
 type Server struct {
-	Web      Web      `yaml:"web"`
-	Rpc      RPC      `yaml:"rpc"`
-	FileSync RPC      `yaml:"fileSync"`
-	Database Database `yaml:"database"`
-	Rabbitmq Rabbitmq `yaml:"rabbitmq"`
-	Task     Task     `yaml:"task"`
+	Web      Web               `yaml:"web"`
+	Rpc      RPC               `yaml:"rpc"`
+	FileSync RPC               `yaml:"fileSync"`
+	Database Database          `yaml:"database"`
+	Rabbitmq Rabbitmq          `yaml:"rabbitmq"`
+	Task     Task              `yaml:"task"`
+	Notify   map[string]Notify `yaml:"notify"`
 }
 
 type Worker struct {
@@ -128,12 +129,10 @@ type Fingerprint struct {
 
 type Pocscan struct {
 	Xray struct {
-		PocPath       string `yaml:"pocPath"`
-		LatestVersion string `yaml:"latest"`
+		PocPath string `yaml:"pocPath"`
 	} `yaml:"xray"`
 	Nuclei struct {
 		PocPath string `yaml:"pocPath"`
-		Threads int    `yaml:"threads"`
 	} `yaml:"nuclei"`
 }
 
@@ -142,6 +141,10 @@ type Domainscan struct {
 	Wordlist       string `yaml:"wordlist"`
 	MassdnsThreads int    `yaml:"massdnsThreads"`
 	ProviderConfig string `yaml:"providerConfig"`
+}
+
+type Notify struct {
+	Token string `yaml:"token"`
 }
 
 // WriteConfig 写配置到yaml文件中

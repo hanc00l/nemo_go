@@ -3,6 +3,7 @@ package runner
 import (
 	"bufio"
 	"encoding/json"
+	"fmt"
 	"github.com/hanc00l/nemo_go/pkg/conf"
 	"github.com/hanc00l/nemo_go/pkg/db"
 	"github.com/hanc00l/nemo_go/pkg/logging"
@@ -21,7 +22,7 @@ import (
 )
 
 // StartPortScanTask 端口扫描任务
-func StartPortScanTask(req PortscanRequestParam, cronTaskId string) (taskId string, err error) {
+func StartPortScanTask(req PortscanRequestParam, mainTaskId string) (taskId string, err error) {
 	// 解析参数
 	ts := utils.NewTaskSlice()
 	ts.TaskMode = req.TaskMode
@@ -34,31 +35,31 @@ func StartPortScanTask(req PortscanRequestParam, cronTaskId string) (taskId stri
 	for _, t := range targets {
 		for _, p := range ports {
 			// 端口扫描
-			if taskId, err = doPortscan(cronTaskId, t, p, req); err != nil {
+			if taskId, err = doPortscan(mainTaskId, t, p, req); err != nil {
 				return
 			}
 			// IP归属地：如果有端口执行任务，则IP归属地任务在端口扫描中执行，否则单独执行
 			// 如果IP地址是带掩码的子网（如192.168.1.0/24）则不进行归属地查询（在实际中容易出现误操作，导致整段IP地址无意义地进行归属地查询）
 			if !req.IsPortScan && req.IsIPLocation && utils.CheckIPV4Subnet(t) == false {
-				if taskId, err = doIPLocation(cronTaskId, t, &req.OrgId); err != nil {
+				if taskId, err = doIPLocation(mainTaskId, t, &req.OrgId); err != nil {
 					return
 				}
 			}
 			// FOFA
 			if req.IsFofa {
-				if taskId, err = doOnlineAPISearch(cronTaskId, "fofa", t, &req.OrgId, req.IsIPLocation, req.IsHttpx, req.IsFingerprintHub, req.IsScreenshot, req.IsIconHash, req.IsIgnoreCDN, req.IsIgnoreOutofChina); err != nil {
+				if taskId, err = doOnlineAPISearch(mainTaskId, "fofa", t, &req.OrgId, req.IsIPLocation, req.IsHttpx, req.IsFingerprintHub, req.IsScreenshot, req.IsIconHash, req.IsIgnoreCDN, req.IsIgnoreOutofChina); err != nil {
 					return
 				}
 			}
 			// Quake
 			if req.IsQuake {
-				if taskId, err = doOnlineAPISearch(cronTaskId, "quake", t, &req.OrgId, req.IsIPLocation, req.IsHttpx, req.IsFingerprintHub, req.IsScreenshot, req.IsIconHash, req.IsIgnoreCDN, req.IsIgnoreOutofChina); err != nil {
+				if taskId, err = doOnlineAPISearch(mainTaskId, "quake", t, &req.OrgId, req.IsIPLocation, req.IsHttpx, req.IsFingerprintHub, req.IsScreenshot, req.IsIconHash, req.IsIgnoreCDN, req.IsIgnoreOutofChina); err != nil {
 					return
 				}
 			}
 			// Hunter
 			if req.IsHunter {
-				if taskId, err = doOnlineAPISearch(cronTaskId, "hunter", t, &req.OrgId, req.IsIPLocation, req.IsHttpx, req.IsFingerprintHub, req.IsScreenshot, req.IsIconHash, req.IsIgnoreCDN, req.IsIgnoreOutofChina); err != nil {
+				if taskId, err = doOnlineAPISearch(mainTaskId, "hunter", t, &req.OrgId, req.IsIPLocation, req.IsHttpx, req.IsFingerprintHub, req.IsScreenshot, req.IsIconHash, req.IsIgnoreCDN, req.IsIgnoreOutofChina); err != nil {
 					return
 				}
 			}
@@ -68,7 +69,7 @@ func StartPortScanTask(req PortscanRequestParam, cronTaskId string) (taskId stri
 }
 
 // StartBatchScanTask 探测+扫描任务
-func StartBatchScanTask(req PortscanRequestParam, cronTaskId string) (taskId string, err error) {
+func StartBatchScanTask(req PortscanRequestParam, mainTaskId string) (taskId string, err error) {
 	ts := utils.NewTaskSlice()
 	ts.TaskMode = req.TaskMode
 	ts.IpTarget = formatIpTarget(req.Target, req.OrgId)
@@ -80,7 +81,7 @@ func StartBatchScanTask(req PortscanRequestParam, cronTaskId string) (taskId str
 	for _, t := range targets {
 		for _, p := range ports {
 			// 端口扫描
-			if taskId, err = doBatchScan(cronTaskId, t, p, req); err != nil {
+			if taskId, err = doBatchScan(mainTaskId, t, p, req); err != nil {
 				return
 			}
 		}
@@ -89,7 +90,7 @@ func StartBatchScanTask(req PortscanRequestParam, cronTaskId string) (taskId str
 }
 
 // StartDomainScanTask 域名任务
-func StartDomainScanTask(req DomainscanRequestParam, cronTaskId string) (taskId string, err error) {
+func StartDomainScanTask(req DomainscanRequestParam, mainTaskId string) (taskId string, err error) {
 	ts := utils.NewTaskSlice()
 	domainTargetList := formatDomainTarget(req.Target)
 	// 域名的FLD
@@ -107,7 +108,7 @@ func StartDomainScanTask(req DomainscanRequestParam, cronTaskId string) (taskId 
 			subConfig := req
 			subConfig.IsSubdomainBrute = false
 			subConfig.IsCrawler = false
-			if taskId, err = doDomainscan(cronTaskId, t, subConfig); err != nil {
+			if taskId, err = doDomainscan(mainTaskId, t, subConfig); err != nil {
 				return
 			}
 			taskStarted = true
@@ -116,7 +117,7 @@ func StartDomainScanTask(req DomainscanRequestParam, cronTaskId string) (taskId 
 			subConfig := req
 			subConfig.IsSubfinder = false
 			subConfig.IsCrawler = false
-			if taskId, err = doDomainscan(cronTaskId, t, subConfig); err != nil {
+			if taskId, err = doDomainscan(mainTaskId, t, subConfig); err != nil {
 				return
 			}
 			taskStarted = true
@@ -125,39 +126,39 @@ func StartDomainScanTask(req DomainscanRequestParam, cronTaskId string) (taskId 
 			subConfig := req
 			subConfig.IsSubfinder = false
 			subConfig.IsSubdomainBrute = false
-			if taskId, err = doDomainscan(cronTaskId, t, subConfig); err != nil {
+			if taskId, err = doDomainscan(mainTaskId, t, subConfig); err != nil {
 				return
 			}
 			taskStarted = true
 		}
 		// 如果没有子域名任务，则至少启动一个域名解析任务
 		if !taskStarted {
-			if taskId, err = doDomainscan(cronTaskId, t, req); err != nil {
+			if taskId, err = doDomainscan(mainTaskId, t, req); err != nil {
 				return
 			}
 		}
 		if req.IsFofa {
-			if taskId, err = doOnlineAPISearch(cronTaskId, "fofa", t, &req.OrgId, true, req.IsHttpx, req.IsFingerprintHub, req.IsScreenshot, req.IsIconHash, req.IsIgnoreCDN, req.IsIgnoreOutofChina); err != nil {
+			if taskId, err = doOnlineAPISearch(mainTaskId, "fofa", t, &req.OrgId, true, req.IsHttpx, req.IsFingerprintHub, req.IsScreenshot, req.IsIconHash, req.IsIgnoreCDN, req.IsIgnoreOutofChina); err != nil {
 				return
 			}
 		}
 		if req.IsQuake {
-			if taskId, err = doOnlineAPISearch(cronTaskId, "quake", t, &req.OrgId, true, req.IsHttpx, req.IsFingerprintHub, req.IsScreenshot, req.IsIconHash, req.IsIgnoreCDN, req.IsIgnoreOutofChina); err != nil {
+			if taskId, err = doOnlineAPISearch(mainTaskId, "quake", t, &req.OrgId, true, req.IsHttpx, req.IsFingerprintHub, req.IsScreenshot, req.IsIconHash, req.IsIgnoreCDN, req.IsIgnoreOutofChina); err != nil {
 				return
 			}
 		}
 		if req.IsHunter {
-			if taskId, err = doOnlineAPISearch(cronTaskId, "hunter", t, &req.OrgId, true, req.IsHttpx, req.IsFingerprintHub, req.IsScreenshot, req.IsIconHash, req.IsIgnoreCDN, req.IsIgnoreOutofChina); err != nil {
+			if taskId, err = doOnlineAPISearch(mainTaskId, "hunter", t, &req.OrgId, true, req.IsHttpx, req.IsFingerprintHub, req.IsScreenshot, req.IsIconHash, req.IsIgnoreCDN, req.IsIgnoreOutofChina); err != nil {
 				return
 			}
 		}
 		if req.IsICPQuery {
-			if taskId, err = doICPQuery(cronTaskId, t); err != nil {
+			if taskId, err = doICPQuery(mainTaskId, t); err != nil {
 				return
 			}
 		}
 		if req.IsWhoisQuery {
-			if taskId, err = doWhoisQuery(cronTaskId, t); err != nil {
+			if taskId, err = doWhoisQuery(mainTaskId, t); err != nil {
 				return
 			}
 		}
@@ -166,7 +167,7 @@ func StartDomainScanTask(req DomainscanRequestParam, cronTaskId string) (taskId 
 }
 
 // StartPocScanTask pocscan任务
-func StartPocScanTask(req PocscanRequestParam, cronTaskId string) (taskId string, err error) {
+func StartPocScanTask(req PocscanRequestParam, mainTaskId string) (taskId string, err error) {
 	var targetList []string
 	for _, t := range strings.Split(req.Target, "\n") {
 		if tt := strings.TrimSpace(t); tt != "" {
@@ -176,7 +177,7 @@ func StartPocScanTask(req PocscanRequestParam, cronTaskId string) (taskId string
 	if req.IsXrayVerify && req.XrayPocFile != "" {
 		config := pocscan.Config{Target: strings.Join(targetList, ","), PocFile: req.XrayPocFile, CmdBin: "xray", IsLoadOpenedPort: req.IsLoadOpenedPort}
 		configJSON, _ := json.Marshal(config)
-		taskId, err = serverapi.NewTask("xray", string(configJSON), cronTaskId)
+		taskId, err = serverapi.NewRunTask("xray", string(configJSON), mainTaskId, "")
 		if err != nil {
 			return
 		}
@@ -184,7 +185,7 @@ func StartPocScanTask(req PocscanRequestParam, cronTaskId string) (taskId string
 	if req.IsNucleiVerify && req.NucleiPocFile != "" {
 		config := pocscan.Config{Target: strings.Join(targetList, ","), PocFile: req.NucleiPocFile, CmdBin: "nuclei", IsLoadOpenedPort: req.IsLoadOpenedPort}
 		configJSON, _ := json.Marshal(config)
-		taskId, err = serverapi.NewTask("nuclei", string(configJSON), cronTaskId)
+		taskId, err = serverapi.NewRunTask("nuclei", string(configJSON), mainTaskId, "")
 		if err != nil {
 			return
 		}
@@ -192,7 +193,7 @@ func StartPocScanTask(req PocscanRequestParam, cronTaskId string) (taskId string
 	if req.IsDirsearch && req.DirsearchExtName != "" {
 		config := pocscan.Config{Target: strings.Join(targetList, ","), PocFile: req.DirsearchExtName, CmdBin: "dirsearch", IsLoadOpenedPort: req.IsLoadOpenedPort}
 		configJSON, _ := json.Marshal(config)
-		taskId, err = serverapi.NewTask("dirsearch", string(configJSON), cronTaskId)
+		taskId, err = serverapi.NewRunTask("dirsearch", string(configJSON), mainTaskId, "")
 		if err != nil {
 			return
 		}
@@ -201,7 +202,7 @@ func StartPocScanTask(req PocscanRequestParam, cronTaskId string) (taskId string
 }
 
 // StartXFofaKeywordTask xscan任务，根据fofa关键字查询资产
-func StartXFofaKeywordTask(req XScanRequestParam, cronTaskId string) (taskId string, err error) {
+func StartXFofaKeywordTask(req XScanRequestParam, mainTaskId string) (taskId string, err error) {
 	config := workerapi.XScanConfig{
 		OrgId:              &req.OrgId,
 		IsIgnoreCDN:        false,
@@ -227,7 +228,7 @@ func StartXFofaKeywordTask(req XScanRequestParam, cronTaskId string) (taskId str
 		configRun.FofaKeyword = keyword
 		configRun.FofaSearchLimit = count
 		configJSONRun, _ := json.Marshal(configRun)
-		taskId, err = serverapi.NewTask("xfofa", string(configJSONRun), cronTaskId)
+		taskId, err = serverapi.NewRunTask("xfofa", string(configJSONRun), mainTaskId, "")
 		if err != nil {
 			logging.RuntimeLog.Errorf("start xfofa fail:%s", err.Error())
 			return "", err
@@ -237,7 +238,7 @@ func StartXFofaKeywordTask(req XScanRequestParam, cronTaskId string) (taskId str
 }
 
 // StartXDomainScanTask xscan任务，域名任务
-func StartXDomainScanTask(req XScanRequestParam, cronTaskId string) (taskId string, err error) {
+func StartXDomainScanTask(req XScanRequestParam, mainTaskId string) (taskId string, err error) {
 	config := workerapi.XScanConfig{
 		OrgId:              &req.OrgId,
 		IsIgnoreCDN:        false,
@@ -269,7 +270,7 @@ func StartXDomainScanTask(req XScanRequestParam, cronTaskId string) (taskId stri
 		configRun.IsSubDomainFinder = true
 		configRun.IsSubDomainBrute = false
 		configJSON, _ := json.Marshal(configRun)
-		taskId, err = serverapi.NewTask("xdomainscan", string(configJSON), cronTaskId)
+		taskId, err = serverapi.NewRunTask("xdomainscan", string(configJSON), mainTaskId, "")
 		if err != nil {
 			logging.RuntimeLog.Errorf("start xdomainscan fail:%s", err.Error())
 			return "", err
@@ -277,7 +278,7 @@ func StartXDomainScanTask(req XScanRequestParam, cronTaskId string) (taskId stri
 		configRun.IsSubDomainFinder = false
 		configRun.IsSubDomainBrute = true
 		configJSON, _ = json.Marshal(configRun)
-		taskId, err = serverapi.NewTask("xdomainscan", string(configJSON), cronTaskId)
+		taskId, err = serverapi.NewRunTask("xdomainscan", string(configJSON), mainTaskId, "")
 		if err != nil {
 			logging.RuntimeLog.Errorf("start xdomainscan fail:%s", err.Error())
 			return "", err
@@ -286,7 +287,7 @@ func StartXDomainScanTask(req XScanRequestParam, cronTaskId string) (taskId stri
 			configRunFofa := config
 			configRunFofa.FofaTarget = target
 			configJSONFofa, _ := json.Marshal(configRunFofa)
-			taskId, err = serverapi.NewTask("xfofa", string(configJSONFofa), cronTaskId)
+			taskId, err = serverapi.NewRunTask("xfofa", string(configJSONFofa), mainTaskId, "")
 			if err != nil {
 				logging.RuntimeLog.Errorf("start xfofa fail:%s", err.Error())
 				return "", err
@@ -297,7 +298,7 @@ func StartXDomainScanTask(req XScanRequestParam, cronTaskId string) (taskId stri
 }
 
 // StartXPortScanTask xscan的IP任务
-func StartXPortScanTask(req XScanRequestParam, cronTaskId string) (taskId string, err error) {
+func StartXPortScanTask(req XScanRequestParam, mainTaskId string) (taskId string, err error) {
 	config := workerapi.XScanConfig{
 		OrgId:              &req.OrgId,
 		IsIgnoreCDN:        false,
@@ -329,7 +330,7 @@ func StartXPortScanTask(req XScanRequestParam, cronTaskId string) (taskId string
 		configRun.IPPortString = make(map[string]string)
 		configRun.IPPortString[target] = req.Port
 		configJSON, _ := json.Marshal(configRun)
-		taskId, err = serverapi.NewTask("xportscan", string(configJSON), cronTaskId)
+		taskId, err = serverapi.NewRunTask("xportscan", string(configJSON), mainTaskId, "")
 		if err != nil {
 			logging.RuntimeLog.Errorf("start xportscan fail:%s", err.Error())
 			return "", err
@@ -338,7 +339,7 @@ func StartXPortScanTask(req XScanRequestParam, cronTaskId string) (taskId string
 			configRunFofa := config
 			configRunFofa.FofaTarget = target
 			configJSONFofa, _ := json.Marshal(configRunFofa)
-			taskId, err = serverapi.NewTask("xfofa", string(configJSONFofa), cronTaskId)
+			taskId, err = serverapi.NewRunTask("xfofa", string(configJSONFofa), mainTaskId, "")
 			if err != nil {
 				logging.RuntimeLog.Errorf("start xfofa fail:%s", err.Error())
 				return "", err
@@ -349,7 +350,7 @@ func StartXPortScanTask(req XScanRequestParam, cronTaskId string) (taskId string
 }
 
 // StartXOrgScanTask xscan任务，获取指定组织的资产并开始扫描任务
-func StartXOrgScanTask(req XScanRequestParam, cronTaskId string) (taskId string, err error) {
+func StartXOrgScanTask(req XScanRequestParam, mainTaskId string) (taskId string, err error) {
 	config := workerapi.XScanConfig{
 		OrgId:              &req.OrgId,
 		IsOrgIP:            req.IsOrgIP,
@@ -367,7 +368,7 @@ func StartXOrgScanTask(req XScanRequestParam, cronTaskId string) (taskId string,
 		config.IsIconHash = conf.GlobalWorkerConfig().Fingerprint.IsIconHash
 	}
 	configJSON, _ := json.Marshal(config)
-	taskId, err = serverapi.NewTask("xorgscan", string(configJSON), cronTaskId)
+	taskId, err = serverapi.NewRunTask("xorgscan", string(configJSON), mainTaskId, "")
 	if err != nil {
 		logging.RuntimeLog.Errorf("start xorgscan fail:%s", err.Error())
 		return "", err
@@ -376,7 +377,7 @@ func StartXOrgScanTask(req XScanRequestParam, cronTaskId string) (taskId string,
 }
 
 // doPortscan 端口扫描
-func doPortscan(cronTaskId string, target string, port string, req PortscanRequestParam) (taskId string, err error) {
+func doPortscan(mainTaskId string, target string, port string, req PortscanRequestParam) (taskId string, err error) {
 	config := portscan.Config{
 		Target:           target,
 		ExcludeTarget:    req.ExcludeIP,
@@ -416,7 +417,7 @@ func doPortscan(cronTaskId string, target string, port string, req PortscanReque
 		logging.RuntimeLog.Errorf("start portscan fail:%s", err.Error())
 		return "", err
 	}
-	taskId, err = serverapi.NewTask("portscan", string(configJSON), cronTaskId)
+	taskId, err = serverapi.NewRunTask("portscan", string(configJSON), mainTaskId, "")
 	if err != nil {
 		logging.RuntimeLog.Errorf("start portscan fail:%s", err.Error())
 		return "", err
@@ -425,7 +426,7 @@ func doPortscan(cronTaskId string, target string, port string, req PortscanReque
 }
 
 // doBatchScan 探测+端口扫描
-func doBatchScan(cronTaskId string, target string, port string, req PortscanRequestParam) (taskId string, err error) {
+func doBatchScan(mainTaskId string, target string, port string, req PortscanRequestParam) (taskId string, err error) {
 	config := portscan.Config{
 		Target:           target,
 		ExcludeTarget:    req.ExcludeIP,
@@ -463,7 +464,7 @@ func doBatchScan(cronTaskId string, target string, port string, req PortscanRequ
 		logging.RuntimeLog.Errorf("start batchscan fail:%s", err.Error())
 		return "", err
 	}
-	taskId, err = serverapi.NewTask("batchscan", string(configJSON), cronTaskId)
+	taskId, err = serverapi.NewRunTask("batchscan", string(configJSON), mainTaskId, "")
 	if err != nil {
 		logging.RuntimeLog.Errorf("start batchscan fail:%s", err.Error())
 		return "", err
@@ -472,7 +473,7 @@ func doBatchScan(cronTaskId string, target string, port string, req PortscanRequ
 }
 
 // doDomainscan 域名任务
-func doDomainscan(cronTaskId string, target string, req DomainscanRequestParam) (taskId string, err error) {
+func doDomainscan(mainTaskId string, target string, req DomainscanRequestParam) (taskId string, err error) {
 	config := domainscan.Config{
 		Target:             target,
 		OrgId:              &req.OrgId,
@@ -497,7 +498,7 @@ func doDomainscan(cronTaskId string, target string, req DomainscanRequestParam) 
 		logging.RuntimeLog.Errorf("start domainscan fail:%s", err.Error())
 		return "", err
 	}
-	taskId, err = serverapi.NewTask("domainscan", string(configJSON), cronTaskId)
+	taskId, err = serverapi.NewRunTask("domainscan", string(configJSON), mainTaskId, "")
 	if err != nil {
 		logging.RuntimeLog.Errorf("start domainscan fail:%s", err.Error())
 		return "", err
@@ -506,7 +507,7 @@ func doDomainscan(cronTaskId string, target string, req DomainscanRequestParam) 
 }
 
 // doOnlineAPISearch Fofa,hunter,quaker的查询
-func doOnlineAPISearch(cronTaskId string, apiName string, target string, orgId *int, isIplocation, isHttp, isFingerprintHub, isScreenshot, isIconHash, isIgnoreCDN, isIgnorOutofChina bool) (taskId string, err error) {
+func doOnlineAPISearch(mainTaskId string, apiName string, target string, orgId *int, isIplocation, isHttp, isFingerprintHub, isScreenshot, isIconHash, isIgnoreCDN, isIgnorOutofChina bool) (taskId string, err error) {
 	config := onlineapi.OnlineAPIConfig{
 		Target:             target,
 		OrgId:              orgId,
@@ -528,7 +529,7 @@ func doOnlineAPISearch(cronTaskId string, apiName string, target string, orgId *
 		logging.RuntimeLog.Errorf("start %s fail:%s", apiName, err.Error())
 		return "", err
 	}
-	taskId, err = serverapi.NewTask(apiName, string(configJSON), cronTaskId)
+	taskId, err = serverapi.NewRunTask(apiName, string(configJSON), mainTaskId, "")
 	if err != nil {
 		logging.RuntimeLog.Errorf("start %s fail:%s", apiName, err.Error())
 		return "", err
@@ -537,14 +538,14 @@ func doOnlineAPISearch(cronTaskId string, apiName string, target string, orgId *
 }
 
 // doICPQuery ICP备案信息查询
-func doICPQuery(cronTaskId string, target string) (taskId string, err error) {
+func doICPQuery(mainTaskId string, target string) (taskId string, err error) {
 	config := onlineapi.ICPQueryConfig{Target: target}
 	configJSON, err := json.Marshal(config)
 	if err != nil {
 		logging.RuntimeLog.Errorf("start icpquery fail:%s", err.Error())
 		return "", err
 	}
-	taskId, err = serverapi.NewTask("icpquery", string(configJSON), cronTaskId)
+	taskId, err = serverapi.NewRunTask("icpquery", string(configJSON), mainTaskId, "")
 	if err != nil {
 		logging.RuntimeLog.Errorf("start icpquery fail:%s", err.Error())
 		return "", err
@@ -553,14 +554,14 @@ func doICPQuery(cronTaskId string, target string) (taskId string, err error) {
 }
 
 // doWhoisQuery Whois信息查询
-func doWhoisQuery(cronTaskId string, target string) (taskId string, err error) {
+func doWhoisQuery(mainTaskId string, target string) (taskId string, err error) {
 	config := onlineapi.WhoisQueryConfig{Target: target}
 	configJSON, err := json.Marshal(config)
 	if err != nil {
 		logging.RuntimeLog.Errorf("start whoisquery fail:%s", err.Error())
 		return "", err
 	}
-	taskId, err = serverapi.NewTask("whoisquery", string(configJSON), cronTaskId)
+	taskId, err = serverapi.NewRunTask("whoisquery", string(configJSON), mainTaskId, "")
 	if err != nil {
 		logging.RuntimeLog.Errorf("start whoisquery fail:%s", err.Error())
 		return "", err
@@ -569,7 +570,7 @@ func doWhoisQuery(cronTaskId string, target string) (taskId string, err error) {
 }
 
 // doIPLocation IP归属地
-func doIPLocation(cronTaskId string, target string, orgId *int) (taskId string, err error) {
+func doIPLocation(mainTaskId string, target string, orgId *int) (taskId string, err error) {
 	config := custom.Config{Target: target, OrgId: orgId}
 	// config.OrgId 为int，默认为0
 	// db.Organization.OrgId为指针，默认nil
@@ -581,7 +582,7 @@ func doIPLocation(cronTaskId string, target string, orgId *int) (taskId string, 
 		logging.RuntimeLog.Errorf("start portscan fail:%s", err.Error())
 		return "", err
 	}
-	taskId, err = serverapi.NewTask("iplocation", string(configJSON), cronTaskId)
+	taskId, err = serverapi.NewRunTask("iplocation", string(configJSON), mainTaskId, "")
 	if err != nil {
 		logging.RuntimeLog.Errorf("start iplocation fail:%s", err.Error())
 		return "", err
@@ -664,6 +665,120 @@ func formatDomainTarget(target string) (domainTargetList []string) {
 			domainTargetList = append(domainTargetList, tt)
 		}
 	}
+	return
+}
+
+// ParseTargetFromKwArgs 从经过JSON序列化的参数中单独提取出target
+func ParseTargetFromKwArgs(taskName, args string) (target string) {
+	const displayedLength = 100
+	type TargetStrut struct {
+		Target string `json:"target"`
+	}
+	type FingerTargetStrut struct {
+		IPTargetMap     *map[string][]int    `json:"IPTargetMap"`
+		DomainTargetMap *map[string]struct{} `json:"DomainTargetMap"`
+	}
+	type XrayPocStrut struct {
+		IPPortResult map[string][]int
+		DomainResult []string
+	}
+	type XScanConfig struct {
+		OrgId        *int                `json:"orgid"`
+		FofaTarget   string              `json:"fofatarget"`
+		FofaKeyword  string              `json:"fofaKeyword"`
+		IPPort       map[string][]int    `json:"ipport"`
+		IPPortString map[string]string   `json:"ipportstring"`
+		Domain       map[string]struct{} `json:"domain"`
+		Target       string              `json:"target"`
+	}
+	if taskName == "fingerprint" {
+		var t FingerTargetStrut
+		err := json.Unmarshal([]byte(args), &t)
+		if err != nil {
+			target = args
+		} else {
+			var allTarget []string
+			if t.IPTargetMap != nil {
+				for ip := range *t.IPTargetMap {
+					allTarget = append(allTarget, ip)
+				}
+			}
+			if t.DomainTargetMap != nil {
+				for domain := range *t.DomainTargetMap {
+					allTarget = append(allTarget, domain)
+				}
+			}
+			target = strings.Join(allTarget, ",")
+		}
+	} else if taskName == "xraypoc" {
+		var t XrayPocStrut
+		err := json.Unmarshal([]byte(args), &t)
+		if err != nil {
+			target = args
+		} else {
+			var allTarget []string
+			for ip, ports := range t.IPPortResult {
+				for _, port := range ports {
+					allTarget = append(allTarget, fmt.Sprintf("%s:%d", ip, port))
+				}
+			}
+			for _, domain := range t.DomainResult {
+				allTarget = append(allTarget, domain)
+			}
+			target = strings.Join(allTarget, ",")
+		}
+	} else if taskName == "xportscan" || taskName == "xdomainscan" || taskName == "xfofa" || taskName == "xxraypoc" || taskName == "xxray" || taskName == "xfingerprint" || taskName == "xorgscan" {
+		var t XScanConfig
+		err := json.Unmarshal([]byte(args), &t)
+		if err != nil {
+			target = args
+		} else {
+			var allTarget []string
+			if len(t.FofaKeyword) > 0 {
+				allTarget = append(allTarget, t.FofaKeyword)
+			}
+			if len(t.FofaTarget) > 0 {
+				allTarget = append(allTarget, t.FofaTarget)
+			}
+			if len(t.IPPort) > 0 {
+				for tip := range t.IPPort {
+					allTarget = append(allTarget, tip)
+				}
+			}
+			if len(t.IPPortString) > 0 {
+				for tip := range t.IPPortString {
+					allTarget = append(allTarget, tip)
+				}
+			}
+			if len(t.Domain) > 0 {
+				for td := range t.Domain {
+					allTarget = append(allTarget, td)
+				}
+			}
+			if len(t.Target) > 0 {
+				allTarget = append(allTarget, t.Target)
+			}
+			if taskName == "xorgscan" {
+				orgDb := db.Organization{Id: *t.OrgId}
+				if orgDb.Get() {
+					allTarget = append(allTarget, orgDb.OrgName)
+				}
+			}
+			target = strings.Join(allTarget, ",")
+		}
+	} else {
+		var t TargetStrut
+		err := json.Unmarshal([]byte(args), &t)
+		if err != nil {
+			target = args
+		} else {
+			target = t.Target
+		}
+	}
+	if len(target) > displayedLength {
+		return fmt.Sprintf("%s...", target[:displayedLength])
+	}
+
 	return
 }
 

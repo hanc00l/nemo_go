@@ -1,14 +1,13 @@
 package workerapi
 
 import (
-	"context"
 	"github.com/hanc00l/nemo_go/pkg/comm"
 	"github.com/hanc00l/nemo_go/pkg/logging"
 	"github.com/hanc00l/nemo_go/pkg/task/pocscan"
 )
 
 // PocScan 漏洞验证任务
-func PocScan(taskId, configJSON string) (result string, err error) {
+func PocScan(taskId, mainTaskId, configJSON string) (result string, err error) {
 	var ok bool
 	if ok, result, err = CheckTaskStatus(taskId); !ok {
 		return result, err
@@ -17,11 +16,10 @@ func PocScan(taskId, configJSON string) (result string, err error) {
 	if err = ParseConfig(configJSON, &config); err != nil {
 		return FailedTask(err.Error()), err
 	}
-	x := comm.NewXClient()
 	//读取资产开放端口
 	var resultIPPorts string
 	if config.IsLoadOpenedPort {
-		err = x.Call(context.Background(), "LoadOpenedPort", &config.Target, &resultIPPorts)
+		err = comm.CallXClient("LoadOpenedPort", &config.Target, &resultIPPorts)
 		if err == nil {
 			config.Target = resultIPPorts
 		} else {
@@ -45,9 +43,10 @@ func PocScan(taskId, configJSON string) (result string, err error) {
 	// 保存结果
 	resultArgs := comm.ScanResultArgs{
 		TaskID:              taskId,
+		MainTaskId:          mainTaskId,
 		VulnerabilityResult: scanResult,
 	}
-	err = x.Call(context.Background(), "SaveVulnerabilityResult", &resultArgs, &result)
+	err = comm.CallXClient("SaveVulnerabilityResult", &resultArgs, &result)
 	if err != nil {
 		logging.RuntimeLog.Error(err)
 		return FailedTask(err.Error()), err
@@ -57,7 +56,7 @@ func PocScan(taskId, configJSON string) (result string, err error) {
 }
 
 // XrayPocScan 调用本地的xraypoc，批量验证漏洞任务
-func XrayPocScan(taskId, configJSON string) (result string, err error) {
+func XrayPocScan(taskId, mainTaskId, configJSON string) (result string, err error) {
 	var ok bool
 	if ok, result, err = CheckTaskStatus(taskId); !ok {
 		return result, err
@@ -67,7 +66,7 @@ func XrayPocScan(taskId, configJSON string) (result string, err error) {
 		return FailedTask(err.Error()), err
 	}
 
-	result, err = doXrayPocScanAndSave(taskId, config)
+	result, err = doXrayPocScanAndSave(taskId, mainTaskId, config)
 	if err != nil {
 		logging.RuntimeLog.Error(err)
 		return FailedTask(err.Error()), err
@@ -76,7 +75,7 @@ func XrayPocScan(taskId, configJSON string) (result string, err error) {
 	return SucceedTask(result), nil
 }
 
-func doXrayPocScanAndSave(taskId string, config pocscan.XrayPocConfig) (result string, err error) {
+func doXrayPocScanAndSave(taskId string, mainTaskId string, config pocscan.XrayPocConfig) (result string, err error) {
 	var scanResult []pocscan.Result
 	p := pocscan.NewXrayPoc(config)
 	p.Do()
@@ -84,9 +83,9 @@ func doXrayPocScanAndSave(taskId string, config pocscan.XrayPocConfig) (result s
 	// 保存结果
 	resultArgs := comm.ScanResultArgs{
 		TaskID:              taskId,
+		MainTaskId:          mainTaskId,
 		VulnerabilityResult: scanResult,
 	}
-	x := comm.NewXClient()
-	err = x.Call(context.Background(), "SaveVulnerabilityResult", &resultArgs, &result)
+	err = comm.CallXClient("SaveVulnerabilityResult", &resultArgs, &result)
 	return
 }

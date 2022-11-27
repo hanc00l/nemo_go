@@ -6,35 +6,32 @@ import (
 	"time"
 )
 
-type Task struct {
+type TaskMain struct {
 	Id              int        `gorm:"primaryKey"`
 	TaskId          string     `gorm:"column:task_id"`
 	TaskName        string     `gorm:"column:task_name"`
-	Args            string     `gorm:"column:args"`
 	KwArgs          string     `gorm:"column:kwargs"`
-	Worker          string     `gorm:"column:worker"`
 	State           string     `gorm:"column:state"`
 	Result          string     `gorm:"column:result"`
-	ReceivedTime    *time.Time `gorm:"column:received"`
-	RetriedTime     *time.Time `gorm:"column:retried"`
-	RevokedTime     *time.Time `gorm:"column:revoked"`
+	ReceivedTime    time.Time  `gorm:"column:received"`
 	StartedTime     *time.Time `gorm:"column:started"`
 	SucceededTime   *time.Time `gorm:"column:succeeded"`
-	FailedTime      *time.Time `gorm:"column:failed"`
 	ProgressMessage string     `gorm:"column:progress_message"`
+	CronTaskId      string     `gorm:"column:cron_id"`
 	CreateDatetime  time.Time  `gorm:"column:create_datetime"`
 	UpdateDatetime  time.Time  `gorm:"column:update_datetime"`
-	CronTaskId      string     `gorm:"column:cron_id"`
 }
 
-func (Task) TableName() string {
-	return "task"
+func (TaskMain) TableName() string {
+	return "task_main"
 }
 
-//Add 插入一条新的记录，返回主键ID及成功标志
-func (t *Task) Add() (success bool) {
-	t.CreateDatetime = time.Now()
-	t.UpdateDatetime = time.Now()
+// Add 插入一条新的记录，返回主键ID及成功标志
+func (t *TaskMain) Add() (success bool) {
+	now := time.Now()
+	t.ReceivedTime = now
+	t.CreateDatetime = now
+	t.UpdateDatetime = now
 
 	db := GetDB()
 	defer CloseDB(db)
@@ -46,7 +43,7 @@ func (t *Task) Add() (success bool) {
 }
 
 // Get 根据ID查询记录
-func (t *Task) Get() (success bool) {
+func (t *TaskMain) Get() (success bool) {
 	db := GetDB()
 	defer CloseDB(db)
 
@@ -57,8 +54,8 @@ func (t *Task) Get() (success bool) {
 	}
 }
 
-//GetByTaskId 根据TaskID（不是数据库ID）精确查询一条记录
-func (t *Task) GetByTaskId() (success bool) {
+// GetByTaskId 根据TaskID（不是数据库ID）精确查询一条记录
+func (t *TaskMain) GetByTaskId() (success bool) {
 	db := GetDB()
 	defer CloseDB(db)
 	if result := db.Where("task_id", t.TaskId).First(t); result.RowsAffected > 0 {
@@ -69,7 +66,7 @@ func (t *Task) GetByTaskId() (success bool) {
 }
 
 // Update 更新指定ID的一条记录，列名和内容位于map中
-func (t *Task) Update(updateMap map[string]interface{}) (success bool) {
+func (t *TaskMain) Update(updateMap map[string]interface{}) (success bool) {
 	updateMap["update_datetime"] = time.Now()
 
 	db := GetDB()
@@ -82,7 +79,7 @@ func (t *Task) Update(updateMap map[string]interface{}) (success bool) {
 }
 
 // Delete 删除指定主键ID的一条记录
-func (t *Task) Delete() (success bool) {
+func (t *TaskMain) Delete() (success bool) {
 	db := GetDB()
 	defer CloseDB(db)
 	if result := db.Delete(t, t.Id); result.RowsAffected > 0 {
@@ -93,7 +90,7 @@ func (t *Task) Delete() (success bool) {
 }
 
 // Count 统计指定查询条件的记录数量
-func (t *Task) Count(searchMap map[string]interface{}) (count int) {
+func (t *TaskMain) Count(searchMap map[string]interface{}) (count int) {
 	db := t.makeWhere(searchMap).Model(t)
 	defer CloseDB(db)
 	var result int64
@@ -102,7 +99,7 @@ func (t *Task) Count(searchMap map[string]interface{}) (count int) {
 }
 
 // makeWhere 根据查询条件的不同的字段，组合生成count和search的查询条件
-func (t *Task) makeWhere(searchMap map[string]interface{}) *gorm.DB {
+func (t *TaskMain) makeWhere(searchMap map[string]interface{}) *gorm.DB {
 	db := GetDB()
 	for column, value := range searchMap {
 		switch column {
@@ -114,8 +111,6 @@ func (t *Task) makeWhere(searchMap map[string]interface{}) *gorm.DB {
 			db = db.Where("result like ?", fmt.Sprintf("%%%s%%", value))
 		case "state":
 			db = db.Where("state", value)
-		case "worker":
-			db = db.Where("worker like ?", fmt.Sprintf("%%%s%%", value))
 		case "date_delta":
 			daysToHour := 24 * value.(int)
 			dayDelta, err := time.ParseDuration(fmt.Sprintf("-%dh", daysToHour))
@@ -132,7 +127,7 @@ func (t *Task) makeWhere(searchMap map[string]interface{}) *gorm.DB {
 }
 
 // Gets 根据指定的条件，查询满足要求的记录
-func (t *Task) Gets(searchMap map[string]interface{}, page, rowsPerPage int) (results []Task, count int) {
+func (t *TaskMain) Gets(searchMap map[string]interface{}, page, rowsPerPage int) (results []TaskMain, count int) {
 	orderBy := "update_datetime desc"
 
 	db := t.makeWhere(searchMap).Model(t)
@@ -150,36 +145,15 @@ func (t *Task) Gets(searchMap map[string]interface{}, page, rowsPerPage int) (re
 }
 
 // SaveOrUpdate 保存、更新一条记录
-func (t *Task) SaveOrUpdate() (success bool) {
-	oldRecord := &Task{TaskId: t.TaskId}
+func (t *TaskMain) SaveOrUpdate() (success bool) {
+	oldRecord := &TaskRun{TaskId: t.TaskId}
 	if oldRecord.GetByTaskId() {
 		updateMap := map[string]interface{}{}
-		if t.Worker != "" {
-			updateMap["worker"] = t.Worker
-		}
 		if t.State != "" {
 			updateMap["state"] = t.State
 		}
 		if t.Result != "" {
 			updateMap["result"] = t.Result
-		}
-		if t.ReceivedTime != nil {
-			updateMap["received"] = t.ReceivedTime
-		}
-		if t.RetriedTime != nil {
-			updateMap["retried"] = t.RetriedTime
-		}
-		if t.RevokedTime != nil {
-			updateMap["revoked"] = t.RevokedTime
-		}
-		if t.StartedTime != nil {
-			updateMap["started"] = t.StartedTime
-		}
-		if t.SucceededTime != nil {
-			updateMap["succeeded"] = t.SucceededTime
-		}
-		if t.FailedTime != nil {
-			updateMap["failed"] = t.FailedTime
 		}
 		if t.ProgressMessage != "" {
 			updateMap["progress_message"] = t.ProgressMessage

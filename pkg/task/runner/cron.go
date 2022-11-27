@@ -1,7 +1,6 @@
 package runner
 
 import (
-	"encoding/json"
 	"github.com/google/uuid"
 	"github.com/hanc00l/nemo_go/pkg/db"
 	"github.com/hanc00l/nemo_go/pkg/logging"
@@ -112,83 +111,13 @@ func (j CronTaskJob) Run() {
 		logging.RuntimeLog.Errorf("cron task:%s not exist...", j.TaskId)
 		return
 	}
-	if ct.TaskName == "portscan" {
-		var req PortscanRequestParam
-		err := json.Unmarshal([]byte(ct.KwArgs), &req)
-		if err != nil {
-			logging.RuntimeLog.Error(err)
-			return
-		}
-		taskId, err := StartPortScanTask(req, j.TaskId)
-		if err != nil {
-			logging.RuntimeLog.Error(err)
-			return
-		}
-		logging.CLILog.Infof("start portscan cron task:%s,running taskId:%s", j.TaskId, taskId)
-	} else if ct.TaskName == "batchscan" {
-		var req PortscanRequestParam
-		err := json.Unmarshal([]byte(ct.KwArgs), &req)
-		if err != nil {
-			logging.RuntimeLog.Error(err)
-			return
-		}
-		taskId, err := StartBatchScanTask(req, j.TaskId)
-		if err != nil {
-			logging.RuntimeLog.Error(err)
-			return
-		}
-		logging.CLILog.Infof("start batch cron task:%s,running taskId:%s", j.TaskId, taskId)
-	} else if ct.TaskName == "domainscan" {
-		var req DomainscanRequestParam
-		err := json.Unmarshal([]byte(ct.KwArgs), &req)
-		if err != nil {
-			logging.RuntimeLog.Error(err)
-			return
-		}
-		taskId, err := StartDomainScanTask(req, j.TaskId)
-		if err != nil {
-			logging.RuntimeLog.Error(err)
-			return
-		}
-		logging.CLILog.Infof("start domainscan cron task:%s,running taskId:%s", j.TaskId, taskId)
-	} else if ct.TaskName == "pocscan" {
-		var req PocscanRequestParam
-		err := json.Unmarshal([]byte(ct.KwArgs), &req)
-		if err != nil {
-			logging.RuntimeLog.Error(err)
-			return
-		}
-		taskId, err := StartPocScanTask(req, j.TaskId)
-		if err != nil {
-			logging.RuntimeLog.Error(err)
-			return
-		}
-		logging.CLILog.Infof("start pocscan cron task:%s,running taskId:%s", j.TaskId, taskId)
-	} else if ct.TaskName == "xportscan" || ct.TaskName == "xdomainscan" || ct.TaskName == "xorgscan" || ct.TaskName == "xfofa" {
-		var req XScanRequestParam
-		err := json.Unmarshal([]byte(ct.KwArgs), &req)
-		if err != nil {
-			logging.RuntimeLog.Error(err)
-			return
-		}
-		var taskId string
-		if ct.TaskName == "xportscan" {
-			taskId, err = StartXPortScanTask(req, j.TaskId)
-		} else if ct.TaskName == "xdomainscan" {
-			taskId, err = StartXDomainScanTask(req, j.TaskId)
-		} else if ct.TaskName == "xfofa" {
-			taskId, err = StartXFofaKeywordTask(req, j.TaskId)
-		} else if ct.TaskName == "xorgscan" {
-			taskId, err = StartXOrgScanTask(req, j.TaskId)
-		}
-		if err != nil {
-			logging.RuntimeLog.Error(err)
-			return
-		}
-		logging.CLILog.Infof("start pocscan cron task:%s,running taskId:%s", j.TaskId, taskId)
-	} else {
-		logging.RuntimeLog.Errorf("invalid task name:%s in %s...", ct.TaskName, j.TaskId)
+	taskId, err := SaveMainTask(ct.TaskName, ct.KwArgs, ct.TaskId)
+	if err != nil {
+		logging.RuntimeLog.Error(err)
+		return
 	}
+	logging.CLILog.Infof("start cron task:%s,main taskId:%s", j.TaskId, taskId)
+	// 更新数据库
 	updateMap := make(map[string]interface{})
 	updateMap["lastrun_datetime"] = time.Now()
 	updateMap["run_count"] = ct.RunCount + 1

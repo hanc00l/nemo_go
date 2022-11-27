@@ -1,7 +1,6 @@
 package workerapi
 
 import (
-	"context"
 	"fmt"
 	"github.com/hanc00l/nemo_go/pkg/comm"
 	"github.com/hanc00l/nemo_go/pkg/logging"
@@ -17,7 +16,7 @@ const (
 )
 
 // PortScan 端口扫描任务
-func PortScan(taskId, configJSON string) (result string, err error) {
+func PortScan(taskId, mainTaskId, configJSON string) (result string, err error) {
 	var ok bool
 	if ok, result, err = CheckTaskStatus(taskId); !ok {
 		return result, err
@@ -27,9 +26,9 @@ func PortScan(taskId, configJSON string) (result string, err error) {
 		return FailedTask(err.Error()), err
 	}
 	var resultPortScan portscan.Result
-	resultPortScan, result, err = doPortScanAndSave(taskId, config)
+	resultPortScan, result, err = doPortScanAndSave(taskId, mainTaskId, config)
 	//指纹识别任务
-	_, err = NewFingerprintTask(&resultPortScan, nil, FingerprintTaskConfig{
+	_, err = NewFingerprintTask(taskId, mainTaskId, &resultPortScan, nil, FingerprintTaskConfig{
 		IsHttpx:          config.IsHttpx,
 		IsFingerprintHub: config.IsFingerprintHub,
 		IsIconHash:       config.IsIconHash,
@@ -41,8 +40,7 @@ func PortScan(taskId, configJSON string) (result string, err error) {
 	return SucceedTask(result), nil
 }
 
-func doPortScanAndSave(taskId string, config portscan.Config) (resultPortScan portscan.Result, result string, err error) {
-	x := comm.NewXClient()
+func doPortScanAndSave(taskId string, mainTaskId string, config portscan.Config) (resultPortScan portscan.Result, result string, err error) {
 	//端口扫描：
 	if config.IsPortscan {
 		if config.CmdBin == "masnmap" {
@@ -65,18 +63,19 @@ func doPortScanAndSave(taskId string, config portscan.Config) (resultPortScan po
 	}
 	// 保存结果
 	resultArgs := comm.ScanResultArgs{
-		TaskID:   taskId,
-		IPConfig: &config,
-		IPResult: resultPortScan.IPResult,
+		TaskID:     taskId,
+		MainTaskId: mainTaskId,
+		IPConfig:   &config,
+		IPResult:   resultPortScan.IPResult,
 	}
-	err = x.Call(context.Background(), "SaveScanResult", &resultArgs, &result)
+	err = comm.CallXClient("SaveScanResult", &resultArgs, &result)
 	if err != nil {
 		logging.RuntimeLog.Error(err)
 	}
 	// 读取目标的数据库中已保存的开放端口
 	var resultIPPorts string
 	if config.IsLoadOpenedPort {
-		err = x.Call(context.Background(), "LoadOpenedPort", &config.Target, &resultIPPorts)
+		err = comm.CallXClient("LoadOpenedPort", &config.Target, &resultIPPorts)
 		if err == nil && resultIPPorts != "" {
 			allTargets := strings.Split(resultIPPorts, ",")
 			for _, target := range allTargets {

@@ -17,6 +17,6 @@ func TestXray(t *testing.T) {
 	if err != nil {
 		t.Log(err)
 	}
-	result, err := serverapi.NewTask("pocscan", string(configJSON), "")
+	result, err := serverapi.NewRunTask("pocscan", string(configJSON), "", "")
 	t.Log(result, err)
 }

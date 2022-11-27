@@ -1,7 +1,6 @@
 package workerapi
 
 import (
-	"context"
 	"github.com/hanc00l/nemo_go/pkg/comm"
 	"github.com/hanc00l/nemo_go/pkg/logging"
 	"github.com/hanc00l/nemo_go/pkg/task/custom"
@@ -11,7 +10,7 @@ import (
 )
 
 // IPLocation IP归属任务
-func IPLocation(taskId, configJSON string) (result string, err error) {
+func IPLocation(taskId, mainTaskId, configJSON string) (result string, err error) {
 	var ok bool
 	if ok, result, err = CheckTaskStatus(taskId); !ok {
 		return result, err
@@ -34,13 +33,13 @@ func IPLocation(taskId, configJSON string) (result string, err error) {
 	}
 	doLocation(&resultPortScan)
 	// 保存结果
-	x := comm.NewXClient()
-
 	resultArgs := comm.ScanResultArgs{
-		IPConfig: &portscan.Config{OrgId: config.OrgId},
-		IPResult: resultPortScan.IPResult,
+		TaskID:     taskId,
+		MainTaskId: mainTaskId,
+		IPConfig:   &portscan.Config{OrgId: config.OrgId},
+		IPResult:   resultPortScan.IPResult,
 	}
-	err = x.Call(context.Background(), "SaveScanResult", &resultArgs, &result)
+	err = comm.CallXClient("SaveScanResult", &resultArgs, &result)
 	if err != nil {
 		logging.RuntimeLog.Error(err)
 		return FailedTask(err.Error()), err

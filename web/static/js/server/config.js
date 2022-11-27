@@ -65,7 +65,7 @@ $(function () {
         $.post("/config-save-taskslice",
             {
                 "portslicenumber": $('#input_portslicenumber').val(),
-                "ipslicenumber": $('#input_ipslicenumber').val()
+                "ipslicenumber": $('#input_ipslicenumber').val(),
             }, function (data, e) {
                 if (e === "success" && data['status'] == 'success') {
                     swal({
@@ -81,7 +81,30 @@ $(function () {
                     swal('Warning', data['msg'], 'error');
                 }
             });
-    })
+    });
+
+    $("#buttonSaveNotify").click(function () {
+        $.post("/config-save-notify",
+            {
+                "token_serverchan": $('#input_serverchan').val(),
+                "token_dingtalk": $('#input_dingtalk').val(),
+                "token_feishu": $('#input_feishu').val(),
+            }, function (data, e) {
+                if (e === "success" && data['status'] == 'success') {
+                    swal({
+                        title: "保存成功！",
+                        text: "",
+                        type: "success",
+                        confirmButtonText: "确定",
+                        confirmButtonColor: "#41b883",
+                        closeOnConfirm: true,
+                        timer: 3000
+                    });
+                } else {
+                    swal('Warning', data['msg'], 'error');
+                }
+            });
+    });
 });
 $("#buttonSaveHoneypot").click(function () {
     save_custom("honeypot", $('#text_honeypot').val())
@@ -177,6 +200,9 @@ function load_config() {
         $('#input_ipslicenumber').val(data['ipslicenumber']);
         $('#input_portslicenumber').val(data['portslicenumber']);
         $('#nemo_version').html(data['version']);
+        $('#input_serverchan').val(data['serverchan']);
+        $('#input_dingtalk').val(data['dingtalk']);
+        $('#input_feishu').val(data['feishu']);
     });
 }
 

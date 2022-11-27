@@ -11,8 +11,8 @@ import (
 	"time"
 )
 
-// NewTask 创建一个新执行任务
-func NewTask(taskName, configJSON, cronTaskId string) (taskId string, err error) {
+// NewRunTask 创建一个新执行任务
+func NewRunTask(taskName, configJSON, mainTaskId, lastRunTaskId string) (taskId string, err error) {
 	server := ampq.GetServerTaskAMPQSrever()
 	// 延迟5秒后执行
 	eta := time.Now().Add(time.Second * 5)
@@ -23,6 +23,7 @@ func NewTask(taskName, configJSON, cronTaskId string) (taskId string, err error)
 		ETA:  &eta,
 		Args: []tasks.Arg{
 			{Name: "taskId", Type: "string", Value: taskId},
+			{Name: "mainTaskId", Type: "string", Value: mainTaskId},
 			{Name: "configJSON", Type: "string", Value: configJSON},
 		},
 	}
@@ -31,14 +32,14 @@ func NewTask(taskName, configJSON, cronTaskId string) (taskId string, err error)
 		logging.RuntimeLog.Error(err)
 		return "", err
 	}
-	addTask(taskId, taskName, configJSON, cronTaskId)
+	addTask(taskId, taskName, configJSON, mainTaskId, lastRunTaskId)
 
 	return taskId, nil
 }
 
 // RevokeUnexcusedTask 取消一个未开始执行的任务
 func RevokeUnexcusedTask(taskId string) (isRevoked bool, err error) {
-	task := &db.Task{TaskId: taskId}
+	task := &db.TaskRun{TaskId: taskId}
 	if !task.GetByTaskId() {
 		logging.RuntimeLog.Errorf("Task not exists when revoked: %s", taskId)
 		return false, errors.New("task not exists")
@@ -53,15 +54,16 @@ func RevokeUnexcusedTask(taskId string) (isRevoked bool, err error) {
 }
 
 // addTask 将任务写入到数据库中
-func addTask(taskId, taskName, kwArgs, cronTaskId string) {
+func addTask(taskId, taskName, kwArgs, mainTaskId, lastRunTaskId string) {
 	dt := time.Now()
-	task := &db.Task{
-		TaskId:       taskId,
-		TaskName:     taskName,
-		KwArgs:       kwArgs,
-		State:        ampq.CREATED,
-		ReceivedTime: &dt,
-		CronTaskId:   cronTaskId,
+	task := &db.TaskRun{
+		TaskId:        taskId,
+		TaskName:      taskName,
+		KwArgs:        kwArgs,
+		State:         ampq.CREATED,
+		ReceivedTime:  &dt,
+		MainTaskId:    mainTaskId,
+		LastRunTaskId: lastRunTaskId,
 	}
 	//kwargs可能因为target很多导致超过数据库中的字段设计长度，因此作一个长度截取
 	const argsLength = 6000
@@ -76,7 +78,7 @@ func addTask(taskId, taskName, kwArgs, cronTaskId string) {
 // updateRevokedTask 更新取消的任务状态
 func updateRevokedTask(taskId string) {
 	dt := time.Now()
-	task := &db.Task{
+	task := &db.TaskRun{
 		TaskId:      taskId,
 		State:       ampq.REVOKED,
 		RevokedTime: &dt,

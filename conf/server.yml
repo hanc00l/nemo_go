@@ -26,3 +26,10 @@ rabbitmq:
 task:
   ipSliceNumber: 64
   portSliceNumber: 1000
+notify:
+  dingtalk:
+    token: ""
+  feishu:
+    token: ""
+  serverchan:
+    token: ""

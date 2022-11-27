@@ -11,7 +11,7 @@
  Target Server Version : 50739
  File Encoding         : 65001
 
- Date: 04/11/2022 10:11:20
+ Date: 27/11/2022 22:54:01
 */
 
 SET NAMES utf8mb4;
@@ -31,7 +31,7 @@ CREATE TABLE `domain` (
   UNIQUE KEY `index_domain_domain` (`domain`) USING BTREE,
   KEY `fk_domain_org_id` (`org_id`),
   CONSTRAINT `fk_domain_org_id` FOREIGN KEY (`org_id`) REFERENCES `organization` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=733 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=784 DEFAULT CHARSET=utf8;
 
 -- ----------------------------
 -- Table structure for domain_attr
@@ -50,7 +50,7 @@ CREATE TABLE `domain_attr` (
   UNIQUE KEY `index_domain_attr_hash` (`hash`) USING BTREE,
   KEY `index_domain_attr_ip_id` (`r_id`),
   CONSTRAINT `domain_attr_ibfk_1` FOREIGN KEY (`r_id`) REFERENCES `domain` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=3461 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=5413 DEFAULT CHARSET=utf8;
 
 -- ----------------------------
 -- Table structure for domain_color_tag
@@ -101,7 +101,7 @@ CREATE TABLE `ip` (
   UNIQUE KEY `index_ip_ip_int` (`ip_int`) USING BTREE,
   KEY `index_ip_org_id` (`org_id`),
   CONSTRAINT `fk_ip_org_id` FOREIGN KEY (`org_id`) REFERENCES `organization` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=774 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=793 DEFAULT CHARSET=utf8;
 
 -- ----------------------------
 -- Table structure for ip_attr
@@ -199,7 +199,7 @@ CREATE TABLE `port` (
   PRIMARY KEY (`id`),
   UNIQUE KEY `index_port_ip_port` (`ip_id`,`port`),
   CONSTRAINT `fk_port_ip` FOREIGN KEY (`ip_id`) REFERENCES `ip` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=904 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=1033 DEFAULT CHARSET=utf8;
 
 -- ----------------------------
 -- Table structure for port_attr
@@ -218,18 +218,57 @@ CREATE TABLE `port_attr` (
   UNIQUE KEY `index_port_attr_hash` (`hash`),
   KEY `fk_port_attr_r_id` (`r_id`),
   CONSTRAINT `fk_port_attr_r_id` FOREIGN KEY (`r_id`) REFERENCES `port` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=3322 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=3838 DEFAULT CHARSET=utf8;
 
 -- ----------------------------
--- Table structure for task
+-- Table structure for task_cron
 -- ----------------------------
-DROP TABLE IF EXISTS `task`;
-CREATE TABLE `task` (
+DROP TABLE IF EXISTS `task_cron`;
+CREATE TABLE `task_cron` (
   `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
   `task_id` char(36) NOT NULL,
   `task_name` varchar(100) NOT NULL,
-  `args` varchar(2000) DEFAULT NULL,
-  `kwargs` varchar(4000) DEFAULT NULL,
+  `kwargs` varchar(8000) DEFAULT NULL,
+  `create_datetime` datetime NOT NULL,
+  `update_datetime` datetime NOT NULL,
+  `cron_rule` varchar(200) NOT NULL COMMENT '定时规则',
+  `lastrun_datetime` datetime DEFAULT NULL COMMENT '上次运行时间',
+  `status` varchar(10) NOT NULL COMMENT '状态enable or disable',
+  `run_count` int(11) DEFAULT NULL COMMENT '启动次数',
+  `comment` varchar(200) DEFAULT NULL COMMENT '定时任务说明',
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8;
+
+-- ----------------------------
+-- Table structure for task_main
+-- ----------------------------
+DROP TABLE IF EXISTS `task_main`;
+CREATE TABLE `task_main` (
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `task_id` char(36) NOT NULL,
+  `task_name` varchar(100) NOT NULL,
+  `kwargs` varchar(8000) DEFAULT NULL,
+  `state` varchar(40) NOT NULL,
+  `result` varchar(4000) DEFAULT NULL,
+  `received` datetime NOT NULL,
+  `started` datetime DEFAULT NULL,
+  `succeeded` datetime DEFAULT NULL,
+  `progress_message` varchar(100) DEFAULT NULL,
+  `cron_id` char(36) DEFAULT NULL COMMENT 'the id for cron task',
+  `create_datetime` datetime NOT NULL,
+  `update_datetime` datetime NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=52 DEFAULT CHARSET=utf8;
+
+-- ----------------------------
+-- Table structure for task_run
+-- ----------------------------
+DROP TABLE IF EXISTS `task_run`;
+CREATE TABLE `task_run` (
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `task_id` char(36) NOT NULL,
+  `task_name` varchar(100) NOT NULL,
+  `kwargs` varchar(8000) DEFAULT NULL,
   `worker` varchar(100) DEFAULT NULL,
   `state` varchar(40) NOT NULL,
   `result` varchar(4000) DEFAULT NULL,
@@ -242,29 +281,10 @@ CREATE TABLE `task` (
   `progress_message` varchar(100) DEFAULT NULL,
   `create_datetime` datetime NOT NULL,
   `update_datetime` datetime NOT NULL,
-  `cron_id` char(36) DEFAULT NULL COMMENT 'the id for cron task',
+  `main_id` char(36) DEFAULT NULL COMMENT 'the id for main task',
+  `last_run_id` char(36) DEFAULT NULL COMMENT 'last runtask id',
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=397 DEFAULT CHARSET=utf8;
-
--- ----------------------------
--- Table structure for task_cron
--- ----------------------------
-DROP TABLE IF EXISTS `task_cron`;
-CREATE TABLE `task_cron` (
-  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
-  `task_id` char(36) NOT NULL,
-  `task_name` varchar(100) NOT NULL,
-  `args` varchar(2000) DEFAULT NULL,
-  `kwargs` varchar(8000) DEFAULT NULL,
-  `create_datetime` datetime NOT NULL,
-  `update_datetime` datetime NOT NULL,
-  `cron_rule` varchar(200) NOT NULL COMMENT '定时规则',
-  `lastrun_datetime` datetime DEFAULT NULL COMMENT '上次运行时间',
-  `status` varchar(10) NOT NULL COMMENT '状态enable or disable',
-  `run_count` int(11) DEFAULT NULL COMMENT '启动次数',
-  `comment` varchar(200) DEFAULT NULL COMMENT '定时任务说明',
-  PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=9 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=154 DEFAULT CHARSET=utf8;
 
 -- ----------------------------
 -- Table structure for vulnerability
@@ -281,6 +301,6 @@ CREATE TABLE `vulnerability` (
   `create_datetime` datetime NOT NULL,
   `update_datetime` datetime NOT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=17 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=16 DEFAULT CHARSET=utf8;
 
 SET FOREIGN_KEY_CHECKS = 1;

@@ -114,8 +114,7 @@ func (s *ScreenShot) LoadResult() (result []ScreenshotFileInfo) {
 }
 
 // SaveFile 保存screenshot文件到本地
-func (s *ScreenShot) SaveFile(localSavePath string, result []ScreenshotFileInfo) string {
-	count := 0
+func (s *ScreenShot) SaveFile(localSavePath string, result []ScreenshotFileInfo) (count int) {
 	for _, sfi := range result {
 		// check
 		if sfi.Port == 0 || sfi.Domain == "" || sfi.Protocol == "" || len(sfi.Content) == 0 {
@@ -150,8 +149,7 @@ func (s *ScreenShot) SaveFile(localSavePath string, result []ScreenshotFileInfo)
 			logging.RuntimeLog.Error("generate thumbnail picature fail")
 		}
 	}
-
-	return fmt.Sprintf("screenshot:%d", count)
+	return
 }
 
 // LoadScreenshotFile 获取screenshot文件

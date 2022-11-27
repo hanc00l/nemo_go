@@ -21,7 +21,7 @@ func TestDomainScan(t *testing.T) {
 	if err != nil {
 		t.Log(err)
 	}
-	result, err := serverapi.NewTask("domainscan", string(configJSON), "")
+	result, err := serverapi.NewRunTask("domainscan", string(configJSON), "", "")
 	t.Log(result, err)
 }
 
@@ -40,7 +40,7 @@ func TestDomainScanCrawler(t *testing.T) {
 	if err != nil {
 		t.Log(err)
 	}
-	result, err := serverapi.NewTask("domainscan", string(configJSON), "")
+	result, err := serverapi.NewRunTask("domainscan", string(configJSON), "", "")
 	t.Log(result, err)
 }
 func TestDomainWithPortScanScan(t *testing.T) {
@@ -57,6 +57,6 @@ func TestDomainWithPortScanScan(t *testing.T) {
 	if err != nil {
 		t.Log(err)
 	}
-	result, err := serverapi.NewTask("domainscan", string(configJSON), "")
+	result, err := serverapi.NewRunTask("domainscan", string(configJSON), "", "")
 	t.Log(result, err)
 }

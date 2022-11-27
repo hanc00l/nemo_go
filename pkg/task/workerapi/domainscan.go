@@ -1,7 +1,6 @@
 package workerapi
 
 import (
-	"context"
 	"encoding/json"
 	"fmt"
 	"github.com/hanc00l/nemo_go/pkg/comm"
@@ -15,7 +14,7 @@ import (
 )
 
 // DomainScan 域名任务
-func DomainScan(taskId, configJSON string) (result string, err error) {
+func DomainScan(taskId, mainTaskId, configJSON string) (result string, err error) {
 	var ok bool
 	if ok, result, err = CheckTaskStatus(taskId); !ok {
 		return result, err
@@ -28,21 +27,21 @@ func DomainScan(taskId, configJSON string) (result string, err error) {
 	resultDomainScan := doDomainScan(config)
 	// 如果有端口扫描的选项
 	if config.IsIPPortScan || config.IsIPSubnetPortScan {
-		doPortScanByDomainscan(config, &resultDomainScan)
+		doPortScanByDomainscan(taskId, mainTaskId, config, &resultDomainScan)
 	}
 	// 保存结果
-	x := comm.NewXClient()
 	resultArgs := comm.ScanResultArgs{
 		TaskID:       taskId,
+		MainTaskId:   mainTaskId,
 		DomainConfig: &config,
 		DomainResult: resultDomainScan.DomainResult,
 	}
-	err = x.Call(context.Background(), "SaveScanResult", &resultArgs, &result)
+	err = comm.CallXClient("SaveScanResult", &resultArgs, &result)
 	if err != nil {
 		logging.RuntimeLog.Error(err)
 		return FailedTask(err.Error()), err
 	}
-	_, err = NewFingerprintTask(nil, &resultDomainScan, FingerprintTaskConfig{
+	_, err = NewFingerprintTask(taskId, mainTaskId, nil, &resultDomainScan, FingerprintTaskConfig{
 		IsHttpx:          config.IsHttpx,
 		IsFingerprintHub: config.IsFingerprintHub,
 		IsIconHash:       config.IsIconHash,
@@ -93,7 +92,7 @@ func doDomainScan(config domainscan.Config) (resultDomainScan domainscan.Result)
 }
 
 // doPortScanByDomainscan 对IP进行端口扫描
-func doPortScanByDomainscan(config domainscan.Config, resultDomainScan *domainscan.Result) {
+func doPortScanByDomainscan(taskId, mainTaskId string, config domainscan.Config, resultDomainScan *domainscan.Result) {
 	ipResult, ipSubnetResult := getResultIPList(resultDomainScan)
 	if len(ipResult) == 0 {
 		return
@@ -130,13 +129,16 @@ func doPortScanByDomainscan(config domainscan.Config, resultDomainScan *domainsc
 			}
 			configPortScanJSON, _ := json.Marshal(configPortScan)
 			// 创建端口扫描任务
-			x := comm.NewXClient()
+			//x := comm.NewXClient()
 			newTaskArgs := comm.NewTaskArgs{
-				TaskName:   "portscan",
-				ConfigJSON: string(configPortScanJSON),
+				TaskName:      "portscan",
+				LastRunTaskId: taskId,
+				MainTaskID:    mainTaskId,
+				ConfigJSON:    string(configPortScanJSON),
 			}
 			var result string
-			err := x.Call(context.Background(), "NewTask", &newTaskArgs, &result)
+			//err := x.Call(context.Background(), "NewTask", &newTaskArgs, &result)
+			err := comm.CallXClient("NewTask", &newTaskArgs, &result)
 			if err != nil {
 				logging.RuntimeLog.Error("Start Portscan task fail:", err)
 				logging.CLILog.Error("Start Portscan task fail:", err)

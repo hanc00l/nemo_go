@@ -1,7 +1,6 @@
 package comm
 
 import (
-	"context"
 	"github.com/hanc00l/nemo_go/pkg/conf"
 	"github.com/hanc00l/nemo_go/pkg/logging"
 	"github.com/hanc00l/nemo_go/pkg/task/ampq"
@@ -22,27 +21,29 @@ type WorkerDaemonManualInfo struct {
 	ManualFileSyncFlag bool `json:"manual_file_sync_flag"`
 }
 
-var WorkerStatusMutex sync.Mutex
-var WorkerStatus = make(map[string]*ampq.WorkerStatus)
+var (
+	WorkerStatusMutex sync.Mutex
+	WorkerStatus      = make(map[string]*ampq.WorkerStatus)
 
-// asynFiles 需要同步的自定义配置文件
-var asynFiles = []string{
-	"thirdparty/custom/honeypot.txt",
-	"thirdparty/custom/iplocation-custom.txt",
-	"thirdparty/custom/iplocation-custom-B.txt",
-	"thirdparty/custom/iplocation-custom-C.txt",
-	"thirdparty/custom/services-custom.txt",
-	"thirdparty/icp/icp.cache",
-}
+	// asynFiles 需要同步的自定义配置文件
+	asynFiles = []string{
+		"thirdparty/custom/honeypot.txt",
+		"thirdparty/custom/iplocation-custom.txt",
+		"thirdparty/custom/iplocation-custom-B.txt",
+		"thirdparty/custom/iplocation-custom-C.txt",
+		"thirdparty/custom/services-custom.txt",
+		"thirdparty/custom/fofa_filter_keyword.txt",
+		"thirdparty/custom/web_fingerprint.json",
+		"thirdparty/icp/icp.cache",
+	}
+)
 
 // DoKeepAlive worker请求keepAlive
 func DoKeepAlive(ws ampq.WorkerStatus) bool {
 	kari := newKeepAliveRequestInfo(ws)
 	syncMap := make(map[string]string)
 
-	x := NewXClient()
-	err := x.Call(context.Background(), "KeepAlive", &kari, &syncMap)
-	if err != nil {
+	if err := CallXClient("KeepAlive", &kari, &syncMap); err != nil {
 		logging.RuntimeLog.Errorf("keep alive fail:%v", err)
 		return false
 	}
@@ -53,9 +54,7 @@ func DoKeepAlive(ws ampq.WorkerStatus) bool {
 
 // DoDaemonKeepAlive worker请求keepAlive
 func DoDaemonKeepAlive() (replay WorkerDaemonManualInfo, err error) {
-	x := NewXClient()
-	err = x.Call(context.Background(), "KeepDaemonAlive", &WorkerName, &replay)
-	if err != nil {
+	if err = CallXClient("KeepDaemonAlive", &WorkerName, &replay); err != nil {
 		logging.CLILog.Errorf("keep daemon alive fail:%v", err)
 		return
 	}
@@ -108,8 +107,7 @@ func syncCustomFiles(cf map[string]string) {
 		if _, ok := cf[file]; !ok || cf[file] == "" {
 			continue
 		}
-		err := os.WriteFile(filepath.Join(conf.GetRootPath(), file), []byte(cf[file]), 0666)
-		if err != nil {
+		if err := os.WriteFile(filepath.Join(conf.GetRootPath(), file), []byte(cf[file]), 0666); err != nil {
 			logging.RuntimeLog.Error(err)
 		}
 	}
