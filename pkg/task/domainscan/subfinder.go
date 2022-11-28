@@ -3,11 +3,9 @@ package domainscan
 import (
 	"bufio"
 	"bytes"
-	"context"
 	"github.com/hanc00l/nemo_go/pkg/conf"
 	"github.com/hanc00l/nemo_go/pkg/logging"
 	"github.com/hanc00l/nemo_go/pkg/utils"
-	"github.com/projectdiscovery/subfinder/v2/pkg/passive"
 	"github.com/projectdiscovery/subfinder/v2/pkg/resolve"
 	"github.com/projectdiscovery/subfinder/v2/pkg/runner"
 	"github.com/remeh/sizedwaitgroup"
@@ -54,34 +52,28 @@ func (s *SubFinder) RunSubFinder(domain string) {
 	//subfinder的options
 	options := &runner.Options{
 		Verbose:            true,
-		Threads:            10,                              // Thread controls the number of threads to use for active enumerations
-		Timeout:            30,                              // Timeout is the seconds to wait for sources to respond
-		MaxEnumerationTime: 10,                              // MaxEnumerationTime is the maximum amount of time in mins to wait for enumeration
-		Resolvers:          defaultResolvers,                // Use the default list of resolvers by marshaling it to the config
-		Sources:            passive.DefaultSources,          // Use the default list of passive sources
-		AllSources:         passive.DefaultAllSources,       // Use the default list of all passive sources
-		Recursive:          passive.DefaultRecursiveSources, // Use the default list of recursive sources
-		Providers:          &runner.Providers{},             // Use empty api keys for all providers
+		Threads:            10,               // Thread controls the number of threads to use for active enumerations
+		Timeout:            30,               // Timeout is the seconds to wait for sources to respond
+		MaxEnumerationTime: 10,               // MaxEnumerationTime is the maximum amount of time in mins to wait for enumeration
+		Resolvers:          defaultResolvers, // Use the default list of resolvers by marshaling it to the config
+		All:                true,             // All specifies whether to use all (slow) sources.
 	}
-	if len(defaultResolvers)==0{
+	if len(defaultResolvers) == 0 {
 		options.Resolvers = resolve.DefaultResolvers
 	}
 	//读取provider配置文件，参见https://github.com/projectdiscovery/subfinder#post-installation-instructions
 	if len(conf.GlobalWorkerConfig().Domainscan.ProviderConfig) > 0 {
 		providerFile := filepath.Join(conf.GetRootPath(), "thirdparty/dict", conf.GlobalWorkerConfig().Domainscan.ProviderConfig)
 		if utils.CheckFileExist(providerFile) {
-			err := options.Providers.UnmarshalFrom(providerFile)
-			if err != nil {
-				logging.RuntimeLog.Error(err)
-			}
-		}else{
-			logging.RuntimeLog.Errorf("provider-config file not exist:%s",providerFile)
+			options.ProviderConfig = providerFile
+		} else {
+			logging.RuntimeLog.Errorf("provider-config file not exist:%s", providerFile)
 		}
 	}
 	//执行subfinder
 	runnerInstance, err := runner.NewRunner(options)
 	buf := bytes.Buffer{}
-	err = runnerInstance.EnumerateSingleDomain(context.Background(), domain, []io.Writer{&buf})
+	err = runnerInstance.EnumerateSingleDomain(domain, []io.Writer{&buf})
 	if err != nil {
 		logging.RuntimeLog.Error(err)
 		return
@@ -118,8 +110,9 @@ func (s *SubFinder) parseResultContent(content []byte) {
 		}
 	}
 }
+
 // loadDefaultResolver  读取Resolvers
-func loadDefaultResolver(){
+func loadDefaultResolver() {
 	inputFile, err := os.Open(filepath.Join(conf.GetRootPath(), "thirdparty/dict", conf.GlobalWorkerConfig().Domainscan.Resolver))
 	if err != nil {
 		logging.RuntimeLog.Errorf("Could not read default resolver: %s\n", err)

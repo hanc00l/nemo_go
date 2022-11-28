@@ -62,3 +62,28 @@ func TestHttpx_ParseJSONContentResult(t *testing.T) {
 		}
 	}
 }
+
+func TestHttpx1(t *testing.T) {
+	httpx := NewHttpxFinger()
+	httpx.ResultPortScan.IPResult = make(map[string]*portscan.IPResult)
+	httpx.ResultPortScan.SetIP("192.168.3.1")
+	httpx.ResultPortScan.SetPort("192.168.3.1", 80)
+	httpx.DoHttpxAndFingerPrint()
+	for k, ip := range httpx.ResultPortScan.IPResult {
+		t.Log(k)
+		for kk, port := range ip.Ports {
+			t.Log(kk, port.Status)
+			t.Log(port.PortAttrs)
+		}
+	}
+}
+
+func TestHttpx2(t *testing.T) {
+	httpx := NewHttpxFinger()
+	httpx.ResultDomainScan.DomainResult = make(map[string]*domainscan.DomainResult)
+	httpx.ResultDomainScan.SetDomain("www.baidu.com")
+	httpx.DoHttpxAndFingerPrint()
+	for d, da := range httpx.ResultDomainScan.DomainResult {
+		t.Log(d, da)
+	}
+}

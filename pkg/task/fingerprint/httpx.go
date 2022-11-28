@@ -28,6 +28,34 @@ type Httpx struct {
 	FingerPrintFunc        []func(domain string, ip string, port int, url string, result []FingerAttrResult) []string
 }
 
+/*
+{"timestamp":"2022-11-28T09:45:09.742937+08:00",
+"tls":{"host":"www.baidu.com","port":"443","probe_status":true,"tls_version":"tls12","cipher":"TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256",
+"not_before":"2022-07-05T05:16:02Z","not_after":"2023-08-06T05:16:01Z",
+"subject_dn":"CN=baidu.com, O=Beijing Baidu Netcom Science Technology Co.\\, Ltd, OU=service operation department, L=beijing, ST=beijing, C=CN","subject_cn":"baidu.com",
+"subject_org":["Beijing Baidu Netcom Science Technology Co., Ltd"],
+"subject_an":["baidu.com","baifubao.com","www.baidu.cn","www.baidu.com.cn","mct.y.nuomi.com","apollo.auto","dwz.cn","*.baidu.com","*.baifubao.com","*.baidustatic.com","*.bdstatic.com","*.bdimg.com","*.hao123.com","*.nuomi.com","*.chuanke.com","*.trustgo.com","*.bce.baidu.com","*.eyun.baidu.com","*.map.baidu.com","*.mbd.baidu.com","*.fanyi.baidu.com","*.baidubce.com","*.mipcdn.com","*.news.baidu.com","*.baidupcs.com","*.aipage.com","*.aipage.cn","*.bcehost.com","*.safe.baidu.com","*.im.baidu.com","*.baiducontent.com","*.dlnel.com","*.dlnel.org","*.dueros.baidu.com","*.su.baidu.com","*.91.com","*.hao123.baidu.com","*.apollo.auto","*.xueshu.baidu.com","*.bj.baidubce.com","*.gz.baidubce.com","*.smartapps.cn","*.bdtjrcv.com","*.hao222.com","*.haokan.com","*.pae.baidu.com","*.vd.bdstatic.com","*.cloud.baidu.com","click.hm.baidu.com","log.hm.baidu.com","cm.pos.baidu.com","wn.pos.baidu.com","update.pan.baidu.com"],
+"issuer_dn":"CN=GlobalSign RSA OV SSL CA 2018, O=GlobalSign nv-sa, C=BE","issuer_cn":"GlobalSign RSA OV SSL CA 2018",
+"issuer_org":["GlobalSign nv-sa"],
+"fingerprint_hash":{"md5":"ed1949098287a63d206f549a22918c38","sha1":"486aedd16852e5974fa09246b33c56463dd99cd5","sha256":"9ee66a02e0af04405c3e9570b039427af237cab3404d42d56dad235969ce626a"},"wildcard_certificate":true,"tls_connection":"ctls","sni":"www.baidu.com"},
+"hash":{"body_md5":"d41d8cd98f00b204e9800998ecf8427e","body_mmh3":"-1840324437","body_sha256":"e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855","body_simhash":"18446744073709551615","header_md5":"a211a24f0a8916bb3a9b405237f246fd","header_mmh3":"808001881","header_sha256":"236458af9411bdf5737baf03f8a7fe5ce2bdf47eddf8018c024a46a2c8262877","header_simhash":"11021017595241015215"},
+"port":"443",
+"url":"https://www.baidu.com:443",
+"input":"www.baidu.com:443",
+"title":"百度一下，你就知道",
+"scheme":"https",
+"webserver":"BWS/1.1",
+"content_type":"text/html",
+"method":"GET",
+"host":"103.235.46.40",
+"path":"/",
+"time":"2.942597075s",
+"a":["103.235.46.40"],
+"cname":["www.a.shifen.com","www.wshifen.com"],
+"words":1,"lines":1,
+"status_code":200,"failed":false}
+*/
+
 type HttpxResult struct {
 	A           []string `json:"a,omitempty"`
 	CNames      []string `json:"cnames,omitempty"`
@@ -36,18 +64,18 @@ type HttpxResult struct {
 	Port        string   `json:"port,omitempty"`
 	Title       string   `json:"title,omitempty"`
 	WebServer   string   `json:"webserver,omitempty"`
-	ContentType string   `json:"content-type,omitempty"`
-	StatusCode  int      `json:"status-code,omitempty"`
-	FinalUrl    string   `json:"final-url,omitempty"`
-	TLSData     *TLS     `json:"tls-grab,omitempty"`
+	ContentType string   `json:"content_type,omitempty"`
+	StatusCode  int      `json:"status_code,omitempty"`
+	TLSData     *TLS     `json:"tls,omitempty"`
 }
 
 type TLS struct {
-	DNSName            []string `json:"dns_names,omitempty"`
-	CommonName         []string `json:"common_name,omitempty"`
-	Organization       []string `json:"organization,omitempty"`
-	IssuerCommonName   []string `json:"issuer_common_name,omitempty"`
-	IssuerOrganization []string `json:"issuer_organization,omitempty"`
+	SubjectDNSName           []string `json:"subject_an,omitempty"`
+	SubjectCommonName        string   `json:"subject_cn,omitempty"`
+	SubjectDistinguishedName string   `json:"subject_dn,omitempty"`
+	SubjectOrganization      []string `json:"subject_org,omitempty"`
+	IssuerDistinguishedName  string   `json:"issuer_dn,omitempty"`
+	IssuerOrganization       []string `json:"issuer_org,omitempty"`
 }
 
 // NewHttpx 创建httpx对象

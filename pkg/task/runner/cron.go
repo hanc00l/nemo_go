@@ -1,9 +1,11 @@
 package runner
 
 import (
+	"fmt"
 	"github.com/google/uuid"
 	"github.com/hanc00l/nemo_go/pkg/db"
 	"github.com/hanc00l/nemo_go/pkg/logging"
+	"github.com/hanc00l/nemo_go/pkg/notify"
 	"github.com/robfig/cron/v3"
 	"sync"
 	"time"
@@ -122,6 +124,9 @@ func (j CronTaskJob) Run() {
 	updateMap["lastrun_datetime"] = time.Now()
 	updateMap["run_count"] = ct.RunCount + 1
 	ct.Update(updateMap)
+	// 消息通知
+	message := fmt.Sprintf("启动计划任务->%s:%s", ct.TaskName, ct.Comment)
+	go notify.Send(message)
 }
 
 // StartCronTask 启动定时任务守护和调度

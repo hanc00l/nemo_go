@@ -55,7 +55,12 @@ $(function () {
                     data: "state", title: "状态", width: "8%",
                     "render": function (data, type, row) {
                         if (row["tasktype"] === "RunTask" && data === 'CREATED') {
-                            return data + '<button class="btn btn-sm btn-danger" type="button" onclick="stop_task(\'' + row['task_id'] + '\')" >&nbsp;中止&nbsp;</button>';
+                            let strData;
+                            strData = data;
+                            strData += '<button class="btn btn-sm btn-danger" type="button" onclick="stop_task(\'' + row['task_id'] + '\')" >&nbsp;中止&nbsp;</button>';
+                            return strData;
+                        } else if (data === 'STARTED') {
+                            return " <span class=\"badge badge-warning\">" + data + "</span>";
                         } else return data;
                     }
                 },
@@ -147,7 +152,8 @@ $(function () {
     $("#batch_delete").click(function () {
         batch_delete('#task_table', '/task-delete-main');
     });
-});
+})
+;
 
 /**
  * 移除 dataTables默认参数，并设置分页值

@@ -57,10 +57,12 @@ type OnlineUserInfo struct {
 	UpdateNumber int64
 }
 
-// OnlineUserMutex 在线用户Mutex
-var OnlineUserMutex sync.Mutex
-// OnlineUser 在线用户信息
-var OnlineUser = make(map[string]*OnlineUserInfo)
+var (
+	// OnlineUserMutex 在线用户Mutex
+	OnlineUserMutex sync.Mutex
+	// OnlineUser 在线用户信息
+	OnlineUser = make(map[string]*OnlineUserInfo)
+)
 
 func (c *BaseController) GetGlobalSessionData() GlobalSessionData {
 	data := GlobalSessionData{

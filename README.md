@@ -54,15 +54,15 @@ Nemo是用来进行自动化信息收集的一个简单平台，通过集成常�
 - 定时任务执行
 - Server与Worker通过 [RPC](https://github.com/smallnest/rpcx) 同步
 - Server与Worker文件自动同步
+- 任务执行完成消息通知（钉钉、飞书群机器人及Server酱）
 
 
 ### 7、团队在线协作
 
-- [TODO]
+- 资产颜色标记、备忘录协作
 
 ### 8、其它
 
-- 资产的统计、颜色标记与备忘录协作
 - Docker支持
 - 资产流程化扫描（XSCAN）
 
@@ -117,6 +117,7 @@ Tested on [ubuntu18.04/20.04/22.04 LTS](docs/install_linux.md)、[macOS](docs/in
 
 ## 版本更新
 
+- 2.8.0：2022-11-28，重构任务机制，将任务分为前端生成的MainTask和分布式执行的RunTask；增加MainTask任务完成消息通知，支持Server酱、钉钉群及飞书群机器人，设置Token后将发送任务完成消息。从2.7升级需要导入task.sql到数据库中。
 - 2.7.1：2022-11-18，修复XrayPocV2多线程任务时，在POC加载及Request时共享变量冲突问题（目前默认是直接调用xray二进制文件进行漏洞验证，该代码功能目前未使用）；
 - 2.7.0：2022-11-4，增加资产流程化扫描（XSCAN）功能，支持对IP、域名（以及指定组织相关联的资产）及通过FOFA关键词，流程化进行端口扫描、子域名枚举及爆破，获取相关指纹并进行漏洞扫描（支持Xray）；增加自定义的web指纹功能；增加XrayPoc的上传功能；移除pocsuite3代码及功能；对部份模块代码进行重构；docker默认使用Ubuntu22.04LTS；增加FOFA关键词搜索及定义功能，从2.6.1升级需导key_word.sql，并且在worker.yml中增加fingerprint相关的参数；
 - 2.6.1：2022-10-17，在Windows平台运行Nemo的Server与Worker（只测试在win10里代码及功能运行正常，server及worker的依赖环境的安装和配置请参考linux平台；子域名爆破使用的massdns暂不支持在windows平台上运行）；
