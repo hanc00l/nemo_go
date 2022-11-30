@@ -3,6 +3,7 @@ package domainscan
 import (
 	"fmt"
 	"github.com/hanc00l/nemo_go/pkg/db"
+	"strings"
 	"sync"
 )
 
@@ -39,13 +40,13 @@ type DomainAttrResult struct {
 	Content   string
 }
 
-//DomainResult 域名结果
+// DomainResult 域名结果
 type DomainResult struct {
 	OrgId       *int
 	DomainAttrs []DomainAttrResult
 }
 
-//Result 域名结果
+// Result 域名结果
 type Result struct {
 	sync.RWMutex
 	DomainResult    map[string]*DomainResult
@@ -77,13 +78,18 @@ func (r *Result) SetDomainAttr(domain string, dar DomainAttrResult) {
 // SaveResult 保存域名结果
 func (r *Result) SaveResult(config Config) string {
 	var resultDomainCount int
+	var newDomain int
 	for domainName, domainResult := range r.DomainResult {
 		domain := &db.Domain{
 			DomainName: domainName,
 			OrgId:      config.OrgId,
 		}
-		if !domain.SaveOrUpdate() {
+		if ok, isNew := domain.SaveOrUpdate(); !ok {
 			continue
+		} else {
+			if isNew {
+				newDomain++
+			}
 		}
 		resultDomainCount++
 		for _, domainAttrResult := range domainResult.DomainAttrs {
@@ -96,6 +102,10 @@ func (r *Result) SaveResult(config Config) string {
 			domainAttr.SaveOrUpdate()
 		}
 	}
-
-	return fmt.Sprintf("domain:%d", resultDomainCount)
+	var sb strings.Builder
+	sb.WriteString(fmt.Sprintf("domain:%d", resultDomainCount))
+	if newDomain > 0 {
+		sb.WriteString(fmt.Sprintf(",domainNew:%d", newDomain))
+	}
+	return sb.String()
 }

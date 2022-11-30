@@ -15,7 +15,7 @@ func (Port) TableName() string {
 	return "port"
 }
 
-//Add 插入一条新的记录，返回主键ID及成功标志
+// Add 插入一条新的记录，返回主键ID及成功标志
 func (port *Port) Add() (success bool) {
 	port.CreateDatetime = time.Now()
 	port.UpdateDatetime = time.Now()
@@ -57,7 +57,7 @@ func (port *Port) Update(updatedMap map[string]interface{}) (success bool) {
 
 	db := GetDB()
 	defer CloseDB(db)
-	if result := db.Model(port).Updates(updatedMap);result.RowsAffected > 0 {
+	if result := db.Model(port).Updates(updatedMap); result.RowsAffected > 0 {
 		return true
 	} else {
 		return false
@@ -65,7 +65,7 @@ func (port *Port) Update(updatedMap map[string]interface{}) (success bool) {
 }
 
 // SaveOrUpdate 保存、更新一条记录
-func (port *Port) SaveOrUpdate() (success bool) {
+func (port *Port) SaveOrUpdate() (success bool, isNew bool) {
 	oldRecord := &Port{IpId: port.IpId, PortNum: port.PortNum}
 	if oldRecord.GetByIPPort() {
 		updateMap := map[string]interface{}{}
@@ -73,8 +73,8 @@ func (port *Port) SaveOrUpdate() (success bool) {
 			updateMap["status"] = port.Status
 		}
 		port.Id = oldRecord.Id
-		return port.Update(updateMap)
+		return port.Update(updateMap), false
 	} else {
-		return port.Add()
+		return port.Add(), true
 	}
 }

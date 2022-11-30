@@ -23,6 +23,7 @@ import (
 	"os"
 	"path"
 	"path/filepath"
+	"strconv"
 	"strings"
 	"sync"
 	"time"
@@ -71,6 +72,10 @@ type MainTaskResultMap struct {
 	DomainResult     map[string]interface{}
 	VulResult        map[string]map[string]interface{}
 	ScreenShotResult int
+	IPNew            int
+	PortNew          int
+	DomainNew        int
+	VulnerabilityNew int
 }
 
 var (
@@ -133,8 +138,9 @@ func (s *Service) SaveScanResult(ctx context.Context, args *ScanResultArgs, repl
 		}
 	}
 	saveMainTaskResult(args.MainTaskId, args.IPResult, args.DomainResult, args.VulnerabilityResult, 0)
-
 	*replay = strings.Join(msg, ",")
+	saveMainTaskNewResult(args.MainTaskId, *replay)
+
 	return nil
 }
 
@@ -172,6 +178,7 @@ func (s *Service) SaveVulnerabilityResult(ctx context.Context, args *ScanResultA
 	*replay = pocscan.SaveResult(args.VulnerabilityResult)
 	if len(args.VulnerabilityResult) > 0 {
 		saveTaskResult(args.TaskID, args.VulnerabilityResult)
+		saveMainTaskNewResult(args.MainTaskId, *replay)
 	}
 	return nil
 }
@@ -477,8 +484,43 @@ func saveMainTaskResult(taskId string, ipResult map[string]*portscan.IPResult, d
 		}
 	}
 	taskObj.ScreenShotResult += screenshotResult
-	// 小坑：重新将value传递给map对应的key
-	MainTaskResult[taskId] = taskObj
 
+	MainTaskResult[taskId] = taskObj
+	return
+}
+
+// saveMainTaskNewResult 解析并保存任务结果中新增的资产数量
+func saveMainTaskNewResult(mainTaskId, msg string) {
+	MainTaskResultMutex.Lock()
+	defer MainTaskResultMutex.Unlock()
+
+	if _, ok := MainTaskResult[mainTaskId]; !ok {
+		return
+	}
+	taskObj := MainTaskResult[mainTaskId]
+	allResult := strings.Split(msg, ",")
+	for _, result := range allResult {
+		kv := strings.Split(result, ":")
+		switch kv[0] {
+		case "ipNew":
+			if v, err := strconv.Atoi(kv[1]); err == nil {
+				taskObj.IPNew += v
+			}
+		case "portNew":
+			if v, err := strconv.Atoi(kv[1]); err == nil {
+				taskObj.PortNew += v
+			}
+		case "domainNew":
+			if v, err := strconv.Atoi(kv[1]); err == nil {
+				taskObj.DomainNew += v
+			}
+		case "vulnerabilityNew":
+			if v, err := strconv.Atoi(kv[1]); err == nil {
+				taskObj.VulnerabilityNew += v
+			}
+		}
+	}
+
+	MainTaskResult[mainTaskId] = taskObj
 	return
 }

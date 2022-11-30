@@ -117,7 +117,7 @@ func (ip *Ip) Gets(searchMap map[string]interface{}, page, rowsPerPage int, orde
 }
 
 // SaveOrUpdate 保存、更新一条记录
-func (ip *Ip) SaveOrUpdate() (success bool) {
+func (ip *Ip) SaveOrUpdate() (success bool, isAdd bool) {
 	oldRecord := &Ip{IpName: ip.IpName}
 	//如果记录已存在，则更新指定的字段
 	if oldRecord.GetByIp() {
@@ -133,10 +133,10 @@ func (ip *Ip) SaveOrUpdate() (success bool) {
 		}
 		//更新记录
 		ip.Id = oldRecord.Id
-		return ip.Update(updateMap)
+		return ip.Update(updateMap), false
 	} else {
 		//新增一条记录
-		return ip.Add()
+		return ip.Add(), true
 	}
 }
 

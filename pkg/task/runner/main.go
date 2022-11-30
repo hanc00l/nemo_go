@@ -259,17 +259,30 @@ func checkMainTaskResult(taskId string) (result string) {
 	var resultAllString []string
 	taskObj := comm.MainTaskResult[taskId]
 	if len(taskObj.IPResult) > 0 {
-		resultAllString = append(resultAllString, fmt.Sprintf("ip:%d", len(taskObj.IPResult)))
+		if taskObj.IPNew > 0 {
+			resultAllString = append(resultAllString, fmt.Sprintf("ip:%d(+%d)", len(taskObj.IPResult), taskObj.IPNew))
+
+		} else {
+			resultAllString = append(resultAllString, fmt.Sprintf("ip:%d", len(taskObj.IPResult)))
+		}
 		var portNum int
 		for _, ports := range taskObj.IPResult {
 			portNum += len(ports)
 		}
 		if portNum > 0 {
-			resultAllString = append(resultAllString, fmt.Sprintf("port:%d", portNum))
+			if taskObj.PortNew > 0 {
+				resultAllString = append(resultAllString, fmt.Sprintf("port:%d(+%d)", portNum, taskObj.PortNew))
+			} else {
+				resultAllString = append(resultAllString, fmt.Sprintf("port:%d", portNum))
+			}
 		}
 	}
 	if len(taskObj.DomainResult) > 0 {
-		resultAllString = append(resultAllString, fmt.Sprintf("domain:%d", len(taskObj.DomainResult)))
+		if taskObj.DomainNew > 0 {
+			resultAllString = append(resultAllString, fmt.Sprintf("domain:%d(+%d)", len(taskObj.DomainResult), taskObj.DomainNew))
+		} else {
+			resultAllString = append(resultAllString, fmt.Sprintf("domain:%d", len(taskObj.DomainResult)))
+		}
 	}
 	if len(taskObj.VulResult) > 0 {
 		var vulNum int
@@ -277,7 +290,11 @@ func checkMainTaskResult(taskId string) (result string) {
 			vulNum += len(vul)
 		}
 		if vulNum > 0 {
-			resultAllString = append(resultAllString, fmt.Sprintf("vulnerability:%d", vulNum))
+			if taskObj.VulnerabilityNew > 0 {
+				resultAllString = append(resultAllString, fmt.Sprintf("vulnerability:%d(+%d)", vulNum, taskObj.VulnerabilityNew))
+			} else {
+				resultAllString = append(resultAllString, fmt.Sprintf("vulnerability:%d", vulNum))
+			}
 		}
 	}
 	if taskObj.ScreenShotResult > 0 {

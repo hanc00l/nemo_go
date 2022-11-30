@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/hanc00l/nemo_go/pkg/db"
 	"github.com/hanc00l/nemo_go/pkg/logging"
+	"strings"
 	"sync"
 )
 
@@ -98,6 +99,7 @@ func (r *Result) SetPortAttr(ip string, port int, par PortAttrResult) {
 // SaveResult 保存端口扫描的结果到数据库
 func (r *Result) SaveResult(config Config) string {
 	var resultIPCount, resultPortCount int
+	var newIP, newPort int
 	for ipName, ipResult := range r.IPResult {
 		if len(ipResult.Ports) > IpOpenedPortFilterNumber {
 			logging.RuntimeLog.Infof("ip:%s has too much open port:%d,discard to save!", ipName, len(ipResult.Ports))
@@ -110,8 +112,12 @@ func (r *Result) SaveResult(config Config) string {
 			Location: ipResult.Location,
 			Status:   ipResult.Status,
 		}
-		if !ip.SaveOrUpdate() {
+		if ok, isNew := ip.SaveOrUpdate(); !ok {
 			continue
+		} else {
+			if isNew {
+				newIP++
+			}
 		}
 		resultIPCount++
 		for portNumber, portResult := range ipResult.Ports {
@@ -121,8 +127,12 @@ func (r *Result) SaveResult(config Config) string {
 				PortNum: portNumber,
 				Status:  portResult.Status,
 			}
-			if !port.SaveOrUpdate() {
+			if ok, isNew := port.SaveOrUpdate(); !ok {
 				continue
+			} else {
+				if isNew {
+					newPort++
+				}
 			}
 			resultPortCount++
 			//save port attribute
@@ -137,7 +147,16 @@ func (r *Result) SaveResult(config Config) string {
 			}
 		}
 	}
-	return fmt.Sprintf("ip:%d,port:%d", resultIPCount, resultPortCount)
+	var sb strings.Builder
+	sb.WriteString(fmt.Sprintf("ip:%d", resultIPCount))
+	if newIP > 0 {
+		sb.WriteString(fmt.Sprintf(",ipNew:%d", newIP))
+	}
+	sb.WriteString(fmt.Sprintf(",port:%d", resultPortCount))
+	if newPort > 0 {
+		sb.WriteString(fmt.Sprintf(",portNew:%d", resultPortCount))
+	}
+	return sb.String()
 }
 
 // FilterIPHasTooMuchPort 过滤有安全防护、显示太多端口开放的IP

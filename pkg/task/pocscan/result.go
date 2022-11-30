@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/hanc00l/nemo_go/pkg/db"
 	"github.com/hanc00l/nemo_go/pkg/utils"
+	"strings"
 	"sync"
 	"time"
 )
@@ -159,6 +160,7 @@ func (r *DomainscanVulResult) SetDomainVul(domain string, vul string) {
 // SaveResult 保存结果
 func SaveResult(result []Result) string {
 	var resultCount int
+	var newVul int
 	for _, r := range result {
 		target := utils.HostStrip(r.Target)
 		extra := r.Extra
@@ -172,9 +174,17 @@ func SaveResult(result []Result) string {
 			Source:  r.Source,
 			Extra:   extra,
 		}
-		if vul.SaveOrUpdate() {
+		if ok, isNew := vul.SaveOrUpdate(); ok {
 			resultCount++
+			if isNew {
+				newVul++
+			}
 		}
 	}
-	return fmt.Sprintf("vulnerability:%d", resultCount)
+	var sb strings.Builder
+	sb.WriteString(fmt.Sprintf("vulnerability:%d", resultCount))
+	if newVul > 0 {
+		sb.WriteString(fmt.Sprintf(",vulnerabilityNew:%d", newVul))
+	}
+	return sb.String()
 }

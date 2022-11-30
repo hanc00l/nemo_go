@@ -155,7 +155,7 @@ func (domain *Domain) Gets(searchMap map[string]interface{}, page, rowsPerPage i
 }
 
 // SaveOrUpdate 保存、更新一条记录
-func (domain *Domain) SaveOrUpdate() (success bool) {
+func (domain *Domain) SaveOrUpdate() (success bool, isAdd bool) {
 	oldRecord := &Domain{DomainName: domain.DomainName}
 	//如果记录已存在，则更新指定的字段
 	if oldRecord.GetByDomain() {
@@ -165,9 +165,9 @@ func (domain *Domain) SaveOrUpdate() (success bool) {
 		}
 		//更新记录
 		domain.Id = oldRecord.Id
-		return domain.Update(updateMap)
+		return domain.Update(updateMap), false
 	} else {
 		//新增一条记录
-		return domain.Add()
+		return domain.Add(), true
 	}
 }
