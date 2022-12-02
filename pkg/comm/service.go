@@ -178,6 +178,7 @@ func (s *Service) SaveVulnerabilityResult(ctx context.Context, args *ScanResultA
 	*replay = pocscan.SaveResult(args.VulnerabilityResult)
 	if len(args.VulnerabilityResult) > 0 {
 		saveTaskResult(args.TaskID, args.VulnerabilityResult)
+		saveMainTaskResult(args.MainTaskId, nil, nil, args.VulnerabilityResult, 0)
 		saveMainTaskNewResult(args.MainTaskId, *replay)
 	}
 	return nil
