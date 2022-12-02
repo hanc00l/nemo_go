@@ -529,8 +529,6 @@ func (c *TaskController) StartXScanTaskAction() {
 		c.FailedStatus(err.Error())
 		return
 	}
-
-	var result string
 	// 计划任务
 	if req.IsTaskCron {
 		taskId = runner.SaveCronTask(taskName, string(kwArgs), req.TaskCronRule, req.TaskCronComment)
@@ -546,7 +544,7 @@ func (c *TaskController) StartXScanTaskAction() {
 			return
 		}
 	}
-	c.SucceededStatus(result)
+	c.SucceededStatus(taskId)
 }
 
 // validateRequestParam 校验请求的参数
