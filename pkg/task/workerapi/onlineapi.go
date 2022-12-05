@@ -1,13 +1,18 @@
 package workerapi
 
 import (
+	"bufio"
 	"github.com/hanc00l/nemo_go/pkg/comm"
+	"github.com/hanc00l/nemo_go/pkg/conf"
 	"github.com/hanc00l/nemo_go/pkg/logging"
 	"github.com/hanc00l/nemo_go/pkg/task/custom"
 	"github.com/hanc00l/nemo_go/pkg/task/domainscan"
 	"github.com/hanc00l/nemo_go/pkg/task/onlineapi"
 	"github.com/hanc00l/nemo_go/pkg/task/portscan"
 	"github.com/hanc00l/nemo_go/pkg/utils"
+	"os"
+	"path/filepath"
+	"strings"
 )
 
 // Fofa Fofa任务
@@ -160,4 +165,67 @@ func checkIgnoreResult(portScanResult *portscan.Result, domainScanResult *domain
 			}
 		}
 	}
+	// 关键词过滤
+	globalFilterWords := addGlobalFilterWord()
+	if len(portScanResult.IPResult) > 0 {
+		for ip := range portScanResult.IPResult {
+			ipInfo := portScanResult.IPResult[ip]
+			needDelete := false
+			if len(ipInfo.Ports) > 0 {
+				for port := range ipInfo.Ports {
+					portInfo := ipInfo.Ports[port]
+					for _, attr := range portInfo.PortAttrs {
+						if attr.Source == "fofa" && attr.Tag == "title" {
+							if len(attr.Content) > 100 {
+								needDelete = true
+								break
+							}
+							if len(globalFilterWords) > 0 {
+								for _, globalFilterWord := range globalFilterWords {
+									if strings.Contains(attr.Content, globalFilterWord) {
+										needDelete = true
+										break
+									}
+								}
+							}
+						}
+						if needDelete {
+							break
+						}
+					}
+					if needDelete {
+						break
+					}
+				}
+				if needDelete {
+					delete(portScanResult.IPResult, ip)
+					continue
+				}
+			}
+		}
+	}
+}
+
+func addGlobalFilterWord() (globalLocalFilterWords []string) {
+	// 从custom目录中读取定义的过滤词，每一个关键词一行：
+	filterFile := filepath.Join(conf.GetRootPath(), "thirdparty/custom", "fofa_filter_keyword_local.txt")
+	if utils.CheckFileExist(filterFile) == false {
+		logging.RuntimeLog.Errorf("fofa filter file not exist:%s", filterFile)
+		return
+	}
+	inputFile, err := os.Open(filterFile)
+	if err != nil {
+		logging.RuntimeLog.Errorf("Could not read fofa filter file: %s\n", err)
+		return
+	}
+	defer inputFile.Close()
+	scanner := bufio.NewScanner(inputFile)
+	for scanner.Scan() {
+		text := strings.TrimSpace(scanner.Text())
+		if text == "" {
+			continue
+		}
+		globalLocalFilterWords = append(globalLocalFilterWords, text)
+	}
+	return
 }
