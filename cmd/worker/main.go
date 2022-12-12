@@ -3,8 +3,12 @@ package main
 import (
 	"flag"
 	"github.com/hanc00l/nemo_go/pkg/comm"
+	"github.com/hanc00l/nemo_go/pkg/conf"
 	"github.com/hanc00l/nemo_go/pkg/logging"
 	"github.com/hanc00l/nemo_go/pkg/task/workerapi"
+	"log"
+	"net/http"
+	_ "net/http/pprof"
 	"time"
 )
 
@@ -25,6 +29,12 @@ func main() {
 	flag.IntVar(&concurrency, "c", 3, "concurrent number of tasks")
 	flag.Parse()
 
+	if conf.RunMode == conf.Debug {
+		go func() {
+			log.Println(http.ListenAndServe("localhost:6060", nil))
+		}()
+	}
+	
 	go keepAlive()
 
 	err := workerapi.StartWorker(concurrency)

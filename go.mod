@@ -249,3 +249,5 @@ require (
 	gopkg.in/ini.v1 v1.66.3 // indirect
 	gopkg.in/tomb.v1 v1.0.0-20141024135613-dd632973f1e7 // indirect
 )
+
+replace github.com/projectdiscovery/httpx v1.2.5 => github.com/hanc00l/httpx v0.0.0-20221212080123-0b5be6b3cb84

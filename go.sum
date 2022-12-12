@@ -535,6 +535,8 @@ github.com/grpc-ecosystem/grpc-gateway v1.9.5/go.mod h1:vNeuVxBJEsws4ogUvrchl83t
 github.com/grpc-ecosystem/grpc-gateway v1.16.0/go.mod h1:BDjrQk3hbvj6Nolgz8mAMFbcEtjT1g+wF4CSlocrBnw=
 github.com/hako/durafmt v0.0.0-20210316092057-3a2c319c1acd h1:FsX+T6wA8spPe4c1K9vi7T0LvNCO1TTqiL8u7Wok2hw=
 github.com/hako/durafmt v0.0.0-20210316092057-3a2c319c1acd/go.mod h1:VzxiSdG6j1pi7rwGm/xYI5RbtpBgM8sARDXlvEvxlu0=
+github.com/hanc00l/httpx v0.0.0-20221212080123-0b5be6b3cb84 h1:CY9vspuvAFrTP/zLC4qDF4UrQPnrn72nAxqSATPwXz0=
+github.com/hanc00l/httpx v0.0.0-20221212080123-0b5be6b3cb84/go.mod h1:sqTTqF97C6fkiZ1khPJHYhA+QI76Q4jY71AR4cgG+QM=
 github.com/hashicorp/consul/api v1.3.0/go.mod h1:MmDNSzIMUjNpY/mQ398R4bk2FnqQLoPndWW5VkKPlCE=
 github.com/hashicorp/consul/api v1.8.1/go.mod h1:sDjTOq0yUyv5G4h+BqSea7Fn6BU+XbolEz1952UB+mk=
 github.com/hashicorp/consul/api v1.10.1 h1:MwZJp86nlnL+6+W1Zly4JUuVn9YHhMggBirMpHGD7kw=
@@ -934,8 +936,6 @@ github.com/projectdiscovery/hmap v0.0.2 h1:fe3k0b6tj95mn9a1phD3JXvAAOmmWAh/Upg1B
 github.com/projectdiscovery/hmap v0.0.2/go.mod h1:YU3TeNTDmLW2dtb4LvuEtDsPTsQ06XMnmOeD3KOuU6c=
 github.com/projectdiscovery/httputil v0.0.0-20210913064028-815c8db933ff h1:7PH2QB1tyQHyg+Nw8WpRz/POfDl4yvB/MVD4KBiDr/E=
 github.com/projectdiscovery/httputil v0.0.0-20210913064028-815c8db933ff/go.mod h1:BueJPSPWAX11IFS6bdAqTkekiIz5Fgco5LVc1kqO9L4=
-github.com/projectdiscovery/httpx v1.2.5 h1:k17stzyKGGfCJKxhN2DAG88OFj/C1GXk44bPIochgGk=
-github.com/projectdiscovery/httpx v1.2.5/go.mod h1:sqTTqF97C6fkiZ1khPJHYhA+QI76Q4jY71AR4cgG+QM=
 github.com/projectdiscovery/ipranger v0.0.2/go.mod h1:kcAIk/lo5rW+IzUrFkeYyXnFJ+dKwYooEOHGVPP/RWE=
 github.com/projectdiscovery/iputil v0.0.0-20210414194613-4b4d2517acf0/go.mod h1:PQAqn5h5NXsQTF4ZA00ZTYLRzGCjOtcCq8llAqrsd1A=
 github.com/projectdiscovery/iputil v0.0.0-20220712175312-b9406f31cdd8 h1:HRqev12wKvcwK1fe4pSlMfQdPHo9LfTxuFeRN4f3tS4=
