@@ -2,6 +2,7 @@ package pocscan
 
 import (
 	"fmt"
+	"github.com/hanc00l/nemo_go/pkg/conf"
 	"github.com/hanc00l/nemo_go/pkg/db"
 	"github.com/hanc00l/nemo_go/pkg/utils"
 	"strings"
@@ -10,10 +11,13 @@ import (
 )
 
 const (
-	nucleiConcurrencyThreadNumber = 25
-	ipMaxPocForHoneypot           = 40
-	portMaxPocForHoneypot         = 10
-	domainMaxPocForHoneypot       = 40
+	ipMaxPocForHoneypot     = 40
+	portMaxPocForHoneypot   = 10
+	domainMaxPocForHoneypot = 40
+)
+
+var (
+	nucleiConcurrencyThreadNumber = make(map[string]int)
 )
 
 type Config struct {
@@ -42,6 +46,7 @@ type xrayJSONResult struct {
 		Snapshot [][]string `json:"snapshot"`
 	} `json:"detail"`
 }
+
 type nucleiJSONResult struct {
 	// Template is the relative filename for the template
 	Template string `json:"template,omitempty"`
@@ -85,6 +90,11 @@ type IPResult struct {
 type PortscanVulResult struct {
 	sync.RWMutex `json:"-"`
 	IPResult     map[string]*IPResult
+}
+
+func init() {
+	nucleiConcurrencyThreadNumber[conf.HighPerformance] = 20
+	nucleiConcurrencyThreadNumber[conf.NormalPerformance] = 10
 }
 
 func (r *PortscanVulResult) HasIP(ip string) bool {

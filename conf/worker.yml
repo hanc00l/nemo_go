@@ -38,7 +38,6 @@ fingerprint:
 domainscan:
   resolver: resolver.txt
   wordlist: subnames.txt
-  massdnsThreads: 600
   providerConfig: provider-config.yml
 pocscan:
   xray:

@@ -31,7 +31,7 @@ func NewSubFinder(config Config) *SubFinder {
 // Do 执行子域名枚举
 func (s *SubFinder) Do() {
 	s.Result.DomainResult = make(map[string]*DomainResult)
-	swg := sizedwaitgroup.New(subfinderThreadNumber)
+	swg := sizedwaitgroup.New(subfinderThreadNumber[conf.WorkerPerformanceMode])
 
 	for _, line := range strings.Split(s.Config.Target, ",") {
 		domain := strings.TrimSpace(line)

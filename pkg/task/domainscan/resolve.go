@@ -1,6 +1,7 @@
 package domainscan
 
 import (
+	"github.com/hanc00l/nemo_go/pkg/conf"
 	"github.com/hanc00l/nemo_go/pkg/task/custom"
 	"github.com/hanc00l/nemo_go/pkg/utils"
 	"github.com/remeh/sizedwaitgroup"
@@ -20,7 +21,7 @@ func NewResolve(config Config) *Resolve {
 
 // Do 执行域名解析
 func (r *Resolve) Do() {
-	swg := sizedwaitgroup.New(resolveThreadNumber)
+	swg := sizedwaitgroup.New(resolveThreadNumber[conf.WorkerPerformanceMode])
 	// 如果Result中已有map[domain]*DomainResult，则遍历并解析域名
 	if r.Result.DomainResult != nil {
 		for domain, _ := range r.Result.DomainResult {

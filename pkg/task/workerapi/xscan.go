@@ -53,12 +53,23 @@ type XScan struct {
 	vulMutex     sync.Mutex
 }
 
-const (
-	portscanMaxThreadNum   = 4
-	domainscanMaxThreadNum = 4
-	xrayscanMaxThreadNum   = 3
+var (
+	portscanMaxThreadNum   = make(map[string]int)
+	domainscanMaxThreadNum = make(map[string]int)
+	xrayscanMaxThreadNum   = make(map[string]int)
 )
 
+func init() {
+	portscanMaxThreadNum[conf.HighPerformance] = 4
+	portscanMaxThreadNum[conf.NormalPerformance] = 2
+	//
+	domainscanMaxThreadNum[conf.HighPerformance] = 4
+	domainscanMaxThreadNum[conf.NormalPerformance] = 2
+	//
+	xrayscanMaxThreadNum[conf.HighPerformance] = 4
+	xrayscanMaxThreadNum[conf.NormalPerformance] = 2
+
+}
 func NewXScan(config XScanConfig) *XScan {
 	x := XScan{Config: config}
 	return &x
@@ -273,7 +284,7 @@ func XXray(taskId, mainTaskId, configJSON string) (result string, err error) {
 func (x *XScan) Portscan(taskId string, mainTaskId string) (result string, err error) {
 	x.ResultIP.IPResult = make(map[string]*portscan.IPResult)
 
-	swg := sizedwaitgroup.New(portscanMaxThreadNum)
+	swg := sizedwaitgroup.New(portscanMaxThreadNum[conf.WorkerPerformanceMode])
 	// 生成扫描参数
 	defaultConf := conf.GlobalWorkerConfig().Portscan
 	config := portscan.Config{
@@ -411,7 +422,7 @@ func (x *XScan) FofaSearch(taskId string, mainTaskId string) (result string, err
 // Domainscan 执行域名任务
 func (x *XScan) Domainscan(taskId string, mainTaskId string) (result string, err error) {
 	x.ResultDomain.DomainResult = make(map[string]*domainscan.DomainResult)
-	swg := sizedwaitgroup.New(domainscanMaxThreadNum)
+	swg := sizedwaitgroup.New(domainscanMaxThreadNum[conf.WorkerPerformanceMode])
 
 	config := domainscan.Config{
 		OrgId:              x.Config.OrgId,
@@ -586,7 +597,7 @@ func (x *XScan) XrayScan(taskId string, mainTaskId string) (result string, err e
 	if x.Config.XrayPocFile == "" {
 		config.PocFile = "*"
 	}
-	swg := sizedwaitgroup.New(xrayscanMaxThreadNum)
+	swg := sizedwaitgroup.New(xrayscanMaxThreadNum[conf.WorkerPerformanceMode])
 	if len(x.Config.IPPort) > 0 {
 		for ip, ports := range x.Config.IPPort {
 			for _, port := range ports {

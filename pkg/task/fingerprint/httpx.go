@@ -5,6 +5,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"github.com/hanc00l/nemo_go/pkg/conf"
 	"github.com/hanc00l/nemo_go/pkg/logging"
 	"github.com/hanc00l/nemo_go/pkg/task/custom"
 	"github.com/hanc00l/nemo_go/pkg/task/domainscan"
@@ -85,7 +86,7 @@ func NewHttpx() *Httpx {
 
 // Do 执行httpx
 func (x *Httpx) Do() {
-	swg := sizedwaitgroup.New(fpHttpxThreadNumber)
+	swg := sizedwaitgroup.New(fpHttpxThreadNumber[conf.WorkerPerformanceMode])
 
 	if x.ResultPortScan.IPResult != nil {
 		for ipName, ipResult := range x.ResultPortScan.IPResult {

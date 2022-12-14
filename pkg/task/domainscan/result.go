@@ -2,16 +2,18 @@ package domainscan
 
 import (
 	"fmt"
+	"github.com/hanc00l/nemo_go/pkg/conf"
 	"github.com/hanc00l/nemo_go/pkg/db"
 	"strings"
 	"sync"
 )
 
-const (
-	resolveThreadNumber   = 100
-	subfinderThreadNumber = 4
-	massdnsThreadNumber   = 1
-	crawlerThreadNumber   = 2
+var (
+	resolveThreadNumber   = make(map[string]int)
+	subfinderThreadNumber = make(map[string]int)
+	massdnsThreadNumber   = make(map[string]int)
+	massdnsRunnerThreads  = make(map[string]int)
+	crawlerThreadNumber   = make(map[string]int)
 )
 
 // Config 端口扫描的参数配置
@@ -51,6 +53,24 @@ type Result struct {
 	sync.RWMutex
 	DomainResult    map[string]*DomainResult
 	ReqResponseList []UrlResponse
+}
+
+func init() {
+	resolveThreadNumber[conf.HighPerformance] = 100
+	resolveThreadNumber[conf.NormalPerformance] = 50
+	//
+	subfinderThreadNumber[conf.HighPerformance] = 4
+	subfinderThreadNumber[conf.NormalPerformance] = 2
+	//
+	massdnsThreadNumber[conf.HighPerformance] = 1
+	massdnsThreadNumber[conf.NormalPerformance] = 1
+	//
+	massdnsRunnerThreads[conf.HighPerformance] = 600
+	massdnsRunnerThreads[conf.NormalPerformance] = 300
+	//
+	crawlerThreadNumber[conf.HighPerformance] = 2
+	crawlerThreadNumber[conf.NormalPerformance] = 1
+
 }
 
 func (r *Result) HasDomain(domain string) bool {

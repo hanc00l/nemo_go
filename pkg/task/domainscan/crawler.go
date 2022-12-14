@@ -7,6 +7,7 @@ import (
 	"github.com/Qianlitp/crawlergo/pkg/config"
 	"github.com/Qianlitp/crawlergo/pkg/logger"
 	model2 "github.com/Qianlitp/crawlergo/pkg/model"
+	"github.com/hanc00l/nemo_go/pkg/conf"
 	"github.com/hanc00l/nemo_go/pkg/logging"
 	"github.com/hanc00l/nemo_go/pkg/utils"
 	"github.com/remeh/sizedwaitgroup"
@@ -42,7 +43,7 @@ func NewCrawler(config Config) *Crawler {
 // Do 执行爬虫获取子域名
 func (c *Crawler) Do() {
 	c.Result.DomainResult = make(map[string]*DomainResult)
-	swg := sizedwaitgroup.New(crawlerThreadNumber)
+	swg := sizedwaitgroup.New(crawlerThreadNumber[conf.WorkerPerformanceMode])
 	for _, line := range strings.Split(c.Config.Target, ",") {
 		domain := strings.TrimSpace(line)
 		if domain == "" || utils.CheckIPV4(domain) || utils.CheckIPV4Subnet(domain) {

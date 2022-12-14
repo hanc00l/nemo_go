@@ -1,6 +1,9 @@
 package fingerprint
 
-import "sync"
+import (
+	"github.com/hanc00l/nemo_go/pkg/conf"
+	"sync"
+)
 
 var IgnorePort = []int{7, 9, 13, 17, 19, 21, 22, 23, 25, 26, 37, 53, 100, 106, 110, 111, 113, 119, 135, 138, 139,
 	143, 144, 145, 161,
@@ -11,12 +14,26 @@ var IgnorePort = []int{7, 9, 13, 17, 19, 21, 22, 23, 25, 26, 37, 53, 100, 106, 1
 
 var blankPort = map[int]struct{}{}
 
-const (
-	fpHttpxThreadNumber        = 10
-	fpScreenshotThreadNum      = 5
-	fpObserverWardThreadNumber = 10
-	fpIconHashThreadNumber     = 10
+var (
+	fpHttpxThreadNumber        = make(map[string]int)
+	fpScreenshotThreadNum      = make(map[string]int)
+	fpObserverWardThreadNumber = make(map[string]int)
+	fpIconHashThreadNumber     = make(map[string]int)
 )
+
+func init() {
+	fpHttpxThreadNumber[conf.HighPerformance] = 8
+	fpHttpxThreadNumber[conf.NormalPerformance] = 4
+	//
+	fpScreenshotThreadNum[conf.HighPerformance] = 6
+	fpScreenshotThreadNum[conf.NormalPerformance] = 3
+	//
+	fpObserverWardThreadNumber[conf.HighPerformance] = 8
+	fpObserverWardThreadNumber[conf.NormalPerformance] = 4
+	//
+	fpIconHashThreadNumber[conf.HighPerformance] = 8
+	fpIconHashThreadNumber[conf.NormalPerformance] = 4
+}
 
 type Config struct {
 	Target string

@@ -17,7 +17,7 @@ var cmd *exec.Cmd
 var WorkerName string
 
 // StartWorkerDaemon 启动worker的daemon
-func StartWorkerDaemon(concurrency int, noFilesync bool) {
+func StartWorkerDaemon(concurrency int, workerPerformance int, noFilesync bool) {
 	// 1、worker与server文件同步
 	fileSyncServer := conf.GlobalWorkerConfig().FileSync
 	if noFilesync == false {
@@ -25,7 +25,7 @@ func StartWorkerDaemon(concurrency int, noFilesync bool) {
 		filesync.WorkerStartupSync(fileSyncServer.Host, fmt.Sprintf("%d", fileSyncServer.Port), fileSyncServer.AuthKey)
 	}
 	// 2、启动worker
-	if success := StartWorker(concurrency); success == false {
+	if success := StartWorker(concurrency, workerPerformance); success == false {
 		return
 	}
 	// 3、心跳并接收命令
@@ -46,7 +46,7 @@ func StartWorkerDaemon(concurrency int, noFilesync bool) {
 					filesync.WorkerStartupSync(fileSyncServer.Host, fmt.Sprintf("%d", fileSyncServer.Port), fileSyncServer.AuthKey)
 				}
 				//2、重新启动worker
-				StartWorker(concurrency)
+				StartWorker(concurrency, workerPerformance)
 			}
 			// 忽略文件同步（如果有）
 			continue
@@ -80,7 +80,7 @@ func KillWorker() bool {
 }
 
 // StartWorker 启动worker进程
-func StartWorker(concurrency int) bool {
+func StartWorker(concurrency int, workerPerformance int) bool {
 	workerBin := "worker_darwin_amd64"
 	if runtime.GOOS == "linux" {
 		workerBin = "worker_linux_amd64"
@@ -93,7 +93,7 @@ func StartWorker(concurrency int) bool {
 		logging.CLILog.Error(err.Error())
 		return false
 	}
-	cmd = exec.Command(workerPathName, "-c", fmt.Sprintf("%d", concurrency))
+	cmd = exec.Command(workerPathName, "-c", fmt.Sprintf("%d", concurrency), "-p", fmt.Sprintf("%d", workerPerformance))
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
 	if err = cmd.Start(); err != nil {

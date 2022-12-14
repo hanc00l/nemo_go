@@ -5,6 +5,7 @@ import (
 	"crypto/sha1"
 	"encoding/base64"
 	"fmt"
+	"github.com/hanc00l/nemo_go/pkg/conf"
 	"github.com/hanc00l/nemo_go/pkg/logging"
 	"github.com/hanc00l/nemo_go/pkg/task/domainscan"
 	"github.com/hanc00l/nemo_go/pkg/task/portscan"
@@ -57,7 +58,7 @@ func NewIconHash() *IconHash {
 }
 
 func (i *IconHash) Do() {
-	swg := sizedwaitgroup.New(fpIconHashThreadNumber)
+	swg := sizedwaitgroup.New(fpIconHashThreadNumber[conf.WorkerPerformanceMode])
 
 	if i.ResultPortScan.IPResult != nil {
 		for ipName, ipResult := range i.ResultPortScan.IPResult {

@@ -3,6 +3,7 @@ package workerapi
 import (
 	"fmt"
 	"github.com/hanc00l/nemo_go/pkg/comm"
+	"github.com/hanc00l/nemo_go/pkg/conf"
 	"github.com/hanc00l/nemo_go/pkg/logging"
 	"github.com/hanc00l/nemo_go/pkg/task/portscan"
 	"github.com/hanc00l/nemo_go/pkg/utils"
@@ -11,9 +12,12 @@ import (
 	"strings"
 )
 
-const (
-	fpNmapThreadNumber = 10
-)
+var fpNmapThreadNumber = make(map[string]int)
+
+func init() {
+	fpNmapThreadNumber[conf.HighPerformance] = 10
+	fpNmapThreadNumber[conf.NormalPerformance] = 5
+}
 
 // PortScan 端口扫描任务
 func PortScan(taskId, mainTaskId, configJSON string) (result string, err error) {
@@ -111,7 +115,7 @@ func doMasscanPlusNmap(config portscan.Config) (resultPortScan portscan.Result) 
 	masscan.Do()
 	ipPortMap := getResultIPPortMap(masscan.Result.IPResult)
 	//nmap多线程扫描
-	swg := sizedwaitgroup.New(fpNmapThreadNumber)
+	swg := sizedwaitgroup.New(fpNmapThreadNumber[conf.WorkerPerformanceMode])
 	for ip, port := range ipPortMap {
 		nmapConfig := config
 		nmapConfig.Target = ip

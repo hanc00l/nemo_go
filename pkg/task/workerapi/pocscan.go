@@ -75,6 +75,7 @@ func XrayPocScan(taskId, mainTaskId, configJSON string) (result string, err erro
 	return SucceedTask(result), nil
 }
 
+// doXrayPocScanAndSave xraypoc扫描
 func doXrayPocScanAndSave(taskId string, mainTaskId string, config pocscan.XrayPocConfig) (result string, err error) {
 	var scanResult []pocscan.Result
 	p := pocscan.NewXrayPoc(config)

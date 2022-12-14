@@ -51,7 +51,7 @@ func NewScreenShot() *ScreenShot {
 
 // Do 执行任务
 func (s *ScreenShot) Do() {
-	swg := sizedwaitgroup.New(fpScreenshotThreadNum)
+	swg := sizedwaitgroup.New(fpScreenshotThreadNum[conf.WorkerPerformanceMode])
 
 	if s.ResultPortScan.IPResult != nil {
 		for ipName, ipResult := range s.ResultPortScan.IPResult {

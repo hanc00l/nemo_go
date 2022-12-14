@@ -22,12 +22,13 @@ func SetupCloseHandler() {
 }
 
 func main() {
-	var concurrency int
+	var concurrency, workerPerformance int
 	var noFilesync bool
 	flag.IntVar(&concurrency, "c", 3, "concurrent number of tasks")
+	flag.IntVar(&workerPerformance, "p", 0, "worker performance,default is autodetect (0: autodetect,1:high,2:normal)")
 	flag.BoolVar(&noFilesync, "nf", false, "disable file sync")
 	flag.Parse()
 
 	go SetupCloseHandler()
-	comm.StartWorkerDaemon(concurrency, noFilesync)
+	comm.StartWorkerDaemon(concurrency, workerPerformance, noFilesync)
 }

@@ -38,7 +38,7 @@ func NewFingerprintHub() *FingerprintHub {
 
 // Do 调用ObserverWard，获取指纹
 func (f *FingerprintHub) Do() {
-	swg := sizedwaitgroup.New(fpObserverWardThreadNumber)
+	swg := sizedwaitgroup.New(fpObserverWardThreadNumber[conf.WorkerPerformanceMode])
 
 	if f.ResultPortScan.IPResult != nil {
 		for ipName, ipResult := range f.ResultPortScan.IPResult {

@@ -26,7 +26,7 @@ func NewMassdns(config Config) *Massdns {
 // Do 执行Massdns任务
 func (m *Massdns) Do() {
 	m.Result.DomainResult = make(map[string]*DomainResult)
-	swg := sizedwaitgroup.New(massdnsThreadNumber)
+	swg := sizedwaitgroup.New(massdnsThreadNumber[conf.WorkerPerformanceMode])
 
 	for _, line := range strings.Split(m.Config.Target, ",") {
 		domain := strings.TrimSpace(line)
@@ -90,7 +90,7 @@ func (m *Massdns) RunMassdns(domain string) {
 		Retries:            5,
 		Verbose:            true,
 		NoColor:            true,
-		Threads:            conf.GlobalWorkerConfig().Domainscan.MassdnsThreads,
+		Threads:            massdnsRunnerThreads[conf.WorkerPerformanceMode],
 		MassdnsRaw:         "",
 		WildcardThreads:    25,
 		StrictWildcard:     true,

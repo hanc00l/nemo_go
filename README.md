@@ -117,6 +117,7 @@ Tested on [ubuntu18.04/20.04/22.04 LTS](docs/install_linux.md)、[macOS](docs/in
 
 ## 版本更新
 
+- 2.8.3：2022-12-14，增加按worker的CPU及内存数量设置不同的性能模式（HighPerformance：4核4G内存及以上），降低docker及一般的VPS的并发线程数量（任务执行时间将增加）。
 - 2.8.2：2022-12-12，修复Httpx库使用leveldb时，缓存不释放导致的内存泄露；增加fofa结果的关键词全局过滤；修复XSCAN任务的taskId未能显示、漏洞扫描任务结果不能在maintask正常显示。
 - 2.8.1：2022-11-30，增加在任务结果里显示新增加资产的数量。
 - 2.8.0：2022-11-28，重构任务机制，将任务分为前端生成的MainTask和分布式执行的RunTask；增加MainTask任务完成消息通知，支持Server酱、钉钉群及飞书群机器人，设置Token后将发送任务完成消息。从2.7升级需要导入task.sql到数据库中。
