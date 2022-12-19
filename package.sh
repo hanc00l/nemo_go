@@ -82,11 +82,11 @@ tar -cvzf release/worker_darwin_amd64.tar \
 
 tar -cvzf release/worker_windows_amd64.tar \
   --exclude=thirdparty/xray/xray_darwin_amd64 \
-  --exclude=thirdparty/xray/xray_linux_amd64.exe \
+  --exclude=thirdparty/xray/xray_linux_amd64 \
   --exclude=thirdparty/nuclei/nuclei_darwin_amd64 \
-  --exclude=thirdparty/nuclei/nuclei_linux_amd64.exe \
+  --exclude=thirdparty/nuclei/nuclei_linux_amd64 \
   --exclude=thirdparty/fingerprinthub/observer_ward_darwin_amd64 \
-  --exclude=thirdparty/fingerprinthub/observer_ward_linux_amd64.exe \
+  --exclude=thirdparty/fingerprinthub/observer_ward_linux_amd64 \
   --exclude=conf/app.conf --exclude=server.yml \
   --exclude=thirdparty/xray/xray/docs --exclude=thirdparty/xray/xray/fingerprints --exclude=thirdparty/xray/xray/report --exclude=thirdparty/xray/xray/tests --exclude=thirdparty/xray/xray/webhook \
   xray.yaml config.yaml module.xray.yaml plugin.xray.yaml \
