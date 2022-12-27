@@ -9,7 +9,6 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
-	"runtime"
 	"time"
 )
 
@@ -81,12 +80,7 @@ func KillWorker() bool {
 
 // StartWorker 启动worker进程
 func StartWorker(concurrency int, workerPerformance int) bool {
-	workerBin := "worker_darwin_amd64"
-	if runtime.GOOS == "linux" {
-		workerBin = "worker_linux_amd64"
-	} else if runtime.GOOS == "windows" {
-		workerBin = "worker_windows_amd64.exe"
-	}
+	workerBin := utils.GetThirdpartyBinNameByPlatform(utils.Worker)
 	//绝对路径
 	workerPathName, err := filepath.Abs(filepath.Join(conf.GetRootPath(), workerBin))
 	if err != nil {

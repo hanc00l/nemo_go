@@ -12,7 +12,6 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
-	"runtime"
 )
 
 type FingerprintHub struct {
@@ -111,14 +110,8 @@ func (f *FingerprintHub) RunObserverWard(url string) []FingerprintHubReult {
 	resultTempFile := utils.GetTempPathFileName()
 	defer os.Remove(resultTempFile)
 
-	observerWardBin := "observer_ward_darwin_amd64"
-	if runtime.GOOS == "linux" {
-		observerWardBin = "observer_ward_linux_amd64"
-	} else if runtime.GOOS == "windows" {
-		observerWardBin = "observer_ward_windows_amd64.exe"
-	}
 	//Fix：要指定绝对路径
-	observerWardBinPath := filepath.Join(conf.GetAbsRootPath(), "thirdparty/fingerprinthub", observerWardBin)
+	observerWardBinPath := filepath.Join(conf.GetAbsRootPath(), "thirdparty/fingerprinthub", utils.GetThirdpartyBinNameByPlatform(utils.ObserverWard))
 	var cmdArgs []string
 	cmdArgs = append(cmdArgs, "-t", url, "-j", resultTempFile)
 	cmd := exec.Command(observerWardBinPath, cmdArgs...)

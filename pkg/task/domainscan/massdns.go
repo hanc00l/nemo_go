@@ -6,7 +6,6 @@ import (
 	"github.com/hanc00l/nemo_go/pkg/utils"
 	"github.com/projectdiscovery/shuffledns/pkg/runner"
 	"github.com/remeh/sizedwaitgroup"
-	"io/ioutil"
 	"os"
 	"path/filepath"
 	"runtime"
@@ -70,7 +69,7 @@ func (m *Massdns) RunMassdns(domain string) {
 	tempOutputFile := utils.GetTempPathFileName()
 	defer os.Remove(tempOutputFile)
 
-	tempDir, err := ioutil.TempDir(filepath.Join(conf.GetRootPath(), "thirdparty/massdns/temp"), utils.GetRandomString2(8))
+	tempDir, err := os.MkdirTemp(filepath.Join(conf.GetRootPath(), "thirdparty/massdns/temp"), utils.GetRandomString2(8))
 	if err != nil {
 		return
 	}
@@ -82,7 +81,7 @@ func (m *Massdns) RunMassdns(domain string) {
 		SubdomainsList:     "",
 		ResolversFile:      filepath.Join(conf.GetRootPath(), "thirdparty/dict", conf.GlobalWorkerConfig().Domainscan.Resolver),
 		Wordlist:           filepath.Join(conf.GetRootPath(), "thirdparty/dict", conf.GlobalWorkerConfig().Domainscan.Wordlist),
-		MassdnsPath:        filepath.Join(conf.GetRootPath(), "thirdparty/massdns", "massdns_darwin_amd64"),
+		MassdnsPath:        filepath.Join(conf.GetRootPath(), "thirdparty/massdns", utils.GetThirdpartyBinNameByPlatform(utils.MassDns)),
 		Output:             tempOutputFile,
 		Json:               false,
 		Silent:             false,
@@ -96,9 +95,6 @@ func (m *Massdns) RunMassdns(domain string) {
 		StrictWildcard:     true,
 		WildcardOutputFile: "",
 		Stdin:              false,
-	}
-	if runtime.GOOS == "linux" {
-		options.MassdnsPath = filepath.Join(conf.GetRootPath(), "thirdparty/massdns", "massdns_linux_amd64")
 	}
 	massdnsRunner, err := runner.New(options)
 	if err != nil {

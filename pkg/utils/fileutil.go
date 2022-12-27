@@ -11,6 +11,7 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
+	"runtime"
 	"time"
 )
 
@@ -146,4 +147,57 @@ func ReSizePicture(srcFile, dstFile string, width, height int) bool {
 		return false
 	}
 	return true
+}
+
+type BinShortName string
+
+const (
+	ObserverWard BinShortName = "observer_ward"
+	MassDns      BinShortName = "massdns"
+	Xray         BinShortName = "xray"
+	Nuclei       BinShortName = "nuclei"
+	Worker       BinShortName = "worker"
+)
+
+// GetThirdpartyBinNameByPlatform 根据当前运行平台及架构，生成指定的文件名称
+func GetThirdpartyBinNameByPlatform(binShortName BinShortName) (binPlatformName string) {
+	binPlatformName = fmt.Sprintf("%s_%s_%s", binShortName, runtime.GOOS, runtime.GOARCH)
+	if runtime.GOOS == "windows" {
+		binPlatformName += ".exe"
+	}
+	/*
+		https://go.dev/doc/install/source#environment
+			$GOOS	$GOARCH
+			android   arm
+			darwin    386
+			darwin    amd64
+			darwin    arm
+			darwin    arm64
+			dragonfly amd64
+			freebsd   386
+			freebsd   amd64
+			freebsd   arm
+			linux     386
+			linux     amd64
+			linux     arm
+			linux     arm64
+			linux     ppc64
+			linux     ppc64le
+			linux     mips
+			linux     mipsle
+			linux     mips64
+			linux     mips64le
+			netbsd    386
+			netbsd    amd64
+			netbsd    arm
+			openbsd   386
+			openbsd   amd64
+			openbsd   arm
+			plan9     386
+			plan9     amd64
+			solaris   amd64
+			windows   386
+			windows   amd64
+	*/
+	return
 }

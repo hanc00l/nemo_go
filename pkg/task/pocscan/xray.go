@@ -8,7 +8,6 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
-	"runtime"
 	"strings"
 )
 
@@ -35,13 +34,7 @@ func (x *Xray) Do() {
 		logging.RuntimeLog.Error(err.Error())
 		return
 	}
-	cmdBin := filepath.Join(conf.GetAbsRootPath(), "thirdparty/xray", "xray_darwin_amd64")
-	if runtime.GOOS == "linux" {
-		cmdBin = filepath.Join(conf.GetAbsRootPath(), "thirdparty/xray", "xray_linux_amd64")
-	} else if runtime.GOOS == "windows" {
-		cmdBin = filepath.Join(conf.GetAbsRootPath(), "thirdparty/xray", "xray_windows_amd64.exe")
-	}
-
+	cmdBin := filepath.Join(conf.GetAbsRootPath(), "thirdparty/xray", utils.GetThirdpartyBinNameByPlatform(utils.Xray))
 	var cmdArgs []string
 	cmdArgs = append(
 		cmdArgs,

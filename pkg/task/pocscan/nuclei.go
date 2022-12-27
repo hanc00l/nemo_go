@@ -47,12 +47,7 @@ func (n *Nuclei) Do() {
 		logging.RuntimeLog.Error(err.Error())
 		return
 	}
-	cmdBin := filepath.Join(conf.GetAbsRootPath(), "thirdparty/nuclei", "nuclei_darwin_amd64")
-	if runtime.GOOS == "linux" {
-		cmdBin = filepath.Join(conf.GetAbsRootPath(), "thirdparty/nuclei", "nuclei_linux_amd64")
-	} else if runtime.GOOS == "windows" {
-		cmdBin = filepath.Join(conf.GetAbsRootPath(), "thirdparty/nuclei", "nuclei_windows_amd64.exe")
-	}
+	cmdBin := filepath.Join(conf.GetAbsRootPath(), "thirdparty/nuclei", utils.GetThirdpartyBinNameByPlatform(utils.Nuclei))
 	var cmdArgs []string
 	/*RATE-LIMIT:
 	  -rl, -rate-limit int            maximum number of requests to send per second (default 150)
