@@ -29,6 +29,11 @@ func (x *Xray) Do() {
 	defer os.Remove(inputTargetFile)
 
 	urls := strings.Split(x.Config.Target, ",")
+	for idx, url := range urls {
+		if strings.HasSuffix(url, ":443") {
+			urls[idx] = "https://" + url
+		}
+	}
 	err := os.WriteFile(inputTargetFile, []byte(strings.Join(urls, "\n")), 0666)
 	if err != nil {
 		logging.RuntimeLog.Error(err.Error())
@@ -36,12 +41,20 @@ func (x *Xray) Do() {
 	}
 	cmdBin := filepath.Join(conf.GetAbsRootPath(), "thirdparty/xray", utils.GetThirdpartyBinNameByPlatform(utils.Xray))
 	var cmdArgs []string
-	cmdArgs = append(
-		cmdArgs,
-		"--log-level", "error", "webscan", "--plugins", "phantasm", "--poc",
-		filepath.Join(conf.GetAbsRootPath(), conf.GlobalWorkerConfig().Pocscan.Xray.PocPath, x.Config.PocFile),
-		"--json-output", resultTempFile, "--url-file", inputTargetFile,
-	)
+	if x.Config.PocFile == "" || x.Config.PocFile == "*" {
+		cmdArgs = append(
+			cmdArgs,
+			"--log-level", "error", "webscan",
+			"--json-output", resultTempFile, "--url-file", inputTargetFile,
+		)
+	} else {
+		cmdArgs = append(
+			cmdArgs,
+			"--log-level", "error", "webscan", "--plugins", "phantasm", "--poc",
+			filepath.Join(conf.GetAbsRootPath(), conf.GlobalWorkerConfig().Pocscan.Xray.PocPath, x.Config.PocFile),
+			"--json-output", resultTempFile, "--url-file", inputTargetFile,
+		)
+	}
 	cmd := exec.Command(cmdBin, cmdArgs...)
 	_, err = cmd.CombinedOutput()
 	if err != nil {
@@ -70,7 +83,7 @@ func (x *Xray) parseXrayResult(outputTempFile string) {
 			extraAll = append(extraAll, strings.Join(s, ""))
 		}
 		host := utils.HostStrip(r.Target.Url)
-		if host == "" {
+		if host == "" || strings.Contains(r.Plugin, "baseline") || strings.Contains(r.Plugin, "dirscan") {
 			continue
 		}
 		x.Result = append(x.Result, Result{
