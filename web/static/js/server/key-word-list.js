@@ -242,3 +242,26 @@ $("#start_add_key_search_word").click(function () {
         swal('Warning', '导入失败！' + res['msg'], 'error');
     });
 });
+
+function delete_key_word(id) {
+    swal({
+            title: "确定要删除?",
+            text: "该操作会删除当前关键词配置信息，请确认！",
+            type: "warning",
+            showCancelButton: true,
+            confirmButtonColor: "#DD6B55",
+            confirmButtonText: "确认删除",
+            cancelButtonText: "取消",
+            closeOnConfirm: true
+        },
+        function () {
+            $.post("/key-word-del",
+                {
+                    "id": id,
+                }, function (data, e) {
+                    if (e === "success") {
+                        $('#key_word_table').DataTable().draw(false);
+                    }
+                });
+        });
+}
