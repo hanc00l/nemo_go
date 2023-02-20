@@ -5,10 +5,10 @@ import (
 )
 
 // syncFileList 需要同步的文件白名单
-var syncFileList = []string{"worker_linux_amd64", "version.txt", "conf/worker.yml", "thirdparty"}
+var syncFileList = []string{"worker_linux_amd64", "version.txt", "conf", "thirdparty"}
 
 // syncFileBlackList 不需要、禁止同步的文件黑名单
-var syncFileBlackList = []string{"thirdparty/massdns/temp"}
+var syncFileBlackList = []string{"thirdparty/massdns/temp", "conf/server.yml", "conf/app.conf"}
 
 // checkFileIsSyncWhileList 同步文件的白名单校验
 func checkFileIsSyncWhileList(filePathName string) bool {

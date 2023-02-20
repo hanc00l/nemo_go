@@ -20,7 +20,7 @@ func StartWorkerDaemon(concurrency int, workerPerformance int, noFilesync bool) 
 	// 1、worker与server文件同步
 	fileSyncServer := conf.GlobalWorkerConfig().FileSync
 	if noFilesync == false {
-		logging.CLILog.Info("开始文件同步...")
+		logging.CLILog.Info("start file sync...")
 		filesync.WorkerStartupSync(fileSyncServer.Host, fmt.Sprintf("%d", fileSyncServer.Port), fileSyncServer.AuthKey)
 	}
 	// 2、启动worker
@@ -41,7 +41,7 @@ func StartWorkerDaemon(concurrency int, workerPerformance int, noFilesync bool) 
 			if KillWorker() {
 				//1、同步文件
 				if noFilesync == false {
-					logging.CLILog.Info("开始文件同步...")
+					logging.CLILog.Info("start file sync...")
 					filesync.WorkerStartupSync(fileSyncServer.Host, fmt.Sprintf("%d", fileSyncServer.Port), fileSyncServer.AuthKey)
 				}
 				//2、重新启动worker
@@ -52,7 +52,7 @@ func StartWorkerDaemon(concurrency int, workerPerformance int, noFilesync bool) 
 		}
 		if noFilesync == false && replay.ManualFileSyncFlag {
 			//同步文件
-			logging.CLILog.Info("开始文件同步...")
+			logging.CLILog.Info("start file sync...")
 			filesync.WorkerStartupSync(fileSyncServer.Host, fmt.Sprintf("%d", fileSyncServer.Port), fileSyncServer.AuthKey)
 		}
 	}

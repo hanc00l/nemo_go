@@ -20,7 +20,7 @@ func WorkerStartupSync(host, port, authKey string) {
 	// 1 连接到server
 	conn, cnErr := net.Dial("tcp", serverAddr)
 	if cnErr != nil {
-		logging.CLILog.Errorf("连接到server同步失败:%v", cnErr.Error())
+		logging.CLILog.Errorf("connect to server fail:%v", cnErr.Error())
 		return
 	}
 	defer conn.Close()
@@ -41,21 +41,21 @@ func WorkerStartupSync(host, port, authKey string) {
 		return
 	}
 	if hostMessage.MgType != MsgMd5List {
-		logging.CLILog.Errorf("无法获取同步文件信息:%s", hostMessage.MgString)
-		logging.RuntimeLog.Errorf("无法获取同步文件信息:%s", hostMessage.MgString)
+		logging.CLILog.Errorf("get sync file fail:%s", hostMessage.MgString)
+		logging.RuntimeLog.Errorf("get sync file fail:%s", hostMessage.MgString)
 		return
 	}
 	// 4 获取服务器所有文件及md5值,并预处理本地的路径和文件
 	transFiles, err := doFileMd5List(&hostMessage)
 	if err == nil {
-		logging.CLILog.Infof("需要同步的文件数量: %d", len(transFiles))
+		logging.CLILog.Infof("file needed sync: %d", len(transFiles))
 		// 5 同步文件
 		for i, file := range transFiles {
 			status := doTranFile(file, authKey, gbc)
 			logging.CLILog.Infof("%d %s %v", i+1, file, status)
 
 		}
-		logging.CLILog.Info("完成同步")
+		logging.CLILog.Info("finish file sync")
 	}
 	// 6 结束同步
 	endMsg := Message{MgType: MsgEnd, MgAuthKey: authKey}
