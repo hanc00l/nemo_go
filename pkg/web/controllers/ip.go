@@ -363,8 +363,8 @@ func (c *IPController) ImportPortscanResultAction() {
 	}
 	// 文件后缀检查
 	ext := path.Ext(fileHeader.Filename)
-	if ext != ".json" && ext != ".xml" && ext != ".txt" && ext != ".csv" {
-		c.FailedStatus("只允许.json、.xml、.csv或.txt文件")
+	if ext != ".json" && ext != ".xml" && ext != ".txt" && ext != ".csv" && ext != ".dat" {
+		c.FailedStatus("只允许.json、.xml、.csv、.dat或.txt文件")
 		return
 	}
 	// 读取文件内容
@@ -399,6 +399,13 @@ func (c *IPController) ImportPortscanResultAction() {
 		portscan.FilterIPHasTooMuchPort(&f.Result, true)
 		resultIpPort := f.Result.SaveResult(config)
 		resultVul := pocscan.SaveResult(f.VulResult)
+		result = fmt.Sprintf("%s,%s", resultIpPort, resultVul)
+	} else if bin == "gogo" {
+		g := portscan.NewGogo(config)
+		g.ParseJsonContentResult(fileContent)
+		portscan.FilterIPHasTooMuchPort(&g.Result, true)
+		resultIpPort := g.Result.SaveResult(config)
+		resultVul := pocscan.SaveResult(g.VulResult)
 		result = fmt.Sprintf("%s,%s", resultIpPort, resultVul)
 	} else if bin == "naabu" {
 		n := portscan.NewNaabu(config)

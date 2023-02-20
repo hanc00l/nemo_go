@@ -16,9 +16,7 @@ type TXPortMap struct {
 }
 
 func NewTXPortMap(config Config) *TXPortMap {
-	return &TXPortMap{
-		Config: config,
-	}
+	return &TXPortMap{Config: config}
 }
 
 // ParseTxtContentResult 解析TXPortMap扫描的文本结果
