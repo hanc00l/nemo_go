@@ -31,14 +31,23 @@ func NewNmap(config Config) *Nmap {
 // Do 执行nmap
 func (nmap *Nmap) Do() {
 	nmap.Result.IPResult = make(map[string]*IPResult)
+	inputTargetFile := utils.GetTempPathFileName()
 	resultTempFile := utils.GetTempPathFileName()
+	defer os.Remove(inputTargetFile)
 	defer os.Remove(resultTempFile)
+
+	targets := strings.Split(nmap.Config.Target, ",")
+	err := os.WriteFile(inputTargetFile, []byte(strings.Join(targets, "\n")), 0666)
+	if err != nil {
+		logging.RuntimeLog.Error(err.Error())
+		return
+	}
 
 	var cmdArgs []string
 	cmdArgs = append(
 		cmdArgs,
 		nmap.Config.Tech, "-T4", "--open", "-n", "--randomize-hosts",
-		"--min-rate", strconv.Itoa(nmap.Config.Rate), "-oG", resultTempFile,
+		"--min-rate", strconv.Itoa(nmap.Config.Rate), "-oG", resultTempFile, "-iL", inputTargetFile,
 	)
 	if !nmap.Config.IsPing {
 		cmdArgs = append(cmdArgs, "-Pn")
@@ -52,9 +61,8 @@ func (nmap *Nmap) Do() {
 	if nmap.Config.ExcludeTarget != "" {
 		cmdArgs = append(cmdArgs, "--exclude", nmap.Config.ExcludeTarget)
 	}
-	cmdArgs = append(cmdArgs, nmap.Config.Target)
 	cmd := exec.Command(nmap.Config.CmdBin, cmdArgs...)
-	_, err := cmd.CombinedOutput()
+	_, err = cmd.CombinedOutput()
 	if err != nil {
 		logging.RuntimeLog.Error(err.Error())
 		return
