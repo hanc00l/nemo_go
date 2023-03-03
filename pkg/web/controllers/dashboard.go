@@ -63,6 +63,10 @@ func (c *DashboardController) GetStatisticDataAction() {
 	defer c.ServeJSON()
 
 	searchMap := make(map[string]interface{})
+	workspaceId := c.GetSession("Workspace").(int)
+	if workspaceId > 0 {
+		searchMap["workspace_id"] = workspaceId
+	}
 	ip := &db.Ip{}
 	domain := &db.Domain{}
 	vul := &db.Vulnerability{}
@@ -74,6 +78,9 @@ func (c *DashboardController) GetStatisticDataAction() {
 	}
 	searchMapTask := make(map[string]interface{})
 	searchMapTask["state"] = ampq.STARTED
+	if workspaceId > 0 {
+		searchMapTask["workspace_id"] = workspaceId
+	}
 	data.ActiveTask = task.Count(searchMapTask)
 	c.Data["json"] = data
 }
@@ -89,6 +96,14 @@ func (c *DashboardController) GetTaskInfoAction() {
 	searchMapCreated["state"] = ampq.CREATED
 	searchMapALL := make(map[string]interface{})
 	searchMapALL["date_delta"] = 7
+
+	workspaceId := c.GetSession("Workspace").(int)
+	if workspaceId > 0 {
+		searchMapActivated["workspace_id"] = workspaceId
+		searchMapCreated["workspace_id"] = workspaceId
+		searchMapALL["workspace_id"] = workspaceId
+	}
+
 	task := &db.TaskRun{}
 	data := TaskInfoData{}
 	data.TaskInfo = fmt.Sprintf("%d/%d/%d", task.Count(searchMapActivated), task.Count(searchMapCreated), task.Count(searchMapALL))
@@ -101,6 +116,10 @@ func (c *DashboardController) GetStartedTaskInfoAction() {
 	defer c.ServeJSON()
 
 	searchMapActivated := make(map[string]interface{})
+	workspaceId := c.GetSession("Workspace").(int)
+	if workspaceId > 0 {
+		searchMapActivated["workspace_id"] = workspaceId
+	}
 	searchMapActivated["state"] = ampq.STARTED
 	task := &db.TaskRun{}
 	var tis []StartedTaskInfo
@@ -169,6 +188,10 @@ func (c *DashboardController) WorkerAliveListAction() {
 // ManualReloadWorkerAction 重启worker
 func (c *DashboardController) ManualReloadWorkerAction() {
 	defer c.ServeJSON()
+	if c.CheckMultiAccessRequest([]RequestRole{SuperAdmin, Admin}, false) == false {
+		c.FailedStatus("当前用户权限不允许！")
+		return
+	}
 
 	worker := c.GetString("worker_name")
 	if worker == "" {
@@ -188,6 +211,10 @@ func (c *DashboardController) ManualReloadWorkerAction() {
 // ManualWorkerFileSyncAction 同步worker
 func (c *DashboardController) ManualWorkerFileSyncAction() {
 	defer c.ServeJSON()
+	if c.CheckMultiAccessRequest([]RequestRole{SuperAdmin, Admin}, false) == false {
+		c.FailedStatus("当前用户权限不允许！")
+		return
+	}
 
 	worker := c.GetString("worker_name")
 	if worker == "" {

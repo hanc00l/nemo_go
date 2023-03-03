@@ -123,6 +123,10 @@ $(function () {
         }
     );//end datatable
     get_count_data();
+    get_user_workspace_list();
+    $('#select_workspace').change(function () {
+        change_user_workspace();
+    });
     //定时刷新页面
     setInterval(function () {
         get_count_data();
@@ -133,6 +137,7 @@ $(function () {
     }, 60 * 1000);
 });
 
+// 获取统计信息
 function get_count_data() {
     //异步获取任务统计信息
     $.post("/dashboard", function (data) {
@@ -140,6 +145,39 @@ function get_count_data() {
         $("#vulnerability_count").html(data['vulnerability_count']);
         $("#domain_count").html(data['domain_count']);
         $("#ip_count").html(data['ip_count']);
+    });
+}
+//  获取用户的工作空间
+function get_user_workspace_list() {
+    document.getElementById('li_workspace').style.visibility = 'visible';
+    $.post("/workspace-user-list", function (data) {
+        $("#select_workspace").empty();
+        for (let i = 0; i < data.WorkspaceInfoList.length; i++) {
+            $("#select_workspace").append("<option value='" + data.WorkspaceInfoList[i].workspaceId + "'>" + data.WorkspaceInfoList[i].workspaceName + "</option>")
+        }
+        $('#select_workspace').val(data.CurrentWorkspace);
+    });
+}
+
+// 手工切换用户的工作空间
+function change_user_workspace() {
+    let newWorkspace = $("#select_workspace").val();
+    $.post("/workspace-user-change", {"workspace": newWorkspace}, function (data) {
+        if (data['status'] == 'success') {
+            swal({
+                    title: "切换工作空间成功！",
+                    text: data['msg'],
+                    type: "success",
+                    confirmButtonText: "确定",
+                    confirmButtonColor: "#41b883",
+                    closeOnConfirm: true,
+                },
+                function () {
+                    get_count_data();
+                });
+        } else {
+            swal('Warning', "切换工作空间失败! " + data['msg'], 'error');
+        }
     });
 }
 

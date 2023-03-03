@@ -22,6 +22,7 @@ type FingerprintTaskConfig struct {
 	IsScreenshot     bool
 	IPTargetMap      map[string][]int
 	DomainTargetMap  map[string]struct{}
+	WorkspaceId      int
 }
 
 // Fingerprint 指纹识别任务，将所有指纹识别任务整合后，可由worker将端口扫描与域名收集后的结果进行二次拆分为多个任务，提高指纹识别效率
@@ -68,6 +69,7 @@ func doFingerPrintAndSave(taskId string, mainTaskId string, config FingerprintTa
 			IsHttpx:          config.IsHttpx,
 			IsFingerprintHub: config.IsFingerprintHub,
 			IsIconHash:       config.IsIconHash,
+			WorkspaceId:      config.WorkspaceId,
 		}
 		doIPFingerPrint(portscanConfig, &resultPortScan)
 		resultArgs.IPConfig = &portscanConfig
@@ -76,7 +78,11 @@ func doFingerPrintAndSave(taskId string, mainTaskId string, config FingerprintTa
 	// 域名的指纹任务
 	if len(config.DomainTargetMap) > 0 {
 		// 读取目标的数据库中已保存的开放端口
-		err = comm.CallXClient("LoadDomainOpenedPort", &config.DomainTargetMap, &domainPort)
+		args := comm.LoadDomainOpenedPortArgs{
+			WorkspaceId: config.WorkspaceId,
+			Target:      config.DomainTargetMap,
+		}
+		err = comm.CallXClient("LoadDomainOpenedPort", &args, &domainPort)
 		if err != nil {
 			logging.RuntimeLog.Error(err)
 		}
@@ -87,6 +93,7 @@ func doFingerPrintAndSave(taskId string, mainTaskId string, config FingerprintTa
 			IsHttpx:          config.IsHttpx,
 			IsFingerprintHub: config.IsFingerprintHub,
 			IsIconHash:       config.IsIconHash,
+			WorkspaceId:      config.WorkspaceId,
 		}
 		doDomainFingerPrint(domainscanConfig, &resultDomainScan, domainPort)
 		resultArgs.DomainConfig = &domainscanConfig
@@ -100,7 +107,7 @@ func doFingerPrintAndSave(taskId string, mainTaskId string, config FingerprintTa
 	}
 	// screenshot任务
 	if config.IsScreenshot {
-		resultScreenshot := doScreenshotAndSave(mainTaskId, &resultPortScan, &resultDomainScan, domainPort)
+		resultScreenshot := doScreenshotAndSave(config.WorkspaceId, mainTaskId, &resultPortScan, &resultDomainScan, domainPort)
 		result = strings.Join([]string{result, resultScreenshot}, ",")
 	}
 
@@ -121,7 +128,7 @@ func doIPFingerPrint(config portscan.Config, resultPortScan *portscan.Result) {
 		fp.Do()
 	}
 	if config.IsIconHash {
-		doIconHashAndSave(resultPortScan, nil, nil)
+		doIconHashAndSave(config.WorkspaceId, resultPortScan, nil, nil)
 	}
 }
 
@@ -142,12 +149,12 @@ func doDomainFingerPrint(config domainscan.Config, resultDomainScan *domainscan.
 		fp.Do()
 	}
 	if config.IsIconHash {
-		doIconHashAndSave(nil, resultDomainScan, domainPort)
+		doIconHashAndSave(config.WorkspaceId, nil, resultDomainScan, domainPort)
 	}
 }
 
 // doScreenshotAndSave 执行Screenshot并保存
-func doScreenshotAndSave(mainTaskId string, resultIPScan *portscan.Result, resultDomainScan *domainscan.Result, domainPort map[string]map[int]struct{}) (result string) {
+func doScreenshotAndSave(workspaceId int, mainTaskId string, resultIPScan *portscan.Result, resultDomainScan *domainscan.Result, domainPort map[string]map[int]struct{}) (result string) {
 	ss := fingerprint.NewScreenShot()
 	if resultIPScan != nil {
 		ss.ResultPortScan = *resultIPScan
@@ -158,8 +165,9 @@ func doScreenshotAndSave(mainTaskId string, resultIPScan *portscan.Result, resul
 	}
 	ss.Do()
 	args := comm.ScreenshotResultArgs{
-		MainTaskId: mainTaskId,
-		FileInfo:   ss.LoadResult(),
+		MainTaskId:  mainTaskId,
+		FileInfo:    ss.LoadResult(),
+		WorkspaceId: workspaceId,
 	}
 	err := comm.CallXClient("SaveScreenshotResult", &args, &result)
 	if err != nil {
@@ -170,7 +178,7 @@ func doScreenshotAndSave(mainTaskId string, resultIPScan *portscan.Result, resul
 }
 
 // doIconHashAndSave 获取icon，并将icon image保存到服务端
-func doIconHashAndSave(resultIPScan *portscan.Result, resultDomainScan *domainscan.Result, domainPort map[string]map[int]struct{}) (result string) {
+func doIconHashAndSave(workspaceId int, resultIPScan *portscan.Result, resultDomainScan *domainscan.Result, domainPort map[string]map[int]struct{}) (result string) {
 	hash := fingerprint.NewIconHash()
 	if resultIPScan != nil {
 		hash.ResultPortScan = *resultIPScan
@@ -184,7 +192,11 @@ func doIconHashAndSave(resultIPScan *portscan.Result, resultDomainScan *domainsc
 	if len(hash.IconHashInfoResult.Result) <= 0 {
 		return ""
 	}
-	err := comm.CallXClient("SaveIconImageResult", &hash.IconHashInfoResult.Result, &result)
+	args := comm.IconHashResultArgs{
+		WorkspaceId:  workspaceId,
+		IconHashInfo: hash.IconHashInfoResult.Result,
+	}
+	err := comm.CallXClient("SaveIconImageResult", &args, &result)
 	if err != nil {
 		logging.RuntimeLog.Error(err)
 		return err.Error()

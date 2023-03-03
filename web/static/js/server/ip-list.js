@@ -360,7 +360,11 @@ $(function () {
     $("#batch_delete").click(function () {
         batch_delete('#ip_table', '/ip-delete');
     });
-
+    // workspace
+    get_user_workspace_list();
+    $('#select_workspace').change(function () {
+        change_user_workspace('#ip_table');
+    });
     //IP列表
     $('#ip_table').DataTable(
         {
@@ -415,6 +419,7 @@ $(function () {
                     data: "index", title: "序号", width: "5%",
                     "render": function (data, type, row, meta) {
                         let strData = data;
+                        if (row["pinindex"] === 1) strData = '<i class="fa fa-thumb-tack fa-rotate-90" style="color: orange" title="已置顶"></i>';
                         if (row["honeypot"].length > 0) strData = "<span style='color:red;font-weight:bold' title='" + row["honeypot"] + "'>蜜罐</span>";
                         return strData;
                     }
@@ -427,9 +432,9 @@ $(function () {
                         let strData = "";
                         let disable_fofa = $('#checkbox_disable_fofa').is(":checked");
                         if (row['color_tag']) {
-                            strData += '<h5><a href="/ip-info?ip=' + data + '&&disable_fofa=' + disable_fofa + '" target="_blank" class="badge ' + row['color_tag'] + '">' + data + '</a></h5>';
+                            strData += '<h5><a href="/ip-info?workspace=' + row['workspace'] + '&&ip=' + data + '&&disable_fofa=' + disable_fofa + '" target="_blank" class="badge ' + row['color_tag'] + '">' + data + '</a></h5>';
                         } else {
-                            strData += '<a href="/ip-info?ip=' + data + '&&disable_fofa=' + disable_fofa + '" target="_blank">' + data + '</a>';
+                            strData += '<a href="/ip-info?workspace=' + row['workspace'] + '&&ip=' + data + '&&disable_fofa=' + disable_fofa + '" target="_blank">' + data + '</a>';
                         }
                         if (row['vulnerability']) {
                             strData += '&nbsp;<span class="badge badge-danger" data-toggle="tooltip" data-html="true" title="' + html2Escape(row['vulnerability']) + '"><i class="fa fa-bolt"></span>';
@@ -476,7 +481,7 @@ $(function () {
                     "render": function (data, type, row, meta) {
                         let icons = '';
                         for (let i in row['iconimage']) {
-                            icons += '<img src=/webfiles/iconimage/' + row['iconimage'][i] + ' width="24px" height="24px"/>&nbsp;';
+                            icons += '<img src=/webfiles/' + row['workspace_guid'] + '/iconimage/' + row['iconimage'][i] + ' width="24px" height="24px"/>&nbsp;';
                         }
                         if (icons != "") icons += "<br>";
                         let title = encodeHtml(row['title'].substr(0, 200));
@@ -495,7 +500,7 @@ $(function () {
                         for (let i in data) {
                             let thumbnailFile = data[i].replace('.png', '_thumbnail.png');
                             let imgTitle = data[i].replace(".png", "").replace("_", ":");
-                            title += '<img src="/webfiles/screenshot/' + row['ip'] + '/' + thumbnailFile + '" class="img"  style="margin-bottom: 5px;margin-left: 5px;" title="' + imgTitle + '" onclick="show_bigpic(\'/webfiles/screenshot/' + row['ip'] + '/' + data[i] + '\')"/>'
+                            title += '<img src="/webfiles/' + row['workspace_guid'] + '/screenshot/' + row['ip'] + '/' + thumbnailFile + '" class="img"  style="margin-bottom: 5px;margin-left: 5px;" title="' + imgTitle + '" onclick="show_bigpic(\'/webfiles/' + row['workspace_guid'] + '/screenshot/' + row['ip'] + '/' + data[i] + '\')"/>'
                         }
                         const strData = '<div style="width:100%;white-space:normal;word-wrap:break-word;word-break:break-all;">' + title + '</div>';
                         return strData;
@@ -567,4 +572,3 @@ function load_portscan_config() {
         $('#checkbox_batchscan_ping').prop("checked", data['ping']);
     });
 }
-

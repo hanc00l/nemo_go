@@ -25,12 +25,14 @@ type XrayPoc struct {
 	VulResult        []Result
 	pocFiles         []Poc
 	pocV2Bytes       [][]byte
+	WorkspaceId      int
 }
 
 type XrayPocConfig struct {
 	IPPort      map[string][]int
 	Domain      map[string]struct{}
 	XrayPocFile string
+	WorkspaceId int
 }
 
 type Poc struct {
@@ -46,6 +48,7 @@ func NewXrayPoc(config XrayPocConfig) *XrayPoc {
 	p := &XrayPoc{
 		ResultPortScan:   PortscanVulResult{IPResult: make(map[string]*IPResult)},
 		ResultDomainScan: DomainscanVulResult{DomainResult: make(map[string]*DomainResult)},
+		WorkspaceId:      config.WorkspaceId,
 	}
 	for ip, ports := range config.IPPort {
 		p.ResultPortScan.SetIP(ip)
@@ -218,10 +221,11 @@ func (p *XrayPoc) exportVulResult() {
 				}
 				for _, v := range portResult.Vuls {
 					p.VulResult = append(p.VulResult, Result{
-						Target:  fmt.Sprintf("%s:%d", ipName, portNumber),
-						Url:     fmt.Sprintf("%s:%d", ipName, portNumber),
-						PocFile: v,
-						Source:  "xraypoc",
+						Target:      fmt.Sprintf("%s:%d", ipName, portNumber),
+						Url:         fmt.Sprintf("%s:%d", ipName, portNumber),
+						PocFile:     v,
+						Source:      "xraypoc",
+						WorkspaceId: p.WorkspaceId,
 					})
 				}
 			}
@@ -237,10 +241,11 @@ func (p *XrayPoc) exportVulResult() {
 			}
 			for _, v := range p.ResultDomainScan.DomainResult[domain].Vuls {
 				p.VulResult = append(p.VulResult, Result{
-					Target:  domain,
-					Url:     domain,
-					PocFile: v,
-					Source:  "xraypoc",
+					Target:      domain,
+					Url:         domain,
+					PocFile:     v,
+					Source:      "xraypoc",
+					WorkspaceId: p.WorkspaceId,
 				})
 			}
 		}

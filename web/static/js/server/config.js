@@ -105,6 +105,31 @@ $(function () {
                 }
             });
     });
+
+    $("#buttonSaveAPIToken").click(function () {
+        $.post("/config-save-api",
+            {
+                "fofa_user": $('#input_fofa_user').val(),
+                "fofa_token": $('#input_fofa_token').val(),
+                "hunter_token": $('#input_hunter_token').val(),
+                "quake_token": $('#input_quake_token').val(),
+                "chinaz_token": $('#input_chinaz_token').val(),
+            }, function (data, e) {
+                if (e === "success" && data['status'] == 'success') {
+                    swal({
+                        title: "保存成功！",
+                        text: "",
+                        type: "success",
+                        confirmButtonText: "确定",
+                        confirmButtonColor: "#41b883",
+                        closeOnConfirm: true,
+                        timer: 3000
+                    });
+                } else {
+                    swal('Warning', data['msg'], 'error');
+                }
+            });
+    });
 });
 $("#buttonSaveHoneypot").click(function () {
     save_custom("honeypot", $('#text_honeypot').val())
@@ -203,6 +228,11 @@ function load_config() {
         $('#input_serverchan').val(data['serverchan']);
         $('#input_dingtalk').val(data['dingtalk']);
         $('#input_feishu').val(data['feishu']);
+        $('#input_fofa_user').val(data['fofauser']);
+        $('#input_fofa_token').val(data['fofatoken']);
+        $('#input_hunter_token').val(data['huntertoken']);
+        $('#input_quake_token').val(data['quaketoken']);
+        $('#input_chinaz_token').val(data['chinaztoken']);
     });
 }
 

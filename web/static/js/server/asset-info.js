@@ -33,7 +33,7 @@ function delete_op(url, id) {
 }
 
 // 删除关关闭当前网页窗口
-function delete_and_close(url,id){
+function delete_and_close(url, id) {
     swal({
             title: "确定要删除?",
             type: "warning",
@@ -153,12 +153,29 @@ function show_bigpic(src) {
     $('.imgPreview').show();
 }
 
-function refresh_info(type, r_id, status) {
-    let url = type + "-info?" + type + "=" + r_id + "&&disable_fofa=";
-    if(status){
+function refresh_info(type, workspace, r_id, status) {
+    let url = type + "-info?workspace=" + workspace + "&&" + type + "=" + r_id + "&&disable_fofa=";
+    if (status) {
         url += "false"
-    }else{
+    } else {
         url += "true"
     }
     window.location.href = url;
+}
+
+function pin_top_info(type, id, status) {
+    let url = type + "-pin-top";
+    let pin_index = 1;
+    if (status === "1") pin_index = 0;
+    $.post(url,
+        {
+            "id": id,
+            "pin_index": pin_index,
+        }, function (data, e) {
+            if (e === "success" && data['status'] == 'success') {
+                window.location.reload();
+            } else {
+                swal('Warning', "置顶失败!", 'error');
+            }
+        });
 }

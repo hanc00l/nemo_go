@@ -29,6 +29,7 @@ type Config struct {
 	CmdBin           string `json:"cmdBin"`
 	IsLoadOpenedPort bool   `json:"loadOpenedPort"`
 	IsPortscan       bool   `json:"isPortscan"`
+	WorkspaceId      int    `json:"workspaceId"`
 }
 
 // PortAttrResult 端口属性结果
@@ -105,12 +106,13 @@ func (r *Result) SaveResult(config Config) string {
 			logging.RuntimeLog.Infof("ip:%s has too much open port:%d,discard to save!", ipName, len(ipResult.Ports))
 			continue
 		}
-		//save Domain
+		//save ip
 		ip := &db.Ip{
-			IpName:   ipName,
-			OrgId:    config.OrgId,
-			Location: ipResult.Location,
-			Status:   ipResult.Status,
+			IpName:      ipName,
+			OrgId:       config.OrgId,
+			Location:    ipResult.Location,
+			Status:      ipResult.Status,
+			WorkspaceId: config.WorkspaceId,
 		}
 		if ok, isNew := ip.SaveOrUpdate(); !ok {
 			continue

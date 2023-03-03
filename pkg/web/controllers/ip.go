@@ -63,6 +63,9 @@ type IPListData struct {
 	ScreenshotFile []string `json:"screenshot"`
 	IsCDN          bool     `json:"cdn"`
 	IconImage      []string `json:"iconimage"`
+	WorkspaceId    int      `json:"workspace"`
+	WorkspaceGUID  string   `json:"workspace_guid"`
+	PinIndex       int      `json:"pinindex"`
 }
 
 type IconHashWithFofa struct {
@@ -92,6 +95,9 @@ type IPInfo struct {
 	DisableFofa   bool
 	IconHashes    []IconHashWithFofa
 	TlsData       []string
+	Workspace     string
+	WorkspaceGUID string
+	PinIndex      string
 }
 
 // PortAttrInfo 每一个端口的详细数据
@@ -171,9 +177,10 @@ func (c *IPController) ListAction() {
 func (c *IPController) InfoAction() {
 	var ipInfo IPInfo
 	ipName := c.GetString("ip")
+	workspaceId, err := c.GetInt("workspace")
 	disableFofa, _ := c.GetBool("disable_fofa", false)
-	if ipName != "" {
-		ipInfo = getIPInfo(ipName, disableFofa, false)
+	if ipName != "" && err == nil && workspaceId > 0 {
+		ipInfo = getIPInfo(workspaceId, ipName, disableFofa, false)
 		// 修改背景色为交叉显示
 		if len(ipInfo.PortAttr) > 0 {
 			tableBackgroundSet := false
@@ -194,7 +201,10 @@ func (c *IPController) InfoAction() {
 // DeleteIPAction 删除一个IP记录
 func (c *IPController) DeleteIPAction() {
 	defer c.ServeJSON()
-
+	if c.CheckMultiAccessRequest([]RequestRole{SuperAdmin, Admin}, false) == false {
+		c.FailedStatus("当前用户权限不允许！")
+		return
+	}
 	id, err := c.GetInt("id")
 	if err != nil {
 		logging.RuntimeLog.Error(err.Error())
@@ -203,8 +213,11 @@ func (c *IPController) DeleteIPAction() {
 	}
 	ip := db.Ip{Id: id}
 	if ip.Get() {
-		ss := fingerprint.NewScreenShot()
-		ss.Delete(ip.IpName)
+		workspace := db.Workspace{Id: ip.WorkspaceId}
+		if workspace.Get() {
+			ss := fingerprint.NewScreenShot()
+			ss.Delete(workspace.WorkspaceGUID, ip.IpName)
+		}
 		c.MakeStatusResponse(ip.Delete())
 	} else {
 		c.MakeStatusResponse(false)
@@ -214,6 +227,10 @@ func (c *IPController) DeleteIPAction() {
 // DeletePortAttrAction 删除一个Port属性值
 func (c *IPController) DeletePortAttrAction() {
 	defer c.ServeJSON()
+	if c.CheckMultiAccessRequest([]RequestRole{SuperAdmin, Admin}, false) == false {
+		c.FailedStatus("当前用户权限不允许！")
+		return
+	}
 
 	id, err := c.GetInt("id")
 	if err != nil {
@@ -352,10 +369,44 @@ func (c *IPController) MarkColorTagAction() {
 	c.MakeStatusResponse(success)
 }
 
+// PinTopAction 置顶/取消在列表中的置顶显示
+func (c *IPController) PinTopAction() {
+	defer c.ServeJSON()
+
+	id, err1 := c.GetInt("id")
+	pinIndex, err2 := c.GetInt("pin_index")
+	if err1 != nil || err2 != nil {
+		logging.RuntimeLog.Error("get id or pin_index error")
+		c.FailedStatus("get id or pin_index error")
+		return
+	}
+	ip := db.Ip{Id: id}
+	if ip.Get() {
+		updateMap := make(map[string]interface{})
+		if pinIndex == 1 {
+			updateMap["pin_index"] = 1
+		} else {
+			updateMap["pin_index"] = 0
+		}
+		c.MakeStatusResponse(ip.Update(updateMap))
+		return
+	}
+	c.FailedStatus("ip not exist")
+}
+
 // ImportPortscanResultAction 导入portscan扫描结果
 func (c *IPController) ImportPortscanResultAction() {
 	defer c.ServeJSON()
+	if c.CheckMultiAccessRequest([]RequestRole{SuperAdmin, Admin}, false) == false {
+		c.FailedStatus("当前用户权限不允许！")
+		return
+	}
 
+	workspaceId := c.GetSession("Workspace").(int)
+	if workspaceId <= 0 {
+		c.FailedStatus("未选择当前的工作空间！")
+		return
+	}
 	file, fileHeader, err := c.GetFile("file")
 	if err != nil {
 		c.FailedStatus(err.Error())
@@ -377,7 +428,7 @@ func (c *IPController) ImportPortscanResultAction() {
 	// 解析并保存
 	bin := c.GetString("bin", "nmap")
 	orgId, _ := c.GetInt("org_id", 0)
-	config := portscan.Config{OrgId: &orgId}
+	config := portscan.Config{OrgId: &orgId, WorkspaceId: workspaceId}
 	// 如果不指定所属于组织，将值为nil
 	if orgId == 0 {
 		config.OrgId = nil
@@ -430,21 +481,21 @@ func (c *IPController) ImportPortscanResultAction() {
 		z.ParseCSVContentResult(fileContent)
 		portscan.FilterIPHasTooMuchPort(&z.IpResult, true)
 		resultIpPort := z.IpResult.SaveResult(config)
-		resultDomain := z.DomainResult.SaveResult(domainscan.Config{OrgId: config.OrgId})
+		resultDomain := z.DomainResult.SaveResult(domainscan.Config{OrgId: config.OrgId, WorkspaceId: workspaceId})
 		result = fmt.Sprintf("%s,%s", resultDomain, resultIpPort)
 	} else if bin == "fofa" {
 		z := onlineapi.NewFofa(onlineapi.OnlineAPIConfig{})
 		z.ParseCSVContentResult(fileContent)
 		portscan.FilterIPHasTooMuchPort(&z.IpResult, true)
 		resultIpPort := z.IpResult.SaveResult(config)
-		resultDomain := z.DomainResult.SaveResult(domainscan.Config{OrgId: config.OrgId})
+		resultDomain := z.DomainResult.SaveResult(domainscan.Config{OrgId: config.OrgId, WorkspaceId: workspaceId})
 		result = fmt.Sprintf("%s,%s", resultDomain, resultIpPort)
 	} else if bin == "hunter" {
 		z := onlineapi.NewHunter(onlineapi.OnlineAPIConfig{})
 		z.ParseCSVContentResult(fileContent)
 		portscan.FilterIPHasTooMuchPort(&z.IpResult, true)
 		resultIpPort := z.IpResult.SaveResult(config)
-		resultDomain := z.DomainResult.SaveResult(domainscan.Config{OrgId: config.OrgId})
+		resultDomain := z.DomainResult.SaveResult(domainscan.Config{OrgId: config.OrgId, WorkspaceId: workspaceId})
 		result = fmt.Sprintf("%s,%s", resultDomain, resultIpPort)
 	} else {
 		c.FailedStatus("未知的扫描方法")
@@ -466,6 +517,11 @@ func (c *IPController) validateRequestParam(req *ipRequestParam) {
 // getSearchMap 根据查询参数生成查询条件
 func (c *IPController) getSearchMap(req ipRequestParam) (searchMap map[string]interface{}) {
 	searchMap = make(map[string]interface{})
+
+	workspaceId := c.GetSession("Workspace").(int)
+	if workspaceId > 0 {
+		searchMap["workspace_id"] = workspaceId
+	}
 	if req.OrgId > 0 {
 		searchMap["org_id"] = req.OrgId
 	}
@@ -510,6 +566,7 @@ func (c *IPController) getIPListData(req ipRequestParam) (resp DataTableResponse
 	hp := custom.NewHoneyPot()
 	ss := fingerprint.NewScreenShot()
 	cdn := custom.NewCDNCheck()
+	workspaceCacheMap := make(map[int]string)
 	for i, ipRow := range results {
 		// 筛选满足指定条件的IP
 		// 只看国外的IP：
@@ -525,7 +582,8 @@ func (c *IPController) getIPListData(req ipRequestParam) (resp DataTableResponse
 		ipData.Id = ipRow.Id
 		ipData.IP = ipRow.IpName
 		ipData.Location = ipRow.Location
-		ipInfo := getIPInfo(ipRow.IpName, req.DisableFofa, req.DisableBanner)
+		ipData.PinIndex = ipRow.PinIndex
+		ipInfo := getIPInfo(ipRow.WorkspaceId, ipRow.IpName, req.DisableFofa, req.DisableBanner)
 		// 筛选满足指定条件的IP
 		// 只看没有开放端口的IP：
 		if req.SelectNoOpenedPort && len(ipInfo.Port) > 0 {
@@ -535,7 +593,17 @@ func (c *IPController) getIPListData(req ipRequestParam) (resp DataTableResponse
 		ipData.MemoContent = ipInfo.Memo
 		ipData.Title = strings.Join(ipInfo.Title, ", ")
 		ipData.Banner = strings.Join(ipInfo.Banner, ", ")
-		ipData.ScreenshotFile = ss.LoadScreenshotFile(ipRow.IpName)
+		ipData.WorkspaceId = ipRow.WorkspaceId
+		if _, ok := workspaceCacheMap[ipRow.WorkspaceId]; !ok {
+			workspace := db.Workspace{Id: ipRow.WorkspaceId}
+			if workspace.Get() {
+				workspaceCacheMap[workspace.Id] = workspace.WorkspaceGUID
+			}
+		}
+		if _, ok := workspaceCacheMap[ipRow.WorkspaceId]; ok {
+			ipData.WorkspaceGUID = workspaceCacheMap[ipRow.WorkspaceId]
+		}
+		ipData.ScreenshotFile = ss.LoadScreenshotFile(ipData.WorkspaceGUID, ipRow.IpName)
 		for _, ihm := range ipInfo.IconHashes {
 			ipData.IconImage = append(ipData.IconImage, ihm.IconImage)
 		}
@@ -548,7 +616,7 @@ func (c *IPController) getIPListData(req ipRequestParam) (resp DataTableResponse
 		}
 		ipData.Vulnerability = strings.Join(vulSet, "\r\n")
 
-		ipPortInfo := getPortInfo(ipRow.IpName, ipRow.Id, req.DisableFofa, req.DisableBanner)
+		ipPortInfo := getPortInfo(ipData.WorkspaceGUID, ipRow.IpName, ipRow.Id, req.DisableFofa, req.DisableBanner)
 		var ports []string
 		for _, p := range ipPortInfo.PortNumbers {
 			ports = append(ports, fmt.Sprintf("%d", p))
@@ -580,7 +648,7 @@ func (c *IPController) getIPListData(req ipRequestParam) (resp DataTableResponse
 }
 
 // getPortInfo 获取一个IP的所有端口信息集合
-func getPortInfo(ip string, ipId int, disableFofa, disableBanner bool) (r PortInfo) {
+func getPortInfo(workspaceGUID string, ip string, ipId int, disableFofa, disableBanner bool) (r PortInfo) {
 	r.PortStatus = make(map[int]string)
 	r.BannerSet = make(map[string]struct{})
 	r.TitleSet = make(map[string]struct{})
@@ -646,7 +714,7 @@ func getPortInfo(ip string, ipId int, disableFofa, disableBanner bool) (r PortIn
 					fileSuffix := utils.GetFaviconSuffixUrl(strings.TrimSpace(hashAndUrls[1]))
 					if fileSuffix != "" {
 						imageFile := fmt.Sprintf("%s.%s", utils.MD5(hash), fileSuffix)
-						if utils.CheckFileExist(filepath.Join(conf.GlobalServerConfig().Web.WebFiles, "iconimage", imageFile)) {
+						if utils.CheckFileExist(filepath.Join(conf.GlobalServerConfig().Web.WebFiles, workspaceGUID, "iconimage", imageFile)) {
 							if _, ok := r.IconHashImageSet[hash]; !ok {
 								r.IconHashImageSet[hash] = imageFile
 							}
@@ -664,8 +732,8 @@ func getPortInfo(ip string, ipId int, disableFofa, disableBanner bool) (r PortIn
 }
 
 // getIPInfo 获取一个IP的信息集合
-func getIPInfo(ipName string, disableFofa, disableBanner bool) (r IPInfo) {
-	ip := db.Ip{IpName: ipName}
+func getIPInfo(workspaceId int, ipName string, disableFofa, disableBanner bool) (r IPInfo) {
+	ip := db.Ip{IpName: ipName, WorkspaceId: workspaceId}
 	if !ip.GetByIp() {
 		return r
 	}
@@ -675,10 +743,16 @@ func getIPInfo(ipName string, disableFofa, disableBanner bool) (r IPInfo) {
 	r.Status = ip.Status
 	r.CreateTime = FormatDateTime(ip.CreateDatetime)
 	r.UpdateTime = FormatDateTime(ip.UpdateDatetime)
+	r.PinIndex = fmt.Sprintf("%d", ip.PinIndex)
+	r.Workspace = fmt.Sprintf("%d", ip.WorkspaceId)
+	workspace := db.Workspace{Id: ip.WorkspaceId}
+	if workspace.Get() {
+		r.WorkspaceGUID = workspace.WorkspaceGUID
+	}
 	//screenshot
-	for _, v := range fingerprint.NewScreenShot().LoadScreenshotFile(ipName) {
-		sfp := fmt.Sprintf("/webfiles/screenshot/%s/%s", ipName, v)
-		filepathThumbnail := fmt.Sprintf("/webfiles/screenshot/%s/%s", ipName, strings.ReplaceAll(v, ".png", "_thumbnail.png"))
+	for _, v := range fingerprint.NewScreenShot().LoadScreenshotFile(workspace.WorkspaceGUID, ipName) {
+		sfp := fmt.Sprintf("/webfiles/%s/screenshot/%s/%s", r.WorkspaceGUID, ipName, v)
+		filepathThumbnail := fmt.Sprintf("/webfiles/%s/screenshot/%s/%s", r.WorkspaceGUID, ipName, strings.ReplaceAll(v, ".png", "_thumbnail.png"))
 		r.Screenshot = append(r.Screenshot, ScreenshotFileInfo{
 			ScreenShotFile:          sfp,
 			ScreenShotThumbnailFile: filepathThumbnail,
@@ -696,7 +770,7 @@ func getIPInfo(ipName string, disableFofa, disableBanner bool) (r IPInfo) {
 		}
 	}
 	// port
-	portInfo := getPortInfo(ipName, ip.Id, disableFofa, disableBanner)
+	portInfo := getPortInfo(r.WorkspaceGUID, ipName, ip.Id, disableFofa, disableBanner)
 	r.PortAttr = portInfo.PortAttr
 	r.Title = utils.SetToSlice(portInfo.TitleSet)
 	r.Banner = utils.SetToSlice(portInfo.BannerSet)
@@ -732,7 +806,7 @@ func getIPInfo(ipName string, disableFofa, disableBanner bool) (r IPInfo) {
 		})
 	}
 	r.TlsData = utils.SetToSlice(portInfo.TlsDataSet)
-	r.Domain = getIpRelatedDomain(ipName)
+	r.Domain = getIpRelatedDomain(workspaceId, ipName)
 	return
 }
 
@@ -801,10 +875,11 @@ func (c *IPController) getMemoData(req ipRequestParam) (r []string) {
 }
 
 // getIpRelatedDomain 获取IP关联的域名
-func getIpRelatedDomain(ipName string) []string {
+func getIpRelatedDomain(workspaceId int, ipName string) []string {
 	domain := db.Domain{}
 	searchMap := make(map[string]interface{})
 	searchMap["ip"] = ipName
+	searchMap["workspace_id"] = workspaceId
 	rows, _ := domain.Gets(searchMap, -1, -1, false)
 	domains := make(map[string]struct{})
 	for _, r := range rows {

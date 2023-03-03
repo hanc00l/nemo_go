@@ -36,8 +36,9 @@ type KeyWordList struct {
 	CheckMod       string `json:"check_mod"`
 	IsDelete       bool   `json:"is_delete"`
 	Count          int    `json:"count"`
-	CreateDatetime string `json:"column:create_datetime"`
-	UpdateDatetime string `json:"column:update_datetime"`
+	CreateDatetime string `json:"create_datetime"`
+	UpdateDatetime string `json:"update_datetime"`
+	WorkspaceId    int    `json:"workspace"`
 }
 type KeyWordInfo struct {
 	Id             int    `json:"id"`
@@ -48,8 +49,8 @@ type KeyWordInfo struct {
 	CheckMod       string `json:"check_mod"`
 	IsDelete       bool   `json:"is_delete"`
 	Count          int    `json:"count"`
-	CreateDatetime string `json:"column:create_datetime"`
-	UpdateDatetime string `json:"column:update_datetime"`
+	CreateDatetime string `json:"create_datetime"`
+	UpdateDatetime string `json:"update_datetime"`
 }
 
 func (c *KeySearchController) IndexAction() {
@@ -67,7 +68,16 @@ func (c *KeySearchController) IndexBlackAction() {
 // AddSaveAction 保存新增的记录
 func (c *KeySearchController) AddSaveAction() {
 	defer c.ServeJSON()
+	if c.CheckMultiAccessRequest([]RequestRole{SuperAdmin, Admin}, false) == false {
+		c.FailedStatus("当前用户权限不允许！")
+		return
+	}
 
+	workspaceId := c.GetSession("Workspace").(int)
+	if workspaceId <= 0 {
+		c.FailedStatus("未选择当前的工作空间！")
+		return
+	}
 	keyWordData := keyWordInitRequestParam{}
 	err := c.ParseForm(&keyWordData)
 	if err != nil {
@@ -75,14 +85,15 @@ func (c *KeySearchController) AddSaveAction() {
 		c.FailedStatus(err.Error())
 		return
 	}
-	org := db.KeyWord{}
-	org.OrgId = keyWordData.AddOrgId
-	org.KeyWord = keyWordData.AddKeyWord
-	org.SearchTime = keyWordData.AddSearchTime
-	org.ExcludeWords = keyWordData.AddExcludeWords
-	org.CheckMod = keyWordData.AddCheckMod
-	org.Count = keyWordData.AddCount
-	c.MakeStatusResponse(org.Add())
+	kw := db.KeyWord{}
+	kw.OrgId = keyWordData.AddOrgId
+	kw.KeyWord = keyWordData.AddKeyWord
+	kw.SearchTime = keyWordData.AddSearchTime
+	kw.ExcludeWords = keyWordData.AddExcludeWords
+	kw.CheckMod = keyWordData.AddCheckMod
+	kw.Count = keyWordData.AddCount
+	kw.WorkspaceId = workspaceId
+	c.MakeStatusResponse(kw.Add())
 }
 
 // validateRequestParam 校验请求的参数
@@ -114,6 +125,10 @@ func (c *KeySearchController) ListAction() {
 // DeleteKeyWordAction 删除一个记录
 func (c *KeySearchController) DeleteKeyWordAction() {
 	defer c.ServeJSON()
+	if c.CheckMultiAccessRequest([]RequestRole{SuperAdmin, Admin}, false) == false {
+		c.FailedStatus("当前用户权限不允许！")
+		return
+	}
 
 	id, err := c.GetInt("id")
 	if err != nil {
@@ -132,6 +147,10 @@ func (c *KeySearchController) DeleteKeyWordAction() {
 func (c *KeySearchController) getSearchMap(req keySearchRequestParam) (searchMap map[string]interface{}) {
 	searchMap = make(map[string]interface{})
 
+	workspaceId := c.GetSession("Workspace").(int)
+	if workspaceId > 0 {
+		searchMap["workspace_id"] = workspaceId
+	}
 	if req.KeyWord != "" {
 		searchMap["key_word"] = req.KeyWord
 	}
@@ -154,6 +173,10 @@ func (c *KeySearchController) getSearchMap(req keySearchRequestParam) (searchMap
 func (c *KeySearchController) getKeyWordListData(req keySearchRequestParam) (resp DataTableResponseData) {
 	keyWords := db.KeyWord{}
 	searchMap := c.getSearchMap(req)
+	workspaceId := c.GetSession("Workspace").(int)
+	if workspaceId > 0 {
+		searchMap["workspace_id"] = workspaceId
+	}
 	startPage := req.Start/req.Length + 1
 	results, total := keyWords.Gets(searchMap, startPage, req.Length)
 	for i, keyWordRow := range results {
@@ -164,6 +187,7 @@ func (c *KeySearchController) getKeyWordListData(req keySearchRequestParam) (res
 		r.CheckMod = keyWordRow.CheckMod
 		r.ExcludeWords = keyWordRow.ExcludeWords
 		r.SearchTime = keyWordRow.SearchTime
+		r.WorkspaceId = keyWordRow.WorkspaceId
 		orgDb := db.Organization{}
 		orgDb.Id = keyWordRow.OrgId
 		if orgDb.Get() {

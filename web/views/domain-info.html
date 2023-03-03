@@ -12,13 +12,22 @@
                                     class="fa fa fa-trash-o"></i>
                             </button>&nbsp;
                             <button type="button" id="btn_switchShowFofa" class="btn btn-secondary"
-                                    onclick="refresh_info('domain','{{ .domain_info.Domain }}',{{ .domain_info.DisableFofa }})">
+                                    onclick="refresh_info('domain','{{ .domain_info.Workspace }}','{{ .domain_info.Domain }}',{{ .domain_info.DisableFofa }})">
                                 <i class="fa fa-info-circle"></i>{{ if .domain_info.DisableFofa }}
                                 显示FOFA/Quake/Hunter/0Zone信息
                                 {{ else }}
                                 不看FOFA/Quake/Hunter/0Zone信息
                                 {{ end }}
                             </button>&nbsp;
+                            <button type="button" id="btn_switchPin" class="btn btn-secondary"
+                                    onclick="pin_top_info('domain','{{ .domain_info.Id }}','{{ .domain_info.PinIndex }}')">
+                                {{ if eq .domain_info.PinIndex "1" }}
+                                <i class="fa fa-thumb-tack"></i>取消置顶
+                                {{ else }}
+                                <i class="fa fa-thumb-tack fa-rotate-90"></i>置顶
+                                {{ end }}
+                            </button>
+                            &nbsp;
                             <button type="button" id="btn_editDomainMemo" class="btn btn-secondary"><i
                                     class="fa fa-pencil-square-o"></i>编辑备忘录
                             </button>&nbsp;
@@ -61,7 +70,7 @@
                         <span class="btn btn-info">关联IP</span></b>
                         <span class="btn btn-warning text-left">
                             {{ range .domain_info.IP }}
-                                <a href="ip-info?ip={{ . }}" target="_blank">{{ . }}</a>&nbsp;
+                                <a href="ip-info?workspace={{ $.domain_info.Workspace }}&&ip={{ . }}" target="_blank">{{ . }}</a>&nbsp;
                             {{ end }}
                         </span>
                         <span class="btn btn-info">端口信息</span></b>

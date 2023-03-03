@@ -1,0 +1,186 @@
+<main class="app-content">
+    <div class="app-title">
+        <div>
+            <h1><i class="fa fa-th-list"></i>&nbsp;用户列表</h1>
+            <p></p>
+        </div>
+        <ul class="app-breadcrumb breadcrumb side">
+            <li class="breadcrumb-item"><i class="fa fa-home fa-lg"></i></li>
+            <li class="breadcrumb-item"><a href="/index">首页</a></li>
+            <li class="breadcrumb-item active"><a href="#">用户列表</a></li>
+        </ul>
+    </div>
+
+    <div class="row">
+        <div class="col-md-12">
+            <div class="tile">
+                <div class="tile-body">
+                    <a class="btn btn-primary" href="user-add" role="button" title="新建用户">
+                        <i class="fa fa-user fa-lg"></i>新建用户</a>
+                    <br>
+                    <br>
+                    <table class="table table-hover table-bordered dataTable no-footer" id="user_table" role="grid"
+                           aria-describedby="user_table" width="100%">
+                    </table>
+                    <!-- 模态对话框：修改-->
+                    <div class="modal fade" id="edituser" tabindex="-1" role="dialog" aria-labelledby="myModalLabel"
+                         aria-hidden="true">
+                        <div class="modal-dialog">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h4 class="modal-title" id="myModalLabel">
+                                        修改用户
+                                    </h4>
+                                </div>
+                                <div class="modal-body">
+                                    <form class="form-horizontal" role="form">
+                                        <div class="form-group">
+                                            <label class="control-label no-padding-right"
+                                                   for="user_name">用户名称</label>
+                                            <div>
+                                                <input class="form-control col-md-7" title="用户名称" id="user_name">
+                                            </div>
+                                        </div>
+                                        <div class="form-group">
+                                            <label class="control-label no-padding-right"
+                                                   for="user_description">用户描述</label>
+                                            <div>
+                                                <input class="form-control col-md-7" title="用户描述"
+                                                       id="user_description">
+                                            </div>
+                                        </div>
+                                        <div class="form-group">
+                                            <label class="control-label no-padding-right"
+                                                   for="sort_order">排序号</label>
+                                            <div>
+                                                <input class="form-control col-md-7" title="排序号" id="sort_order">
+                                            </div>
+                                        </div>
+                                        <div class="form-group">
+                                            <label class="control-label no-padding-right" for="state">状态</label>
+                                            <div>
+                                                <select class="form-control col-md-7" title="用户状态" id="state">
+                                                    <option value="enable">Enable</option>
+                                                    <option value="disable">Disable</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                        <div class="form-group">
+                                            <label class="control-label no-padding-right"
+                                                   for="user_role">用户类型</label>
+                                            <div>
+                                                <select class="form-control col-md-7" title="用户类型" id="user_role">
+                                                    <option value="superadmin">超级管理员</option>
+                                                    <option value="admin">管理员</option>
+                                                    <option value="guest">普通用户</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                        <div class="hr hr-16 hr-dotted"></div>
+                                        <div class="modal-footer">
+                                            <button type="button" class="btn btn-secondary" data-dismiss="modal"
+                                                    aria-hidden="true">Cancel
+                                            </button>
+                                            <button class="btn btn-primary user-update" type="button" id="user_update">
+                                                <span>更新</span> <i class="fa fa-send m-l-10"></i>
+                                            </button>
+                                        </div>
+                                        <input type="hidden" id="user_id">
+                                    </form>
+                                </div>
+                            </div><!-- /.modal-content -->
+                        </div><!-- /.modal-dialog -->
+                    </div>
+
+                    <div class="modal fade" id="resetpassword" tabindex="-1" role="dialog"
+                         aria-labelledby="myModalLabel2"
+                         aria-hidden="true">
+                        <div class="modal-dialog">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h4 class="modal-title" id="myModalLabel2">
+                                        重置密码
+                                    </h4>
+                                </div>
+                                <div class="modal-body">
+                                    <form class="form-horizontal" role="form">
+                                        <div class="form-group">
+                                            <label class="control-label no-padding-right" for="reset_user_password1">登录密码</label>
+                                            <div>
+                                                <input class="form-control col-md-7" title="登录密码" type="password"
+                                                       id="reset_user_password1">
+                                            </div>
+                                        </div>
+                                        <div class="form-group">
+                                            <label class="control-label no-padding-right" for="reset_user_password2">确认密码</label>
+                                            <div>
+                                                <input class="form-control col-md-7" title="确认密码" type="password"
+                                                       id="reset_user_password2">
+                                            </div>
+                                        </div>
+                                        <div class="hr hr-16 hr-dotted"></div>
+                                        <div class="modal-footer">
+                                            <button type="button" class="btn btn-secondary" data-dismiss="modal"
+                                                    aria-hidden="true">Cancel
+                                            </button>
+                                            <button class="btn btn-primary user-update" type="button"
+                                                    id="reset_user_password">
+                                                <span>重置密码</span> <i class="fa fa-send m-l-10"></i>
+                                            </button>
+                                        </div>
+                                        <input type="hidden" id="reset_user_id">
+                                    </form>
+                                </div>
+                            </div><!-- /.modal-content -->
+                        </div><!-- /.modal-dialog -->
+                    </div>
+                    <div class="modal fade" id="setuserworkspace" tabindex="-1" role="dialog"
+                         aria-labelledby="myModalLabel2"
+                         aria-hidden="true">
+                        <div class="modal-dialog">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h4 class="modal-title" id="myModalLabel3">
+                                        工作空间访问权限
+                                    </h4>
+                                </div>
+                                <div class="modal-body">
+                                    <form class="form-horizontal" role="form">
+                                        <div id="checkbox_user_workspace_list">
+                                        </div>
+                                        <div class="hr hr-16 hr-dotted"></div>
+                                        <div class="modal-footer">
+                                            <button type="button" class="btn btn-secondary" data-dismiss="modal"
+                                                    aria-hidden="true">Cancel
+                                            </button>
+                                            <button class="btn btn-primary user-update" type="button"
+                                                    id="set_user_workspace">
+                                                <span>保存设置</span> <i class="fa fa-send m-l-10"></i>
+                                            </button>
+                                        </div>
+                                        <input type="hidden" id="userworkspace_user_id">
+                                    </form>
+                                </div>
+                            </div><!-- /.modal-content -->
+                        </div><!-- /.modal-dialog -->
+                    </div>
+
+
+                </div>
+                <!----tile body-->
+            </div> <!-- tile -->
+        </div> <!-- col md-12 -->
+    </div>
+    <!--row-->
+</main>
+<script src="static/js/jquery/jquery-3.3.1.min.js"></script>
+<script src="static/js/bootstrap/popper.min.js"></script>
+<script src="static/js/bootstrap/bootstrap.min.js"></script>
+<script src="static/js/main.js"></script>
+<script src="static/js/plugins/pace.min.js"></script>
+<!-- Data table plugin-->
+<script type="text/javascript" src="static/js/plugins/jquery.dataTables.min.js"></script>
+<script type="text/javascript" src="static/js/plugins/dataTables.bootstrap.min.js"></script>
+<script src="static/js/sweetalert/sweetalert.min.js"></script>
+<script src="static/js/jquery/jquery.bootstrap-duallistbox.js"></script>
+<script type="text/javascript" src="static/js/server/user-list.js"></script>

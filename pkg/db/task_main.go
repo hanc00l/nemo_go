@@ -18,6 +18,7 @@ type TaskMain struct {
 	SucceededTime   *time.Time `gorm:"column:succeeded"`
 	ProgressMessage string     `gorm:"column:progress_message"`
 	CronTaskId      string     `gorm:"column:cron_id"`
+	WorkspaceId     int        `gorm:"column:workspace_id"`
 	CreateDatetime  time.Time  `gorm:"column:create_datetime"`
 	UpdateDatetime  time.Time  `gorm:"column:update_datetime"`
 }
@@ -119,6 +120,8 @@ func (t *TaskMain) makeWhere(searchMap map[string]interface{}) *gorm.DB {
 			}
 		case "cron_id":
 			db = db.Where("cron_id", value)
+		case "workspace_id":
+			db = db.Where("workspace_id", value)
 		default:
 			db = db.Where(column, value)
 		}

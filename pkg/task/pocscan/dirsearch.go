@@ -90,11 +90,12 @@ func (d *Dirsearch) Do() {
 			//保存结果
 			if len(d.resultUrl) > 0 {
 				d.Result = append(d.Result, Result{
-					Target:  target,
-					Url:     url,
-					PocFile: d.Config.PocFile,
-					Source:  "dirsearch",
-					Extra:   strings.Join(d.resultUrl, "\n"),
+					Target:      target,
+					Url:         url,
+					PocFile:     d.Config.PocFile,
+					Source:      "dirsearch",
+					Extra:       strings.Join(d.resultUrl, "\n"),
+					WorkspaceId: d.Config.WorkspaceId,
 				})
 			}
 		}

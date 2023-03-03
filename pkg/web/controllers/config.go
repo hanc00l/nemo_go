@@ -37,6 +37,11 @@ type DefaultConfig struct {
 	ServerChanToken  string `json:"serverchan"`
 	DingTalkToken    string `json:"dingtalk"`
 	FeishuToken      string `json:"feishu"`
+	FofaUser         string `json:"fofauser"`
+	FofaToken        string `json:"fofatoken"`
+	HunterToken      string `json:"huntertoken"`
+	QuakeToken       string `json:"quaketoken"`
+	ChinazToken      string `json:"chinaztoken"`
 }
 
 func (c *ConfigController) IndexAction() {
@@ -46,6 +51,8 @@ func (c *ConfigController) IndexAction() {
 }
 
 func (c *ConfigController) CustomAction() {
+	c.CheckMultiAccessRequest([]RequestRole{SuperAdmin, Admin}, true)
+
 	c.UpdateOnlineUser()
 	c.Layout = "base.html"
 	c.TplName = "custom.html"
@@ -64,6 +71,7 @@ func (c *ConfigController) LoadDefaultConfigAction() {
 	task := conf.GlobalServerConfig().Task
 	fingerprint := conf.GlobalWorkerConfig().Fingerprint
 	notify := conf.GlobalServerConfig().Notify
+	apiConfig := conf.GlobalWorkerConfig().API
 	data := DefaultConfig{
 		CmdBin:           portscan.Cmdbin,
 		Port:             portscan.Port,
@@ -79,6 +87,11 @@ func (c *ConfigController) LoadDefaultConfigAction() {
 		ServerChanToken:  notify["serverchan"].Token,
 		DingTalkToken:    notify["dingtalk"].Token,
 		FeishuToken:      notify["feishu"].Token,
+		FofaUser:         apiConfig.Fofa.Name,
+		FofaToken:        apiConfig.Fofa.Key,
+		HunterToken:      apiConfig.Hunter.Key,
+		QuakeToken:       apiConfig.Quake.Key,
+		ChinazToken:      apiConfig.ICP.Key,
 	}
 	if fileContent, err1 := os.ReadFile(filepath.Join(conf.GetRootPath(), "version.txt")); err1 == nil {
 		data.Version = string(fileContent)
@@ -96,11 +109,12 @@ func (c *ConfigController) ChangePasswordAction() {
 		c.FailedStatus("密码为空！")
 		return
 	}
-	if !CheckPassword(oldPass) {
-		c.FailedStatus("校验旧密码失败！")
+	userName := c.GetSession("User").(string)
+	if len(userName) == 0 {
+		c.FailedStatus("修改密码失败！")
 		return
 	}
-	if UpdatePassword(newPass) {
+	if UpdatePassword(userName, oldPass, newPass) {
 		c.SucceededStatus("OK！")
 	} else {
 		c.FailedStatus("修改密码失败！")
@@ -132,6 +146,10 @@ func (c *ConfigController) LoadCustomConfigAction() {
 // SaveCustomConfigAction 保存一个自定义文件
 func (c *ConfigController) SaveCustomConfigAction() {
 	defer c.ServeJSON()
+	if c.CheckMultiAccessRequest([]RequestRole{SuperAdmin, Admin}, false) == false {
+		c.FailedStatus("当前用户权限不允许！")
+		return
+	}
 
 	customType := c.GetString("type", "")
 	customContent := c.GetString("content", "")
@@ -155,6 +173,10 @@ func (c *ConfigController) SaveCustomConfigAction() {
 // SaveTaskSliceNumberAction 保存任务切分设置
 func (c *ConfigController) SaveTaskSliceNumberAction() {
 	defer c.ServeJSON()
+	if c.CheckMultiAccessRequest([]RequestRole{SuperAdmin, Admin}, false) == false {
+		c.FailedStatus("当前用户权限不允许！")
+		return
+	}
 
 	ipSliceNumber, err1 := c.GetInt("ipslicenumber", utils.DefaultIpSliceNumber)
 	portSliceNumber, err2 := c.GetInt("portslicenumber", utils.DefaultPortSliceNumber)
@@ -179,6 +201,10 @@ func (c *ConfigController) SaveTaskSliceNumberAction() {
 // SaveTaskNotifyAction 保存任务通知的Token设置
 func (c *ConfigController) SaveTaskNotifyAction() {
 	defer c.ServeJSON()
+	if c.CheckMultiAccessRequest([]RequestRole{SuperAdmin, Admin}, false) == false {
+		c.FailedStatus("当前用户权限不允许！")
+		return
+	}
 
 	serverChanToken := c.GetString("token_serverchan", "")
 	dingtalkToken := c.GetString("token_dingtalk", "")
@@ -203,9 +229,45 @@ func (c *ConfigController) SaveTaskNotifyAction() {
 	c.SucceededStatus("保存配置成功")
 }
 
+// SaveAPITokenAction 保存API的Token
+func (c *ConfigController) SaveAPITokenAction() {
+	defer c.ServeJSON()
+	if c.CheckMultiAccessRequest([]RequestRole{SuperAdmin, Admin}, false) == false {
+		c.FailedStatus("当前用户权限不允许！")
+		return
+	}
+
+	fofaUser := c.GetString("fofa_user", "")
+	fofaToken := c.GetString("fofa_token", "")
+	hunterToken := c.GetString("hunter_token", "")
+	quakeToken := c.GetString("quake_token", "")
+	chinazToken := c.GetString("chinaz_token", "")
+
+	err := conf.GlobalWorkerConfig().ReloadConfig()
+	if err != nil {
+		c.FailedStatus(err.Error())
+		return
+	}
+	conf.GlobalWorkerConfig().API.Fofa.Name = fofaUser
+	conf.GlobalWorkerConfig().API.Fofa.Key = fofaToken
+	conf.GlobalWorkerConfig().API.Hunter.Key = hunterToken
+	conf.GlobalWorkerConfig().API.Quake.Key = quakeToken
+	conf.GlobalWorkerConfig().API.ICP.Key = chinazToken
+
+	err = conf.GlobalWorkerConfig().WriteConfig()
+	if err != nil {
+		c.FailedStatus(err.Error())
+	}
+	c.SucceededStatus("保存配置成功")
+}
+
 // SaveFingerprintAction 保存默认指纹设置
 func (c *ConfigController) SaveFingerprintAction() {
 	defer c.ServeJSON()
+	if c.CheckMultiAccessRequest([]RequestRole{SuperAdmin, Admin}, false) == false {
+		c.FailedStatus("当前用户权限不允许！")
+		return
+	}
 
 	httpx, err1 := c.GetBool("httpx", true)
 	fingerprinthub, err2 := c.GetBool("fingerprinthub", true)
@@ -236,6 +298,10 @@ func (c *ConfigController) SaveFingerprintAction() {
 // SavePortscanAction 保存默认端口扫描设置
 func (c *ConfigController) SavePortscanAction() {
 	defer c.ServeJSON()
+	if c.CheckMultiAccessRequest([]RequestRole{SuperAdmin, Admin}, false) == false {
+		c.FailedStatus("当前用户权限不允许！")
+		return
+	}
 
 	cmdbin := c.GetString("cmdbin", "masscan")
 	port := c.GetString("port", "--top-ports 1000")
@@ -270,6 +336,11 @@ func (c *ConfigController) SavePortscanAction() {
 // UploadXrayPocAction xraypoc的上传
 func (c *ConfigController) UploadXrayPocAction() {
 	defer c.ServeJSON()
+	if c.CheckMultiAccessRequest([]RequestRole{SuperAdmin, Admin}, false) == false {
+		c.FailedStatus("当前用户权限不允许！")
+		return
+	}
+
 	// 获取上传信息
 	f, h, err := c.GetFile("file")
 	if err != nil {

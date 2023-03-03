@@ -22,7 +22,7 @@ import (
 )
 
 // StartPortScanTask 端口扫描任务
-func StartPortScanTask(req PortscanRequestParam, mainTaskId string) (taskId string, err error) {
+func StartPortScanTask(req PortscanRequestParam, mainTaskId string, workspaceId int) (taskId string, err error) {
 	// 解析参数
 	ts := utils.NewTaskSlice()
 	ts.TaskMode = req.TaskMode
@@ -35,7 +35,7 @@ func StartPortScanTask(req PortscanRequestParam, mainTaskId string) (taskId stri
 	for _, t := range targets {
 		for _, p := range ports {
 			// 端口扫描
-			if taskId, err = doPortscan(mainTaskId, t, p, req); err != nil {
+			if taskId, err = doPortscan(workspaceId, mainTaskId, t, p, req); err != nil {
 				return
 			}
 			// IP归属地：如果有端口执行任务，则IP归属地任务在端口扫描中执行，否则单独执行
@@ -47,19 +47,19 @@ func StartPortScanTask(req PortscanRequestParam, mainTaskId string) (taskId stri
 			}
 			// FOFA
 			if req.IsFofa {
-				if taskId, err = doOnlineAPISearch(mainTaskId, "fofa", t, &req.OrgId, req.IsIPLocation, req.IsHttpx, req.IsFingerprintHub, req.IsScreenshot, req.IsIconHash, req.IsIgnoreCDN, req.IsIgnoreOutofChina); err != nil {
+				if taskId, err = doOnlineAPISearch(workspaceId, mainTaskId, "fofa", t, &req.OrgId, req.IsIPLocation, req.IsHttpx, req.IsFingerprintHub, req.IsScreenshot, req.IsIconHash, req.IsIgnoreCDN, req.IsIgnoreOutofChina); err != nil {
 					return
 				}
 			}
 			// Quake
 			if req.IsQuake {
-				if taskId, err = doOnlineAPISearch(mainTaskId, "quake", t, &req.OrgId, req.IsIPLocation, req.IsHttpx, req.IsFingerprintHub, req.IsScreenshot, req.IsIconHash, req.IsIgnoreCDN, req.IsIgnoreOutofChina); err != nil {
+				if taskId, err = doOnlineAPISearch(workspaceId, mainTaskId, "quake", t, &req.OrgId, req.IsIPLocation, req.IsHttpx, req.IsFingerprintHub, req.IsScreenshot, req.IsIconHash, req.IsIgnoreCDN, req.IsIgnoreOutofChina); err != nil {
 					return
 				}
 			}
 			// Hunter
 			if req.IsHunter {
-				if taskId, err = doOnlineAPISearch(mainTaskId, "hunter", t, &req.OrgId, req.IsIPLocation, req.IsHttpx, req.IsFingerprintHub, req.IsScreenshot, req.IsIconHash, req.IsIgnoreCDN, req.IsIgnoreOutofChina); err != nil {
+				if taskId, err = doOnlineAPISearch(workspaceId, mainTaskId, "hunter", t, &req.OrgId, req.IsIPLocation, req.IsHttpx, req.IsFingerprintHub, req.IsScreenshot, req.IsIconHash, req.IsIgnoreCDN, req.IsIgnoreOutofChina); err != nil {
 					return
 				}
 			}
@@ -69,7 +69,7 @@ func StartPortScanTask(req PortscanRequestParam, mainTaskId string) (taskId stri
 }
 
 // StartBatchScanTask 探测+扫描任务
-func StartBatchScanTask(req PortscanRequestParam, mainTaskId string) (taskId string, err error) {
+func StartBatchScanTask(req PortscanRequestParam, mainTaskId string, workspaceId int) (taskId string, err error) {
 	ts := utils.NewTaskSlice()
 	ts.TaskMode = req.TaskMode
 	ts.IpTarget = formatIpTarget(req.Target, req.OrgId)
@@ -81,7 +81,7 @@ func StartBatchScanTask(req PortscanRequestParam, mainTaskId string) (taskId str
 	for _, t := range targets {
 		for _, p := range ports {
 			// 端口扫描
-			if taskId, err = doBatchScan(mainTaskId, t, p, req); err != nil {
+			if taskId, err = doBatchScan(workspaceId, mainTaskId, t, p, req); err != nil {
 				return
 			}
 		}
@@ -90,7 +90,7 @@ func StartBatchScanTask(req PortscanRequestParam, mainTaskId string) (taskId str
 }
 
 // StartDomainScanTask 域名任务
-func StartDomainScanTask(req DomainscanRequestParam, mainTaskId string) (taskId string, err error) {
+func StartDomainScanTask(req DomainscanRequestParam, mainTaskId string, workspaceId int) (taskId string, err error) {
 	ts := utils.NewTaskSlice()
 	domainTargetList := formatDomainTarget(req.Target)
 	// 域名的FLD
@@ -108,7 +108,7 @@ func StartDomainScanTask(req DomainscanRequestParam, mainTaskId string) (taskId 
 			subConfig := req
 			subConfig.IsSubdomainBrute = false
 			subConfig.IsCrawler = false
-			if taskId, err = doDomainscan(mainTaskId, t, subConfig); err != nil {
+			if taskId, err = doDomainscan(workspaceId, mainTaskId, t, subConfig); err != nil {
 				return
 			}
 			taskStarted = true
@@ -117,7 +117,7 @@ func StartDomainScanTask(req DomainscanRequestParam, mainTaskId string) (taskId 
 			subConfig := req
 			subConfig.IsSubfinder = false
 			subConfig.IsCrawler = false
-			if taskId, err = doDomainscan(mainTaskId, t, subConfig); err != nil {
+			if taskId, err = doDomainscan(workspaceId, mainTaskId, t, subConfig); err != nil {
 				return
 			}
 			taskStarted = true
@@ -126,29 +126,29 @@ func StartDomainScanTask(req DomainscanRequestParam, mainTaskId string) (taskId 
 			subConfig := req
 			subConfig.IsSubfinder = false
 			subConfig.IsSubdomainBrute = false
-			if taskId, err = doDomainscan(mainTaskId, t, subConfig); err != nil {
+			if taskId, err = doDomainscan(workspaceId, mainTaskId, t, subConfig); err != nil {
 				return
 			}
 			taskStarted = true
 		}
 		// 如果没有子域名任务，则至少启动一个域名解析任务
 		if !taskStarted {
-			if taskId, err = doDomainscan(mainTaskId, t, req); err != nil {
+			if taskId, err = doDomainscan(workspaceId, mainTaskId, t, req); err != nil {
 				return
 			}
 		}
 		if req.IsFofa {
-			if taskId, err = doOnlineAPISearch(mainTaskId, "fofa", t, &req.OrgId, true, req.IsHttpx, req.IsFingerprintHub, req.IsScreenshot, req.IsIconHash, req.IsIgnoreCDN, req.IsIgnoreOutofChina); err != nil {
+			if taskId, err = doOnlineAPISearch(workspaceId, mainTaskId, "fofa", t, &req.OrgId, true, req.IsHttpx, req.IsFingerprintHub, req.IsScreenshot, req.IsIconHash, req.IsIgnoreCDN, req.IsIgnoreOutofChina); err != nil {
 				return
 			}
 		}
 		if req.IsQuake {
-			if taskId, err = doOnlineAPISearch(mainTaskId, "quake", t, &req.OrgId, true, req.IsHttpx, req.IsFingerprintHub, req.IsScreenshot, req.IsIconHash, req.IsIgnoreCDN, req.IsIgnoreOutofChina); err != nil {
+			if taskId, err = doOnlineAPISearch(workspaceId, mainTaskId, "quake", t, &req.OrgId, true, req.IsHttpx, req.IsFingerprintHub, req.IsScreenshot, req.IsIconHash, req.IsIgnoreCDN, req.IsIgnoreOutofChina); err != nil {
 				return
 			}
 		}
 		if req.IsHunter {
-			if taskId, err = doOnlineAPISearch(mainTaskId, "hunter", t, &req.OrgId, true, req.IsHttpx, req.IsFingerprintHub, req.IsScreenshot, req.IsIconHash, req.IsIgnoreCDN, req.IsIgnoreOutofChina); err != nil {
+			if taskId, err = doOnlineAPISearch(workspaceId, mainTaskId, "hunter", t, &req.OrgId, true, req.IsHttpx, req.IsFingerprintHub, req.IsScreenshot, req.IsIconHash, req.IsIgnoreCDN, req.IsIgnoreOutofChina); err != nil {
 				return
 			}
 		}
@@ -167,7 +167,7 @@ func StartDomainScanTask(req DomainscanRequestParam, mainTaskId string) (taskId 
 }
 
 // StartPocScanTask pocscan任务
-func StartPocScanTask(req PocscanRequestParam, mainTaskId string) (taskId string, err error) {
+func StartPocScanTask(req PocscanRequestParam, mainTaskId string, workspaceId int) (taskId string, err error) {
 	var targetList []string
 	for _, t := range strings.Split(req.Target, "\n") {
 		if tt := strings.TrimSpace(t); tt != "" {
@@ -175,7 +175,7 @@ func StartPocScanTask(req PocscanRequestParam, mainTaskId string) (taskId string
 		}
 	}
 	if req.IsXrayVerify && req.XrayPocFile != "" {
-		config := pocscan.Config{Target: strings.Join(targetList, ","), PocFile: req.XrayPocFile, CmdBin: "xray", IsLoadOpenedPort: req.IsLoadOpenedPort}
+		config := pocscan.Config{Target: strings.Join(targetList, ","), PocFile: req.XrayPocFile, CmdBin: "xray", IsLoadOpenedPort: req.IsLoadOpenedPort, WorkspaceId: workspaceId}
 		configJSON, _ := json.Marshal(config)
 		taskId, err = serverapi.NewRunTask("xray", string(configJSON), mainTaskId, "")
 		if err != nil {
@@ -183,7 +183,7 @@ func StartPocScanTask(req PocscanRequestParam, mainTaskId string) (taskId string
 		}
 	}
 	if req.IsNucleiVerify && req.NucleiPocFile != "" {
-		config := pocscan.Config{Target: strings.Join(targetList, ","), PocFile: req.NucleiPocFile, CmdBin: "nuclei", IsLoadOpenedPort: req.IsLoadOpenedPort}
+		config := pocscan.Config{Target: strings.Join(targetList, ","), PocFile: req.NucleiPocFile, CmdBin: "nuclei", IsLoadOpenedPort: req.IsLoadOpenedPort, WorkspaceId: workspaceId}
 		configJSON, _ := json.Marshal(config)
 		taskId, err = serverapi.NewRunTask("nuclei", string(configJSON), mainTaskId, "")
 		if err != nil {
@@ -191,7 +191,7 @@ func StartPocScanTask(req PocscanRequestParam, mainTaskId string) (taskId string
 		}
 	}
 	if req.IsDirsearch && req.DirsearchExtName != "" {
-		config := pocscan.Config{Target: strings.Join(targetList, ","), PocFile: req.DirsearchExtName, CmdBin: "dirsearch", IsLoadOpenedPort: req.IsLoadOpenedPort}
+		config := pocscan.Config{Target: strings.Join(targetList, ","), PocFile: req.DirsearchExtName, CmdBin: "dirsearch", IsLoadOpenedPort: req.IsLoadOpenedPort, WorkspaceId: workspaceId}
 		configJSON, _ := json.Marshal(config)
 		taskId, err = serverapi.NewRunTask("dirsearch", string(configJSON), mainTaskId, "")
 		if err != nil {
@@ -202,13 +202,14 @@ func StartPocScanTask(req PocscanRequestParam, mainTaskId string) (taskId string
 }
 
 // StartXFofaKeywordTask xscan任务，根据fofa关键字查询资产
-func StartXFofaKeywordTask(req XScanRequestParam, mainTaskId string) (taskId string, err error) {
+func StartXFofaKeywordTask(req XScanRequestParam, mainTaskId string, workspaceId int) (taskId string, err error) {
 	config := workerapi.XScanConfig{
 		OrgId:              &req.OrgId,
 		IsIgnoreCDN:        false,
 		IsIgnoreOutofChina: req.IsCn,
 		IsXrayPoc:          req.IsXrayPocscan,
 		XrayPocFile:        req.XrayPocFile,
+		WorkspaceId:        workspaceId,
 	}
 	// config.OrgId 为int，默认为0
 	// db.Organization.OrgId为指针，默认nil
@@ -238,13 +239,14 @@ func StartXFofaKeywordTask(req XScanRequestParam, mainTaskId string) (taskId str
 }
 
 // StartXDomainScanTask xscan任务，域名任务
-func StartXDomainScanTask(req XScanRequestParam, mainTaskId string) (taskId string, err error) {
+func StartXDomainScanTask(req XScanRequestParam, mainTaskId string, workspaceId int) (taskId string, err error) {
 	config := workerapi.XScanConfig{
 		OrgId:              &req.OrgId,
 		IsIgnoreCDN:        false,
 		IsIgnoreOutofChina: req.IsCn,
 		IsXrayPoc:          req.IsXrayPocscan,
 		XrayPocFile:        req.XrayPocFile,
+		WorkspaceId:        workspaceId,
 	}
 	// config.OrgId 为int，默认为0
 	// db.Organization.OrgId为指针，默认nil
@@ -298,13 +300,14 @@ func StartXDomainScanTask(req XScanRequestParam, mainTaskId string) (taskId stri
 }
 
 // StartXPortScanTask xscan的IP任务
-func StartXPortScanTask(req XScanRequestParam, mainTaskId string) (taskId string, err error) {
+func StartXPortScanTask(req XScanRequestParam, mainTaskId string, workspaceId int) (taskId string, err error) {
 	config := workerapi.XScanConfig{
 		OrgId:              &req.OrgId,
 		IsIgnoreCDN:        false,
 		IsIgnoreOutofChina: req.IsCn,
 		IsXrayPoc:          req.IsXrayPocscan,
 		XrayPocFile:        req.XrayPocFile,
+		WorkspaceId:        workspaceId,
 	}
 	// config.OrgId 为int，默认为0
 	// db.Organization.OrgId为指针，默认nil
@@ -350,7 +353,7 @@ func StartXPortScanTask(req XScanRequestParam, mainTaskId string) (taskId string
 }
 
 // StartXOrgScanTask xscan任务，获取指定组织的资产并开始扫描任务
-func StartXOrgScanTask(req XScanRequestParam, mainTaskId string) (taskId string, err error) {
+func StartXOrgScanTask(req XScanRequestParam, mainTaskId string, workspaceId int) (taskId string, err error) {
 	config := workerapi.XScanConfig{
 		OrgId:              &req.OrgId,
 		IsOrgIP:            req.IsOrgIP,
@@ -360,6 +363,7 @@ func StartXOrgScanTask(req XScanRequestParam, mainTaskId string) (taskId string,
 		IsIgnoreOutofChina: req.IsCn,
 		IsXrayPoc:          req.IsXrayPocscan,
 		XrayPocFile:        req.XrayPocFile,
+		WorkspaceId:        workspaceId,
 	}
 	if req.IsFingerprint {
 		config.IsHttpx = conf.GlobalWorkerConfig().Fingerprint.IsHttpx
@@ -377,7 +381,7 @@ func StartXOrgScanTask(req XScanRequestParam, mainTaskId string) (taskId string,
 }
 
 // doPortscan 端口扫描
-func doPortscan(mainTaskId string, target string, port string, req PortscanRequestParam) (taskId string, err error) {
+func doPortscan(workspaceId int, mainTaskId string, target string, port string, req PortscanRequestParam) (taskId string, err error) {
 	config := portscan.Config{
 		Target:           target,
 		ExcludeTarget:    req.ExcludeIP,
@@ -394,6 +398,7 @@ func doPortscan(mainTaskId string, target string, port string, req PortscanReque
 		CmdBin:           req.CmdBin,
 		IsPortscan:       req.IsPortScan,
 		IsLoadOpenedPort: req.IsLoadOpenedPort,
+		WorkspaceId:      workspaceId,
 	}
 	if req.CmdBin == "" {
 		config.CmdBin = conf.GlobalWorkerConfig().Portscan.Cmdbin
@@ -426,7 +431,7 @@ func doPortscan(mainTaskId string, target string, port string, req PortscanReque
 }
 
 // doBatchScan 探测+端口扫描
-func doBatchScan(mainTaskId string, target string, port string, req PortscanRequestParam) (taskId string, err error) {
+func doBatchScan(workspaceId int, mainTaskId string, target string, port string, req PortscanRequestParam) (taskId string, err error) {
 	config := portscan.Config{
 		Target:           target,
 		ExcludeTarget:    req.ExcludeIP,
@@ -441,6 +446,7 @@ func doBatchScan(mainTaskId string, target string, port string, req PortscanRequ
 		IsFingerprintHub: req.IsFingerprintHub,
 		IsIconHash:       req.IsIconHash,
 		CmdBin:           "masscan",
+		WorkspaceId:      workspaceId,
 	}
 	if req.CmdBin == "nmap" {
 		config.CmdBin = "nmap"
@@ -473,7 +479,7 @@ func doBatchScan(mainTaskId string, target string, port string, req PortscanRequ
 }
 
 // doDomainscan 域名任务
-func doDomainscan(mainTaskId string, target string, req DomainscanRequestParam) (taskId string, err error) {
+func doDomainscan(workspaceId int, mainTaskId string, target string, req DomainscanRequestParam) (taskId string, err error) {
 	config := domainscan.Config{
 		Target:             target,
 		OrgId:              &req.OrgId,
@@ -487,6 +493,7 @@ func doDomainscan(mainTaskId string, target string, req DomainscanRequestParam) 
 		IsFingerprintHub:   req.IsFingerprintHub,
 		IsIconHash:         req.IsIconHash,
 		PortTaskMode:       req.PortTaskMode,
+		WorkspaceId:        workspaceId,
 	}
 	// config.OrgId 为int，默认为0
 	// db.Organization.OrgId为指针，默认nil
@@ -507,7 +514,7 @@ func doDomainscan(mainTaskId string, target string, req DomainscanRequestParam) 
 }
 
 // doOnlineAPISearch Fofa,hunter,quaker的查询
-func doOnlineAPISearch(mainTaskId string, apiName string, target string, orgId *int, isIplocation, isHttp, isFingerprintHub, isScreenshot, isIconHash, isIgnoreCDN, isIgnorOutofChina bool) (taskId string, err error) {
+func doOnlineAPISearch(workspaceId int, mainTaskId string, apiName string, target string, orgId *int, isIplocation, isHttp, isFingerprintHub, isScreenshot, isIconHash, isIgnoreCDN, isIgnorOutofChina bool) (taskId string, err error) {
 	config := onlineapi.OnlineAPIConfig{
 		Target:             target,
 		OrgId:              orgId,
@@ -518,6 +525,7 @@ func doOnlineAPISearch(mainTaskId string, apiName string, target string, orgId *
 		IsIconHash:         isIconHash,
 		IsIgnoreCDN:        isIgnoreCDN,
 		IsIgnoreOutofChina: isIgnorOutofChina,
+		WorkspaceId:        workspaceId,
 	}
 	// config.OrgId 为int，默认为0
 	// db.Organization.OrgId为指针，默认nil

@@ -88,11 +88,12 @@ func (n *Nuclei) parseNucleiContentResult(content []byte) {
 		return
 	}
 	n.Result = append(n.Result, Result{
-		Target:  host,
-		Url:     xr.Host,
-		PocFile: xr.TemplateID,
-		Source:  "nuclei",
-		Extra:   string(pretty.Pretty(content)),
+		Target:      host,
+		Url:         xr.Host,
+		PocFile:     xr.TemplateID,
+		Source:      "nuclei",
+		Extra:       string(pretty.Pretty(content)),
+		WorkspaceId: n.Config.WorkspaceId,
 	})
 }
 

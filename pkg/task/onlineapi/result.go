@@ -25,6 +25,7 @@ type OnlineAPIConfig struct {
 	IsIgnoreOutofChina bool   `json:"ignoreoutofchina"`
 	SearchByKeyWord    bool   `json:"keywordsearch"`
 	SearchLimitCount   int    `json:"searchlimitcount"`
+	WorkspaceId        int    `json:"workspaceId"`
 }
 
 type ICPQueryConfig struct {
@@ -120,8 +121,8 @@ func (ff *Fofa) SaveResult() string {
 	if conf.GlobalWorkerConfig().API.Fofa.Key == "" || conf.GlobalWorkerConfig().API.Fofa.Name == "" {
 		return "no fofa api"
 	}
-	ips := ff.IpResult.SaveResult(portscan.Config{OrgId: ff.Config.OrgId})
-	domains := ff.DomainResult.SaveResult(domainscan.Config{OrgId: ff.Config.OrgId})
+	ips := ff.IpResult.SaveResult(portscan.Config{OrgId: ff.Config.OrgId, WorkspaceId: ff.Config.WorkspaceId})
+	domains := ff.DomainResult.SaveResult(domainscan.Config{OrgId: ff.Config.OrgId, WorkspaceId: ff.Config.WorkspaceId})
 
 	return fmt.Sprintf("%s,%s", ips, domains)
 }
@@ -174,8 +175,8 @@ func (q *Quake) SaveResult() string {
 	if conf.GlobalWorkerConfig().API.Quake.Key == "" {
 		return "no quake api"
 	}
-	ips := q.IpResult.SaveResult(portscan.Config{OrgId: q.Config.OrgId})
-	domains := q.DomainResult.SaveResult(domainscan.Config{OrgId: q.Config.OrgId})
+	ips := q.IpResult.SaveResult(portscan.Config{OrgId: q.Config.OrgId, WorkspaceId: q.Config.WorkspaceId})
+	domains := q.DomainResult.SaveResult(domainscan.Config{OrgId: q.Config.OrgId, WorkspaceId: q.Config.WorkspaceId})
 
 	return fmt.Sprintf("%s,%s", ips, domains)
 }
@@ -196,8 +197,8 @@ func (h *Hunter) SaveResult() string {
 	if conf.GlobalWorkerConfig().API.Hunter.Key == "" {
 		return "no hunter api"
 	}
-	ips := h.IpResult.SaveResult(portscan.Config{OrgId: h.Config.OrgId})
-	domains := h.DomainResult.SaveResult(domainscan.Config{OrgId: h.Config.OrgId})
+	ips := h.IpResult.SaveResult(portscan.Config{OrgId: h.Config.OrgId, WorkspaceId: h.Config.WorkspaceId})
+	domains := h.DomainResult.SaveResult(domainscan.Config{OrgId: h.Config.OrgId, WorkspaceId: h.Config.WorkspaceId})
 
 	return fmt.Sprintf("%s,%s", ips, domains)
 }

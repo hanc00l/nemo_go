@@ -13,7 +13,7 @@ import (
 
 // NewRunTask 创建一个新执行任务
 func NewRunTask(taskName, configJSON, mainTaskId, lastRunTaskId string) (taskId string, err error) {
-	server := ampq.GetServerTaskAMPQSrever()
+	server := ampq.GetServerTaskAMPQServer()
 	// 延迟5秒后执行
 	eta := time.Now().Add(time.Second * 5)
 	taskId = uuid.New().String()
@@ -55,6 +55,12 @@ func RevokeUnexcusedTask(taskId string) (isRevoked bool, err error) {
 
 // addTask 将任务写入到数据库中
 func addTask(taskId, taskName, kwArgs, mainTaskId, lastRunTaskId string) {
+	taskMain := db.TaskMain{TaskId: mainTaskId}
+	if taskMain.GetByTaskId() == false {
+		logging.RuntimeLog.Errorf("add new task fail: main task %s not exist", taskId)
+		logging.CLILog.Errorf("add new task fail: main task %s not exist", taskId)
+		return
+	}
 	dt := time.Now()
 	task := &db.TaskRun{
 		TaskId:        taskId,
@@ -64,6 +70,7 @@ func addTask(taskId, taskName, kwArgs, mainTaskId, lastRunTaskId string) {
 		ReceivedTime:  &dt,
 		MainTaskId:    mainTaskId,
 		LastRunTaskId: lastRunTaskId,
+		WorkspaceId:   taskMain.WorkspaceId,
 	}
 	//kwargs可能因为target很多导致超过数据库中的字段设计长度，因此作一个长度截取
 	const argsLength = 6000

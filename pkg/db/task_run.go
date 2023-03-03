@@ -25,6 +25,7 @@ type TaskRun struct {
 	UpdateDatetime  time.Time  `gorm:"column:update_datetime"`
 	MainTaskId      string     `gorm:"column:main_id"`
 	LastRunTaskId   string     `gorm:"column:last_run_id"`
+	WorkspaceId     int        `gorm:"column:workspace_id"`
 }
 
 func (TaskRun) TableName() string {
@@ -138,6 +139,8 @@ func (t *TaskRun) makeWhere(searchMap map[string]interface{}) *gorm.DB {
 			db = db.Where("main_id", value)
 		case "last_run_id":
 			db = db.Where("last_run_id", value)
+		case "workspace_id":
+			db = db.Where("workspace_id", value)
 		default:
 			db = db.Where(column, value)
 		}

@@ -5,6 +5,7 @@ import (
 	"github.com/beego/beego/v2/client/cache"
 	"github.com/beego/beego/v2/server/web/captcha"
 	"github.com/hanc00l/nemo_go/pkg/conf"
+	"github.com/hanc00l/nemo_go/pkg/db"
 	"github.com/hanc00l/nemo_go/pkg/logging"
 	"github.com/hanc00l/nemo_go/pkg/utils"
 	"net/http"
@@ -34,14 +35,43 @@ func (c *LoginController) IndexAction() {
 func (c *LoginController) LoginAction() {
 	if conf.RunMode == conf.Release && !cpt.VerifyReq(c.Ctx.Request) {
 		c.Redirect("/", http.StatusFound)
+		return
 	}
+	userName := c.GetString("username")
 	password := c.GetString("password")
-	if password != "" && CheckPassword(password) {
-		logging.RuntimeLog.Infof("login from ip:%s", c.Ctx.Input.IP())
-		logging.CLILog.Infof("login from ip:%s", c.Ctx.Input.IP())
-		c.UpdateOnlineUser()
-		c.SetSession("IsLogin", true)
-		c.Redirect("/dashboard", http.StatusFound)
+	if userName != "" && password != "" {
+		// check for username and password
+		status, userData := ValidLoginUser(userName, password)
+		if status {
+			// superadmin：允许同时查看多个workspace资源
+			if userData.UserRole == SuperAdmin {
+				c.SetSession("Workspace", 0)
+			} else {
+				// 普通管理员及guest，必须设置一个默认的workspace
+				// get and check user's workspace
+				userWorkspace := db.UserWorkspace{}
+				userWorkspaceData := userWorkspace.GetsByUserId(userData.Id)
+				var enabledUserWorkspaceData []db.Workspace
+				for n := range userWorkspaceData {
+					w := db.Workspace{Id: userWorkspaceData[n].WorkspaceId}
+					if w.Get() && w.State == "enable" {
+						enabledUserWorkspaceData = append(enabledUserWorkspaceData, w)
+					}
+				}
+				if len(enabledUserWorkspaceData) <= 0 {
+					logging.RuntimeLog.Infof("%s login from ip:%s,no available workspace set!", userData.UserName, c.Ctx.Input.IP())
+					logging.CLILog.Infof("%s login from ip:%s,no available workspace set!", userData.UserName, c.Ctx.Input.IP())
+					c.Redirect("/", http.StatusFound)
+				}
+				c.SetSession("Workspace", enabledUserWorkspaceData[0].Id)
+			}
+			c.SetSession("User", userData.UserName)
+			c.SetSession("UserRole", userData.UserRole)
+			logging.RuntimeLog.Infof("%s login from ip:%s", userData.UserName, c.Ctx.Input.IP())
+			logging.CLILog.Infof("%s login from ip:%s", userData.UserName, c.Ctx.Input.IP())
+			c.UpdateOnlineUser()
+			c.Redirect("/dashboard", http.StatusFound)
+		}
 	}
 	c.Redirect("/", http.StatusFound)
 }
@@ -51,35 +81,49 @@ func (c *LoginController) LogoutAction() {
 	logging.RuntimeLog.Infof("logout from ip:%s", c.Ctx.Input.IP())
 	logging.CLILog.Infof("logout from ip:%s", c.Ctx.Input.IP())
 	c.DeleteOnlineUser()
-	c.DelSession("IsLogin")
+	c.DelSession("User")
+	c.DelSession("UserRole")
+	c.DelSession("Workspace")
 	c.Redirect("/", http.StatusFound)
 }
 
-// CheckPassword 校验密码
-func CheckPassword(password string) bool {
-	conf.GlobalServerConfig().ReloadConfig()
+// ValidLoginUser 校验用户名和密码
+func ValidLoginUser(username, password string) (bool, db.User) {
+	user := db.User{UserName: username}
+	if user.GetByUsername() == false {
+		return false, user
+	}
+	if user.State != "enable" {
+		return false, user
+	}
 
-	configuredPassword := conf.GlobalServerConfig().Web.Password
+	configuredPassword := user.UserPassword
 	hash := configuredPassword[:32]
 	salt := configuredPassword[32:]
 	checkedPass := utils.MD5V3(fmt.Sprintf("%s%s", password, salt))
 	if checkedPass == hash {
-		return true
+		return true, user
+	}
+
+	return false, user
+}
+
+// UpdatePassword 更新密码
+func UpdatePassword(userName, oldPassword, newPassword string) bool {
+	validOldPassword, user := ValidLoginUser(userName, oldPassword)
+	if validOldPassword {
+		updateMap := make(map[string]interface{})
+		updateMap["user_password"] = ProcessPasswordHash(newPassword)
+		return user.Update(updateMap)
 	}
 	return false
 }
 
-// UpdatePassword 更新密码
-func UpdatePassword(newPassword string) bool {
+// ProcessPasswordHash 根据明文密码生成带salt的hash密码
+func ProcessPasswordHash(password string) string {
 	salt := utils.GetRandomString2(16)
-	hash := utils.MD5V3(fmt.Sprintf("%s%s", newPassword, salt))
-
-	conf.GlobalServerConfig().ReloadConfig()
-	conf.GlobalServerConfig().Web.Password = fmt.Sprintf("%s%s", hash, salt)
-	if err := conf.GlobalServerConfig().WriteConfig(); err != nil {
-		return false
-	}
-	return true
+	hash := utils.MD5V3(fmt.Sprintf("%s%s", password, salt))
+	return fmt.Sprintf("%s%s", hash, salt)
 }
 
 //password:648ce596dba3b408b523d3d1189b15070123456789abcdef -> nemo

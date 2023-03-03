@@ -32,6 +32,7 @@ type Config struct {
 	PortTaskMode       int    `json:"portTaskMode"`
 	IsIgnoreCDN        bool   `json:"ignorecdn"`
 	IsIgnoreOutofChina bool   `json:"ignoreoutofchina"`
+	WorkspaceId        int    `json:"workspaceId"`
 }
 
 // DomainAttrResult 域名属性结果
@@ -101,8 +102,9 @@ func (r *Result) SaveResult(config Config) string {
 	var newDomain int
 	for domainName, domainResult := range r.DomainResult {
 		domain := &db.Domain{
-			DomainName: domainName,
-			OrgId:      config.OrgId,
+			DomainName:  domainName,
+			OrgId:       config.OrgId,
+			WorkspaceId: config.WorkspaceId,
 		}
 		if ok, isNew := domain.SaveOrUpdate(); !ok {
 			continue

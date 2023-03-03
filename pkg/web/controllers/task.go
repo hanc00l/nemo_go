@@ -90,6 +90,7 @@ type TaskInfo struct {
 	UpdateTime    string
 	ResultFile    string
 	RunTaskInfo   []TaskListData
+	Workspace     string
 }
 
 type TaskCronInfo struct {
@@ -104,6 +105,7 @@ type TaskCronInfo struct {
 	UpdateTime  string
 	RunCount    int
 	Comment     string
+	Workspace   string
 }
 
 func (c *TaskController) IndexAction() {
@@ -190,25 +192,37 @@ func (c *TaskController) InfoCronAction() {
 // DeleteAction 删除一个记录
 func (c *TaskController) DeleteAction() {
 	defer c.ServeJSON()
+	if c.CheckMultiAccessRequest([]RequestRole{SuperAdmin, Admin}, false) == false {
+		c.FailedStatus("当前用户权限不允许！")
+		return
+	}
 
 	id, err := c.GetInt("id")
 	if err != nil {
 		logging.RuntimeLog.Error(err.Error())
 		c.FailedStatus(err.Error())
-	} else {
-		task := db.TaskRun{Id: id}
-		resultPath := path.Join(conf.GlobalServerConfig().Web.WebFiles, "taskresult")
-		if task.Get() {
-			filePath := path.Join(resultPath, fmt.Sprintf("%s.json", task.TaskId))
+		return
+	}
+	task := db.TaskRun{Id: id}
+	if task.Get() {
+		workspace := db.Workspace{Id: task.WorkspaceId}
+		if workspace.Get() {
+			filePath := path.Join(conf.GlobalServerConfig().Web.WebFiles, workspace.WorkspaceGUID, "taskresult", fmt.Sprintf("%s.json", task.TaskId))
 			os.Remove(filePath)
 		}
 		c.MakeStatusResponse(task.Delete())
+	} else {
+		c.MakeStatusResponse(false)
 	}
 }
 
 // DeleteMainAction 删除一个记录
 func (c *TaskController) DeleteMainAction() {
 	defer c.ServeJSON()
+	if c.CheckMultiAccessRequest([]RequestRole{SuperAdmin, Admin}, false) == false {
+		c.FailedStatus("当前用户权限不允许！")
+		return
+	}
 
 	id, err := c.GetInt("id")
 	if err != nil {
@@ -217,8 +231,13 @@ func (c *TaskController) DeleteMainAction() {
 	} else {
 		task := db.TaskMain{Id: id}
 		if task.Get() {
+			workspace := db.Workspace{Id: task.WorkspaceId}
+			var workspaceGUID string
+			if workspace.Get() {
+				workspaceGUID = workspace.WorkspaceGUID
+			}
 			//同时删除相关的子任务
-			deleteRunTaskByMainTaskId(task.TaskId)
+			deleteRunTaskByMainTaskId(workspaceGUID, task.TaskId)
 		}
 		c.MakeStatusResponse(task.Delete())
 	}
@@ -227,6 +246,10 @@ func (c *TaskController) DeleteMainAction() {
 // DeleteBatchAction 批量删除任务
 func (c *TaskController) DeleteBatchAction() {
 	defer c.ServeJSON()
+	if c.CheckMultiAccessRequest([]RequestRole{SuperAdmin, Admin}, false) == false {
+		c.FailedStatus("当前用户权限不允许！")
+		return
+	}
 
 	taskType := c.GetString("type", "")
 	taskTotal := 0
@@ -246,6 +269,10 @@ func (c *TaskController) DeleteBatchAction() {
 // DeleteCronAction 删除一个记录
 func (c *TaskController) DeleteCronAction() {
 	defer c.ServeJSON()
+	if c.CheckMultiAccessRequest([]RequestRole{SuperAdmin, Admin}, false) == false {
+		c.FailedStatus("当前用户权限不允许！")
+		return
+	}
 
 	id, err := c.GetInt("id")
 	if err != nil {
@@ -265,6 +292,10 @@ func (c *TaskController) DeleteCronAction() {
 // StopAction 取消一个未开始执行的任务
 func (c *TaskController) StopAction() {
 	defer c.ServeJSON()
+	if c.CheckMultiAccessRequest([]RequestRole{SuperAdmin, Admin}, false) == false {
+		c.FailedStatus("当前用户权限不允许！")
+		return
+	}
 
 	taskId := c.GetString("task_id")
 	if taskId != "" {
@@ -278,6 +309,10 @@ func (c *TaskController) StopAction() {
 // DisableCronTaskAction 禁用一个任务
 func (c *TaskController) DisableCronTaskAction() {
 	defer c.ServeJSON()
+	if c.CheckMultiAccessRequest([]RequestRole{SuperAdmin, Admin}, false) == false {
+		c.FailedStatus("当前用户权限不允许！")
+		return
+	}
 
 	taskId := c.GetString("task_id")
 	if taskId != "" {
@@ -290,6 +325,10 @@ func (c *TaskController) DisableCronTaskAction() {
 // EnableCronTaskAction 启用一个任务
 func (c *TaskController) EnableCronTaskAction() {
 	defer c.ServeJSON()
+	if c.CheckMultiAccessRequest([]RequestRole{SuperAdmin, Admin}, false) == false {
+		c.FailedStatus("当前用户权限不允许！")
+		return
+	}
 
 	taskId := c.GetString("task_id")
 	if taskId != "" {
@@ -302,6 +341,10 @@ func (c *TaskController) EnableCronTaskAction() {
 // RunCronTaskAction 立即执行一个任务
 func (c *TaskController) RunCronTaskAction() {
 	defer c.ServeJSON()
+	if c.CheckMultiAccessRequest([]RequestRole{SuperAdmin, Admin}, false) == false {
+		c.FailedStatus("当前用户权限不允许！")
+		return
+	}
 
 	taskId := c.GetString("task_id")
 	if taskId != "" {
@@ -314,6 +357,10 @@ func (c *TaskController) RunCronTaskAction() {
 // StartPortScanTaskAction 端口扫描任务
 func (c *TaskController) StartPortScanTaskAction() {
 	defer c.ServeJSON()
+	if c.CheckMultiAccessRequest([]RequestRole{SuperAdmin, Admin}, false) == false {
+		c.FailedStatus("当前用户权限不允许！")
+		return
+	}
 	// 解析参数
 	var req runner.PortscanRequestParam
 	err := c.ParseForm(&req)
@@ -324,6 +371,11 @@ func (c *TaskController) StartPortScanTaskAction() {
 	}
 	if req.Target == "" {
 		c.FailedStatus("no target")
+		return
+	}
+	workspaceId := c.GetSession("Workspace").(int)
+	if workspaceId <= 0 {
+		c.FailedStatus("未选择当前的工作空间！")
 		return
 	}
 	if req.Port == "" {
@@ -337,14 +389,14 @@ func (c *TaskController) StartPortScanTaskAction() {
 		return
 	}
 	if req.IsTaskCron {
-		taskId = runner.SaveCronTask("portscan", string(kwArgs), req.TaskCronRule, req.TaskCronComment)
+		taskId = runner.SaveCronTask("portscan", string(kwArgs), req.TaskCronRule, req.TaskCronComment, workspaceId)
 		if taskId == "" {
 			c.FailedStatus("save to db fail")
 			return
 		}
 		c.SucceededStatus(taskId)
 	} else {
-		taskId, err = runner.SaveMainTask("portscan", string(kwArgs), "")
+		taskId, err = runner.SaveMainTask("portscan", string(kwArgs), "", workspaceId)
 		if err != nil {
 			c.FailedStatus(err.Error())
 			return
@@ -356,6 +408,10 @@ func (c *TaskController) StartPortScanTaskAction() {
 // StartBatchScanTaskAction 探测+扫描任务
 func (c *TaskController) StartBatchScanTaskAction() {
 	defer c.ServeJSON()
+	if c.CheckMultiAccessRequest([]RequestRole{SuperAdmin, Admin}, false) == false {
+		c.FailedStatus("当前用户权限不允许！")
+		return
+	}
 	// 解析参数
 	var req runner.PortscanRequestParam
 	err := c.ParseForm(&req)
@@ -368,6 +424,11 @@ func (c *TaskController) StartBatchScanTaskAction() {
 		c.FailedStatus("no target")
 		return
 	}
+	workspaceId := c.GetSession("Workspace").(int)
+	if workspaceId <= 0 {
+		c.FailedStatus("未选择当前的工作空间！")
+		return
+	}
 	var kwArgs []byte
 	var taskId string
 	kwArgs, err = json.Marshal(req)
@@ -376,14 +437,14 @@ func (c *TaskController) StartBatchScanTaskAction() {
 		return
 	}
 	if req.IsTaskCron {
-		taskId = runner.SaveCronTask("batchscan", string(kwArgs), req.TaskCronRule, req.TaskCronComment)
+		taskId = runner.SaveCronTask("batchscan", string(kwArgs), req.TaskCronRule, req.TaskCronComment, workspaceId)
 		if taskId == "" {
 			c.FailedStatus("save to db fail")
 			return
 		}
 		c.SucceededStatus(taskId)
 	} else {
-		taskId, err = runner.SaveMainTask("batchscan", string(kwArgs), "")
+		taskId, err = runner.SaveMainTask("batchscan", string(kwArgs), "", workspaceId)
 		if err != nil {
 			c.FailedStatus(err.Error())
 			return
@@ -395,6 +456,10 @@ func (c *TaskController) StartBatchScanTaskAction() {
 // StartDomainScanTaskAction 域名任务
 func (c *TaskController) StartDomainScanTaskAction() {
 	defer c.ServeJSON()
+	if c.CheckMultiAccessRequest([]RequestRole{SuperAdmin, Admin}, false) == false {
+		c.FailedStatus("当前用户权限不允许！")
+		return
+	}
 
 	// 解析参数
 	var req runner.DomainscanRequestParam
@@ -408,6 +473,11 @@ func (c *TaskController) StartDomainScanTaskAction() {
 		c.FailedStatus("no target")
 		return
 	}
+	workspaceId := c.GetSession("Workspace").(int)
+	if workspaceId <= 0 {
+		c.FailedStatus("未选择当前的工作空间！")
+		return
+	}
 	var kwArgs []byte
 	var taskId string
 	kwArgs, err = json.Marshal(req)
@@ -417,14 +487,14 @@ func (c *TaskController) StartDomainScanTaskAction() {
 	}
 	if req.IsTaskCron {
 
-		taskId = runner.SaveCronTask("domainscan", string(kwArgs), req.TaskCronRule, req.TaskCronComment)
+		taskId = runner.SaveCronTask("domainscan", string(kwArgs), req.TaskCronRule, req.TaskCronComment, workspaceId)
 		if taskId == "" {
 			c.FailedStatus("save to db fail")
 			return
 		}
 		c.SucceededStatus(taskId)
 	} else {
-		taskId, err = runner.SaveMainTask("domainscan", string(kwArgs), "")
+		taskId, err = runner.SaveMainTask("domainscan", string(kwArgs), "", workspaceId)
 		if err != nil {
 			c.FailedStatus(err.Error())
 			return
@@ -436,7 +506,10 @@ func (c *TaskController) StartDomainScanTaskAction() {
 // StartPocScanTaskAction pocscan任务
 func (c *TaskController) StartPocScanTaskAction() {
 	defer c.ServeJSON()
-
+	if c.CheckMultiAccessRequest([]RequestRole{SuperAdmin, Admin}, false) == false {
+		c.FailedStatus("当前用户权限不允许！")
+		return
+	}
 	// 解析参数
 	var req runner.PocscanRequestParam
 	err := c.ParseForm(&req)
@@ -457,15 +530,20 @@ func (c *TaskController) StartPocScanTaskAction() {
 		c.FailedStatus(err.Error())
 		return
 	}
+	workspaceId := c.GetSession("Workspace").(int)
+	if workspaceId <= 0 {
+		c.FailedStatus("未选择当前的工作空间！")
+		return
+	}
 	if req.IsTaskCron {
-		taskId = runner.SaveCronTask("pocscan", string(kwArgs), req.TaskCronRule, req.TaskCronComment)
+		taskId = runner.SaveCronTask("pocscan", string(kwArgs), req.TaskCronRule, req.TaskCronComment, workspaceId)
 		if taskId == "" {
 			c.FailedStatus("save to db fail")
 			return
 		}
 		c.SucceededStatus(taskId)
 	} else {
-		taskId, err = runner.SaveMainTask("pocscan", string(kwArgs), "")
+		taskId, err = runner.SaveMainTask("pocscan", string(kwArgs), "", workspaceId)
 		if err != nil {
 			c.FailedStatus(err.Error())
 			return
@@ -476,8 +554,11 @@ func (c *TaskController) StartPocScanTaskAction() {
 
 // StartXScanTaskAction 新建Xscan任务
 func (c *TaskController) StartXScanTaskAction() {
-	c.UpdateOnlineUser()
 	defer c.ServeJSON()
+	if c.CheckMultiAccessRequest([]RequestRole{SuperAdmin, Admin}, false) == false {
+		c.FailedStatus("当前用户权限不允许！")
+		return
+	}
 	//校验参数
 	req := runner.XScanRequestParam{}
 	err := c.ParseForm(&req)
@@ -522,6 +603,11 @@ func (c *TaskController) StartXScanTaskAction() {
 		c.FailedStatus("invalide xscan type")
 		return
 	}
+	workspaceId := c.GetSession("Workspace").(int)
+	if workspaceId <= 0 {
+		c.FailedStatus("未选择当前的工作空间！")
+		return
+	}
 	var kwArgs []byte
 	var taskId string
 	kwArgs, err = json.Marshal(req)
@@ -531,14 +617,14 @@ func (c *TaskController) StartXScanTaskAction() {
 	}
 	// 计划任务
 	if req.IsTaskCron {
-		taskId = runner.SaveCronTask(taskName, string(kwArgs), req.TaskCronRule, req.TaskCronComment)
+		taskId = runner.SaveCronTask(taskName, string(kwArgs), req.TaskCronRule, req.TaskCronComment, workspaceId)
 		if taskId == "" {
 			c.FailedStatus("save to db fail")
 			return
 		}
 	} else {
 		// 立即执行的任务
-		taskId, err = runner.SaveMainTask(taskName, string(kwArgs), "")
+		taskId, err = runner.SaveMainTask(taskName, string(kwArgs), "", workspaceId)
 		if err != nil {
 			c.FailedStatus(err.Error())
 			return
@@ -573,6 +659,10 @@ func (c *TaskController) getSearchMap(req *taskRequestParam) (searchMap map[stri
 	if req == nil {
 		return
 	}
+	workspaceId := c.GetSession("Workspace").(int)
+	if workspaceId > 0 {
+		searchMap["workspace_id"] = workspaceId
+	}
 	if req.Name != "" {
 		searchMap["task_name"] = req.Name
 	}
@@ -595,6 +685,10 @@ func (c *TaskController) getSearchMap(req *taskRequestParam) (searchMap map[stri
 func (c *TaskController) getSearchMap2(req taskCronRequestParam) (searchMap map[string]interface{}) {
 	searchMap = make(map[string]interface{})
 
+	workspaceId := c.GetSession("Workspace").(int)
+	if workspaceId > 0 {
+		searchMap["workspace_id"] = workspaceId
+	}
 	if req.Name != "" {
 		searchMap["task_name"] = req.Name
 	}
@@ -772,6 +866,10 @@ func (c *TaskController) getTaskInfo(taskId string) (r TaskInfo) {
 			r.ResultFile = fmt.Sprintf("/webfiles/taskresult/%s.json", taskId)
 		}
 	}
+	workspace := db.Workspace{Id: task.WorkspaceId}
+	if workspace.Get() {
+		r.Workspace = workspace.WorkspaceName
+	}
 	return
 }
 
@@ -793,6 +891,10 @@ func (c *TaskController) getTaskCronInfo(taskId string) (r TaskCronInfo) {
 	r.UpdateTime = FormatDateTime(task.UpdateDatetime)
 	if task.LastRunDatetime != task.CreateDatetime {
 		r.LastRunTime = FormatDateTime(task.LastRunDatetime)
+	}
+	workspace := db.Workspace{Id: task.WorkspaceId}
+	if workspace.Get() {
+		r.Workspace = workspace.WorkspaceName
 	}
 	return
 }
@@ -823,7 +925,10 @@ func (c *TaskController) getTaskMainInfo(taskId string) (r TaskInfo) {
 	r.CreateTime = FormatDateTime(task.CreateDatetime)
 	r.UpdateTime = FormatDateTime(task.UpdateDatetime)
 	r.RunTaskInfo = c.getRunTaskListData(taskId, nil, true, true)
-
+	workspace := db.Workspace{Id: task.WorkspaceId}
+	if workspace.Get() {
+		r.Workspace = workspace.WorkspaceName
+	}
 	return
 }
 
@@ -866,24 +971,34 @@ func batchDeleteTaskByState(taskState string) (total int) {
 	searchMap["state"] = taskState
 	task := db.TaskMain{}
 	results, _ := task.Gets(searchMap, -1, -1)
+	workspaceGUIDCacheMap := make(map[int]string)
 	for _, taskRow := range results {
 		taskDelete := db.TaskMain{Id: taskRow.Id}
-		taskDelete.Delete()
-		total += deleteRunTaskByMainTaskId(taskRow.TaskId)
+		if taskDelete.Get() {
+			if _, ok := workspaceGUIDCacheMap[taskDelete.WorkspaceId]; !ok {
+				workspace := db.Workspace{Id: taskDelete.WorkspaceId}
+				if workspace.Get() {
+					workspaceGUIDCacheMap[workspace.Id] = workspace.WorkspaceGUID
+				}
+			}
+			taskDelete.Delete()
+			deleteRunTaskByMainTaskId(workspaceGUIDCacheMap[taskDelete.Id], taskDelete.TaskId)
+			total++
+		}
 	}
 	return
 }
 
 // deleteRunTaskByMainTaskId 删除maintask下的所有rantask子任务
-func deleteRunTaskByMainTaskId(mainTaskId string) (total int) {
+func deleteRunTaskByMainTaskId(workspaceGUID string, mainTaskId string) (total int) {
 	task := db.TaskRun{}
 	searchMap := make(map[string]interface{})
 	searchMap["main_id"] = mainTaskId
 	results, _ := task.Gets(searchMap, -1, -1)
-	resultPath := path.Join(conf.GlobalServerConfig().Web.WebFiles, "taskresult")
+	resultPath := path.Join(conf.GlobalServerConfig().Web.WebFiles, workspaceGUID, "taskresult")
 	for _, taskRow := range results {
 		taskDelete := db.TaskRun{Id: taskRow.Id}
-		if taskDelete.Delete() && resultPath != "" {
+		if taskDelete.Delete() && workspaceGUID != "" {
 			filePath := path.Join(resultPath, fmt.Sprintf("%s.json", taskRow.TaskId))
 			os.Remove(filePath)
 			total++

@@ -9,6 +9,7 @@ type Organization struct {
 	OrgName        string    `gorm:"column:org_name"`
 	Status         string    `gorm:"column:status"`
 	SortOrder      int       `gorm:"column:sort_order" `
+	WorkspaceId    int       `gorm:"column:workspace_id"`
 	CreateDatetime time.Time `gorm:"column:create_datetime"`
 	UpdateDatetime time.Time `gorm:"column:update_datetime" `
 }
@@ -18,7 +19,7 @@ func (Organization) TableName() string {
 	return "organization"
 }
 
-//Get 查询指定主键ID的一条记录
+// Get 查询指定主键ID的一条记录
 func (org *Organization) Get() (success bool) {
 	db := GetDB()
 	defer CloseDB(db)
@@ -96,4 +97,3 @@ func (org *Organization) Count(searchMap map[string]interface{}) (count int) {
 
 	return int(result)
 }
-

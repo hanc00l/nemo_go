@@ -230,3 +230,38 @@ this.encodeHtml = function (s) {
                 return r.join("");
             });
 };
+
+//  获取用户的工作空间
+function get_user_workspace_list() {
+    document.getElementById('li_workspace').style.visibility = 'visible';
+    $.post("/workspace-user-list", function (data) {
+        $("#select_workspace").empty();
+        for (let i = 0; i < data.WorkspaceInfoList.length; i++) {
+            $("#select_workspace").append("<option value='" + data.WorkspaceInfoList[i].workspaceId + "'>" + data.WorkspaceInfoList[i].workspaceName + "</option>")
+        }
+        $('#select_workspace').val(data.CurrentWorkspace);
+    });
+}
+
+
+// 手工切换用户的工作空间
+function change_user_workspace(dataTableId) {
+    let newWorkspace = $("#select_workspace").val();
+    $.post("/workspace-user-change", {"workspace": newWorkspace}, function (data) {
+        if (data['status'] == 'success') {
+            swal({
+                    title: "切换工作空间成功！",
+                    text: data['msg'],
+                    type: "success",
+                    confirmButtonText: "确定",
+                    confirmButtonColor: "#41b883",
+                    closeOnConfirm: true,
+                },
+                function () {
+                    $(dataTableId).DataTable().draw(false);
+                });
+        } else {
+            swal('Warning', "切换工作空间失败! " + data['msg'], 'error');
+        }
+    });
+}

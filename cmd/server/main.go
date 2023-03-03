@@ -16,34 +16,48 @@ import (
 	_ "github.com/hanc00l/nemo_go/pkg/web/routers"
 	"github.com/smallnest/rpcx/protocol"
 	"github.com/smallnest/rpcx/server"
+	"net/http"
 	"time"
 )
 
+var UrlFilterWhiteList = []string{"/"}
+
 // startWebServer 启动web server
 func startWebServer() {
-	logs.SetLogger("file", `{"filename":"log/access.log"}`)
-
-	UrlFilterWhiteList := []string{
-		"/",
-	}
-	var FilterLoginCheck = func(ctx *beegoContext.Context) {
-		for _, url := range UrlFilterWhiteList {
-			if ctx.Request.RequestURI == url {
-				return
-			}
-		}
-		if _, ok := ctx.Input.Session("IsLogin").(bool); !ok {
-			ctx.Redirect(302, "/")
-		}
+	err := logs.SetLogger("file", `{"filename":"log/access.log"}`)
+	if err != nil {
+		logging.CLILog.Error(err)
+		return
 	}
 	if conf.RunMode == conf.Release {
-		web.InsertFilter("/*", web.BeforeRouter, FilterLoginCheck)
+		web.InsertFilter("/*", web.BeforeRouter, filterLoginCheck)
 	}
-
 	logging.RuntimeLog.Info("Nemo Server started...")
 	addr := fmt.Sprintf("%s:%d", conf.GlobalServerConfig().Web.Host, conf.GlobalServerConfig().Web.Port)
 	web.Run(addr)
 
+}
+
+// filterLoginCheck 全局的登录验证
+func filterLoginCheck(ctx *beegoContext.Context) {
+	for _, url := range UrlFilterWhiteList {
+		if ctx.Request.RequestURI == url {
+			return
+		}
+	}
+	// 检查用户是否登录（检查登录成功后的session:User、UserRole、Workspace
+	if user, ok := ctx.Input.Session("User").(string); !ok || len(user) == 0 {
+		ctx.Redirect(http.StatusFound, "/")
+	}
+	userRole, ok := ctx.Input.Session("UserRole").(string)
+	{
+		if !ok || len(userRole) == 0 {
+			ctx.Redirect(http.StatusFound, "/")
+		}
+	}
+	if workspaceId, ok := ctx.Input.Session("Workspace").(int); !ok || (userRole != "superadmin" && workspaceId <= 0) {
+		ctx.Redirect(http.StatusFound, "/")
+	}
 }
 
 // startRPCServer 启动RPC server
@@ -53,9 +67,21 @@ func startRPCServer() {
 	logging.CLILog.Infof("rpc server running on tcp@%s:%d...", rpc.Host, rpc.Port)
 
 	s := server.NewServer()
-	s.Register(new(comm.Service), "")
+	err := s.Register(new(comm.Service), "")
+	if err != nil {
+		logging.RuntimeLog.Error(err)
+		logging.CLILog.Error(err)
+		return
+	}
 	s.AuthFunc = auth
-	s.Serve("tcp", fmt.Sprintf("%s:%d", rpc.Host, rpc.Port))
+	err = s.Serve("tcp", fmt.Sprintf("%s:%d", rpc.Host, rpc.Port))
+	if err != nil {
+		if err != nil {
+			logging.RuntimeLog.Error(err)
+			logging.CLILog.Error(err)
+		}
+		return
+	}
 }
 
 // startCronTask 启动定时任务

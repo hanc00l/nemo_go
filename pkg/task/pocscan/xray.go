@@ -87,11 +87,12 @@ func (x *Xray) parseXrayResult(outputTempFile string) {
 			continue
 		}
 		x.Result = append(x.Result, Result{
-			Target:  host,
-			Url:     r.Target.Url,
-			PocFile: r.Plugin,
-			Source:  "xray",
-			Extra:   strings.Join(extraAll, ""),
+			Target:      host,
+			Url:         r.Target.Url,
+			PocFile:     r.Plugin,
+			Source:      "xray",
+			Extra:       strings.Join(extraAll, ""),
+			WorkspaceId: x.Config.WorkspaceId,
 		})
 	}
 }

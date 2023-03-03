@@ -12,13 +12,22 @@
                                     class="fa fa fa-trash-o"></i>
                             </button>&nbsp;
                             <button type="button" id="btn_switchShowFofa" class="btn btn-secondary"
-                                    onclick="refresh_info('ip','{{ .ip_info.IP }}',{{ .ip_info.DisableFofa }})">
+                                    onclick="refresh_info('ip','{{ .ip_info.Workspace }}','{{ .ip_info.IP }}',{{ .ip_info.DisableFofa }})">
                                 <i class="fa fa-info-circle"></i>{{ if .ip_info.DisableFofa }}
                                 显示FOFA/Quake/Hunter/0Zone信息
                                 {{ else }}
                                 不看FOFA/Quake/Hunter/0Zone信息
                                 {{ end }}
                             </button>&nbsp;
+                            <button type="button" id="btn_switchPin" class="btn btn-secondary"
+                                    onclick="pin_top_info('ip','{{ .ip_info.Id }}','{{ .ip_info.PinIndex }}')">
+                                {{ if eq .ip_info.PinIndex "1" }}
+                                <i class="fa fa-thumb-tack"></i>取消置顶
+                                {{ else }}
+                                <i class="fa fa-thumb-tack fa-rotate-90"></i>置顶
+                                {{ end }}
+                            </button>
+                            &nbsp;
                             <button type="button" id="btn_editIpMemo" class="btn btn-secondary"><i
                                     class="fa fa-pencil-square-o"></i>编辑备忘录
                             </button>&nbsp;
@@ -59,7 +68,7 @@
                         <span class="btn btn-info">关联域名</span>
                         <span class="btn btn-warning text-left">
                             {{ range .ip_info.Domain }}
-                            <a href="domain-info?domain={{ . }}" target="_blank">{{ . }}</a>&nbsp;
+                            <a href="domain-info?workspace={{ $.ip_info.Workspace }}&&domain={{ . }}" target="_blank">{{ . }}</a>&nbsp;
                             {{ end }}
                         </span>
                         {{ end }}
@@ -79,9 +88,10 @@
                         {{ if .ip_info.IconHashes }}
                         <span class="btn btn-info">IconHash</span>
                         {{ range .ip_info.IconHashes }}
-                        <a href="{{ .FofaUrl }}" target="_blank"><img src="/webfiles/iconimage/{{ .IconImage }}"
-                                                                      height="24px" width="24px"
-                                                                      title="{{ .IconHash }}"/></a>&nbsp;
+                        <a href="{{ .FofaUrl }}" target="_blank"><img
+                                src="/webfiles/{{ $.ip_info.WorkspaceGUID }}/iconimage/{{ .IconImage }}"
+                                height="24px" width="24px"
+                                title="{{ .IconHash }}"/></a>&nbsp;
                         {{ end }}
                         {{ end }}
                         {{ if .ip_info.TlsData }}
@@ -226,7 +236,7 @@
                                     class="badge badge-success">  {{ .Source }} </span></a>
                             {{ else }}
                             <span class="badge badge-success"> {{ .Source }}</span>
-                            {{end }}
+                            {{ end }}
                             {{ else if eq .Source "hunter" "quake" "0zone" }}
                             <span class="badge badge-success"> {{ .Source }}</span>
                             {{ else if eq .Source "iconhash" }}
@@ -270,7 +280,8 @@
             <div class="modal-body ">
                 <form class="form-horizontal" role="form">
                     <div class="form-group">
-                        <textarea class="form-control" id="text_content" rows="15" placeholder="输入备忘录信息..."></textarea>
+                        <textarea class="form-control" id="text_content" rows="15"
+                                  placeholder="输入备忘录信息..."></textarea>
                     </div>
                     <input type="hidden" id="r_id" value="{{.ip_info.Id }}"/>
                 </form>

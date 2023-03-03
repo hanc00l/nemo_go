@@ -1,7 +1,7 @@
 <main class="app-content">
     <div class="app-title">
         <div>
-            <h1><i class="fa fa-dashboard"></i> 配置管理</h1>
+            <h1><i class="fa fa-gear"></i> 配置管理</h1>
         </div>
         <ul class="app-breadcrumb breadcrumb">
             <li class="breadcrumb-item"><i class="fa fa-home fa-lg"></i></li>
@@ -11,6 +11,7 @@
     </div>
     <div class="row">
         <div class="col-md-6">
+            {{ if eq .UserRole "superadmin" "admin" }}
             <div class="tile">
                 <h3 class="tile-title">端口扫描默认配置</h3>
                 <div class="tile-body">
@@ -105,6 +106,18 @@
                     </button>&nbsp;&nbsp;&nbsp;
                 </div>
             </div>
+            {{ end }}
+            <div class="tile">
+                <h3 class="tile-title">Version&nbsp;<span id="nemo_version"></span></h3>
+                <div class="tile-body">
+                </div>
+                <div class="tile-footer">
+                    <div class="row">
+                        <div class="col-md-8 col-md-offset-3">
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
         <div class="col-md-6">
             <div class="tile">
@@ -113,24 +126,64 @@
                     <div class="form-group row">
                         <label class="control-label col-md-3"> 原始密码</label>
                         <div class="col-md-8">
-                            <input class="form-control" id="input_oldpass" type="password" value="">
+                            <input class="form-control" id="input_oldpass" type="password" placeholder="old password"
+                                   value="">
                         </div>
                     </div>
                     <div class="form-group row">
                         <label class="control-label col-md-3">修改后的新密码</label>
                         <div class="col-md-8">
-                            <input class="form-control" id="input_password1" type="password" value="">
+                            <input class="form-control" id="input_password1" type="password" placeholder="new password"
+                                   value="">
                         </div>
                     </div>
                     <div class="form-group row">
                         <label class="control-label col-md-3">确认修改新密码</label>
                         <div class="col-md-8">
-                            <input class="form-control" id="input_password2" type="password" value="">
+                            <input class="form-control" id="input_password2" type="password"
+                                   placeholder="confirm password" value="">
                         </div>
                     </div>
                 </div>
                 <div class="tile-footer">
                     <button class="btn btn-primary" type="button" id="buttonChangPassword"><i
+                            class="fa fa-fw fa-lg fa-check-circle"></i>保存设置
+                    </button>&nbsp;&nbsp;&nbsp;
+                </div>
+            </div>
+            {{ if eq .UserRole "superadmin" "admin" }}
+            <div class="tile">
+                <h3 class="tile-title">API Token</h3>
+                <div class="tile-body">
+                    <form>
+                        <div class="form-group">
+                            <label class="col-form-label" for="input_fofa_user">
+                                <b>FOFA Token</b>
+                            </label>
+                            <input class="form-control" id="input_fofa_user" type="text" placeholder="fofa token email"
+                                   value="">
+                            <input class="form-control" id="input_fofa_token" type="text" placeholder="fofa token"
+                                   value="">
+                            <label class="col-form-label" for="input_hunter_token">
+                                <b>Hunter Token</b>
+                            </label>
+                            <input class="form-control" id="input_hunter_token" type="text" placeholder="hunter token"
+                                   value="">
+                            <label class="col-form-label" for="input_quake_token">
+                                <b>Quake Token</b>
+                            </label>
+                            <input class="form-control" id="input_quake_token" type="text" placeholder="quake token"
+                                   value="">
+                            <label class="col-form-label" for="input_chinaz_token">
+                                <b>Chinaz ICP Token</b>
+                            </label>
+                            <input class="form-control" id="input_chinaz_token" type="text" placeholder="chinaz icp token"
+                                   value="">
+                        </div>
+                    </form>
+                </div>
+                <div class="tile-footer">
+                    <button class="btn btn-primary" type="button" id="buttonSaveAPIToken"><i
                             class="fa fa-fw fa-lg fa-check-circle"></i>保存设置
                     </button>&nbsp;&nbsp;&nbsp;
                 </div>
@@ -144,19 +197,22 @@
                                 <b>Server酱<a href="https://sct.ftqq.com/" target="_blank"><i
                                         class="fa fa-fw fa-external-link" aria-hidden="true"></i></a></b>
                             </label>
-                            <input class="form-control" id="input_serverchan" type="text" value="">
+                            <input class="form-control" id="input_serverchan" type="text" placeholder="serverchan token"
+                                   value="">
                             <label class="col-form-label" for="input_dingtalk">
                                 <b>钉钉群机器人<a href="https://open.dingtalk.com/document/group/custom-robot-access"
                                                   target="_blank"><i class="fa fa-fw fa-external-link"
                                                                      aria-hidden="true"></i></a></b>
                             </label>
-                            <input class="form-control" id="input_dingtalk" type="text" value="">
+                            <input class="form-control" id="input_dingtalk" type="text"
+                                   placeholder="dingtalk robot token" value="">
                             <label class="col-form-label" for="input_feishu">
                                 <b>飞书群机器人<a
                                         href="https://open.feishu.cn/document/ukTMukTMukTM/ucTM5YjL3ETO24yNxkjN"
                                         target="_blank"><i class="fa fa-fw fa-external-link" aria-hidden="true"></i></a></b>
                             </label>
-                            <input class="form-control" id="input_feishu" type="text" value="">
+                            <input class="form-control" id="input_feishu" type="text" placeholder="feishu robot token"
+                                   value="">
                         </div>
                     </form>
                 </div>
@@ -166,17 +222,7 @@
                     </button>&nbsp;&nbsp;&nbsp;
                 </div>
             </div>
-            <div class="tile">
-                <h3 class="tile-title">Version&nbsp;<span id="nemo_version"></span></h3>
-                <div class="tile-body">
-                </div>
-                <div class="tile-footer">
-                    <div class="row">
-                        <div class="col-md-8 col-md-offset-3">
-                        </div>
-                    </div>
-                </div>
-            </div>
+            {{ end }}
         </div>
         <div class="clearix"></div>
     </div>

@@ -16,6 +16,7 @@ type TaskCron struct {
 	CronRule        string    `gorm:"column:cron_rule"`
 	LastRunDatetime time.Time `gorm:"column:lastrun_datetime"`
 	Status          string    `gorm:"column:status"`
+	WorkspaceId     int       `gorm:"column:workspace_id"`
 	RunCount        int       `gorm:"column:run_count"`
 	Comment         string    `gorm:"column:comment"`
 }
@@ -106,6 +107,8 @@ func (t *TaskCron) makeWhere(searchMap map[string]interface{}) *gorm.DB {
 			db = db.Where("task_name like ?", fmt.Sprintf("%%%s%%", value))
 		case "kwargs":
 			db = db.Where("kwargs like ?", fmt.Sprintf("%%%s%%", value))
+		case "workspace_id":
+			db = db.Where("workspace_id", value)
 		default:
 			db = db.Where(column, value)
 		}

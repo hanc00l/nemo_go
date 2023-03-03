@@ -10,6 +10,8 @@ type Domain struct {
 	Id             int       `gorm:"primaryKey"`
 	DomainName     string    `gorm:"column:domain"`
 	OrgId          *int      `gorm:"column:org_id"` //使用指针可以处理数据库的NULL（go中传递nil）
+	WorkspaceId    int       `gorm:"column:workspace_id"`
+	PinIndex       int       `gorm:"column:pin_index"`
 	CreateDatetime time.Time `gorm:"column:create_datetime"`
 	UpdateDatetime time.Time `gorm:"column:update_datetime"`
 }
@@ -48,6 +50,9 @@ func (domain *Domain) Add() (success bool) {
 func (domain *Domain) GetByDomain() (success bool) {
 	db := GetDB()
 	defer CloseDB(db)
+	if domain.WorkspaceId > 0 {
+		db = db.Where("workspace_id", domain.WorkspaceId)
+	}
 	if result := db.Where("domain = ?", domain.DomainName).First(domain); result.RowsAffected > 0 {
 		return true
 	} else {
@@ -127,6 +132,8 @@ func (domain *Domain) makeWhere(searchMap map[string]interface{}) *gorm.DB {
 			domainAttr := GetDB().Model(&DomainAttr{}).Select("r_id").Where("content like ?", fmt.Sprintf("%%%s%%", value))
 			db = db.Where("id in (?)", domainAttr)
 			CloseDB(domainAttr)
+		case "workspace_id":
+			db = db.Where("workspace_id", value)
 		default:
 			db = db.Where(column, value)
 		}
@@ -136,10 +143,11 @@ func (domain *Domain) makeWhere(searchMap map[string]interface{}) *gorm.DB {
 
 // Gets 根据指定的条件，查询满足要求的记录
 func (domain *Domain) Gets(searchMap map[string]interface{}, page, rowsPerPage int, orderByDate bool) (results []Domain, count int) {
-	orderBy := "domain"
+	orderByField := "domain"
 	if orderByDate {
-		orderBy = "update_datetime desc"
+		orderByField = "update_datetime desc"
 	}
+	orderBy := "pin_index desc," + orderByField
 
 	db := domain.makeWhere(searchMap).Model(domain)
 	defer CloseDB(db)
@@ -156,7 +164,7 @@ func (domain *Domain) Gets(searchMap map[string]interface{}, page, rowsPerPage i
 
 // SaveOrUpdate 保存、更新一条记录
 func (domain *Domain) SaveOrUpdate() (success bool, isAdd bool) {
-	oldRecord := &Domain{DomainName: domain.DomainName}
+	oldRecord := &Domain{DomainName: domain.DomainName, WorkspaceId: domain.WorkspaceId}
 	//如果记录已存在，则更新指定的字段
 	if oldRecord.GetByDomain() {
 		updateMap := make(map[string]interface{})

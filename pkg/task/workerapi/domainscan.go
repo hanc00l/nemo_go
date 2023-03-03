@@ -46,6 +46,7 @@ func DomainScan(taskId, mainTaskId, configJSON string) (result string, err error
 		IsFingerprintHub: config.IsFingerprintHub,
 		IsIconHash:       config.IsIconHash,
 		IsScreenshot:     config.IsIconHash,
+		WorkspaceId:      config.WorkspaceId,
 	})
 	if err != nil {
 		logging.RuntimeLog.Error(err)
@@ -126,6 +127,7 @@ func doPortScanByDomainscan(taskId, mainTaskId string, config domainscan.Config,
 				IsIconHash:       config.IsIconHash,
 				IsLoadOpenedPort: false, //只扫描当前结果
 				IsPortscan:       true,
+				WorkspaceId:      config.WorkspaceId,
 			}
 			configPortScanJSON, _ := json.Marshal(configPortScan)
 			// 创建端口扫描任务

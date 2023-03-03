@@ -37,14 +37,15 @@ func StartMainTaskDamon() {
 }
 
 // SaveMainTask 保存一个MainTask到数据库中
-func SaveMainTask(taskName, configJSON, cronTaskId string) (taskId string, err error) {
+func SaveMainTask(taskName, configJSON, cronTaskId string, workspaceId int) (taskId string, err error) {
 	taskId = uuid.New().String()
 	task := &db.TaskMain{
-		TaskId:     taskId,
-		TaskName:   taskName,
-		KwArgs:     configJSON,
-		State:      ampq.CREATED,
-		CronTaskId: cronTaskId,
+		TaskId:      taskId,
+		TaskName:    taskName,
+		KwArgs:      configJSON,
+		State:       ampq.CREATED,
+		CronTaskId:  cronTaskId,
+		WorkspaceId: workspaceId,
 	}
 	//kwargs可能因为target很多导致超过数据库中的字段设计长度，因此作一个长度截取
 	const argsLength = 6000
@@ -59,7 +60,7 @@ func SaveMainTask(taskName, configJSON, cronTaskId string) (taskId string, err e
 }
 
 // runMainTask 运行一个创建的maintask
-func runMainTask(taskName, taskId, kwArgs string) (err error) {
+func runMainTask(taskName, taskId, kwArgs string, workspaceId int) (err error) {
 	var taskRunId string
 	if taskName == "portscan" {
 		var req PortscanRequestParam
@@ -67,7 +68,7 @@ func runMainTask(taskName, taskId, kwArgs string) (err error) {
 			logging.RuntimeLog.Error(err)
 			return
 		}
-		if taskRunId, err = StartPortScanTask(req, taskId); err != nil {
+		if taskRunId, err = StartPortScanTask(req, taskId, workspaceId); err != nil {
 			logging.RuntimeLog.Error(err)
 			return
 		}
@@ -78,7 +79,7 @@ func runMainTask(taskName, taskId, kwArgs string) (err error) {
 			logging.RuntimeLog.Error(err)
 			return
 		}
-		if taskRunId, err = StartBatchScanTask(req, taskId); err != nil {
+		if taskRunId, err = StartBatchScanTask(req, taskId, workspaceId); err != nil {
 			logging.RuntimeLog.Error(err)
 			return
 		}
@@ -89,7 +90,7 @@ func runMainTask(taskName, taskId, kwArgs string) (err error) {
 			logging.RuntimeLog.Error(err)
 			return
 		}
-		if taskRunId, err = StartDomainScanTask(req, taskId); err != nil {
+		if taskRunId, err = StartDomainScanTask(req, taskId, workspaceId); err != nil {
 			logging.RuntimeLog.Error(err)
 			return
 		}
@@ -100,7 +101,7 @@ func runMainTask(taskName, taskId, kwArgs string) (err error) {
 			logging.RuntimeLog.Error(err)
 			return
 		}
-		if taskRunId, err = StartPocScanTask(req, taskId); err != nil {
+		if taskRunId, err = StartPocScanTask(req, taskId, workspaceId); err != nil {
 			logging.RuntimeLog.Error(err)
 			return
 		}
@@ -113,13 +114,13 @@ func runMainTask(taskName, taskId, kwArgs string) (err error) {
 		}
 		switch taskName {
 		case "xportscan":
-			taskRunId, err = StartXPortScanTask(req, taskId)
+			taskRunId, err = StartXPortScanTask(req, taskId, workspaceId)
 		case "xdomainscan":
-			taskRunId, err = StartXDomainScanTask(req, taskId)
+			taskRunId, err = StartXDomainScanTask(req, taskId, workspaceId)
 		case "xfofa":
-			taskRunId, err = StartXFofaKeywordTask(req, taskId)
+			taskRunId, err = StartXFofaKeywordTask(req, taskId, workspaceId)
 		case "xorgscan":
-			taskRunId, err = StartXOrgScanTask(req, taskId)
+			taskRunId, err = StartXOrgScanTask(req, taskId, workspaceId)
 		}
 		if err != nil {
 			logging.RuntimeLog.Error(err)
@@ -147,7 +148,7 @@ func processCreatedTask() (err error) {
 		}
 		comm.MainTaskResultMutex.Unlock()
 		// 启动任务执行
-		if err = runMainTask(t.TaskName, t.TaskId, t.KwArgs); err != nil {
+		if err = runMainTask(t.TaskName, t.TaskId, t.KwArgs, t.WorkspaceId); err != nil {
 			return err
 		}
 		// 更新任务状态

@@ -57,6 +57,9 @@ type DomainListData struct {
 	DomainCNAME    string   `json:"domaincname"`
 	IsIPCDN        bool     `json:"ipcdn"`
 	IconImage      []string `json:"iconimage"`
+	WorkspaceId    int      `json:"workspace"`
+	WorkspaceGUID  string   `json:"workspace_guid"`
+	PinIndex       int      `json:"pinindex"`
 }
 
 // DomainInfo domain详细数据聚合
@@ -81,6 +84,9 @@ type DomainInfo struct {
 	TlsData       []string
 	DomainCDN     string
 	DomainCNAME   string
+	Workspace     string
+	WorkspaceGUID string
+	PinIndex      string
 }
 
 // DomainAttrInfo domain属性
@@ -150,9 +156,10 @@ func (c *DomainController) InfoAction() {
 	var domainInfo DomainInfo
 
 	domainName := c.GetString("domain")
+	workspaceId, err := c.GetInt("workspace")
 	disableFofa, _ := c.GetBool("disable_fofa", false)
-	if domainName != "" {
-		domainInfo = getDomainInfo(domainName, disableFofa, false)
+	if domainName != "" && err == nil && workspaceId > 0 {
+		domainInfo = getDomainInfo(workspaceId, domainName, disableFofa, false)
 		if len(domainInfo.PortAttr) > 0 {
 			tableBackgroundSet := false
 			for i, _ := range domainInfo.PortAttr {
@@ -172,6 +179,10 @@ func (c *DomainController) InfoAction() {
 // DeleteDomainAction 删除一个记录
 func (c *DomainController) DeleteDomainAction() {
 	defer c.ServeJSON()
+	if c.CheckMultiAccessRequest([]RequestRole{SuperAdmin, Admin}, false) == false {
+		c.FailedStatus("当前用户权限不允许！")
+		return
+	}
 
 	id, err := c.GetInt("id")
 	if err != nil {
@@ -181,18 +192,24 @@ func (c *DomainController) DeleteDomainAction() {
 	}
 	domain := db.Domain{Id: id}
 	if domain.Get() {
-		ss := fingerprint.NewScreenShot()
-		ss.Delete(domain.DomainName)
+		workspace := db.Workspace{Id: domain.WorkspaceId}
+		if workspace.Get() {
+			ss := fingerprint.NewScreenShot()
+			ss.Delete(workspace.WorkspaceGUID, domain.DomainName)
+		}
 		c.MakeStatusResponse(domain.Delete())
-		return
+	} else {
+		c.MakeStatusResponse(false)
 	}
-	c.MakeStatusResponse(false)
-
 }
 
 // DeleteDomainAttrAction 删除一个域名的属性
 func (c *DomainController) DeleteDomainAttrAction() {
 	defer c.ServeJSON()
+	if c.CheckMultiAccessRequest([]RequestRole{SuperAdmin, Admin}, false) == false {
+		c.FailedStatus("当前用户权限不允许！")
+		return
+	}
 
 	id, err := c.GetInt("id")
 	if err != nil {
@@ -207,6 +224,10 @@ func (c *DomainController) DeleteDomainAttrAction() {
 // DeleteDomainOnlineAPIAttrAction 删除fofa等属性
 func (c *DomainController) DeleteDomainOnlineAPIAttrAction() {
 	defer c.ServeJSON()
+	if c.CheckMultiAccessRequest([]RequestRole{SuperAdmin, Admin}, false) == false {
+		c.FailedStatus("当前用户权限不允许！")
+		return
+	}
 
 	id, err := c.GetInt("id")
 	if err != nil {
@@ -361,6 +382,31 @@ func (c *DomainController) StatisticsAction() {
 	http.ServeContent(rw, c.Ctx.Request, "domain-statistics.txt", time.Now(), strings.NewReader(strings.Join(content, "\n")))
 }
 
+// PinTopAction 置顶/取消在列表中的置顶显示
+func (c *DomainController) PinTopAction() {
+	defer c.ServeJSON()
+
+	id, err1 := c.GetInt("id")
+	pinIndex, err2 := c.GetInt("pin_index")
+	if err1 != nil || err2 != nil {
+		logging.RuntimeLog.Error("get id or pin_index error")
+		c.FailedStatus("get id or pin_index error")
+		return
+	}
+	domain := db.Domain{Id: id}
+	if domain.Get() {
+		updateMap := make(map[string]interface{})
+		if pinIndex == 1 {
+			updateMap["pin_index"] = 1
+		} else {
+			updateMap["pin_index"] = 0
+		}
+		c.MakeStatusResponse(domain.Update(updateMap))
+		return
+	}
+	c.FailedStatus("domain not exist")
+}
+
 // validateRequestParam 校验请求的参数
 func (c *DomainController) validateRequestParam(req *domainRequestParam) {
 	if req.Length <= 0 {
@@ -374,6 +420,11 @@ func (c *DomainController) validateRequestParam(req *domainRequestParam) {
 // getSearchMap 根据查询参数生成查询条件
 func (c *DomainController) getSearchMap(req domainRequestParam) (searchMap map[string]interface{}) {
 	searchMap = make(map[string]interface{})
+
+	workspaceId := c.GetSession("Workspace").(int)
+	if workspaceId > 0 {
+		searchMap["workspace_id"] = workspaceId
+	}
 	if req.OrgId > 0 {
 		searchMap["org_id"] = req.OrgId
 	}
@@ -409,12 +460,24 @@ func (c *DomainController) getDomainListData(req domainRequestParam) (resp DataT
 	hp := custom.NewHoneyPot()
 	ss := fingerprint.NewScreenShot()
 	cdn := custom.NewCDNCheck()
+	workspaceCacheMap := make(map[int]string)
 	for i, domainRow := range results {
 		domainData := DomainListData{}
 		domainData.Id = domainRow.Id
 		domainData.Index = req.Start + i + 1
 		domainData.Domain = domainRow.DomainName
-		domainInfo := getDomainInfo(domainRow.DomainName, req.DisableFofa, req.DisableBanner)
+		domainData.PinIndex = domainRow.PinIndex
+		domainData.WorkspaceId = domainRow.WorkspaceId
+		if _, ok := workspaceCacheMap[domainData.WorkspaceId]; !ok {
+			workspace := db.Workspace{Id: domainData.WorkspaceId}
+			if workspace.Get() {
+				workspaceCacheMap[workspace.Id] = workspace.WorkspaceGUID
+			}
+		}
+		if _, ok := workspaceCacheMap[domainData.WorkspaceId]; ok {
+			domainData.WorkspaceGUID = workspaceCacheMap[domainData.WorkspaceId]
+		}
+		domainInfo := getDomainInfo(domainRow.WorkspaceId, domainRow.DomainName, req.DisableFofa, req.DisableBanner)
 		// 筛选没有域名的解析IP的记录：
 		if req.SelectNoResolvedIP && len(domainInfo.IP) > 0 {
 			continue
@@ -442,7 +505,7 @@ func (c *DomainController) getDomainListData(req domainRequestParam) (resp DataT
 		//domainData.Banner = strings.Join(utils.RemoveDuplicationElement(append(domainInfo.Title, domainInfo.Banner...)), ", ")
 		domainData.Title = strings.Join(domainInfo.Title, ", ")
 		domainData.Banner = strings.Join(domainInfo.Banner, ", ")
-		domainData.ScreenshotFile = ss.LoadScreenshotFile(domainRow.DomainName)
+		domainData.ScreenshotFile = ss.LoadScreenshotFile(domainData.WorkspaceGUID, domainRow.DomainName)
 		if domainData.ScreenshotFile == nil {
 			domainData.ScreenshotFile = make([]string, 0)
 		}
@@ -490,8 +553,8 @@ func (c *DomainController) getMemoData(req domainRequestParam) (r []string) {
 }
 
 // getDomainInfo获取一个域名的数据集合
-func getDomainInfo(domainName string, disableFofa, disableBanner bool) (r DomainInfo) {
-	domain := db.Domain{DomainName: domainName}
+func getDomainInfo(workspaceId int, domainName string, disableFofa, disableBanner bool) (r DomainInfo) {
+	domain := db.Domain{DomainName: domainName, WorkspaceId: workspaceId}
 	if !domain.GetByDomain() {
 		return
 	}
@@ -499,11 +562,17 @@ func getDomainInfo(domainName string, disableFofa, disableBanner bool) (r Domain
 	r.Domain = domain.DomainName
 	r.CreateTime = FormatDateTime(domain.CreateDatetime)
 	r.UpdateTime = FormatDateTime(domain.UpdateDatetime)
-	for _, v := range fingerprint.NewScreenShot().LoadScreenshotFile(domainName) {
-		filepath := fmt.Sprintf("/webfiles/screenshot/%s/%s", domainName, v)
-		filepathThumbnail := fmt.Sprintf("/webfiles/screenshot/%s/%s", domainName, strings.ReplaceAll(v, ".png", "_thumbnail.png"))
+	r.PinIndex = fmt.Sprintf("%d", domain.PinIndex)
+	r.Workspace = fmt.Sprintf("%d", domain.WorkspaceId)
+	workspace := db.Workspace{Id: workspaceId}
+	if workspace.Get() {
+		r.WorkspaceGUID = workspace.WorkspaceGUID
+	}
+	for _, v := range fingerprint.NewScreenShot().LoadScreenshotFile(workspace.WorkspaceGUID, domainName) {
+		screenFilePath := fmt.Sprintf("/webfiles/%s/screenshot/%s/%s", r.WorkspaceGUID, domainName, v)
+		filepathThumbnail := fmt.Sprintf("/webfiles/%s/screenshot/%s/%s", r.WorkspaceGUID, domainName, strings.ReplaceAll(v, ".png", "_thumbnail.png"))
 		r.Screenshot = append(r.Screenshot, ScreenshotFileInfo{
-			ScreenShotFile:          filepath,
+			ScreenShotFile:          screenFilePath,
 			ScreenShotThumbnailFile: filepathThumbnail,
 			Tooltip:                 v,
 		})
@@ -521,12 +590,12 @@ func getDomainInfo(domainName string, disableFofa, disableBanner bool) (r Domain
 	//域名的属性
 	domainAttrInfo := getDomainAttrFullInfo(domain.Id, disableFofa, disableBanner)
 	//遍历域名关联的每一个IP，获取port,title,banner和PortAttrInfo
-	for ipName, _ := range domainAttrInfo.IP {
-		ip := db.Ip{IpName: ipName}
+	for ipName := range domainAttrInfo.IP {
+		ip := db.Ip{IpName: ipName, WorkspaceId: workspaceId}
 		if !ip.GetByIp() {
 			continue
 		}
-		pi := getPortInfo(ipName, ip.Id, disableFofa, disableBanner)
+		pi := getPortInfo(r.WorkspaceGUID, ipName, ip.Id, disableFofa, disableBanner)
 		for _, portNumber := range pi.PortNumbers {
 			if _, ok := portSet[portNumber]; !ok {
 				portSet[portNumber] = struct{}{}

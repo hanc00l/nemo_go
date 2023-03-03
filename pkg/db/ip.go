@@ -16,6 +16,8 @@ type Ip struct {
 	OrgId          *int      `gorm:"column:org_id"` //使用指针可以处理数据库的NULL（go中传递nil）
 	Location       string    `gorm:"column:location"`
 	Status         string    `gorm:"column:status"`
+	WorkspaceId    int       `gorm:"column:workspace_id"`
+	PinIndex       int       `gorm:"column:pin_index"`
 	CreateDatetime time.Time `gorm:"column:create_datetime"`
 	UpdateDatetime time.Time `gorm:"column:update_datetime"`
 }
@@ -57,6 +59,9 @@ func (ip *Ip) GetByIp() (success bool) {
 	db := GetDB()
 	defer CloseDB(db)
 
+	if ip.WorkspaceId > 0 {
+		db = db.Where("workspace_id", ip.WorkspaceId)
+	}
 	if result := db.Where("ip", ip.IpName).First(ip); result.RowsAffected > 0 {
 		return true
 	} else {
@@ -99,10 +104,11 @@ func (ip *Ip) Count(searchMap map[string]interface{}) (count int) {
 
 // Gets 根据指定的条件，查询满足要求的记录
 func (ip *Ip) Gets(searchMap map[string]interface{}, page, rowsPerPage int, orderByDate bool) (results []Ip, count int) {
-	orderBy := "ip_int"
+	orderByField := "ip_int"
 	if orderByDate {
-		orderBy = "update_datetime desc"
+		orderByField = "update_datetime desc"
 	}
+	orderBy := "pin_index desc," + orderByField
 	db := ip.makeWhere(searchMap).Model(ip)
 	defer CloseDB(db)
 	//统计满足条件的总记录数
@@ -118,7 +124,7 @@ func (ip *Ip) Gets(searchMap map[string]interface{}, page, rowsPerPage int, orde
 
 // SaveOrUpdate 保存、更新一条记录
 func (ip *Ip) SaveOrUpdate() (success bool, isAdd bool) {
-	oldRecord := &Ip{IpName: ip.IpName}
+	oldRecord := &Ip{IpName: ip.IpName, WorkspaceId: ip.WorkspaceId}
 	//如果记录已存在，则更新指定的字段
 	if oldRecord.GetByIp() {
 		updateMap := map[string]interface{}{}
@@ -206,6 +212,8 @@ func (ip *Ip) makeWhere(searchMap map[string]interface{}) *gorm.DB {
 				db = db.Where("id in (?)", dbPorts)
 				CloseDB(dbPorts)
 			}
+		case "workspace_id":
+			db = db.Where("workspace_id", value)
 		default:
 			db = db.Where(column, value)
 		}

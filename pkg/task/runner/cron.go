@@ -22,14 +22,15 @@ var (
 )
 
 // SaveCronTask 保存定时任务
-func SaveCronTask(taskName, kwArgs, cronRule, comment string) (taskId string) {
+func SaveCronTask(taskName, kwArgs, cronRule, comment string, workspaceId int) (taskId string) {
 	tc := db.TaskCron{
-		TaskId:   uuid.New().String(),
-		TaskName: taskName,
-		KwArgs:   kwArgs,
-		CronRule: cronRule,
-		Status:   "enable",
-		Comment:  comment,
+		TaskId:      uuid.New().String(),
+		TaskName:    taskName,
+		KwArgs:      kwArgs,
+		CronRule:    cronRule,
+		Status:      "enable",
+		Comment:     comment,
+		WorkspaceId: workspaceId,
 	}
 	if !tc.Add() {
 		logging.RuntimeLog.Errorf("save cron task to databse fail:%s", tc.TaskId)
@@ -113,7 +114,7 @@ func (j CronTaskJob) Run() {
 		logging.RuntimeLog.Errorf("cron task:%s not exist...", j.TaskId)
 		return
 	}
-	taskId, err := SaveMainTask(ct.TaskName, ct.KwArgs, ct.TaskId)
+	taskId, err := SaveMainTask(ct.TaskName, ct.KwArgs, ct.TaskId, ct.WorkspaceId)
 	if err != nil {
 		logging.RuntimeLog.Error(err)
 		return

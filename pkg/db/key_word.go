@@ -15,6 +15,7 @@ type KeyWord struct {
 	CheckMod       string    `gorm:"column:check_mod"`
 	IsDelete       bool      `gorm:"column:is_delete"`
 	Count          int       `gorm:"column:count"`
+	WorkspaceId    int       `gorm:"column:workspace_id"`
 	CreateDatetime time.Time `gorm:"column:create_datetime"`
 	UpdateDatetime time.Time `gorm:"column:update_datetime"`
 }
@@ -114,6 +115,8 @@ func (t *KeyWord) makeWhere(searchMap map[string]interface{}) *gorm.DB {
 			if err == nil {
 				db = db.Where("update_datetime between ? and ?", time.Now().Add(dayDelta), time.Now())
 			}
+		case "workspace_id":
+			db = db.Where("workspace_id", value)
 		default:
 
 			db = db.Where(column, value)

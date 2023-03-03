@@ -37,6 +37,7 @@ func PortScan(taskId, mainTaskId, configJSON string) (result string, err error) 
 		IsFingerprintHub: config.IsFingerprintHub,
 		IsIconHash:       config.IsIconHash,
 		IsScreenshot:     config.IsScreenshot,
+		WorkspaceId:      config.WorkspaceId,
 	})
 	if err != nil {
 		return FailedTask(err.Error()), err
@@ -79,7 +80,11 @@ func doPortScanAndSave(taskId string, mainTaskId string, config portscan.Config)
 	// 读取目标的数据库中已保存的开放端口
 	var resultIPPorts string
 	if config.IsLoadOpenedPort {
-		err = comm.CallXClient("LoadOpenedPort", &config.Target, &resultIPPorts)
+		args := comm.LoadIPOpenedPortArgs{
+			WorkspaceId: config.WorkspaceId,
+			Target:      config.Target,
+		}
+		err = comm.CallXClient("LoadOpenedPort", &args, &resultIPPorts)
 		if err == nil && resultIPPorts != "" {
 			allTargets := strings.Split(resultIPPorts, ",")
 			for _, target := range allTargets {

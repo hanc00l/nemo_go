@@ -17,7 +17,8 @@ import (
 )
 
 type XScanConfig struct {
-	OrgId *int `json:"orgid,omitempty"`
+	OrgId       *int `json:"orgid,omitempty"`
+	WorkspaceId int  `json:"workspaceId"`
 	// orgscan
 	IsOrgIP     bool   `json:"orgip,omitempty"`     //XOrganizaiton：IP资产
 	IsOrgDomain bool   `json:"orgdomain,omitempty"` //XOrganizaiton：domain资产
@@ -468,6 +469,7 @@ func (x *XScan) NewPortScan(taskId, mainTaskId string, ipPortMap []map[string][]
 		IsIconHash:         x.Config.IsIconHash,
 		IsXrayPoc:          x.Config.IsXrayPoc,
 		XrayPocFile:        x.Config.XrayPocFile,
+		WorkspaceId:        x.Config.WorkspaceId,
 	}
 	for _, t := range ipPortMap {
 		configRun := config
@@ -505,6 +507,8 @@ func (x *XScan) NewDomainScan(taskId, mainTaskId string, domainMap []map[string]
 		IsIconHash:         x.Config.IsIconHash,
 		IsXrayPoc:          x.Config.IsXrayPoc,
 		XrayPocFile:        x.Config.XrayPocFile,
+
+		WorkspaceId: x.Config.WorkspaceId,
 	}
 	for _, t := range domainMap {
 		configRun := config
@@ -527,6 +531,7 @@ func (x *XScan) FingerPrint(taskId string, mainTaskId string) (result string, er
 		IsScreenshot:     x.Config.IsScreenshot,
 		IPTargetMap:      x.Config.IPPort,
 		DomainTargetMap:  x.Config.Domain,
+		WorkspaceId:      x.Config.WorkspaceId,
 	}
 	x.ResultIP, x.ResultDomain, result, err = doFingerPrintAndSave(taskId, mainTaskId, config)
 
@@ -546,6 +551,7 @@ func (x *XScan) NewFingerprintScan(taskId, mainTaskId string) (result string, er
 		IsIconHash:       x.Config.IsIconHash,
 		IsXrayPoc:        x.Config.IsXrayPoc,
 		XrayPocFile:      x.Config.XrayPocFile,
+		WorkspaceId:      x.Config.WorkspaceId,
 	}
 	//拆分子任务
 	ipTarget, domainTarget := MakeSubTaskTarget(&x.ResultIP, &x.ResultDomain)
@@ -574,14 +580,14 @@ func (x *XScan) NewXrayScan(taskId, mainTaskId string) (result string, err error
 	//拆分子任务
 	ipTarget, domainTarget := MakeSubTaskTarget(&x.ResultIP, &x.ResultDomain)
 	for _, t := range ipTarget {
-		newConfig := XScanConfig{IPPort: t, IsXrayPoc: true, XrayPocFile: x.Config.XrayPocFile}
+		newConfig := XScanConfig{IPPort: t, IsXrayPoc: true, XrayPocFile: x.Config.XrayPocFile, WorkspaceId: x.Config.WorkspaceId}
 		result, err = sendTask(taskId, mainTaskId, newConfig, "xxray")
 		if err != nil {
 			return
 		}
 	}
 	for _, t := range domainTarget {
-		newConfig := XScanConfig{Domain: t, IsXrayPoc: true, XrayPocFile: x.Config.XrayPocFile}
+		newConfig := XScanConfig{Domain: t, IsXrayPoc: true, XrayPocFile: x.Config.XrayPocFile, WorkspaceId: x.Config.WorkspaceId}
 		result, err = sendTask(taskId, mainTaskId, newConfig, "xxray")
 		if err != nil {
 			return

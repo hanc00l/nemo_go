@@ -75,6 +75,7 @@ func BatchScan(taskId, mainTaskId, configJSON string) (result string, err error)
 		IsFingerprintHub: config.IsFingerprintHub,
 		IsIconHash:       config.IsIconHash,
 		IsScreenshot:     config.IsScreenshot,
+		WorkspaceId:      config.WorkspaceId,
 	})
 	if err != nil {
 		return FailedTask(err.Error()), err

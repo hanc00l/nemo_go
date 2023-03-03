@@ -25,7 +25,7 @@ api:
     name: ""
     key: ""
 portscan:
-  ping: false
+  ping: true
   port: --top-ports 1000
   rate: 1000
   tech: -sS

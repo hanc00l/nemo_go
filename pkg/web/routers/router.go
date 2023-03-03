@@ -22,6 +22,7 @@ func init() {
 	web.CtrlPost("/config-save-fingerprint", (*controllers.ConfigController).SaveFingerprintAction)
 	web.CtrlPost("/config-upload-xraypoc", (*controllers.ConfigController).UploadXrayPocAction)
 	web.CtrlPost("/config-save-notify", (*controllers.ConfigController).SaveTaskNotifyAction)
+	web.CtrlPost("/config-save-api", (*controllers.ConfigController).SaveAPITokenAction)
 
 	web.CtrlGet("/dashboard", (*controllers.DashboardController).IndexAction)
 	web.CtrlPost("/dashboard", (*controllers.DashboardController).GetStatisticDataAction)
@@ -43,6 +44,7 @@ func init() {
 	web.CtrlGet("/ip-memo-export", (*controllers.IPController).ExportMemoAction)
 	web.CtrlPost("/ip-color-tag", (*controllers.IPController).MarkColorTagAction)
 	web.CtrlPost("/ip-import-portscan", (*controllers.IPController).ImportPortscanResultAction)
+	web.CtrlPost("/ip-pin-top", (*controllers.IPController).PinTopAction)
 
 	web.CtrlGet("/domain-list", (*controllers.DomainController).IndexAction)
 	web.CtrlPost("/domain-list", (*controllers.DomainController).ListAction)
@@ -55,6 +57,7 @@ func init() {
 	web.CtrlPost("/domain-memo-update", (*controllers.DomainController).UpdateMemoAction)
 	web.CtrlGet("/domain-memo-export", (*controllers.DomainController).ExportMemoAction)
 	web.CtrlPost("/domain-color-tag", (*controllers.DomainController).MarkColorTagAction)
+	web.CtrlPost("/domain-pin-top", (*controllers.DomainController).PinTopAction)
 
 	web.CtrlGet("/vulnerability-list", (*controllers.VulController).IndexAction)
 	web.CtrlPost("/vulnerability-list", (*controllers.VulController).ListAction)
@@ -98,4 +101,25 @@ func init() {
 	web.CtrlPost("/key-word-list", (*controllers.KeySearchController).ListAction)
 	web.CtrlPost("/key-word-add", (*controllers.KeySearchController).AddSaveAction)
 	web.CtrlPost("/key-word-del", (*controllers.KeySearchController).DeleteKeyWordAction)
+
+	web.CtrlPost("/workspace-user-list", (*controllers.WorkspaceController).UserWorkspaceAction)
+	web.CtrlPost("/workspace-user-change", (*controllers.WorkspaceController).ChangeWorkspaceSelectAction)
+	web.CtrlGet("/workspace-list", (*controllers.WorkspaceController).IndexAction)
+	web.CtrlPost("/workspace-list", (*controllers.WorkspaceController).ListAction)
+	web.CtrlPost("/workspace-get", (*controllers.WorkspaceController).GetAction)
+	web.CtrlGet("/workspace-add", (*controllers.WorkspaceController).AddIndexAction)
+	web.CtrlPost("/workspace-add", (*controllers.WorkspaceController).AddSaveAction)
+	web.CtrlPost("/workspace-update", (*controllers.WorkspaceController).UpdateAction)
+	web.CtrlPost("/workspace-delete", (*controllers.WorkspaceController).DeleteAction)
+
+	web.CtrlGet("/user-list", (*controllers.UserController).IndexAction)
+	web.CtrlPost("/user-list", (*controllers.UserController).ListAction)
+	web.CtrlPost("/user-get", (*controllers.UserController).GetAction)
+	web.CtrlGet("/user-add", (*controllers.UserController).AddIndexAction)
+	web.CtrlPost("/user-add", (*controllers.UserController).AddSaveAction)
+	web.CtrlPost("/user-update", (*controllers.UserController).UpdateAction)
+	web.CtrlPost("/user-delete", (*controllers.UserController).DeleteAction)
+	web.CtrlPost("/user-reset-password", (*controllers.UserController).ResetPasswordAction)
+	web.CtrlPost("/user-workspace-list", (*controllers.UserController).ListUserWorkspaceAction)
+	web.CtrlPost("/user-workspace-update", (*controllers.UserController).UpdateUserWorkspaceAction)
 }

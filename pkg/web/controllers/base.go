@@ -3,6 +3,7 @@ package controllers
 import (
 	"bytes"
 	"github.com/beego/beego/v2/server/web"
+	"github.com/hanc00l/nemo_go/pkg/db"
 	"github.com/hanc00l/nemo_go/pkg/logging"
 	"net/http"
 	"strings"
@@ -17,6 +18,14 @@ type BaseController struct {
 const (
 	Success = "success"
 	Fail    = "fail"
+)
+
+type RequestRole string
+
+const (
+	SuperAdmin = "superadmin"
+	Admin      = "admin"
+	Guest      = "guest"
 )
 
 // StatusResponseData JSON的状态响应
@@ -63,6 +72,19 @@ var (
 	// OnlineUser 在线用户信息
 	OnlineUser = make(map[string]*OnlineUserInfo)
 )
+
+func (c *BaseController) Prepare() {
+	var userName string
+	if c.GetSession("User") != nil {
+		userName = c.GetSession("User").(string)
+	}
+	c.Data["User"] = userName
+	var userRole string
+	if c.GetSession("UserRole") != nil {
+		userRole = c.GetSession("UserRole").(string)
+	}
+	c.Data["UserRole"] = userRole
+}
 
 func (c *BaseController) GetGlobalSessionData() GlobalSessionData {
 	data := GlobalSessionData{
@@ -153,4 +175,64 @@ func (c *BaseController) DeleteOnlineUser() {
 	if _, ok := OnlineUser[ip]; ok {
 		delete(OnlineUser, ip)
 	}
+}
+
+// CheckOneAccessRequest 检查用户当前登录是否满足请求的角色要求
+func (c *BaseController) CheckOneAccessRequest(role RequestRole, forceRedirect bool) (isPermit bool) {
+	userName := c.GetSession("User").(string)
+	user := db.User{UserName: userName}
+	if user.GetByUsername() == false {
+		if forceRedirect {
+			c.Redirect("/", http.StatusFound)
+		} else {
+			return false
+		}
+	}
+	if user.State != "enable" {
+		if forceRedirect {
+			c.Redirect("/", http.StatusFound)
+		} else {
+			return false
+		}
+	}
+	if user.UserRole != string(role) {
+		if forceRedirect {
+			c.Redirect("/", http.StatusFound)
+		} else {
+			return false
+		}
+	}
+	return true
+}
+
+// CheckMultiAccessRequest 检查用户当前登录是否满足请求的角色要求
+func (c *BaseController) CheckMultiAccessRequest(roleList []RequestRole, forceRedirect bool) (isPermit bool) {
+	userName := c.GetSession("User").(string)
+	user := db.User{UserName: userName}
+	if user.GetByUsername() == false {
+		if forceRedirect {
+			c.Redirect("/", http.StatusFound)
+		} else {
+			return false
+		}
+	}
+	if user.State != "enable" {
+		if forceRedirect {
+			c.Redirect("/", http.StatusFound)
+		} else {
+			return false
+		}
+	}
+	isPermit = false
+	for _, r := range roleList {
+		if user.UserRole == string(r) {
+			isPermit = true
+			break
+		}
+	}
+	if isPermit == false && forceRedirect {
+		c.Redirect("/", http.StatusFound)
+	}
+
+	return
 }

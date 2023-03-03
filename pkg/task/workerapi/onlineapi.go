@@ -52,6 +52,7 @@ func doFofaOnlineAPI(taskId string, mainTaskId string, configJSON string, apiNam
 		IsFingerprintHub: config.IsFingerprintHub,
 		IsIconHash:       config.IsIconHash,
 		IsScreenshot:     config.IsScreenshot,
+		WorkspaceId:      config.WorkspaceId,
 	})
 	if err != nil {
 		logging.RuntimeLog.Error(err)
@@ -89,8 +90,8 @@ func doFofaAndSave(taskId string, mainTaskId string, apiName string, config onli
 	args := comm.ScanResultArgs{
 		TaskID:       taskId,
 		MainTaskId:   mainTaskId,
-		IPConfig:     &portscan.Config{OrgId: config.OrgId},
-		DomainConfig: &domainscan.Config{OrgId: config.OrgId},
+		IPConfig:     &portscan.Config{OrgId: config.OrgId, WorkspaceId: config.WorkspaceId},
+		DomainConfig: &domainscan.Config{OrgId: config.OrgId, WorkspaceId: config.WorkspaceId},
 		IPResult:     ipResult.IPResult,
 		DomainResult: domainResult.DomainResult,
 	}

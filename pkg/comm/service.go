@@ -45,8 +45,15 @@ type ScanResultArgs struct {
 
 // ScreenshotResultArgs screenshot结果请求参数
 type ScreenshotResultArgs struct {
-	MainTaskId string
-	FileInfo   []fingerprint.ScreenshotFileInfo
+	MainTaskId  string
+	WorkspaceId int
+	FileInfo    []fingerprint.ScreenshotFileInfo
+}
+
+// IconHashResultArgs icconhash保存的结果值
+type IconHashResultArgs struct {
+	WorkspaceId  int
+	IconHashInfo []fingerprint.IconHashInfo
 }
 
 // TaskStatusArgs 任务状态请求与返回参数
@@ -65,6 +72,16 @@ type NewTaskArgs struct {
 	ConfigJSON    string
 	MainTaskID    string
 	LastRunTaskId string
+}
+
+type LoadIPOpenedPortArgs struct {
+	WorkspaceId int
+	Target      string
+}
+
+type LoadDomainOpenedPortArgs struct {
+	WorkspaceId int
+	Target      map[string]struct{}
 }
 
 type MainTaskResultMap struct {
@@ -148,7 +165,11 @@ func (s *Service) SaveScanResult(ctx context.Context, args *ScanResultArgs, repl
 func (s *Service) SaveScreenshotResult(ctx context.Context, args *ScreenshotResultArgs, replay *string) error {
 	ss := fingerprint.NewScreenShot()
 	//检查保存结果的路径
-	screenshotPath := path.Join(conf.GlobalServerConfig().Web.WebFiles, "screenshot")
+	workspace := db.Workspace{Id: args.WorkspaceId}
+	if workspace.Get() == false {
+		logging.RuntimeLog.Error("workspace error")
+	}
+	screenshotPath := path.Join(conf.GlobalServerConfig().Web.WebFiles, workspace.WorkspaceGUID, "screenshot")
 	if !utils.MakePath(screenshotPath) {
 		logging.RuntimeLog.Error("创建保存screenshot的目录失败！")
 		return errors.New("创建保存screenshot的目录失败！")
@@ -160,15 +181,19 @@ func (s *Service) SaveScreenshotResult(ctx context.Context, args *ScreenshotResu
 }
 
 // SaveIconImageResult 保存IconImage结果到Server
-func (s *Service) SaveIconImageResult(ctx context.Context, args *[]fingerprint.IconHashInfo, replay *string) error {
-	iconImagePath := path.Join(conf.GlobalServerConfig().Web.WebFiles, "iconimage")
+func (s *Service) SaveIconImageResult(ctx context.Context, args *IconHashResultArgs, replay *string) error {
+	workspace := db.Workspace{Id: args.WorkspaceId}
+	if workspace.Get() == false {
+		logging.RuntimeLog.Error("workspace error")
+	}
+	iconImagePath := path.Join(conf.GlobalServerConfig().Web.WebFiles, workspace.WorkspaceGUID, "iconimage")
 	if !utils.MakePath(iconImagePath) {
 		*replay = "fail to mkdir"
 		logging.RuntimeLog.Error("创建任务保存Image的目录失败！")
 		return errors.New("创建任务保存Image的目录失败！")
 	}
 	hash := fingerprint.NewIconHash()
-	*replay = hash.SaveFile(iconImagePath, *args)
+	*replay = hash.SaveFile(iconImagePath, args.IconHashInfo)
 
 	return nil
 }
@@ -337,10 +362,10 @@ func (s *Service) NewTask(ctx context.Context, args *NewTaskArgs, replay *string
 }
 
 // LoadOpenedPort 读取指定IP已开放的全部端口
-func (s *Service) LoadOpenedPort(ctx context.Context, args *string, replay *string) error {
+func (s *Service) LoadOpenedPort(ctx context.Context, args *LoadIPOpenedPortArgs, replay *string) error {
 	var resultIPAndPort []string
 
-	ips := strings.Split(*args, ",")
+	ips := strings.Split(args.Target, ",")
 	for _, ip := range ips {
 		// 如果不是有效的IP（可能是域名）
 		if utils.CheckIPV4(ip) == false && utils.CheckIPV4Subnet(ip) == false {
@@ -351,14 +376,12 @@ func (s *Service) LoadOpenedPort(ctx context.Context, args *string, replay *stri
 		for _, ipOneByOne := range ipAllByParse {
 			//Fix Bug：
 			//每次重新初始化数据库对象
-			ipDb := db.Ip{}
-			portDb := db.Port{}
-			ipDb.IpName = ipOneByOne
+			ipDb := db.Ip{IpName: ipOneByOne, WorkspaceId: args.WorkspaceId}
 			// 如果数据库中无IP记录
 			if ipDb.GetByIp() == false {
 				continue
 			}
-			portDb.IpId = ipDb.Id
+			portDb := db.Port{IpId: ipDb.Id}
 			ports := portDb.GetsByIPId()
 			// 如果该IP无已扫描到的开放端口
 			if len(ports) == 0 {
@@ -375,13 +398,13 @@ func (s *Service) LoadOpenedPort(ctx context.Context, args *string, replay *stri
 }
 
 // LoadDomainOpenedPort 获取域名关联的IP的端口
-func (s *Service) LoadDomainOpenedPort(ctx context.Context, args *map[string]struct{}, replay *map[string]map[int]struct{}) error {
+func (s *Service) LoadDomainOpenedPort(ctx context.Context, args *LoadDomainOpenedPortArgs, replay *map[string]map[int]struct{}) error {
 	result := make(map[string]map[int]struct{})
 
 	domainIP := make(map[string]map[string]struct{})
 	//获取域名关联的所有IP
-	for domainName := range *args {
-		domain := db.Domain{DomainName: domainName}
+	for domainName := range args.Target {
+		domain := db.Domain{DomainName: domainName, WorkspaceId: args.WorkspaceId}
 		if !domain.GetByDomain() {
 			continue
 		}
@@ -398,7 +421,7 @@ func (s *Service) LoadDomainOpenedPort(ctx context.Context, args *map[string]str
 	for domainName, ips := range domainIP {
 		ports := make(map[int]struct{})
 		for ip := range ips {
-			ipDb := db.Ip{IpName: ip}
+			ipDb := db.Ip{IpName: ip, WorkspaceId: args.WorkspaceId}
 			if ipDb.GetByIp() {
 				portDb := db.Port{IpId: ipDb.Id}
 				pts := portDb.GetsByIPId()
@@ -413,14 +436,31 @@ func (s *Service) LoadDomainOpenedPort(ctx context.Context, args *map[string]str
 	return nil
 }
 
+// getWorkspaceGUIDByRunTaskId 根据runtask获取workspace的GUID
+func getWorkspaceGUIDByRunTaskId(taskId string) string {
+	runTask := db.TaskRun{TaskId: taskId}
+	if runTask.GetByTaskId() {
+		workspace := db.Workspace{Id: runTask.WorkspaceId}
+		if workspace.Get() {
+			return workspace.WorkspaceGUID
+		}
+	}
+	return ""
+}
+
 // saveTaskResult 将任务结果保存到本地文件
 func saveTaskResult(taskID string, result interface{}) {
 	if taskID == "" {
 		logging.RuntimeLog.Error("任务ID为空！")
 		return
 	}
+	workspaceGUID := getWorkspaceGUIDByRunTaskId(taskID)
+	if workspaceGUID == "" {
+		logging.RuntimeLog.Error("workspace GUID为空！")
+		return
+	}
 	//检查保存结果的路径
-	resultPath := path.Join(conf.GlobalServerConfig().Web.WebFiles, "taskresult")
+	resultPath := path.Join(conf.GlobalServerConfig().Web.WebFiles, workspaceGUID, "taskresult")
 	if !utils.MakePath(resultPath) {
 		logging.RuntimeLog.Error("创建任务保存结果的目录失败！")
 		return

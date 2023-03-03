@@ -25,14 +25,16 @@ type Config struct {
 	PocFile          string `json:"pocFile"`
 	CmdBin           string `json:"cmdBin"`
 	IsLoadOpenedPort bool   `json:"loadOpenedPort"`
+	WorkspaceId      int    `json:"workspaceId"`
 }
 
 type Result struct {
-	Target  string `json:"target"`
-	Url     string `json:"url"`
-	PocFile string `json:"pocFile"`
-	Source  string `json:"source"`
-	Extra   string `json:"extra"`
+	Target      string `json:"target"`
+	Url         string `json:"url"`
+	PocFile     string `json:"pocFile"`
+	Source      string `json:"source"`
+	Extra       string `json:"extra"`
+	WorkspaceId int    `json:"workspaceId"`
 }
 
 type xrayJSONResult struct {
@@ -178,11 +180,12 @@ func SaveResult(result []Result) string {
 			extra = r.Extra[:2000] + "..."
 		}
 		vul := db.Vulnerability{
-			Target:  target,
-			Url:     r.Url,
-			PocFile: r.PocFile,
-			Source:  r.Source,
-			Extra:   extra,
+			Target:      target,
+			Url:         r.Url,
+			PocFile:     r.PocFile,
+			Source:      r.Source,
+			Extra:       extra,
+			WorkspaceId: r.WorkspaceId,
 		}
 		if ok, isNew := vul.SaveOrUpdate(); ok {
 			resultCount++

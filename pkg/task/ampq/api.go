@@ -40,8 +40,8 @@ type WorkerStatus struct {
 	WorkerDaemonUpdateTime time.Time `json:"worker_daemon_update_time"`
 }
 
-// GetServerTaskAMPQSrever 根据server配置文件，获取到消息中心的连接
-func GetServerTaskAMPQSrever() (taskServer *machinery.Server) {
+// GetServerTaskAMPQServer 根据server配置文件，获取到消息中心的连接
+func GetServerTaskAMPQServer() (taskServer *machinery.Server) {
 	rabbitmq := conf.GlobalServerConfig().Rabbitmq
 	return startAMQPServer(rabbitmq.Username, rabbitmq.Password, rabbitmq.Host, rabbitmq.Port)
 }

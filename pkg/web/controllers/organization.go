@@ -21,6 +21,7 @@ type OrganizationData struct {
 	SortOrder      int    `json:"sort_order" form:"sort_order"`
 	CreateDatetime string `json:"create_time" form:"-"`
 	UpdateDatetime string `json:"update_time" form:"-"`
+	WorkspaceId    int    `json:"workspace"`
 }
 
 type OrganizationSelectData struct {
@@ -33,7 +34,12 @@ func (c *OrganizationController) GetAllAction() {
 	defer c.ServeJSON()
 
 	org := &db.Organization{}
-	orgData := org.Gets(make(map[string]interface{}), -1, -1)
+	searchMap := make(map[string]interface{})
+	workspaceId := c.GetSession("Workspace").(int)
+	if workspaceId > 0 {
+		searchMap["workspace_id"] = workspaceId
+	}
+	orgData := org.Gets(searchMap, -1, -1)
 	var results []OrganizationSelectData
 	for _, r := range orgData {
 		results = append(results, OrganizationSelectData{Id: r.Id, OrgName: r.OrgName})
@@ -69,6 +75,10 @@ func (c *OrganizationController) ListAction() {
 // DeleteAction 删除一条记录
 func (c *OrganizationController) DeleteAction() {
 	defer c.ServeJSON()
+	if c.CheckMultiAccessRequest([]RequestRole{SuperAdmin, Admin}, false) == false {
+		c.FailedStatus("当前用户权限不允许！")
+		return
+	}
 
 	id, err := c.GetInt("id")
 	if err != nil {
@@ -82,6 +92,8 @@ func (c *OrganizationController) DeleteAction() {
 
 // AddIndexAction 新增页面显示
 func (c *OrganizationController) AddIndexAction() {
+	c.CheckMultiAccessRequest([]RequestRole{SuperAdmin, Admin}, true)
+
 	c.Layout = "base.html"
 	c.TplName = "org-add.html"
 }
@@ -89,7 +101,16 @@ func (c *OrganizationController) AddIndexAction() {
 // AddSaveAction 保存新增的记录
 func (c *OrganizationController) AddSaveAction() {
 	defer c.ServeJSON()
+	if c.CheckMultiAccessRequest([]RequestRole{SuperAdmin, Admin}, false) == false {
+		c.FailedStatus("当前用户权限不允许！")
+		return
+	}
 
+	workspaceId := c.GetSession("Workspace").(int)
+	if workspaceId <= 0 {
+		c.FailedStatus("未选择当前的工作空间！")
+		return
+	}
 	orgData := OrganizationData{}
 	err := c.ParseForm(&orgData)
 	if err != nil {
@@ -101,6 +122,7 @@ func (c *OrganizationController) AddSaveAction() {
 	org.OrgName = orgData.OrgName
 	org.Status = orgData.Status
 	org.SortOrder = orgData.SortOrder
+	org.WorkspaceId = workspaceId
 	c.MakeStatusResponse(org.Add())
 }
 
@@ -121,6 +143,7 @@ func (c *OrganizationController) GetAction() {
 		r.OrgName = org.OrgName
 		r.Status = org.Status
 		r.SortOrder = org.SortOrder
+		r.WorkspaceId = org.WorkspaceId
 		r.UpdateDatetime = FormatDateTime(org.UpdateDatetime)
 		r.CreateDatetime = FormatDateTime(org.CreateDatetime)
 	}
@@ -130,6 +153,10 @@ func (c *OrganizationController) GetAction() {
 // UpdateAction 更新一个记录
 func (c *OrganizationController) UpdateAction() {
 	defer c.ServeJSON()
+	if c.CheckMultiAccessRequest([]RequestRole{SuperAdmin, Admin}, false) == false {
+		c.FailedStatus("当前用户权限不允许！")
+		return
+	}
 
 	id, err := c.GetInt("id")
 	if err != nil {
@@ -166,6 +193,10 @@ func (c *OrganizationController) validateRequestParam(req *orgRequestParam) {
 func (c *OrganizationController) getOrganizationListData(req orgRequestParam) (resp DataTableResponseData) {
 	org := db.Organization{}
 	searchMap := make(map[string]interface{})
+	workspaceId := c.GetSession("Workspace").(int)
+	if workspaceId > 0 {
+		searchMap["workspace_id"] = workspaceId
+	}
 	startPage := req.Start/req.Length + 1
 	results := org.Gets(searchMap, startPage, req.Length)
 	for i, orgRow := range results {

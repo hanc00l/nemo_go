@@ -240,7 +240,11 @@ $(function () {
     $("#batch_delete").click(function () {
         batch_delete('#domain_table', '/domain-delete');
     });
-
+    // workspace
+    get_user_workspace_list();
+    $('#select_workspace').change(function () {
+        change_user_workspace('#domain_table');
+    });
     $('#domain_table').DataTable(
         {
             "paging": true,
@@ -289,6 +293,7 @@ $(function () {
                     data: "index", title: "序号", width: "5%",
                     "render": function (data, type, row, meta) {
                         let strData = data;
+                        if (row["pinindex"] === 1) strData = '<i class="fa fa-thumb-tack fa-rotate-90" style="color: orange" title="已置顶"></i>';
                         if (row["honeypot"].length > 0) {
                             strData = "<span style='color:red;font-weight:bold' title='" + row["honeypot"] + "'>蜜罐</span>";
                         }
@@ -303,9 +308,9 @@ $(function () {
                         let strData;
                         let disable_fofa = $('#checkbox_disable_fofa').is(":checked");
                         if (row['color_tag']) {
-                            strData = '<h5><a href="/domain-info?domain=' + data + '&&disable_fofa=' + disable_fofa + '" target="_blank" class="badge ' + row['color_tag'] + '">' + data + '</a></h5>';
+                            strData = '<h5><a href="/domain-info?workspace=' + row['workspace'] + '&&domain=' + data + '&&disable_fofa=' + disable_fofa + '" target="_blank" class="badge ' + row['color_tag'] + '">' + data + '</a></h5>';
                         } else {
-                            strData = '<a href="/domain-info?domain=' + data + '&&disable_fofa=' + disable_fofa + '" target="_blank">' + data + '</a>';
+                            strData = '<a href="/domain-info?workspace=' + row['workspace'] + '&&domain=' + data + '&&disable_fofa=' + disable_fofa + '" target="_blank">' + data + '</a>';
                         }
                         if (row['vulnerability']) {
                             strData += '&nbsp;<span class="badge badge-danger" data-toggle="tooltip" data-html="true" title="' + html2Escape(row['vulnerability']) + '"><i class="fa fa-bolt"></span>';
@@ -328,7 +333,7 @@ $(function () {
                         let disable_fofa = $('#checkbox_disable_fofa').is(":checked");
                         for (; j < len; j++) {
                             strData += pre_link
-                            strData += '<a href="ip-info?ip=' + data[j] + '&&disable_fofa=' + disable_fofa + '" target="_blank">' + data[j] + '</a>';
+                            strData += '<a href="ip-info?workspace=' + row['workspace'] + '&&ip=' + data[j] + '&&disable_fofa=' + disable_fofa + '" target="_blank">' + data[j] + '</a>';
                             pre_link = ",";
                         }
                         if (row["ipcdn"]) {

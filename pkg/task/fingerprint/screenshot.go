@@ -153,11 +153,11 @@ func (s *ScreenShot) SaveFile(localSavePath string, result []ScreenshotFileInfo)
 }
 
 // LoadScreenshotFile 获取screenshot文件
-func (s *ScreenShot) LoadScreenshotFile(domain string) (r []string) {
+func (s *ScreenShot) LoadScreenshotFile(workspaceGUID, domain string) (r []string) {
 	if !utils.CheckDomain(domain) && !utils.CheckIPV4(domain) {
 		return
 	}
-	files, _ := filepath.Glob(filepath.Join(conf.GlobalServerConfig().Web.WebFiles, "screenshot", domain, "*.png"))
+	files, _ := filepath.Glob(filepath.Join(conf.GlobalServerConfig().Web.WebFiles, workspaceGUID, "screenshot", domain, "*.png"))
 	for _, file := range files {
 		_, f := filepath.Split(file)
 		if !strings.HasSuffix(f, "_thumbnail.png") {
@@ -188,12 +188,12 @@ func (s *ScreenShot) doScreenshotAndResize(swg *sizedwaitgroup.SizedWaitGroup, d
 }
 
 // Delete 删除指定domain、IP下保存的screenshot文件
-func (s *ScreenShot) Delete(domain string) bool {
+func (s *ScreenShot) Delete(workspaceGUID, domain string) bool {
 	if !utils.CheckDomain(domain) && !utils.CheckIPV4(domain) {
 		logging.RuntimeLog.Errorf("invalid domain:%s", domain)
 		return false
 	}
-	domainPath := filepath.Join(conf.GlobalServerConfig().Web.WebFiles, "screenshot", domain)
+	domainPath := filepath.Join(conf.GlobalServerConfig().Web.WebFiles, workspaceGUID, "screenshot", domain)
 	if err := os.RemoveAll(domainPath); err != nil {
 		return false
 	}
