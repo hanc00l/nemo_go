@@ -90,7 +90,7 @@ $(function () {
                     render: function (data, type, row, meta) {
                         let str = "";
                         if (row["enable_manual_reload_flag"] === true) {
-                            str += '&nbsp;<button class="btn btn-sm btn-primary" type="button" onclick="reload_worker(\'' + row['worker_name'] + '\')" ><i class="fa fa-refresh"></i>重启</button>';
+                            str += '&nbsp;<button class="btn btn-sm btn-primary" type="button" onclick="reload_worker(\'' + row['worker_name'] + '\')" ><i class="fa fa-play-circle"></i>重启</button>';
                         }
                         return str
                     }
@@ -147,6 +147,7 @@ function get_count_data() {
         $("#ip_count").html(data['ip_count']);
     });
 }
+
 //  获取用户的工作空间
 function get_user_workspace_list() {
     document.getElementById('li_workspace').style.visibility = 'visible';

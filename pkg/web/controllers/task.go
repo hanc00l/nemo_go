@@ -755,7 +755,7 @@ func (c *TaskController) getRunTaskListData(mainTaskId string, req *taskRequestP
 	} else {
 		results, _ = task.Gets(searchMap, 1, 10)
 	}
-	resultPath := path.Join(conf.GlobalServerConfig().Web.WebFiles, "taskresult")
+	cachedWorkspaceGUID := make(map[int]string)
 	for index, taskRow := range results {
 		t := TaskListData{}
 		if showIndex {
@@ -777,10 +777,19 @@ func (c *TaskController) getRunTaskListData(mainTaskId string, req *taskRequestP
 			t.ReceivedTime = FormatDateTime(*taskRow.ReceivedTime)
 		}
 		t.Runtime = formatRuntime(&taskRow)
-		if resultPath != "" {
-			filePath := path.Join(resultPath, fmt.Sprintf("%s.json", taskRow.TaskId))
-			if utils.CheckFileExist(filePath) {
-				t.ResultFile = fmt.Sprintf("/webfiles/taskresult/%s.json", taskRow.TaskId)
+		if _, ok := cachedWorkspaceGUID[taskRow.WorkspaceId]; !ok {
+			workspace := db.Workspace{Id: taskRow.WorkspaceId}
+			if workspace.Get() {
+				cachedWorkspaceGUID[taskRow.WorkspaceId] = workspace.WorkspaceGUID
+			}
+		}
+		if _, ok := cachedWorkspaceGUID[taskRow.WorkspaceId]; ok {
+			resultPath := path.Join(conf.GlobalServerConfig().Web.WebFiles, cachedWorkspaceGUID[taskRow.WorkspaceId], "taskresult")
+			if resultPath != "" {
+				filePath := path.Join(resultPath, fmt.Sprintf("%s.json", taskRow.TaskId))
+				if utils.CheckFileExist(filePath) {
+					t.ResultFile = fmt.Sprintf("/webfiles/%s/taskresult/%s.json", cachedWorkspaceGUID[taskRow.WorkspaceId], taskRow.TaskId)
+				}
 			}
 		}
 		t.TaskType = "RunTask"
@@ -858,18 +867,18 @@ func (c *TaskController) getTaskInfo(taskId string) (r TaskInfo) {
 	r.Runtime = formatRuntime(&task)
 	r.CreateTime = FormatDateTime(task.CreateDatetime)
 	r.UpdateTime = FormatDateTime(task.UpdateDatetime)
-
-	resultPath := path.Join(conf.GlobalServerConfig().Web.WebFiles, "taskresult")
-	if resultPath != "" {
-		filePath := path.Join(resultPath, fmt.Sprintf("%s.json", taskId))
-		if utils.CheckFileExist(filePath) {
-			r.ResultFile = fmt.Sprintf("/webfiles/taskresult/%s.json", taskId)
-		}
-	}
 	workspace := db.Workspace{Id: task.WorkspaceId}
 	if workspace.Get() {
 		r.Workspace = workspace.WorkspaceName
+		resultPath := path.Join(conf.GlobalServerConfig().Web.WebFiles, workspace.WorkspaceGUID, "taskresult")
+		if resultPath != "" {
+			filePath := path.Join(resultPath, fmt.Sprintf("%s.json", taskId))
+			if utils.CheckFileExist(filePath) {
+				r.ResultFile = fmt.Sprintf("/webfiles/%s/taskresult/%s.json", workspace.WorkspaceGUID, taskId)
+			}
+		}
 	}
+
 	return
 }
 

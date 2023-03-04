@@ -238,7 +238,7 @@ function set_user_workspace(id) {
                     if (data[i].enable === true) strCheckBox += ' checked';
                     strCheckBox += '><label className="form-check-label" for="cb_userworkspace_';
                     strCheckBox += data[i].workspaceId;
-                    strCheckBox += '">';
+                    strCheckBox += '">&nbsp;';
                     strCheckBox += data[i].workspaceName;
                     strCheckBox += '</label></div>';
                 }

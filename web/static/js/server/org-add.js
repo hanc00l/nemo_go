@@ -22,18 +22,22 @@ $(function () {
                 'status': status
             }, function (data, e) {
                 if (e === "success") {
-                    swal({
-                            title: "添加组织成功",
-                            text: "",
-                            type: "success",
-                            confirmButtonText: "确定",
-                            confirmButtonColor: "#41b883",
-                            closeOnConfirm: true,
-                            timer: 3000
-                        },
-                        function () {
-                            location.href = "/org-list"
-                        });
+                    if (data.status === "success")
+                        swal({
+                                title: "添加组织成功",
+                                text: "",
+                                type: "success",
+                                confirmButtonText: "确定",
+                                confirmButtonColor: "#41b883",
+                                closeOnConfirm: true,
+                                timer: 3000
+                            },
+                            function () {
+                                location.href = "/org-list"
+                            });
+                    else {
+                        swal('Warning', "添加机构失败：" + data.msg, 'error');
+                    }
                 } else {
                     swal('Warning', "添加机构失败!", 'error');
                 }
