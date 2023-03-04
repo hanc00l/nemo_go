@@ -59,7 +59,8 @@ Nemo是用来进行自动化信息收集的一个简单平台，通过集成常�
 
 ### 7、团队在线协作
 
-- 资产颜色标记、备忘录协作
+- 多用户/角色、多工作空间（项目）支持
+- 资产颜色标记、置顶、备忘录协作
 
 ### 8、其它
 
@@ -85,7 +86,9 @@ Tested on [ubuntu18.04/20.04/22.04 LTS](docs/install_linux.md)、[macOS](docs/in
 
 ## Demo
 
-默认监听端口为5000，默认密码 **nemo** ；通过“系统设置--配置管理”更改默认密码。
+- 默认监听端口为5000，默认用户**nemo（超级管理员）**、密码 **nemo** ；通过“Config--配置管理”更改默认密码，通过“System--User“创建和管理用户权限。
+- 用户角色分为superadmin、admin和guest三种； **superadmin（超级管理员）** 可管理用户和工作空间，**admin（管理员）** 可管理资源、任务和参数配置，**guest（普通用户）** 只有资源和任务的查看权限。
+- 工作空间对资源（IP、Domain、任务、组织及漏洞）进行隔离，每个工作空间可分配给不同的用户访问权限。
 
 <img src="docs/image/dashboard.png" alt="dashbord"  />
 
@@ -117,6 +120,7 @@ Tested on [ubuntu18.04/20.04/22.04 LTS](docs/install_linux.md)、[macOS](docs/in
 
 ## 版本更新
 
+- 2.9.0：2023-3-6，增加用户与角色、权限管理，增加工作空间功能，支持多用户和多项目的资源隔离；增加ip/domain资产的置顶功能。由于数据库的表有重大调整，从v2.8升级需导入**user_workspace.sql**，并在webfiles目录下新建**b0c79065-7ff7-32ae-cc18-864ccd8f7717**目录（默认的workspace），将原webfiles目录下文件迁移至该默认workspace目录下。
 - 2.8.3：2022-12-14，增加按worker的CPU及内存数量设置不同的性能模式（HighPerformance：4核4G内存及以上），降低docker及一般的VPS的并发线程数量（任务执行时间将增加）。
 - 2.8.2：2022-12-12，修复Httpx库使用leveldb时，缓存不释放导致的内存泄露；增加fofa结果的关键词全局过滤；修复XSCAN任务的taskId未能显示、漏洞扫描任务结果不能在maintask正常显示。
 - 2.8.1：2022-11-30，增加在任务结果里显示新增加资产的数量。
