@@ -94,4 +94,6 @@
   docker-compose -f docker-compose.worker.yml up -d # 默认启动1个worker
   docker-compose -f docker-compose.worker.yml up -d --scale worker=2  #启动指定个worker
   ```
+#### 3、关于文件同步
 
+#### 由于server与worker的文件自动同步机制，worker与server的conf/worker.yml配置应先确保一致后，再构建docker镜像，否则可能会导致worker的worker.yml被不正确同步。

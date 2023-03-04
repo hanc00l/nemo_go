@@ -56,9 +56,7 @@
     # web server 监听IP和地址
     host: 0.0.0.0
     port: 5000
-    # 登录用户名密码
-    username: nemo
-    password: 648ce596dba3b408b523d3d1189b15070123456789abcdef
+    # v2.9：支持多用户和角色，用户管理在超级管理员登录后在System-User中进行管理
     # webfiles 在用于保存屏幕截图、Icon、任务执行结果等本地保存位置，需与app.conf中与staticdir映射地址保持一致
     webfiles: /tmp/webfiles
   # rpc监听地址和端口、auth
@@ -84,6 +82,18 @@
     port: 5672
     username: guest
     password: guest
+  # 任务拆分粒度默认设置
+  task:
+    ipSliceNumber: 64
+    portSliceNumber: 1000
+  # 任务完成通知的token 
+  notify:
+    dingtalk:
+      token: ""
+  feishu:
+      token: ""
+  serverchan:
+      token: ""
   ```
 
   
@@ -120,7 +130,7 @@
 
   ```bash
   sudo apt-get update \
-      && sudo apt-get install vim git python3-pip python3-setuptools \
+      && sudo apt-get install vim git \
       nmap masscan --fix-missing
   #docker ubuntu
   curl -LO https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb \
@@ -179,15 +189,17 @@
   domainscan:
     resolver: resolver.txt
     wordlist: subnames.txt
-    massdnsThreads: 600
     providerConfig: provider-config.yml
+  fingerprint:
+    httpx: true
+    screenshot: true
+    fingerprinthub: true
+    iconhash: true
   pocscan:
     xray:
       pocPath: thirdparty/xray/xray/pocs
-      latest: 1.8.2
     nuclei:
       pocPath: thirdparty/nuclei/nuclei-templates
-      threads: 25
   ```
 
 ## 运行
