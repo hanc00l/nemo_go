@@ -2,8 +2,11 @@ package controllers
 
 import (
 	"fmt"
+	"github.com/hanc00l/nemo_go/pkg/conf"
 	"github.com/hanc00l/nemo_go/pkg/db"
 	"github.com/hanc00l/nemo_go/pkg/logging"
+	"os"
+	"path/filepath"
 )
 
 type WorkspaceController struct {
@@ -280,5 +283,10 @@ func (c *WorkspaceController) DeleteAction() {
 		return
 	}
 	workspace := db.Workspace{Id: id}
-	c.MakeStatusResponse(workspace.Delete())
+	if workspace.Get() {
+		domainPath := filepath.Join(conf.GlobalServerConfig().Web.WebFiles, workspace.WorkspaceGUID)
+		os.RemoveAll(domainPath)
+		c.MakeStatusResponse(workspace.Delete())
+	}
+	c.MakeStatusResponse(false)
 }
