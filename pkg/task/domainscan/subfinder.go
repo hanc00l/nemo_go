@@ -115,10 +115,11 @@ func (s *SubFinder) parseResultContent(content []byte) {
 func loadDefaultResolver() {
 	inputFile, err := os.Open(filepath.Join(conf.GetRootPath(), "thirdparty/dict", conf.GlobalWorkerConfig().Domainscan.Resolver))
 	if err != nil {
-		logging.RuntimeLog.Errorf("Could not read default resolver: %s\n", err)
+		logging.RuntimeLog.Errorf("Could not read default resolver: %s", err)
 		return
 	}
-	inputFile.Close()
+	defer inputFile.Close()
+
 	scanner := bufio.NewScanner(inputFile)
 	for scanner.Scan() {
 		text := strings.ToLower(scanner.Text())
