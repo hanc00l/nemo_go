@@ -1,0 +1,86 @@
+Client:
+    active_paths: []
+    allow_methods:
+        - HEAD
+        - GET
+        - POST
+        - PUT
+        - PATCH
+        - DELETE
+        - OPTIONS
+        - CONNECT
+        - TRACE
+        - MOVE
+        - PROPFIND
+    dial_timeout: 5
+    enable_http2: false
+    fail_retries: 0
+    headers: {}
+    max_conns_per_host: 50
+    max_qps: 500
+    max_redirect: 5
+    max_resp_body_size: 2.097152e+06
+    passive_mode: false
+    pkcs12:
+        Password: ""
+        Path: ""
+    proxy: ""
+    proxy_rule: null
+    read_timeout: 10
+Pool:
+    size: 100
+Reverse:
+    client:
+        dns_server_ip: ""
+        http_base_url: ""
+        remote_server: false
+        reverse_api: ""
+        reverse_server_url: ""
+        rmi_server_addr: ""
+    db_file_path: ""
+    dns:
+        domain: ""
+        enabled: false
+        is_domain_name_server: false
+        listen_ip: 0.0.0.0
+        resolve:
+            - record: localhost
+              ttl: 60
+              type: A
+              value: 127.0.0.1
+    http:
+        enabled: false
+        ip_header: ""
+        listen_ip: 0.0.0.0
+        listen_port: ""
+    rmi:
+        enabled: false
+        listen_ip: 127.0.0.1
+        listen_port: ""
+    token: ""
+
+# 
+# Pool.size                 [int]                 go routine 池的大小，即事件处理并发度
+# 
+# Reverse.db_file_path      [string]              反连平台数据库文件位置, 这是一个 KV 数据库
+# Reverse.token             [string]              反连平台认证的 Token, 独立部署时不能为空
+# Reverse.http              []                    
+# Reverse.dns               []                    
+# Reverse.rmi               []                    
+# Reverse.client            []                    
+# 
+# Client.proxy              [string]              漏洞扫描时使用的代理，如: http://127.0.0.1:8080。 如需设置多个代理，请使用 proxy_rule 或自行创建上层代理
+# Client.proxy_rule         []                    漏洞扫描使用多个代理的配置规则, 具体请参照文档
+# Client.dial_timeout       [int]                 建立 tcp 连接的超时时间
+# Client.read_timeout       [int]                 读取 http 响应的超时时间，不可太小，否则会影响到 sql 时间盲注的判断
+# Client.max_conns_per_host [int]                 同一 host 最大允许的连接数，可以根据目标主机性能适当增大
+# Client.enable_http2       [bool]                是否启用 http2, 开启可以提升部分网站的速度，但目前不稳定有崩溃的风险
+# Client.pkcs12             []                    
+# Client.passive_mode       [bool]                被动模式, 值为true时, 所有请求都会返回FakeResponse
+# Client.active_paths       [slice-string]        被动模式下, 仍会主动发起请求的路径
+# Client.fail_retries       [int]                 请求失败的重试次数，0 则不重试
+# Client.max_redirect       [int]                 单个请求最大允许的跳转数
+# Client.max_resp_body_size []                    最大允许的响应大小, 默认 2M
+# Client.max_qps            []                    每秒最大请求数
+# Client.allow_methods      [slice-string]        允许的请求方法
+# Client.headers            [map-string-string]   

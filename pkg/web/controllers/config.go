@@ -19,6 +19,10 @@ const (
 	IPLocationB string = "iplocationB"
 	IPLocationC string = "iplocationC"
 	Service     string = "service"
+	Xray        string = "xray.yaml"
+	XrayConfig  string = "config.yaml"
+	XrayPlugin  string = "plugin.xray.yaml"
+	XrayModule  string = "module.xray.yaml"
 )
 
 type DefaultConfig struct {
@@ -333,14 +337,19 @@ func (c *ConfigController) SavePortscanAction() {
 	c.SucceededStatus("保存配置成功")
 }
 
-// UploadXrayPocAction xraypoc的上传
-func (c *ConfigController) UploadXrayPocAction() {
+// UploadPocAction xraypoc的上传
+func (c *ConfigController) UploadPocAction() {
 	defer c.ServeJSON()
 	if c.CheckMultiAccessRequest([]RequestRole{SuperAdmin, Admin}, false) == false {
 		c.FailedStatus("当前用户权限不允许！")
 		return
 	}
 
+	pocType := c.GetString("type", "")
+	if len(pocType) == 0 {
+		logging.RuntimeLog.Error("get poc file error ")
+		return
+	}
 	// 获取上传信息
 	f, h, err := c.GetFile("file")
 	if err != nil {
@@ -350,13 +359,24 @@ func (c *ConfigController) UploadXrayPocAction() {
 	}
 	defer f.Close()
 	// 检查文件后缀
-	if path.Ext(h.Filename) != ".yml" {
+	fileExt := path.Ext(h.Filename)
+	if fileExt != ".yml" && fileExt != ".yaml" {
 		logging.RuntimeLog.Error("invalid file type!")
 		c.FailedStatus("invalid file type!")
 		return
 	}
 	// 保存到poc目录下
-	pocSavedPathName := filepath.Join(conf.GetRootPath(), conf.GlobalWorkerConfig().Pocscan.Xray.PocPath, h.Filename)
+	var pocSavedPathName string
+	if pocType == "xray" {
+		pocSavedPathName = filepath.Join(conf.GetRootPath(), conf.GlobalWorkerConfig().Pocscan.Xray.PocPath, h.Filename)
+	} else if pocType == "nuclei" {
+		pocSavedPathName = filepath.Join(conf.GetRootPath(), conf.GlobalWorkerConfig().Pocscan.Nuclei.PocPath, h.Filename)
+	}
+	if pocSavedPathName == "" {
+		logging.RuntimeLog.Error("invalid poc type!")
+		c.FailedStatus("invalid poc type!")
+		return
+	}
 	err = c.SaveToFile("file", pocSavedPathName)
 	if err != nil {
 		logging.RuntimeLog.Error("save file err ", err)
@@ -379,6 +399,15 @@ func getCustomFilename(customType string) (customFile string) {
 		customFile = "custom/iplocation-custom-C.txt"
 	case Service:
 		customFile = "custom/services-custom.txt"
+	case Xray:
+		customFile = "xray/xray.yaml"
+	case XrayConfig:
+		customFile = "xray/config.yaml"
+	case XrayModule:
+		customFile = "xray/module.xray.yaml"
+	case XrayPlugin:
+		customFile = "xray/plugin.xray.yaml"
+
 	}
 	return
 }

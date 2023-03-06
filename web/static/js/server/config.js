@@ -4,8 +4,13 @@ $(function () {
     load_custom('honeypot', $('#text_honeypot'));
     load_custom('service', $('#text_service'));
     load_custom('iplocation', $('#text_iplocation'));
-    load_custom('iplocationB', $('#text_iplocationB'));
-    load_custom('iplocationC', $('#text_iplocationC'));
+    $('#select_iplocation_filename').change(function () {
+        load_custom($('#select_iplocation_filename').val(), $('#text_iplocation'));
+    });
+    load_custom('config.yaml', $('#text_xray_config'));
+    $('#select_xray_config_filename').change(function () {
+        load_custom($('#select_xray_config_filename').val(), $('#text_xray_config'));
+    });
 
     $("#buttonSaveNmap").click(function () {
         $.post("/config-save-portscan",
@@ -138,23 +143,18 @@ $("#buttonSaveService").click(function () {
     save_custom("service", $('#text_service').val())
 });
 $("#buttonSaveIPLocation").click(function () {
-    save_custom("iplocation", $('#text_iplocation').val())
+    save_custom($("#select_iplocation_filename").val(), $('#text_iplocation').val())
 });
-$("#buttonSaveIPLocationB").click(function () {
-    save_custom("iplocationB", $('#text_iplocationB').val())
-});
-$("#buttonSaveIPLocationC").click(function () {
-    save_custom("iplocationC", $('#text_iplocationC').val())
-});
-$("#buttonUploadXrayPoc").click(function () {
+$("#buttonUploadPoc").click(function () {
     let formData = new FormData();
-    formData.append('file', $('#file_xraypoc')[0].files[0]);
+    formData.append('type', $('#select_poc_type').val());
+    formData.append('file', $('#file_poc')[0].files[0]);
     if (formData.get("file") === "undefined") {
         swal('Warning', '请选择要上传的文件！', 'error');
         return;
     }
     $.ajax({
-        url: "/config-upload-xraypoc",
+        url: "/config-upload-poc",
         type: "post",
         data: formData,
         //十分重要，不能省略
@@ -177,6 +177,9 @@ $("#buttonUploadXrayPoc").click(function () {
             }
         }
     });
+});
+$("#buttonSaveXrayConfig").click(function () {
+    save_custom($('#select_xray_config_filename').val(), $('#text_xray_config').val())
 });
 $("#buttonChangPassword").click(function () {
     if ($('#input_oldpass').val() === '' || $('#input_password1').val() === '' || $('#input_password2').val() === '') {

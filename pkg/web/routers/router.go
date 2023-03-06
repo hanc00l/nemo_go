@@ -20,7 +20,7 @@ func init() {
 	web.CtrlPost("/config-save-taskslice", (*controllers.ConfigController).SaveTaskSliceNumberAction)
 	web.CtrlPost("/config-save-portscan", (*controllers.ConfigController).SavePortscanAction)
 	web.CtrlPost("/config-save-fingerprint", (*controllers.ConfigController).SaveFingerprintAction)
-	web.CtrlPost("/config-upload-xraypoc", (*controllers.ConfigController).UploadXrayPocAction)
+	web.CtrlPost("/config-upload-poc", (*controllers.ConfigController).UploadPocAction)
 	web.CtrlPost("/config-save-notify", (*controllers.ConfigController).SaveTaskNotifyAction)
 	web.CtrlPost("/config-save-api", (*controllers.ConfigController).SaveAPITokenAction)
 

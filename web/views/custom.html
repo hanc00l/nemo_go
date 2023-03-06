@@ -14,30 +14,30 @@
             <div class="tile">
                 <h3 class="tile-title">IP归属地</h3>
                 <div class="tile-body">
+
+                    <label class="col-form-label" for="select_iplocation_filename">
+                        <b>配置文件</b>
+                    </label>
+                    <select class="form-control" id="select_iplocation_filename">
+                        <option value="iplocation">自定义IP</option>
+                        <option value="iplocationC">自定义C段</option>
+                        <option value="iplocationB">自定义B段</option>
+                    </select>
+                    <form>
                         <div class="form-group">
                             <label class="col-form-label" for="text_iplocation">
-                                <b>IP:</b> <button class="btn btn-primary" type="button" id="buttonSaveIPLocation">保存IP设置
-                            </button>&nbsp;
+                                <b>配置参数</b>
                             </label>
                             <textarea class="form-control" id="text_iplocation" rows="8"></textarea>
-
-                            <label class="col-form-label" for="text_iplocationC">
-                                <b>C段:</b> <button class="btn btn-primary" type="button" id="buttonSaveIPLocationC">保存C段设置
-                            </button>&nbsp;
-                            </label>
-                            <textarea class="form-control" id="text_iplocationC" rows="8"></textarea>
-
-                            <label class="col-form-label" for="text_iplocationB">
-                                <b>B段:</b>
-                                <button class="btn btn-primary" type="button" id="buttonSaveIPLocationB">保存B段设置
-                                </button>&nbsp;
-                            </label>
-                            <textarea class="form-control" id="text_iplocationB" rows="8"></textarea>
                         </div>
+                    </form>
+                    <div class="tile-footer">
+                        <button class="btn btn-primary" type="button" id="buttonSaveIPLocation"><i
+                                class="fa fa-fw fa-lg fa-check-circle"></i>保存IP设置
+                        </button>&nbsp;&nbsp;&nbsp;
+                    </div>
                 </div>
             </div>
-        </div>
-        <div class="col-md-6">
             <div class="tile">
                 <h3 class="tile-title">服务</h3>
                 <div class="tile-body">
@@ -68,19 +68,59 @@
                     </button>&nbsp;&nbsp;&nbsp;
                 </div>
             </div>
+        </div>
+        <div class="col-md-6">
             <div class="tile">
-                <h3 class="tile-title">XrayPoc上传</h3>
+                <h3 class="tile-title">自定义Poc上传</h3>
                 <div class="tile-body">
-                    <form enctype="multipart/form-data" method="post" id="form_upload_xraypoc">
+                    <label class="col-form-label" for="select_poc_type">
+                        <b>Poc类型</b>
+                    </label>
+                    <select class="form-control" id="select_poc_type">
+                        <option value="xray">xray</option>
+                        <option value="nuclei">nuclei</option>
+                    </select>
+                    <label class="col-form-label" for="file_poc">
+                        <b>Poc文件</b>
+                    </label>
+                    <form enctype="multipart/form-data" method="post" id="form_upload_poc">
                         <div class="form-group">
-                            <input class="form-control-file" id="file_xraypoc" type="file" aria-describedby="fileHelp">
-                            <small class="form-text text-muted" id="fileHelp">请上传单个xraypoc V2格式的.yml类型的poc文件</small>
+                            <input class="form-control-file" id="file_poc" type="file" aria-describedby="fileHelp">
+                            <small class="form-text text-muted"
+                                   id="fileHelp">上传单个xray（.yml）或nuclei（.yaml）的poc文件</small>
                         </div>
                     </form>
                 </div>
                 <div class="tile-footer">
-                    <button class="btn btn-primary" type="button" id="buttonUploadXrayPoc"><i
+                    <button class="btn btn-primary" type="button" id="buttonUploadPoc"><i
                             class="fa fa-fw fa-lg fa-check-circle"></i>上传
+                    </button>&nbsp;&nbsp;&nbsp;
+                </div>
+            </div>
+            <div class="tile">
+                <h3 class="tile-title">Xray配置</h3>
+                <div class="tile-body">
+                    <label class="col-form-label" for="select_xray_config_filename">
+                        <b>配置文件</b>
+                    </label>
+                    <select class="form-control" id="select_xray_config_filename">
+                        <option value="config.yaml">config.yaml</option>
+                        <option value="module.xray.yaml">module.xray.yaml</option>
+                        <option value="plugin.xray.yaml">plugin.xray.yaml</option>
+                        <option value="xray.yaml">xray.yaml</option>
+                    </select>
+                    <form>
+                        <div class="form-group">
+                            <label class="col-form-label" for="text_xray_config">
+                                <b>配置参数</b>
+                            </label>
+                            <textarea class="form-control" id="text_xray_config" rows="16"></textarea>
+                        </div>
+                    </form>
+                </div>
+                <div class="tile-footer">
+                    <button class="btn btn-primary" type="button" id="buttonSaveXrayConfig"><i
+                            class="fa fa-fw fa-lg fa-check-circle"></i>保存Xray设置
                     </button>&nbsp;&nbsp;&nbsp;
                 </div>
             </div>

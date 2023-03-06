@@ -1,0 +1,85 @@
+printer:
+    disable_host_print: false
+    disable_port_print: false
+    disable_service_print: false
+    disable_website_print: false
+service-scan:
+    bandwidth: 1000
+    flag:
+        bandwidth: bandwidth,bw
+        max_service_per_host: max-srv,ms
+        port: port,p
+        skip_fingerprint: skip-fingerprint,sf
+        skip_live: skip-live,sl
+        skip_syn: skip-syn,ss
+        skip_web_fingerprint: skip-web,sw
+        timeout: timeout
+    max_service_per_host: 0
+    port: 22,80,443
+    skip_fingerprint: false
+    skip_live: false
+    skip_syn: false
+    skip_web_fingerprint: false
+    timeout: 2
+target-parser:
+    flag:
+        target: target,t
+    group_size: 256
+    target: ""
+vuln-scan:
+    config_file: config.yaml
+    flag:
+        config_file: config
+        html_output: html-output,ho
+        json_output: json_output,jo
+        level: level
+        log_level: log-level
+        plugins: plugins
+        poc: poc
+        stdout: stdout
+        tags: tags
+        text_output: text-output,to
+        webhook_output: webhook-output,wo
+    html_output: ""
+    json_output: ""
+    level: ""
+    log_level: ""
+    plugins: ""
+    poc: ""
+    stdout: true
+    tags: ""
+    text_output: ""
+    webhook_output: ""
+
+# 
+# printer.disable_host_print        [bool]                不在命令行打印host信息
+# printer.disable_port_print        [bool]                不在命令行打印port信息
+# printer.disable_service_print     [bool]                不在命令行打印service信息
+# printer.disable_website_print     [bool]                不在命令行打印website信息
+# 
+# service-scan.port                 [string]              要扫描的端口
+# service-scan.bandwidth            [int]                 SYN/ICMP扫描最大带宽占用（KB/s）
+# service-scan.timeout              [int]                 探测超时（秒）
+# service-scan.skip_live            [bool]                跳过主机活货探测
+# service-scan.skip_syn             [bool]                跳过SYN端口扫描
+# service-scan.skip_fingerprint     [bool]                跳过对端口的指纹识别
+# service-scan.skip_web_fingerprint [bool]                跳过对http服务的web指纹识别
+# service-scan.max_service_per_host [int]                 单主机最大服务数量（超过部分将不进行探测）
+# service-scan.flag                 [map-string-string]   
+# 
+# target-parser.target              [string]              目标，如URL、域名、IP、CIDR，转化为x.EventTarget以及[]x.EventTarget事件
+# target-parser.group_size          [int]                 每次生成的[]x.EventTarget的大小，当<=0时，将一次性解析单次输入全部输出
+# target-parser.flag                [map-string-string]   
+# 
+# vuln-scan.config_file             [string]              漏洞扫描配置文件名
+# vuln-scan.log_level               [string]              日志等级
+# vuln-scan.plugins                 [string]              指定运行的插件名，以 ',' 分割
+# vuln-scan.poc                     [string]              指定运行的POC，以 ',' 分割
+# vuln-scan.stdout                  [bool]                输出日志到stdout
+# vuln-scan.text_output             [string]              输出xray结果至txt文件
+# vuln-scan.json_output             [string]              输出xray结果至json文件
+# vuln-scan.html_output             [string]              输出xray结果至html文件
+# vuln-scan.webhook_output          [string]              以JSON格式POST xray结果至指定URL
+# vuln-scan.tags                    [string]              选择启动哪些标签的POC，首先需要在配置文件中添加标签
+# vuln-scan.level                   [string]              选择启动哪些漏洞等级的POC [low,medium,high,critical]
+# vuln-scan.flag                    [map-string-string]   
