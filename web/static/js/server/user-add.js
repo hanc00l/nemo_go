@@ -6,11 +6,12 @@ $(function () {
         const user_description = $("#user_description").val();
         const sort_order = $("#sort_order").val();
         const user_password = $("#user_password").val();
+        const user_password_confirm = $("#user_password_confirm").val();
         if (!user_name) {
             swal('Warning', '用户名称不能为空', 'error');
             return;
         }
-        if (!user_password) {
+        if (!user_password || !user_password_confirm) {
             swal('Warning', '登录密码不能为空', 'error');
             return;
         }
