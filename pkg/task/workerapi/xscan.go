@@ -295,6 +295,7 @@ func (x *XScan) Portscan(taskId string, mainTaskId string) (result string, err e
 		Tech:         defaultConf.Tech,
 		IsIpLocation: true,
 		CmdBin:       defaultConf.Cmdbin,
+		WorkspaceId:  x.Config.WorkspaceId,
 	}
 	if len(x.Config.IPPortString) > 0 {
 		for ip, ports := range x.Config.IPPortString {
@@ -332,7 +333,7 @@ func (x *XScan) Portscan(taskId string, mainTaskId string) (result string, err e
 	resultArgs := comm.ScanResultArgs{
 		TaskID:     taskId,
 		MainTaskId: mainTaskId,
-		IPConfig:   &portscan.Config{OrgId: config.OrgId},
+		IPConfig:   &portscan.Config{OrgId: config.OrgId, WorkspaceId: config.WorkspaceId},
 		IPResult:   x.ResultIP.IPResult,
 	}
 	err = comm.CallXClient("SaveScanResult", &resultArgs, &result)
@@ -404,6 +405,7 @@ func (x *XScan) FofaSearch(taskId string, mainTaskId string) (result string, err
 		IsIconHash:         x.Config.IsIconHash,
 		IsIgnoreCDN:        x.Config.IsIgnoreCDN,
 		IsIgnoreOutofChina: x.Config.IsIgnoreOutofChina,
+		WorkspaceId:        x.Config.WorkspaceId,
 	}
 	//fofa任务支持两种模式：
 	//一种是关键词，需设置SearchByKeyWord为true
@@ -431,6 +433,7 @@ func (x *XScan) Domainscan(taskId string, mainTaskId string) (result string, err
 		IsSubDomainBrute:   x.Config.IsSubDomainBrute,
 		IsIgnoreCDN:        x.Config.IsIgnoreCDN,
 		IsIgnoreOutofChina: x.Config.IsIgnoreOutofChina,
+		WorkspaceId:        x.Config.WorkspaceId,
 	}
 	for domain := range x.Config.Domain {
 		runConfig := config
@@ -448,7 +451,7 @@ func (x *XScan) Domainscan(taskId string, mainTaskId string) (result string, err
 	resultArgs := comm.ScanResultArgs{
 		TaskID:       taskId,
 		MainTaskId:   mainTaskId,
-		DomainConfig: &domainscan.Config{OrgId: config.OrgId},
+		DomainConfig: &domainscan.Config{OrgId: config.OrgId, WorkspaceId: x.Config.WorkspaceId},
 		DomainResult: x.ResultDomain.DomainResult,
 	}
 	if err = comm.CallXClient("SaveScanResult", &resultArgs, &result); err != nil {
@@ -599,7 +602,7 @@ func (x *XScan) NewXrayScan(taskId, mainTaskId string) (result string, err error
 // XrayScan 调用执行xray扫描任务
 func (x *XScan) XrayScan(taskId string, mainTaskId string) (result string, err error) {
 	// 生成扫描参数
-	config := pocscan.Config{PocFile: x.Config.XrayPocFile}
+	config := pocscan.Config{PocFile: x.Config.XrayPocFile, WorkspaceId: x.Config.WorkspaceId}
 	if x.Config.XrayPocFile == "" {
 		config.PocFile = "*"
 	}

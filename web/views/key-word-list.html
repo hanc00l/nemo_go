@@ -107,18 +107,31 @@
                                                                        for="checkbox_xraypoc_xscan">
                                                                     <input class="form-check-input"
                                                                            id="checkbox_xraypoc_xscan"
-                                                                           type="checkbox">XrayPocV2<i
+                                                                           type="checkbox">Xray<i
                                                                         class="fa fa-question-circle"
                                                                         aria-hidden="true"
                                                                         title="通过调用xray，对获得的ip资产和域名资产进行漏洞验证；可以指定单个POC文件，或者*think*类的通配符；如果不选择poc文件，将使用全部poc进行测试"></i>
                                                                 </label>
                                                             </div>
+                                                            <br/>
+                                                            <label class="col-form-label" for="select_poc_type_xscan">
+                                                                Poc类型
+                                                            </label>
+                                                            <select class="form-control" id="select_poc_type_xscan">
+                                                                <option value="default">默认的内置Poc</option>
+                                                                <option value="custom">自定义Poc文件</option>
+                                                            </select>
+                                                            <label class="col-form-label" for="input_xray_poc_file_xscan">
+                                                                Poc文件
+                                                            </label>
                                                             <input class="form-control" id="input_xray_poc_file_xscan"
-                                                                   type="text" placeholder="--选择POC文件--"
+                                                                   type="text"
+                                                                   placeholder="--全部--" value=""
                                                                    list="datalist_xray_poc_file_xscan">
                                                             <datalist id="datalist_xray_poc_file_xscan"
                                                                       style="display:none;">
                                                             </datalist>
+                                                            <p></p>
                                                         </div>
                                                     </div>
                                                 </div>

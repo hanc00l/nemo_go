@@ -90,7 +90,7 @@ plugins:
     boolean_based_detection: true       # 是否检测布尔盲注
     error_based_detection: true         # 是否检测报错注入
     time_based_detection: true          # 是否检测时间盲注
-    use_comment_in_payload: false       # 在 payload 中使用 or, 慎用！可能导致删库！
+    use_comment_in_payload: false       # 是否在时间盲注中使用 comment 关键字, 有风险, 建议不开
     detect_sqli_in_cookie: true         # 是否检查在 cookie 中的注入
   ssrf:
     enabled: true
@@ -107,6 +107,10 @@ plugins:
     ie_feature: false                   # 是否扫描仅能在 ie 下利用的 xss
   xxe:
     enabled: true
+  xstream:
+    enabled: true
+    full: false                         # 是否完全扫描，一般情况下只通过post请求body发post
+                                        # 如果开启完全扫描，则会有大量请求对每一个参数进行测试
 
 # 反连平台配置，更多解释见 https://docs.xray.cool/#/configration/reverse
 # 注意: 默认配置为禁用反连平台，这是无法扫描出依赖反连平台的漏洞，这些漏洞包括 fastjson，ssrf 以及 poc 中依赖反连的情况等

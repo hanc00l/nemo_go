@@ -131,12 +131,6 @@ $(function () {
                 swal('Warning', '请选择要使用的验证工具！', 'error');
                 return;
             }
-            if ($('#checkbox_xray').is(":checked")) {
-                if ($('#input_xray_poc_file').val() == '') {
-                    swal('Warning', '请选择poc file', 'error');
-                    return;
-                }
-            }
             if ($('#checkbox_nuclei').is(":checked")) {
                 if ($('#input_nuclei_poc_file').val() == '') {
                     swal('Warning', '请选择poc file', 'error');
@@ -153,7 +147,7 @@ $(function () {
                 {
                     "target": target,
                     'xrayverify': $('#checkbox_xray').is(":checked"),
-                    'xray_poc_file': $('#input_xray_poc_file').val(),
+                    'xray_poc_file': $('#select_poc_type') + "|" + $('#input_xray_poc_file').val(),
                     'nucleiverify': $('#checkbox_nuclei').is(":checked"),
                     'nuclei_poc_file': $('#input_nuclei_poc_file').val(),
                     'dirsearch': $('#checkbox_dirsearch').is(":checked"),
@@ -264,7 +258,7 @@ $(function () {
         formData.append("is_CN", $('#checkbox_ignorecdn_outofchina_xscan').is(":checked"));
         formData.append("fingerprint", $('#checkbox_fingerpint_xscan').is(":checked"));
         formData.append("xraypoc", $('#checkbox_xraypoc_xscan').is(":checked"));
-        formData.append("xraypocfile", $('#input_xray_poc_file_xscan').val());
+        formData.append("xraypocfile", $('#select_poc_type_xscan').val() + "|" + $('#input_xray_poc_file_xscan').val());
         formData.append("taskcron", $('#checkbox_cron_task_xscan').is(":checked"));
         formData.append("cronrule", cron_rule);
         formData.append("croncomment", $('#input_cron_comment_xscan').val());
@@ -364,6 +358,12 @@ $(function () {
     get_user_workspace_list();
     $('#select_workspace').change(function () {
         change_user_workspace('#ip_table');
+    });
+    $('#select_poc_type').change(function () {
+        load_pocfile_list(true, false, $('#select_poc_type').val())
+    });
+    $('#select_poc_type_xscan').change(function () {
+        load_pocfile_list(true, false, $('#select_poc_type_xscan').val())
     });
     //IP列表
     $('#ip_table').DataTable(

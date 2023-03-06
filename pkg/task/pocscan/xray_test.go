@@ -1,6 +1,8 @@
 package pocscan
 
-import "testing"
+import (
+	"testing"
+)
 
 func TestXray_RunXray(t *testing.T) {
 	config := Config{
@@ -22,4 +24,14 @@ func TestXray_RunXray2(t *testing.T) {
 	xray.Do()
 	t.Log(xray.Result)
 
+}
+
+func TestXray_RunXray3(t *testing.T) {
+	config := Config{
+		Target:  "172.16.222.1:8161",
+		PocFile: "default|",
+	}
+	xray := NewXray(config)
+	xray.Do()
+	t.Log(xray.Result)
 }

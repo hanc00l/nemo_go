@@ -1,6 +1,7 @@
 package pocscan
 
 import (
+	"bufio"
 	"encoding/json"
 	"github.com/hanc00l/nemo_go/pkg/conf"
 	"github.com/hanc00l/nemo_go/pkg/logging"
@@ -41,21 +42,46 @@ func (x *Xray) Do() {
 	}
 	cmdBin := filepath.Join(conf.GetAbsRootPath(), "thirdparty/xray", utils.GetThirdpartyBinNameByPlatform(utils.Xray))
 	var cmdArgs []string
-	if x.Config.PocFile == "" || x.Config.PocFile == "*" {
+	// pocType: default（使用xray内置的poc）、custom（使用自定义的poc）
+	pocType := "default"
+	pocFile := x.Config.PocFile
+	if strings.Contains(x.Config.PocFile, "|") {
+		if pocArray := strings.Split(x.Config.PocFile, "|"); len(pocArray) == 2 {
+			pocType = pocArray[0]
+			pocFile = pocArray[1]
+		}
+	}
+	// check poc file name
+	if strings.Contains(pocFile, "..") || strings.Contains(pocFile, "/") || strings.Contains(pocFile, "\\") {
+		logging.RuntimeLog.Errorf("invalid poc file:%s", pocFile)
+		return
+	}
+	// format xray cmdline
+	cmdArgs = append(
+		cmdArgs,
+		"--log-level", "error", "webscan", "--json-output", resultTempFile, "--url-file", inputTargetFile,
+	)
+	if pocType == "default" && pocFile != "" {
 		cmdArgs = append(
-			cmdArgs,
-			"--log-level", "error", "webscan",
-			"--json-output", resultTempFile, "--url-file", inputTargetFile,
-		)
-	} else {
-		cmdArgs = append(
-			cmdArgs,
-			"--log-level", "error", "webscan", "--plugins", "phantasm", "--poc",
-			filepath.Join(conf.GetAbsRootPath(), conf.GlobalWorkerConfig().Pocscan.Xray.PocPath, x.Config.PocFile),
-			"--json-output", resultTempFile, "--url-file", inputTargetFile,
+			cmdArgs, "--plugins", "phantasm", "--poc", pocFile,
 		)
 	}
+	if pocType == "custom" {
+		if pocType != "" {
+			cmdArgs = append(
+				cmdArgs, "--plugins", "phantasm", "--poc",
+				filepath.Join(conf.GetAbsRootPath(), conf.GlobalWorkerConfig().Pocscan.Xray.PocPath, x.Config.PocFile),
+			)
+		} else {
+			cmdArgs = append(
+				cmdArgs, "--plugins", "phantasm", "--poc",
+				filepath.Join(conf.GetAbsRootPath(), conf.GlobalWorkerConfig().Pocscan.Xray.PocPath, "*"),
+			)
+		}
+	}
 	cmd := exec.Command(cmdBin, cmdArgs...)
+	//Fix:必须指定绝对路径，才能正确读取到配置文件
+	cmd.Dir = filepath.Join(conf.GetAbsRootPath(), "thirdparty/xray")
 	_, err = cmd.CombinedOutput()
 	if err != nil {
 		logging.RuntimeLog.Error(err.Error())
@@ -103,6 +129,26 @@ func (x *Xray) LoadPocFile() (pocs []string) {
 	for _, file := range files {
 		_, pocFile := filepath.Split(file)
 		pocs = append(pocs, pocFile)
+	}
+	return
+}
+
+// LoadDefaultPocFile 加载xray内置的poc文件列表
+func (x *Xray) LoadDefaultPocFile() (pocs []string) {
+	inputFile, err := os.Open(filepath.Join(conf.GetRootPath(), "thirdparty/xray", "poc.list"))
+	if err != nil {
+		logging.RuntimeLog.Errorf("Could not read poc.list: %s", err)
+		return
+	}
+	defer inputFile.Close()
+
+	scanner := bufio.NewScanner(inputFile)
+	for scanner.Scan() {
+		text := strings.ToLower(scanner.Text())
+		if text == "" {
+			continue
+		}
+		pocs = append(pocs, text)
 	}
 	return
 }

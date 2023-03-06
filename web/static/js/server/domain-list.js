@@ -87,12 +87,6 @@ $(function () {
                 swal('Warning', '请选择要使用的验证工具！', 'error');
                 return;
             }
-            if ($('#checkbox_xray').is(":checked")) {
-                if ($('#input_xray_poc_file').val() == '') {
-                    swal('Warning', '请选择poc file', 'error');
-                    return;
-                }
-            }
             if ($('#checkbox_nuclei').is(":checked")) {
                 if ($('#input_nuclei_poc_file').val() == '') {
                     swal('Warning', '请选择poc file', 'error');
@@ -108,7 +102,7 @@ $(function () {
             $.post("/task-start-vulnerability", {
                 "target": target,
                 'xrayverify': $('#checkbox_xray').is(":checked"),
-                'xray_poc_file': $('#input_xray_poc_file').val(),
+                'xray_poc_file': $('#select_poc_type').val() + '|' + $('#input_xray_poc_file').val(),
                 'nucleiverify': $('#checkbox_nuclei').is(":checked"),
                 'nuclei_poc_file': $('#input_nuclei_poc_file').val(),
                 'dirsearch': $('#checkbox_dirsearch').is(":checked"),
@@ -166,7 +160,7 @@ $(function () {
         formData.append("is_CN", $('#checkbox_ignorecdn_outofchina_xscan').is(":checked"));
         formData.append("fingerprint", $('#checkbox_fingerpint_xscan').is(":checked"));
         formData.append("xraypoc", $('#checkbox_xraypoc_xscan').is(":checked"));
-        formData.append("xraypocfile", $('#input_xray_poc_file_xscan').val());
+        formData.append("xraypocfile", $('#select_poc_type_xscan').val() + '|' + $('#input_xray_poc_file_xscan').val());
         formData.append("taskcron", $('#checkbox_cron_task_xscan').is(":checked"));
         formData.append("cronrule", cron_rule);
         formData.append("croncomment", $('#input_cron_comment_xscan').val());
@@ -244,6 +238,12 @@ $(function () {
     get_user_workspace_list();
     $('#select_workspace').change(function () {
         change_user_workspace('#domain_table');
+    });
+    $('#select_poc_type').change(function () {
+        load_pocfile_list(true, false, $('#select_poc_type').val())
+    });
+    $('#select_poc_type_xscan').change(function () {
+        load_pocfile_list(true, false, $('#select_poc_type_xscan').val())
     });
     $('#domain_table').DataTable(
         {
@@ -348,7 +348,7 @@ $(function () {
                     "render": function (data, type, row, meta) {
                         let icons = '';
                         for (let i in row['iconimage']) {
-                            icons += '<img src=/webfiles/'+row['workspace_guid']+'/iconimage/' + row['iconimage'][i] + ' width="24px" height="24px"/>&nbsp;';
+                            icons += '<img src=/webfiles/' + row['workspace_guid'] + '/iconimage/' + row['iconimage'][i] + ' width="24px" height="24px"/>&nbsp;';
                         }
                         if (icons != "") icons += "<br>";
                         let title = encodeHtml(row['title'].substr(0, 200));
@@ -367,7 +367,7 @@ $(function () {
                         for (let i in data) {
                             let thumbnailFile = data[i].replace('.png', '_thumbnail.png');
                             let imgTitle = data[i].replace(".png", "").replace("_", ":");
-                            title += '<img src="/webfiles/'+row['workspace_guid']+'/screenshot/' + row['domain'] + '/' + thumbnailFile + '" class="img"  style="margin-bottom: 5px;margin-left: 5px;" title="' + imgTitle + '" onclick="show_bigpic(\'/webfiles/'+row['workspace_guid']+'/screenshot/' + row['domain'] + '/' + data[i] + '\')"/>'
+                            title += '<img src="/webfiles/' + row['workspace_guid'] + '/screenshot/' + row['domain'] + '/' + thumbnailFile + '" class="img"  style="margin-bottom: 5px;margin-left: 5px;" title="' + imgTitle + '" onclick="show_bigpic(\'/webfiles/' + row['workspace_guid'] + '/screenshot/' + row['domain'] + '/' + data[i] + '\')"/>'
                         }
                         const strData = '<div style="width:100%;white-space:normal;word-wrap:break-word;word-break:break-all;">' + title + '</div>';
                         return strData;

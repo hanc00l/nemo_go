@@ -60,8 +60,8 @@ func (n *Nuclei) Do() {
 	cmdArgs = append(
 		cmdArgs,
 		"--timeout", "5", "-no-color",
-		"-c", fmt.Sprintf("%d", nucleiConcurrencyThreadNumber),
-		"-bs", fmt.Sprintf("%d", nucleiConcurrencyThreadNumber),
+		"-c", fmt.Sprintf("%d", nucleiConcurrencyThreadNumber[conf.WorkerPerformanceMode]),
+		"-bs", fmt.Sprintf("%d", nucleiConcurrencyThreadNumber[conf.WorkerPerformanceMode]),
 		"-rl", fmt.Sprintf("%d", nucleiConcurrencyThreadNumber[conf.WorkerPerformanceMode]*6),
 		"-t", filepath.Join(conf.GetAbsRootPath(), conf.GlobalWorkerConfig().Pocscan.Nuclei.PocPath, n.Config.PocFile),
 		"-json", "-o", resultTempFile, "-l", inputTargetFile,

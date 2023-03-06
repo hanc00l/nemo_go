@@ -269,7 +269,7 @@
                                                                 <input class="form-control" id="input_exclude"
                                                                        type="text"
                                                                        placeholder="nmap/masscan --exclude 参数"
-                                                                       values="">
+                                                                       value="">
                                                                 <div class="form-row">
                                                                     <div class="form-group col-md-4">
                                                                         <label for="select_bin">扫描方法<i
@@ -472,9 +472,20 @@
                                                                                id="checkbox_xray" type="checkbox"><b>XRay</b>
                                                                     </label>
                                                                 </div>
+                                                                <br/>
+                                                                <label class="col-form-label" for="select_poc_type">
+                                                                    Poc类型
+                                                                </label>
+                                                                <select class="form-control" id="select_poc_type">
+                                                                    <option value="default">默认的内置Poc</option>
+                                                                    <option value="custom">自定义Poc文件</option>
+                                                                </select>
+                                                                <label class="col-form-label" for="input_xray_poc_file">
+                                                                    Poc文件
+                                                                </label>
                                                                 <input class="form-control" id="input_xray_poc_file"
                                                                        type="text"
-                                                                       placeholder="--选择poc文件--" values=""
+                                                                       placeholder="--全部--" value=""
                                                                        list="datalist_xray_poc_file">
                                                                 <datalist id="datalist_xray_poc_file"
                                                                           style="display:none;">
@@ -489,7 +500,7 @@
                                                                 </div>
                                                                 <input class="form-control" id="input_nuclei_poc_file"
                                                                        type="text"
-                                                                       placeholder="--选择poc文件--" values=""
+                                                                       placeholder="--选择poc文件--" value=""
                                                                        list="datalist_nuclei_poc_file">
                                                                 <datalist id="datalist_nuclei_poc_file"
                                                                           style="display:none;">
@@ -505,7 +516,7 @@
                                                                 </div>
                                                                 <input class="form-control" id="input_dirsearch_ext"
                                                                        type="text"
-                                                                       placeholder="--选择EXTENSIONS--" values=""
+                                                                       placeholder="--选择EXTENSIONS--" value=""
                                                                        list="datalist_dirsearch_ext">
                                                                 <datalist id="datalist_dirsearch_ext"
                                                                           style="display:none;">
@@ -568,7 +579,7 @@
                                                                 <input class="form-control" id="input_batchscan_exclude"
                                                                        type="text"
                                                                        placeholder="nmap/masscan --exclude 参数"
-                                                                       values="">
+                                                                       value="">
                                                                 <div class="form-row">
                                                                     <div class="form-group col-md-4">
                                                                         <label for="select_batchscan_bin">扫描方法<i
@@ -911,15 +922,29 @@
                                                                            for="checkbox_xraypoc_xscan">
                                                                         <input class="form-check-input"
                                                                                id="checkbox_xraypoc_xscan"
-                                                                               type="checkbox">XrayPocV2<i
+                                                                               type="checkbox">Xray<i
                                                                             class="fa fa-question-circle"
                                                                             aria-hidden="true"
                                                                             title="通过调用xray，对获得的ip资产和域名资产进行漏洞验证；可以指定单个POC文件，或者*think*类的通配符；如果不选择poc文件，将使用全部poc进行测试。"></i>
                                                                     </label>
                                                                 </div>
+                                                                <br/>
+                                                                <label class="col-form-label"
+                                                                       for="select_poc_type_xscan">
+                                                                    Poc类型
+                                                                </label>
+                                                                <select class="form-control" id="select_poc_type_xscan">
+                                                                    <option value="default">默认的内置Poc</option>
+                                                                    <option value="custom">自定义Poc文件</option>
+                                                                </select>
+                                                                <label class="col-form-label"
+                                                                       for="input_xray_poc_file_xscan">
+                                                                    Poc文件
+                                                                </label>
                                                                 <input class="form-control"
                                                                        id="input_xray_poc_file_xscan"
-                                                                       type="text" placeholder="--选择POC文件--"
+                                                                       type="text"
+                                                                       placeholder="--全部--" value=""
                                                                        list="datalist_xray_poc_file_xscan">
                                                                 <datalist id="datalist_xray_poc_file_xscan"
                                                                           style="display:none;">

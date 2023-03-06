@@ -119,6 +119,9 @@ $(function () {
             $("#label_cron_rule_xscan").prop("disabled", true);
         }
     })
+    $('#select_poc_type_xscan').change(function () {
+        load_pocfile_list(true, false, $('#select_poc_type_xscan').val())
+    });
 });
 
 /**
@@ -143,10 +146,11 @@ $("#create_key_word").click(function () {
 //新建任务创建
 $("#create_key_word_task").click(function () {
     $('#new_key_word_task').modal('toggle');
-    load_pocfile_list(true, false);
+    load_pocfile_list(true, false, "default")
 });
-
-
+$('#select_poc_type_xscan').change(function () {
+    load_pocfile_list(true, false, $('#select_poc_type_xscan').val())
+});
 $("#start_xscan_task").click(function () {
     const formData = new FormData();
     if ($('#select_org_id_task_xscan').val() === "") {
@@ -166,7 +170,7 @@ $("#start_xscan_task").click(function () {
     formData.append("is_CN", $('#checkbox_ignorecdn_outofchina_xscan').is(":checked"));
     formData.append("fingerprint", $('#checkbox_fingerpint_xscan').is(":checked"));
     formData.append("xraypoc", $('#checkbox_xraypoc_xscan').is(":checked"));
-    formData.append("xraypocfile", $('#input_xray_poc_file_xscan').val());
+    formData.append("xraypocfile", $('#select_poc_type_xscan').val() + '|' + $('#input_xray_poc_file_xscan').val());
     formData.append("taskcron", $('#checkbox_cron_task_xscan').is(":checked"));
     formData.append("cronrule", cron_rule);
     formData.append("croncomment", $('#input_cron_comment_xscan').val());
