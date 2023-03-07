@@ -110,6 +110,22 @@ $(function () {
                 }
             });
     });
+    $("#buttonTestNotify").click(function () {
+        $.post("/config-test-notify", {}, function (data, e) {
+            if (e === "success" && data['status'] == 'success') {
+                swal({
+                    title: "测试完成",
+                    text: data['msg'],
+                    type: "success",
+                    confirmButtonText: "确定",
+                    confirmButtonColor: "#41b883",
+                    closeOnConfirm: true,
+                });
+            } else {
+                swal('Warning', data['msg'], 'error');
+            }
+        });
+    });
 
     $("#buttonSaveAPIToken").click(function () {
         $.post("/config-save-api",

@@ -3,6 +3,7 @@ package controllers
 import (
 	"github.com/hanc00l/nemo_go/pkg/conf"
 	"github.com/hanc00l/nemo_go/pkg/logging"
+	"github.com/hanc00l/nemo_go/pkg/notify"
 	"github.com/hanc00l/nemo_go/pkg/task/onlineapi"
 	"github.com/hanc00l/nemo_go/pkg/utils"
 	"os"
@@ -233,6 +234,20 @@ func (c *ConfigController) SaveTaskNotifyAction() {
 		c.FailedStatus(err.Error())
 	}
 	c.SucceededStatus("保存配置成功")
+}
+
+// TestTaskNotifyAction 测试任务通知
+func (c *ConfigController) TestTaskNotifyAction() {
+	defer c.ServeJSON()
+	if c.CheckMultiAccessRequest([]RequestRole{SuperAdmin, Admin}, false) == false {
+		c.FailedStatus("当前用户权限不允许！")
+		return
+	}
+
+	message := "这是一个测试消息，来自Nemo的配置管理！"
+	notify.Send(message)
+
+	c.SucceededStatus("已发送测试通知，请确认消息是否正确！")
 }
 
 // SaveAPITokenAction 保存API的Token
