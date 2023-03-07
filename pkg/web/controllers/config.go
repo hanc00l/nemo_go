@@ -3,10 +3,12 @@ package controllers
 import (
 	"github.com/hanc00l/nemo_go/pkg/conf"
 	"github.com/hanc00l/nemo_go/pkg/logging"
+	"github.com/hanc00l/nemo_go/pkg/task/onlineapi"
 	"github.com/hanc00l/nemo_go/pkg/utils"
 	"os"
 	"path"
 	"path/filepath"
+	"strings"
 )
 
 type ConfigController struct {
@@ -263,6 +265,50 @@ func (c *ConfigController) SaveAPITokenAction() {
 		c.FailedStatus(err.Error())
 	}
 	c.SucceededStatus("保存配置成功")
+}
+
+// OnlineTestAPITokenAction 在线测试API的Token是否可用
+func (c *ConfigController) OnlineTestAPITokenAction() {
+	defer c.ServeJSON()
+	if c.CheckMultiAccessRequest([]RequestRole{SuperAdmin, Admin}, false) == false {
+		c.FailedStatus("当前用户权限不允许！")
+		return
+	}
+	sb := strings.Builder{}
+	//FOFA
+	config := onlineapi.OnlineAPIConfig{Target: "fofa.info"}
+	fofa := onlineapi.NewFofa(config)
+	fofa.Do()
+	if len(fofa.DomainResult.DomainResult) > 0 || len(fofa.IpResult.IPResult) > 0 {
+		sb.WriteString("Fofa: OK!\n")
+	} else {
+		sb.WriteString("Fofa: Fail!\n")
+	}
+	//HUNTER
+	hunter := onlineapi.NewHunter(config)
+	hunter.Do()
+	if len(hunter.DomainResult.DomainResult) > 0 || len(hunter.IpResult.IPResult) > 0 {
+		sb.WriteString("Hunter: OK!\n")
+	} else {
+		sb.WriteString("Hunter: Fail!\n")
+	}
+	//Quake
+	quake := onlineapi.NewQuake(config)
+	quake.Do()
+	if len(quake.DomainResult.DomainResult) > 0 || len(quake.IpResult.IPResult) > 0 {
+		sb.WriteString("Quake: OK!\n")
+	} else {
+		sb.WriteString("Quake: Fail!\n")
+	}
+	//ICP
+	icp := onlineapi.NewICPQuery(onlineapi.ICPQueryConfig{})
+	if icp.RunICPQuery("10086.cn") != nil {
+		sb.WriteString("ICP: OK!\n")
+	} else {
+		sb.WriteString("ICP: Fail!\n")
+	}
+
+	c.SucceededStatus(sb.String())
 }
 
 // SaveFingerprintAction 保存默认指纹设置

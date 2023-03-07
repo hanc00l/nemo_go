@@ -45,7 +45,7 @@ func (i *ICPQuery) Do() {
 			i.cachedICpInfoNum++
 			continue
 		}
-		icpInfo = i.runICPQuery(fldDomain)
+		icpInfo = i.RunICPQuery(fldDomain)
 		if icpInfo != nil {
 			i.QueriedICPInfo[fldDomain] = icpInfo
 			i.ICPMap[fldDomain] = icpInfo
@@ -82,8 +82,8 @@ func (i *ICPQuery) SaveLocalICPInfo() bool {
 	return true
 }
 
-// runICPQuery 通过API在线查询一个域名的ICP备案信息
-func (i *ICPQuery) runICPQuery(domain string) *ICPInfo {
+// RunICPQuery 通过API在线查询一个域名的ICP备案信息
+func (i *ICPQuery) RunICPQuery(domain string) *ICPInfo {
 	if conf.GlobalWorkerConfig().API.ICP.Key == "" {
 		logging.RuntimeLog.Error("query key is empty")
 		return nil

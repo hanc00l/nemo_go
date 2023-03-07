@@ -135,6 +135,22 @@ $(function () {
                 }
             });
     });
+    $("#buttonTestAPIToken").click(function () {
+        $.post("/config-test-api", {}, function (data, e) {
+            if (e === "success" && data['status'] == 'success') {
+                swal({
+                    title: "测试完成",
+                    text: data['msg'],
+                    type: "success",
+                    confirmButtonText: "确定",
+                    confirmButtonColor: "#41b883",
+                    closeOnConfirm: true,
+                });
+            } else {
+                swal('Warning', data['msg'], 'error');
+            }
+        });
+    });
 });
 $("#buttonSaveHoneypot").click(function () {
     save_custom("honeypot", $('#text_honeypot').val())

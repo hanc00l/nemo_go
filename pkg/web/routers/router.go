@@ -23,6 +23,7 @@ func init() {
 	web.CtrlPost("/config-upload-poc", (*controllers.ConfigController).UploadPocAction)
 	web.CtrlPost("/config-save-notify", (*controllers.ConfigController).SaveTaskNotifyAction)
 	web.CtrlPost("/config-save-api", (*controllers.ConfigController).SaveAPITokenAction)
+	web.CtrlPost("/config-test-api", (*controllers.ConfigController).OnlineTestAPITokenAction)
 
 	web.CtrlGet("/dashboard", (*controllers.DashboardController).IndexAction)
 	web.CtrlPost("/dashboard", (*controllers.DashboardController).GetStatisticDataAction)
