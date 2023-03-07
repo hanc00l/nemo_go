@@ -120,7 +120,7 @@ Tested on [ubuntu18.04/20.04/22.04 LTS](docs/install_linux.md)、[macOS](docs/in
 
 ## 版本更新
 
-- 2.9.0：2023-3-6，增加用户与角色、权限管理，增加工作空间功能，支持多用户和多项目的资源隔离；增加ip/domain资产的置顶功能。由于数据库的表有重大调整，从v2.8升级需导入**user_workspace.sql**，并在webfiles目录下新建**b0c79065-7ff7-32ae-cc18-864ccd8f7717**目录（默认的workspace），将原webfiles目录下文件迁移至该默认workspace目录下。
+- 2.9.0：2023-3-7，增加用户与角色、权限管理，增加工作空间功能，支持多用户和多项目的资源隔离；增加ip/domain资产的置顶功能；更新xray扫描调用的poc规则和使用方式；参数配置增加xray配置、api与token的测试。由于数据库的表有重大调整，从v2.8升级需导入**user_workspace.sql**，并在webfiles目录下新建**b0c79065-7ff7-32ae-cc18-864ccd8f7717**目录（默认的workspace），将原webfiles目录下文件迁移至该默认workspace目录下。
 - 2.8.3：2022-12-14，增加按worker的CPU及内存数量设置不同的性能模式（HighPerformance：4核4G内存及以上），降低docker及一般的VPS的并发线程数量（任务执行时间将增加）。
 - 2.8.2：2022-12-12，修复Httpx库使用leveldb时，缓存不释放导致的内存泄露；增加fofa结果的关键词全局过滤；修复XSCAN任务的taskId未能显示、漏洞扫描任务结果不能在maintask正常显示。
 - 2.8.1：2022-11-30，增加在任务结果里显示新增加资产的数量。

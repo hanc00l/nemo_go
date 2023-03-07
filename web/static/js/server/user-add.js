@@ -16,7 +16,7 @@ $(function () {
             return;
         }
         if (user_password !== user_password_confirm) {
-            swal('Warning', '现次密码不一致', 'error');
+            swal('Warning', '两次密码不一致', 'error');
             return;
         }
         if (!sort_order) {
