@@ -34,6 +34,7 @@ require (
 	github.com/projectdiscovery/urlutil v0.0.0-20220603144104-f4c60e5107b2
 	github.com/remeh/sizedwaitgroup v1.0.0
 	github.com/robfig/cron/v3 v3.0.1
+	github.com/shirou/gopsutil/v3 v3.22.11
 	github.com/sirupsen/logrus v1.7.0
 	github.com/smallnest/rpcx v1.6.11
 	github.com/spaolacci/murmur3 v1.1.0
@@ -47,7 +48,7 @@ require (
 	gopkg.in/yaml.v2 v2.4.0
 	gopkg.in/yaml.v3 v3.0.1
 	gorm.io/driver/mysql v1.3.3
-	gorm.io/gorm v1.23.5
+	gorm.io/gorm v1.24.6
 )
 
 require (
@@ -207,7 +208,6 @@ require (
 	github.com/saintfish/chardet v0.0.0-20120816061221-3af4cd4741ca // indirect
 	github.com/samuel/go-zookeeper v0.0.0-20201211165307-7117e9ea2414 // indirect
 	github.com/shiena/ansicolor v0.0.0-20200904210342-c7312218db18 // indirect
-	github.com/shirou/gopsutil/v3 v3.22.11 // indirect
 	github.com/smallnest/quick v0.0.0-20210406061658-4bf95e372fbd // indirect
 	github.com/soheilhy/cmux v0.1.5 // indirect
 	github.com/stoewer/go-strcase v1.2.0 // indirect
