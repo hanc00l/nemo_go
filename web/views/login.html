@@ -15,7 +15,7 @@
 </head>
 <body>
 <section class="material-half-bg">
-    <img src="static/images/bj.jpg">
+    <img src="static/images/bj.jpg" style="height: 100vh;width: 100%;"/>
     <div class="cover"></div>
 </section>
 <section class="lockscreen-content">
@@ -36,7 +36,8 @@
                        autofocus>
             </div>
             <div class="form-group">
-                <label class="control-label" for="captcha"><i class="fa fa-universal-access fa-lg" title="验证码"></i></label>
+                <label class="control-label" for="captcha"><i class="fa fa-universal-access fa-lg"
+                                                              title="验证码"></i></label>
                 <input class="form-control" type="text" id="captcha" name="captcha" placeholder="Captcha Code">
                 {{create_captcha}}
             </div>
