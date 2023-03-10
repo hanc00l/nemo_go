@@ -11,6 +11,7 @@ import (
 	"github.com/hanc00l/nemo_go/pkg/task/onlineapi"
 	"github.com/hanc00l/nemo_go/pkg/task/pocscan"
 	"github.com/hanc00l/nemo_go/pkg/task/portscan"
+	"github.com/hanc00l/nemo_go/pkg/utils"
 	"github.com/remeh/sizedwaitgroup"
 	"strings"
 	"sync"
@@ -357,6 +358,12 @@ func (x *XScan) doPortscan(swg *sizedwaitgroup.SizedWaitGroup, config portscan.C
 		m.Do()
 		result.IPResult = m.Result.IPResult
 	}
+
+	//增加ip归属地查询,先判断是否合规，再进行查询归属地
+	if utils.CheckIPV4Subnet(config.Target) == false {
+		doLocation(&result)
+	}
+
 	//合并结果
 	x.ResultIP.Lock()
 	for k, v := range result.IPResult {
