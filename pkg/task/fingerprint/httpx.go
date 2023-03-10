@@ -149,7 +149,7 @@ func (x *Httpx) Do() {
 				}
 				url := fmt.Sprintf("%s:%d", domain, port)
 				swg.Add()
-				go func(d string, u string) {
+				go func(d string, p int, u string) {
 					fingerPrintResult := x.RunHttpx(u)
 					if len(fingerPrintResult) > 0 {
 						for _, fpa := range fingerPrintResult {
@@ -163,7 +163,7 @@ func (x *Httpx) Do() {
 						//处理自定义的finger
 						if x.StoreResponse && len(x.FingerPrintFunc) > 0 {
 							for _, f := range x.FingerPrintFunc {
-								xfars := f(d, "", 0, u, fingerPrintResult)
+								xfars := f(d, "", p, u, fingerPrintResult)
 								if len(xfars) > 0 {
 									for _, fps := range xfars {
 										dar := domainscan.DomainAttrResult{
@@ -178,7 +178,7 @@ func (x *Httpx) Do() {
 						}
 					}
 					swg.Done()
-				}(domain, url)
+				}(domain, port, url)
 			}
 		}
 	}

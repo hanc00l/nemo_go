@@ -122,7 +122,7 @@ func (c *WorkspaceController) ChangeWorkspaceSelectAction() {
 		}
 	}
 	c.SetSession("Workspace", newWorkspaceId)
-	c.SucceededStatus("change workspace ok")
+	c.SucceededStatus("")
 }
 
 // IndexAction 显示列表页面

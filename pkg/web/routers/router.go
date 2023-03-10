@@ -47,6 +47,7 @@ func init() {
 	web.CtrlPost("/ip-color-tag", (*controllers.IPController).MarkColorTagAction)
 	web.CtrlPost("/ip-import-portscan", (*controllers.IPController).ImportPortscanResultAction)
 	web.CtrlPost("/ip-pin-top", (*controllers.IPController).PinTopAction)
+	web.CtrlPost("/ip-info-http", (*controllers.IPController).InfoHttpAction)
 
 	web.CtrlGet("/domain-list", (*controllers.DomainController).IndexAction)
 	web.CtrlPost("/domain-list", (*controllers.DomainController).ListAction)
@@ -60,6 +61,7 @@ func init() {
 	web.CtrlGet("/domain-memo-export", (*controllers.DomainController).ExportMemoAction)
 	web.CtrlPost("/domain-color-tag", (*controllers.DomainController).MarkColorTagAction)
 	web.CtrlPost("/domain-pin-top", (*controllers.DomainController).PinTopAction)
+	web.CtrlPost("/domain-info-http", (*controllers.DomainController).InfoHttpAction)
 
 	web.CtrlGet("/vulnerability-list", (*controllers.VulController).IndexAction)
 	web.CtrlPost("/vulnerability-list", (*controllers.VulController).ListAction)

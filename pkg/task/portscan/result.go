@@ -40,10 +40,18 @@ type PortAttrResult struct {
 	Content   string
 }
 
+type HttpResult struct {
+	RelatedId int
+	Source    string
+	Tag       string
+	Content   string
+}
+
 // PortResult 端口结果
 type PortResult struct {
 	Status    string
 	PortAttrs []PortAttrResult
+	HttpInfo  []HttpResult
 }
 
 // IPResult IP结果
@@ -97,6 +105,13 @@ func (r *Result) SetPortAttr(ip string, port int, par PortAttrResult) {
 	r.IPResult[ip].Ports[port].PortAttrs = append(r.IPResult[ip].Ports[port].PortAttrs, par)
 }
 
+func (r *Result) SetPortHttpInfo(ip string, port int, result HttpResult) {
+	r.Lock()
+	defer r.Unlock()
+
+	r.IPResult[ip].Ports[port].HttpInfo = append(r.IPResult[ip].Ports[port].HttpInfo, result)
+}
+
 // SaveResult 保存端口扫描的结果到数据库
 func (r *Result) SaveResult(config Config) string {
 	var resultIPCount, resultPortCount int
@@ -143,9 +158,27 @@ func (r *Result) SaveResult(config Config) string {
 					RelatedId: port.Id,
 					Source:    portAttrResult.Source,
 					Tag:       portAttrResult.Tag,
-					Content:   portAttrResult.Content,
+				}
+				if len(portAttrResult.Content) > 4000 {
+					portAttr.Content = portAttrResult.Content[:4000]
+				} else {
+					portAttr.Content = portAttrResult.Content
 				}
 				portAttr.SaveOrUpdate()
+			}
+			//save http info
+			for _, httpInfoResult := range portResult.HttpInfo {
+				httpInfo := &db.IpHttp{
+					RelatedId: port.Id,
+					Source:    httpInfoResult.Source,
+					Tag:       httpInfoResult.Tag,
+				}
+				if len(httpInfoResult.Content) > 4000 {
+					httpInfo.Content = httpInfoResult.Content[:4000]
+				} else {
+					httpInfo.Content = httpInfoResult.Content
+				}
+				httpInfo.SaveOrUpdate()
 			}
 		}
 	}

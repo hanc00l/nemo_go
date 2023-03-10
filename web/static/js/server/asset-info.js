@@ -179,3 +179,19 @@ function pin_top_info(type, id, status) {
             }
         });
 }
+
+// 显示网站正文
+function show_http_content(obj_type, r_id, port = 0) {
+    $('#text_content_http').val("");
+    var url = "/" + obj_type + "-info-http?r_id=" + r_id;
+    if (port > 0) {
+        url += "&&port=" + port;
+    }
+    $.post(url,
+        function (data, e) {
+            if (e === "success" && data['status'] == 'success') {
+                $('#text_content_http').val(data['msg']);
+            }
+        })
+    $('#showHttpInfo').modal('toggle');
+}

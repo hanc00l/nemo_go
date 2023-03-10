@@ -247,17 +247,33 @@
                             <span class="badge badge-secondary"> {{ .Source }}</span>
                             {{ end }}
                         </td>
-                        <td>{{ .Tag }}</td>
                         <td>
+                            {{ if eq .Tag "http_header" }}
+                            http_header<br/><a href="javascript:show_http_content('ip',{{ .PortId }})"><i
+                                class="fa fa-file-code-o" title="网站正文"></i></a>
+                            {{ else }}
+                            {{ .Tag }}
+                            {{ end }}
+                        </td>
+                        <td>
+                            {{ if eq .Tag "http_header" }}
+                            <pre>{{ .Content }}</pre>
+                            {{ else }}
                             <div id="div_content"
                                  style="width:100%;white-space:normal;word-wrap:break-word;word-break:break-all;">
                                 {{ .Content }}
                             </div>
+                            {{ end }}
                         </td>
                         <td>{{ .CreateTime }}</td>
                         <td>{{ .UpdateTime }}</td>
-                        <td><a class="btn btn-sm btn-danger" href="javascript:delete_port_attr({{ .Id }})"
+                        <td>
+                            {{ if eq .Tag "http_header" }}
+                            &nbsp;
+                            {{ else }}
+                            <a class="btn btn-sm btn-danger" href="javascript:delete_port_attr({{ .Id }})"
                                role="button" title="Delete"><i class="fa fa-trash-o"></i></a>
+                            {{ end }}
                         </td>
                     </tr>
                     {{ end }}
@@ -291,6 +307,31 @@
                 </button>
                 <button class="btn btn-primary org-update" type="button" id="btn_saveIpMemo">
                     保存
+                </button>
+            </div>
+        </div><!-- /.modal-content -->
+    </div><!-- /.modal-dialog -->
+</div> <!-- table responsive-->
+<!-- 模态对话框：显示网站正文-->
+<div class="modal fade" id="showHttpInfo" tabindex="-1" role="dialog" aria-labelledby="myModalLabel2"
+     aria-hidden="true">
+    <div class="modal-dialog" style="max-width: 1024px;">
+        <div class="modal-content">
+            <div class="modal-header card-header bg-primary">
+                <h4 class="modal-title" id="myModalLabel2">
+                    网站正文
+                </h4>
+            </div>
+            <div class="modal-body">
+                <form class="form-horizontal" role="form">
+                    <div class="form-group">
+                        <textarea class="form-control" id="text_content_http" rows="20"
+                                  placeholder="网站正文"></textarea>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal" aria-hidden="true">关闭
                 </button>
             </div>
         </div><!-- /.modal-content -->

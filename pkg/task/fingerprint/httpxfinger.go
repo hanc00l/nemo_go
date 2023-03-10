@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"github.com/hanc00l/nemo_go/pkg/conf"
 	"github.com/hanc00l/nemo_go/pkg/logging"
+	"github.com/hanc00l/nemo_go/pkg/task/domainscan"
+	"github.com/hanc00l/nemo_go/pkg/task/portscan"
 	"github.com/hanc00l/nemo_go/pkg/utils"
 	"github.com/hanc00l/nemo_go/pkg/xraypocv1"
 	"github.com/projectdiscovery/urlutil"
@@ -56,6 +58,8 @@ func NewHttpxFinger() *HttpxFinger {
 	//加载自定义指纹及回调函数
 	//h.loadFingerprintHub()
 	h.loadCustomFingerprint()
+	//保存HTTP的header与body到数据库：
+	h.FingerPrintFunc = append(h.FingerPrintFunc, h.fingerPrintFuncForSaveHttpHeaderAndBody)
 
 	return h
 }
@@ -108,7 +112,7 @@ func (h *HttpxFinger) DoHttpxAndFingerPrint() {
 // fingerPrintFuncForFingerprintHub 回调函数，用于处理自己的指纹识别
 func (h *HttpxFinger) fingerPrintFuncForFingerprintHub(domain string, ip string, port int, url string, result []FingerAttrResult) (fingers []string) {
 	// 读取httpx保存的response内容，并解析为body和headers
-	data, headers := h.parseHttpHeaderAndBody(h.getStoredResponseContent(url))
+	body, _, headers := h.parseHttpHeaderAndBody(h.getStoredResponseContent(url))
 	// 指纹匹配
 	for _, v := range h.fpWebFingerprintHub {
 		flag := false
@@ -138,7 +142,7 @@ func (h *HttpxFinger) fingerPrintFuncForFingerprintHub(domain string, ip string,
 		if len(v.Keyword) > 0 {
 			kflag = false
 			for _, k := range v.Keyword {
-				if !strings.Contains(data, k) {
+				if !strings.Contains(body, k) {
 					kflag = false
 					break
 				}
@@ -160,22 +164,12 @@ func (h *HttpxFinger) fingerPrintFuncForFingerprintHub(domain string, ip string,
 
 // fingerPrintFuncForIceMoon 回调函数，用于处理自己的指纹识别
 func (h *HttpxFinger) fingerPrintFuncForCustom(domain string, ip string, port int, url string, result []FingerAttrResult) (fingers []string) {
-	responseContent := h.getStoredResponseContent(url)
-	if len(responseContent) <= 0 {
-		return
-	}
-	var headers, data string
-	headerAndBodyArrays := strings.SplitN(responseContent, "\r\n\r\n", 2)
-	if len(headerAndBodyArrays) >= 1 {
-		headers = headerAndBodyArrays[0]
-	}
-	if len(headerAndBodyArrays) == 2 {
-		data = headerAndBodyArrays[1]
-	}
+	body, header, _ := h.parseHttpHeaderAndBody(h.getStoredResponseContent(url))
+
 	content := xraypocv1.Content{
 		Port:   fmt.Sprintf("%d", port),
-		Body:   data,
-		Header: headers,
+		Body:   body,
+		Header: header,
 	}
 	for _, fa := range result {
 		if fa.Tag == "title" {
@@ -192,6 +186,46 @@ func (h *HttpxFinger) fingerPrintFuncForCustom(domain string, ip string, port in
 		if xraypocv1.MatchRules(*rule, content) {
 			//fmt.Println(v)
 			fingers = append(fingers, v.App)
+		}
+	}
+	return
+}
+
+// fingerPrintFuncForSaveHttpHeaderAndBody 回调函数，用于保存http协议的raw信息
+func (h *HttpxFinger) fingerPrintFuncForSaveHttpHeaderAndBody(domain string, ip string, port int, url string, result []FingerAttrResult) (fingers []string) {
+	body, header, _ := h.parseHttpHeaderAndBody(h.getStoredResponseContent(url))
+	if len(ip) > 0 && port > 0 {
+		if len(header) > 0 {
+			h.ResultPortScan.SetPortHttpInfo(ip, port, portscan.HttpResult{
+				Source:  "httpx",
+				Tag:     "header",
+				Content: header,
+			})
+		}
+		if len(body) > 0 {
+			h.ResultPortScan.SetPortHttpInfo(ip, port, portscan.HttpResult{
+				Source:  "httpx",
+				Tag:     "body",
+				Content: body,
+			})
+		}
+	}
+	if len(domain) > 0 && port > 0 {
+		if len(header) > 0 {
+			h.ResultDomainScan.SetHttpInfo(domain, domainscan.HttpResult{
+				Source:  "httpx",
+				Port:    port,
+				Tag:     "header",
+				Content: header,
+			})
+		}
+		if len(body) > 0 {
+			h.ResultDomainScan.SetHttpInfo(domain, domainscan.HttpResult{
+				Source:  "httpx",
+				Port:    port,
+				Tag:     "body",
+				Content: body,
+			})
 		}
 	}
 	return
@@ -220,14 +254,15 @@ func (h *HttpxFinger) getStoredResponseContent(url string) string {
 }
 
 // parseHttpHeaderAndBody 分离、解析http的header与body
-func (h *HttpxFinger) parseHttpHeaderAndBody(content string) (body string, headers map[string][]string) {
-	headers = make(map[string][]string)
+func (h *HttpxFinger) parseHttpHeaderAndBody(content string) (body string, header string, headerMap map[string][]string) {
+	headerMap = make(map[string][]string)
 	if len(content) <= 0 {
 		return
 	}
 	headerAndBodyArrays := strings.Split(content, "\r\n\r\n")
 	if len(headerAndBodyArrays) >= 1 {
-		respHeaderSlice := strings.Split(headerAndBodyArrays[0], "\r\n")
+		header = headerAndBodyArrays[0]
+		respHeaderSlice := strings.Split(header, "\r\n")
 		for _, hh := range respHeaderSlice {
 			hslice := strings.SplitN(hh, ":", 2)
 			if len(hslice) != 2 {
@@ -235,10 +270,10 @@ func (h *HttpxFinger) parseHttpHeaderAndBody(content string) (body string, heade
 			}
 			k := strings.ToLower(hslice[0])
 			v := strings.TrimLeft(hslice[1], " ")
-			if len(headers[k]) > 0 {
-				headers[k] = append(headers[k], v)
+			if len(headerMap[k]) > 0 {
+				headerMap[k] = append(headerMap[k], v)
 			} else {
-				headers[k] = []string{v}
+				headerMap[k] = []string{v}
 			}
 		}
 	}

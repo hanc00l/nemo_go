@@ -272,6 +272,7 @@ $(function () {
                         'select_no_ip': $('#checkbox_select_no_ip').is(":checked"),
                         'content': $('#content').val(),
                         'select_order_by_date': $('#checkbox_select_order_by_date').is(":checked"),
+                        "domain_http": $('#http_content').val(),
                     });
                 }
             },

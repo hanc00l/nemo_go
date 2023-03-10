@@ -38,6 +38,7 @@ type domainRequestParam struct {
 	Content            string `form:"content"`
 	SelectNoResolvedIP bool   `form:"select_no_ip"`
 	OrderByDate        bool   `form:"select_order_by_date"`
+	DomainHttp         string `form:"domain_http"`
 }
 
 // DomainListData datable显示的每一行数据
@@ -92,6 +93,8 @@ type DomainInfo struct {
 // DomainAttrInfo domain属性
 type DomainAttrInfo struct {
 	Id         int    `json:"id"`
+	DomainId   int    `json:"domainId"`
+	Port       int    `json:"port"`
 	Tag        string `json:"tag"`
 	Content    string `json:"content"`
 	CreateTime string `json:"create_datetime"`
@@ -407,6 +410,28 @@ func (c *DomainController) PinTopAction() {
 	c.FailedStatus("domain not exist")
 }
 
+// InfoHttpAction 获取指定的http信息
+func (c *DomainController) InfoHttpAction() {
+	defer c.ServeJSON()
+
+	domainId, err := c.GetInt("r_id")
+	port, err2 := c.GetInt("port")
+	if err != nil {
+		c.FailedStatus(err.Error())
+		return
+	}
+	if err2 != nil {
+		c.FailedStatus(err2.Error())
+		return
+	}
+	domainHttp := db.DomainHttp{RelatedId: domainId, Port: port, Tag: "body"}
+	if domainHttp.GetByRelatedIdAndPortAndTag() {
+		c.SucceededStatus(domainHttp.Content)
+		return
+	}
+	return
+}
+
 // validateRequestParam 校验请求的参数
 func (c *DomainController) validateRequestParam(req *domainRequestParam) {
 	if req.Length <= 0 {
@@ -448,6 +473,9 @@ func (c *DomainController) getSearchMap(req domainRequestParam) (searchMap map[s
 	}
 	if req.Content != "" {
 		searchMap["content"] = req.Content
+	}
+	if req.DomainHttp != "" {
+		searchMap["domain_http"] = req.DomainHttp
 	}
 	return
 }
@@ -665,6 +693,21 @@ func getDomainInfo(workspaceId int, domainName string, disableFofa, disableBanne
 			FofaUrl: fmt.Sprintf("https://fofa.info/result?qbase64=%s",
 				base64.URLEncoding.EncodeToString([]byte(fmt.Sprintf("icon_hash=%s", hash)))),
 		})
+	}
+	// http info
+	domainHttp := db.DomainHttp{RelatedId: domain.Id, Tag: "header"}
+	domainHttpInfos := domainHttp.GetsByRelatedIdAndTag()
+	for _, info := range domainHttpInfos {
+		dai := DomainAttrInfo{
+			Id:         info.Id,
+			DomainId:   info.RelatedId,
+			Port:       info.Port,
+			Tag:        "http_header",
+			Content:    info.Content,
+			CreateTime: FormatDateTime(info.CreateDatetime),
+			UpdateTime: FormatDateTime(info.UpdateDatetime),
+		}
+		r.DomainAttr = append(r.DomainAttr, dai)
 	}
 	return
 }

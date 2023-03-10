@@ -134,6 +134,10 @@ func (domain *Domain) makeWhere(searchMap map[string]interface{}) *gorm.DB {
 			CloseDB(domainAttr)
 		case "workspace_id":
 			db = db.Where("workspace_id", value)
+		case "domain_http":
+			http := GetDB().Model(&DomainHttp{}).Select("r_id").Where("content like ?", fmt.Sprintf("%%%s%%", value))
+			db = db.Where("id in (?)", http)
+			CloseDB(http)
 		default:
 			db = db.Where(column, value)
 		}

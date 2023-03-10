@@ -45,6 +45,7 @@ type ipRequestParam struct {
 	SelectOutofChina      bool   `form:"select_outof_china"`
 	SelectNoOpenedPort    bool   `form:"select_no_openedport"`
 	OrderByDate           bool   `form:"select_order_by_date"`
+	IpHttp                string `form:"ip_http"`
 }
 
 // IPListData 列表中每一行显示的IP数据
@@ -103,6 +104,7 @@ type IPInfo struct {
 // PortAttrInfo 每一个端口的详细数据
 type PortAttrInfo struct {
 	Id                 int
+	PortId             int
 	IP                 string
 	Port               string
 	Tag                string
@@ -394,6 +396,23 @@ func (c *IPController) PinTopAction() {
 	c.FailedStatus("ip not exist")
 }
 
+// InfoHttpAction 获取指定的http信息
+func (c *IPController) InfoHttpAction() {
+	defer c.ServeJSON()
+
+	portId, err := c.GetInt("r_id")
+	if err != nil {
+		c.FailedStatus(err.Error())
+		return
+	}
+	ipHttp := db.IpHttp{RelatedId: portId, Tag: "body"}
+	if ipHttp.GetByRelatedIdAndTag() {
+		c.SucceededStatus(ipHttp.Content)
+		return
+	}
+	return
+}
+
 // ImportPortscanResultAction 导入portscan扫描结果
 func (c *IPController) ImportPortscanResultAction() {
 	defer c.ServeJSON()
@@ -555,6 +574,9 @@ func (c *IPController) getSearchMap(req ipRequestParam) (searchMap map[string]in
 	if req.AssertCreateDateDelta > 0 {
 		searchMap["create_date_delta"] = req.AssertCreateDateDelta
 	}
+	if req.IpHttp != "" {
+		searchMap["ip_http"] = req.IpHttp
+	}
 	return searchMap
 }
 
@@ -673,6 +695,7 @@ func getPortInfo(workspaceGUID string, ip string, ipId int, disableFofa, disable
 			}
 			pai := PortAttrInfo{}
 			pai.Id = pad.Id
+			pai.PortId = pd.Id
 			pai.Tag = pad.Tag
 			pai.Content = pad.Content
 			pai.Source = pad.Source
@@ -726,6 +749,27 @@ func getPortInfo(workspaceGUID string, ip string, ipId int, disableFofa, disable
 					r.TlsDataSet[pad.Content] = struct{}{}
 				}
 			}
+		}
+		// http header info
+		httpInfo := db.IpHttp{RelatedId: pd.Id, Tag: "header"}
+		if httpInfo.GetByRelatedIdAndTag() {
+			httpPortAttr := PortAttrInfo{
+				Id:         httpInfo.Id,
+				PortId:     httpInfo.RelatedId,
+				Tag:        "http_header",
+				Content:    httpInfo.Content,
+				Source:     httpInfo.Source,
+				CreateTime: FormatDateTime(httpInfo.CreateDatetime),
+				UpdateTime: FormatDateTime(httpInfo.UpdateDatetime),
+			}
+			/* 每个端口的一个属性生成一行记录
+			第一行记录显示IP和PORT，其它行保持为空（方便查看）*/
+			if FirstRow {
+				FirstRow = false
+				httpPortAttr.IP = ip
+				httpPortAttr.Port = fmt.Sprintf("%d", pd.PortNum)
+			}
+			r.PortAttr = append(r.PortAttr, httpPortAttr)
 		}
 	}
 	return

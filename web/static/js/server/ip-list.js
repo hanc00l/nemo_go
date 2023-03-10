@@ -398,6 +398,7 @@ $(function () {
                         'select_outof_china': $('#checkbox_select_outof_china').is(":checked"),
                         'select_no_openedport': $('#checkbox_select_no_openedport').is(":checked"),
                         'select_order_by_date': $('#checkbox_select_order_by_date').is(":checked"),
+                        "ip_http": $('#http_content').val(),
                     });
                 }
             },

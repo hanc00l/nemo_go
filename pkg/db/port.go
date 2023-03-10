@@ -4,7 +4,7 @@ import "time"
 
 type Port struct {
 	Id             int       `gorm:"primaryKey"`
-	IpId           int       `gorm:"column:ip_id"'`
+	IpId           int       `gorm:"column:ip_id"`
 	PortNum        int       `gorm:"column:port"`
 	Status         string    `gorm:"column:status"`
 	CreateDatetime time.Time `gorm:"column:create_datetime"`

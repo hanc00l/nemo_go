@@ -43,10 +43,19 @@ type DomainAttrResult struct {
 	Content   string
 }
 
+type HttpResult struct {
+	RelatedId int
+	Port      int
+	Source    string
+	Tag       string
+	Content   string
+}
+
 // DomainResult 域名结果
 type DomainResult struct {
 	OrgId       *int
 	DomainAttrs []DomainAttrResult
+	HttpInfo    []HttpResult
 }
 
 // Result 域名结果
@@ -96,6 +105,13 @@ func (r *Result) SetDomainAttr(domain string, dar DomainAttrResult) {
 	r.DomainResult[domain].DomainAttrs = append(r.DomainResult[domain].DomainAttrs, dar)
 }
 
+func (r *Result) SetHttpInfo(domain string, result HttpResult) {
+	r.Lock()
+	defer r.Unlock()
+
+	r.DomainResult[domain].HttpInfo = append(r.DomainResult[domain].HttpInfo, result)
+}
+
 // SaveResult 保存域名结果
 func (r *Result) SaveResult(config Config) string {
 	var resultDomainCount int
@@ -114,6 +130,7 @@ func (r *Result) SaveResult(config Config) string {
 			}
 		}
 		resultDomainCount++
+		// save domain attr
 		for _, domainAttrResult := range domainResult.DomainAttrs {
 			domainAttr := &db.DomainAttr{
 				RelatedId: domain.Id,
@@ -121,7 +138,27 @@ func (r *Result) SaveResult(config Config) string {
 				Tag:       domainAttrResult.Tag,
 				Content:   domainAttrResult.Content,
 			}
+			if len(domainAttrResult.Content) > 4000 {
+				domainAttr.Content = domainAttrResult.Content[:4000]
+			} else {
+				domainAttr.Content = domainAttrResult.Content
+			}
 			domainAttr.SaveOrUpdate()
+		}
+		//save http info
+		for _, httpInfoResult := range domainResult.HttpInfo {
+			httpInfo := &db.DomainHttp{
+				RelatedId: domain.Id,
+				Port:      httpInfoResult.Port,
+				Source:    httpInfoResult.Source,
+				Tag:       httpInfoResult.Tag,
+			}
+			if len(httpInfoResult.Content) > 4000 {
+				httpInfo.Content = httpInfoResult.Content[:4000]
+			} else {
+				httpInfo.Content = httpInfoResult.Content
+			}
+			httpInfo.SaveOrUpdate()
 		}
 	}
 	var sb strings.Builder

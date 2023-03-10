@@ -117,7 +117,6 @@ func doFingerPrintAndSave(taskId string, mainTaskId string, config FingerprintTa
 // doIPFingerPrint 对 IP结果进行指纹识别
 func doIPFingerPrint(config portscan.Config, resultPortScan *portscan.Result) {
 	if config.IsHttpx {
-		//httpx := fingerprint.NewHttpx()
 		httpx := fingerprint.NewHttpxFinger()
 		httpx.ResultPortScan = *resultPortScan
 		httpx.DoHttpxAndFingerPrint()
@@ -136,7 +135,6 @@ func doIPFingerPrint(config portscan.Config, resultPortScan *portscan.Result) {
 func doDomainFingerPrint(config domainscan.Config, resultDomainScan *domainscan.Result, domainPort map[string]map[int]struct{}) {
 	// 指纹识别
 	if config.IsHttpx {
-		//httpx := fingerprint.NewHttpx()
 		httpx := fingerprint.NewHttpxFinger()
 		httpx.ResultDomainScan = *resultDomainScan
 		httpx.DomainTargetPort = domainPort

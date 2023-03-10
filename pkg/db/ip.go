@@ -214,6 +214,12 @@ func (ip *Ip) makeWhere(searchMap map[string]interface{}) *gorm.DB {
 			}
 		case "workspace_id":
 			db = db.Where("workspace_id", value)
+		case "ip_http":
+			http := GetDB().Model(&IpHttp{}).Select("r_id").Where("content like ?", fmt.Sprintf("%%%s%%", value))
+			port := GetDB().Model(&Port{}).Select("ip_id").Where("id in (?)", http)
+			db = db.Where("id in (?)", port)
+			CloseDB(http)
+			CloseDB(port)
 		default:
 			db = db.Where(column, value)
 		}
