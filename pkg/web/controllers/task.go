@@ -375,7 +375,7 @@ func (c *TaskController) StartPortScanTaskAction() {
 	}
 	workspaceId := c.GetSession("Workspace").(int)
 	if workspaceId <= 0 {
-		c.FailedStatus("未选择当前的工作空间！")
+		c.FailedStatus("请选择一个当前的工作空间！（如果是超级管理员，请在右上角进行切换）")
 		return
 	}
 	if req.Port == "" {
@@ -426,7 +426,7 @@ func (c *TaskController) StartBatchScanTaskAction() {
 	}
 	workspaceId := c.GetSession("Workspace").(int)
 	if workspaceId <= 0 {
-		c.FailedStatus("未选择当前的工作空间！")
+		c.FailedStatus("请选择一个当前的工作空间！（如果是超级管理员，请在右上角进行切换）")
 		return
 	}
 	var kwArgs []byte
@@ -475,7 +475,7 @@ func (c *TaskController) StartDomainScanTaskAction() {
 	}
 	workspaceId := c.GetSession("Workspace").(int)
 	if workspaceId <= 0 {
-		c.FailedStatus("未选择当前的工作空间！")
+		c.FailedStatus("请选择一个当前的工作空间！（如果是超级管理员，请在右上角进行切换）")
 		return
 	}
 	var kwArgs []byte
@@ -532,7 +532,7 @@ func (c *TaskController) StartPocScanTaskAction() {
 	}
 	workspaceId := c.GetSession("Workspace").(int)
 	if workspaceId <= 0 {
-		c.FailedStatus("未选择当前的工作空间！")
+		c.FailedStatus("请选择一个当前的工作空间！（如果是超级管理员，请在右上角进行切换）")
 		return
 	}
 	if req.IsTaskCron {
@@ -605,7 +605,7 @@ func (c *TaskController) StartXScanTaskAction() {
 	}
 	workspaceId := c.GetSession("Workspace").(int)
 	if workspaceId <= 0 {
-		c.FailedStatus("未选择当前的工作空间！")
+		c.FailedStatus("请选择一个当前的工作空间！（如果是超级管理员，请在右上角进行切换）")
 		return
 	}
 	var kwArgs []byte

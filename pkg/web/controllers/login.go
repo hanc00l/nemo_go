@@ -40,29 +40,30 @@ func (c *LoginController) LoginAction() {
 	userName := c.GetString("username")
 	password := c.GetString("password")
 	if userName != "" && password != "" {
-		// check for username and password
+		// 校验用户名、密码
 		status, userData := ValidLoginUser(userName, password)
 		if status {
-			// superadmin：允许同时查看多个workspace资源
-			if userData.UserRole == SuperAdmin {
-				c.SetSession("Workspace", 0)
-			} else {
-				// 普通管理员及guest，必须设置一个默认的workspace
-				// get and check user's workspace
-				userWorkspace := db.UserWorkspace{}
-				userWorkspaceData := userWorkspace.GetsByUserId(userData.Id)
-				var enabledUserWorkspaceData []db.Workspace
-				for n := range userWorkspaceData {
-					w := db.Workspace{Id: userWorkspaceData[n].WorkspaceId}
-					if w.Get() && w.State == "enable" {
-						enabledUserWorkspaceData = append(enabledUserWorkspaceData, w)
-					}
+			// 获取用户的可用工作空间
+			userWorkspace := db.UserWorkspace{}
+			userWorkspaceData := userWorkspace.GetsByUserId(userData.Id)
+			var enabledUserWorkspaceData []db.Workspace
+			for n := range userWorkspaceData {
+				w := db.Workspace{Id: userWorkspaceData[n].WorkspaceId}
+				if w.Get() && w.State == "enable" {
+					enabledUserWorkspaceData = append(enabledUserWorkspaceData, w)
 				}
-				if len(enabledUserWorkspaceData) <= 0 {
+			}
+			// superadmin：允许同时管理多个workspace资源；普通管理员及guest，必须设置一个默认的workspace
+			if len(enabledUserWorkspaceData) <= 0 {
+				if userData.UserRole == SuperAdmin {
+					c.SetSession("Workspace", 0)
+				} else {
 					logging.RuntimeLog.Infof("%s login from ip:%s,no available workspace set!", userData.UserName, c.Ctx.Input.IP())
 					logging.CLILog.Infof("%s login from ip:%s,no available workspace set!", userData.UserName, c.Ctx.Input.IP())
 					c.Redirect("/", http.StatusFound)
 				}
+			} else {
+				// 默认关联第一个工作空间
 				c.SetSession("Workspace", enabledUserWorkspaceData[0].Id)
 			}
 			c.SetSession("User", userData.UserName)
