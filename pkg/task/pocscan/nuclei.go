@@ -2,18 +2,22 @@ package pocscan
 
 import (
 	"bufio"
+	"crypto/tls"
 	"encoding/json"
 	"fmt"
 	"github.com/hanc00l/nemo_go/pkg/conf"
 	"github.com/hanc00l/nemo_go/pkg/logging"
 	"github.com/hanc00l/nemo_go/pkg/utils"
 	"github.com/tidwall/pretty"
+	"net"
+	"net/http"
 	"os"
 	"os/exec"
 	"path/filepath"
 	"runtime"
 	"sort"
 	"strings"
+	"time"
 )
 
 type Nuclei struct {
@@ -33,15 +37,23 @@ func (n *Nuclei) Do() {
 
 	urls := strings.Split(n.Config.Target, ",")
 	var urlsFormatted []string
-	//由于nuclei要求url要http或https开始：
+	//由于nuclei要求url要http或https开始，非http/https协议不进行漏洞检测，节约扫描时间
 	for _, u := range urls {
 		if strings.HasPrefix(u, "http") == false {
-			urlsFormatted = append(urlsFormatted, fmt.Sprintf("http://%s", u))
-			urlsFormatted = append(urlsFormatted, fmt.Sprintf("https://%s", u))
+			protocol := getProtocol(u, 4)
+			if protocol == "" || protocol == "tcp" {
+				continue
+			}
+			urlsFormatted = append(urlsFormatted, fmt.Sprintf("%s://%s", protocol, u))
 		} else {
 			urlsFormatted = append(urlsFormatted, u)
 		}
 	}
+	//没有需要检测的端口,直接返回
+	if len(urlsFormatted) == 0 {
+		return
+	}
+
 	err := os.WriteFile(inputTargetFile, []byte(strings.Join(urlsFormatted, "\n")), 0666)
 	if err != nil {
 		logging.RuntimeLog.Error(err.Error())
@@ -146,4 +158,35 @@ func (n *Nuclei) LoadPocFile() (pocs []string) {
 	}
 	sort.Strings(pocs)
 	return
+}
+
+// 获取协议，返回空“”（端口未开放），http/https,tcp
+func getProtocol(host string, Timeout int64) string {
+	conn, err := tls.DialWithDialer(&net.Dialer{Timeout: time.Duration(Timeout) * time.Second}, "tcp", host, &tls.Config{InsecureSkipVerify: true})
+	defer func() {
+		if conn != nil {
+			conn.Close()
+		}
+	}()
+	//端口未开放
+	if err != nil && strings.Contains(err.Error(), "No connection could be made") {
+		return ""
+	}
+	protocol := "http"
+	if err == nil || strings.Contains(err.Error(), "handshake failure") {
+		protocol = "https"
+	}
+	req, _ := http.NewRequest("GET", protocol+"://"+host, nil)
+	tr := &http.Transport{
+		TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
+	}
+	Client := &http.Client{
+		Transport: tr,
+		Timeout:   time.Duration(Timeout) * time.Second,
+	}
+	_, err = Client.Do(req)
+	if err != nil {
+		protocol = "tcp"
+	}
+	return protocol
 }
