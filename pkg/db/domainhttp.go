@@ -4,6 +4,8 @@ import (
 	"time"
 )
 
+const HttpBodyContentSize = 16000 // 由于utf-8-mb4的mysql每行sizew不能超过16383（64K/4）
+
 type DomainHttp struct {
 	Id             int       `gorm:"primaryKey"`
 	RelatedId      int       `gorm:"column:r_id"`

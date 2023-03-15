@@ -138,8 +138,8 @@ func (r *Result) SaveResult(config Config) string {
 				Tag:       domainAttrResult.Tag,
 				Content:   domainAttrResult.Content,
 			}
-			if len(domainAttrResult.Content) > 4000 {
-				domainAttr.Content = domainAttrResult.Content[:4000]
+			if len(domainAttrResult.Content) > db.AttrContentSize {
+				domainAttr.Content = domainAttrResult.Content[:db.AttrContentSize]
 			} else {
 				domainAttr.Content = domainAttrResult.Content
 			}
@@ -153,8 +153,8 @@ func (r *Result) SaveResult(config Config) string {
 				Source:    httpInfoResult.Source,
 				Tag:       httpInfoResult.Tag,
 			}
-			if len(httpInfoResult.Content) > 4000 {
-				httpInfo.Content = httpInfoResult.Content[:4000]
+			if len(httpInfoResult.Content) > db.HttpBodyContentSize {
+				httpInfo.Content = httpInfoResult.Content[:db.HttpBodyContentSize]
 			} else {
 				httpInfo.Content = httpInfoResult.Content
 			}

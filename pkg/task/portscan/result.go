@@ -159,8 +159,8 @@ func (r *Result) SaveResult(config Config) string {
 					Source:    portAttrResult.Source,
 					Tag:       portAttrResult.Tag,
 				}
-				if len(portAttrResult.Content) > 4000 {
-					portAttr.Content = portAttrResult.Content[:4000]
+				if len(portAttrResult.Content) > db.AttrContentSize {
+					portAttr.Content = portAttrResult.Content[:db.AttrContentSize]
 				} else {
 					portAttr.Content = portAttrResult.Content
 				}
@@ -173,8 +173,8 @@ func (r *Result) SaveResult(config Config) string {
 					Source:    httpInfoResult.Source,
 					Tag:       httpInfoResult.Tag,
 				}
-				if len(httpInfoResult.Content) > 4000 {
-					httpInfo.Content = httpInfoResult.Content[:4000]
+				if len(httpInfoResult.Content) > db.HttpBodyContentSize {
+					httpInfo.Content = httpInfoResult.Content[:db.HttpBodyContentSize]
 				} else {
 					httpInfo.Content = httpInfoResult.Content
 				}

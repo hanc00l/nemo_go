@@ -6,6 +6,8 @@ import (
 	"time"
 )
 
+const AttrContentSize = 4000
+
 type DomainAttr struct {
 	Id             int       `gorm:"primaryKey"`
 	RelatedId      int       `gorm:"column:r_id"`
@@ -21,7 +23,7 @@ func (DomainAttr) TableName() string {
 	return "domain_attr"
 }
 
-//Add 插入一条新的记录，返回主键ID及成功标志
+// Add 插入一条新的记录，返回主键ID及成功标志
 func (domainAttr *DomainAttr) Add() (success bool) {
 	domainAttr.CreateDatetime = time.Now()
 	domainAttr.UpdateDatetime = time.Now()
@@ -89,14 +91,13 @@ func (domainAttr *DomainAttr) DeleteByRelatedIDAndSource() (success bool) {
 	db := GetDB()
 	defer CloseDB(db)
 
-	result := db.Where("r_id",domainAttr.RelatedId).Where("source",domainAttr.Source).Delete(domainAttr)
+	result := db.Where("r_id", domainAttr.RelatedId).Where("source", domainAttr.Source).Delete(domainAttr)
 	if result.RowsAffected > 0 {
 		return true
 	} else {
 		return false
 	}
 }
-
 
 // SaveOrUpdate 保存、更新一条记录
 func (domainAttr *DomainAttr) SaveOrUpdate() bool {
