@@ -93,11 +93,17 @@ func (d *DomainHttp) Delete() (success bool) {
 
 // SaveOrUpdate 保存、更新一条记录
 func (d *DomainHttp) SaveOrUpdate() (success bool) {
-	if d.GetByRelatedIdAndPortAndTag() {
+	oldRecord := &DomainHttp{RelatedId: d.RelatedId, Port: d.Port, Tag: d.Tag}
+	if oldRecord.GetByRelatedIdAndPortAndTag() {
 		updateMap := make(map[string]interface{})
-		updateMap["source"] = d.Source
-		updateMap["tag"] = d.Tag
-		updateMap["content"] = d.Content
+		if d.Source != "" {
+			updateMap["source"] = d.Source
+		}
+		if d.Content != "" {
+			updateMap["content"] = d.Content
+		}
+		//更新记录
+		d.Id = oldRecord.Id
 		return d.Update(updateMap)
 	} else {
 		return d.Add()

@@ -80,11 +80,17 @@ func (i *IpHttp) Delete() (success bool) {
 
 // SaveOrUpdate 保存、更新一条记录
 func (i *IpHttp) SaveOrUpdate() (success bool) {
-	if i.GetByRelatedIdAndTag() {
+	oldRecord := &IpHttp{RelatedId: i.RelatedId, Tag: i.Tag}
+	if oldRecord.GetByRelatedIdAndTag() {
 		updateMap := make(map[string]interface{})
-		updateMap["source"] = i.Source
-		updateMap["tag"] = i.Tag
-		updateMap["content"] = i.Content
+		if i.Source != "" {
+			updateMap["source"] = i.Source
+		}
+		if i.Content != "" {
+			updateMap["content"] = i.Content
+		}
+		//更新记录
+		i.Id = oldRecord.Id
 		return i.Update(updateMap)
 	} else {
 		return i.Add()
