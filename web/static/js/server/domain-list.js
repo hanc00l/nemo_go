@@ -30,6 +30,11 @@ $(function () {
             swal('Warning', '请至少输入一个Target', 'error');
             return;
         }
+        target.replaceAll("\r\n","\n");
+        if (target.length>5000) {
+            swal('Warning', '目标Targets长度不能超过5000', 'error');
+            return;
+        }
         let cron_rule = "";
         if ($('#checkbox_cron_task').is(":checked")) {
             cron_rule = $('#input_cron_rule').val();
@@ -136,6 +141,11 @@ $(function () {
             const target = $('#text_target_xscan').val();
             if (!target) {
                 swal('Warning', '请至少输入一个Target', 'error');
+                return;
+            }
+            target.replaceAll("\r\n","\n");
+            if (target.length>5000) {
+                swal('Warning', '目标Targets长度不能超过5000', 'error');
                 return;
             }
             formData.append("xscan_type", "xdomainscan");

@@ -51,6 +51,10 @@ func SaveMainTask(taskName, configJSON, cronTaskId string, workspaceId int) (tas
 	const argsLength = 6000
 	if len(task.KwArgs) > argsLength {
 		task.KwArgs = fmt.Sprintf("%s...", task.KwArgs[:argsLength])
+		//kwargs可能因为target很多导致超过数据库中的字段设计长度，直接返回错误，不保存任务信息
+		err = errors.New(fmt.Sprintf("Arguments too long: %s,%s,%s", taskId, taskName, task.KwArgs))
+		logging.RuntimeLog.Error(err)
+		return
 	}
 	if !task.Add() {
 		err = errors.New(fmt.Sprintf("Add new main task fail: %s,%s,%s", taskId, taskName, task.KwArgs))
