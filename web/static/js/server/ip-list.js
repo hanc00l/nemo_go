@@ -67,7 +67,6 @@ $(function () {
             swal('Warning', '请至少输入一个Target', 'error');
             return;
         }
-        target.replaceAll("\r\n","\n");
         if (target.length>5000) {
             swal('Warning', '目标Targets长度不能超过5000', 'error');
             return;
@@ -240,7 +239,6 @@ $(function () {
                 swal('Warning', '请至少输入一个Target', 'error');
                 return;
             }
-            target.replaceAll("\r\n","\n");
             if (target.length>5000) {
                 swal('Warning', '目标Targets长度不能超过5000', 'error');
                 return;
