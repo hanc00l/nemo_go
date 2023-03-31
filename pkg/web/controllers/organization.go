@@ -35,7 +35,7 @@ func (c *OrganizationController) GetAllAction() {
 
 	org := &db.Organization{}
 	searchMap := make(map[string]interface{})
-	workspaceId := c.GetSession("Workspace").(int)
+	workspaceId := c.GetCurrentWorkspace()
 	if workspaceId > 0 {
 		searchMap["workspace_id"] = workspaceId
 	}
@@ -52,14 +52,12 @@ func (c *OrganizationController) GetAllAction() {
 
 // IndexAction 显示列表页面
 func (c *OrganizationController) IndexAction() {
-	c.UpdateOnlineUser()
 	c.Layout = "base.html"
 	c.TplName = "org-list.html"
 }
 
 // ListAction 获取列表显示的数据
 func (c *OrganizationController) ListAction() {
-	c.UpdateOnlineUser()
 	defer c.ServeJSON()
 
 	req := orgRequestParam{}
@@ -106,7 +104,7 @@ func (c *OrganizationController) AddSaveAction() {
 		return
 	}
 
-	workspaceId := c.GetSession("Workspace").(int)
+	workspaceId := c.GetCurrentWorkspace()
 	if workspaceId <= 0 {
 		c.FailedStatus("未选择当前的工作空间！")
 		return
@@ -193,7 +191,7 @@ func (c *OrganizationController) validateRequestParam(req *orgRequestParam) {
 func (c *OrganizationController) getOrganizationListData(req orgRequestParam) (resp DataTableResponseData) {
 	org := db.Organization{}
 	searchMap := make(map[string]interface{})
-	workspaceId := c.GetSession("Workspace").(int)
+	workspaceId := c.GetCurrentWorkspace()
 	if workspaceId > 0 {
 		searchMap["workspace_id"] = workspaceId
 	}

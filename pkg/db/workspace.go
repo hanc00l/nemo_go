@@ -50,6 +50,10 @@ func (w *Workspace) Gets(searchMap map[string]interface{}, page, rowsPerPage int
 
 	db := GetDB()
 	defer CloseDB(db)
+	for column, value := range searchMap {
+		db = db.Where(column, value)
+	}
+	db = db.Model(w)
 	//统计满足条件的总记录数
 	var total int64
 	db.Count(&total)

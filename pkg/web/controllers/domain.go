@@ -124,7 +124,6 @@ type DomainStatisticInfo struct {
 
 // IndexAction index
 func (c *DomainController) IndexAction() {
-	c.UpdateOnlineUser()
 	sessionData := c.GetGlobalSessionData()
 	c.Data["data"] = sessionData
 	c.Layout = "base.html"
@@ -133,7 +132,6 @@ func (c *DomainController) IndexAction() {
 
 // ListAction Datable列表数据
 func (c *DomainController) ListAction() {
-	c.UpdateOnlineUser()
 	defer c.ServeJSON()
 
 	req := domainRequestParam{}
@@ -142,13 +140,15 @@ func (c *DomainController) ListAction() {
 		logging.RuntimeLog.Error(err.Error())
 	}
 	c.validateRequestParam(&req)
-	//更新session
-	c.setSessionData("ip_address_domain", req.IPAddress)
-	c.setSessionData("domain_address", req.DomainAddress)
-	if req.OrgId == 0 {
-		c.setSessionData("session_org_id", "")
-	} else {
-		c.setSessionData("session_org_id", fmt.Sprintf("%d", req.OrgId))
+	if !c.IsServerAPI {
+		//更新session
+		c.setSessionData("ip_address_domain", req.IPAddress)
+		c.setSessionData("domain_address", req.DomainAddress)
+		if req.OrgId == 0 {
+			c.setSessionData("session_org_id", "")
+		} else {
+			c.setSessionData("session_org_id", fmt.Sprintf("%d", req.OrgId))
+		}
 	}
 	resp := c.getDomainListData(req)
 	c.Data["json"] = resp
@@ -446,7 +446,7 @@ func (c *DomainController) validateRequestParam(req *domainRequestParam) {
 func (c *DomainController) getSearchMap(req domainRequestParam) (searchMap map[string]interface{}) {
 	searchMap = make(map[string]interface{})
 
-	workspaceId := c.GetSession("Workspace").(int)
+	workspaceId := c.GetCurrentWorkspace()
 	if workspaceId > 0 {
 		searchMap["workspace_id"] = workspaceId
 	}

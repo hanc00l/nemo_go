@@ -15,6 +15,7 @@ require (
 	github.com/evilsocket/brutemachine v0.0.0-20170703145059-0331ad6a82ce
 	github.com/evilsocket/dirsearch v0.0.0-20210927162954-fe7fffa39084
 	github.com/fsnotify/fsnotify v1.5.4
+	github.com/golang-jwt/jwt/v5 v5.0.0-rc.1
 	github.com/golang/protobuf v1.5.2
 	github.com/google/cel-go v0.11.4
 	github.com/google/uuid v1.3.0

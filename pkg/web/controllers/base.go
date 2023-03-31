@@ -13,6 +13,7 @@ import (
 
 type BaseController struct {
 	web.Controller
+	IsServerAPI bool //server工作模式是否是api方式
 }
 
 const (
@@ -74,16 +75,12 @@ var (
 )
 
 func (c *BaseController) Prepare() {
-	var userName string
-	if c.GetSession("User") != nil {
-		userName = c.GetSession("User").(string)
-	}
+	userName := c.GetCurrentUser()
 	c.Data["User"] = userName
-	var userRole string
-	if c.GetSession("UserRole") != nil {
-		userRole = c.GetSession("UserRole").(string)
+	c.Data["UserRole"] = c.getSessionData("UserRole", "")
+	if userName != "" {
+		c.UpdateOnlineUser()
 	}
-	c.Data["UserRole"] = userRole
 }
 
 func (c *BaseController) GetGlobalSessionData() GlobalSessionData {
@@ -179,8 +176,7 @@ func (c *BaseController) DeleteOnlineUser() {
 
 // CheckOneAccessRequest 检查用户当前登录是否满足请求的角色要求
 func (c *BaseController) CheckOneAccessRequest(role RequestRole, forceRedirect bool) (isPermit bool) {
-	userName := c.GetSession("User").(string)
-	user := db.User{UserName: userName}
+	user := db.User{UserName: c.GetCurrentUser()}
 	if user.GetByUsername() == false {
 		if forceRedirect {
 			c.Redirect("/", http.StatusFound)
@@ -207,8 +203,7 @@ func (c *BaseController) CheckOneAccessRequest(role RequestRole, forceRedirect b
 
 // CheckMultiAccessRequest 检查用户当前登录是否满足请求的角色要求
 func (c *BaseController) CheckMultiAccessRequest(roleList []RequestRole, forceRedirect bool) (isPermit bool) {
-	userName := c.GetSession("User").(string)
-	user := db.User{UserName: userName}
+	user := db.User{UserName: c.GetCurrentUser()}
 	if user.GetByUsername() == false {
 		if forceRedirect {
 			c.Redirect("/", http.StatusFound)
@@ -235,4 +230,39 @@ func (c *BaseController) CheckMultiAccessRequest(roleList []RequestRole, forceRe
 	}
 
 	return
+}
+
+// GetCurrentWorkspace 获取保存在session或jwt中的workspaceId
+func (c *BaseController) GetCurrentWorkspace() (workspaceId int) {
+	workspaceId = -1
+	if c.IsServerAPI {
+		jwtData := ValidToken(c.GetJWTTokenValue())
+		if jwtData != nil && jwtData.Workspace > 0 {
+			workspaceId = jwtData.Workspace
+		}
+	} else {
+		if c.GetSession("Workspace") != nil {
+			workspaceId = c.GetSession("Workspace").(int)
+		}
+	}
+	return
+}
+
+// GetCurrentUser 获取保存在session或jwt中的username
+func (c *BaseController) GetCurrentUser() (userName string) {
+	if c.IsServerAPI {
+		jwtData := ValidToken(c.GetJWTTokenValue())
+		if jwtData != nil && jwtData.Workspace > 0 {
+			userName = jwtData.User
+		}
+	} else {
+		userName = c.getSessionData("User", "")
+	}
+	return
+}
+
+// GetJWTTokenValue 从header中获取验证的token
+func (c *BaseController) GetJWTTokenValue() string {
+	//Authorization: Bearer <token>
+	return GetTokenValueFromHeader(c.Ctx.Input.Header("Authorization"))
 }

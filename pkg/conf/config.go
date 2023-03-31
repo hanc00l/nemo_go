@@ -55,6 +55,7 @@ func GlobalWorkerConfig() *Worker {
 
 type Server struct {
 	Web      Web               `yaml:"web"`
+	WebAPI   WebAPI            `yaml:"api"`
 	Rpc      RPC               `yaml:"rpc"`
 	FileSync RPC               `yaml:"fileSync"`
 	Database Database          `yaml:"database"`
@@ -71,6 +72,7 @@ type Worker struct {
 	Portscan    Portscan    `yaml:"portscan"`
 	Fingerprint Fingerprint `yaml:"fingerprint"`
 	Domainscan  Domainscan  `yaml:"domainscan"`
+	OnlineAPI   OnlineAPI   `yaml:"onlineapi"`
 	Pocscan     Pocscan     `yaml:"pocscan"`
 }
 
@@ -80,6 +82,10 @@ type Web struct {
 	WebFiles string `yaml:"webfiles"`
 }
 
+type WebAPI struct {
+	Host string `yaml:"host"`
+	Port int    `yaml:"port"`
+}
 type RPC struct {
 	Host    string `yaml:"host"`
 	Port    int    `yaml:"port"`
@@ -143,9 +149,23 @@ type Pocscan struct {
 }
 
 type Domainscan struct {
-	Resolver       string `yaml:"resolver"`
-	Wordlist       string `yaml:"wordlist"`
-	ProviderConfig string `yaml:"providerConfig"`
+	Resolver           string `yaml:"resolver"`
+	Wordlist           string `yaml:"wordlist"`
+	ProviderConfig     string `yaml:"providerConfig"`
+	IsSubDomainFinder  bool   `yaml:"subfinder"`
+	IsSubDomainBrute   bool   `yaml:"subdomainBrute"`
+	IsSubdomainCrawler bool   `yaml:"subdomainCrawler"`
+	IsIgnoreCDN        bool   `yaml:"ignoreCDN"`
+	IsIgnoreOutofChina bool   `yaml:"ignoreOutofChina"`
+	IsPortScan         bool   `yaml:"portscan"`
+	IsWhois            bool   `yaml:"whois"`
+	IsICP              bool   `yaml:"icp"`
+}
+
+type OnlineAPI struct {
+	IsFofa   bool `yaml:"fofa"`
+	IsQuake  bool `yaml:"quake"`
+	IsHunter bool `yaml:"hunter"`
 }
 
 type Notify struct {

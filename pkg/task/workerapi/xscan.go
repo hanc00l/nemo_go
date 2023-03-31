@@ -35,6 +35,7 @@ type XScanConfig struct {
 	Domain             map[string]struct{} `json:"domain,omitempty"`
 	IsSubDomainFinder  bool                `json:"subfinder,omitempty"`
 	IsSubDomainBrute   bool                `json:"subdomainBrute,omitempty"`
+	IsSubDomainCrawler bool                `json:"subdomainCrawler,omitempty"`
 	IsIgnoreCDN        bool                `json:"ignorecdn,omitempty"`
 	IsIgnoreOutofChina bool                `json:"ignoreoutofchina,omitempty"`
 	// fingerprint

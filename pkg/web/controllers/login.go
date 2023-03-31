@@ -15,15 +15,15 @@ type LoginController struct {
 	BaseController
 }
 
-var cpt *captcha.Captcha
+var Cpt *captcha.Captcha
 
 func init() {
 	// use beego cache system store the captcha data
 	store := cache.NewMemoryCache()
-	cpt = captcha.NewWithFilter("/captcha/", store)
-	cpt.ChallengeNums = 6
-	cpt.StdWidth = 200
-	cpt.StdHeight = 40
+	Cpt = captcha.NewWithFilter("/captcha/", store)
+	Cpt.ChallengeNums = 6
+	Cpt.StdWidth = 200
+	Cpt.StdHeight = 40
 }
 
 // IndexAction 登录首页
@@ -33,7 +33,7 @@ func (c *LoginController) IndexAction() {
 
 // LoginAction 登录验证
 func (c *LoginController) LoginAction() {
-	if conf.RunMode == conf.Release && !cpt.VerifyReq(c.Ctx.Request) {
+	if conf.RunMode == conf.Release && !Cpt.VerifyReq(c.Ctx.Request) {
 		c.Redirect("/", http.StatusFound)
 		return
 	}

@@ -52,7 +52,6 @@ type DefaultConfig struct {
 }
 
 func (c *ConfigController) IndexAction() {
-	c.UpdateOnlineUser()
 	c.Layout = "base.html"
 	c.TplName = "config.html"
 }
@@ -60,7 +59,6 @@ func (c *ConfigController) IndexAction() {
 func (c *ConfigController) CustomAction() {
 	c.CheckMultiAccessRequest([]RequestRole{SuperAdmin, Admin}, true)
 
-	c.UpdateOnlineUser()
 	c.Layout = "base.html"
 	c.TplName = "custom.html"
 }
@@ -116,7 +114,7 @@ func (c *ConfigController) ChangePasswordAction() {
 		c.FailedStatus("密码为空！")
 		return
 	}
-	userName := c.GetSession("User").(string)
+	userName := c.GetCurrentUser()
 	if len(userName) == 0 {
 		c.FailedStatus("修改密码失败！")
 		return

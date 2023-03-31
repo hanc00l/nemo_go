@@ -144,7 +144,6 @@ type IPStatisticInfo struct {
 
 // IndexAction GET请求显示页面
 func (c *IPController) IndexAction() {
-	c.UpdateOnlineUser()
 	sessionData := c.GetGlobalSessionData()
 	c.Data["data"] = sessionData
 	c.Layout = "base.html"
@@ -153,7 +152,6 @@ func (c *IPController) IndexAction() {
 
 // ListAction IP列表
 func (c *IPController) ListAction() {
-	c.UpdateOnlineUser()
 	defer c.ServeJSON()
 
 	req := ipRequestParam{}
@@ -163,15 +161,17 @@ func (c *IPController) ListAction() {
 	}
 	c.validateRequestParam(&req)
 	//更新session
-	c.setSessionData("ip_address_ip", req.IPAddress)
-	c.setSessionData("domain_address", req.DomainAddress)
-	c.setSessionData("port", req.Port)
-	if req.OrgId == 0 {
-		c.setSessionData("session_org_id", "")
-	} else {
-		c.setSessionData("session_org_id", fmt.Sprintf("%d", req.OrgId))
+	if !c.IsServerAPI {
+		c.setSessionData("ip_address_ip", req.IPAddress)
+		c.setSessionData("domain_address", req.DomainAddress)
+		c.setSessionData("port", req.Port)
+		if req.OrgId == 0 {
+			c.setSessionData("session_org_id", "")
+		} else {
+			c.setSessionData("session_org_id", fmt.Sprintf("%d", req.OrgId))
+		}
 	}
-	resp := c.getIPListData(req)
+	resp := c.GetIPListData(req)
 	c.Data["json"] = resp
 }
 
@@ -194,10 +194,15 @@ func (c *IPController) InfoAction() {
 			}
 		}
 	}
-	ipInfo.DisableFofa = disableFofa
-	c.Data["ip_info"] = ipInfo
-	c.Layout = "base.html"
-	c.TplName = "ip-info.html"
+	if c.IsServerAPI {
+		c.Data["json"] = ipInfo
+		c.ServeJSON()
+	} else {
+		ipInfo.DisableFofa = disableFofa
+		c.Data["ip_info"] = ipInfo
+		c.Layout = "base.html"
+		c.TplName = "ip-info.html"
+	}
 }
 
 // DeleteIPAction 删除一个IP记录
@@ -207,6 +212,7 @@ func (c *IPController) DeleteIPAction() {
 		c.FailedStatus("当前用户权限不允许！")
 		return
 	}
+
 	id, err := c.GetInt("id")
 	if err != nil {
 		logging.RuntimeLog.Error(err.Error())
@@ -421,28 +427,37 @@ func (c *IPController) ImportPortscanResultAction() {
 		return
 	}
 
-	workspaceId := c.GetSession("Workspace").(int)
+	workspaceId := c.GetCurrentWorkspace()
 	if workspaceId <= 0 {
 		c.FailedStatus("未选择当前的工作空间！")
 		return
 	}
-	file, fileHeader, err := c.GetFile("file")
-	if err != nil {
-		c.FailedStatus(err.Error())
-		return
-	}
-	// 文件后缀检查
-	ext := path.Ext(fileHeader.Filename)
-	if ext != ".json" && ext != ".xml" && ext != ".txt" && ext != ".csv" && ext != ".dat" {
-		c.FailedStatus("只允许.json、.xml、.csv、.dat或.txt文件")
-		return
-	}
-	// 读取文件内容
-	fileContent := make([]byte, fileHeader.Size)
-	_, err = file.Read(fileContent)
-	if err != nil {
-		c.FailedStatus(err.Error())
-		return
+	var fileContent []byte
+	if c.IsServerAPI {
+		fileContent = []byte(c.GetString("file"))
+		if len(fileContent) == 0 {
+			c.FailedStatus("empty file content")
+			return
+		}
+	} else {
+		file, fileHeader, err := c.GetFile("file")
+		if err != nil {
+			c.FailedStatus(err.Error())
+			return
+		}
+		// 文件后缀检查
+		ext := path.Ext(fileHeader.Filename)
+		if ext != ".json" && ext != ".xml" && ext != ".txt" && ext != ".csv" && ext != ".dat" {
+			c.FailedStatus("只允许.json、.xml、.csv、.dat或.txt文件")
+			return
+		}
+		// 读取文件内容
+		fileContent = make([]byte, fileHeader.Size)
+		_, err = file.Read(fileContent)
+		if err != nil {
+			c.FailedStatus(err.Error())
+			return
+		}
 	}
 	// 解析并保存
 	bin := c.GetString("bin", "nmap")
@@ -537,7 +552,7 @@ func (c *IPController) validateRequestParam(req *ipRequestParam) {
 func (c *IPController) getSearchMap(req ipRequestParam) (searchMap map[string]interface{}) {
 	searchMap = make(map[string]interface{})
 
-	workspaceId := c.GetSession("Workspace").(int)
+	workspaceId := c.GetCurrentWorkspace()
 	if workspaceId > 0 {
 		searchMap["workspace_id"] = workspaceId
 	}
@@ -580,8 +595,8 @@ func (c *IPController) getSearchMap(req ipRequestParam) (searchMap map[string]in
 	return searchMap
 }
 
-// getIPListData 获取IP列表显示的数据
-func (c *IPController) getIPListData(req ipRequestParam) (resp DataTableResponseData) {
+// GetIPListData 获取IP列表显示的数据
+func (c *IPController) GetIPListData(req ipRequestParam) (resp DataTableResponseData) {
 	ip := db.Ip{}
 	searchMap := c.getSearchMap(req)
 	results, total := ip.Gets(searchMap, req.Start/req.Length+1, req.Length, req.OrderByDate)
@@ -901,7 +916,7 @@ func (c *IPController) getStatisticsData(req ipRequestParam) IPStatisticInfo {
 	return r
 }
 
-// getIPListData 获取备忘录数据
+// GetIPListData 获取备忘录数据
 func (c *IPController) getMemoData(req ipRequestParam) (r []string) {
 	ip := db.Ip{}
 

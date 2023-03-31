@@ -33,7 +33,6 @@ type UserData struct {
 func (c *UserController) IndexAction() {
 	c.CheckOneAccessRequest(SuperAdmin, true)
 
-	c.UpdateOnlineUser()
 	c.Layout = "base.html"
 	c.TplName = "user-list.html"
 }
@@ -41,8 +40,6 @@ func (c *UserController) IndexAction() {
 // ListAction 获取列表显示的数据
 func (c *UserController) ListAction() {
 	c.CheckOneAccessRequest(SuperAdmin, true)
-
-	c.UpdateOnlineUser()
 	defer c.ServeJSON()
 
 	req := userRequestParam{}

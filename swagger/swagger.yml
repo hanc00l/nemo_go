@@ -1,0 +1,3166 @@
+swagger: "2.0"
+info:
+  title: beego Test API
+  description: |
+    beego has a very cool tools to autogenerate documents for your API
+  version: 1.0.0
+  termsOfService: http://beego.me/
+  contact:
+    email: astaxie@gmail.com
+  license:
+    name: Apache 2.0
+    url: http://www.apache.org/licenses/LICENSE-2.0.html
+basePath: /v1
+paths:
+  /config/changepass:
+    post:
+      tags:
+      - config
+      description: |-
+        修改密码
+        <br>
+      operationId: ConfigController.ChangePassword
+      parameters:
+      - in: header
+        name: authorization
+        description: token
+        required: true
+        type: string
+      - in: formData
+        name: oldpass
+        description: 旧的密码
+        required: true
+        type: string
+      - in: formData
+        name: newpass
+        description: 新的密码
+        required: true
+        type: string
+      responses:
+        "200":
+          description: ""
+          schema:
+            $ref: '#/definitions/models.WorkspaceDataTableResponseData'
+  /config/load-default:
+    post:
+      tags:
+      - config
+      description: |-
+        获取默认的配置
+        <br>
+      operationId: ConfigController.LoadDefaultConfig
+      parameters:
+      - in: header
+        name: authorization
+        description: token
+        required: true
+        type: string
+      responses:
+        "200":
+          description: ""
+          schema:
+            $ref: '#/definitions/models.DefaultConfigData'
+  /config/save-default:
+    post:
+      tags:
+      - config
+      description: |-
+        保存默认的配置
+        <br>
+      operationId: ConfigController.SaveDefaultConfig
+      parameters:
+      - in: header
+        name: authorization
+        description: token
+        required: true
+        type: string
+      - in: formData
+        name: cmdbin
+        description: 端口扫描使用的程序
+        required: true
+        type: string
+      - in: formData
+        name: port
+        description: 默认端口（nmap支持和格式，如--top-ports 1000）
+        required: true
+        type: string
+      - in: formData
+        name: rate
+        description: 速率（默认1000）
+        required: true
+        type: integer
+        format: int64
+      - in: formData
+        name: tech
+        description: 扫描技术（nmap支持的格式，如-sS，-sT，-sV），masscan只支持-sS
+        required: true
+        type: string
+      - in: formData
+        name: ping
+        description: 是否Ping（只支持nmap）
+        required: true
+        type: boolean
+      - in: formData
+        name: wordlist
+        description: Brute使用的子域名字典文件（默认：subnames.txt，9万条记录；较大的字典：subnames_medium.txt，88万条记录）
+        required: true
+        type: string
+      - in: formData
+        name: subfinder
+        description: 是否进行子域名枚举
+        required: true
+        type: boolean
+      - in: formData
+        name: subdomainBrute
+        description: 是否进行子域名Brute
+        required: true
+        type: boolean
+      - in: formData
+        name: subdomainCrawler
+        description: 是否进行子域名爬虫
+        required: true
+        type: boolean
+      - in: formData
+        name: ignoreCDN
+        description: 是否忽略CDN
+        required: true
+        type: boolean
+      - in: formData
+        name: ignoreOutofChina
+        description: 是否忽略非中国大陆IP
+        required: true
+        type: boolean
+      - in: formData
+        name: portscan
+        description: 是否对域名收集结果的IP进行端口扫描
+        required: true
+        type: boolean
+      - in: formData
+        name: whois
+        description: 是否执行whois
+        required: true
+        type: boolean
+      - in: formData
+        name: icp
+        description: 是否执行icp备案查询
+        required: true
+        type: boolean
+      - in: formData
+        name: httpx
+        description: 是否使用httpx获取指纹
+        required: true
+        type: boolean
+      - in: formData
+        name: fingerprinthub
+        description: 是否使用fingerprinthub获取指纹
+        required: true
+        type: boolean
+      - in: formData
+        name: screenshot
+        description: 是否进行屏幕截图
+        required: true
+        type: boolean
+      - in: formData
+        name: iconhash
+        description: 是否获取icon的哈希值
+        required: true
+        type: boolean
+      - in: formData
+        name: ipslicenumber
+        description: ip拆分的数量
+        required: true
+        type: integer
+        format: int64
+      - in: formData
+        name: portslicenumber
+        description: 端口拆分的数量
+        required: true
+        type: integer
+        format: int64
+      - in: formData
+        name: fofa
+        description: 是否执行fofa
+        required: true
+        type: boolean
+      - in: formData
+        name: hunter
+        description: 是否执行hunter
+        required: true
+        type: boolean
+      - in: formData
+        name: quake
+        description: 是否执行quake
+        required: true
+        type: boolean
+      responses:
+        "200":
+          description: ""
+          schema:
+            $ref: '#/definitions/models.WorkspaceDataTableResponseData'
+  /dashboard/statistic:
+    post:
+      tags:
+      - dashboard
+      description: |-
+        获取统计信息
+        <br>
+      operationId: DashboardController.GetStatisticData
+      parameters:
+      - in: header
+        name: authorization
+        description: token
+        required: true
+        type: string
+      responses:
+        "200":
+          description: ""
+          schema:
+            $ref: '#/definitions/models.DashboardStatisticData'
+  /dashboard/task:
+    post:
+      tags:
+      - dashboard
+      description: |-
+        获取任务数据
+        <br>
+      operationId: DashboardController.GetTaskInfo
+      parameters:
+      - in: header
+        name: authorization
+        description: token
+        required: true
+        type: string
+      responses:
+        "200":
+          description: ""
+          schema:
+            $ref: '#/definitions/models.TaskInfoData'
+  /dashboard/user:
+    post:
+      tags:
+      - dashboard
+      description: |-
+        获取在线用户数据，用于Dashboard表表显示
+        <br>
+      operationId: DashboardController.OnlineUserList
+      parameters:
+      - in: header
+        name: authorization
+        description: token
+        required: true
+        type: string
+      responses:
+        "200":
+          description: ""
+          schema:
+            $ref: '#/definitions/models.OnlineUserDataTableResponseData'
+  /dashboard/worker/filesync:
+    post:
+      tags:
+      - dashboard
+      description: |-
+        同步worker文件
+        <br>
+      operationId: DashboardController.ManualWorkerFileSync
+      parameters:
+      - in: header
+        name: authorization
+        description: token
+        required: true
+        type: string
+      - in: formData
+        name: worker_name
+        description: worker name
+        required: true
+        type: string
+      responses:
+        "200":
+          description: ""
+          schema:
+            $ref: '#/definitions/models.WorkspaceDataTableResponseData'
+  /dashboard/worker/list:
+    post:
+      tags:
+      - dashboard
+      description: |-
+        获取worker数据，用于dashboard列表显示
+        <br>
+      operationId: DashboardController.WorkerAliveList
+      parameters:
+      - in: header
+        name: authorization
+        description: token
+        required: true
+        type: string
+      responses:
+        "200":
+          description: ""
+          schema:
+            $ref: '#/definitions/models.WorkerStatusData'
+  /dashboard/worker/reload:
+    post:
+      tags:
+      - dashboard
+      description: |-
+        ManualReloadWorkerAction 重启worker
+        <br>
+      operationId: DashboardController.ManualReloadWorker
+      parameters:
+      - in: header
+        name: authorization
+        description: token
+        required: true
+        type: string
+      - in: formData
+        name: worker_name
+        description: worker name
+        required: true
+        type: string
+      responses:
+        "200":
+          description: ""
+          schema:
+            $ref: '#/definitions/models.WorkspaceDataTableResponseData'
+  /domain/color/mark:
+    post:
+      tags:
+      - domain
+      description: |-
+        颜色标记
+        <br>
+      operationId: DomainController.MarkColor
+      parameters:
+      - in: header
+        name: authorization
+        description: token
+        required: true
+        type: string
+      - in: formData
+        name: r_id
+        description: domain id
+        required: true
+        type: integer
+        format: int64
+      - in: formData
+        name: color
+        description: 标记的颜色值（空或DELETE为清除标记）
+        required: true
+        type: string
+      responses:
+        "200":
+          description: ""
+          schema:
+            $ref: '#/definitions/models.StatusResponseData'
+  /domain/delete:
+    post:
+      tags:
+      - domain
+      description: |-
+        删除一个domain
+        <br>
+      operationId: DomainController.DeleteDomain
+      parameters:
+      - in: header
+        name: authorization
+        description: token
+        required: true
+        type: string
+      - in: formData
+        name: id
+        description: id
+        required: true
+        type: integer
+        format: int64
+      responses:
+        "200":
+          description: ""
+          schema:
+            $ref: '#/definitions/models.StatusResponseData'
+  /domain/domain-api-attr/delete:
+    post:
+      tags:
+      - domain
+      description: |-
+        删除fofa等属性
+        <br>
+      operationId: DomainController.DeleteDomainOnlineAPIAttr
+      parameters:
+      - in: header
+        name: authorization
+        description: token
+        required: true
+        type: string
+      - in: formData
+        name: id
+        description: id
+        required: true
+        type: integer
+        format: int64
+      responses:
+        "200":
+          description: ""
+          schema:
+            $ref: '#/definitions/models.StatusResponseData'
+  /domain/domain-attr/delete:
+    post:
+      tags:
+      - domain
+      description: |-
+        删除一个域名的属性
+        <br>
+      operationId: DomainController.DeleteDomainAttr
+      parameters:
+      - in: header
+        name: authorization
+        description: token
+        required: true
+        type: string
+      - in: formData
+        name: id
+        description: id
+        required: true
+        type: integer
+        format: int64
+      responses:
+        "200":
+          description: ""
+          schema:
+            $ref: '#/definitions/models.StatusResponseData'
+  /domain/http/info:
+    post:
+      tags:
+      - domain
+      description: |-
+        获取指定的http信息
+        <br>
+      operationId: DomainController.InfoHttp
+      parameters:
+      - in: header
+        name: authorization
+        description: token
+        required: true
+        type: string
+      - in: formData
+        name: r_id
+        description: domain id
+        required: true
+        type: integer
+        format: int64
+      responses:
+        "200":
+          description: ""
+          schema:
+            $ref: '#/definitions/models.StatusResponseData'
+  /domain/info:
+    post:
+      tags:
+      - domain
+      description: |-
+        聚合显示一个domain的详细信息
+        <br>
+      operationId: DomainController.Info
+      parameters:
+      - in: header
+        name: authorization
+        description: token
+        required: true
+        type: string
+      - in: formData
+        name: domain
+        description: domain
+        required: true
+        type: string
+      - in: formData
+        name: workspace
+        description: 所在的workspace id
+        required: true
+        type: integer
+        format: int64
+      - in: formData
+        name: disable_fofa
+        description: 是否不显示fofa等在线资产的信息
+        required: true
+        type: boolean
+      responses:
+        "200":
+          description: ""
+          schema:
+            $ref: '#/definitions/models.DomainInfo'
+  /domain/list:
+    post:
+      tags:
+      - domain
+      description: |-
+        根据指定筛选条件，查询domain资产
+        <br>
+      operationId: DomainController.List
+      parameters:
+      - in: header
+        name: authorization
+        description: token
+        required: true
+        type: string
+      - in: formData
+        name: start
+        description: 查询的资产的起始行数
+        required: true
+        type: integer
+        format: int64
+      - in: formData
+        name: length
+        description: 返回资产指定的数量
+        required: true
+        type: integer
+        format: int64
+      - in: formData
+        name: org_id
+        description: 组织机构的ID
+        type: integer
+        format: int64
+      - in: formData
+        name: ip_address
+        description: IP地址，单个IP
+        type: string
+      - in: formData
+        name: domain_address
+        description: 域名地址
+        type: string
+      - in: formData
+        name: content
+        description: 域名资产的属性
+        type: string
+      - in: formData
+        name: color_tag
+        description: 颜色标记
+        type: string
+      - in: formData
+        name: memo_content
+        description: 备忘录内容
+        type: string
+      - in: formData
+        name: date_delta
+        description: 更新的日期范围
+        type: integer
+        format: int64
+      - in: formData
+        name: create_date_delta
+        description: 创建的日期范围
+        type: integer
+        format: int64
+      - in: formData
+        name: disable_fofa
+        description: 禁止显示fofa的来源资产
+        type: boolean
+      - in: formData
+        name: disable_banner
+        description: 禁止显示banner
+        type: boolean
+      - in: formData
+        name: select_no_ip
+        description: 选择没有解析IP的资产
+        type: boolean
+      - in: formData
+        name: select_order_by_date
+        description: IP按更新日期排序
+        type: boolean
+      - in: formData
+        name: domain_http
+        description: http协议中的属性
+        type: string
+      responses:
+        "200":
+          description: ""
+          schema:
+            $ref: '#/definitions/models.DomainDataTableResponseData'
+  /domain/memo:
+    post:
+      tags:
+      - domain
+      description: |-
+        获取指定IP的备忘录信息
+        <br>
+      operationId: DomainController.GetMemo
+      parameters:
+      - in: header
+        name: authorization
+        description: token
+        required: true
+        type: string
+      - in: formData
+        name: r_id
+        description: ip id
+        required: true
+        type: integer
+        format: int64
+      responses:
+        "200":
+          description: ""
+          schema:
+            $ref: '#/definitions/models.StatusResponseData'
+  /domain/memo/update:
+    post:
+      tags:
+      - domain
+      description: |-
+        更新指定IP的备忘录信息
+        <br>
+      operationId: DomainController.UpdateMemo
+      parameters:
+      - in: header
+        name: authorization
+        description: token
+        required: true
+        type: string
+      - in: formData
+        name: r_id
+        description: domain id
+        required: true
+        type: integer
+        format: int64
+      - in: formData
+        name: memo
+        description: memo内容
+        required: true
+        type: string
+      responses:
+        "200":
+          description: ""
+          schema:
+            $ref: '#/definitions/models.StatusResponseData'
+  /domain/pintop:
+    post:
+      tags:
+      - domain
+      description: |-
+        置顶/取消在列表中的置顶显示
+        <br>
+      operationId: DomainController.PinTop
+      parameters:
+      - in: header
+        name: authorization
+        description: token
+        required: true
+        type: string
+      - in: formData
+        name: id
+        description: domain id
+        required: true
+        type: integer
+        format: int64
+      - in: formData
+        name: pin_index
+        description: Pin值（1或0），为1/0表示置顶/取消
+        required: true
+        type: integer
+        format: int64
+      responses:
+        "200":
+          description: ""
+          schema:
+            $ref: '#/definitions/models.StatusResponseData'
+  /ip/color/mark:
+    post:
+      tags:
+      - ip
+      description: |-
+        颜色标记
+        <br>
+      operationId: IPController.MarkColor
+      parameters:
+      - in: header
+        name: authorization
+        description: token
+        required: true
+        type: string
+      - in: formData
+        name: r_id
+        description: ip id
+        required: true
+        type: integer
+        format: int64
+      - in: formData
+        name: color
+        description: 标记的颜色值（空或DELETE为清除标记）
+        required: true
+        type: string
+      responses:
+        "200":
+          description: ""
+          schema:
+            $ref: '#/definitions/models.StatusResponseData'
+  /ip/delete:
+    post:
+      tags:
+      - ip
+      description: |-
+        删除一个IP
+        <br>
+      operationId: IPController.DeleteIP
+      parameters:
+      - in: header
+        name: authorization
+        description: token
+        required: true
+        type: string
+      - in: formData
+        name: id
+        description: id
+        required: true
+        type: integer
+        format: int64
+      responses:
+        "200":
+          description: ""
+          schema:
+            $ref: '#/definitions/models.StatusResponseData'
+  /ip/http/info:
+    post:
+      tags:
+      - ip
+      description: |-
+        获取指定的http信息
+        <br>
+      operationId: IPController.InfoHttp
+      parameters:
+      - in: header
+        name: authorization
+        description: token
+        required: true
+        type: string
+      - in: formData
+        name: r_id
+        description: ip id
+        required: true
+        type: integer
+        format: int64
+      responses:
+        "200":
+          description: ""
+          schema:
+            $ref: '#/definitions/models.StatusResponseData'
+  /ip/info:
+    post:
+      tags:
+      - ip
+      description: |-
+        聚合显示一个IP的详细信息
+        <br>
+      operationId: IPController.Info
+      parameters:
+      - in: header
+        name: authorization
+        description: token
+        required: true
+        type: string
+      - in: formData
+        name: ip
+        description: ip
+        required: true
+        type: string
+      - in: formData
+        name: workspace
+        description: 所在的workspace id
+        required: true
+        type: integer
+        format: int64
+      - in: formData
+        name: disable_fofa
+        description: 是否不显示fofa等在线资产的信息
+        required: true
+        type: boolean
+      responses:
+        "200":
+          description: ""
+          schema:
+            $ref: '#/definitions/models.IPInfo'
+  /ip/list:
+    post:
+      tags:
+      - ip
+      description: |-
+        根据指定筛选条件，查询IP资产
+        <br>
+      operationId: IPController.List
+      parameters:
+      - in: header
+        name: authorization
+        description: token
+        required: true
+        type: string
+      - in: formData
+        name: start
+        description: 查询的资产的起始行数
+        required: true
+        type: integer
+        format: int64
+      - in: formData
+        name: length
+        description: 返回资产指定的数量
+        required: true
+        type: integer
+        format: int64
+      - in: formData
+        name: org_id
+        description: 组织机构的ID
+        type: integer
+        format: int64
+      - in: formData
+        name: ip_address
+        description: IP地址，单个IP或者掩码
+        type: string
+      - in: formData
+        name: domain_address
+        description: 域名地址
+        type: string
+      - in: formData
+        name: port
+        description: 端口，单个或多个
+        type: string
+      - in: formData
+        name: content
+        description: IP端口的属性
+        type: string
+      - in: formData
+        name: iplocation
+        description: IP归属地
+        type: string
+      - in: formData
+        name: port_status
+        description: 端口状态
+        type: string
+      - in: formData
+        name: color_tag
+        description: 颜色标记
+        type: string
+      - in: formData
+        name: memo_content
+        description: 备忘录内容
+        type: string
+      - in: formData
+        name: date_delta
+        description: 更新的日期范围
+        type: integer
+        format: int64
+      - in: formData
+        name: create_date_delta
+        description: 创建的日期范围
+        type: integer
+        format: int64
+      - in: formData
+        name: disable_fofa
+        description: 禁止显示fofa的来源资产
+        type: boolean
+      - in: formData
+        name: disable_banner
+        description: 禁止显示banner
+        type: boolean
+      - in: formData
+        name: disable_outof_china
+        description: 禁止显示中国大陆以外的IP
+        type: boolean
+      - in: formData
+        name: select_outof_china
+        description: 选择中国大陆以外的IP
+        type: boolean
+      - in: formData
+        name: select_no_openedport
+        description: 选择没有开放端口的IP
+        type: boolean
+      - in: formData
+        name: select_order_by_date
+        description: IP按更新日期排序
+        type: boolean
+      - in: formData
+        name: ip_http
+        description: http协议中的属性
+        type: string
+      responses:
+        "200":
+          description: ""
+          schema:
+            $ref: '#/definitions/models.IPDataTableResponseData'
+  /ip/memo:
+    post:
+      tags:
+      - ip
+      description: |-
+        获取指定IP的备忘录信息
+        <br>
+      operationId: IPController.GetMemo
+      parameters:
+      - in: header
+        name: authorization
+        description: token
+        required: true
+        type: string
+      - in: formData
+        name: r_id
+        description: ip id
+        required: true
+        type: integer
+        format: int64
+      responses:
+        "200":
+          description: ""
+          schema:
+            $ref: '#/definitions/models.StatusResponseData'
+  /ip/memo/update:
+    post:
+      tags:
+      - ip
+      description: |-
+        更新指定IP的备忘录信息
+        <br>
+      operationId: IPController.UpdateMemo
+      parameters:
+      - in: header
+        name: authorization
+        description: token
+        required: true
+        type: string
+      - in: formData
+        name: r_id
+        description: ip id
+        required: true
+        type: integer
+        format: int64
+      - in: formData
+        name: memo
+        description: memo内容
+        required: true
+        type: string
+      responses:
+        "200":
+          description: ""
+          schema:
+            $ref: '#/definitions/models.StatusResponseData'
+  /ip/pintop:
+    post:
+      tags:
+      - ip
+      description: |-
+        置顶/取消在列表中的置顶显示
+        <br>
+      operationId: IPController.PinTop
+      parameters:
+      - in: header
+        name: authorization
+        description: token
+        required: true
+        type: string
+      - in: formData
+        name: id
+        description: ip id
+        required: true
+        type: integer
+        format: int64
+      - in: formData
+        name: pin_index
+        description: Pin值（1或0），为1/0表示置顶/取消
+        required: true
+        type: integer
+        format: int64
+      responses:
+        "200":
+          description: ""
+          schema:
+            $ref: '#/definitions/models.StatusResponseData'
+  /ip/port-attr/delete:
+    post:
+      tags:
+      - ip
+      description: |-
+        删除一个IP的端口的属性
+        <br>
+      operationId: IPController.DeletePortAttr
+      parameters:
+      - in: header
+        name: authorization
+        description: token
+        required: true
+        type: string
+      - in: formData
+        name: id
+        description: id
+        required: true
+        type: integer
+        format: int64
+      responses:
+        "200":
+          description: ""
+          schema:
+            $ref: '#/definitions/models.StatusResponseData'
+  /ip/result/import:
+    post:
+      tags:
+      - ip
+      description: |-
+        导入portscan扫描结果
+        <br>
+      operationId: IPController.ImportPortscanResult
+      parameters:
+      - in: header
+        name: authorization
+        description: token
+        required: true
+        type: string
+      - in: formData
+        name: bin
+        description: 扫描结果类型
+        required: true
+        type: string
+      - in: formData
+        name: org_id
+        description: 关联的组织id
+        required: true
+        type: integer
+        format: int64
+      - in: formData
+        name: file
+        description: 文件内容
+        required: true
+        type: string
+      responses:
+        "200":
+          description: ""
+          schema:
+            $ref: '#/definitions/models.StatusResponseData'
+  /login/captcha:
+    get:
+      tags:
+      - login
+      description: |-
+        创建一个验证码id和对应的验证码（返回验证码id，通过请求/captcha/<id>.png来显示图形化的验证码）
+        <br>
+      operationId: LoginController.Capture
+      responses:
+        "200":
+          description: ""
+          schema:
+            $ref: '#/definitions/models.StatusResponseData'
+    post:
+      tags:
+      - login
+      description: |-
+        创建一个验证码id和对应的验证码（返回验证码id，通过请求/captcha/<id>.png来显示图形化的验证码）
+        <br>
+      operationId: LoginController.Capture
+      responses:
+        "200":
+          description: ""
+          schema:
+            $ref: '#/definitions/models.StatusResponseData'
+  /login/login:
+    post:
+      tags:
+      - login
+      description: |-
+        用户登录
+        <br>
+      operationId: LoginController.Login
+      parameters:
+      - in: formData
+        name: captcha_id
+        description: capture_id for capture verify
+        required: true
+        type: string
+      - in: formData
+        name: captcha
+        description: capture code for capture verify
+        required: true
+        type: string
+      - in: formData
+        name: username
+        description: the user name for login
+        required: true
+        type: string
+      - in: formData
+        name: password
+        description: the password for login
+        required: true
+        type: string
+      responses:
+        "200":
+          description: ""
+          schema:
+            $ref: '#/definitions/models.StatusResponseData'
+  /org/delete:
+    post:
+      tags:
+      - org
+      description: |-
+        删除一个组织
+        <br>
+      operationId: OrganizationController.DeleteOrg
+      parameters:
+      - in: header
+        name: authorization
+        description: token
+        required: true
+        type: string
+      - in: formData
+        name: id
+        description: id
+        required: true
+        type: integer
+        format: int64
+      responses:
+        "200":
+          description: ""
+          schema:
+            $ref: '#/definitions/models.StatusResponseData'
+  /org/getall:
+    post:
+      tags:
+      - org
+      description: |-
+        显示一个资产的详情
+        <br>
+      operationId: OrganizationController.GetAll
+      parameters:
+      - in: header
+        name: authorization
+        description: token
+        required: true
+        type: string
+      - in: formData
+        name: id
+        description: id
+        required: true
+        type: integer
+        format: int64
+      responses:
+        "200":
+          description: ""
+          schema:
+            $ref: '#/definitions/models.OrganizationAllData'
+  /org/info:
+    post:
+      tags:
+      - org
+      description: |-
+        显示一个资产的详情
+        <br>
+      operationId: OrganizationController.Info
+      parameters:
+      - in: header
+        name: authorization
+        description: token
+        required: true
+        type: string
+      - in: formData
+        name: id
+        description: id
+        required: true
+        type: integer
+        format: int64
+      responses:
+        "200":
+          description: ""
+          schema:
+            $ref: '#/definitions/models.OrganizationData'
+  /org/list:
+    post:
+      tags:
+      - org
+      description: |-
+        根据指定筛选条件，获取列表显示的数据
+        <br>
+      operationId: OrganizationController.List
+      parameters:
+      - in: header
+        name: authorization
+        description: token
+        required: true
+        type: string
+      - in: formData
+        name: start
+        description: 查询的资产的起始行数
+        required: true
+        type: integer
+        format: int64
+      - in: formData
+        name: length
+        description: 返回资产指定的数量
+        required: true
+        type: integer
+        format: int64
+      responses:
+        "200":
+          description: ""
+          schema:
+            $ref: '#/definitions/models.OrgDataTableResponseData'
+  /org/save:
+    post:
+      tags:
+      - org
+      description: |-
+        保存一个新增的记录
+        <br>
+      operationId: OrganizationController.SaveOrg
+      parameters:
+      - in: header
+        name: authorization
+        description: token
+        required: true
+        type: string
+      - in: formData
+        name: org_name
+        description: 组织名称
+        required: true
+        type: string
+      - in: formData
+        name: status
+        description: 组织状态（enable/disable）
+        required: true
+        type: string
+      - in: formData
+        name: sort_order
+        description: 排序号（默认100）
+        required: true
+        type: integer
+        format: int64
+      responses:
+        "200":
+          description: ""
+          schema:
+            $ref: '#/definitions/models.StatusResponseData'
+  /org/update:
+    post:
+      tags:
+      - org
+      description: |-
+        更新一个已有的记录
+        <br>
+      operationId: OrganizationController.UpdateOrg
+      parameters:
+      - in: header
+        name: authorization
+        description: token
+        required: true
+        type: string
+      - in: formData
+        name: id
+        description: id
+        required: true
+        type: integer
+        format: int64
+      - in: formData
+        name: org_name
+        description: 组织名称
+        required: true
+        type: string
+      - in: formData
+        name: status
+        description: 组织状态（enable/disable）
+        required: true
+        type: string
+      - in: formData
+        name: sort_order
+        description: 排序号（默认100）
+        required: true
+        type: integer
+        format: int64
+      responses:
+        "200":
+          description: ""
+          schema:
+            $ref: '#/definitions/models.StatusResponseData'
+  /task/batch-delete:
+    post:
+      tags:
+      - task
+      description: |-
+        批量删除指定类型的任务记录
+        <br>
+      operationId: TaskController.DeleteBatchTask
+      parameters:
+      - in: header
+        name: authorization
+        description: token
+        required: true
+        type: string
+      - in: formData
+        name: type
+        description: 任务类型
+        required: true
+        type: string
+      responses:
+        "200":
+          description: ""
+          schema:
+            $ref: '#/definitions/models.StatusResponseData'
+  /task/cron/delete:
+    post:
+      tags:
+      - task
+      description: |-
+        删除一个CronTask任务记录
+        <br>
+      operationId: TaskController.DeleteCronTask
+      parameters:
+      - in: header
+        name: authorization
+        description: token
+        required: true
+        type: string
+      - in: formData
+        name: id
+        description: id
+        required: true
+        type: integer
+        format: int64
+      responses:
+        "200":
+          description: ""
+          schema:
+            $ref: '#/definitions/models.StatusResponseData'
+  /task/cron/disable:
+    post:
+      tags:
+      - task
+      description: |-
+        禁用一个计划任务
+        <br>
+      operationId: TaskController.DisableCronTask
+      parameters:
+      - in: header
+        name: authorization
+        description: token
+        required: true
+        type: string
+      - in: formData
+        name: task_id
+        description: task id
+        required: true
+        type: integer
+        format: int64
+      responses:
+        "200":
+          description: ""
+          schema:
+            $ref: '#/definitions/models.StatusResponseData'
+  /task/cron/enable:
+    post:
+      tags:
+      - task
+      description: |-
+        启用一个禁用的计划任务
+        <br>
+      operationId: TaskController.EnableCronTask
+      parameters:
+      - in: header
+        name: authorization
+        description: token
+        required: true
+        type: string
+      - in: formData
+        name: task_id
+        description: task id
+        required: true
+        type: integer
+        format: int64
+      responses:
+        "200":
+          description: ""
+          schema:
+            $ref: '#/definitions/models.StatusResponseData'
+  /task/cron/info:
+    post:
+      tags:
+      - task
+      description: |-
+        显示一个CronTask任务的详情
+        <br>
+      operationId: TaskController.InfoCronTask
+      parameters:
+      - in: header
+        name: authorization
+        description: token
+        required: true
+        type: string
+      - in: formData
+        name: task_id
+        description: 任务ID
+        required: true
+        type: string
+      responses:
+        "200":
+          description: ""
+          schema:
+            $ref: '#/definitions/models.TaskCronInfo'
+  /task/cron/list:
+    post:
+      tags:
+      - task
+      description: |-
+        计划任务列表的数据
+        <br>
+      operationId: TaskController.ListCronTask
+      parameters:
+      - in: header
+        name: authorization
+        description: token
+        required: true
+        type: string
+      - in: formData
+        name: start
+        description: 查询起始行数
+        required: true
+        type: integer
+        format: int64
+      - in: formData
+        name: length
+        description: 返回指定的数量
+        required: true
+        type: integer
+        format: int64
+      - in: formData
+        name: task_name
+        description: 任务名称
+        type: string
+      - in: formData
+        name: task_args
+        description: 任务参数
+        type: string
+      - in: formData
+        name: task_status
+        description: 任务状态
+        type: string
+      responses:
+        "200":
+          description: ""
+          schema:
+            $ref: '#/definitions/models.TaskDataTableResponseData'
+  /task/cron/run:
+    post:
+      tags:
+      - task
+      description: |-
+        立即执行一个计划任务
+        <br>
+      operationId: TaskController.RunCronTask
+      parameters:
+      - in: header
+        name: authorization
+        description: token
+        required: true
+        type: string
+      - in: formData
+        name: task_id
+        description: task id
+        required: true
+        type: integer
+        format: int64
+      responses:
+        "200":
+          description: ""
+          schema:
+            $ref: '#/definitions/models.StatusResponseData'
+  /task/main/delete:
+    post:
+      tags:
+      - task
+      description: |-
+        删除一个MainTask任务记录
+        <br>
+      operationId: TaskController.DeleteMainTask
+      parameters:
+      - in: header
+        name: authorization
+        description: token
+        required: true
+        type: string
+      - in: formData
+        name: id
+        description: id
+        required: true
+        type: integer
+        format: int64
+      responses:
+        "200":
+          description: ""
+          schema:
+            $ref: '#/definitions/models.StatusResponseData'
+  /task/main/info:
+    post:
+      tags:
+      - task
+      description: |-
+        显示一个MainTask任务的详情
+        <br>
+      operationId: TaskController.InfoMainTask
+      parameters:
+      - in: header
+        name: authorization
+        description: token
+        required: true
+        type: string
+      - in: formData
+        name: task_id
+        description: 任务ID
+        required: true
+        type: string
+      responses:
+        "200":
+          description: ""
+          schema:
+            $ref: '#/definitions/models.TaskInfo'
+  /task/main/list:
+    post:
+      tags:
+      - task
+      description: |-
+        任务列表的数据
+        <br>
+      operationId: TaskController.ListMainTask
+      parameters:
+      - in: header
+        name: authorization
+        description: token
+        required: true
+        type: string
+      - in: formData
+        name: start
+        description: 查询起始行数
+        required: true
+        type: integer
+        format: int64
+      - in: formData
+        name: length
+        description: 返回指定的数量
+        required: true
+        type: integer
+        format: int64
+      - in: formData
+        name: task_state
+        description: 任务状态
+        type: string
+      - in: formData
+        name: task_name
+        description: 任务名称
+        type: string
+      - in: formData
+        name: task_args
+        description: 任务参数
+        type: string
+      - in: formData
+        name: task_worker
+        description: 任务执行的worker
+        type: string
+      - in: formData
+        name: cron_id
+        description: 计划任务ID
+        type: string
+      - in: formData
+        name: show_runtask
+        description: 是否显示运行任务
+        type: boolean
+      - in: formData
+        name: runtask_state
+        description: 运行任务的状态
+        type: string
+      responses:
+        "200":
+          description: ""
+          schema:
+            $ref: '#/definitions/models.TaskDataTableResponseData'
+  /task/run/delete:
+    post:
+      tags:
+      - task
+      description: |-
+        删除一个RunTask任务记录
+        <br>
+      operationId: TaskController.DeleteRunTask
+      parameters:
+      - in: header
+        name: authorization
+        description: token
+        required: true
+        type: string
+      - in: formData
+        name: id
+        description: id
+        required: true
+        type: integer
+        format: int64
+      responses:
+        "200":
+          description: ""
+          schema:
+            $ref: '#/definitions/models.StatusResponseData'
+  /task/run/info:
+    post:
+      tags:
+      - task
+      description: |-
+        显示一个RunTask任务的详情
+        <br>
+      operationId: TaskController.InfoRunTask
+      parameters:
+      - in: header
+        name: authorization
+        description: token
+        required: true
+        type: string
+      - in: formData
+        name: task_id
+        description: 任务ID
+        required: true
+        type: string
+      responses:
+        "200":
+          description: ""
+          schema:
+            $ref: '#/definitions/models.TaskInfo'
+  /task/run/stop:
+    post:
+      tags:
+      - task
+      description: |-
+        取消一个未开始执行的任务
+        <br>
+      operationId: TaskController.StopRunTask
+      parameters:
+      - in: header
+        name: authorization
+        description: token
+        required: true
+        type: string
+      - in: formData
+        name: task_id
+        description: task id
+        required: true
+        type: integer
+        format: int64
+      responses:
+        "200":
+          description: ""
+          schema:
+            $ref: '#/definitions/models.StatusResponseData'
+  /task/xscan:
+    post:
+      tags:
+      - task
+      description: |-
+        执行一个XScan任务
+        <br>
+      operationId: TaskController.StartXScanTask
+      parameters:
+      - in: header
+        name: authorization
+        description: token
+        required: true
+        type: string
+      - in: formData
+        name: target
+        description: 任务目标(ip、ip/掩码或域名），多个任务以,分开
+        required: true
+        type: string
+      - in: formData
+        name: port
+        description: ip目标扫描的端口
+        type: string
+      - in: formData
+        name: org_id
+        description: 关联的组机构
+        type: integer
+        format: int64
+      - in: formData
+        name: fofa
+        description: 是否要执行fofa任务
+        type: boolean
+      - in: formData
+        name: xraypoc
+        description: 是否要执行xraypoc扫描
+        type: boolean
+      - in: formData
+        name: xraypocfile
+        description: xraypoc使用的pocfile，格式为\poc类型|poc文件名\；poc类型为default或custom，poc文件名可为空（全部poc）或xray支持的模糊匹配方式
+        type: string
+      - in: formData
+        name: taskcron
+        description: 是否为计划任务
+        type: boolean
+      - in: formData
+        name: cronrule
+        description: 计划任务的规则
+        type: string
+      - in: formData
+        name: croncomment
+        description: 计划任务的名称
+        type: string
+      responses:
+        "200":
+          description: ""
+          schema:
+            $ref: '#/definitions/models.StatusResponseData'
+  /user/delete:
+    post:
+      tags:
+      - user
+      description: |-
+        删除一个用户
+        <br>
+      operationId: UserController.DeleteUser
+      parameters:
+      - in: header
+        name: authorization
+        description: token
+        required: true
+        type: string
+      - in: formData
+        name: id
+        description: id
+        required: true
+        type: integer
+        format: int64
+      responses:
+        "200":
+          description: ""
+          schema:
+            $ref: '#/definitions/models.StatusResponseData'
+  /user/info:
+    post:
+      tags:
+      - user
+      description: |-
+        显示一个资产的详情
+        <br>
+      operationId: UserController.Info
+      parameters:
+      - in: header
+        name: authorization
+        description: token
+        required: true
+        type: string
+      - in: formData
+        name: id
+        description: id
+        required: true
+        type: integer
+        format: int64
+      responses:
+        "200":
+          description: ""
+          schema:
+            $ref: '#/definitions/models.UserData'
+  /user/list:
+    post:
+      tags:
+      - user
+      description: |-
+        根据指定筛选条件，获取列表显示的数据
+        <br>
+      operationId: UserController.List
+      parameters:
+      - in: header
+        name: authorization
+        description: token
+        required: true
+        type: string
+      - in: formData
+        name: start
+        description: 查询的资产的起始行数
+        required: true
+        type: integer
+        format: int64
+      - in: formData
+        name: length
+        description: 返回资产指定的数量
+        required: true
+        type: integer
+        format: int64
+      responses:
+        "200":
+          description: ""
+          schema:
+            $ref: '#/definitions/models.UserDataTableResponseData'
+  /user/reset:
+    post:
+      tags:
+      - user
+      description: |-
+        重置用户密码
+        <br>
+      operationId: UserController.ResetPassword
+      parameters:
+      - in: header
+        name: authorization
+        description: token
+        required: true
+        type: string
+      - in: formData
+        name: id
+        description: 用户的id
+        required: true
+        type: integer
+        format: int64
+      - in: formData
+        name: user_password
+        description: 用户密码
+        required: true
+        type: string
+      responses:
+        "200":
+          description: ""
+          schema:
+            $ref: '#/definitions/models.StatusResponseData'
+  /user/save:
+    post:
+      tags:
+      - user
+      description: |-
+        保存一个新增的记录
+        <br>
+      operationId: UserController.SaveUser
+      parameters:
+      - in: header
+        name: authorization
+        description: token
+        required: true
+        type: string
+      - in: formData
+        name: user_name
+        description: 用户名称
+        required: true
+        type: string
+      - in: formData
+        name: user_password
+        description: 用户密码
+        required: true
+        type: string
+      - in: formData
+        name: user_role
+        description: 用户角色
+        required: true
+        type: string
+      - in: formData
+        name: user_description
+        description: 用户描述
+        required: true
+        type: string
+      - in: formData
+        name: state
+        description: 用户状态（enable/disable）
+        required: true
+        type: string
+      - in: formData
+        name: sort_order
+        description: 排序号（默认100）
+        required: true
+        type: integer
+        format: int64
+      responses:
+        "200":
+          description: ""
+          schema:
+            $ref: '#/definitions/models.StatusResponseData'
+  /user/update:
+    post:
+      tags:
+      - user
+      description: |-
+        更新一个已有的记录
+        <br>
+      operationId: UserController.UpdateUser
+      parameters:
+      - in: header
+        name: authorization
+        description: token
+        required: true
+        type: string
+      - in: formData
+        name: id
+        description: id
+        required: true
+        type: integer
+        format: int64
+      - in: formData
+        name: user_name
+        description: 用户名称
+        required: true
+        type: string
+      - in: formData
+        name: user_role
+        description: 用户角色
+        required: true
+        type: string
+      - in: formData
+        name: user_description
+        description: 用户描述
+        required: true
+        type: string
+      - in: formData
+        name: state
+        description: 用户状态（enable/disable）
+        required: true
+        type: string
+      - in: formData
+        name: sort_order
+        description: 排序号（默认100）
+        required: true
+        type: integer
+        format: int64
+      responses:
+        "200":
+          description: ""
+          schema:
+            $ref: '#/definitions/models.StatusResponseData'
+  /user/workspace/list:
+    post:
+      tags:
+      - user
+      description: |-
+        获取用户相关的工作空间权限设置情况
+        <br>
+      operationId: UserController.ListUserWorkspace
+      parameters:
+      - in: header
+        name: authorization
+        description: token
+        required: true
+        type: string
+      - in: formData
+        name: user_id
+        description: 用户的id
+        required: true
+        type: integer
+        format: int64
+      responses:
+        "200":
+          description: ""
+          schema:
+            $ref: '#/definitions/models.UserWorkspaceData'
+  /user/workspace/update:
+    post:
+      tags:
+      - user
+      description: |-
+        获取用户相关的工作空间权限设置情况
+        <br>
+      operationId: UserController.UpdateUserWorkspace
+      parameters:
+      - in: header
+        name: authorization
+        description: token
+        required: true
+        type: string
+      - in: formData
+        name: user_id
+        description: 用户的id
+        required: true
+        type: integer
+        format: int64
+      - in: formData
+        name: workspace_id
+        description: workspace id，多个id用\,\分隔
+        required: true
+        type: integer
+        format: int64
+      responses:
+        "200":
+          description: ""
+          schema:
+            $ref: '#/definitions/models.StatusResponseData'
+  /vul/delete:
+    post:
+      tags:
+      - vul
+      description: |-
+        删除一个漏洞
+        <br>
+      operationId: VulController.DeleteVul
+      parameters:
+      - in: header
+        name: authorization
+        description: token
+        required: true
+        type: string
+      - in: formData
+        name: id
+        description: id
+        required: true
+        type: integer
+        format: int64
+      responses:
+        "200":
+          description: ""
+          schema:
+            $ref: '#/definitions/models.StatusResponseData'
+  /vul/info:
+    post:
+      tags:
+      - vul
+      description: |-
+        显示一个漏洞的详情
+        <br>
+      operationId: VulController.Info
+      parameters:
+      - in: header
+        name: authorization
+        description: token
+        required: true
+        type: string
+      - in: formData
+        name: id
+        description: id
+        required: true
+        type: integer
+        format: int64
+      responses:
+        "200":
+          description: ""
+          schema:
+            $ref: '#/definitions/models.VulnerabilityInfo'
+  /vul/list:
+    post:
+      tags:
+      - vul
+      description: |-
+        根据指定筛选条件，查询漏洞的数据
+        <br>
+      operationId: VulController.List
+      parameters:
+      - in: header
+        name: authorization
+        description: token
+        required: true
+        type: string
+      - in: formData
+        name: start
+        description: 查询的资产的起始行数
+        required: true
+        type: integer
+        format: int64
+      - in: formData
+        name: length
+        description: 返回资产指定的数量
+        required: true
+        type: integer
+        format: int64
+      - in: formData
+        name: vul_source
+        description: 漏洞的来源(xray、nuclei等）
+        type: string
+      - in: formData
+        name: vul_target
+        description: 漏洞目标
+        type: string
+      - in: formData
+        name: vul_poc_file
+        description: 漏洞的poc
+        type: string
+      - in: formData
+        name: date_delta
+        description: 时间间隔
+        type: integer
+        format: int64
+      responses:
+        "200":
+          description: ""
+          schema:
+            $ref: '#/definitions/models.VulDataTableResponseData'
+  /vul/nuclei/pocfile:
+    post:
+      tags:
+      - vul
+      description: |-
+        获取Nuclei的pocfile列表
+        <br>
+      operationId: VulController.LoadNucleiPocFile
+      parameters:
+      - in: header
+        name: authorization
+        description: token
+        required: true
+        type: string
+      responses:
+        "200":
+          description: ""
+          schema:
+            $ref: '#/definitions/models.PocFileList'
+  /vul/xray/pocfile:
+    post:
+      tags:
+      - vul
+      description: |-
+        获取xray的pocfile列表
+        <br>
+      operationId: VulController.LoadXrayPocFile
+      parameters:
+      - in: header
+        name: authorization
+        description: token
+        required: true
+        type: string
+      - in: formData
+        name: type
+        description: xray漏洞类型（default或custom）
+        required: true
+        type: string
+      responses:
+        "200":
+          description: ""
+          schema:
+            $ref: '#/definitions/models.PocFileList'
+  /workspace/change:
+    post:
+      tags:
+      - workspace
+      description: |-
+        切换到指定的workspace、更新JWT
+        <br>
+      operationId: WorkspaceController.ChangeWorkspaceSelect
+      parameters:
+      - in: header
+        name: authorization
+        description: token
+        required: true
+        type: string
+      - in: formData
+        name: workspace
+        description: workspace id
+        required: true
+        type: integer
+        format: int64
+      responses:
+        "200":
+          description: ""
+          schema:
+            $ref: '#/definitions/models.StatusResponseData'
+  /workspace/delete:
+    post:
+      tags:
+      - workspace
+      description: |-
+        删除一个workspace
+        <br>
+      operationId: WorkspaceController.DeleteWorkspace
+      parameters:
+      - in: header
+        name: authorization
+        description: token
+        required: true
+        type: string
+      - in: formData
+        name: id
+        description: id
+        required: true
+        type: integer
+        format: int64
+      responses:
+        "200":
+          description: ""
+          schema:
+            $ref: '#/definitions/models.StatusResponseData'
+  /workspace/info:
+    post:
+      tags:
+      - workspace
+      description: |-
+        显示一个workspace的详情
+        <br>
+      operationId: WorkspaceController.Info
+      parameters:
+      - in: header
+        name: authorization
+        description: token
+        required: true
+        type: string
+      - in: formData
+        name: id
+        description: id
+        required: true
+        type: integer
+        format: int64
+      responses:
+        "200":
+          description: ""
+          schema:
+            $ref: '#/definitions/models.WorkspaceData'
+  /workspace/list:
+    post:
+      tags:
+      - workspace
+      description: |-
+        根据指定筛选条件，获取列表显示的数据
+        <br>
+      operationId: WorkspaceController.List
+      parameters:
+      - in: header
+        name: authorization
+        description: token
+        required: true
+        type: string
+      - in: formData
+        name: start
+        description: 查询的资产的起始行数
+        required: true
+        type: integer
+        format: int64
+      - in: formData
+        name: length
+        description: 返回资产指定的数量
+        required: true
+        type: integer
+        format: int64
+      responses:
+        "200":
+          description: ""
+          schema:
+            $ref: '#/definitions/models.WorkspaceDataTableResponseData'
+  /workspace/save:
+    post:
+      tags:
+      - workspace
+      description: |-
+        保存一个新增的记录
+        <br>
+      operationId: WorkspaceController.SaveWorkspace
+      parameters:
+      - in: header
+        name: authorization
+        description: token
+        required: true
+        type: string
+      - in: formData
+        name: workspace_name
+        description: 名称
+        required: true
+        type: string
+      - in: formData
+        name: workspace_guid
+        description: guid
+        required: true
+        type: string
+      - in: formData
+        name: workspace_description
+        description: 描述
+        required: true
+        type: string
+      - in: formData
+        name: state
+        description: 状态（enable/disable）
+        required: true
+        type: string
+      - in: formData
+        name: sort_order
+        description: 排序号（默认100）
+        required: true
+        type: integer
+        format: int64
+      responses:
+        "200":
+          description: ""
+          schema:
+            $ref: '#/definitions/models.StatusResponseData'
+  /workspace/update:
+    post:
+      tags:
+      - workspace
+      description: |-
+        更新一个已有的记录
+        <br>
+      operationId: WorkspaceController.UpdateWorkspace
+      parameters:
+      - in: header
+        name: authorization
+        description: token
+        required: true
+        type: string
+      - in: formData
+        name: id
+        description: id
+        required: true
+        type: integer
+        format: int64
+      - in: formData
+        name: workspace_name
+        description: 名称
+        required: true
+        type: string
+      - in: formData
+        name: workspace_description
+        description: 描述
+        required: true
+        type: string
+      - in: formData
+        name: state
+        description: 状态（enable/disable）
+        required: true
+        type: string
+      - in: formData
+        name: sort_order
+        description: 排序号（默认100）
+        required: true
+        type: integer
+        format: int64
+      responses:
+        "200":
+          description: ""
+          schema:
+            $ref: '#/definitions/models.StatusResponseData'
+  /workspace/user-ownerd:
+    post:
+      tags:
+      - workspace
+      description: |-
+        显示一个用户具有的workspace列表
+        <br>
+      operationId: WorkspaceController.UserWorkspace
+      parameters:
+      - in: header
+        name: authorization
+        description: token
+        required: true
+        type: string
+      responses:
+        "200":
+          description: ""
+          schema:
+            $ref: '#/definitions/models.WorkspaceInfo'
+definitions:
+  models.DashboardStatisticData:
+    title: DashboardStatisticData
+    type: object
+    properties:
+      domain_count:
+        type: integer
+        format: int64
+      ip_count:
+        type: integer
+        format: int64
+      task_active:
+        type: integer
+        format: int64
+      vulnerability_count:
+        type: integer
+        format: int64
+  models.DefaultConfigData:
+    title: DefaultConfigData
+    type: object
+    properties:
+      cmdbin:
+        type: string
+      fingerprinthub:
+        type: boolean
+      fofa:
+        type: boolean
+      httpx:
+        type: boolean
+      hunter:
+        type: boolean
+      iconhash:
+        type: boolean
+      icp:
+        type: boolean
+      ignoreCDN:
+        type: boolean
+      ignoreOutofChina:
+        type: boolean
+      ipslicenumber:
+        type: integer
+        format: int64
+      ping:
+        type: boolean
+      port:
+        type: string
+      portscan:
+        type: boolean
+      portslicenumber:
+        type: integer
+        format: int64
+      quake:
+        type: boolean
+      rate:
+        type: integer
+        format: int64
+      screenshot:
+        type: boolean
+      subdomainBrute:
+        type: boolean
+      subdomainCrawler:
+        type: boolean
+      subfinder:
+        type: boolean
+      tech:
+        type: string
+      version:
+        type: string
+      whois:
+        type: boolean
+      wordlist:
+        type: string
+  models.DomainAttrInfo:
+    title: DomainAttrInfo
+    type: object
+    properties:
+      content:
+        type: string
+      create_datetime:
+        type: string
+      domainId:
+        type: integer
+        format: int64
+      id:
+        type: integer
+        format: int64
+      port:
+        type: integer
+        format: int64
+      tag:
+        type: string
+      update_datetime:
+        type: string
+  models.DomainDataTableResponseData:
+    title: DomainDataTableResponseData
+    type: object
+    properties:
+      data:
+        type: array
+        items:
+          $ref: '#/definitions/models.DomainListData'
+      draw:
+        type: integer
+        format: int64
+      recordsFiltered:
+        type: integer
+        format: int64
+      recordsTotal:
+        type: integer
+        format: int64
+  models.DomainInfo:
+    title: DomainInfo
+    type: object
+    properties:
+      Banner:
+        type: array
+        items:
+          type: string
+      ColorTag:
+        type: string
+      CreateTime:
+        type: string
+      DisableFofa:
+        type: boolean
+      Domain:
+        type: string
+      DomainAttr:
+        type: array
+        items:
+          $ref: '#/definitions/models.DomainAttrInfo'
+      DomainCDN:
+        type: string
+      DomainCNAME:
+        type: string
+      IP:
+        type: array
+        items:
+          type: string
+      IconHashes:
+        type: array
+        items:
+          $ref: '#/definitions/models.IconHashWithFofa'
+      Id:
+        type: integer
+        format: int64
+      Memo:
+        type: string
+      Organization:
+        type: string
+      PinIndex:
+        type: string
+      Port:
+        type: array
+        items:
+          type: integer
+          format: int64
+      PortAttr:
+        type: array
+        items:
+          $ref: '#/definitions/models.PortAttrInfo'
+      Screenshot:
+        type: array
+        items:
+          $ref: '#/definitions/models.ScreenshotFileInfo'
+      Title:
+        type: array
+        items:
+          type: string
+      TlsData:
+        type: array
+        items:
+          type: string
+      UpdateTime:
+        type: string
+      Vulnerability:
+        type: array
+        items:
+          $ref: '#/definitions/models.VulnerabilityInfo'
+      Workspace:
+        type: string
+      WorkspaceGUID:
+        type: string
+  models.DomainListData:
+    title: DomainListData
+    type: object
+    properties:
+      banner:
+        type: string
+      color_tag:
+        type: string
+      domain:
+        type: string
+      domaincdn:
+        type: string
+      domaincname:
+        type: string
+      honeypot:
+        type: string
+      iconimage:
+        type: array
+        items:
+          type: string
+      id:
+        type: integer
+        format: int64
+      index:
+        type: integer
+        format: int64
+      ip:
+        type: array
+        items:
+          type: string
+      ipcdn:
+        type: boolean
+      memo_content:
+        type: string
+      pinindex:
+        type: integer
+        format: int64
+      screenshot:
+        type: array
+        items:
+          type: string
+      title:
+        type: string
+      vulnerability:
+        type: string
+      workspace:
+        type: integer
+        format: int64
+      workspace_guid:
+        type: string
+  models.IPDataTableResponseData:
+    title: IPDataTableResponseData
+    type: object
+    properties:
+      data:
+        type: array
+        items:
+          $ref: '#/definitions/models.IPListData'
+      draw:
+        type: integer
+        format: int64
+      recordsFiltered:
+        type: integer
+        format: int64
+      recordsTotal:
+        type: integer
+        format: int64
+  models.IPInfo:
+    title: IPInfo
+    type: object
+    properties:
+      Banner:
+        type: array
+        items:
+          type: string
+      ColorTag:
+        type: string
+      CreateTime:
+        type: string
+      DisableFofa:
+        type: boolean
+      Domain:
+        type: array
+        items:
+          type: string
+      IP:
+        type: string
+      IconHashes:
+        type: array
+        items:
+          $ref: '#/definitions/models.IconHashWithFofa'
+      Id:
+        type: integer
+        format: int64
+      Location:
+        type: string
+      Memo:
+        type: string
+      Organization:
+        type: string
+      PinIndex:
+        type: string
+      Port:
+        type: array
+        items:
+          type: integer
+          format: int64
+      PortAttr:
+        type: array
+        items:
+          $ref: '#/definitions/models.PortAttrInfo'
+      Screenshot:
+        type: array
+        items:
+          $ref: '#/definitions/models.ScreenshotFileInfo'
+      Status:
+        type: string
+      Title:
+        type: array
+        items:
+          type: string
+      TlsData:
+        type: array
+        items:
+          type: string
+      UpdateTime:
+        type: string
+      Vulnerability:
+        type: array
+        items:
+          $ref: '#/definitions/models.VulnerabilityInfo'
+      Workspace:
+        type: string
+      WorkspaceGUID:
+        type: string
+  models.IPListData:
+    title: IPListData
+    type: object
+    properties:
+      banner:
+        type: string
+      cdn:
+        type: boolean
+      color_tag:
+        type: string
+      honeypot:
+        type: string
+      iconimage:
+        type: array
+        items:
+          type: string
+      id:
+        type: integer
+        format: int64
+      index:
+        type: integer
+        format: int64
+      ip:
+        type: string
+      location:
+        type: string
+      memo_content:
+        type: string
+      pinindex:
+        type: integer
+        format: int64
+      port:
+        type: array
+        items:
+          type: string
+      screenshot:
+        type: array
+        items:
+          type: string
+      title:
+        type: string
+      vulnerability:
+        type: string
+      workspace:
+        type: integer
+        format: int64
+      workspace_guid:
+        type: string
+  models.IconHashWithFofa:
+    title: IconHashWithFofa
+    type: object
+    properties:
+      FofaUrl:
+        type: string
+      IconHash:
+        type: string
+      IconImage:
+        type: string
+  models.OnlineUserDataTableResponseData:
+    title: OnlineUserDataTableResponseData
+    type: object
+    properties:
+      data:
+        type: array
+        items:
+          $ref: '#/definitions/models.OnlineUserInfo'
+      draw:
+        type: integer
+        format: int64
+      recordsFiltered:
+        type: integer
+        format: int64
+      recordsTotal:
+        type: integer
+        format: int64
+  models.OnlineUserInfo:
+    title: OnlineUserInfo
+    type: object
+    properties:
+      IP:
+        type: string
+      LoginTime:
+        type: string
+        format: datetime
+      UpdateNumber:
+        type: integer
+        format: int64
+      UpdateTime:
+        type: string
+        format: datetime
+  models.OrgDataTableResponseData:
+    title: OrgDataTableResponseData
+    type: object
+    properties:
+      data:
+        type: array
+        items:
+          $ref: '#/definitions/models.OrganizationData'
+      draw:
+        type: integer
+        format: int64
+      recordsFiltered:
+        type: integer
+        format: int64
+      recordsTotal:
+        type: integer
+        format: int64
+  models.OrganizationAllData:
+    title: OrganizationAllData
+    type: array
+    items:
+      $ref: '#/definitions/models.OrganizationSelectData'
+  models.OrganizationData:
+    title: OrganizationData
+    type: object
+    properties:
+      create_time:
+        type: string
+      id:
+        type: integer
+        format: int64
+      index:
+        type: integer
+        format: int64
+      org_name:
+        type: string
+      sort_order:
+        type: integer
+        format: int64
+      status:
+        type: string
+      update_time:
+        type: string
+      workspace:
+        type: integer
+        format: int64
+  models.OrganizationSelectData:
+    title: OrganizationSelectData
+    type: object
+    properties:
+      id:
+        type: integer
+        format: int64
+      name:
+        type: string
+  models.PocFileList:
+    title: PocFileList
+    format: string
+    type: array
+  models.PortAttrInfo:
+    title: PortAttrInfo
+    type: object
+    properties:
+      Content:
+        type: string
+      CreateTime:
+        type: string
+      FofaLink:
+        type: string
+      IP:
+        type: string
+      Id:
+        type: integer
+        format: int64
+      Port:
+        type: string
+      PortId:
+        type: integer
+        format: int64
+      Source:
+        type: string
+      TableBackgroundSet:
+        type: boolean
+      Tag:
+        type: string
+      UpdateTime:
+        type: string
+  models.ScreenshotFileInfo:
+    title: ScreenshotFileInfo
+    type: object
+    properties:
+      ScreenShotFile:
+        type: string
+      ScreenShotThumbnailFile:
+        type: string
+      Tooltip:
+        type: string
+  models.StatusResponseData:
+    title: StatusResponseData
+    type: object
+    properties:
+      msg:
+        type: string
+      status:
+        type: string
+  models.TaskCronInfo:
+    title: TaskCronInfo
+    type: object
+    properties:
+      Comment:
+        type: string
+      CreateTime:
+        type: string
+      CronRule:
+        type: string
+      Id:
+        type: integer
+        format: int64
+      KwArgs:
+        type: string
+      LastRunTime:
+        type: string
+      RunCount:
+        type: integer
+        format: int64
+      Status:
+        type: string
+      TaskId:
+        type: string
+      TaskName:
+        type: string
+      UpdateTime:
+        type: string
+      Workspace:
+        type: string
+  models.TaskDataTableResponseData:
+    title: TaskDataTableResponseData
+    type: object
+    properties:
+      data:
+        type: array
+        items:
+          $ref: '#/definitions/models.TaskListData'
+      draw:
+        type: integer
+        format: int64
+      recordsFiltered:
+        type: integer
+        format: int64
+      recordsTotal:
+        type: integer
+        format: int64
+  models.TaskInfo:
+    title: TaskInfo
+    type: object
+    properties:
+      CreateTime:
+        type: string
+      FailedTime:
+        type: string
+      Id:
+        type: integer
+        format: int64
+      KwArgs:
+        type: string
+      ReceivedTime:
+        type: string
+      Result:
+        type: string
+      ResultFile:
+        type: string
+      RetriedTime:
+        type: string
+      RevokedTime:
+        type: string
+      RunTaskInfo:
+        type: array
+        items:
+          $ref: '#/definitions/models.TaskListData'
+      Runtime:
+        type: string
+      StartedTime:
+        type: string
+      State:
+        type: string
+      SucceededTime:
+        type: string
+      TaskId:
+        type: string
+      TaskName:
+        type: string
+      UpdateTime:
+        type: string
+      Worker:
+        type: string
+      Workspace:
+        type: string
+  models.TaskInfoData:
+    title: TaskInfoData
+    type: object
+    properties:
+      task_info:
+        type: string
+  models.TaskListData:
+    title: TaskListData
+    type: object
+    properties:
+      created:
+        type: string
+      id:
+        type: integer
+        format: int64
+      index:
+        type: string
+      kwargs:
+        type: string
+      received:
+        type: string
+      result:
+        type: string
+      resultfile:
+        type: string
+      runtime:
+        type: string
+      started:
+        type: string
+      state:
+        type: string
+      task_id:
+        type: string
+      task_name:
+        type: string
+      tasktype:
+        type: string
+      updated:
+        type: string
+      worker:
+        type: string
+  models.UserData:
+    title: UserData
+    type: object
+    properties:
+      create_time:
+        type: string
+      id:
+        type: integer
+        format: int64
+      index:
+        type: integer
+        format: int64
+      sort_order:
+        type: integer
+        format: int64
+      state:
+        type: string
+      update_time:
+        type: string
+      user_description:
+        type: string
+      user_name:
+        type: string
+      user_password:
+        type: string
+      user_role:
+        type: string
+  models.UserDataTableResponseData:
+    title: UserDataTableResponseData
+    type: object
+    properties:
+      data:
+        type: array
+        items:
+          $ref: '#/definitions/models.UserData'
+      draw:
+        type: integer
+        format: int64
+      recordsFiltered:
+        type: integer
+        format: int64
+      recordsTotal:
+        type: integer
+        format: int64
+  models.UserWorkspaceData:
+    title: UserWorkspaceData
+    type: array
+    items:
+      $ref: '#/definitions/models.WorkspaceInfoData'
+  models.VulDataTableResponseData:
+    title: VulDataTableResponseData
+    type: object
+    properties:
+      data:
+        type: array
+        items:
+          $ref: '#/definitions/models.VulnerabilityData'
+      draw:
+        type: integer
+        format: int64
+      recordsFiltered:
+        type: integer
+        format: int64
+      recordsTotal:
+        type: integer
+        format: int64
+  models.VulnerabilityData:
+    title: VulnerabilityData
+    type: object
+    properties:
+      create_datetime:
+        type: string
+      id:
+        type: integer
+        format: int64
+      index:
+        type: integer
+        format: int64
+      poc_file:
+        type: string
+      source:
+        type: string
+      target:
+        type: string
+      update_datetime:
+        type: string
+      url:
+        type: string
+      workspace:
+        type: integer
+        format: int64
+  models.VulnerabilityInfo:
+    title: VulnerabilityInfo
+    type: object
+    properties:
+      CreateTime:
+        type: string
+      Extra:
+        type: string
+      Id:
+        type: integer
+        format: int64
+      PocFile:
+        type: string
+      Source:
+        type: string
+      Target:
+        type: string
+      UpdateTime:
+        type: string
+      Url:
+        type: string
+      Workspace:
+        type: string
+  models.WorkerStatusData:
+    title: WorkerStatusData
+    type: object
+    properties:
+      create_time:
+        type: string
+      enable_manual_file_sync_flag:
+        type: boolean
+      enable_manual_reload_flag:
+        type: boolean
+      heart_color:
+        type: string
+      index:
+        type: integer
+        format: int64
+      task_number:
+        type: integer
+        format: int64
+      update_time:
+        type: string
+      worker_name:
+        type: string
+  models.WorkspaceData:
+    title: WorkspaceData
+    type: object
+    properties:
+      create_time:
+        type: string
+      id:
+        type: integer
+        format: int64
+      index:
+        type: integer
+        format: int64
+      sort_order:
+        type: integer
+        format: int64
+      state:
+        type: string
+      update_time:
+        type: string
+      workspace_description:
+        type: string
+      workspace_guid:
+        type: string
+      workspace_name:
+        type: string
+  models.WorkspaceDataTableResponseData:
+    title: WorkspaceDataTableResponseData
+    type: object
+    properties:
+      data:
+        type: array
+        items:
+          $ref: '#/definitions/models.WorkspaceData'
+      draw:
+        type: integer
+        format: int64
+      recordsFiltered:
+        type: integer
+        format: int64
+      recordsTotal:
+        type: integer
+        format: int64
+  models.WorkspaceInfo:
+    title: WorkspaceInfo
+    type: object
+    properties:
+      CurrentWorkspace:
+        type: string
+      WorkspaceInfoList:
+        type: array
+        items:
+          $ref: '#/definitions/models.WorkspaceInfoData'
+  models.WorkspaceInfoData:
+    title: WorkspaceInfoData
+    type: object
+    properties:
+      enable:
+        type: boolean
+      workspaceId:
+        type: string
+      workspaceName:
+        type: string

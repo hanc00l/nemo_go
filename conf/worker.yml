@@ -39,6 +39,18 @@ domainscan:
   resolver: resolver.txt
   wordlist: subnames.txt
   providerConfig: provider-config.yml
+  subfinder: true
+  subdomainBrute: true
+  subdomainCrawler: false
+  ignoreCDN: false
+  ignoreOutofChina: true
+  portscan: false
+  whois: false
+  icp: false
+onlineapi:
+  fofa: true
+  quake: false
+  hunter: false
 pocscan:
   xray:
     pocPath: thirdparty/xray/xray/pocs

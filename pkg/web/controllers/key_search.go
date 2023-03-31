@@ -54,13 +54,11 @@ type KeyWordInfo struct {
 }
 
 func (c *KeySearchController) IndexAction() {
-	c.UpdateOnlineUser()
 	c.Layout = "base.html"
 	c.TplName = "key-word-list.html"
 }
 
 func (c *KeySearchController) IndexBlackAction() {
-	c.UpdateOnlineUser()
 	c.Layout = "base.html"
 	c.TplName = "task-cron-list.html"
 }
@@ -73,7 +71,7 @@ func (c *KeySearchController) AddSaveAction() {
 		return
 	}
 
-	workspaceId := c.GetSession("Workspace").(int)
+	workspaceId := c.GetCurrentWorkspace()
 	if workspaceId <= 0 {
 		c.FailedStatus("未选择当前的工作空间！")
 		return
@@ -108,7 +106,6 @@ func (c *KeySearchController) validateRequestParam(req *keySearchRequestParam) {
 
 // ListAction IP列表
 func (c *KeySearchController) ListAction() {
-	c.UpdateOnlineUser()
 	defer c.ServeJSON()
 
 	req := keySearchRequestParam{}
@@ -147,7 +144,7 @@ func (c *KeySearchController) DeleteKeyWordAction() {
 func (c *KeySearchController) getSearchMap(req keySearchRequestParam) (searchMap map[string]interface{}) {
 	searchMap = make(map[string]interface{})
 
-	workspaceId := c.GetSession("Workspace").(int)
+	workspaceId := c.GetCurrentWorkspace()
 	if workspaceId > 0 {
 		searchMap["workspace_id"] = workspaceId
 	}
@@ -173,7 +170,7 @@ func (c *KeySearchController) getSearchMap(req keySearchRequestParam) (searchMap
 func (c *KeySearchController) getKeyWordListData(req keySearchRequestParam) (resp DataTableResponseData) {
 	keyWords := db.KeyWord{}
 	searchMap := c.getSearchMap(req)
-	workspaceId := c.GetSession("Workspace").(int)
+	workspaceId := c.GetCurrentWorkspace()
 	if workspaceId > 0 {
 		searchMap["workspace_id"] = workspaceId
 	}

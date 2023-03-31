@@ -42,7 +42,7 @@ func (org *Organization) Gets(searchMap map[string]interface{}, page int, rowsPe
 	if rowsPerPage > 0 && page > 0 {
 		db = db.Offset((page - 1) * rowsPerPage).Limit(rowsPerPage)
 	}
-	db.Order(orderBy).Find(&results)
+	db.Model(org).Order(orderBy).Find(&results)
 	return
 }
 

@@ -10,6 +10,9 @@ fileSync:
   host: 0.0.0.0
   port: 5002
   authKey: ZduibTKhcbb6Pi8W
+api:
+  host: 0.0.0.0
+  port: 5003
 database:
   host: 127.0.0.1
   port: 3306

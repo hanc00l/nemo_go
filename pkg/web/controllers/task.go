@@ -109,20 +109,17 @@ type TaskCronInfo struct {
 }
 
 func (c *TaskController) IndexAction() {
-	c.UpdateOnlineUser()
 	c.Layout = "base.html"
 	c.TplName = "task-list.html"
 }
 
 func (c *TaskController) IndexCronAction() {
-	c.UpdateOnlineUser()
 	c.Layout = "base.html"
 	c.TplName = "task-cron-list.html"
 }
 
 // ListAction 任务列表的数据
 func (c *TaskController) ListAction() {
-	c.UpdateOnlineUser()
 	defer c.ServeJSON()
 
 	req := taskRequestParam{}
@@ -137,7 +134,6 @@ func (c *TaskController) ListAction() {
 
 // ListCronAction 定时任务列表的数据
 func (c *TaskController) ListCronAction() {
-	c.UpdateOnlineUser()
 	defer c.ServeJSON()
 
 	req := taskCronRequestParam{}
@@ -158,9 +154,14 @@ func (c *TaskController) InfoAction() {
 	if taskId != "" {
 		taskInfo = c.getTaskInfo(taskId)
 	}
-	c.Data["task_info"] = taskInfo
-	c.Layout = "base.html"
-	c.TplName = "task-info.html"
+	if c.IsServerAPI {
+		c.Data["json"] = taskInfo
+		c.ServeJSON()
+	} else {
+		c.Data["task_info"] = taskInfo
+		c.Layout = "base.html"
+		c.TplName = "task-info.html"
+	}
 }
 
 // InfoMainAction 显示一个Main任务的详情
@@ -171,9 +172,14 @@ func (c *TaskController) InfoMainAction() {
 	if taskId != "" {
 		taskInfo = c.getTaskMainInfo(taskId)
 	}
-	c.Data["task_info"] = taskInfo
-	c.Layout = "base.html"
-	c.TplName = "task-info-main.html"
+	if c.IsServerAPI {
+		c.Data["json"] = taskInfo
+		c.ServeJSON()
+	} else {
+		c.Data["task_info"] = taskInfo
+		c.Layout = "base.html"
+		c.TplName = "task-info-main.html"
+	}
 }
 
 // InfoCronAction 显示一个任务的详情
@@ -184,9 +190,14 @@ func (c *TaskController) InfoCronAction() {
 	if taskId != "" {
 		taskInfo = c.getTaskCronInfo(taskId)
 	}
-	c.Data["task_info"] = taskInfo
-	c.Layout = "base.html"
-	c.TplName = "task-cron-info.html"
+	if c.IsServerAPI {
+		c.Data["json"] = taskInfo
+		c.ServeJSON()
+	} else {
+		c.Data["task_info"] = taskInfo
+		c.Layout = "base.html"
+		c.TplName = "task-cron-info.html"
+	}
 }
 
 // DeleteAction 删除一个记录
@@ -373,7 +384,7 @@ func (c *TaskController) StartPortScanTaskAction() {
 		c.FailedStatus("no target")
 		return
 	}
-	workspaceId := c.GetSession("Workspace").(int)
+	workspaceId := c.GetCurrentWorkspace()
 	if workspaceId <= 0 {
 		c.FailedStatus("请选择一个当前的工作空间！（如果是超级管理员，请在右上角进行切换）")
 		return
@@ -424,7 +435,7 @@ func (c *TaskController) StartBatchScanTaskAction() {
 		c.FailedStatus("no target")
 		return
 	}
-	workspaceId := c.GetSession("Workspace").(int)
+	workspaceId := c.GetCurrentWorkspace()
 	if workspaceId <= 0 {
 		c.FailedStatus("请选择一个当前的工作空间！（如果是超级管理员，请在右上角进行切换）")
 		return
@@ -473,7 +484,7 @@ func (c *TaskController) StartDomainScanTaskAction() {
 		c.FailedStatus("no target")
 		return
 	}
-	workspaceId := c.GetSession("Workspace").(int)
+	workspaceId := c.GetCurrentWorkspace()
 	if workspaceId <= 0 {
 		c.FailedStatus("请选择一个当前的工作空间！（如果是超级管理员，请在右上角进行切换）")
 		return
@@ -530,7 +541,7 @@ func (c *TaskController) StartPocScanTaskAction() {
 		c.FailedStatus(err.Error())
 		return
 	}
-	workspaceId := c.GetSession("Workspace").(int)
+	workspaceId := c.GetCurrentWorkspace()
 	if workspaceId <= 0 {
 		c.FailedStatus("请选择一个当前的工作空间！（如果是超级管理员，请在右上角进行切换）")
 		return
@@ -560,74 +571,96 @@ func (c *TaskController) StartXScanTaskAction() {
 		return
 	}
 	//校验参数
-	req := runner.XScanRequestParam{}
-	err := c.ParseForm(&req)
+	reqByForm := runner.XScanRequestParam{}
+	err := c.ParseForm(&reqByForm)
 	if err != nil {
 		logging.RuntimeLog.Error(err.Error())
 		c.FailedStatus(err.Error())
 		return
 	}
-	var taskName string
-	if req.XScanType == "xportscan" {
-		taskName = "xportscan"
-		if req.Target == "" {
-			c.FailedStatus("no target")
-			return
-		}
-		if req.Port == "" {
-			req.Port = conf.GlobalWorkerConfig().Portscan.Port
-		}
-	} else if req.XScanType == "xorgipscan" {
-		taskName = "xorgscan"
-		req.IsOrgIP = true
-		if req.OrgId == 0 {
-			c.FailedStatus("no org")
-			return
-		}
-	} else if req.XScanType == "xdomainscan" {
-		taskName = "xdomainscan"
-		if req.Target == "" {
-			c.FailedStatus("no target")
-			return
-		}
-	} else if req.XScanType == "xorgdomainscan" {
-		taskName = "xorgscan"
-		req.IsOrgDomain = true
-		if req.OrgId == 0 {
-			c.FailedStatus("no org")
-			return
-		}
-	} else if req.XScanType == "xfofa" {
-		taskName = "xfofa"
+	var targets []string
+	if c.IsServerAPI {
+		// webapi方式：多个目标以“,”分隔，并且每一个目标单独生成一个任务
+		targets = strings.Split(reqByForm.Target, ",")
 	} else {
-		c.FailedStatus("invalide xscan type")
-		return
+		// 非webapi方式：将所有的目标作为一个任务的目标
+		targets = []string{reqByForm.Target}
 	}
-	workspaceId := c.GetSession("Workspace").(int)
-	if workspaceId <= 0 {
-		c.FailedStatus("请选择一个当前的工作空间！（如果是超级管理员，请在右上角进行切换）")
-		return
-	}
-	var kwArgs []byte
 	var taskId string
-	kwArgs, err = json.Marshal(req)
-	if err != nil {
-		c.FailedStatus(err.Error())
-		return
-	}
-	// 计划任务
-	if req.IsTaskCron {
-		taskId = runner.SaveCronTask(taskName, string(kwArgs), req.TaskCronRule, req.TaskCronComment, workspaceId)
-		if taskId == "" {
-			c.FailedStatus("save to db fail")
+	for _, target := range targets {
+		req := reqByForm
+		req.Target = target
+		// webapi方式：根据每个任务的目标是ip或domain自动生成相应的任务类型
+		// 非webapi则由使用者指定任务类型
+		if c.IsServerAPI {
+			if utils.CheckIPV4(target) || utils.CheckIPV4Subnet(target) {
+				req.XScanType = "xportscan"
+			} else {
+				req.XScanType = "xdomainscan"
+			}
+		}
+		// 生成并保存相应的任务
+		var taskName string
+		if req.XScanType == "xportscan" {
+			taskName = "xportscan"
+			if req.Target == "" {
+				c.FailedStatus("no target")
+				return
+			}
+			if req.Port == "" {
+				req.Port = conf.GlobalWorkerConfig().Portscan.Port
+			}
+		} else if req.XScanType == "xorgipscan" {
+			taskName = "xorgscan"
+			req.IsOrgIP = true
+			if req.OrgId == 0 {
+				c.FailedStatus("no org")
+				return
+			}
+		} else if req.XScanType == "xdomainscan" {
+			taskName = "xdomainscan"
+			if req.Target == "" {
+				c.FailedStatus("no target")
+				return
+			}
+		} else if req.XScanType == "xorgdomainscan" {
+			taskName = "xorgscan"
+			req.IsOrgDomain = true
+			if req.OrgId == 0 {
+				c.FailedStatus("no org")
+				return
+			}
+		} else if req.XScanType == "xfofa" {
+			taskName = "xfofa"
+		} else {
+			c.FailedStatus("invalide xscan type")
 			return
 		}
-	} else {
-		// 立即执行的任务
-		taskId, err = runner.SaveMainTask(taskName, string(kwArgs), "", workspaceId)
+		workspaceId := c.GetCurrentWorkspace()
+		if workspaceId <= 0 {
+			c.FailedStatus("请选择一个当前的工作空间！（如果是超级管理员，请在右上角进行切换）")
+			return
+		}
+		var kwArgs []byte
+		kwArgs, err = json.Marshal(req)
 		if err != nil {
 			c.FailedStatus(err.Error())
 			return
+		}
+		// 计划任务
+		if req.IsTaskCron {
+			taskId = runner.SaveCronTask(taskName, string(kwArgs), req.TaskCronRule, req.TaskCronComment, workspaceId)
+			if taskId == "" {
+				c.FailedStatus("save to db fail")
+				return
+			}
+		} else {
+			// 立即执行的任务
+			taskId, err = runner.SaveMainTask(taskName, string(kwArgs), "", workspaceId)
+			if err != nil {
+				c.FailedStatus(err.Error())
+				return
+			}
 		}
 	}
 	c.SucceededStatus(taskId)
@@ -659,7 +692,7 @@ func (c *TaskController) getSearchMap(req *taskRequestParam) (searchMap map[stri
 	if req == nil {
 		return
 	}
-	workspaceId := c.GetSession("Workspace").(int)
+	workspaceId := c.GetCurrentWorkspace()
 	if workspaceId > 0 {
 		searchMap["workspace_id"] = workspaceId
 	}
@@ -685,7 +718,7 @@ func (c *TaskController) getSearchMap(req *taskRequestParam) (searchMap map[stri
 func (c *TaskController) getSearchMap2(req taskCronRequestParam) (searchMap map[string]interface{}) {
 	searchMap = make(map[string]interface{})
 
-	workspaceId := c.GetSession("Workspace").(int)
+	workspaceId := c.GetCurrentWorkspace()
 	if workspaceId > 0 {
 		searchMap["workspace_id"] = workspaceId
 	}

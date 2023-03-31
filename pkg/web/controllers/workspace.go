@@ -44,8 +44,8 @@ type WorkspaceInfo struct {
 func (c *WorkspaceController) UserWorkspaceAction() {
 	defer c.ServeJSON()
 
-	username := c.GetSession("User").(string)
-	workspaceId := c.GetSession("Workspace").(int)
+	username := c.GetCurrentUser()
+	workspaceId := c.GetCurrentWorkspace()
 
 	var workspaceInfo WorkspaceInfo
 	if len(username) == 0 {
@@ -95,11 +95,11 @@ func (c *WorkspaceController) UserWorkspaceAction() {
 	c.Data["json"] = workspaceInfo
 }
 
-// ChangeWorkspaceSelectAction 切换到指定的workspace、更新session
+// ChangeWorkspaceSelectAction 切换到指定的workspace、更新JWTData或session
 func (c *WorkspaceController) ChangeWorkspaceSelectAction() {
 	defer c.ServeJSON()
 
-	userName := c.GetSession("User").(string)
+	userName := c.GetCurrentUser()
 	newWorkspaceId, err := c.GetInt("workspace")
 	if err != nil {
 		c.FailedStatus(err.Error())
@@ -120,16 +120,34 @@ func (c *WorkspaceController) ChangeWorkspaceSelectAction() {
 			c.FailedStatus("user or workspace not permit!")
 			return
 		}
+		workspace := db.Workspace{Id: newWorkspaceId}
+		if !workspace.Get() || workspace.State != "enable" {
+			c.FailedStatus("workspace not exist or disabled!")
+			return
+		}
 	}
-	c.SetSession("Workspace", newWorkspaceId)
-	c.SucceededStatus("")
+	// 生成新的token
+	if c.IsServerAPI {
+		tokenString, err := GenerateToken(TokenData{
+			User:      user.UserName,
+			UserRole:  user.UserRole,
+			Workspace: newWorkspaceId,
+		})
+		if err != nil || tokenString == "" {
+			c.FailedStatus("生成新的token失败")
+		}
+		c.SucceededStatus(tokenString)
+	} else {
+		// 设置新的workspaceId
+		c.SetSession("Workspace", newWorkspaceId)
+		c.SucceededStatus("")
+	}
 }
 
 // IndexAction 显示列表页面
 func (c *WorkspaceController) IndexAction() {
 	c.CheckOneAccessRequest(SuperAdmin, true)
 
-	c.UpdateOnlineUser()
 	c.Layout = "base.html"
 	c.TplName = "workspace-list.html"
 }
@@ -137,7 +155,6 @@ func (c *WorkspaceController) IndexAction() {
 // ListAction 获取列表显示的数据
 func (c *WorkspaceController) ListAction() {
 	c.CheckOneAccessRequest(SuperAdmin, true)
-	c.UpdateOnlineUser()
 	defer c.ServeJSON()
 
 	req := workspaceRequestParam{}

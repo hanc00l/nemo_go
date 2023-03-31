@@ -53,7 +53,6 @@ type OnlineUserInfoData struct {
 
 // IndexAction dashboard首页
 func (c *DashboardController) IndexAction() {
-	c.UpdateOnlineUser()
 	c.Layout = "base.html"
 	c.TplName = "dashboard.html"
 }
@@ -63,7 +62,7 @@ func (c *DashboardController) GetStatisticDataAction() {
 	defer c.ServeJSON()
 
 	searchMap := make(map[string]interface{})
-	workspaceId := c.GetSession("Workspace").(int)
+	workspaceId := c.GetCurrentWorkspace()
 	if workspaceId > 0 {
 		searchMap["workspace_id"] = workspaceId
 	}
@@ -87,7 +86,6 @@ func (c *DashboardController) GetStatisticDataAction() {
 
 // GetTaskInfoAction 获取任务数据
 func (c *DashboardController) GetTaskInfoAction() {
-	c.UpdateOnlineUser()
 	defer c.ServeJSON()
 
 	searchMapActivated := make(map[string]interface{})
@@ -97,7 +95,7 @@ func (c *DashboardController) GetTaskInfoAction() {
 	searchMapALL := make(map[string]interface{})
 	searchMapALL["date_delta"] = 7
 
-	workspaceId := c.GetSession("Workspace").(int)
+	workspaceId := c.GetCurrentWorkspace()
 	if workspaceId > 0 {
 		searchMapActivated["workspace_id"] = workspaceId
 		searchMapCreated["workspace_id"] = workspaceId
@@ -112,11 +110,10 @@ func (c *DashboardController) GetTaskInfoAction() {
 
 // GetStartedTaskInfoAction 获取正在执行的任务数据
 func (c *DashboardController) GetStartedTaskInfoAction() {
-	c.UpdateOnlineUser()
 	defer c.ServeJSON()
 
 	searchMapActivated := make(map[string]interface{})
-	workspaceId := c.GetSession("Workspace").(int)
+	workspaceId := c.GetCurrentWorkspace()
 	if workspaceId > 0 {
 		searchMapActivated["workspace_id"] = workspaceId
 	}
@@ -148,6 +145,7 @@ func (c *DashboardController) WorkerAliveListAction() {
 	resp := DataTableResponseData{}
 
 	comm.WorkerStatusMutex.Lock()
+	defer comm.WorkerStatusMutex.Unlock()
 	for _, v := range comm.WorkerStatus {
 		if time.Now().Sub(v.UpdateTime).Minutes() > 5 {
 			delete(comm.WorkerStatus, v.WorkerName)
@@ -177,7 +175,6 @@ func (c *DashboardController) WorkerAliveListAction() {
 		resp.Data = append(resp.Data, wsd)
 		index++
 	}
-	comm.WorkerStatusMutex.Unlock()
 
 	resp.Draw = req.Draw
 	resp.RecordsTotal = len(comm.WorkerStatus)
@@ -199,13 +196,14 @@ func (c *DashboardController) ManualReloadWorkerAction() {
 		return
 	}
 	comm.WorkerStatusMutex.Lock()
+	defer comm.WorkerStatusMutex.Unlock()
 	if _, ok := comm.WorkerStatus[worker]; ok {
 		comm.WorkerStatus[worker].ManualReloadFlag = true
 		c.SucceededStatus("已设置worker重启标志，等待worker的daemon进程执行！")
 	} else {
 		c.FailedStatus("无效的worker name")
 	}
-	comm.WorkerStatusMutex.Unlock()
+
 }
 
 // ManualWorkerFileSyncAction 同步worker
@@ -222,13 +220,14 @@ func (c *DashboardController) ManualWorkerFileSyncAction() {
 		return
 	}
 	comm.WorkerStatusMutex.Lock()
+	defer comm.WorkerStatusMutex.Unlock()
 	if _, ok := comm.WorkerStatus[worker]; ok {
 		comm.WorkerStatus[worker].ManualFileSyncFlag = true
 		c.SucceededStatus("已设置worker同步标志，等待worker的daemon进程执行！")
 	} else {
 		c.FailedStatus("无效的worker name")
 	}
-	comm.WorkerStatusMutex.Unlock()
+
 }
 
 // OnlineUserListAction 获取在线用户数据，用于Dashboard表表显示
