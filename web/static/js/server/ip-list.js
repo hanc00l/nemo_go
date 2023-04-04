@@ -569,6 +569,7 @@ function get_export_options() {
 
 function load_portscan_config() {
     $.post("/config-list", function (data) {
+        //portscan
         $('#select_bin').val(data['cmdbin']);
         $('#input_port').val(data['port']);
         $('#select_tech').val(data['tech']);
@@ -579,5 +580,15 @@ function load_portscan_config() {
         $('#select_batchscan_tech').val(data['tech']);
         $('#input_batchscan_rate').val(data['rate']);
         $('#checkbox_batchscan_ping').prop("checked", data['ping']);
+        // onlineapi
+        $('#checkbox_fofasearch').prop("checked", data['fofa']);
+        $('#checkbox_huntersearch').prop("checked", data['hunter']);
+        $('#checkbox_quakesearch').prop("checked", data['quake']);
+        $('#checkbox_ignorecdn_outofchina').prop("checked", data['ignorecdn']);
+        //fingerprint
+        $('#checkbox_httpx').prop("checked", data['httpx']);
+        $('#checkbox_fingerprinthub').prop("checked", data['fingerprinthub']);
+        $('#checkbox_screenshot').prop("checked", data['screenshot']);
+        $('#checkbox_iconhash').prop("checked", data['iconhash']);
     });
 }

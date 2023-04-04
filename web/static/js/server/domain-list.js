@@ -1,4 +1,5 @@
 $(function () {
+    load_domainscan_config();
     //搜索任务
     $("#search").click(function () {
         $("#hidden_org_id").val($("#select_org_id_search").val())
@@ -30,7 +31,7 @@ $(function () {
             swal('Warning', '请至少输入一个Target', 'error');
             return;
         }
-        if (target.length>5000) {
+        if (target.length > 5000) {
             swal('Warning', '目标Targets长度不能超过5000', 'error');
             return;
         }
@@ -142,7 +143,7 @@ $(function () {
                 swal('Warning', '请至少输入一个Target', 'error');
                 return;
             }
-            if (target.length>5000) {
+            if (target.length > 5000) {
                 swal('Warning', '目标Targets长度不能超过5000', 'error');
                 return;
             }
@@ -428,4 +429,27 @@ function get_export_options() {
     url += '&disable_fofa=' + encodeURI($('#checkbox_disable_fofa').is(":checked"));
 
     return url;
+}
+
+function load_domainscan_config() {
+    $.post("/config-list", function (data) {
+        $('#checkbox_subfinder').prop("checked", data['subfinder']);
+        $('#checkbox_subdomainbrute').prop("checked", data['subdomainbrute']);
+        $('#checkbox_crawler').prop("checked", data['subdomaincrawler']);
+        //onlineapi
+        $('#checkbox_fofasearch').prop("checked", data['fofa']);
+        $('#checkbox_huntersearch').prop("checked", data['hunter']);
+        $('#checkbox_quakesearch').prop("checked", data['quake']);
+        $('#checkbox_icpquery').prop("checked", data['icp']);
+        $('#checkbox_whoisquery').prop("checked", data['whois']);
+        $('#checkbox_ignorecdn_outofchina').prop("checked", data['ignorecdn']);
+
+        $('#checkbox_portscan').prop("checked", data['portscan']);
+        //fingerprint
+        $('#checkbox_httpx').prop("checked", data['httpx']);
+        $('#checkbox_fingerprinthub').prop("checked", data['fingerprinthub']);
+        $('#checkbox_screenshot').prop("checked", data['screenshot']);
+        $('#checkbox_iconhash').prop("checked", data['iconhash']);
+
+    });
 }
