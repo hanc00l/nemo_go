@@ -25,6 +25,7 @@ func init() {
 	web.CtrlPost("/config-save-api", (*controllers.ConfigController).SaveAPITokenAction)
 	web.CtrlPost("/config-test-api", (*controllers.ConfigController).OnlineTestAPITokenAction)
 	web.CtrlPost("/config-test-notify", (*controllers.ConfigController).TestTaskNotifyAction)
+	web.CtrlPost("/config-save-domainscan", (*controllers.ConfigController).SaveDomainscanAction)
 
 	web.CtrlGet("/dashboard", (*controllers.DashboardController).IndexAction)
 	web.CtrlPost("/dashboard", (*controllers.DashboardController).GetStatisticDataAction)

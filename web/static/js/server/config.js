@@ -130,11 +130,14 @@ $(function () {
     $("#buttonSaveAPIToken").click(function () {
         $.post("/config-save-api",
             {
-                "fofa_user": $('#input_fofa_user').val(),
-                "fofa_token": $('#input_fofa_token').val(),
-                "hunter_token": $('#input_hunter_token').val(),
-                "quake_token": $('#input_quake_token').val(),
-                "chinaz_token": $('#input_chinaz_token').val(),
+                "fofa": $('#checkbox_fofa').is(":checked"),
+                "hunter": $('#checkbox_hunter').is(":checked"),
+                "quake": $('#checkbox_quake').is(":checked"),
+                "fofauser": $('#input_fofa_user').val(),
+                "fofatoken": $('#input_fofa_token').val(),
+                "huntertoken": $('#input_hunter_token').val(),
+                "quaketoken": $('#input_quake_token').val(),
+                "chinaztoken": $('#input_chinaz_token').val(),
             }, function (data, e) {
                 if (e === "success" && data['status'] == 'success') {
                     swal({
@@ -166,6 +169,35 @@ $(function () {
                 swal('Warning', data['msg'], 'error');
             }
         });
+    });
+
+    $("#buttonSaveDomainscan").click(function () {
+        $.post("/config-save-domainscan",
+            {
+                "subfinder": $('#checkbox_subfinder').is(":checked"),
+                "subdomainbrute": $('#checkbox_subdomainbrute').is(":checked"),
+                "subdomaincrawler": $('#checkbox_subdomaincrawler').is(":checked"),
+                "icp": $('#checkbox_icp').is(":checked"),
+                "whois": $('#checkbox_whois').is(":checked"),
+                "portscan": $('#checkbox_portscan').is(":checked"),
+                "ignorecdn": $('#checkbox_ignorecdn').is(":checked"),
+                "ignoreoutofchina": $('#checkbox_ignoreoutofchina').is(":checked"),
+                "wordlist": $('#select_wordlist').val(),
+            }, function (data, e) {
+                if (e === "success" && data['status'] == 'success') {
+                    swal({
+                        title: "保存成功！",
+                        text: "",
+                        type: "success",
+                        confirmButtonText: "确定",
+                        confirmButtonColor: "#41b883",
+                        closeOnConfirm: true,
+                        timer: 3000
+                    });
+                } else {
+                    swal('Warning', data['msg'], 'error');
+                }
+            });
     });
 });
 $("#buttonSaveHoneypot").click(function () {
@@ -253,13 +285,16 @@ function load_config() {
         $('#select_tech').val(data['tech']);
         $('#input_rate').val(data['rate']);
         $('#checkbox_ping').prop("checked", data['ping']);
+
         $('#checkbox_httpx').prop("checked", data['httpx']);
         $('#checkbox_fingerprinthub').prop("checked", data['fingerprinthub']);
         $('#checkbox_screenshot').prop("checked", data['screenshot']);
         $('#checkbox_iconhash').prop("checked", data['iconhash']);
+
         $('#input_ipslicenumber').val(data['ipslicenumber']);
         $('#input_portslicenumber').val(data['portslicenumber']);
         $('#nemo_version').html(data['version']);
+
         $('#input_serverchan').val(data['serverchan']);
         $('#input_dingtalk').val(data['dingtalk']);
         $('#input_feishu').val(data['feishu']);
@@ -268,6 +303,19 @@ function load_config() {
         $('#input_hunter_token').val(data['huntertoken']);
         $('#input_quake_token').val(data['quaketoken']);
         $('#input_chinaz_token').val(data['chinaztoken']);
+
+        $('#checkbox_subfinder').prop("checked", data['subfinder']);
+        $('#checkbox_subdomainbrute').prop("checked", data['subdomainbrute']);
+        $('#checkbox_subdomaincrawler').prop("checked", data['subdomaincrawler']);
+        $('#checkbox_icp').prop("checked", data['icp']);
+        $('#checkbox_whois').prop("checked", data['whois']);
+        $('#checkbox_ignorecdn').prop("checked", data['ignorecdn']);
+        $('#checkbox_portscan').prop("checked", data['portscan']);
+        $('#select_wordlist').val(data['wordlist']);
+
+        $('#checkbox_fofa').prop("checked", data['fofa']);
+        $('#checkbox_hunter').prop("checked", data['hunter']);
+        $('#checkbox_quake').prop("checked", data['quake']);
     });
 }
 

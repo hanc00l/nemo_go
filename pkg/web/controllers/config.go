@@ -29,26 +29,43 @@ const (
 )
 
 type DefaultConfig struct {
-	CmdBin           string `json:"cmdbin"`
-	Port             string `json:"port"`
-	Rate             int    `json:"rate"`
-	Tech             string `json:"tech"`
-	IsPing           bool   `json:"ping"`
-	IpSliceNumber    int    `json:"ipslicenumber"`
-	PortSliceNumber  int    `json:"portslicenumber"`
-	Version          string `json:"version"`
-	IsHttpx          bool   `json:"httpx"`
-	IsScreenshot     bool   `json:"screenshot"`
-	IsFingerprintHub bool   `json:"fingerprinthub"`
-	IsIconHash       bool   `json:"iconhash"`
-	ServerChanToken  string `json:"serverchan"`
-	DingTalkToken    string `json:"dingtalk"`
-	FeishuToken      string `json:"feishu"`
-	FofaUser         string `json:"fofauser"`
-	FofaToken        string `json:"fofatoken"`
-	HunterToken      string `json:"huntertoken"`
-	QuakeToken       string `json:"quaketoken"`
-	ChinazToken      string `json:"chinaztoken"`
+	//portscan
+	CmdBin string `json:"cmdbin" form:"cmdbin"`
+	Port   string `json:"port" form:"port"`
+	Rate   int    `json:"rate" form:"rate"`
+	Tech   string `json:"tech" form:"tech"`
+	IsPing bool   `json:"ping" form:"ping"`
+	//task
+	IpSliceNumber   int    `json:"ipslicenumber" form:"ipslicenumber"`
+	PortSliceNumber int    `json:"portslicenumber" form:"portslicenumber"`
+	Version         string `json:"version" form:"version"`
+	//fingerprint
+	IsHttpx          bool `json:"httpx" form:"httpx"`
+	IsScreenshot     bool `json:"screenshot" form:"screenshot"`
+	IsFingerprintHub bool `json:"fingerprinthub" form:"fingerprinthub"`
+	IsIconHash       bool `json:"iconhash" form:"iconhash"`
+	// onlineapi
+	IsFofa          bool   `json:"fofa" form:"fofa"`
+	IsQuake         bool   `json:"quake" form:"quake"`
+	IsHunter        bool   `json:"hunter" form:"hunter"`
+	ServerChanToken string `json:"serverchan" form:"serverchan"`
+	DingTalkToken   string `json:"dingtalk" form:"dingtalk"`
+	FeishuToken     string `json:"feishu" form:"feishu"`
+	FofaUser        string `json:"fofauser" form:"fofauser"`
+	FofaToken       string `json:"fofatoken" form:"fofatoken"`
+	HunterToken     string `json:"huntertoken" form:"huntertoken"`
+	QuakeToken      string `json:"quaketoken" form:"quaketoken"`
+	ChinazToken     string `json:"chinaztoken" form:"chinaztoken"`
+	// domainscan
+	Wordlist           string `json:"wordlist" form:"wordlist"`
+	IsSubDomainFinder  bool   `json:"subfinder" form:"subfinder"`
+	IsSubDomainBrute   bool   `json:"subdomainbrute" form:"subdomainbrute"`
+	IsSubDomainCrawler bool   `json:"subdomaincrawler" form:"subdomaincrawler"`
+	IsIgnoreCDN        bool   `json:"ignorecdn" form:"ignorecdn"`
+	IsIgnoreOutofChina bool   `json:"ignoreoutofchina" form:"ignoreoutofchina"`
+	IsPortscan         bool   `json:"portscan" form:"portscan"`
+	IsWhois            bool   `json:"whois" form:"whois"`
+	IsICP              bool   `json:"icp" form:"icp"`
 }
 
 func (c *ConfigController) IndexAction() {
@@ -77,29 +94,49 @@ func (c *ConfigController) LoadDefaultConfigAction() {
 	fingerprint := conf.GlobalWorkerConfig().Fingerprint
 	notify := conf.GlobalServerConfig().Notify
 	apiConfig := conf.GlobalWorkerConfig().API
+	onlineapi := conf.GlobalWorkerConfig().OnlineAPI
+	domainscan := conf.GlobalWorkerConfig().Domainscan
 	data := DefaultConfig{
-		CmdBin:           portscan.Cmdbin,
-		Port:             portscan.Port,
-		Rate:             portscan.Rate,
-		Tech:             portscan.Tech,
-		IsPing:           portscan.IsPing,
-		IpSliceNumber:    task.IpSliceNumber,
-		PortSliceNumber:  task.PortSliceNumber,
+		CmdBin: portscan.Cmdbin,
+		Port:   portscan.Port,
+		Rate:   portscan.Rate,
+		Tech:   portscan.Tech,
+		IsPing: portscan.IsPing,
+		//
+		IpSliceNumber:   task.IpSliceNumber,
+		PortSliceNumber: task.PortSliceNumber,
+		//
 		IsHttpx:          fingerprint.IsHttpx,
 		IsScreenshot:     fingerprint.IsScreenshot,
 		IsFingerprintHub: fingerprint.IsFingerprintHub,
 		IsIconHash:       fingerprint.IsIconHash,
-		ServerChanToken:  notify["serverchan"].Token,
-		DingTalkToken:    notify["dingtalk"].Token,
-		FeishuToken:      notify["feishu"].Token,
-		FofaUser:         apiConfig.Fofa.Name,
-		FofaToken:        apiConfig.Fofa.Key,
-		HunterToken:      apiConfig.Hunter.Key,
-		QuakeToken:       apiConfig.Quake.Key,
-		ChinazToken:      apiConfig.ICP.Key,
+		//
+		ServerChanToken: notify["serverchan"].Token,
+		DingTalkToken:   notify["dingtalk"].Token,
+		FeishuToken:     notify["feishu"].Token,
+		//
+		FofaUser:    apiConfig.Fofa.Name,
+		FofaToken:   apiConfig.Fofa.Key,
+		HunterToken: apiConfig.Hunter.Key,
+		QuakeToken:  apiConfig.Quake.Key,
+		ChinazToken: apiConfig.ICP.Key,
+		//
+		Wordlist:           domainscan.Wordlist,
+		IsSubDomainFinder:  domainscan.IsSubDomainFinder,
+		IsSubDomainBrute:   domainscan.IsSubDomainBrute,
+		IsSubDomainCrawler: domainscan.IsSubdomainCrawler,
+		IsIgnoreCDN:        domainscan.IsIgnoreCDN,
+		IsIgnoreOutofChina: domainscan.IsIgnoreOutofChina,
+		IsPortscan:         domainscan.IsPortScan,
+		IsWhois:            domainscan.IsWhois,
+		IsICP:              domainscan.IsICP,
+		//onlineAPI:
+		IsFofa:   onlineapi.IsFofa,
+		IsHunter: onlineapi.IsHunter,
+		IsQuake:  onlineapi.IsQuake,
 	}
 	if fileContent, err1 := os.ReadFile(filepath.Join(conf.GetRootPath(), "version.txt")); err1 == nil {
-		data.Version = string(fileContent)
+		data.Version = strings.TrimSpace(string(fileContent))
 	}
 	c.Data["json"] = data
 }
@@ -256,26 +293,30 @@ func (c *ConfigController) SaveAPITokenAction() {
 		return
 	}
 
-	fofaUser := c.GetString("fofa_user", "")
-	fofaToken := c.GetString("fofa_token", "")
-	hunterToken := c.GetString("hunter_token", "")
-	quakeToken := c.GetString("quake_token", "")
-	chinazToken := c.GetString("chinaz_token", "")
-
-	err := conf.GlobalWorkerConfig().ReloadConfig()
+	data := DefaultConfig{}
+	err := c.ParseForm(&data)
 	if err != nil {
 		c.FailedStatus(err.Error())
 		return
 	}
-	conf.GlobalWorkerConfig().API.Fofa.Name = fofaUser
-	conf.GlobalWorkerConfig().API.Fofa.Key = fofaToken
-	conf.GlobalWorkerConfig().API.Hunter.Key = hunterToken
-	conf.GlobalWorkerConfig().API.Quake.Key = quakeToken
-	conf.GlobalWorkerConfig().API.ICP.Key = chinazToken
-
+	err = conf.GlobalWorkerConfig().ReloadConfig()
+	if err != nil {
+		c.FailedStatus(err.Error())
+		return
+	}
+	//onlineapi
+	conf.GlobalWorkerConfig().OnlineAPI.IsFofa = data.IsFofa
+	conf.GlobalWorkerConfig().OnlineAPI.IsQuake = data.IsQuake
+	conf.GlobalWorkerConfig().OnlineAPI.IsHunter = data.IsHunter
+	conf.GlobalWorkerConfig().API.Fofa.Name = data.FofaUser
+	conf.GlobalWorkerConfig().API.Fofa.Key = data.FofaToken
+	conf.GlobalWorkerConfig().API.Hunter.Key = data.HunterToken
+	conf.GlobalWorkerConfig().API.Quake.Key = data.QuakeToken
+	conf.GlobalWorkerConfig().API.ICP.Key = data.ChinazToken
 	err = conf.GlobalWorkerConfig().WriteConfig()
 	if err != nil {
 		c.FailedStatus(err.Error())
+		return
 	}
 	c.SucceededStatus("保存配置成功")
 }
@@ -331,26 +372,57 @@ func (c *ConfigController) SaveFingerprintAction() {
 		c.FailedStatus("当前用户权限不允许！")
 		return
 	}
-
-	httpx, err1 := c.GetBool("httpx", true)
-	fingerprinthub, err2 := c.GetBool("fingerprinthub", true)
-	screenshot, err3 := c.GetBool("screenshot", true)
-	iconhash, err4 := c.GetBool("iconhash", true)
-
-	if err1 != nil || err2 != nil || err3 != nil || err4 != nil {
-		c.FailedStatus("配置参数错误！")
-		return
-	}
-	err := conf.GlobalWorkerConfig().ReloadConfig()
+	data := DefaultConfig{}
+	err := c.ParseForm(&data)
 	if err != nil {
 		c.FailedStatus(err.Error())
 		return
 	}
+	err = conf.GlobalWorkerConfig().ReloadConfig()
+	if err != nil {
+		c.FailedStatus(err.Error())
+		return
+	}
+	//fingerprint
+	conf.GlobalWorkerConfig().Fingerprint.IsHttpx = data.IsHttpx
+	conf.GlobalWorkerConfig().Fingerprint.IsFingerprintHub = data.IsFingerprintHub
+	conf.GlobalWorkerConfig().Fingerprint.IsScreenshot = data.IsScreenshot
+	conf.GlobalWorkerConfig().Fingerprint.IsIconHash = data.IsIconHash
+	err = conf.GlobalWorkerConfig().WriteConfig()
+	if err != nil {
+		c.FailedStatus(err.Error())
+	}
+	c.SucceededStatus("保存配置成功")
+}
 
-	conf.GlobalWorkerConfig().Fingerprint.IsHttpx = httpx
-	conf.GlobalWorkerConfig().Fingerprint.IsScreenshot = screenshot
-	conf.GlobalWorkerConfig().Fingerprint.IsFingerprintHub = fingerprinthub
-	conf.GlobalWorkerConfig().Fingerprint.IsIconHash = iconhash
+// SaveDomainscanAction 保存默认域名任务的设置
+func (c *ConfigController) SaveDomainscanAction() {
+	defer c.ServeJSON()
+	if c.CheckMultiAccessRequest([]RequestRole{SuperAdmin, Admin}, false) == false {
+		c.FailedStatus("当前用户权限不允许！")
+		return
+	}
+
+	data := DefaultConfig{}
+	err := c.ParseForm(&data)
+	if err != nil {
+		c.FailedStatus(err.Error())
+		return
+	}
+	err = conf.GlobalWorkerConfig().ReloadConfig()
+	if err != nil {
+		c.FailedStatus(err.Error())
+		return
+	}
+	conf.GlobalWorkerConfig().Domainscan.Wordlist = data.Wordlist
+	conf.GlobalWorkerConfig().Domainscan.IsSubDomainFinder = data.IsSubDomainFinder
+	conf.GlobalWorkerConfig().Domainscan.IsSubDomainBrute = data.IsSubDomainBrute
+	conf.GlobalWorkerConfig().Domainscan.IsSubdomainCrawler = data.IsSubDomainCrawler
+	conf.GlobalWorkerConfig().Domainscan.IsIgnoreCDN = data.IsIgnoreCDN
+	conf.GlobalWorkerConfig().Domainscan.IsIgnoreOutofChina = data.IsIgnoreOutofChina
+	conf.GlobalWorkerConfig().Domainscan.IsPortScan = data.IsPortscan
+	conf.GlobalWorkerConfig().Domainscan.IsICP = data.IsICP
+	conf.GlobalWorkerConfig().Domainscan.IsWhois = data.IsWhois
 	err = conf.GlobalWorkerConfig().WriteConfig()
 	if err != nil {
 		c.FailedStatus(err.Error())

@@ -53,6 +53,77 @@
                 </div>
             </div>
             <div class="tile">
+                <h3 class="tile-title">子域名收集默认配置</h3>
+                <div class="tile-body">
+                    <form>
+                        <div class="form-group">
+                            <label class="col-form-label" for="div_subdomain">
+                                <b>子域名收集技术：</b>
+                            </label>
+                            </br>
+                            <div class="form-check form-check-inline" id="div_subdomain">
+                                <div class="form-check form-check-inline">
+                                    <label class="form-check-label" for="checkbox_subfinder">
+                                        <input class="form-check-input" id="checkbox_subfinder" type="checkbox">子域名被动枚举
+                                    </label>
+                                </div>
+                                <div class="form-check form-check-inline">
+                                    <label class="form-check-label" for="checkbox_subdomainbrute">
+                                        <input class="form-check-input" id="checkbox_subdomainbrute" type="checkbox">子域名暴力枚举
+                                    </label>
+                                </div>
+                                <div class="form-check form-check-inline">
+                                    <label class="form-check-label" for="checkbox_subdomaincrawler">
+                                        <input class="form-check-input" id="checkbox_subdomaincrawler" type="checkbox">子域名爬虫
+                                    </label>
+                                </div>
+                            </div>
+                            </br>
+                            <div class="form-check form-check-inline">
+                                <div class="form-check form-check-inline">
+                                    <label class="form-check-label" for="checkbox_icp">
+                                        <input class="form-check-input" id="checkbox_icp" type="checkbox">ICP备案查询
+                                    </label>
+                                </div>
+                                <div class="form-check form-check-inline">
+                                    <label class="form-check-label" for="checkbox_whois">
+                                        <input class="form-check-input" id="checkbox_whois" type="checkbox">Whois查询
+                                    </label>
+                                </div>
+                                <div class="form-check form-check-inline">
+                                    <label class="form-check-label" for="checkbox_ignorecdn">
+                                        <input class="form-check-input" id="checkbox_ignorecdn" type="checkbox">忽略CDN
+                                    </label>
+                                </div>
+                                <div class="form-check form-check-inline">
+                                    <label class="form-check-label" for="checkbox_ignoreoutofchina">
+                                        <input class="form-check-input" id="checkbox_ignoreoutofchina" type="checkbox">忽略非中国大陆IP
+                                    </label>
+                                </div>
+                                <div class="form-check form-check-inline">
+                                    <label class="form-check-label" for="checkbox_portscan">
+                                        <input class="form-check-input" id="checkbox_portscan" type="checkbox">对IP进行端口扫描
+                                    </label>
+                                </div>
+                            </div>
+                            <br/>
+                            <label class="col-form-label" for="select_wordlist">
+                                <b>暴力枚举字典文件：</b>
+                            </label>
+                            <select class="form-control" id="select_wordlist">
+                                <option value="subnames.txt">subnames.txt（9万条记录）</option>
+                                <option value="subnames_medium.txt">subnames_medium.txt（88万条记录）</option>
+                            </select>
+                        </div>
+                    </form>
+                </div>
+                <div class="tile-footer">
+                    <button class="btn btn-primary" type="button" id="buttonSaveDomainscan"><i
+                            class="fa fa-fw fa-lg fa-check-circle"></i>保存设置
+                    </button>&nbsp;&nbsp;&nbsp;
+                </div>
+            </div>
+            <div class="tile">
                 <h3 class="tile-title">指纹获取默认配置</h3>
                 <div class="tile-body">
                     <form>
@@ -107,56 +178,36 @@
                 </div>
             </div>
             {{ end }}
-            <div class="tile">
-                <h3 class="tile-title">Version&nbsp;<span id="nemo_version"></span></h3>
-                <div class="tile-body">
-                </div>
-                <div class="tile-footer">
-                    <div class="row">
-                        <div class="col-md-8 col-md-offset-3">
-                        </div>
-                    </div>
-                </div>
-            </div>
         </div>
         <div class="col-md-6">
-            <div class="tile">
-                <h3 class="tile-title">修改登录密码</h3>
-                <div class="tile-body">
-                    <div class="form-group row">
-                        <label class="control-label col-md-3"> 原始密码</label>
-                        <div class="col-md-8">
-                            <input class="form-control" id="input_oldpass" type="password" placeholder="old password"
-                                   value="">
-                        </div>
-                    </div>
-                    <div class="form-group row">
-                        <label class="control-label col-md-3">修改后的新密码</label>
-                        <div class="col-md-8">
-                            <input class="form-control" id="input_password1" type="password" placeholder="new password"
-                                   value="">
-                        </div>
-                    </div>
-                    <div class="form-group row">
-                        <label class="control-label col-md-3">确认修改新密码</label>
-                        <div class="col-md-8">
-                            <input class="form-control" id="input_password2" type="password"
-                                   placeholder="confirm password" value="">
-                        </div>
-                    </div>
-                </div>
-                <div class="tile-footer">
-                    <button class="btn btn-primary" type="button" id="buttonChangPassword"><i
-                            class="fa fa-fw fa-lg fa-check-circle"></i>保存设置
-                    </button>&nbsp;&nbsp;&nbsp;
-                </div>
-            </div>
             {{ if eq .UserRole "superadmin" "admin" }}
             <div class="tile">
-                <h3 class="tile-title">API Token</h3>
+                <h3 class="tile-title">在线API默认设置</h3>
                 <div class="tile-body">
                     <form>
                         <div class="form-group">
+                            <label class="col-form-label" for="div_subdomain">
+                                <b>在线API接口：</b>
+                            </label>
+                            </br>
+                            <div class="form-check form-check-inline">
+                                <div class="form-check form-check-inline">
+                                    <label class="form-check-label" for="checkbox_fofa">
+                                        <input class="form-check-input" id="checkbox_fofa" type="checkbox">FOFA
+                                    </label>
+                                </div>
+                                <div class="form-check form-check-inline">
+                                    <label class="form-check-label" for="checkbox_hunter">
+                                        <input class="form-check-input" id="checkbox_hunter" type="checkbox">Hunter
+                                    </label>
+                                </div>
+                                <div class="form-check form-check-inline">
+                                    <label class="form-check-label" for="checkbox_quake">
+                                        <input class="form-check-input" id="checkbox_quake" type="checkbox">Quake
+                                    </label>
+                                </div>
+                            </div>
+                            </br>
                             <label class="col-form-label" for="input_fofa_user">
                                 <b>FOFA Token</b>
                             </label>
@@ -230,6 +281,48 @@
                 </div>
             </div>
             {{ end }}
+            <div class="tile">
+                <h3 class="tile-title">修改登录密码</h3>
+                <div class="tile-body">
+                    <div class="form-group row">
+                        <label class="control-label col-md-3"> 原始密码</label>
+                        <div class="col-md-8">
+                            <input class="form-control" id="input_oldpass" type="password" placeholder="old password"
+                                   value="">
+                        </div>
+                    </div>
+                    <div class="form-group row">
+                        <label class="control-label col-md-3">修改后的新密码</label>
+                        <div class="col-md-8">
+                            <input class="form-control" id="input_password1" type="password" placeholder="new password"
+                                   value="">
+                        </div>
+                    </div>
+                    <div class="form-group row">
+                        <label class="control-label col-md-3">确认修改新密码</label>
+                        <div class="col-md-8">
+                            <input class="form-control" id="input_password2" type="password"
+                                   placeholder="confirm password" value="">
+                        </div>
+                    </div>
+                </div>
+                <div class="tile-footer">
+                    <button class="btn btn-primary" type="button" id="buttonChangPassword"><i
+                            class="fa fa-fw fa-lg fa-check-circle"></i>保存设置
+                    </button>&nbsp;&nbsp;&nbsp;
+                </div>
+            </div>
+            <div class="tile">
+                <h3 class="tile-title">Version&nbsp;<span id="nemo_version"></span></h3>
+                <div class="tile-body">
+                </div>
+                <div class="tile-footer">
+                    <div class="row">
+                        <div class="col-md-8 col-md-offset-3">
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
         <div class="clearix"></div>
     </div>
