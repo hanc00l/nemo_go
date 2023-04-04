@@ -66,6 +66,11 @@ func (s *SubFinder) RunSubFinder(domain string) {
 		providerFile := filepath.Join(conf.GetRootPath(), "thirdparty/dict", conf.GlobalWorkerConfig().Domainscan.ProviderConfig)
 		if utils.CheckFileExist(providerFile) {
 			options.ProviderConfig = providerFile
+			// provider-config 需要手工加载
+			// 位于subfinder项目的main.go中的options := runner.ParseOptions()中
+			if err := runner.UnmarshalFrom(providerFile); err != nil {
+				logging.RuntimeLog.Errorf("provider-config load err:%s", err)
+			}
 		} else {
 			logging.RuntimeLog.Errorf("provider-config file not exist:%s", providerFile)
 		}
