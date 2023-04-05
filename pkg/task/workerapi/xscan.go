@@ -46,6 +46,10 @@ type XScanConfig struct {
 	// xraypoc
 	IsXrayPoc   bool   `json:"xraypoc,omitempty"`
 	XrayPocFile string `json:"xraypocfile,omitempty"`
+
+	// nucleipoc
+	IsNucleiPoc   bool   `json:"nucleipoc,omitempty"`
+	NucleiPocFile string `json:"nucleipocfile,omitempty"`
 }
 
 type XScan struct {
@@ -258,6 +262,14 @@ func XFingerPrint(taskId, mainTaskId, configJSON string) (result string, err err
 			return FailedTask(err.Error()), err
 		}
 	}
+
+	// 启动NucleiPoc任务
+	if config.IsNucleiPoc {
+		_, err = scan.NewNucleiScan(taskId, mainTaskId)
+		if err != nil {
+			return FailedTask(err.Error()), err
+		}
+	}
 	return SucceedTask(result), nil
 }
 
@@ -276,6 +288,28 @@ func XXray(taskId, mainTaskId, configJSON string) (result string, err error) {
 	// 执行任务
 	scan := NewXScan(config)
 	result, err = scan.XrayScan(taskId, mainTaskId)
+	if err != nil {
+		logging.RuntimeLog.Error(err)
+		return FailedTask(err.Error()), err
+	}
+	return SucceedTask(result), nil
+}
+
+// XNuclei Nuclei扫描任务（调用Nuclei二进制程序）
+func XNuclei(taskId, mainTaskId, configJSON string) (result string, err error) {
+	// 检查任务状态
+	var ok bool
+	if ok, result, err = CheckTaskStatus(taskId); !ok {
+		return result, err
+	}
+	// 解析任务参数
+	config := XScanConfig{}
+	if err = ParseConfig(configJSON, &config); err != nil {
+		return FailedTask(err.Error()), err
+	}
+	// 执行任务
+	scan := NewXScan(config)
+	result, err = scan.NucleiScan(taskId, mainTaskId)
 	if err != nil {
 		logging.RuntimeLog.Error(err)
 		return FailedTask(err.Error()), err
@@ -397,6 +431,18 @@ func (x *XScan) doXrayscan(swg *sizedwaitgroup.SizedWaitGroup, config pocscan.Co
 	//合并结果
 	x.vulMutex.Lock()
 	x.ResultVul = append(x.ResultVul, xray.Result...)
+	x.vulMutex.Unlock()
+
+	swg.Done()
+}
+
+// doNucleiScan 调用一次Nuclei
+func (x *XScan) doNucleiScan(swg *sizedwaitgroup.SizedWaitGroup, config pocscan.Config) {
+	nuclei := pocscan.NewNuclei(config)
+	nuclei.Do()
+	//合并结果
+	x.vulMutex.Lock()
+	x.ResultVul = append(x.ResultVul, nuclei.Result...)
 	x.vulMutex.Unlock()
 
 	swg.Done()
@@ -562,6 +608,8 @@ func (x *XScan) NewFingerprintScan(taskId, mainTaskId string) (result string, er
 		IsIconHash:       x.Config.IsIconHash,
 		IsXrayPoc:        x.Config.IsXrayPoc,
 		XrayPocFile:      x.Config.XrayPocFile,
+		IsNucleiPoc:      x.Config.IsNucleiPoc,
+		NucleiPocFile:    x.Config.NucleiPocFile,
 		WorkspaceId:      x.Config.WorkspaceId,
 	}
 	//拆分子任务
@@ -583,6 +631,65 @@ func (x *XScan) NewFingerprintScan(taskId, mainTaskId string) (result string, er
 			return
 		}
 	}
+	return
+}
+
+// NewNucleiScan 生成Nuclei任务
+func (x *XScan) NewNucleiScan(taskId, mainTaskId string) (result string, err error) {
+	//拆分子任务
+	ipTarget, domainTarget := MakeSubTaskTarget(&x.ResultIP, &x.ResultDomain)
+	for _, t := range ipTarget {
+		newConfig := XScanConfig{IPPort: t, IsNucleiPoc: true, NucleiPocFile: x.Config.NucleiPocFile, WorkspaceId: x.Config.WorkspaceId}
+		result, err = sendTask(taskId, mainTaskId, newConfig, "xnuclei")
+		if err != nil {
+			return
+		}
+	}
+	for _, t := range domainTarget {
+		newConfig := XScanConfig{Domain: t, IsNucleiPoc: true, NucleiPocFile: x.Config.NucleiPocFile, WorkspaceId: x.Config.WorkspaceId}
+		result, err = sendTask(taskId, mainTaskId, newConfig, "xnuclei")
+		if err != nil {
+			return
+		}
+	}
+	return
+}
+
+// NucleiScan 调用执行Nuclei扫描任务
+func (x *XScan) NucleiScan(taskId string, mainTaskId string) (result string, err error) {
+	// 生成扫描参数
+	config := pocscan.Config{PocFile: x.Config.NucleiPocFile, WorkspaceId: x.Config.WorkspaceId}
+	if x.Config.NucleiPocFile == "" {
+		config.PocFile = "*"
+	}
+	swg := sizedwaitgroup.New(xrayscanMaxThreadNum[conf.WorkerPerformanceMode])
+	if len(x.Config.IPPort) > 0 {
+		for ip, ports := range x.Config.IPPort {
+			for _, port := range ports {
+				runConfig := config
+				runConfig.Target = fmt.Sprintf("%s:%d", ip, port)
+				swg.Add()
+				go x.doNucleiScan(&swg, runConfig)
+			}
+		}
+	}
+	if len(x.Config.Domain) > 0 {
+		for domain := range x.Config.Domain {
+			runConfig := config
+			runConfig.Target = domain
+			swg.Add()
+			go x.doNucleiScan(&swg, runConfig)
+		}
+	}
+	swg.Wait()
+	// 保存结果
+	resultArgs := comm.ScanResultArgs{
+		TaskID:              taskId,
+		MainTaskId:          mainTaskId,
+		VulnerabilityResult: x.ResultVul,
+	}
+	err = comm.CallXClient("SaveVulnerabilityResult", &resultArgs, &result)
+
 	return
 }
 
