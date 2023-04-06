@@ -84,6 +84,11 @@ func main() {
 	StartMainTaskDemon()
 
 	time.Sleep(time.Second * 1)
-
+	err := comm.GenerateRSAKey()
+	if err != nil {
+		logging.CLILog.Error(err)
+		logging.RuntimeLog.Error(err)
+		return
+	}
 	StartWebServer()
 }

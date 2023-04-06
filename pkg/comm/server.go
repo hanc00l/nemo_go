@@ -1,15 +1,22 @@
 package comm
 
 import (
+	"bytes"
 	"context"
 	"errors"
 	"fmt"
 	"github.com/hanc00l/nemo_go/pkg/conf"
 	"github.com/hanc00l/nemo_go/pkg/filesync"
 	"github.com/hanc00l/nemo_go/pkg/logging"
+	"github.com/hanc00l/nemo_go/pkg/utils"
 	"github.com/smallnest/rpcx/protocol"
 	"github.com/smallnest/rpcx/server"
+	"os"
+	"path/filepath"
+	"regexp"
 )
+
+var RsaPublicKeyText, RsaPrivateKeyText []byte
 
 // StartRPCServer 启动RPC server
 func StartRPCServer() {
@@ -69,4 +76,30 @@ func StartFileSyncMonitor() {
 			WorkerStatusMutex.Unlock()
 		}
 	}
+}
+
+// GenerateRSAKey 生成web的RSA公、私钥
+func GenerateRSAKey() (err error) {
+	if err, RsaPublicKeyText, RsaPrivateKeyText = utils.GenerateRSAKey(2048); err != nil {
+		return
+	}
+	rsaPublicKeyTextJS := bytes.ReplaceAll(RsaPublicKeyText, []byte("\n"), []byte(""))
+	// 将rsa的公钥写入到前端的js中：
+	// 读取js文件：
+	var oldJSText []byte
+	webLoginJSFile := filepath.Join(conf.GetRootPath(), "web/static/js/server/login.js")
+	if oldJSText, err = os.ReadFile(webLoginJSFile); err != nil {
+		return
+	}
+	// 正则替换原来的key
+	pubKeyJS := regexp.MustCompile("(const pubKey = )'(.*?)'")
+	var b bytes.Buffer
+	b.Write([]byte("$1'"))
+	b.Write(rsaPublicKeyTextJS)
+	b.Write([]byte("'"))
+	newJSText := pubKeyJS.ReplaceAll(oldJSText, b.Bytes())
+	// 保存至js文件中
+	err = os.WriteFile(webLoginJSFile, newJSText, 0666)
+
+	return
 }
