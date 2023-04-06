@@ -268,12 +268,23 @@ $(function () {
         formData.append("xraypoc", $('#checkbox_xraypoc_xscan').is(":checked"));
         formData.append("xraypocfile", $('#select_poc_type_xscan').val() + "|" + $('#input_xray_poc_file_xscan').val());
         formData.append("taskcron", $('#checkbox_cron_task_xscan').is(":checked"));
+
+        formData.append("nucleipoc", $('#checkbox_nucleipoc_xscan').is(":checked"));
+        formData.append("nucleipocfile", $('#input_nuclei_poc_file_xscan').val());
+
+
         formData.append("cronrule", cron_rule);
         formData.append("croncomment", $('#input_cron_comment_xscan').val());
         if (formData.get("xraypoc") === "true" && formData.get("fingerprint") === "false") {
             swal('Warning', '漏洞扫描需要开启指纹扫描步骤选项', 'error');
             return;
         }
+
+        if (formData.get("nucleipoc") === "true" && formData.get("fingerprint") === "false") {
+            swal('Warning', '漏洞扫描需要开启指纹扫描步骤选项', 'error');
+            return;
+        }
+
         $.ajax({
             url: '/task-start-xscan',
             type: 'POST',

@@ -209,7 +209,11 @@ func StartXFofaKeywordTask(req XScanRequestParam, mainTaskId string, workspaceId
 		IsIgnoreOutofChina: req.IsCn,
 		IsXrayPoc:          req.IsXrayPocscan,
 		XrayPocFile:        req.XrayPocFile,
-		WorkspaceId:        workspaceId,
+
+		IsNucleiPoc:   req.IsNucleiPocscan,
+		NucleiPocFile: req.NucleiPocFile,
+
+		WorkspaceId: workspaceId,
 	}
 	// config.OrgId 为int，默认为0
 	// db.Organization.OrgId为指针，默认nil
@@ -246,7 +250,11 @@ func StartXDomainScanTask(req XScanRequestParam, mainTaskId string, workspaceId 
 		IsIgnoreOutofChina: req.IsCn,
 		IsXrayPoc:          req.IsXrayPocscan,
 		XrayPocFile:        req.XrayPocFile,
-		WorkspaceId:        workspaceId,
+
+		IsNucleiPoc:   req.IsNucleiPocscan,
+		NucleiPocFile: req.NucleiPocFile,
+
+		WorkspaceId: workspaceId,
 	}
 	// config.OrgId 为int，默认为0
 	// db.Organization.OrgId为指针，默认nil
@@ -307,7 +315,11 @@ func StartXPortScanTask(req XScanRequestParam, mainTaskId string, workspaceId in
 		IsIgnoreOutofChina: req.IsCn,
 		IsXrayPoc:          req.IsXrayPocscan,
 		XrayPocFile:        req.XrayPocFile,
-		WorkspaceId:        workspaceId,
+
+		IsNucleiPoc:   req.IsNucleiPocscan,
+		NucleiPocFile: req.NucleiPocFile,
+
+		WorkspaceId: workspaceId,
 	}
 	// config.OrgId 为int，默认为0
 	// db.Organization.OrgId为指针，默认nil
@@ -363,7 +375,11 @@ func StartXOrgScanTask(req XScanRequestParam, mainTaskId string, workspaceId int
 		IsIgnoreOutofChina: req.IsCn,
 		IsXrayPoc:          req.IsXrayPocscan,
 		XrayPocFile:        req.XrayPocFile,
-		WorkspaceId:        workspaceId,
+
+		IsNucleiPoc:   req.IsNucleiPocscan,
+		NucleiPocFile: req.NucleiPocFile,
+
+		WorkspaceId: workspaceId,
 	}
 	if req.IsFingerprint {
 		config.IsHttpx = conf.GlobalWorkerConfig().Fingerprint.IsHttpx

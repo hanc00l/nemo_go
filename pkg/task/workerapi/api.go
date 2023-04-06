@@ -42,6 +42,9 @@ var taskMaps = map[string]interface{}{
 	"xfingerprint": XFingerPrint,
 	"xxray":        XXray,
 	"xorgscan":     XOrganization,
+
+	"xnuclei": XNuclei,
+
 	//test:
 	"test": TaskTest,
 }
