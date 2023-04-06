@@ -24,7 +24,7 @@
     </div>
     <div class="lock-box"><img class="rounded-circle user-image" src="static/images/favicon.jpg">
         <!-- <p class="text-center text-muted">账号已锁</p> -->
-        <form class="unlock-form" action="" method='post'>
+        <form class="unlock-form" action="" method="post">
             <div class="form-group">
                 <label class="control-label" for="username"><i class="fa fa-user fa-lg" title="用户名"></i></label>
                 <input class="form-control" type="text" id="username" name="username" placeholder="Username" autofocus>
@@ -42,7 +42,9 @@
                 {{create_captcha}}
             </div>
             <div class="form-group btn-container">
-                <button class="btn btn-primary btn-block" type="submit"><i class="fa fa-unlock fa-lg"></i>解 锁</button>
+                <button class="btn btn-primary btn-block" type="submit" id="button_login"><i
+                        class="fa fa-unlock fa-lg"></i>解 锁
+                </button>
             </div>
         </form>
     </div>
@@ -51,6 +53,8 @@
 <script src="static/js/jquery/jquery-3.3.1.min.js"></script>
 <script src="static/js/bootstrap/popper.min.js"></script>
 <script src="static/js/bootstrap/bootstrap.min.js"></script>
+<script src="static/js/rsa/jsencrypt.min.js"></script>
+<script src="static/js/server/login.js"></script>
 <script src="static/js/main.js"></script>
 </body>
 </html>

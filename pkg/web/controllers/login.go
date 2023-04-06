@@ -1,9 +1,11 @@
 package controllers
 
 import (
+	"encoding/base64"
 	"fmt"
 	"github.com/beego/beego/v2/client/cache"
 	"github.com/beego/beego/v2/server/web/captcha"
+	"github.com/hanc00l/nemo_go/pkg/comm"
 	"github.com/hanc00l/nemo_go/pkg/conf"
 	"github.com/hanc00l/nemo_go/pkg/db"
 	"github.com/hanc00l/nemo_go/pkg/logging"
@@ -37,8 +39,27 @@ func (c *LoginController) LoginAction() {
 		c.Redirect("/", http.StatusFound)
 		return
 	}
-	userName := c.GetString("username")
-	password := c.GetString("password")
+	u := c.GetString("username", "")
+	p := c.GetString("password", "")
+	if u == "" || p == "" {
+		c.Redirect("/", http.StatusFound)
+		return
+	}
+	// 用户名与密码使用rsa进行解密：
+	userNameEncrypt, err1 := base64.StdEncoding.DecodeString(u)
+	passwordEncrypt, err2 := base64.StdEncoding.DecodeString(p)
+	if err1 != nil || err2 != nil || len(userNameEncrypt) == 0 || len(passwordEncrypt) == 0 {
+		c.Redirect("/", http.StatusFound)
+		return
+	}
+	userNameDecrypted, err1 := utils.RSADecryptFromPemText(userNameEncrypt, comm.RsaPrivateKeyText)
+	passWordDecrypted, err2 := utils.RSADecryptFromPemText(passwordEncrypt, comm.RsaPrivateKeyText)
+	if err1 != nil || err2 != nil || len(userNameDecrypted) == 0 || len(passWordDecrypted) == 0 {
+		c.Redirect("/", http.StatusFound)
+		return
+	}
+	userName := string(userNameDecrypted)
+	password := string(passWordDecrypted)
 	if userName != "" && password != "" {
 		// 校验用户名、密码
 		status, userData := ValidLoginUser(userName, password)
