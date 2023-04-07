@@ -27,8 +27,8 @@ func (r *Resolve) Do() {
 		for domain, _ := range r.Result.DomainResult {
 			swg.Add()
 			go func(d string) {
+				defer swg.Done()
 				r.RunResolve(d)
-				swg.Done()
 			}(domain)
 		}
 	} else {
@@ -41,8 +41,8 @@ func (r *Resolve) Do() {
 			}
 			swg.Add()
 			go func(d string) {
+				defer swg.Done()
 				r.RunResolve(d)
-				swg.Done()
 			}(domain)
 		}
 	}

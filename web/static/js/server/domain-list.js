@@ -149,7 +149,7 @@ $(function () {
             }
             formData.append("xscan_type", "xdomainscan");
             formData.append("target", target)
-            formData.append("fofa", $('#checkbox_fofasearch_xscan').is(":checked"));
+            formData.append("onlineapi", $('#checkbox_onlineapi_xscan').is(":checked"));
         } else {
             if ($('#select_org_id_task_xscan').val() === "") {
                 swal('Warning', '必须选择要执行任务的组织！', 'error');
@@ -166,7 +166,6 @@ $(function () {
             }
         }
         formData.append("org_id", $('#select_org_id_task_xscan').val());
-        formData.append("is_CN", $('#checkbox_ignorecdn_outofchina_xscan').is(":checked"));
         formData.append("fingerprint", $('#checkbox_fingerpint_xscan').is(":checked"));
         formData.append("xraypoc", $('#checkbox_xraypoc_xscan').is(":checked"));
         formData.append("xraypocfile", $('#select_poc_type_xscan').val() + '|' + $('#input_xray_poc_file_xscan').val());

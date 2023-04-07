@@ -24,29 +24,27 @@ type XScanConfig struct {
 	IsOrgIP     bool   `json:"orgip,omitempty"`     //XOrganizaiton：IP资产
 	IsOrgDomain bool   `json:"orgdomain,omitempty"` //XOrganizaiton：domain资产
 	OrgIPPort   string `json:"orgport,omitempty"`   // Org扫描时，是否指定IP的端口
-	// fofa
+	// onlineapi
 	FofaTarget      string `json:"fofatarget,omitempty"`
 	FofaKeyword     string `json:"fofaKeyword,omitempty"`
 	FofaSearchLimit int    `json:"fofaSearchLimit,omitempty"`
+	// xfofa任务需要区分是哪一个api
+	IsFofa   bool `json:"fofa,omitempty"`
+	IsHunter bool `json:"hunter,omitempty"`
+	IsQuake  bool `json:"quake,omitempty"`
 	// portscan
 	IPPort       map[string][]int  `json:"ipport,omitempty"`       //IP:PORT列表
 	IPPortString map[string]string `json:"ipportstring,omitempty"` //格式为ip列表，port可以为多种形式，如"80,443,8000-9000"、"--top-port 100"
-	// domainscan
+	// domainscan : xdomainscan任务需要区分是哪一个子域名获取方式
 	Domain             map[string]struct{} `json:"domain,omitempty"`
 	IsSubDomainFinder  bool                `json:"subfinder,omitempty"`
 	IsSubDomainBrute   bool                `json:"subdomainBrute,omitempty"`
 	IsSubDomainCrawler bool                `json:"subdomainCrawler,omitempty"`
-	IsIgnoreCDN        bool                `json:"ignorecdn,omitempty"`
-	IsIgnoreOutofChina bool                `json:"ignoreoutofchina,omitempty"`
 	// fingerprint
-	IsHttpx          bool `json:"httpx,omitempty"`
-	IsScreenshot     bool `json:"screenshot,omitempty"`
-	IsFingerprintHub bool `json:"fingerprinthub,omitempty"`
-	IsIconHash       bool `json:"iconhash,omitempty"`
+	IsFingerprint bool `json:"fingerprint,omitempty"`
 	// xraypoc
 	IsXrayPoc   bool   `json:"xraypoc,omitempty"`
 	XrayPocFile string `json:"xraypocfile,omitempty"`
-
 	// nucleipoc
 	IsNucleiPoc   bool   `json:"nucleipoc,omitempty"`
 	NucleiPocFile string `json:"nucleipocfile,omitempty"`
@@ -199,10 +197,12 @@ func XPortScan(taskId, mainTaskId, configJSON string) (result string, err error)
 		return FailedTask(err.Error()), err
 	}
 	// 启动指纹识别任务：
-	_, err = scan.NewFingerprintScan(taskId, mainTaskId)
-	if err != nil {
-		logging.RuntimeLog.Error(err)
-		return FailedTask(err.Error()), err
+	if config.IsFingerprint {
+		_, err = scan.NewFingerprintScan(taskId, mainTaskId)
+		if err != nil {
+			logging.RuntimeLog.Error(err)
+			return FailedTask(err.Error()), err
+		}
 	}
 	//
 	return SucceedTask(result), nil
@@ -228,15 +228,17 @@ func XDomainscan(taskId, mainTaskId, configJSON string) (result string, err erro
 		return FailedTask(err.Error()), err
 	}
 	// 启动指纹识别任务：
-	_, err = scan.NewFingerprintScan(taskId, mainTaskId)
-	if err != nil {
-		logging.RuntimeLog.Error(err)
-		return FailedTask(err.Error()), err
+	if config.IsFingerprint {
+		_, err = scan.NewFingerprintScan(taskId, mainTaskId)
+		if err != nil {
+			logging.RuntimeLog.Error(err)
+			return FailedTask(err.Error()), err
+		}
 	}
 	return SucceedTask(result), nil
 }
 
-// XFingerPrint指纹识别任务
+// XFingerPrint 指纹识别任务
 func XFingerPrint(taskId, mainTaskId, configJSON string) (result string, err error) {
 	// 检查任务状态
 	var ok bool
@@ -323,14 +325,14 @@ func (x *XScan) Portscan(taskId string, mainTaskId string) (result string, err e
 
 	swg := sizedwaitgroup.New(portscanMaxThreadNum[conf.WorkerPerformanceMode])
 	// 生成扫描参数
-	defaultConf := conf.GlobalWorkerConfig().Portscan
+	conf.GlobalWorkerConfig().ReloadConfig()
 	config := portscan.Config{
 		OrgId:        x.Config.OrgId,
-		Rate:         defaultConf.Rate,
-		IsPing:       defaultConf.IsPing,
-		Tech:         defaultConf.Tech,
+		Rate:         conf.GlobalWorkerConfig().Portscan.Rate,
+		IsPing:       conf.GlobalWorkerConfig().Portscan.IsPing,
+		Tech:         conf.GlobalWorkerConfig().Portscan.Tech,
+		CmdBin:       conf.GlobalWorkerConfig().Portscan.Cmdbin,
 		IsIpLocation: true,
-		CmdBin:       defaultConf.Cmdbin,
 		WorkspaceId:  x.Config.WorkspaceId,
 	}
 	if len(x.Config.IPPortString) > 0 {
@@ -381,6 +383,8 @@ func (x *XScan) Portscan(taskId string, mainTaskId string) (result string, err e
 
 // doPortscan 调用一次端口扫描
 func (x *XScan) doPortscan(swg *sizedwaitgroup.SizedWaitGroup, config portscan.Config) {
+	defer swg.Done()
+
 	var result portscan.Result
 	if config.CmdBin == "masnmap" {
 		result.IPResult = doMasscanPlusNmap(config).IPResult
@@ -405,12 +409,12 @@ func (x *XScan) doPortscan(swg *sizedwaitgroup.SizedWaitGroup, config portscan.C
 		x.ResultIP.IPResult[k] = v
 	}
 	x.ResultIP.Unlock()
-
-	swg.Done()
 }
 
 // doDomainscan 调用执行一次域名任务
 func (x *XScan) doDomainscan(swg *sizedwaitgroup.SizedWaitGroup, config domainscan.Config) {
+	defer swg.Done()
+
 	var result domainscan.Result
 	//扫描
 	result = doDomainScan(config)
@@ -420,59 +424,69 @@ func (x *XScan) doDomainscan(swg *sizedwaitgroup.SizedWaitGroup, config domainsc
 		x.ResultDomain.DomainResult[k] = v
 	}
 	x.ResultDomain.Unlock()
-
-	swg.Done()
 }
 
 // doXrayscan 调用一次Xray
 func (x *XScan) doXrayscan(swg *sizedwaitgroup.SizedWaitGroup, config pocscan.Config) {
+	defer swg.Done()
+
 	xray := pocscan.NewXray(config)
 	xray.Do()
 	//合并结果
 	x.vulMutex.Lock()
 	x.ResultVul = append(x.ResultVul, xray.Result...)
 	x.vulMutex.Unlock()
-
-	swg.Done()
 }
 
 // doNucleiScan 调用一次Nuclei
 func (x *XScan) doNucleiScan(swg *sizedwaitgroup.SizedWaitGroup, config pocscan.Config) {
+	defer swg.Done()
+
 	nuclei := pocscan.NewNuclei(config)
 	nuclei.Do()
 	//合并结果
 	x.vulMutex.Lock()
 	x.ResultVul = append(x.ResultVul, nuclei.Result...)
 	x.vulMutex.Unlock()
-
-	swg.Done()
 }
 
 // FofaSearch 执行fofa搜索任务
 func (x *XScan) FofaSearch(taskId string, mainTaskId string) (result string, err error) {
+	conf.GlobalWorkerConfig().ReloadConfig()
 	config := onlineapi.OnlineAPIConfig{
-		OrgId:              x.Config.OrgId,
-		IsIPLocation:       true,
-		IsHttpx:            x.Config.IsHttpx,
-		IsScreenshot:       x.Config.IsScreenshot,
-		IsFingerprintHub:   x.Config.IsFingerprintHub,
-		IsIconHash:         x.Config.IsIconHash,
-		IsIgnoreCDN:        x.Config.IsIgnoreCDN,
-		IsIgnoreOutofChina: x.Config.IsIgnoreOutofChina,
+		OrgId:        x.Config.OrgId,
+		IsIPLocation: true,
+		// 从配置文件默认参数获取：
+		IsIgnoreCDN:        conf.GlobalWorkerConfig().Domainscan.IsIgnoreCDN,
+		IsIgnoreOutofChina: conf.GlobalWorkerConfig().Domainscan.IsIgnoreOutofChina,
 		WorkspaceId:        x.Config.WorkspaceId,
 	}
+	if x.Config.IsFingerprint {
+		config.IsHttpx = conf.GlobalWorkerConfig().Fingerprint.IsHttpx
+		config.IsScreenshot = conf.GlobalWorkerConfig().Fingerprint.IsScreenshot
+		config.IsFingerprintHub = conf.GlobalWorkerConfig().Fingerprint.IsFingerprintHub
+		config.IsIconHash = conf.GlobalWorkerConfig().Fingerprint.IsIconHash
+	}
 	//fofa任务支持两种模式：
-	//一种是关键词，需设置SearchByKeyWord为true
-	//另一种是ip/domain
+	//一种是关键词，需设置SearchByKeyWord为true，只支持fofa
+	//另一种是ip/domain，同时支持fofa、quake、hunter
 	if len(x.Config.FofaKeyword) > 0 {
 		config.SearchByKeyWord = true
 		config.Target = x.Config.FofaKeyword
 		config.SearchLimitCount = x.Config.FofaSearchLimit
+		x.ResultIP, x.ResultDomain, result, err = doFofaAndSave(taskId, mainTaskId, "fofa", config)
 	} else if len(x.Config.FofaTarget) > 0 {
 		config.Target = x.Config.FofaTarget
+		if x.Config.IsFofa {
+			x.ResultIP, x.ResultDomain, result, err = doFofaAndSave(taskId, mainTaskId, "fofa", config)
+		}
+		if x.Config.IsQuake {
+			x.ResultIP, x.ResultDomain, result, err = doFofaAndSave(taskId, mainTaskId, "quake", config)
+		}
+		if x.Config.IsHunter {
+			x.ResultIP, x.ResultDomain, result, err = doFofaAndSave(taskId, mainTaskId, "hunter", config)
+		}
 	}
-	x.ResultIP, x.ResultDomain, result, err = doFofaAndSave(taskId, mainTaskId, "fofa", config)
-
 	return
 }
 
@@ -481,20 +495,25 @@ func (x *XScan) Domainscan(taskId string, mainTaskId string) (result string, err
 	x.ResultDomain.DomainResult = make(map[string]*domainscan.DomainResult)
 	swg := sizedwaitgroup.New(domainscanMaxThreadNum[conf.WorkerPerformanceMode])
 
+	conf.GlobalWorkerConfig().ReloadConfig()
 	config := domainscan.Config{
-		OrgId:              x.Config.OrgId,
-		IsSubDomainFinder:  x.Config.IsSubDomainFinder,
-		IsSubDomainBrute:   x.Config.IsSubDomainBrute,
-		IsIgnoreCDN:        x.Config.IsIgnoreCDN,
-		IsIgnoreOutofChina: x.Config.IsIgnoreOutofChina,
-		WorkspaceId:        x.Config.WorkspaceId,
+		OrgId: x.Config.OrgId,
+		// domain方法：
+		IsSubDomainFinder: x.Config.IsSubDomainFinder,
+		IsSubDomainBrute:  x.Config.IsSubDomainBrute,
+		IsCrawler:         x.Config.IsSubDomainCrawler,
+		//
+		IsIgnoreCDN:        conf.GlobalWorkerConfig().Domainscan.IsIgnoreCDN,
+		IsIgnoreOutofChina: conf.GlobalWorkerConfig().Domainscan.IsIgnoreOutofChina,
+		IsIPPortScan:       conf.GlobalWorkerConfig().Domainscan.IsPortScan,
+
+		WorkspaceId: x.Config.WorkspaceId,
 	}
 	for domain := range x.Config.Domain {
 		runConfig := config
 		runConfig.Target = domain
 		swg.Add()
 		go x.doDomainscan(&swg, runConfig)
-
 	}
 	swg.Wait()
 	// 如果有端口扫描的选项
@@ -517,16 +536,13 @@ func (x *XScan) Domainscan(taskId string, mainTaskId string) (result string, err
 // NewPortScan 根据IP/port列表，生成端口扫描任务
 func (x *XScan) NewPortScan(taskId, mainTaskId string, ipPortMap []map[string][]int, ipPortMapString []map[string]string) (result string, err error) {
 	config := XScanConfig{
-		OrgId:              x.Config.OrgId,
-		IsIgnoreCDN:        x.Config.IsIgnoreCDN,
-		IsIgnoreOutofChina: x.Config.IsIgnoreOutofChina,
-		IsHttpx:            x.Config.IsHttpx,
-		IsScreenshot:       x.Config.IsScreenshot,
-		IsFingerprintHub:   x.Config.IsFingerprintHub,
-		IsIconHash:         x.Config.IsIconHash,
-		IsXrayPoc:          x.Config.IsXrayPoc,
-		XrayPocFile:        x.Config.XrayPocFile,
-		WorkspaceId:        x.Config.WorkspaceId,
+		OrgId:         x.Config.OrgId,
+		IsFingerprint: x.Config.IsFingerprint,
+		IsXrayPoc:     x.Config.IsXrayPoc,
+		XrayPocFile:   x.Config.XrayPocFile,
+		IsNucleiPoc:   x.Config.IsNucleiPoc,
+		NucleiPocFile: x.Config.NucleiPocFile,
+		WorkspaceId:   x.Config.WorkspaceId,
 	}
 	for _, t := range ipPortMap {
 		configRun := config
@@ -549,23 +565,48 @@ func (x *XScan) NewPortScan(taskId, mainTaskId string, ipPortMap []map[string][]
 	return
 }
 
+// NewICPQuery 生成ICP查询任务
+func (x *XScan) NewICPQuery(taskId, mainTaskId string, target string) (result string, err error) {
+	config := onlineapi.ICPQueryConfig{Target: target}
+	if err != nil {
+		logging.RuntimeLog.Errorf("start icpquery fail:%s", err.Error())
+		return "", err
+	}
+	result, err = sendTask(taskId, mainTaskId, config, "icpquery")
+	if err != nil {
+		logging.RuntimeLog.Errorf("start icpquery fail:%s", err.Error())
+		return "", err
+	}
+	return result, nil
+}
+
+// NewWhoisQuery 生成whois查询任务
+func (x *XScan) NewWhoisQuery(taskId, mainTaskId string, target string) (result string, err error) {
+	config := onlineapi.WhoisQueryConfig{Target: target}
+	if err != nil {
+		logging.RuntimeLog.Errorf("start whoisquery fail:%s", err.Error())
+		return "", err
+	}
+	result, err = sendTask(taskId, mainTaskId, config, "whoisquery")
+	if err != nil {
+		logging.RuntimeLog.Errorf("start whoisquery fail:%s", err.Error())
+		return "", err
+	}
+	return result, nil
+}
+
 // NewDomainScan 根据域名列表，生成域名任务
 func (x *XScan) NewDomainScan(taskId, mainTaskId string, domainMap []map[string]struct{}, isSubDomainFinder, isSubDomainBrute bool) (result string, err error) {
 	config := XScanConfig{
 		OrgId:             x.Config.OrgId,
 		IsSubDomainFinder: isSubDomainFinder,
 		IsSubDomainBrute:  isSubDomainBrute,
-		//
-		IsIgnoreCDN:        x.Config.IsIgnoreCDN,
-		IsIgnoreOutofChina: x.Config.IsIgnoreOutofChina,
-		IsHttpx:            x.Config.IsHttpx,
-		IsScreenshot:       x.Config.IsScreenshot,
-		IsFingerprintHub:   x.Config.IsFingerprintHub,
-		IsIconHash:         x.Config.IsIconHash,
-		IsXrayPoc:          x.Config.IsXrayPoc,
-		XrayPocFile:        x.Config.XrayPocFile,
-
-		WorkspaceId: x.Config.WorkspaceId,
+		IsFingerprint:     x.Config.IsFingerprint,
+		IsXrayPoc:         x.Config.IsXrayPoc,
+		XrayPocFile:       x.Config.XrayPocFile,
+		IsNucleiPoc:       x.Config.IsNucleiPoc,
+		NucleiPocFile:     x.Config.NucleiPocFile,
+		WorkspaceId:       x.Config.WorkspaceId,
 	}
 	for _, t := range domainMap {
 		configRun := config
@@ -581,11 +622,13 @@ func (x *XScan) NewDomainScan(taskId, mainTaskId string, domainMap []map[string]
 
 // FingerPrint 执行指纹识别任务
 func (x *XScan) FingerPrint(taskId string, mainTaskId string) (result string, err error) {
+	conf.GlobalWorkerConfig().ReloadConfig()
 	config := FingerprintTaskConfig{
-		IsHttpx:          x.Config.IsHttpx,
-		IsFingerprintHub: x.Config.IsFingerprintHub,
-		IsIconHash:       x.Config.IsIconHash,
-		IsScreenshot:     x.Config.IsScreenshot,
+		// 从配置文件默认参数获取：
+		IsHttpx:          conf.GlobalWorkerConfig().Fingerprint.IsHttpx,
+		IsScreenshot:     conf.GlobalWorkerConfig().Fingerprint.IsScreenshot,
+		IsFingerprintHub: conf.GlobalWorkerConfig().Fingerprint.IsFingerprintHub,
+		IsIconHash:       conf.GlobalWorkerConfig().Fingerprint.IsIconHash,
 		IPTargetMap:      x.Config.IPPort,
 		DomainTargetMap:  x.Config.Domain,
 		WorkspaceId:      x.Config.WorkspaceId,
@@ -602,15 +645,11 @@ func (x *XScan) NewFingerprintScan(taskId, mainTaskId string) (result string, er
 	//	return
 	//}
 	config := XScanConfig{
-		IsHttpx:          x.Config.IsHttpx,
-		IsScreenshot:     x.Config.IsScreenshot,
-		IsFingerprintHub: x.Config.IsFingerprintHub,
-		IsIconHash:       x.Config.IsIconHash,
-		IsXrayPoc:        x.Config.IsXrayPoc,
-		XrayPocFile:      x.Config.XrayPocFile,
-		IsNucleiPoc:      x.Config.IsNucleiPoc,
-		NucleiPocFile:    x.Config.NucleiPocFile,
-		WorkspaceId:      x.Config.WorkspaceId,
+		IsXrayPoc:     x.Config.IsXrayPoc,
+		XrayPocFile:   x.Config.XrayPocFile,
+		IsNucleiPoc:   x.Config.IsNucleiPoc,
+		NucleiPocFile: x.Config.NucleiPocFile,
+		WorkspaceId:   x.Config.WorkspaceId,
 	}
 	//拆分子任务
 	ipTarget, domainTarget := MakeSubTaskTarget(&x.ResultIP, &x.ResultDomain)

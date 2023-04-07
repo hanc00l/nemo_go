@@ -43,7 +43,7 @@ domainscan:
   subdomainBrute: true
   subdomainCrawler: false
   ignoreCDN: false
-  ignoreOutofChina: false
+  ignoreOutofChina: true
   portscan: false
   whois: true
   icp: true

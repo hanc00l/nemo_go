@@ -128,6 +128,7 @@ func doMasscanPlusNmap(config portscan.Config) (resultPortScan portscan.Result) 
 		nmapConfig.Tech = "-sV"
 		swg.Add()
 		go func(c portscan.Config) {
+			defer swg.Done()
 			nmap := portscan.NewNmap(c)
 			nmap.Do()
 			resultPortScan.Lock()
@@ -135,7 +136,6 @@ func doMasscanPlusNmap(config portscan.Config) (resultPortScan portscan.Result) 
 				resultPortScan.IPResult[nip] = r
 			}
 			resultPortScan.Unlock()
-			swg.Done()
 		}(nmapConfig)
 	}
 	swg.Wait()

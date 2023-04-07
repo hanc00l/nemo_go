@@ -310,6 +310,7 @@ function load_config() {
         $('#checkbox_icp').prop("checked", data['icp']);
         $('#checkbox_whois').prop("checked", data['whois']);
         $('#checkbox_ignorecdn').prop("checked", data['ignorecdn']);
+        $('#checkbox_ignoreoutofchina').prop("checked", data['ignoreoutofchina']);
         $('#checkbox_portscan').prop("checked", data['portscan']);
         $('#select_wordlist').val(data['wordlist']);
 

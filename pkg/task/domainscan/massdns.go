@@ -34,8 +34,8 @@ func (m *Massdns) Do() {
 		}
 		swg.Add()
 		go func(d string) {
+			defer swg.Done()
 			m.RunMassdns(domain)
-			swg.Done()
 		}(domain)
 	}
 	swg.Wait()

@@ -40,8 +40,8 @@ func (s *SubFinder) Do() {
 		}
 		swg.Add()
 		go func(d string) {
+			defer swg.Done()
 			s.RunSubFinder(d)
-			swg.Done()
 		}(domain)
 	}
 	swg.Wait()

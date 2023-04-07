@@ -204,27 +204,18 @@ func StartPocScanTask(req PocscanRequestParam, mainTaskId string, workspaceId in
 // StartXFofaKeywordTask xscan任务，根据fofa关键字查询资产
 func StartXFofaKeywordTask(req XScanRequestParam, mainTaskId string, workspaceId int) (taskId string, err error) {
 	config := workerapi.XScanConfig{
-		OrgId:              &req.OrgId,
-		IsIgnoreCDN:        false,
-		IsIgnoreOutofChina: req.IsCn,
-		IsXrayPoc:          req.IsXrayPocscan,
-		XrayPocFile:        req.XrayPocFile,
-
+		OrgId:         &req.OrgId,
+		IsFingerprint: req.IsFingerprint,
+		IsXrayPoc:     req.IsXrayPocscan,
+		XrayPocFile:   req.XrayPocFile,
 		IsNucleiPoc:   req.IsNucleiPocscan,
 		NucleiPocFile: req.NucleiPocFile,
-
-		WorkspaceId: workspaceId,
+		WorkspaceId:   workspaceId,
 	}
 	// config.OrgId 为int，默认为0
 	// db.Organization.OrgId为指针，默认nil
 	if *config.OrgId == 0 {
 		config.OrgId = nil
-	}
-	if req.IsFingerprint {
-		config.IsHttpx = conf.GlobalWorkerConfig().Fingerprint.IsHttpx
-		config.IsFingerprintHub = conf.GlobalWorkerConfig().Fingerprint.IsFingerprintHub
-		config.IsScreenshot = conf.GlobalWorkerConfig().Fingerprint.IsScreenshot
-		config.IsIconHash = conf.GlobalWorkerConfig().Fingerprint.IsIconHash
 	}
 	// 生成查询语法
 	keywords := searchKeyword(req)
@@ -245,15 +236,14 @@ func StartXFofaKeywordTask(req XScanRequestParam, mainTaskId string, workspaceId
 // StartXDomainScanTask xscan任务，域名任务
 func StartXDomainScanTask(req XScanRequestParam, mainTaskId string, workspaceId int) (taskId string, err error) {
 	config := workerapi.XScanConfig{
-		OrgId:              &req.OrgId,
-		IsIgnoreCDN:        false,
-		IsIgnoreOutofChina: req.IsCn,
-		IsXrayPoc:          req.IsXrayPocscan,
-		XrayPocFile:        req.XrayPocFile,
-
+		OrgId:         &req.OrgId,
+		IsFingerprint: req.IsFingerprint,
+		// 漏洞扫描
+		IsXrayPoc:     req.IsXrayPocscan,
+		XrayPocFile:   req.XrayPocFile,
 		IsNucleiPoc:   req.IsNucleiPocscan,
 		NucleiPocFile: req.NucleiPocFile,
-
+		//
 		WorkspaceId: workspaceId,
 	}
 	// config.OrgId 为int，默认为0
@@ -261,46 +251,97 @@ func StartXDomainScanTask(req XScanRequestParam, mainTaskId string, workspaceId 
 	if *config.OrgId == 0 {
 		config.OrgId = nil
 	}
-	if req.IsFingerprint {
-		config.IsHttpx = conf.GlobalWorkerConfig().Fingerprint.IsHttpx
-		config.IsFingerprintHub = conf.GlobalWorkerConfig().Fingerprint.IsFingerprintHub
-		config.IsScreenshot = conf.GlobalWorkerConfig().Fingerprint.IsScreenshot
-		config.IsIconHash = conf.GlobalWorkerConfig().Fingerprint.IsIconHash
-	}
 	targetList := formatDomainTarget(req.Target)
 	for _, target := range targetList {
 		// 忽略IP
 		if utils.CheckIPV4(target) || utils.CheckIPV4Subnet(target) {
 			continue
 		}
-		configRun := config
-		configRun.Domain = make(map[string]struct{})
-		configRun.Domain[target] = struct{}{}
-		// 子域名枚举和爆破拆分成两个任务并行执行
-		configRun.IsSubDomainFinder = true
-		configRun.IsSubDomainBrute = false
-		configJSON, _ := json.Marshal(configRun)
-		taskId, err = serverapi.NewRunTask("xdomainscan", string(configJSON), mainTaskId, "")
-		if err != nil {
-			logging.RuntimeLog.Errorf("start xdomainscan fail:%s", err.Error())
-			return "", err
-		}
-		configRun.IsSubDomainFinder = false
-		configRun.IsSubDomainBrute = true
-		configJSON, _ = json.Marshal(configRun)
-		taskId, err = serverapi.NewRunTask("xdomainscan", string(configJSON), mainTaskId, "")
-		if err != nil {
-			logging.RuntimeLog.Errorf("start xdomainscan fail:%s", err.Error())
-			return "", err
-		}
-		if req.IsFofaSearch {
-			configRunFofa := config
-			configRunFofa.FofaTarget = target
-			configJSONFofa, _ := json.Marshal(configRunFofa)
-			taskId, err = serverapi.NewRunTask("xfofa", string(configJSONFofa), mainTaskId, "")
+		// 子域名枚举、爆破、爬虫拆分成为多个任务并行执行
+		if conf.GlobalWorkerConfig().Domainscan.IsSubDomainFinder {
+			configRun := config
+			configRun.Domain = make(map[string]struct{})
+			configRun.Domain[target] = struct{}{}
+			configRun.IsSubDomainFinder = true
+			configJSON, _ := json.Marshal(configRun)
+			taskId, err = serverapi.NewRunTask("xdomainscan", string(configJSON), mainTaskId, "")
 			if err != nil {
-				logging.RuntimeLog.Errorf("start xfofa fail:%s", err.Error())
+				logging.RuntimeLog.Errorf("start xdomainscan fail:%s", err.Error())
 				return "", err
+			}
+		}
+		if conf.GlobalWorkerConfig().Domainscan.IsSubDomainBrute {
+			configRun := config
+			configRun.Domain = make(map[string]struct{})
+			configRun.Domain[target] = struct{}{}
+			configRun.IsSubDomainBrute = true
+			configJSON, _ := json.Marshal(configRun)
+			taskId, err = serverapi.NewRunTask("xdomainscan", string(configJSON), mainTaskId, "")
+			if err != nil {
+				logging.RuntimeLog.Errorf("start xdomainscan fail:%s", err.Error())
+				return "", err
+			}
+		}
+		if conf.GlobalWorkerConfig().Domainscan.IsSubdomainCrawler {
+			configRun := config
+			configRun.Domain = make(map[string]struct{})
+			configRun.Domain[target] = struct{}{}
+			configRun.IsSubDomainCrawler = true
+			configJSON, _ := json.Marshal(configRun)
+			taskId, err = serverapi.NewRunTask("xdomainscan", string(configJSON), mainTaskId, "")
+			if err != nil {
+				logging.RuntimeLog.Errorf("start xdomainscan fail:%s", err.Error())
+				return "", err
+			}
+		}
+		if conf.GlobalWorkerConfig().Domainscan.IsICP {
+			_, err = doICPQuery(mainTaskId, target)
+			if err != nil {
+				logging.RuntimeLog.Errorf("start icpquery fail:%s", err.Error())
+				return "", err
+			}
+		}
+		if conf.GlobalWorkerConfig().Domainscan.IsWhois {
+			_, err = doWhoisQuery(mainTaskId, target)
+			if err != nil {
+				logging.RuntimeLog.Errorf("start whoisquery fail:%s", err.Error())
+				return "", err
+			}
+		}
+		// 是否进行在线资产平台的查询（包括fofa、quake、hunter）：
+		if req.IsOnlineAPI {
+			if conf.GlobalWorkerConfig().OnlineAPI.IsFofa {
+				configRun := config
+				configRun.FofaTarget = target
+				configRun.IsFofa = true
+				configJSONRun, _ := json.Marshal(configRun)
+				taskId, err = serverapi.NewRunTask("xfofa", string(configJSONRun), mainTaskId, "")
+				if err != nil {
+					logging.RuntimeLog.Errorf("start xfofa fail:%s", err.Error())
+					return "", err
+				}
+			}
+			if conf.GlobalWorkerConfig().OnlineAPI.IsHunter {
+				configRun := config
+				configRun.FofaTarget = target
+				configRun.IsHunter = true
+				configJSONRun, _ := json.Marshal(configRun)
+				taskId, err = serverapi.NewRunTask("xfofa", string(configJSONRun), mainTaskId, "")
+				if err != nil {
+					logging.RuntimeLog.Errorf("start xfofa fail:%s", err.Error())
+					return "", err
+				}
+			}
+			if conf.GlobalWorkerConfig().OnlineAPI.IsQuake {
+				configRun := config
+				configRun.FofaTarget = target
+				configRun.IsQuake = true
+				configJSONRun, _ := json.Marshal(configRun)
+				taskId, err = serverapi.NewRunTask("xfofa", string(configJSONRun), mainTaskId, "")
+				if err != nil {
+					logging.RuntimeLog.Errorf("start xfofa fail:%s", err.Error())
+					return "", err
+				}
 			}
 		}
 	}
@@ -310,27 +351,20 @@ func StartXDomainScanTask(req XScanRequestParam, mainTaskId string, workspaceId 
 // StartXPortScanTask xscan的IP任务
 func StartXPortScanTask(req XScanRequestParam, mainTaskId string, workspaceId int) (taskId string, err error) {
 	config := workerapi.XScanConfig{
-		OrgId:              &req.OrgId,
-		IsIgnoreCDN:        false,
-		IsIgnoreOutofChina: req.IsCn,
-		IsXrayPoc:          req.IsXrayPocscan,
-		XrayPocFile:        req.XrayPocFile,
-
+		OrgId: &req.OrgId,
+		// 指纹：
+		IsFingerprint: req.IsFingerprint,
+		// 漏洞
+		IsXrayPoc:     req.IsXrayPocscan,
+		XrayPocFile:   req.XrayPocFile,
 		IsNucleiPoc:   req.IsNucleiPocscan,
 		NucleiPocFile: req.NucleiPocFile,
-
-		WorkspaceId: workspaceId,
+		WorkspaceId:   workspaceId,
 	}
 	// config.OrgId 为int，默认为0
 	// db.Organization.OrgId为指针，默认nil
 	if *config.OrgId == 0 {
 		config.OrgId = nil
-	}
-	if req.IsFingerprint {
-		config.IsHttpx = conf.GlobalWorkerConfig().Fingerprint.IsHttpx
-		config.IsFingerprintHub = conf.GlobalWorkerConfig().Fingerprint.IsFingerprintHub
-		config.IsScreenshot = conf.GlobalWorkerConfig().Fingerprint.IsScreenshot
-		config.IsIconHash = conf.GlobalWorkerConfig().Fingerprint.IsIconHash
 	}
 	ts := utils.NewTaskSlice()
 	ts.TaskMode = utils.SliceByIP
@@ -350,14 +384,40 @@ func StartXPortScanTask(req XScanRequestParam, mainTaskId string, workspaceId in
 			logging.RuntimeLog.Errorf("start xportscan fail:%s", err.Error())
 			return "", err
 		}
-		if req.IsFofaSearch {
-			configRunFofa := config
-			configRunFofa.FofaTarget = target
-			configJSONFofa, _ := json.Marshal(configRunFofa)
-			taskId, err = serverapi.NewRunTask("xfofa", string(configJSONFofa), mainTaskId, "")
-			if err != nil {
-				logging.RuntimeLog.Errorf("start xfofa fail:%s", err.Error())
-				return "", err
+		// 是否进行在线资产平台的查询（包括fofa、quake、hunter）：
+		if req.IsOnlineAPI {
+			if conf.GlobalWorkerConfig().OnlineAPI.IsFofa {
+				configRunAPI := config
+				configRunAPI.FofaTarget = target
+				configRunAPI.IsFofa = true
+				configJSONRun, _ := json.Marshal(configRunAPI)
+				taskId, err = serverapi.NewRunTask("xfofa", string(configJSONRun), mainTaskId, "")
+				if err != nil {
+					logging.RuntimeLog.Errorf("start xfofa fail:%s", err.Error())
+					return "", err
+				}
+			}
+			if conf.GlobalWorkerConfig().OnlineAPI.IsHunter {
+				configRunAPI := config
+				configRunAPI.FofaTarget = target
+				configRunAPI.IsHunter = true
+				configJSONRun, _ := json.Marshal(configRunAPI)
+				taskId, err = serverapi.NewRunTask("xfofa", string(configJSONRun), mainTaskId, "")
+				if err != nil {
+					logging.RuntimeLog.Errorf("start xfofa fail:%s", err.Error())
+					return "", err
+				}
+			}
+			if conf.GlobalWorkerConfig().OnlineAPI.IsQuake {
+				configRunAPI := config
+				configRunAPI.FofaTarget = target
+				configRunAPI.IsQuake = true
+				configJSONRun, _ := json.Marshal(configRunAPI)
+				taskId, err = serverapi.NewRunTask("xfofa", string(configJSONRun), mainTaskId, "")
+				if err != nil {
+					logging.RuntimeLog.Errorf("start xfofa fail:%s", err.Error())
+					return "", err
+				}
 			}
 		}
 	}
@@ -367,25 +427,18 @@ func StartXPortScanTask(req XScanRequestParam, mainTaskId string, workspaceId in
 // StartXOrgScanTask xscan任务，获取指定组织的资产并开始扫描任务
 func StartXOrgScanTask(req XScanRequestParam, mainTaskId string, workspaceId int) (taskId string, err error) {
 	config := workerapi.XScanConfig{
-		OrgId:              &req.OrgId,
-		IsOrgIP:            req.IsOrgIP,
-		IsOrgDomain:        req.IsOrgDomain,
-		OrgIPPort:          req.Port,
-		IsIgnoreCDN:        false,
-		IsIgnoreOutofChina: req.IsCn,
-		IsXrayPoc:          req.IsXrayPocscan,
-		XrayPocFile:        req.XrayPocFile,
-
+		OrgId:         &req.OrgId,
+		IsOrgIP:       req.IsOrgIP,
+		IsOrgDomain:   req.IsOrgDomain,
+		OrgIPPort:     req.Port,
+		IsFingerprint: req.IsFingerprint,
+		// 漏洞
+		IsXrayPoc:     req.IsXrayPocscan,
+		XrayPocFile:   req.XrayPocFile,
 		IsNucleiPoc:   req.IsNucleiPocscan,
 		NucleiPocFile: req.NucleiPocFile,
-
+		//
 		WorkspaceId: workspaceId,
-	}
-	if req.IsFingerprint {
-		config.IsHttpx = conf.GlobalWorkerConfig().Fingerprint.IsHttpx
-		config.IsFingerprintHub = conf.GlobalWorkerConfig().Fingerprint.IsFingerprintHub
-		config.IsScreenshot = conf.GlobalWorkerConfig().Fingerprint.IsScreenshot
-		config.IsIconHash = conf.GlobalWorkerConfig().Fingerprint.IsIconHash
 	}
 	configJSON, _ := json.Marshal(config)
 	taskId, err = serverapi.NewRunTask("xorgscan", string(configJSON), mainTaskId, "")
@@ -893,7 +946,6 @@ func searchKeyword(req XScanRequestParam) (fofaKeyword map[string]int) {
 	//fofa检索词拼接
 	for _, searchkey := range results {
 		taskSearchKey := taskKeySearchParam{}
-		taskSearchKey.IsCN = req.IsCn
 		taskSearchKey.KeyWord = searchkey.KeyWord
 		taskSearchKey.ExcludeWords = searchkey.ExcludeWords
 		taskSearchKey.ExcludeWords = searchkey.ExcludeWords

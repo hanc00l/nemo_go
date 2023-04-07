@@ -97,6 +97,8 @@ func testOneOne(swg *sizedwaitgroup.SizedWaitGroup) {
 }
 
 func testOne(swg *sizedwaitgroup.SizedWaitGroup, url string, t *testing.T) {
+	defer swg.Done()
+	
 	loadMutex.Lock()
 	var pocAll [][]byte
 	files, _ := filepath.Glob(filepath.Join(conf.GetRootPath(), conf.GlobalWorkerConfig().Pocscan.Xray.PocPath, "*.yml"))
@@ -114,5 +116,4 @@ func testOne(swg *sizedwaitgroup.SizedWaitGroup, url string, t *testing.T) {
 	x := xv2.InitXrayV2Poc("", "", "")
 	aa := x.RunXrayMultiPocByQuery(fmt.Sprintf("%s://%s", protocol, url), pocAll, []xv2.Content{})
 	t.Log(aa)
-	swg.Done()
 }

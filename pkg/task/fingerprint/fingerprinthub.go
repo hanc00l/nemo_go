@@ -48,6 +48,7 @@ func (f *FingerprintHub) Do() {
 				url := fmt.Sprintf("%v:%v", ipName, portNumber)
 				swg.Add()
 				go func(ip string, port int, u string) {
+					defer swg.Done()
 					fingerPrintResult := f.RunObserverWard(u)
 					if len(fingerPrintResult) > 0 {
 						for _, fpa := range fingerPrintResult {
@@ -61,7 +62,6 @@ func (f *FingerprintHub) Do() {
 							}
 						}
 					}
-					swg.Done()
 				}(ipName, portNumber, url)
 			}
 		}
@@ -84,6 +84,7 @@ func (f *FingerprintHub) Do() {
 				url := fmt.Sprintf("%s:%d", domain, port)
 				swg.Add()
 				go func(d string, u string) {
+					defer swg.Done()
 					fingerPrintResult := f.RunObserverWard(u)
 					if len(fingerPrintResult) > 0 {
 						for _, fpa := range fingerPrintResult {
@@ -97,7 +98,6 @@ func (f *FingerprintHub) Do() {
 							}
 						}
 					}
-					swg.Done()
 				}(domain, url)
 			}
 		}

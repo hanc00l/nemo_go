@@ -578,6 +578,12 @@ func (c *TaskController) StartXScanTaskAction() {
 		c.FailedStatus(err.Error())
 		return
 	}
+	if !reqByForm.IsXrayPocscan {
+		reqByForm.XrayPocFile = ""
+	}
+	if !reqByForm.IsNucleiPocscan {
+		reqByForm.NucleiPocFile = ""
+	}
 	var targets []string
 	if c.IsServerAPI {
 		// webapi方式：多个目标以“,”分隔，并且每一个目标单独生成一个任务
@@ -588,6 +594,9 @@ func (c *TaskController) StartXScanTaskAction() {
 	}
 	var taskId string
 	for _, target := range targets {
+		if strings.TrimSpace(target) == "" {
+			continue
+		}
 		req := reqByForm
 		req.Target = target
 		// webapi方式：根据每个任务的目标是ip或domain自动生成相应的任务类型
@@ -642,22 +651,19 @@ func (c *TaskController) StartXScanTaskAction() {
 			return
 		}
 		var kwArgs []byte
-		kwArgs, err = json.Marshal(req)
-		if err != nil {
+		if kwArgs, err = json.Marshal(req); err != nil {
 			c.FailedStatus(err.Error())
 			return
 		}
 		// 计划任务
 		if req.IsTaskCron {
-			taskId = runner.SaveCronTask(taskName, string(kwArgs), req.TaskCronRule, req.TaskCronComment, workspaceId)
-			if taskId == "" {
+			if taskId = runner.SaveCronTask(taskName, string(kwArgs), req.TaskCronRule, req.TaskCronComment, workspaceId); taskId == "" {
 				c.FailedStatus("save to db fail")
 				return
 			}
 		} else {
 			// 立即执行的任务
-			taskId, err = runner.SaveMainTask(taskName, string(kwArgs), "", workspaceId)
-			if err != nil {
+			if taskId, err = runner.SaveMainTask(taskName, string(kwArgs), "", workspaceId); err != nil {
 				c.FailedStatus(err.Error())
 				return
 			}

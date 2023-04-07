@@ -51,8 +51,8 @@ func (c *Crawler) Do() {
 		}
 		swg.Add()
 		go func(d string) {
+			defer swg.Done()
 			c.RunCrawler(d)
-			swg.Done()
 		}(fmt.Sprintf("%s://%s", "http", domain))
 	}
 	swg.Wait()

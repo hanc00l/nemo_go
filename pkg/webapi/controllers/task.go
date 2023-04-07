@@ -174,7 +174,7 @@ type XScanRequestParam struct {
 	OrgId           int    `form:"org_id"`
 	IsOrgIP         bool
 	IsOrgDomain     bool
-	IsFofaSearch    bool   `form:"fofa"`
+	IsOnlineAPI    bool   `form:"fofa"`
 	IsFingerprint   bool   `form:"fingerprint"`
 	IsXrayPocscan   bool   `form:"xraypoc"`
 	XrayPocFile     string `form:"xraypocfile"`

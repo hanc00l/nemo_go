@@ -567,13 +567,13 @@
                                                                     <div class="col-md-12 ">
                                                                         <div class="form-check form-check-inline">
                                                                             <label class="form-check-label"
-                                                                                   for="checkbox_fofasearch_xscan">
+                                                                                   for="checkbox_onlineapi_xscan">
                                                                                 <input class="form-check-input"
-                                                                                       id="checkbox_fofasearch_xscan"
-                                                                                       type="checkbox"><b>Fofa</b><i
+                                                                                       id="checkbox_onlineapi_xscan"
+                                                                                       type="checkbox"><b>在线资产平台（Fofa、Hunter与Quake）</b><i
                                                                                     class="fa fa-info-circle"
                                                                                     aria-hidden="true"
-                                                                                    title="调用FOFA API接口查询，需在worker.yml中配置KEY"></i>
+                                                                                    title="调用在线资产平台（Fofa、Hunter与Quake） API接口查询，需在worker.yml中配置KEY"></i>
                                                                             </label>
                                                                         </div>
                                                                         <br>
@@ -610,6 +610,11 @@
                                                     </div>
                                                     <div>
                                                         <div class="form-group row">
+                                                            <div class="col-md-12">
+                                                                <label for="checkbox_xraypoc_xscan">
+                                                                    <b><span class="text-danger">*</span>漏洞扫描</b>
+                                                                </label>
+                                                            </div>
                                                             <div class="col-md-12">
                                                                 <div class="form-check form-check-inline">
                                                                     <label class="form-check-label"
@@ -708,19 +713,6 @@
                                                                    type="text"
                                                                    placeholder="0 8 * * *" disabled value="0 8 * * *">
                                                         </div>
-                                                    </div>
-                                                    <div class="form-check form-check-inline">
-                                                        <label class="form-check-label"
-                                                               for="checkbox_ignorecdn_outofchina_xscan">
-                                                            <input class="form-check-input"
-                                                                   id="checkbox_ignorecdn_outofchina_xscan"
-                                                                   type="checkbox" checked>忽略中国大陆以外IP<i
-                                                                class="fa fa-question-circle"
-                                                                aria-hidden="true"
-                                                                title="对通过FOFA、Hunter及Quake资产管理平台API接口查询到的结果，检查IP是否采用了CDN，以及是否是中国大陆以外的IP"></i>
-                                                        </label>
-                                                    </div>
-
                                                 </div>
                                             </div>
                                         </div>

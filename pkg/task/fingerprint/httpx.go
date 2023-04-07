@@ -97,6 +97,8 @@ func (x *Httpx) Do() {
 				url := fmt.Sprintf("%v:%v", ipName, portNumber)
 				swg.Add()
 				go func(ip string, port int, u string) {
+					defer swg.Done()
+
 					fingerPrintResult := x.RunHttpx(u)
 					if len(fingerPrintResult) > 0 {
 						for _, fpa := range fingerPrintResult {
@@ -127,7 +129,6 @@ func (x *Httpx) Do() {
 							}
 						}
 					}
-					swg.Done()
 				}(ipName, portNumber, url)
 			}
 		}
@@ -150,6 +151,8 @@ func (x *Httpx) Do() {
 				url := fmt.Sprintf("%s:%d", domain, port)
 				swg.Add()
 				go func(d string, p int, u string) {
+					defer swg.Done()
+					
 					fingerPrintResult := x.RunHttpx(u)
 					if len(fingerPrintResult) > 0 {
 						for _, fpa := range fingerPrintResult {
@@ -177,7 +180,6 @@ func (x *Httpx) Do() {
 							}
 						}
 					}
-					swg.Done()
 				}(domain, port, url)
 			}
 		}

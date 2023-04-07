@@ -69,6 +69,7 @@ func (i *IconHash) Do() {
 				url := fmt.Sprintf("%v:%v", ipName, portNumber)
 				swg.Add()
 				go func(ip string, port int, u string) {
+					defer swg.Done()
 					iconHashes := i.RunFetchIconHashes(u)
 					if len(iconHashes) > 0 {
 						for _, r := range iconHashes {
@@ -89,7 +90,6 @@ func (i *IconHash) Do() {
 							}
 						}
 					}
-					swg.Done()
 				}(ipName, portNumber, url)
 			}
 		}
@@ -112,6 +112,7 @@ func (i *IconHash) Do() {
 				url := fmt.Sprintf("%s:%d", domain, port)
 				swg.Add()
 				go func(d string, u string) {
+					defer swg.Done()
 					iconHashes := i.RunFetchIconHashes(u)
 					if len(iconHashes) > 0 {
 						for _, r := range iconHashes {
@@ -132,11 +133,11 @@ func (i *IconHash) Do() {
 							}
 						}
 					}
-					swg.Done()
 				}(domain, url)
 			}
 		}
 	}
+	
 	swg.Wait()
 }
 
