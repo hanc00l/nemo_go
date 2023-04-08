@@ -6,12 +6,10 @@ require (
 	github.com/Qianlitp/crawlergo v0.4.4
 	github.com/RichardKnop/machinery/v2 v2.0.11
 	github.com/beego/beego/v2 v2.0.6
-	github.com/bluele/gcache v0.0.2
 	github.com/buger/jsonparser v1.1.1
 	github.com/chromedp/cdproto v0.0.0-20221126224343-3a0787b8dd28
 	github.com/chromedp/chromedp v0.8.6
 	github.com/disintegration/imaging v1.6.2
-	github.com/dlclark/regexp2 v1.7.0
 	github.com/evilsocket/brutemachine v0.0.0-20170703145059-0331ad6a82ce
 	github.com/evilsocket/dirsearch v0.0.0-20210927162954-fe7fffa39084
 	github.com/fsnotify/fsnotify v1.5.4
@@ -27,7 +25,6 @@ require (
 	github.com/mat/besticon v0.0.0-20210801190920-bdff7778a634
 	github.com/oschwald/geoip2-golang v1.5.0
 	github.com/pkg/errors v0.9.1
-	github.com/projectdiscovery/gologger v1.1.5-0.20220817095646-8663411b1b0b
 	github.com/projectdiscovery/mapcidr v1.0.3
 	github.com/projectdiscovery/shuffledns v1.0.8
 	github.com/remeh/sizedwaitgroup v1.0.0
@@ -35,14 +32,12 @@ require (
 	github.com/shirou/gopsutil/v3 v3.22.11
 	github.com/sirupsen/logrus v1.7.0
 	github.com/smallnest/rpcx v1.6.11
-	github.com/spaolacci/murmur3 v1.1.0
 	github.com/tidwall/pretty v1.2.0
 	github.com/twmb/murmur3 v1.1.6
 	github.com/yl2chen/cidranger v1.0.2
 	golang.org/x/net v0.1.0
 	golang.org/x/text v0.4.0
 	google.golang.org/genproto v0.0.0-20220527130721-00d5c0f3be58
-	google.golang.org/protobuf v1.28.0
 	gopkg.in/yaml.v2 v2.4.0
 	gopkg.in/yaml.v3 v3.0.1
 	gorm.io/driver/mysql v1.3.3
@@ -147,6 +142,7 @@ require (
 	github.com/projectdiscovery/blackrock v0.0.0-20220628111055-35616c71b2dc // indirect
 	github.com/projectdiscovery/fileutil v0.0.3 // indirect
 	github.com/projectdiscovery/goflags v0.1.3 //indirect
+	github.com/projectdiscovery/gologger v1.1.5-0.20220817095646-8663411b1b0b // indirect
 	github.com/projectdiscovery/roundrobin v0.0.0-20220414090253-f09184199ebd // indirect
 	github.com/projectdiscovery/stringsutil v0.0.2 // indirect
 	github.com/prometheus/client_golang v1.12.1 // indirect
@@ -194,6 +190,7 @@ require (
 	google.golang.org/api v0.81.0 // indirect
 	google.golang.org/appengine v1.6.7 // indirect
 	google.golang.org/grpc v1.46.2 // indirect
+	google.golang.org/protobuf v1.28.0 // indirect
 	gopkg.in/djherbis/times.v1 v1.2.0 // indirect
 	gopkg.in/tomb.v1 v1.0.0-20141024135613-dd632973f1e7 // indirect
 )
