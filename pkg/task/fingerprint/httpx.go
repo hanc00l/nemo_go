@@ -11,11 +11,10 @@ import (
 	"github.com/hanc00l/nemo_go/pkg/task/domainscan"
 	"github.com/hanc00l/nemo_go/pkg/task/portscan"
 	"github.com/hanc00l/nemo_go/pkg/utils"
-	"github.com/projectdiscovery/httpx/common/customheader"
-	"github.com/projectdiscovery/httpx/runner"
 	"github.com/remeh/sizedwaitgroup"
-	"math"
 	"os"
+	"os/exec"
+	"path/filepath"
 	"strconv"
 )
 
@@ -26,7 +25,7 @@ type Httpx struct {
 	//保存响应的数据，用于自定义指纹匹配
 	StoreResponse          bool
 	StoreResponseDirectory string
-	FingerPrintFunc        []func(domain string, ip string, port int, url string, result []FingerAttrResult) []string
+	FingerPrintFunc        []func(domain string, ip string, port int, url string, result []FingerAttrResult, storedResponsePathFile string) []string
 }
 
 /*
@@ -54,20 +53,23 @@ type Httpx struct {
 "a":["103.235.46.40"],
 "cname":["www.a.shifen.com","www.wshifen.com"],
 "words":1,"lines":1,
-"status_code":200,"failed":false}
+"status_code":200,"failed":false,
+"stored_response_path": "/var/folders/0p/pd6qx8z12bbgt_pkl_y03d6w0000gn/T/4eaac6a86d645f2a.dir/www.baidu.com:80/2cdcd50d828446a5c62e1cb8f3544f687ab0f207.txt"
+}
 */
 
 type HttpxResult struct {
-	A           []string `json:"a,omitempty"`
-	CNames      []string `json:"cnames,omitempty"`
-	Url         string   `json:"url,omitempty"`
-	Host        string   `json:"host,omitempty"`
-	Port        string   `json:"port,omitempty"`
-	Title       string   `json:"title,omitempty"`
-	WebServer   string   `json:"webserver,omitempty"`
-	ContentType string   `json:"content_type,omitempty"`
-	StatusCode  int      `json:"status_code,omitempty"`
-	TLSData     *TLS     `json:"tls,omitempty"`
+	A                  []string `json:"a,omitempty"`
+	CNames             []string `json:"cnames,omitempty"`
+	Url                string   `json:"url,omitempty"`
+	Host               string   `json:"host,omitempty"`
+	Port               string   `json:"port,omitempty"`
+	Title              string   `json:"title,omitempty"`
+	WebServer          string   `json:"webserver,omitempty"`
+	ContentType        string   `json:"content_type,omitempty"`
+	StatusCode         int      `json:"status_code,omitempty"`
+	TLSData            *TLS     `json:"tls,omitempty"`
+	StoredResponsePath string   `json:"stored_response_path,omitempty"`
 }
 
 type TLS struct {
@@ -99,7 +101,7 @@ func (x *Httpx) Do() {
 				go func(ip string, port int, u string) {
 					defer swg.Done()
 
-					fingerPrintResult := x.RunHttpx(u)
+					fingerPrintResult, storedResponsePathFile := x.RunHttpx(u)
 					if len(fingerPrintResult) > 0 {
 						for _, fpa := range fingerPrintResult {
 							par := portscan.PortAttrResult{
@@ -113,9 +115,9 @@ func (x *Httpx) Do() {
 							}
 						}
 						//处理自定义的finger
-						if x.StoreResponse && len(x.FingerPrintFunc) > 0 {
+						if x.StoreResponse && len(storedResponsePathFile) > 0 && len(x.FingerPrintFunc) > 0 {
 							for _, f := range x.FingerPrintFunc {
-								xfars := f("", ip, port, u, fingerPrintResult)
+								xfars := f("", ip, port, u, fingerPrintResult, storedResponsePathFile)
 								if len(xfars) > 0 {
 									for _, fps := range xfars {
 										par := portscan.PortAttrResult{
@@ -152,8 +154,8 @@ func (x *Httpx) Do() {
 				swg.Add()
 				go func(d string, p int, u string) {
 					defer swg.Done()
-					
-					fingerPrintResult := x.RunHttpx(u)
+
+					fingerPrintResult, storedResponsePathFile := x.RunHttpx(u)
 					if len(fingerPrintResult) > 0 {
 						for _, fpa := range fingerPrintResult {
 							dar := domainscan.DomainAttrResult{
@@ -164,9 +166,9 @@ func (x *Httpx) Do() {
 							x.ResultDomainScan.SetDomainAttr(d, dar)
 						}
 						//处理自定义的finger
-						if x.StoreResponse && len(x.FingerPrintFunc) > 0 {
+						if x.StoreResponse && len(storedResponsePathFile) > 0 && len(x.FingerPrintFunc) > 0 {
 							for _, f := range x.FingerPrintFunc {
-								xfars := f(d, "", p, u, fingerPrintResult)
+								xfars := f(d, "", p, u, fingerPrintResult, storedResponsePathFile)
 								if len(xfars) > 0 {
 									for _, fps := range xfars {
 										dar := domainscan.DomainAttrResult{
@@ -188,7 +190,7 @@ func (x *Httpx) Do() {
 }
 
 // RunHttpx 调用httpx，获取一个domain的标题指纹
-func (x *Httpx) RunHttpx(domain string) []FingerAttrResult {
+func (x *Httpx) RunHttpx(domain string) (result []FingerAttrResult, storedResponsePathFile string) {
 	resultTempFile := utils.GetTempPathFileName()
 	defer os.Remove(resultTempFile)
 	inputTempFile := utils.GetTempPathFileName()
@@ -196,42 +198,32 @@ func (x *Httpx) RunHttpx(domain string) []FingerAttrResult {
 	err := os.WriteFile(inputTempFile, []byte(domain), 0666)
 	if err != nil {
 		logging.RuntimeLog.Error(err.Error())
-		return nil
+		return nil, ""
 	}
-
-	options := &runner.Options{
-		CustomHeaders:             customheader.CustomHeaders{"User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) Chrome/52.0.2743.116 Safari/537.36 Edge/15.15063"},
-		Output:                    resultTempFile,
-		InputFile:                 inputTempFile,
-		Retries:                   0,
-		Threads:                   50,
-		Timeout:                   5,
-		ExtractTitle:              true,
-		StatusCode:                true,
-		FollowRedirects:           true,
-		JSONOutput:                true,
-		Silent:                    true,
-		NoColor:                   true,
-		OutputServerHeader:        true,
-		OutputContentType:         true,
-		TLSGrab:                   true,
-		StoreResponse:             x.StoreResponse,
-		StoreResponseDir:          x.StoreResponseDirectory,
-		MaxResponseBodySizeToSave: math.MaxInt32,
+	var cmdArgs []string
+	cmdArgs = append(cmdArgs,
+		"-random-agent", "-l", inputTempFile, "-o", resultTempFile,
+		"-retries", "0", "-threads", "50", "-timeout", "5", "-disable-update-check",
+		"-title", "-server", "-status-code", "-content-type", "-follow-redirects", "-json", "-silent", "-no-color", "-tls-grab",
+	)
+	if x.StoreResponse {
+		cmdArgs = append(cmdArgs,
+			"-store-response",
+			"-store-response-dir", x.StoreResponseDirectory)
 	}
-	r, err := runner.New(options)
+	binPath := filepath.Join(conf.GetRootPath(), "thirdparty/httpx", utils.GetThirdpartyBinNameByPlatform(utils.Httpx))
+	cmd := exec.Command(binPath, cmdArgs...)
+	_, err = cmd.CombinedOutput()
 	if err != nil {
 		logging.RuntimeLog.Error(err.Error())
-		return nil
+		return nil, ""
 	}
-	r.RunEnumeration()
-	r.Close()
-	result := x.parseHttpxResult(resultTempFile)
-	return result
+	result, storedResponsePathFile = x.parseHttpxResult(resultTempFile)
+	return
 }
 
 // ParseHttpxJson 解析一条httpx的JSON记录
-func (x *Httpx) ParseHttpxJson(content []byte) (host string, port int, result []FingerAttrResult) {
+func (x *Httpx) ParseHttpxJson(content []byte) (host string, port int, result []FingerAttrResult, storedResponsePathFile string) {
 	resultJSON := HttpxResult{}
 	err := json.Unmarshal(content, &resultJSON)
 	if err != nil {
@@ -243,6 +235,9 @@ func (x *Httpx) ParseHttpxJson(content []byte) (host string, port int, result []
 	if err != nil {
 		return
 	}
+	// 保存stored_response_path供fingerprint功能使用，但返回的JSON字符串不需要
+	storedResponsePathFile = resultJSON.StoredResponsePath
+	resultJSON.StoredResponsePath = ""
 	// 获取全部的Httpx信息
 	httpxResultMarshaled, err := json.Marshal(resultJSON)
 	if err == nil {
@@ -283,13 +278,13 @@ func (x *Httpx) ParseHttpxJson(content []byte) (host string, port int, result []
 }
 
 // parseHttpxResult 解析httpx执行结果
-func (x *Httpx) parseHttpxResult(outputTempFile string) (result []FingerAttrResult) {
+func (x *Httpx) parseHttpxResult(outputTempFile string) (result []FingerAttrResult, storedResponsePathFile string) {
 	content, err := os.ReadFile(outputTempFile)
 	if err != nil || len(content) == 0 {
-		return result
+		return
 	}
 	// host与port这里不需要
-	_, _, result = x.ParseHttpxJson(content)
+	_, _, result, storedResponsePathFile = x.ParseHttpxJson(content)
 
 	return
 }
@@ -303,7 +298,7 @@ func (x *Httpx) ParseJSONContentResult(content []byte) {
 	scanner := bufio.NewScanner(bytes.NewReader(content))
 	for scanner.Scan() {
 		data := scanner.Bytes()
-		host, port, fas := x.ParseHttpxJson(data)
+		host, port, fas, _ := x.ParseHttpxJson(data)
 		if host == "" || port == 0 || len(fas) == 0 || utils.CheckIPV4(host) == false {
 			continue
 		}

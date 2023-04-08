@@ -75,6 +75,7 @@ func (m *Massdns) RunMassdns(domain string) {
 	}
 	defer os.RemoveAll(tempDir)
 
+	conf.GlobalWorkerConfig().ReloadConfig()
 	options := &runner.Options{
 		Directory:          tempDir,
 		Domain:             domain,

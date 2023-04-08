@@ -2293,8 +2293,8 @@
                     },
                     {
                         "in": "formData",
-                        "name": "fofa",
-                        "description": "是否要执行fofa任务",
+                        "name": "onlineapi",
+                        "description": "是否要执行fofa、quake、hunter等任务",
                         "type": "boolean"
                     },
                     {
@@ -2307,6 +2307,18 @@
                         "in": "formData",
                         "name": "xraypocfile",
                         "description": "xraypoc使用的pocfile，格式为\\poc类型|poc文件名\\；poc类型为default或custom，poc文件名可为空（全部poc）或xray支持的模糊匹配方式",
+                        "type": "string"
+                    },
+                    {
+                        "in": "formData",
+                        "name": "nucleipoc",
+                        "description": "是否要执行nuclei扫描",
+                        "type": "boolean"
+                    },
+                    {
+                        "in": "formData",
+                        "name": "nucleipocfile",
+                        "description": "nucleipoc使用的pocfile",
                         "type": "string"
                     },
                     {

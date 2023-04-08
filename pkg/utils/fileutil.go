@@ -157,6 +157,8 @@ const (
 	Xray         BinShortName = "xray"
 	Nuclei       BinShortName = "nuclei"
 	Worker       BinShortName = "worker"
+	Httpx        BinShortName = "httpx"
+	Subfinder    BinShortName = "subfinder"
 )
 
 // GetThirdpartyBinNameByPlatform 根据当前运行平台及架构，生成指定的文件名称

@@ -36,7 +36,7 @@ var taskMaps = map[string]interface{}{
 	"fingerprint": Fingerprint,
 	"xraypoc":     XrayPocScan,
 	//xscan:
-	"xfofa":        XFofa,
+	"xonlineapi":   XOnlineAPI,
 	"xportscan":    XPortScan,
 	"xdomainscan":  XDomainscan,
 	"xfingerprint": XFingerPrint,

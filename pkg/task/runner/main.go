@@ -110,7 +110,7 @@ func runMainTask(taskName, taskId, kwArgs string, workspaceId int) (err error) {
 			return
 		}
 		logging.CLILog.Infof("start pocscan task:%s,running taskRunId:%s", taskId, taskRunId)
-	} else if taskName == "xportscan" || taskName == "xdomainscan" || taskName == "xorgscan" || taskName == "xfofa" {
+	} else if taskName == "xportscan" || taskName == "xdomainscan" || taskName == "xorgscan" || taskName == "xonlineapi" {
 		var req XScanRequestParam
 		if err = json.Unmarshal([]byte(kwArgs), &req); err != nil {
 			logging.RuntimeLog.Error(err)
@@ -121,7 +121,7 @@ func runMainTask(taskName, taskId, kwArgs string, workspaceId int) (err error) {
 			taskRunId, err = StartXPortScanTask(req, taskId, workspaceId)
 		case "xdomainscan":
 			taskRunId, err = StartXDomainScanTask(req, taskId, workspaceId)
-		case "xfofa":
+		case "xonlineapi":
 			taskRunId, err = StartXFofaKeywordTask(req, taskId, workspaceId)
 		case "xorgscan":
 			taskRunId, err = StartXOrgScanTask(req, taskId, workspaceId)

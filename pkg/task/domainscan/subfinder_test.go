@@ -17,5 +17,5 @@ func TestRun(t *testing.T) {
 	for domain, da := range resolve.Result.DomainResult {
 		t.Log(domain, da)
 	}
-	subdomain.Result.SaveResult(config)
+	//subdomain.Result.SaveResult(config)
 }

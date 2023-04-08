@@ -1,16 +1,12 @@
 package domainscan
 
 import (
-	"bufio"
-	"bytes"
 	"github.com/hanc00l/nemo_go/pkg/conf"
 	"github.com/hanc00l/nemo_go/pkg/logging"
 	"github.com/hanc00l/nemo_go/pkg/utils"
-	"github.com/projectdiscovery/subfinder/v2/pkg/resolve"
-	"github.com/projectdiscovery/subfinder/v2/pkg/runner"
 	"github.com/remeh/sizedwaitgroup"
-	"io"
 	"os"
+	"os/exec"
 	"path/filepath"
 	"strings"
 )
@@ -20,11 +16,8 @@ type SubFinder struct {
 	Result Result
 }
 
-var defaultResolvers []string
-
 // NewSubFinder 创建subfinder
 func NewSubFinder(config Config) *SubFinder {
-	loadDefaultResolver()
 	return &SubFinder{Config: config}
 }
 
@@ -49,42 +42,25 @@ func (s *SubFinder) Do() {
 
 // RunSubFinder 执行subfinder
 func (s *SubFinder) RunSubFinder(domain string) {
-	//subfinder的options
-	options := &runner.Options{
-		Verbose:            true,
-		Threads:            10,               // Thread controls the number of threads to use for active enumerations
-		Timeout:            30,               // Timeout is the seconds to wait for sources to respond
-		MaxEnumerationTime: 10,               // MaxEnumerationTime is the maximum amount of time in mins to wait for enumeration
-		Resolvers:          defaultResolvers, // Use the default list of resolvers by marshaling it to the config
-		All:                true,             // All specifies whether to use all (slow) sources.
-	}
-	if len(defaultResolvers) == 0 {
-		options.Resolvers = resolve.DefaultResolvers
-	}
-	//读取provider配置文件，参见https://github.com/projectdiscovery/subfinder#post-installation-instructions
-	if len(conf.GlobalWorkerConfig().Domainscan.ProviderConfig) > 0 {
-		providerFile := filepath.Join(conf.GetRootPath(), "thirdparty/dict", conf.GlobalWorkerConfig().Domainscan.ProviderConfig)
-		if utils.CheckFileExist(providerFile) {
-			options.ProviderConfig = providerFile
-			// provider-config 需要手工加载
-			// 位于subfinder项目的main.go中的options := runner.ParseOptions()中
-			if err := runner.UnmarshalFrom(providerFile); err != nil {
-				logging.RuntimeLog.Errorf("provider-config load err:%s", err)
-			}
-		} else {
-			logging.RuntimeLog.Errorf("provider-config file not exist:%s", providerFile)
-		}
-	}
-	//执行subfinder
-	runnerInstance, err := runner.NewRunner(options)
-	buf := bytes.Buffer{}
-	err = runnerInstance.EnumerateSingleDomain(domain, []io.Writer{&buf})
+	resultTempFile := utils.GetTempPathFileName()
+	defer os.Remove(resultTempFile)
+
+	var cmdArgs []string
+	cmdArgs = append(cmdArgs,
+		"-d", domain, "-all", "-o", resultTempFile, "-disable-update-check",
+		"-rlist", filepath.Join(conf.GetRootPath(), "thirdparty/dict", conf.GlobalWorkerConfig().Domainscan.Resolver),
+		"-provider-config", filepath.Join(conf.GetRootPath(), "thirdparty/dict", conf.GlobalWorkerConfig().Domainscan.ProviderConfig),
+		"-no-color", "-v",
+	)
+	binPath := filepath.Join(conf.GetRootPath(), "thirdparty/subfinder", utils.GetThirdpartyBinNameByPlatform(utils.Subfinder))
+	cmd := exec.Command(binPath, cmdArgs...)
+	_, err := cmd.CombinedOutput()
 	if err != nil {
-		logging.RuntimeLog.Error(err)
+		logging.RuntimeLog.Error(err.Error())
 		return
 	}
 	//读取结果
-	data, err := io.ReadAll(&buf)
+	data, err := os.ReadFile(resultTempFile)
 	if err != nil {
 		logging.RuntimeLog.Error(err)
 		return
@@ -104,7 +80,6 @@ func (s *SubFinder) parseResult(outputTempFile string) {
 
 // parseResult 解析子域名枚举结果
 func (s *SubFinder) parseResultContent(content []byte) {
-
 	for _, line := range strings.Split(string(content), "\n") {
 		domain := strings.TrimSpace(line)
 		if domain == "" {
@@ -113,24 +88,5 @@ func (s *SubFinder) parseResultContent(content []byte) {
 		if !s.Result.HasDomain(domain) {
 			s.Result.SetDomain(domain)
 		}
-	}
-}
-
-// loadDefaultResolver  读取Resolvers
-func loadDefaultResolver() {
-	inputFile, err := os.Open(filepath.Join(conf.GetRootPath(), "thirdparty/dict", conf.GlobalWorkerConfig().Domainscan.Resolver))
-	if err != nil {
-		logging.RuntimeLog.Errorf("Could not read default resolver: %s", err)
-		return
-	}
-	defer inputFile.Close()
-
-	scanner := bufio.NewScanner(inputFile)
-	for scanner.Scan() {
-		text := strings.ToLower(scanner.Text())
-		if text == "" {
-			continue
-		}
-		defaultResolvers = append(defaultResolvers, text)
 	}
 }

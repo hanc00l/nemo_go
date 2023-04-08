@@ -28,7 +28,7 @@ type XScanConfig struct {
 	FofaTarget      string `json:"fofatarget,omitempty"`
 	FofaKeyword     string `json:"fofaKeyword,omitempty"`
 	FofaSearchLimit int    `json:"fofaSearchLimit,omitempty"`
-	// xfofa任务需要区分是哪一个api
+	// xonlineapi 任务需要区分是哪一个api
 	IsFofa   bool `json:"fofa,omitempty"`
 	IsHunter bool `json:"hunter,omitempty"`
 	IsQuake  bool `json:"quake,omitempty"`
@@ -141,8 +141,8 @@ func XOrganization(taskId, mainTaskId, configJSON string) (result string, err er
 	return SucceedTask(result), nil
 }
 
-// XFofa Fofa任务
-func XFofa(taskId, mainTaskId, configJSON string) (result string, err error) {
+// XOnlineAPI Fofa任务
+func XOnlineAPI(taskId, mainTaskId, configJSON string) (result string, err error) {
 	// 检查任务状态
 	var ok bool
 	if ok, result, err = CheckTaskStatus(taskId); !ok {
@@ -155,7 +155,7 @@ func XFofa(taskId, mainTaskId, configJSON string) (result string, err error) {
 	}
 	// 执行任务
 	scan := NewXScan(config)
-	result, err = scan.FofaSearch(taskId, mainTaskId)
+	result, err = scan.OnlineAPISearch(taskId, mainTaskId)
 	if err != nil {
 		logging.RuntimeLog.Error(err)
 		return FailedTask(err.Error()), err
@@ -450,8 +450,8 @@ func (x *XScan) doNucleiScan(swg *sizedwaitgroup.SizedWaitGroup, config pocscan.
 	x.vulMutex.Unlock()
 }
 
-// FofaSearch 执行fofa搜索任务
-func (x *XScan) FofaSearch(taskId string, mainTaskId string) (result string, err error) {
+// OnlineAPISearch 执行fofa搜索任务
+func (x *XScan) OnlineAPISearch(taskId string, mainTaskId string) (result string, err error) {
 	conf.GlobalWorkerConfig().ReloadConfig()
 	config := onlineapi.OnlineAPIConfig{
 		OrgId:        x.Config.OrgId,
@@ -474,17 +474,17 @@ func (x *XScan) FofaSearch(taskId string, mainTaskId string) (result string, err
 		config.SearchByKeyWord = true
 		config.Target = x.Config.FofaKeyword
 		config.SearchLimitCount = x.Config.FofaSearchLimit
-		x.ResultIP, x.ResultDomain, result, err = doFofaAndSave(taskId, mainTaskId, "fofa", config)
+		x.ResultIP, x.ResultDomain, result, err = doOnlineAPIAndSave(taskId, mainTaskId, "fofa", config)
 	} else if len(x.Config.FofaTarget) > 0 {
 		config.Target = x.Config.FofaTarget
 		if x.Config.IsFofa {
-			x.ResultIP, x.ResultDomain, result, err = doFofaAndSave(taskId, mainTaskId, "fofa", config)
+			x.ResultIP, x.ResultDomain, result, err = doOnlineAPIAndSave(taskId, mainTaskId, "fofa", config)
 		}
 		if x.Config.IsQuake {
-			x.ResultIP, x.ResultDomain, result, err = doFofaAndSave(taskId, mainTaskId, "quake", config)
+			x.ResultIP, x.ResultDomain, result, err = doOnlineAPIAndSave(taskId, mainTaskId, "quake", config)
 		}
 		if x.Config.IsHunter {
-			x.ResultIP, x.ResultDomain, result, err = doFofaAndSave(taskId, mainTaskId, "hunter", config)
+			x.ResultIP, x.ResultDomain, result, err = doOnlineAPIAndSave(taskId, mainTaskId, "hunter", config)
 		}
 	}
 	return

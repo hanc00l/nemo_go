@@ -17,21 +17,21 @@ import (
 
 // Fofa Fofa任务
 func Fofa(taskId, mainTaskId, configJSON string) (result string, err error) {
-	return doFofaOnlineAPI(taskId, mainTaskId, configJSON, "fofa")
+	return doOnlineAPI(taskId, mainTaskId, configJSON, "fofa")
 }
 
 // Quake Quake任务
 func Quake(taskId, mainTaskId, configJSON string) (result string, err error) {
-	return doFofaOnlineAPI(taskId, mainTaskId, configJSON, "quake")
+	return doOnlineAPI(taskId, mainTaskId, configJSON, "quake")
 }
 
 // Hunter Hunter
 func Hunter(taskId, mainTaskId, configJSON string) (result string, err error) {
-	return doFofaOnlineAPI(taskId, mainTaskId, configJSON, "hunter")
+	return doOnlineAPI(taskId, mainTaskId, configJSON, "hunter")
 }
 
-// doFofaOnlineAPI 执行fofa、hunter及quake的资产搜索任务
-func doFofaOnlineAPI(taskId string, mainTaskId string, configJSON string, apiName string) (result string, err error) {
+// doOnlineAPI 执行fofa、hunter及quake的资产搜索任务
+func doOnlineAPI(taskId string, mainTaskId string, configJSON string, apiName string) (result string, err error) {
 	// 检查任务状态
 	var ok bool
 	if ok, result, err = CheckTaskStatus(taskId); !ok {
@@ -45,7 +45,7 @@ func doFofaOnlineAPI(taskId string, mainTaskId string, configJSON string, apiNam
 	//执行任务
 	var ipResult portscan.Result
 	var domainResult domainscan.Result
-	ipResult, domainResult, result, err = doFofaAndSave(taskId, mainTaskId, apiName, config)
+	ipResult, domainResult, result, err = doOnlineAPIAndSave(taskId, mainTaskId, apiName, config)
 	//fingerprint
 	_, err = NewFingerprintTask(taskId, mainTaskId, &ipResult, &domainResult, FingerprintTaskConfig{
 		IsHttpx:          config.IsHttpx,
@@ -62,8 +62,8 @@ func doFofaOnlineAPI(taskId string, mainTaskId string, configJSON string, apiNam
 	return SucceedTask(result), nil
 }
 
-// doFofaAndSave 执行fofa、hunter及quake的资产搜索，并保存结果
-func doFofaAndSave(taskId string, mainTaskId string, apiName string, config onlineapi.OnlineAPIConfig) (ipResult portscan.Result, domainResult domainscan.Result, result string, err error) {
+// doOnlineAPIAndSave 执行fofa、hunter及quake的资产搜索，并保存结果
+func doOnlineAPIAndSave(taskId string, mainTaskId string, apiName string, config onlineapi.OnlineAPIConfig) (ipResult portscan.Result, domainResult domainscan.Result, result string, err error) {
 	if apiName == "fofa" {
 		fofa := onlineapi.NewFofa(config)
 		fofa.Do()

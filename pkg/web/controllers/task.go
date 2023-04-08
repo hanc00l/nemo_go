@@ -639,8 +639,8 @@ func (c *TaskController) StartXScanTaskAction() {
 				c.FailedStatus("no org")
 				return
 			}
-		} else if req.XScanType == "xfofa" {
-			taskName = "xfofa"
+		} else if req.XScanType == "xonlineapi" {
+			taskName = "xonlineapi"
 		} else {
 			c.FailedStatus("invalide xscan type")
 			return

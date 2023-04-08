@@ -224,9 +224,9 @@ func StartXFofaKeywordTask(req XScanRequestParam, mainTaskId string, workspaceId
 		configRun.FofaKeyword = keyword
 		configRun.FofaSearchLimit = count
 		configJSONRun, _ := json.Marshal(configRun)
-		taskId, err = serverapi.NewRunTask("xfofa", string(configJSONRun), mainTaskId, "")
+		taskId, err = serverapi.NewRunTask("xonlineapi", string(configJSONRun), mainTaskId, "")
 		if err != nil {
-			logging.RuntimeLog.Errorf("start xfofa fail:%s", err.Error())
+			logging.RuntimeLog.Errorf("start xonlineapi fail:%s", err.Error())
 			return "", err
 		}
 	}
@@ -315,9 +315,9 @@ func StartXDomainScanTask(req XScanRequestParam, mainTaskId string, workspaceId 
 				configRun.FofaTarget = target
 				configRun.IsFofa = true
 				configJSONRun, _ := json.Marshal(configRun)
-				taskId, err = serverapi.NewRunTask("xfofa", string(configJSONRun), mainTaskId, "")
+				taskId, err = serverapi.NewRunTask("xonlineapi", string(configJSONRun), mainTaskId, "")
 				if err != nil {
-					logging.RuntimeLog.Errorf("start xfofa fail:%s", err.Error())
+					logging.RuntimeLog.Errorf("start xonlineapi fail:%s", err.Error())
 					return "", err
 				}
 			}
@@ -326,9 +326,9 @@ func StartXDomainScanTask(req XScanRequestParam, mainTaskId string, workspaceId 
 				configRun.FofaTarget = target
 				configRun.IsHunter = true
 				configJSONRun, _ := json.Marshal(configRun)
-				taskId, err = serverapi.NewRunTask("xfofa", string(configJSONRun), mainTaskId, "")
+				taskId, err = serverapi.NewRunTask("xonlineapi", string(configJSONRun), mainTaskId, "")
 				if err != nil {
-					logging.RuntimeLog.Errorf("start xfofa fail:%s", err.Error())
+					logging.RuntimeLog.Errorf("start xonlineapi fail:%s", err.Error())
 					return "", err
 				}
 			}
@@ -337,9 +337,9 @@ func StartXDomainScanTask(req XScanRequestParam, mainTaskId string, workspaceId 
 				configRun.FofaTarget = target
 				configRun.IsQuake = true
 				configJSONRun, _ := json.Marshal(configRun)
-				taskId, err = serverapi.NewRunTask("xfofa", string(configJSONRun), mainTaskId, "")
+				taskId, err = serverapi.NewRunTask("xonlineapi", string(configJSONRun), mainTaskId, "")
 				if err != nil {
-					logging.RuntimeLog.Errorf("start xfofa fail:%s", err.Error())
+					logging.RuntimeLog.Errorf("start xonlineapi fail:%s", err.Error())
 					return "", err
 				}
 			}
@@ -391,9 +391,9 @@ func StartXPortScanTask(req XScanRequestParam, mainTaskId string, workspaceId in
 				configRunAPI.FofaTarget = target
 				configRunAPI.IsFofa = true
 				configJSONRun, _ := json.Marshal(configRunAPI)
-				taskId, err = serverapi.NewRunTask("xfofa", string(configJSONRun), mainTaskId, "")
+				taskId, err = serverapi.NewRunTask("xonlineapi", string(configJSONRun), mainTaskId, "")
 				if err != nil {
-					logging.RuntimeLog.Errorf("start xfofa fail:%s", err.Error())
+					logging.RuntimeLog.Errorf("start xonlineapi fail:%s", err.Error())
 					return "", err
 				}
 			}
@@ -402,9 +402,9 @@ func StartXPortScanTask(req XScanRequestParam, mainTaskId string, workspaceId in
 				configRunAPI.FofaTarget = target
 				configRunAPI.IsHunter = true
 				configJSONRun, _ := json.Marshal(configRunAPI)
-				taskId, err = serverapi.NewRunTask("xfofa", string(configJSONRun), mainTaskId, "")
+				taskId, err = serverapi.NewRunTask("xonlineapi", string(configJSONRun), mainTaskId, "")
 				if err != nil {
-					logging.RuntimeLog.Errorf("start xfofa fail:%s", err.Error())
+					logging.RuntimeLog.Errorf("start xonlineapi fail:%s", err.Error())
 					return "", err
 				}
 			}
@@ -413,9 +413,9 @@ func StartXPortScanTask(req XScanRequestParam, mainTaskId string, workspaceId in
 				configRunAPI.FofaTarget = target
 				configRunAPI.IsQuake = true
 				configJSONRun, _ := json.Marshal(configRunAPI)
-				taskId, err = serverapi.NewRunTask("xfofa", string(configJSONRun), mainTaskId, "")
+				taskId, err = serverapi.NewRunTask("xonlineapi", string(configJSONRun), mainTaskId, "")
 				if err != nil {
-					logging.RuntimeLog.Errorf("start xfofa fail:%s", err.Error())
+					logging.RuntimeLog.Errorf("start xonlineapi fail:%s", err.Error())
 					return "", err
 				}
 			}
@@ -804,7 +804,7 @@ func ParseTargetFromKwArgs(taskName, args string) (target string) {
 			}
 			target = strings.Join(allTarget, ",")
 		}
-	} else if taskName == "xportscan" || taskName == "xdomainscan" || taskName == "xfofa" || taskName == "xxraypoc" || taskName == "xxray" || taskName == "xfingerprint" || taskName == "xorgscan" {
+	} else if taskName == "xportscan" || taskName == "xdomainscan" || taskName == "xonlineapi" || taskName == "xxraypoc" || taskName == "xxray" || taskName == "xfingerprint" || taskName == "xorgscan" {
 		var t XScanConfig
 		err := json.Unmarshal([]byte(args), &t)
 		if err != nil {

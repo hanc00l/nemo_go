@@ -9,7 +9,6 @@ import (
 	"github.com/hanc00l/nemo_go/pkg/task/portscan"
 	"github.com/hanc00l/nemo_go/pkg/utils"
 	"github.com/hanc00l/nemo_go/pkg/xraypocv1"
-	"github.com/projectdiscovery/urlutil"
 	"os"
 	"path"
 	"strings"
@@ -22,11 +21,6 @@ type HttpxFinger struct {
 	fpWebFingerprintHub []WebFingerPrint
 	fpCustom            []CustomFingerPrint
 }
-
-const (
-	// The maximum file length is 251 (255 - 4 bytes for ".ext" suffix)
-	maxFileNameLength = 251
-)
 
 // WebFingerPrint 匹配web_fingerprint_v3.json的指纹结构
 // 通过借鉴afrog代码获取fingerprinthub定义的指纹信息
@@ -110,9 +104,9 @@ func (h *HttpxFinger) DoHttpxAndFingerPrint() {
 }
 
 // fingerPrintFuncForFingerprintHub 回调函数，用于处理自己的指纹识别
-func (h *HttpxFinger) fingerPrintFuncForFingerprintHub(domain string, ip string, port int, url string, result []FingerAttrResult) (fingers []string) {
+func (h *HttpxFinger) fingerPrintFuncForFingerprintHub(domain string, ip string, port int, url string, result []FingerAttrResult, storedResponsePathFile string) (fingers []string) {
 	// 读取httpx保存的response内容，并解析为body和headers
-	body, _, headers := h.parseHttpHeaderAndBody(h.getStoredResponseContent(url))
+	body, _, headers := h.parseHttpHeaderAndBody(h.getStoredResponseContent(storedResponsePathFile))
 	// 指纹匹配
 	for _, v := range h.fpWebFingerprintHub {
 		flag := false
@@ -163,8 +157,8 @@ func (h *HttpxFinger) fingerPrintFuncForFingerprintHub(domain string, ip string,
 }
 
 // fingerPrintFuncForIceMoon 回调函数，用于处理自己的指纹识别
-func (h *HttpxFinger) fingerPrintFuncForCustom(domain string, ip string, port int, url string, result []FingerAttrResult) (fingers []string) {
-	body, header, _ := h.parseHttpHeaderAndBody(h.getStoredResponseContent(url))
+func (h *HttpxFinger) fingerPrintFuncForCustom(domain string, ip string, port int, url string, result []FingerAttrResult, storedResponsePathFile string) (fingers []string) {
+	body, header, _ := h.parseHttpHeaderAndBody(h.getStoredResponseContent(storedResponsePathFile))
 
 	content := xraypocv1.Content{
 		Port:   fmt.Sprintf("%d", port),
@@ -192,8 +186,8 @@ func (h *HttpxFinger) fingerPrintFuncForCustom(domain string, ip string, port in
 }
 
 // fingerPrintFuncForSaveHttpHeaderAndBody 回调函数，用于保存http协议的raw信息
-func (h *HttpxFinger) fingerPrintFuncForSaveHttpHeaderAndBody(domain string, ip string, port int, url string, result []FingerAttrResult) (fingers []string) {
-	body, header, _ := h.parseHttpHeaderAndBody(h.getStoredResponseContent(url))
+func (h *HttpxFinger) fingerPrintFuncForSaveHttpHeaderAndBody(domain string, ip string, port int, url string, result []FingerAttrResult, storedResponsePathFile string) (fingers []string) {
+	body, header, _ := h.parseHttpHeaderAndBody(h.getStoredResponseContent(storedResponsePathFile))
 	if len(ip) > 0 && port > 0 {
 		if len(header) > 0 {
 			h.ResultPortScan.SetPortHttpInfo(ip, port, portscan.HttpResult{
@@ -232,24 +226,11 @@ func (h *HttpxFinger) fingerPrintFuncForSaveHttpHeaderAndBody(domain string, ip 
 }
 
 // getStoredResponseContent 读取httpx保存的response内容
-func (h *HttpxFinger) getStoredResponseContent(url string) string {
-	domainFile := strings.ReplaceAll(urlutil.TrimScheme(url), ":", ".")
-
-	// On various OS the file max file name length is 255 - https://serverfault.com/questions/9546/filename-length-limits-on-linux
-	// Truncating length at 255
-	if len(domainFile) >= maxFileNameLength {
-		// leaving last 4 bytes free to append ".txt"
-		domainFile = domainFile[:maxFileNameLength]
-	}
-
-	domainFile = strings.ReplaceAll(domainFile, "/", "[slash]") + ".txt"
-	// store response
-	responsePath := path.Join(h.StoreResponseDirectory, domainFile)
-	content, err := os.ReadFile(responsePath)
+func (h *HttpxFinger) getStoredResponseContent(storedResponsePathFile string) string {
+	content, err := os.ReadFile(storedResponsePathFile)
 	if err != nil || len(content) == 0 {
 		return ""
 	}
-
 	return string(content)
 }
 
@@ -259,9 +240,16 @@ func (h *HttpxFinger) parseHttpHeaderAndBody(content string) (body string, heade
 	if len(content) <= 0 {
 		return
 	}
+	/* httpx保存的文件格式为(v1.2.9）：
+	url
+
+	header
+
+	body
+	*/
 	headerAndBodyArrays := strings.Split(content, "\r\n\r\n")
-	if len(headerAndBodyArrays) >= 1 {
-		header = headerAndBodyArrays[0]
+	if len(headerAndBodyArrays) >= 2 {
+		header = headerAndBodyArrays[1]
 		respHeaderSlice := strings.Split(header, "\r\n")
 		for _, hh := range respHeaderSlice {
 			hslice := strings.SplitN(hh, ":", 2)
@@ -277,8 +265,8 @@ func (h *HttpxFinger) parseHttpHeaderAndBody(content string) (body string, heade
 			}
 		}
 	}
-	if len(headerAndBodyArrays) >= 2 {
-		body = strings.Join(headerAndBodyArrays[1:], "\r\n\r\n")
+	if len(headerAndBodyArrays) >= 3 {
+		body = strings.Join(headerAndBodyArrays[2:], "\r\n\r\n")
 	}
 	return
 }
