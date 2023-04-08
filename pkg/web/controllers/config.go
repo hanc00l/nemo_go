@@ -1,6 +1,8 @@
 package controllers
 
 import (
+	"encoding/base64"
+	"github.com/hanc00l/nemo_go/pkg/comm"
 	"github.com/hanc00l/nemo_go/pkg/conf"
 	"github.com/hanc00l/nemo_go/pkg/logging"
 	"github.com/hanc00l/nemo_go/pkg/notify"
@@ -145,8 +147,27 @@ func (c *ConfigController) LoadDefaultConfigAction() {
 func (c *ConfigController) ChangePasswordAction() {
 	defer c.ServeJSON()
 
-	oldPass := c.GetString("oldpass", "")
-	newPass := c.GetString("newpass", "")
+	op := c.GetString("oldpass", "")
+	np := c.GetString("newpass", "")
+	if op == "" || np == "" {
+		c.FailedStatus("参数为空！")
+		return
+	}
+	// 密码使用rsa进行解密：
+	oldPassEncrypt, err1 := base64.StdEncoding.DecodeString(op)
+	newPassEncrypt, err2 := base64.StdEncoding.DecodeString(np)
+	if err1 != nil || err2 != nil || len(oldPassEncrypt) == 0 || len(newPassEncrypt) == 0 {
+		c.FailedStatus("Base64密码解密出错！")
+		return
+	}
+	oldPassDecrypted, err1 := utils.RSADecryptFromPemText(oldPassEncrypt, comm.RsaPrivateKeyText)
+	newPassDecrypted, err2 := utils.RSADecryptFromPemText(newPassEncrypt, comm.RsaPrivateKeyText)
+	if err1 != nil || err2 != nil || len(oldPassDecrypted) == 0 || len(newPassDecrypted) == 0 {
+		c.FailedStatus("RSA密码解密出错！")
+		return
+	}
+	oldPass := string(oldPassDecrypted)
+	newPass := string(newPassDecrypted)
 	if oldPass == "" || newPass == "" {
 		c.FailedStatus("密码为空！")
 		return

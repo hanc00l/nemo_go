@@ -254,10 +254,14 @@ $("#buttonChangPassword").click(function () {
         swal('Warning', "两次新密码不一致！", 'error');
         return;
     }
+    let encryptor = new JSEncrypt();
+    encryptor.setPublicKey(pubKey);
+    let oldpass = encryptor.encrypt($('#input_oldpass').val());
+    let newpass = encryptor.encrypt($('#input_password1').val());
     $.post("/config-change-password",
         {
-            "oldpass": $('#input_oldpass').val(),
-            "newpass": $('#input_password1').val()
+            "oldpass": oldpass,
+            "newpass": newpass,
         }, function (data, e) {
             if (e === "success" && data['status'] == 'success') {
                 $('#input_oldpass').val('');
