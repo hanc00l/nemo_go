@@ -67,7 +67,7 @@ $(function () {
             swal('Warning', '请至少输入一个Target', 'error');
             return;
         }
-        if (target.length>5000) {
+        if (target.length > 5000) {
             swal('Warning', '目标Targets长度不能超过5000', 'error');
             return;
         }
@@ -239,7 +239,7 @@ $(function () {
                 swal('Warning', '请至少输入一个Target', 'error');
                 return;
             }
-            if (target.length>5000) {
+            if (target.length > 5000) {
                 swal('Warning', '目标Targets长度不能超过5000', 'error');
                 return;
             }
@@ -265,7 +265,7 @@ $(function () {
         formData.append("org_id", $('#select_org_id_task_xscan').val());
         formData.append("fingerprint", $('#checkbox_fingerpint_xscan').is(":checked"));
         formData.append("xraypoc", $('#checkbox_xraypoc_xscan').is(":checked"));
-        formData.append("xraypocfile", $('#select_poc_type_xscan').val() + "|" + $('#input_xray_poc_file_xscan').val());
+        formData.append("xraypocfile", $('#select_xray_poc_type_xscan').val() + "|" + $('#input_xray_poc_file_xscan').val());
         formData.append("taskcron", $('#checkbox_cron_task_xscan').is(":checked"));
 
         formData.append("nucleipoc", $('#checkbox_nucleipoc_xscan').is(":checked"));
@@ -380,8 +380,8 @@ $(function () {
     $('#select_poc_type').change(function () {
         load_pocfile_list(true, false, $('#select_poc_type').val())
     });
-    $('#select_poc_type_xscan').change(function () {
-        load_pocfile_list(true, false, $('#select_poc_type_xscan').val())
+    $('#select_xray_poc_type_xscan').change(function () {
+        load_pocfile_list(true, false, $('#select_xray_poc_type_xscan').val())
     });
     //IP列表
     $('#ip_table').DataTable(

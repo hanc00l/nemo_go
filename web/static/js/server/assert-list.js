@@ -131,8 +131,10 @@ function load_pocfile_list(xray = true, nuclei = true, xray_type = "default") {
         $.post("/vulnerability-load-nuclei-pocfile", {}, function (data, e) {
             if (e === "success") {
                 $("#datalist_nuclei_poc_file").empty();
+                $("#datalist_nuclei_poc_file_xscan").empty();
                 for (let i = 0; i < data.length; i++) {
                     $("#datalist_nuclei_poc_file").append("<option value='" + data[i] + "'>" + data[i] + "</option>")
+                    $("#datalist_nuclei_poc_file_xscan").append("<option value='" + data[i] + "'>" + data[i] + "</option>")
                 }
             }
         });

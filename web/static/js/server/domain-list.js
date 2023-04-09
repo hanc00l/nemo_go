@@ -168,7 +168,7 @@ $(function () {
         formData.append("org_id", $('#select_org_id_task_xscan').val());
         formData.append("fingerprint", $('#checkbox_fingerpint_xscan').is(":checked"));
         formData.append("xraypoc", $('#checkbox_xraypoc_xscan').is(":checked"));
-        formData.append("xraypocfile", $('#select_poc_type_xscan').val() + '|' + $('#input_xray_poc_file_xscan').val());
+        formData.append("xraypocfile", $('#select_xray_poc_type_xscan').val() + '|' + $('#input_xray_poc_file_xscan').val());
 
         formData.append("nucleipoc", $('#checkbox_nucleipoc_xscan').is(":checked"));
         formData.append("nucleipocfile", $('#input_nuclei_poc_file_xscan').val());
@@ -258,8 +258,8 @@ $(function () {
     $('#select_poc_type').change(function () {
         load_pocfile_list(true, false, $('#select_poc_type').val())
     });
-    $('#select_poc_type_xscan').change(function () {
-        load_pocfile_list(true, false, $('#select_poc_type_xscan').val())
+    $('#select_xray_poc_type_xscan').change(function () {
+        load_pocfile_list(true, false, $('#select_xray_poc_type_xscan').val())
     });
     $('#domain_table').DataTable(
         {

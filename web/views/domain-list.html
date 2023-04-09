@@ -629,10 +629,10 @@
                                                                 </div>
                                                                 <br/>
                                                                 <label class="col-form-label"
-                                                                       for="select_poc_type_xscan">
+                                                                       for="select_xray_poc_type_xscan">
                                                                     Poc类型
                                                                 </label>
-                                                                <select class="form-control" id="select_poc_type_xscan">
+                                                                <select class="form-control" id="select_xray_poc_type_xscan">
                                                                     <option value="default">默认的内置Poc</option>
                                                                     <option value="custom">自定义Poc文件</option>
                                                                 </select>
@@ -662,7 +662,6 @@
                                                                     </label>
                                                                 </div>
                                                                 <br/>
-
                                                                 <label class="col-form-label"
                                                                        for="input_nuclei_poc_file_xscan">
                                                                     Poc文件
@@ -670,7 +669,11 @@
                                                                 <input class="form-control"
                                                                        id="input_nuclei_poc_file_xscan"
                                                                        type="text"
-                                                                       placeholder="--全部--" value="">
+                                                                       placeholder="--全部--" value=""
+                                                                       list="datalist_nuclei_poc_file_xscan">
+                                                                <datalist id="datalist_nuclei_poc_file_xscan"
+                                                                          style="display:none;">
+                                                                </datalist>
                                                             </div>
                                                         </div>
                                                     </div>
@@ -713,9 +716,9 @@
                                                                    type="text"
                                                                    placeholder="0 8 * * *" disabled value="0 8 * * *">
                                                         </div>
+                                                    </div>
                                                 </div>
                                             </div>
-                                        </div>
                                     </form>
                                 </div>
                                 <div class="modal-footer">
