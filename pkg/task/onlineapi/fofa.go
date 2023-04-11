@@ -270,9 +270,9 @@ func (f *Fofa) RunFofa(domain string) {
 			// query = fmt.Sprintf("domain=\"%s\" || host=\"%s\" || cert=\"%s\"", domain, domain, domain)
 			query = fmt.Sprintf("domain=\"%s\" || cert.subject=\"%s\"", domain, domain)
 		}
-		if f.Config.IsIgnoreOutofChina {
-			query = fmt.Sprintf("(%s) && country=\"CN\" && region!=\"HK\" && region!=\"TW\"  && region!=\"MO\"", query)
-		}
+	}
+	if f.Config.IsIgnoreOutofChina {
+		query = fmt.Sprintf("(%s) && country=\"CN\" && region!=\"HK\" && region!=\"TW\"  && region!=\"MO\"", query)
 	}
 	// 查询第1页，并获取总共记录数量
 	pageResult, sizeTotal := f.retriedFofaSearch(clt, 1, query, fields)

@@ -594,7 +594,7 @@ func (c *TaskController) StartXScanTaskAction() {
 	}
 	var taskId string
 	for _, target := range targets {
-		if strings.TrimSpace(target) == "" {
+		if strings.TrimSpace(target) == "" && reqByForm.OrgId <= 0 {
 			continue
 		}
 		req := reqByForm
