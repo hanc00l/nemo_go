@@ -948,3 +948,58 @@ func getIpRelatedDomain(workspaceId int, ipName string) []string {
 	}
 	return utils.SetToSlice(domains)
 }
+
+// BlackIPAction 一键拉黑一个IP
+func (c *IPController) BlackIPAction() {
+	defer c.ServeJSON()
+	if c.CheckMultiAccessRequest([]RequestRole{SuperAdmin, Admin}, false) == false {
+		c.FailedStatus("当前用户权限不允许！")
+		return
+	}
+
+	ip := c.GetString("ip", "")
+	workspaceId, err := c.GetInt("workspace", 0)
+	if len(ip) == 0 || err != nil || workspaceId <= 0 {
+		c.FailedStatus("err param")
+		return
+	}
+	if utils.CheckIPV4(ip) == false {
+		c.FailedStatus("invalid ipv4")
+		return
+	}
+	// 将IP追加到黑名单文件
+	blackIP := custom.NewBlackIP()
+	err = blackIP.AppendBlackIP(ip)
+	if err != nil {
+		c.FailedStatus(err.Error())
+		return
+	}
+	// 删除数据库中IP记录
+	ipDB := db.Ip{IpName: ip, WorkspaceId: workspaceId}
+	if ipDB.GetByIp() == false {
+		c.FailedStatus("数据库不存在当前IP！")
+		return
+	}
+	if ipDB.Delete() == false {
+		c.FailedStatus("删除IP失败！")
+		return
+	}
+	// 删除IP相关的screenshot
+	workspace := db.Workspace{Id: workspaceId}
+	if workspace.Get() == false {
+		c.FailedStatus("获取当前工作空间失败")
+		return
+	}
+	ss := fingerprint.NewScreenShot()
+	ss.Delete(workspace.WorkspaceGUID, ip)
+	// 删除IP关联的域名记录的信息
+	domains := getIpRelatedDomain(workspaceId, ip)
+	for _, d := range domains {
+		domain := db.Domain{DomainName: d, WorkspaceId: workspaceId}
+		if domain.GetByDomain() {
+			ss.Delete(workspace.WorkspaceGUID, domain.DomainName)
+			domain.Delete()
+		}
+	}
+	c.SucceededStatus("success")
+}

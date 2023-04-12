@@ -891,3 +891,74 @@ func reverseDomainHost(domain string) (fldDomain string, hostDomainReversed []st
 	}
 	return
 }
+
+// BlockDomainAction 一键拉黑域名
+func (c *DomainController) BlockDomainAction() {
+	defer c.ServeJSON()
+	if c.CheckMultiAccessRequest([]RequestRole{SuperAdmin, Admin}, false) == false {
+		c.FailedStatus("当前用户权限不允许！")
+		return
+	}
+	domainName := c.GetString("domain")
+	workspaceId, err := c.GetInt("workspace", 0)
+	if len(domainName) == 0 || err != nil || workspaceId <= 0 {
+		c.FailedStatus("err param")
+		return
+	}
+	if utils.CheckDomain(domainName) == false {
+		c.FailedStatus("invalid domain")
+		return
+	}
+	//  域提取名参数的主域，比如www.images.qq.com的主域名为.qq.com
+	tld := domainscan.NewTldExtract()
+	fldDomain := tld.ExtractFLD(domainName)
+	if len(fldDomain) == 0 {
+		c.FailedStatus("err domain format")
+		return
+	}
+	if strings.HasPrefix(fldDomain, ".") == false {
+		fldDomain = "." + fldDomain
+	}
+	// 将主域名增加到黑名单文件中
+	blackDomain := custom.NewBlackDomain()
+	if err = blackDomain.AppendBlackDomain(fldDomain); err != nil {
+		c.FailedStatus(err.Error())
+		return
+	}
+	workspace := db.Workspace{Id: workspaceId}
+	if workspace.Get() == false {
+		c.FailedStatus("获取当前工作空间失败")
+		return
+	}
+	domainRelatedIP := make(map[string]struct{})
+	// 从数据中获取主域的所有子域名记录
+	domainDb := db.Domain{}
+	domainResult := domainDb.GetsForBlackListDomain(fldDomain, workspaceId)
+	for _, d := range domainResult {
+		// 获取域名关联的IP解析记录
+		domainAttr := db.DomainAttr{RelatedId: d.Id}
+		domainAttrData := domainAttr.GetsByRelatedId()
+		for _, da := range domainAttrData {
+			if da.Tag == "A" {
+				if _, ok := domainRelatedIP[da.Content]; !ok {
+					domainRelatedIP[da.Content] = struct{}{}
+				}
+			}
+		}
+		// 删除screenshot
+		ss := fingerprint.NewScreenShot()
+		ss.Delete(workspace.WorkspaceGUID, d.DomainName)
+		// 删除domain记录
+		d.Delete()
+	}
+	// 删除关联的IP记录
+	for ip := range domainRelatedIP {
+		// 删除数据库中IP记录
+		ipDB := db.Ip{IpName: ip, WorkspaceId: workspaceId}
+		if ipDB.GetByIp() {
+			ipDB.Delete()
+		}
+		ss := fingerprint.NewScreenShot()
+		ss.Delete(workspace.WorkspaceGUID, ip)
+	}
+}

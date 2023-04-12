@@ -53,3 +53,19 @@ func (b *BlackDomain) CheckBlack(domain string) bool {
 	}
 	return false
 }
+
+// AppendBlackDomain 增加一个黑名单
+func (b *BlackDomain) AppendBlackDomain(domain string) error {
+	f, err := os.OpenFile(filepath.Join(conf.GetRootPath(), "thirdparty/custom/black_domain.txt"), os.O_WRONLY|os.O_APPEND, 0666)
+	if err != nil {
+		return err
+	}
+	defer f.Close()
+
+	w := bufio.NewWriter(f)
+	w.WriteString("\n")
+	w.WriteString(domain)
+	w.Flush()
+
+	return nil
+}

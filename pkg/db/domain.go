@@ -183,3 +183,12 @@ func (domain *Domain) SaveOrUpdate() (success bool, isAdd bool) {
 		return domain.Add(), true
 	}
 }
+
+// GetsForBlackListDomain 匹配查找黑名单的域名列表记录
+func (domain *Domain) GetsForBlackListDomain(blackDomain string, workspaceId int) (results []Domain) {
+	db := GetDB()
+	defer CloseDB(db)
+	//sql语句为 select * from domain where domain like "%.qq.com"，只匹配子域名
+	db.Where("workspace_id", workspaceId).Where("domain like ?", fmt.Sprintf("%%%s", blackDomain)).Model(domain).Find(&results)
+	return
+}

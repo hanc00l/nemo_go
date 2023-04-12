@@ -49,6 +49,7 @@ func init() {
 	web.CtrlPost("/ip-import-portscan", (*controllers.IPController).ImportPortscanResultAction)
 	web.CtrlPost("/ip-pin-top", (*controllers.IPController).PinTopAction)
 	web.CtrlPost("/ip-info-http", (*controllers.IPController).InfoHttpAction)
+	web.CtrlPost("/ip-block", (*controllers.IPController).BlackIPAction)
 
 	web.CtrlGet("/domain-list", (*controllers.DomainController).IndexAction)
 	web.CtrlPost("/domain-list", (*controllers.DomainController).ListAction)
@@ -63,6 +64,7 @@ func init() {
 	web.CtrlPost("/domain-color-tag", (*controllers.DomainController).MarkColorTagAction)
 	web.CtrlPost("/domain-pin-top", (*controllers.DomainController).PinTopAction)
 	web.CtrlPost("/domain-info-http", (*controllers.DomainController).InfoHttpAction)
+	web.CtrlPost("/domain-block", (*controllers.DomainController).BlockDomainAction)
 
 	web.CtrlGet("/vulnerability-list", (*controllers.VulController).IndexAction)
 	web.CtrlPost("/vulnerability-list", (*controllers.VulController).ListAction)

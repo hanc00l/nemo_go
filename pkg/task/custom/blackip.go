@@ -49,3 +49,19 @@ func (b *BlackIP) CheckBlack(ip string) bool {
 	_, existed := b.blackIPMap[ip]
 	return existed
 }
+
+// AppendBlackIP 增加一个黑名单
+func (b *BlackIP) AppendBlackIP(ip string) error {
+	f, err := os.OpenFile(filepath.Join(conf.GetRootPath(), "thirdparty/custom/black_ip.txt"), os.O_WRONLY|os.O_APPEND, 0666)
+	if err != nil {
+		return err
+	}
+	defer f.Close()
+
+	w := bufio.NewWriter(f)
+	w.WriteString("\n")
+	w.WriteString(ip)
+	w.Flush()
+
+	return nil
+}
