@@ -116,7 +116,11 @@ func (r *Result) SetHttpInfo(domain string, result HttpResult) {
 func (r *Result) SaveResult(config Config) string {
 	var resultDomainCount int
 	var newDomain int
+	blackDomain := NewBlankDomain()
 	for domainName, domainResult := range r.DomainResult {
+		if blackDomain.CheckBlank(domainName) {
+			continue
+		}
 		domain := &db.Domain{
 			DomainName:  domainName,
 			OrgId:       config.OrgId,

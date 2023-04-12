@@ -110,9 +110,10 @@ func (ff *Fofa) parseResult() {
 	ff.IpResult = portscan.Result{IPResult: make(map[string]*portscan.IPResult)}
 	ff.DomainResult = domainscan.Result{DomainResult: make(map[string]*domainscan.DomainResult)}
 
+	blackDomain := domainscan.NewBlankDomain()
 	for _, fsr := range ff.Result {
 		parseIpPort(ff.IpResult, fsr, "fofa")
-		parseDomainIP(ff.DomainResult, fsr, "fofa")
+		parseDomainIP(ff.DomainResult, fsr, "fofa", blackDomain)
 	}
 }
 
@@ -164,9 +165,10 @@ func (q *Quake) parseResult() {
 	q.IpResult = portscan.Result{IPResult: make(map[string]*portscan.IPResult)}
 	q.DomainResult = domainscan.Result{DomainResult: make(map[string]*domainscan.DomainResult)}
 
+	blackDomain := domainscan.NewBlankDomain()
 	for _, fsr := range q.Result {
 		parseIpPort(q.IpResult, fsr, "quake")
-		parseDomainIP(q.DomainResult, fsr, "quake")
+		parseDomainIP(q.DomainResult, fsr, "quake", blackDomain)
 	}
 }
 
@@ -186,9 +188,10 @@ func (h *Hunter) parseResult() {
 	h.IpResult = portscan.Result{IPResult: make(map[string]*portscan.IPResult)}
 	h.DomainResult = domainscan.Result{DomainResult: make(map[string]*domainscan.DomainResult)}
 
+	blackDomain := domainscan.NewBlankDomain()
 	for _, fsr := range h.Result {
 		parseIpPort(h.IpResult, fsr, "hunter")
-		parseDomainIP(h.DomainResult, fsr, "hunter")
+		parseDomainIP(h.DomainResult, fsr, "hunter", blackDomain)
 	}
 }
 
@@ -243,12 +246,15 @@ func parseIpPort(ipResult portscan.Result, fsr onlineSearchResult, source string
 }
 
 // parseDomainIP 解析搜索结果中的域名记录
-func parseDomainIP(domainResult domainscan.Result, fsr onlineSearchResult, source string) {
+func parseDomainIP(domainResult domainscan.Result, fsr onlineSearchResult, source string, blackDomain *domainscan.BlackDomain) {
 	host := strings.Replace(fsr.Host, "https://", "", -1)
 	host = strings.Replace(host, "http://", "", -1)
 	host = strings.Replace(host, "/", "", -1)
 	domain := strings.Split(host, ":")[0]
 	if domain == "" || utils.CheckIPV4(domain) || utils.CheckDomain(domain) == false {
+		return
+	}
+	if blackDomain != nil && blackDomain.CheckBlank(domain) {
 		return
 	}
 

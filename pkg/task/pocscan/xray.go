@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"github.com/hanc00l/nemo_go/pkg/conf"
 	"github.com/hanc00l/nemo_go/pkg/logging"
+	"github.com/hanc00l/nemo_go/pkg/task/domainscan"
 	"github.com/hanc00l/nemo_go/pkg/utils"
 	"os"
 	"os/exec"
@@ -29,8 +30,12 @@ func (x *Xray) Do() {
 	defer os.Remove(resultTempFile)
 	defer os.Remove(inputTargetFile)
 
+	blackDomain := domainscan.NewBlankDomain()
 	urls := strings.Split(x.Config.Target, ",")
 	for idx, url := range urls {
+		if utils.CheckDomain(url) && blackDomain.CheckBlank(url) {
+			continue
+		}
 		if strings.HasSuffix(url, ":443") {
 			urls[idx] = "https://" + url
 		}

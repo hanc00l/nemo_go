@@ -22,9 +22,13 @@ func NewResolve(config Config) *Resolve {
 // Do 执行域名解析
 func (r *Resolve) Do() {
 	swg := sizedwaitgroup.New(resolveThreadNumber[conf.WorkerPerformanceMode])
+	blackDomain := NewBlankDomain()
 	// 如果Result中已有map[domain]*DomainResult，则遍历并解析域名
 	if r.Result.DomainResult != nil {
 		for domain, _ := range r.Result.DomainResult {
+			if blackDomain.CheckBlank(domain) {
+				continue
+			}
 			swg.Add()
 			go func(d string) {
 				defer swg.Done()
@@ -37,6 +41,9 @@ func (r *Resolve) Do() {
 		for _, line := range strings.Split(r.Config.Target, ",") {
 			domain := strings.TrimSpace(line)
 			if domain == "" || utils.CheckIPV4(domain) || utils.CheckIPV4Subnet(domain) {
+				continue
+			}
+			if blackDomain.CheckBlank(domain) {
 				continue
 			}
 			swg.Add()

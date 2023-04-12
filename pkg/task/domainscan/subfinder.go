@@ -25,10 +25,14 @@ func NewSubFinder(config Config) *SubFinder {
 func (s *SubFinder) Do() {
 	s.Result.DomainResult = make(map[string]*DomainResult)
 	swg := sizedwaitgroup.New(subfinderThreadNumber[conf.WorkerPerformanceMode])
+	blackDomain := NewBlankDomain()
 
 	for _, line := range strings.Split(s.Config.Target, ",") {
 		domain := strings.TrimSpace(line)
 		if domain == "" || utils.CheckIPV4(domain) || utils.CheckIPV4Subnet(domain) {
+			continue
+		}
+		if blackDomain.CheckBlank(domain) {
 			continue
 		}
 		swg.Add()
@@ -80,9 +84,13 @@ func (s *SubFinder) parseResult(outputTempFile string) {
 
 // parseResult 解析子域名枚举结果
 func (s *SubFinder) parseResultContent(content []byte) {
+	blackDomain := NewBlankDomain()
 	for _, line := range strings.Split(string(content), "\n") {
 		domain := strings.TrimSpace(line)
 		if domain == "" {
+			continue
+		}
+		if blackDomain.CheckBlank(domain) {
 			continue
 		}
 		if !s.Result.HasDomain(domain) {

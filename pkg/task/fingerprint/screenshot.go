@@ -70,7 +70,11 @@ func (s *ScreenShot) Do() {
 		if s.DomainTargetPort == nil {
 			s.DomainTargetPort = make(map[string]map[int]struct{})
 		}
+		blackDomain := domainscan.NewBlankDomain()
 		for domain := range s.ResultDomainScan.DomainResult {
+			if blackDomain.CheckBlank(domain) {
+				continue
+			}
 			//如果无域名对应的端口，默认80和443
 			if _, ok := s.DomainTargetPort[domain]; !ok || len(s.DomainTargetPort[domain]) == 0 {
 				s.DomainTargetPort[domain] = make(map[int]struct{})

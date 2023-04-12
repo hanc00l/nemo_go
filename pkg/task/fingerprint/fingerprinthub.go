@@ -70,7 +70,11 @@ func (f *FingerprintHub) Do() {
 		if f.DomainTargetPort == nil {
 			f.DomainTargetPort = make(map[string]map[int]struct{})
 		}
+		blackDomain := domainscan.NewBlankDomain()
 		for domain := range f.ResultDomainScan.DomainResult {
+			if blackDomain.CheckBlank(domain) {
+				continue
+			}
 			//如果无域名对应的端口，默认80和443
 			if _, ok := f.DomainTargetPort[domain]; !ok || len(f.DomainTargetPort[domain]) == 0 {
 				f.DomainTargetPort[domain] = make(map[int]struct{})

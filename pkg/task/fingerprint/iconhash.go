@@ -98,7 +98,11 @@ func (i *IconHash) Do() {
 		if i.DomainTargetPort == nil {
 			i.DomainTargetPort = make(map[string]map[int]struct{})
 		}
+		blackDomain := domainscan.NewBlankDomain()
 		for domain := range i.ResultDomainScan.DomainResult {
+			if blackDomain.CheckBlank(domain) {
+				continue
+			}
 			//如果无域名对应的端口，默认80和443
 			if _, ok := i.DomainTargetPort[domain]; !ok || len(i.DomainTargetPort[domain]) == 0 {
 				i.DomainTargetPort[domain] = make(map[int]struct{})
@@ -137,7 +141,7 @@ func (i *IconHash) Do() {
 			}
 		}
 	}
-	
+
 	swg.Wait()
 }
 
