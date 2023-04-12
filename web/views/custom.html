@@ -71,6 +71,31 @@
         </div>
         <div class="col-md-6">
             <div class="tile">
+                <h3 class="tile-title">IP/Domain黑名单</h3>
+                <div class="tile-body">
+                    <label class="col-form-label" for="select_black_filename">
+                        <b>配置文件</b>
+                    </label>
+                    <select class="form-control" id="select_black_filename">
+                        <option value="black_domain.txt">域名</option>
+                        <option value="black_ip.txt">IP</option>
+                    </select>
+                    <form>
+                        <div class="form-group">
+                            <label class="col-form-label" for="text_black_domain_ip">
+                                <b>配置参数</b>
+                            </label>
+                            <textarea class="form-control" id="text_black_domain_ip" rows="8"></textarea>
+                        </div>
+                    </form>
+                    <div class="tile-footer">
+                        <button class="btn btn-primary" type="button" id="buttonSaveBlackDomainIP"><i
+                                class="fa fa-fw fa-lg fa-check-circle"></i>保存IP设置
+                        </button>&nbsp;&nbsp;&nbsp;
+                    </div>
+                </div>
+            </div>
+            <div class="tile">
                 <h3 class="tile-title">自定义Poc上传</h3>
                 <div class="tile-body">
                     <label class="col-form-label" for="select_poc_type">

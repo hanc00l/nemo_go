@@ -28,6 +28,8 @@ const (
 	XrayConfig  string = "config.yaml"
 	XrayPlugin  string = "plugin.xray.yaml"
 	XrayModule  string = "module.xray.yaml"
+	BlackDomain string = "black_domain.txt"
+	BlackIP     string = "black_ip.txt"
 )
 
 type DefaultConfig struct {
@@ -559,7 +561,10 @@ func getCustomFilename(customType string) (customFile string) {
 		customFile = "xray/module.xray.yaml"
 	case XrayPlugin:
 		customFile = "xray/plugin.xray.yaml"
-
+	case BlackDomain:
+		customFile = "custom/black_domain.txt"
+	case BlackIP:
+		customFile = "custom/black_ip.txt"
 	}
 	return
 }

@@ -11,7 +11,10 @@ $(function () {
     $('#select_xray_config_filename').change(function () {
         load_custom($('#select_xray_config_filename').val(), $('#text_xray_config'));
     });
-
+    load_custom('black_domain.txt', $('#text_black_domain_ip'));
+    $('#select_black_filename').change(function () {
+        load_custom($('#select_black_filename').val(), $('#text_black_domain_ip'));
+    });
     $("#buttonSaveNmap").click(function () {
         $.post("/config-save-portscan",
             {
@@ -208,6 +211,9 @@ $("#buttonSaveService").click(function () {
 });
 $("#buttonSaveIPLocation").click(function () {
     save_custom($("#select_iplocation_filename").val(), $('#text_iplocation').val())
+});
+$("#buttonSaveBlackDomainIP").click(function () {
+    save_custom($("#select_black_filename").val(), $('#text_black_domain_ip').val())
 });
 $("#buttonUploadPoc").click(function () {
     let formData = new FormData();
