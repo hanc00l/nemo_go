@@ -7,7 +7,7 @@ import (
 	"fmt"
 	"github.com/hanc00l/nemo_go/pkg/conf"
 	"github.com/hanc00l/nemo_go/pkg/logging"
-	"github.com/hanc00l/nemo_go/pkg/task/domainscan"
+	"github.com/hanc00l/nemo_go/pkg/task/custom"
 	"github.com/hanc00l/nemo_go/pkg/utils"
 	"github.com/tidwall/pretty"
 	"net"
@@ -36,12 +36,16 @@ func (n *Nuclei) Do() {
 	defer os.Remove(resultTempFile)
 	defer os.Remove(inputTargetFile)
 
-	blackDomain := domainscan.NewBlankDomain()
+	blackDomain := custom.NewBlackDomain()
+	blackIP := custom.NewBlackIP()
 	urls := strings.Split(n.Config.Target, ",")
 	var urlsFormatted []string
 	//由于nuclei要求url要http或https开始，非http/https协议不进行漏洞检测，节约扫描时间
 	for _, u := range urls {
-		if utils.CheckDomain(u) && blackDomain.CheckBlank(u) {
+		if utils.CheckDomain(utils.HostStrip(u)) && blackDomain.CheckBlack(utils.HostStrip(u)) {
+			continue
+		}
+		if utils.CheckIPV4(utils.HostStrip(u)) && blackIP.CheckBlack(utils.HostStrip(u)) {
 			continue
 		}
 		if strings.HasPrefix(u, "http") == false {

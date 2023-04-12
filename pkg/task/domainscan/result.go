@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/hanc00l/nemo_go/pkg/conf"
 	"github.com/hanc00l/nemo_go/pkg/db"
+	"github.com/hanc00l/nemo_go/pkg/task/custom"
 	"strings"
 	"sync"
 )
@@ -116,9 +117,9 @@ func (r *Result) SetHttpInfo(domain string, result HttpResult) {
 func (r *Result) SaveResult(config Config) string {
 	var resultDomainCount int
 	var newDomain int
-	blackDomain := NewBlankDomain()
+	blackDomain := custom.NewBlackDomain()
 	for domainName, domainResult := range r.DomainResult {
-		if blackDomain.CheckBlank(domainName) {
+		if blackDomain.CheckBlack(domainName) {
 			continue
 		}
 		domain := &db.Domain{

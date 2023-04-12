@@ -64,9 +64,17 @@ func (h *Hunter) Do() {
 		logging.RuntimeLog.Error("no hunter api key,exit hunter search")
 		return
 	}
+	blackDomain := custom.NewBlackDomain()
+	blackIP := custom.NewBlackIP()
 	for _, line := range strings.Split(h.Config.Target, ",") {
 		domain := strings.TrimSpace(line)
 		if domain == "" {
+			continue
+		}
+		if utils.CheckIPV4(domain) && blackIP.CheckBlack(domain) {
+			continue
+		}
+		if utils.CheckDomain(domain) && blackDomain.CheckBlack(domain) {
 			continue
 		}
 		h.RunHunter(domain)

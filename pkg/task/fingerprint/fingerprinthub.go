@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/hanc00l/nemo_go/pkg/conf"
 	"github.com/hanc00l/nemo_go/pkg/logging"
+	"github.com/hanc00l/nemo_go/pkg/task/custom"
 	"github.com/hanc00l/nemo_go/pkg/task/domainscan"
 	"github.com/hanc00l/nemo_go/pkg/task/portscan"
 	"github.com/hanc00l/nemo_go/pkg/utils"
@@ -40,7 +41,11 @@ func (f *FingerprintHub) Do() {
 	swg := sizedwaitgroup.New(fpObserverWardThreadNumber[conf.WorkerPerformanceMode])
 
 	if f.ResultPortScan.IPResult != nil {
+		blackIP := custom.NewBlackIP()
 		for ipName, ipResult := range f.ResultPortScan.IPResult {
+			if blackIP.CheckBlack(ipName) {
+				continue
+			}
 			for portNumber := range ipResult.Ports {
 				if _, ok := blankPort[portNumber]; ok {
 					continue
@@ -70,9 +75,9 @@ func (f *FingerprintHub) Do() {
 		if f.DomainTargetPort == nil {
 			f.DomainTargetPort = make(map[string]map[int]struct{})
 		}
-		blackDomain := domainscan.NewBlankDomain()
+		blackDomain := custom.NewBlackDomain()
 		for domain := range f.ResultDomainScan.DomainResult {
-			if blackDomain.CheckBlank(domain) {
+			if blackDomain.CheckBlack(domain) {
 				continue
 			}
 			//如果无域名对应的端口，默认80和443

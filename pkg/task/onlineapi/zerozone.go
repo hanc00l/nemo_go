@@ -33,7 +33,8 @@ func (z *ZeroZone) ParseCSVContentResult(content []byte) {
 	if z.DomainResult.DomainResult == nil {
 		z.DomainResult.DomainResult = make(map[string]*domainscan.DomainResult)
 	}
-	blackDomain := domainscan.NewBlankDomain()
+	blackDomain := custom.NewBlackDomain()
+	blackIP := custom.NewBlackIP()
 	r := csv.NewReader(bytes.NewReader(content))
 	for index := 0; ; index++ {
 		row, err := r.Read()
@@ -51,7 +52,7 @@ func (z *ZeroZone) ParseCSVContentResult(content []byte) {
 		service := strings.TrimSpace(row[7])
 		//域名属性：
 		if len(domain) > 0 && utils.CheckIPV4(domain) == false {
-			if blackDomain.CheckBlank(domain) {
+			if blackDomain.CheckBlack(domain) {
 				continue
 			}
 			if z.DomainResult.HasDomain(domain) == false {
@@ -74,6 +75,9 @@ func (z *ZeroZone) ParseCSVContentResult(content []byte) {
 		}
 		//IP属性（由于不是主动扫描，忽略导入StatusCode）
 		if len(ip) == 0 || utils.CheckIPV4(ip) == false || portErr != nil {
+			continue
+		}
+		if blackIP.CheckBlack(ip) {
 			continue
 		}
 		if z.IpResult.HasIP(ip) == false {

@@ -7,6 +7,7 @@ import (
 	"github.com/chromedp/chromedp"
 	"github.com/hanc00l/nemo_go/pkg/conf"
 	"github.com/hanc00l/nemo_go/pkg/logging"
+	"github.com/hanc00l/nemo_go/pkg/task/custom"
 	"github.com/hanc00l/nemo_go/pkg/task/domainscan"
 	"github.com/hanc00l/nemo_go/pkg/task/portscan"
 	"github.com/hanc00l/nemo_go/pkg/utils"
@@ -54,7 +55,11 @@ func (s *ScreenShot) Do() {
 	swg := sizedwaitgroup.New(fpScreenshotThreadNum[conf.WorkerPerformanceMode])
 
 	if s.ResultPortScan.IPResult != nil {
+		blackIP := custom.NewBlackIP()
 		for ipName, ipResult := range s.ResultPortScan.IPResult {
+			if blackIP.CheckBlack(ipName) {
+				continue
+			}
 			for portNumber := range ipResult.Ports {
 				if _, ok := blankPort[portNumber]; ok {
 					continue
@@ -70,9 +75,9 @@ func (s *ScreenShot) Do() {
 		if s.DomainTargetPort == nil {
 			s.DomainTargetPort = make(map[string]map[int]struct{})
 		}
-		blackDomain := domainscan.NewBlankDomain()
+		blackDomain := custom.NewBlackDomain()
 		for domain := range s.ResultDomainScan.DomainResult {
-			if blackDomain.CheckBlank(domain) {
+			if blackDomain.CheckBlack(domain) {
 				continue
 			}
 			//如果无域名对应的端口，默认80和443

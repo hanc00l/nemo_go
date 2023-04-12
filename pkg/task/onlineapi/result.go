@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/hanc00l/nemo_go/pkg/conf"
 	"github.com/hanc00l/nemo_go/pkg/logging"
+	"github.com/hanc00l/nemo_go/pkg/task/custom"
 	"github.com/hanc00l/nemo_go/pkg/task/domainscan"
 	"github.com/hanc00l/nemo_go/pkg/task/portscan"
 	"github.com/hanc00l/nemo_go/pkg/utils"
@@ -110,9 +111,10 @@ func (ff *Fofa) parseResult() {
 	ff.IpResult = portscan.Result{IPResult: make(map[string]*portscan.IPResult)}
 	ff.DomainResult = domainscan.Result{DomainResult: make(map[string]*domainscan.DomainResult)}
 
-	blackDomain := domainscan.NewBlankDomain()
+	blackDomain := custom.NewBlackDomain()
+	blackIP := custom.NewBlackIP()
 	for _, fsr := range ff.Result {
-		parseIpPort(ff.IpResult, fsr, "fofa")
+		parseIpPort(ff.IpResult, fsr, "fofa", blackIP)
 		parseDomainIP(ff.DomainResult, fsr, "fofa", blackDomain)
 	}
 }
@@ -165,9 +167,10 @@ func (q *Quake) parseResult() {
 	q.IpResult = portscan.Result{IPResult: make(map[string]*portscan.IPResult)}
 	q.DomainResult = domainscan.Result{DomainResult: make(map[string]*domainscan.DomainResult)}
 
-	blackDomain := domainscan.NewBlankDomain()
+	blackDomain := custom.NewBlackDomain()
+	blackIP := custom.NewBlackIP()
 	for _, fsr := range q.Result {
-		parseIpPort(q.IpResult, fsr, "quake")
+		parseIpPort(q.IpResult, fsr, "quake", blackIP)
 		parseDomainIP(q.DomainResult, fsr, "quake", blackDomain)
 	}
 }
@@ -188,9 +191,10 @@ func (h *Hunter) parseResult() {
 	h.IpResult = portscan.Result{IPResult: make(map[string]*portscan.IPResult)}
 	h.DomainResult = domainscan.Result{DomainResult: make(map[string]*domainscan.DomainResult)}
 
-	blackDomain := domainscan.NewBlankDomain()
+	blackDomain := custom.NewBlackDomain()
+	blackIP := custom.NewBlackIP()
 	for _, fsr := range h.Result {
-		parseIpPort(h.IpResult, fsr, "hunter")
+		parseIpPort(h.IpResult, fsr, "hunter", blackIP)
 		parseDomainIP(h.DomainResult, fsr, "hunter", blackDomain)
 	}
 }
@@ -207,8 +211,11 @@ func (h *Hunter) SaveResult() string {
 }
 
 // parseIpPort 解析搜索结果中的IP记录
-func parseIpPort(ipResult portscan.Result, fsr onlineSearchResult, source string) {
+func parseIpPort(ipResult portscan.Result, fsr onlineSearchResult, source string, blackIP *custom.BlackIP) {
 	if fsr.IP == "" || !utils.CheckIPV4(fsr.IP) {
+		return
+	}
+	if blackIP != nil && blackIP.CheckBlack(fsr.IP) {
 		return
 	}
 	if fsr.IP == "0.0.0.0" {
@@ -246,7 +253,7 @@ func parseIpPort(ipResult portscan.Result, fsr onlineSearchResult, source string
 }
 
 // parseDomainIP 解析搜索结果中的域名记录
-func parseDomainIP(domainResult domainscan.Result, fsr onlineSearchResult, source string, blackDomain *domainscan.BlackDomain) {
+func parseDomainIP(domainResult domainscan.Result, fsr onlineSearchResult, source string, blackDomain *custom.BlackDomain) {
 	host := strings.Replace(fsr.Host, "https://", "", -1)
 	host = strings.Replace(host, "http://", "", -1)
 	host = strings.Replace(host, "/", "", -1)
@@ -254,7 +261,7 @@ func parseDomainIP(domainResult domainscan.Result, fsr onlineSearchResult, sourc
 	if domain == "" || utils.CheckIPV4(domain) || utils.CheckDomain(domain) == false {
 		return
 	}
-	if blackDomain != nil && blackDomain.CheckBlank(domain) {
+	if blackDomain != nil && blackDomain.CheckBlack(domain) {
 		return
 	}
 

@@ -3,6 +3,7 @@ package domainscan
 import (
 	"github.com/hanc00l/nemo_go/pkg/conf"
 	"github.com/hanc00l/nemo_go/pkg/logging"
+	"github.com/hanc00l/nemo_go/pkg/task/custom"
 	"github.com/hanc00l/nemo_go/pkg/utils"
 	"github.com/projectdiscovery/shuffledns/pkg/runner"
 	"github.com/remeh/sizedwaitgroup"
@@ -26,13 +27,13 @@ func NewMassdns(config Config) *Massdns {
 func (m *Massdns) Do() {
 	m.Result.DomainResult = make(map[string]*DomainResult)
 	swg := sizedwaitgroup.New(massdnsThreadNumber[conf.WorkerPerformanceMode])
-	blackDomain := NewBlankDomain()
+	blackDomain := custom.NewBlackDomain()
 	for _, line := range strings.Split(m.Config.Target, ",") {
 		domain := strings.TrimSpace(line)
 		if domain == "" || utils.CheckIPV4(domain) || utils.CheckIPV4Subnet(domain) {
 			continue
 		}
-		if blackDomain.CheckBlank(domain) {
+		if blackDomain.CheckBlack(domain) {
 			continue
 		}
 		swg.Add()
@@ -50,13 +51,13 @@ func (m *Massdns) parseResult(outputTempFile string) {
 	if err != nil {
 		return
 	}
-	blackDomain := NewBlankDomain()
+	blackDomain := custom.NewBlackDomain()
 	for _, line := range strings.Split(string(content), "\n") {
 		domain := strings.TrimSpace(line)
 		if domain == "" {
 			continue
 		}
-		if blackDomain.CheckBlank(domain) {
+		if blackDomain.CheckBlack(domain) {
 			continue
 		}
 		if !m.Result.HasDomain(domain) {

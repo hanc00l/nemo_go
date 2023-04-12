@@ -9,6 +9,7 @@ import (
 	model2 "github.com/Qianlitp/crawlergo/pkg/model"
 	"github.com/hanc00l/nemo_go/pkg/conf"
 	"github.com/hanc00l/nemo_go/pkg/logging"
+	"github.com/hanc00l/nemo_go/pkg/task/custom"
 	"github.com/hanc00l/nemo_go/pkg/utils"
 	"github.com/remeh/sizedwaitgroup"
 	"github.com/sirupsen/logrus"
@@ -44,14 +45,14 @@ func NewCrawler(config Config) *Crawler {
 func (c *Crawler) Do() {
 	c.Result.DomainResult = make(map[string]*DomainResult)
 	swg := sizedwaitgroup.New(crawlerThreadNumber[conf.WorkerPerformanceMode])
-	blackDomain := NewBlankDomain()
+	blackDomain := custom.NewBlackDomain()
 
 	for _, line := range strings.Split(c.Config.Target, ",") {
 		domain := strings.TrimSpace(line)
 		if domain == "" || utils.CheckIPV4(domain) || utils.CheckIPV4Subnet(domain) {
 			continue
 		}
-		if blackDomain.CheckBlank(domain) {
+		if blackDomain.CheckBlack(domain) {
 			continue
 		}
 		swg.Add()
@@ -104,13 +105,13 @@ func (c *Crawler) RunCrawler(domainUrl string) {
 
 // parseResult 解析子域名枚举结果文件
 func (c *Crawler) parseResult(result []string) {
-	blackDomain := NewBlankDomain()
+	blackDomain := custom.NewBlackDomain()
 	for _, line := range result {
 		domain := strings.TrimSpace(line)
 		if domain == "" {
 			continue
 		}
-		if blackDomain.CheckBlank(domain) {
+		if blackDomain.CheckBlack(domain) {
 			continue
 		}
 		logging.CLILog.Println(domain)

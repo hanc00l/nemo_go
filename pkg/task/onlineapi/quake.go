@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"github.com/hanc00l/nemo_go/pkg/conf"
 	"github.com/hanc00l/nemo_go/pkg/logging"
+	"github.com/hanc00l/nemo_go/pkg/task/custom"
 	"github.com/hanc00l/nemo_go/pkg/task/domainscan"
 	"github.com/hanc00l/nemo_go/pkg/task/portscan"
 	"github.com/hanc00l/nemo_go/pkg/utils"
@@ -123,9 +124,17 @@ func (q *Quake) Do() {
 		logging.RuntimeLog.Error("no quake api key,exit quake search")
 		return
 	}
+	blackDomain := custom.NewBlackDomain()
+	blackIP := custom.NewBlackIP()
 	for _, line := range strings.Split(q.Config.Target, ",") {
 		domain := strings.TrimSpace(line)
 		if domain == "" {
+			continue
+		}
+		if utils.CheckIPV4(domain) && blackIP.CheckBlack(domain) {
+			continue
+		}
+		if utils.CheckDomain(domain) && blackDomain.CheckBlack(domain) {
 			continue
 		}
 		q.RunQuake(domain)

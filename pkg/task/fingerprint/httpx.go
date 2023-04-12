@@ -91,7 +91,11 @@ func (x *Httpx) Do() {
 	swg := sizedwaitgroup.New(fpHttpxThreadNumber[conf.WorkerPerformanceMode])
 
 	if x.ResultPortScan.IPResult != nil {
+		blackIP := custom.NewBlackIP()
 		for ipName, ipResult := range x.ResultPortScan.IPResult {
+			if blackIP.CheckBlack(ipName) {
+				continue
+			}
 			for portNumber, _ := range ipResult.Ports {
 				if _, ok := blankPort[portNumber]; ok {
 					continue
@@ -139,9 +143,9 @@ func (x *Httpx) Do() {
 		if x.DomainTargetPort == nil {
 			x.DomainTargetPort = make(map[string]map[int]struct{})
 		}
-		blackDomain := domainscan.NewBlankDomain()
+		blackDomain := custom.NewBlackDomain()
 		for domain := range x.ResultDomainScan.DomainResult {
-			if blackDomain.CheckBlank(domain) {
+			if blackDomain.CheckBlack(domain) {
 				continue
 			}
 			//如果无域名对应的端口，默认80和443

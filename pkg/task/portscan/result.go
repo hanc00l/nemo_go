@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/hanc00l/nemo_go/pkg/db"
 	"github.com/hanc00l/nemo_go/pkg/logging"
+	"github.com/hanc00l/nemo_go/pkg/task/custom"
 	"strings"
 	"sync"
 )
@@ -116,7 +117,11 @@ func (r *Result) SetPortHttpInfo(ip string, port int, result HttpResult) {
 func (r *Result) SaveResult(config Config) string {
 	var resultIPCount, resultPortCount int
 	var newIP, newPort int
+	blackIP := custom.NewBlackIP()
 	for ipName, ipResult := range r.IPResult {
+		if blackIP.CheckBlack(ipName) {
+			continue
+		}
 		if len(ipResult.Ports) > IpOpenedPortFilterNumber {
 			logging.RuntimeLog.Infof("ip:%s has too much open port:%d,discard to save!", ipName, len(ipResult.Ports))
 			continue

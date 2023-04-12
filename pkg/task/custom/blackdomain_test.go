@@ -1,11 +1,11 @@
-package domainscan
+package custom
 
 import "testing"
 
-func TestBlackDomain_CheckBlank(t *testing.T) {
+func TestBlackDomain_CheckBlack(t *testing.T) {
 	domains := []string{"www.qq.com", "smtpqq.com", "kk.gov.cn", "2.gov.cnn"}
-	b := NewBlankDomain()
+	b := NewBlackDomain()
 	for _, d := range domains {
-		t.Log(d, b.CheckBlank(d))
+		t.Log(d, b.CheckBlack(d))
 	}
 }

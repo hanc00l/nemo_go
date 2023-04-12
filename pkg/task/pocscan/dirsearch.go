@@ -8,6 +8,8 @@ import (
 	"github.com/evilsocket/dirsearch"
 	"github.com/hanc00l/nemo_go/pkg/conf"
 	"github.com/hanc00l/nemo_go/pkg/logging"
+	"github.com/hanc00l/nemo_go/pkg/task/custom"
+	"github.com/hanc00l/nemo_go/pkg/utils"
 	"net/http"
 	"net/url"
 	"os"
@@ -77,9 +79,17 @@ func (d *Dirsearch) readBlankList(file string) (blackList []string) {
 
 // Do 执行Dirsearch
 func (d *Dirsearch) Do() {
+	blackDomain := custom.NewBlackDomain()
+	blackIP := custom.NewBlackIP()
 	for _, line := range strings.Split(d.Config.Target, ",") {
 		target := strings.TrimSpace(line)
 		if target == "" {
+			continue
+		}
+		if utils.CheckDomain(utils.HostStrip(target)) && blackDomain.CheckBlack(utils.HostStrip(target)) {
+			continue
+		}
+		if utils.CheckIPV4(utils.HostStrip(target)) && blackIP.CheckBlack(utils.HostStrip(target)) {
 			continue
 		}
 		for _, protocol := range []string{"http", "https"} {

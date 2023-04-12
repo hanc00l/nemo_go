@@ -1,4 +1,4 @@
-package domainscan
+package custom
 
 import (
 	"bufio"
@@ -13,8 +13,8 @@ type BlackDomain struct {
 	blackList []string
 }
 
-// NewBlankDomain 创建域名黑名单对象
-func NewBlankDomain() *BlackDomain {
+// NewBlackDomain 创建域名黑名单对象
+func NewBlackDomain() *BlackDomain {
 	b := BlackDomain{}
 	b.loadBlankList()
 	return &b
@@ -42,8 +42,8 @@ func (b *BlackDomain) loadBlankList() {
 	return
 }
 
-// CheckBlank 检查一个域名是否是位于黑名单中
-func (b *BlackDomain) CheckBlank(domain string) bool {
+// CheckBlack 检查一个域名是否是位于黑名单中
+func (b *BlackDomain) CheckBlack(domain string) bool {
 	for _, txt := range b.blackList {
 		// 生成格式为.qq.com$
 		regPattern := strings.ReplaceAll(txt, ".", "\\.") + "$"
