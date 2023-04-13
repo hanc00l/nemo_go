@@ -1,4 +1,3 @@
 # 用于域名任务，以及在线资产管理平台收集到的黑名称匹配，采用正则匹配的方式
-# 格式为完整的主/子域如: qq.com、stmp.qq.com、.pop3.qq.com
-# 或.gov.cn
+# 格式为完整的主/子域如: qq.com、stmp.qq.com、.pop3.qq.com；或.gov.cn
 .gov.cn

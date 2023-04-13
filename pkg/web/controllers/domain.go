@@ -899,19 +899,26 @@ func (c *DomainController) BlockDomainAction() {
 		c.FailedStatus("当前用户权限不允许！")
 		return
 	}
-	domainName := c.GetString("domain")
-	workspaceId, err := c.GetInt("workspace", 0)
-	if len(domainName) == 0 || err != nil || workspaceId <= 0 {
-		c.FailedStatus("err param")
+
+	id, err := c.GetInt("id")
+	if err != nil {
+		logging.RuntimeLog.Error(err.Error())
+		c.FailedStatus(err.Error())
 		return
 	}
-	if utils.CheckDomain(domainName) == false {
-		c.FailedStatus("invalid domain")
+	domain := db.Domain{Id: id}
+	if domain.Get() == false {
+		c.FailedStatus("get domain fail")
+		return
+	}
+	workspace := db.Workspace{Id: domain.WorkspaceId}
+	if workspace.Get() == false {
+		c.FailedStatus("get workspace fail")
 		return
 	}
 	//  域提取名参数的主域，比如www.images.qq.com的主域名为.qq.com
 	tld := domainscan.NewTldExtract()
-	fldDomain := tld.ExtractFLD(domainName)
+	fldDomain := tld.ExtractFLD(domain.DomainName)
 	if len(fldDomain) == 0 {
 		c.FailedStatus("err domain format")
 		return
@@ -925,15 +932,10 @@ func (c *DomainController) BlockDomainAction() {
 		c.FailedStatus(err.Error())
 		return
 	}
-	workspace := db.Workspace{Id: workspaceId}
-	if workspace.Get() == false {
-		c.FailedStatus("获取当前工作空间失败")
-		return
-	}
 	domainRelatedIP := make(map[string]struct{})
 	// 从数据中获取主域的所有子域名记录
 	domainDb := db.Domain{}
-	domainResult := domainDb.GetsForBlackListDomain(fldDomain, workspaceId)
+	domainResult := domainDb.GetsForBlackListDomain(fldDomain, workspace.Id)
 	for _, d := range domainResult {
 		// 获取域名关联的IP解析记录
 		domainAttr := db.DomainAttr{RelatedId: d.Id}
@@ -954,11 +956,12 @@ func (c *DomainController) BlockDomainAction() {
 	// 删除关联的IP记录
 	for ip := range domainRelatedIP {
 		// 删除数据库中IP记录
-		ipDB := db.Ip{IpName: ip, WorkspaceId: workspaceId}
+		ipDB := db.Ip{IpName: ip, WorkspaceId: workspace.Id}
 		if ipDB.GetByIp() {
 			ipDB.Delete()
 		}
 		ss := fingerprint.NewScreenShot()
 		ss.Delete(workspace.WorkspaceGUID, ip)
 	}
+	c.SucceededStatus("success")
 }

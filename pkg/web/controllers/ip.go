@@ -956,46 +956,40 @@ func (c *IPController) BlackIPAction() {
 		c.FailedStatus("当前用户权限不允许！")
 		return
 	}
-
-	ip := c.GetString("ip", "")
-	workspaceId, err := c.GetInt("workspace", 0)
-	if len(ip) == 0 || err != nil || workspaceId <= 0 {
-		c.FailedStatus("err param")
+	id, err := c.GetInt("id")
+	if err != nil {
+		logging.RuntimeLog.Error(err.Error())
+		c.FailedStatus(err.Error())
 		return
 	}
-	if utils.CheckIPV4(ip) == false {
-		c.FailedStatus("invalid ipv4")
+	ip := db.Ip{Id: id}
+	if ip.Get() == false {
+		c.FailedStatus("get ip fail")
+		return
+	}
+	workspace := db.Workspace{Id: ip.WorkspaceId}
+	if workspace.Get() == false {
+		c.FailedStatus("get workspace fail")
 		return
 	}
 	// 将IP追加到黑名单文件
 	blackIP := custom.NewBlackIP()
-	err = blackIP.AppendBlackIP(ip)
+	err = blackIP.AppendBlackIP(ip.IpName)
 	if err != nil {
 		c.FailedStatus(err.Error())
 		return
 	}
-	// 删除数据库中IP记录
-	ipDB := db.Ip{IpName: ip, WorkspaceId: workspaceId}
-	if ipDB.GetByIp() == false {
-		c.FailedStatus("数据库不存在当前IP！")
-		return
-	}
-	if ipDB.Delete() == false {
+	// 删除IP
+	if ip.Delete() == false {
 		c.FailedStatus("删除IP失败！")
 		return
 	}
-	// 删除IP相关的screenshot
-	workspace := db.Workspace{Id: workspaceId}
-	if workspace.Get() == false {
-		c.FailedStatus("获取当前工作空间失败")
-		return
-	}
 	ss := fingerprint.NewScreenShot()
-	ss.Delete(workspace.WorkspaceGUID, ip)
+	ss.Delete(workspace.WorkspaceGUID, ip.IpName)
 	// 删除IP关联的域名记录的信息
-	domains := getIpRelatedDomain(workspaceId, ip)
+	domains := getIpRelatedDomain(workspace.Id, ip.IpName)
 	for _, d := range domains {
-		domain := db.Domain{DomainName: d, WorkspaceId: workspaceId}
+		domain := db.Domain{DomainName: d, WorkspaceId: workspace.Id}
 		if domain.GetByDomain() {
 			ss.Delete(workspace.WorkspaceGUID, domain.DomainName)
 			domain.Delete()

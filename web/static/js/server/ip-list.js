@@ -28,6 +28,32 @@ $(function () {
     $("#import_portscan").click(function () {
         $('#importPortscan').modal('toggle');
     });
+    $("#block_ip").click(function () {
+        swal({
+                title: "确定要一键拉黑选定的IP吗?",
+                text: "该操作会将IP加入到黑名单列表中，同时从数据库中删除IP，以及IP关联的域名！",
+                type: "warning",
+                showCancelButton: true,
+                confirmButtonColor: "#DD6B55",
+                confirmButtonText: "确认",
+                cancelButtonText: "取消",
+                closeOnConfirm: true
+            },
+            function () {
+                $('#ip_table').DataTable().$('input[type=checkbox]:checked').each(function (i) {
+                    let id = $(this).val().split("|")[0];
+                    $.ajax({
+                        type: 'post',
+                        url: 'ip-block?id=' + id,
+                        success: function (data) {
+                        },
+                        error: function (xhr, type) {
+                        }
+                    });
+                });
+                $('#ip_table').DataTable().draw(false);
+            });
+    });
     $("#start_import").click(function () {
         var formData = new FormData();
         formData.append('file', $('#file')[0].files[0]);

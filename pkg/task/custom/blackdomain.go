@@ -10,7 +10,7 @@ import (
 )
 
 type BlackDomain struct {
-	blackList []string
+	blackListMap map[string]struct{}
 }
 
 // NewBlackDomain 创建域名黑名单对象
@@ -22,6 +22,8 @@ func NewBlackDomain() *BlackDomain {
 
 // loadBlankList 从配置文件中加载域名黑名单列表
 func (b *BlackDomain) loadBlankList() {
+	b.blackListMap = make(map[string]struct{})
+
 	inputFile, err := os.Open(filepath.Join(conf.GetRootPath(), "thirdparty/custom/black_domain.txt"))
 	if err != nil {
 		return
@@ -33,9 +35,9 @@ func (b *BlackDomain) loadBlankList() {
 			continue
 		}
 		if strings.HasPrefix(text, ".") == false {
-			b.blackList = append(b.blackList, "."+text)
+			b.blackListMap["."+text] = struct{}{}
 		} else {
-			b.blackList = append(b.blackList, text)
+			b.blackListMap[text] = struct{}{}
 		}
 	}
 	inputFile.Close()
@@ -44,7 +46,7 @@ func (b *BlackDomain) loadBlankList() {
 
 // CheckBlack 检查一个域名是否是位于黑名单中
 func (b *BlackDomain) CheckBlack(domain string) bool {
-	for _, txt := range b.blackList {
+	for txt := range b.blackListMap {
 		// 生成格式为.qq.com$
 		regPattern := strings.ReplaceAll(txt, ".", "\\.") + "$"
 		if m, _ := regexp.MatchString(regPattern, domain); m == true {

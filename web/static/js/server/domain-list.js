@@ -24,6 +24,33 @@ $(function () {
         $('#newXScan').modal('toggle');
         load_pocfile_list();
     });
+    $("#block_domain").click(function () {
+        swal({
+                title: "确定要一键拉黑域名吗?",
+                text: "该操作会将“第一个”选择的的“主域名”加入到黑名单列表中，同时从数据库中删除该主域名下的所有子域名、以及关联的所有IP！",
+                type: "warning",
+                showCancelButton: true,
+                confirmButtonColor: "#DD6B55",
+                confirmButtonText: "确认",
+                cancelButtonText: "取消",
+                closeOnConfirm: true
+            },
+            function () {
+                let selItem = $('#domain_table').DataTable().$('input[type=checkbox]:checked');
+                if (selItem.length >= 1) {
+                    let id = selItem.val().split("|")[0];
+                    $.ajax({
+                        type: 'post',
+                        url: 'domain-block?id=' + id,
+                        success: function (data) {
+                            $('#domain_table').DataTable().draw(false);
+                        },
+                        error: function (xhr, type) {
+                        }
+                    });
+                }
+            });
+    });
     //启动任务 
     $("#start_task").click(function () {
         const target = $('#text_target').val();
