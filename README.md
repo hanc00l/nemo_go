@@ -1,8 +1,9 @@
-## Nemo
+# Nemo
+
+**Nemo**是用来进行自动化信息收集的一个简单平台，通过集成常用的信息收集工具和技术，实现对内网及互联网资产信息的自动收集，提高隐患排查和渗透测试的工作效率。
 
 <img src="docs/image/index.png" alt="login" />
 
-Nemo是用来进行自动化信息收集的一个简单平台，通过集成常用的信息收集工具和技术，实现对内网及互联网资产信息的自动收集，提高隐患排查和渗透测试的工作效率，用Golang完全重构了原Python版本。
 
 
 
@@ -61,6 +62,7 @@ Nemo是用来进行自动化信息收集的一个简单平台，通过集成常�
 
 - 多用户/角色、多工作空间（项目）支持
 - 资产颜色标记、置顶、备忘录协作
+- IP/Domain黑名单、一键拉黑
 
 ### 8、其它
 
@@ -74,47 +76,21 @@ mkdir nemo;tar xvf nemo_linux_amd64.tar -C nemo;cd nemo
 docker-compose up -d
 ```
 
+**Docker方式建议用作体验或临时测试，持续使用建议在虚拟机或VPS中安装和使用。**
+
 [更多Docker使用方式](docs/docker.md)
 
-
-
-## Install
+## 安装
 
 Tested on [ubuntu18.04/20.04/22.04 LTS](docs/install_linux.md)、[macOS](docs/install_mac.md)、Windows（Test In Win10）
 
-
-
-## Demo
+## 使用
 
 - 默认监听端口为5000，默认用户**nemo（超级管理员）**、密码 **nemo** ；通过“Config--配置管理”更改默认密码，通过“System--User“创建和管理用户权限。
 - 用户角色分为superadmin、admin和guest三种； **superadmin（超级管理员）** 可管理用户和工作空间，**admin（管理员）** 可管理资源、任务和参数配置，**guest（普通用户）** 只有资源和任务的查看权限。
 - 工作空间对资源（IP、Domain、任务、组织及漏洞）进行隔离，每个工作空间可分配给不同的用户访问权限。
 
-<img src="docs/image/dashboard.png" alt="dashbord"  />
-
-<img src="docs/image/iplist.png" alt="iplist"  />
-
-<img src="docs/image/ipinfo.png" alt="ipinfo"  />
-
-<img src="docs/image/portscan.png" alt="portscan"  />
-
-<img src="docs/image/domainlist.png" alt="domainlist"  />
-
-<img src="docs/image/domaininfo.png" alt="domaininfo"  />
-
-<img src="docs/image/domainscan.png" alt="domainscan"  />
-
-<img src="docs/image/vulnerabilitylist.png" alt="vulnerabilitylist"  />
-
-
-
-<img src="docs/image/config.png" alt="config"  />
-
-![xscan2](docs/image/xscan1.png)
-
-
-
-![xscan2](docs/image/xscan2.png)
+<img src="docs/demo.gif" />
 
 
 
