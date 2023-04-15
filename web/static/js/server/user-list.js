@@ -32,7 +32,17 @@ $(function () {
                 },
                 {data: "user_role", title: "用户类型", width: "8%"},
                 {data: "user_description", title: "用户描述", width: "15%"},
-                {data: "state", title: "状态", width: "5%"},
+                {
+                    data: "state", title: "状态", width: "5%",
+                    "render": function (data, type, row, meta) {
+                        if (data === "disable") {
+                            return '<span class="badge badge-secondary">Disable</span>';
+                        } else {
+                            return '<span class="badge badge-success">Enable</span>';
+                        }
+
+                    }
+                },
                 {data: "sort_order", title: "排序", width: "8%"},
                 {data: "create_time", title: "创建时间", width: "12%"},
                 {data: "update_time", title: "更新时间", width: "12%"},

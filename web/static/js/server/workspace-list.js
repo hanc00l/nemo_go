@@ -25,7 +25,17 @@ $(function () {
                 {data: "index", title: "序号", width: "5%"},
                 {data: "workspace_name", title: "工作空间名称", width: "15%"},
                 {data: "workspace_guid", title: "GUID", width: "25%"},
-                {data: "state", title: "状态", width: "5%"},
+                {
+                    data: "state", title: "状态", width: "5%",
+                    "render": function (data, type, row, meta) {
+                        if (data === "disable") {
+                            return '<span class="badge badge-secondary">Disable</span>';
+                        } else {
+                            return '<span class="badge badge-success">Enable</span>';
+                        }
+
+                    }
+                },
                 {data: "sort_order", title: "排序", width: "8%"},
                 {data: "create_time", title: "创建时间", width: "15%"},
                 {data: "update_time", title: "更新时间", width: "15%"},

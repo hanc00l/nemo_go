@@ -24,7 +24,17 @@ $(function () {
                 },
                 {data: "index", title: "序号", width: "5%"},
                 {data: "org_name", title: "组织名称", width: "30%"},
-                {data: "status", title: "状态", width: "5%"},
+                {
+                    data: "status", title: "状态", width: "5%",
+                    "render": function (data, type, row, meta) {
+                        if (data === "disable") {
+                            return '<span class="badge badge-secondary">Disable</span>';
+                        } else {
+                            return '<span class="badge badge-success">Enable</span>';
+                        }
+
+                    }
+                },
                 {data: "sort_order", title: "排序", width: "8%"},
                 {data: "create_time", title: "创建时间", width: "15%"},
                 {data: "update_time", title: "更新时间", width: "15%"},
