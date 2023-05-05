@@ -42,7 +42,7 @@ type DirsearcchResult struct {
 
 var (
 	m         *brutemachine.Machine
-	errors    = uint64(0)
+	errorsInt = uint64(0)
 	base, ext string
 	wordlist  = filepath.Join(conf.GetRootPath(), "thirdparty/dict/dicc.txt")
 	consumers = 8
@@ -150,7 +150,7 @@ func (d *Dirsearch) DoRequest(page string) interface{} {
 			return DirsearcchResult{url, resp.StatusCode, resp.Header.Get("Location"), nil}
 		}
 	} else {
-		atomic.AddUint64(&errors, 1)
+		atomic.AddUint64(&errorsInt, 1)
 	}
 	client.CloseIdleConnections()
 
@@ -235,7 +235,7 @@ func (d *Dirsearch) checkHttp(url string) bool {
 func printStats(url string) {
 	m.UpdateStats()
 	logging.CLILog.Printf("%s -> Requests:%d, Errors:%d, Results:%d, Time:%fs,Req/s: %f",
-		url, m.Stats.Execs, errors, m.Stats.Results, m.Stats.Total.Seconds(), m.Stats.Eps)
+		url, m.Stats.Execs, errorsInt, m.Stats.Results, m.Stats.Total.Seconds(), m.Stats.Eps)
 }
 
 // checkBlackList 检查是否是黑名单

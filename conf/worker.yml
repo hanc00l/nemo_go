@@ -56,3 +56,8 @@ pocscan:
     pocPath: thirdparty/xray/xray/pocs
   nuclei:
     pocPath: thirdparty/nuclei/nuclei-templates
+  goby:
+    authUser: goby
+    authPass: goby
+    api:
+      - http://127.0.0.1:8361

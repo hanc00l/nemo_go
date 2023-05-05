@@ -146,6 +146,11 @@ type Pocscan struct {
 	Nuclei struct {
 		PocPath string `yaml:"pocPath"`
 	} `yaml:"nuclei"`
+	Goby struct {
+		AuthUser string   `yaml:"authUser"`
+		AuthPass string   `yaml:"authPass"`
+		API      []string `yaml:"api"`
+	} `yaml:"goby"`
 }
 
 type Domainscan struct {
