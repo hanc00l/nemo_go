@@ -17,7 +17,6 @@ import (
 type Goby struct {
 	Config Config
 	Result []Result
-
 	notice chan int
 }
 
@@ -55,14 +54,13 @@ type GobyStartScanRequest struct {
 		//    	ping concurrent, only valid when set pingfirst (default 2)
 		//  -pingSendCount int
 		//    	ping senbd count, only valid when set pingfirst (default 2)
-		PingCheckSize                  int    `json:"pingCheckSize,omitempty"`
-		PingConcurrent                 int    `json:"pingConcurren,omitempty"`
-		PingSendCount                  int    `json:"pingSendCount,omitempty"`
-		DefaultUserAgent               string `json:"defaultUserAgent,omitempty"`
-		DefaultDeepAnalysisCheckString string `json:"defaultDeepAnalysisCheckString,omitempty"`
-		SocketTimeout                  int    `json:"socketTimeout,omitempty"`
-		RetryTimes                     int    `json:"retryTimes,omitempty"`
-		CheckAliveMode                 int    `json:"checkAliveMode,omitempty"`
+		PingCheckSize    int    `json:"pingCheckSize,omitempty"`
+		PingConcurrent   int    `json:"pingConcurren,omitempty"`
+		PingSendCount    int    `json:"pingSendCount,omitempty"`
+		DefaultUserAgent string `json:"defaultUserAgent,omitempty"`
+		SocketTimeout    int    `json:"socketTimeout,omitempty"`
+		RetryTimes       int    `json:"retryTimes,omitempty"`
+		CheckAliveMode   int    `json:"checkAliveMode,omitempty"`
 	} `json:"options"`
 }
 
@@ -130,7 +128,6 @@ type GobyAssetSearchResponse struct {
 			Screenshots interface{} `json:"screenshots"`
 			Favicons    interface{} `json:"favicons"`
 			Hostnames   []string    `json:"hostnames"`
-			HoneyPot    string      `json:"honey pot,omitempty"`
 		} `json:"ips"`
 	} `json:"data"`
 }
@@ -254,6 +251,7 @@ func (g *Goby) StartScan(ips []string) (taskId string, api string, err error) {
 	reqBody.Options.Rate = 1000
 	reqBody.Options.Random = true
 	reqBody.Options.HostListMode = true
+	reqBody.Options.DefaultUserAgent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/84.0.4147.125 Safari/537.36"
 	dataBytes, _ := json.Marshal(reqBody)
 	var respBody []byte
 	for {
@@ -379,9 +377,9 @@ func (g *Goby) tickListen(api string, taskId string) {
 		select {
 		case <-timer.C:
 			pNow, _ := g.checkGobyTaskProgress(api, taskId)
-			if pNow != progress {
+			if pNow-progress >= 10 {
+				logging.CLILog.Infof("Goby scan task:%s,progress:%d%% ", taskId, pNow)
 				progress = pNow
-				logging.CLILog.Infof("Goby scan task:%s,progress:%d%% ", taskId, progress)
 			}
 			if progress >= 100 {
 				logging.CLILog.Infof("Goby scan task:%s finish", taskId)
