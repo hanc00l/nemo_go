@@ -9,6 +9,7 @@ import (
 	"github.com/hanc00l/nemo_go/pkg/conf"
 	"github.com/hanc00l/nemo_go/pkg/logging"
 	"io"
+	"math/rand"
 	"net/http"
 	"strings"
 	"time"
@@ -19,6 +20,9 @@ type Goby struct {
 	Result []Result
 	notice chan int
 }
+
+// goby服务端部署：
+// goby-cmd -mode api -bind 127.0.0.1:8362 -apiauth goby:goby
 
 // GobyStartScanRequest 扫描任务请求参数
 type GobyStartScanRequest struct {
@@ -193,6 +197,8 @@ const (
 	SleepDelayTimeSecond = 10
 	// CheckProgressTimeSecond 检查任务执行结果的时间
 	CheckProgressTimeSecond = 10
+	// StartScanRandWaitTimeSecond 同时多个任务开始时，goby可能冲突会导致返回相同的taskid
+	StartScanRandWaitTimeSecond = 10
 )
 
 // NewGoby 创建goby对象
@@ -257,6 +263,8 @@ func (g *Goby) StartScan(ips []string) (taskId string, api string, err error) {
 	for {
 		//从多个api接口中，选择一个可用的接口执行，如果接口不可用或失败则回一直等待
 		for _, apiPath := range conf.GlobalWorkerConfig().Pocscan.Goby.API {
+			// 随机阻塞，避免goby的任务冲突导致taskid相同
+			time.Sleep(time.Duration(rand.Intn(StartScanRandWaitTimeSecond)) * time.Second)
 			// 当前使用的api
 			api = apiPath
 			respBody, err = g.postData("POST", fmt.Sprintf("%s%s", api, APIStartScan), dataBytes)
@@ -408,7 +416,13 @@ func (g *Goby) checkGobyTaskProgress(api string, taskId string) (progress int, e
 		logging.RuntimeLog.Error(err)
 		return
 	}
-	progress = result.Data.Progress
+	// state为1，正在执行中；state为2：执行结束（goby不会更新这个进度）
+	if result.Data.State == 1 {
+		progress = result.Data.Progress
+	} else if result.Data.State == 2 {
+		progress = 100
+	}
+
 	return
 }
 

@@ -60,6 +60,7 @@ type PocscanRequestParam struct {
 	XrayPocFile      string `form:"xray_poc_file"`
 	IsNucleiVerify   bool   `form:"nucleiverify"`
 	NucleiPocFile    string `form:"nuclei_poc_file"`
+	IsGobyVerify     bool   `form:"gobyverify"`
 	IsDirsearch      bool   `form:"dirsearch"`
 	DirsearchExtName string `form:"ext"`
 	IsLoadOpenedPort bool   `form:"load_opened_port"`
@@ -81,6 +82,7 @@ type XScanRequestParam struct {
 	XrayPocFile     string `form:"xraypocfile"`
 	IsNucleiPocscan bool   `form:"nucleipoc"`
 	NucleiPocFile   string `form:"nucleipocfile"`
+	IsGobyPocscan   bool   `form:"gobypoc"`
 	IsTaskCron      bool   `form:"taskcron" json:"-"`
 	TaskCronRule    string `form:"cronrule" json:"-"`
 	TaskCronComment string `form:"croncomment" json:"-"`

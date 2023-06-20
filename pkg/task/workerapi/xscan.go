@@ -48,6 +48,8 @@ type XScanConfig struct {
 	// nucleipoc
 	IsNucleiPoc   bool   `json:"nucleipoc,omitempty"`
 	NucleiPocFile string `json:"nucleipocfile,omitempty"`
+	// gobypoc
+	IsGobyPoc bool `json:"gobypoc,omitempty"`
 }
 
 type XScan struct {
@@ -272,6 +274,14 @@ func XFingerPrint(taskId, mainTaskId, configJSON string) (result string, err err
 			return FailedTask(err.Error()), err
 		}
 	}
+
+	// 启动GobyPoc任务
+	if config.IsGobyPoc {
+		_, err = scan.NewGobyScan(taskId, mainTaskId)
+		if err != nil {
+			return FailedTask(err.Error()), err
+		}
+	}
 	return SucceedTask(result), nil
 }
 
@@ -312,6 +322,28 @@ func XNuclei(taskId, mainTaskId, configJSON string) (result string, err error) {
 	// 执行任务
 	scan := NewXScan(config)
 	result, err = scan.NucleiScan(taskId, mainTaskId)
+	if err != nil {
+		logging.RuntimeLog.Error(err)
+		return FailedTask(err.Error()), err
+	}
+	return SucceedTask(result), nil
+}
+
+// XGoby goby扫描任务（调用goby二进制程序）
+func XGoby(taskId, mainTaskId, configJSON string) (result string, err error) {
+	// 检查任务状态
+	var ok bool
+	if ok, result, err = CheckTaskStatus(taskId); !ok {
+		return result, err
+	}
+	// 解析任务参数
+	config := XScanConfig{}
+	if err = ParseConfig(configJSON, &config); err != nil {
+		return FailedTask(err.Error()), err
+	}
+	// 执行任务
+	scan := NewXScan(config)
+	result, err = scan.GobyScan(taskId, mainTaskId)
 	if err != nil {
 		logging.RuntimeLog.Error(err)
 		return FailedTask(err.Error()), err
@@ -450,6 +482,18 @@ func (x *XScan) doNucleiScan(swg *sizedwaitgroup.SizedWaitGroup, config pocscan.
 	x.vulMutex.Unlock()
 }
 
+// doGobyScan 调用一次Goby
+func (x *XScan) doGobyScan(swg *sizedwaitgroup.SizedWaitGroup, config pocscan.Config) {
+	defer swg.Done()
+
+	goby := pocscan.NewGoby(config)
+	goby.Do()
+	//合并结果
+	x.vulMutex.Lock()
+	x.ResultVul = append(x.ResultVul, goby.Result...)
+	x.vulMutex.Unlock()
+}
+
 // OnlineAPISearch 执行fofa搜索任务
 func (x *XScan) OnlineAPISearch(taskId string, mainTaskId string) (result string, err error) {
 	conf.GlobalWorkerConfig().ReloadConfig()
@@ -542,6 +586,7 @@ func (x *XScan) NewPortScan(taskId, mainTaskId string, ipPortMap []map[string][]
 		XrayPocFile:   x.Config.XrayPocFile,
 		IsNucleiPoc:   x.Config.IsNucleiPoc,
 		NucleiPocFile: x.Config.NucleiPocFile,
+		IsGobyPoc:     x.Config.IsGobyPoc,
 		WorkspaceId:   x.Config.WorkspaceId,
 	}
 	for _, t := range ipPortMap {
@@ -606,6 +651,7 @@ func (x *XScan) NewDomainScan(taskId, mainTaskId string, domainMap []map[string]
 		XrayPocFile:       x.Config.XrayPocFile,
 		IsNucleiPoc:       x.Config.IsNucleiPoc,
 		NucleiPocFile:     x.Config.NucleiPocFile,
+		IsGobyPoc:         x.Config.IsGobyPoc,
 		WorkspaceId:       x.Config.WorkspaceId,
 	}
 	for _, t := range domainMap {
@@ -649,6 +695,7 @@ func (x *XScan) NewFingerprintScan(taskId, mainTaskId string) (result string, er
 		XrayPocFile:   x.Config.XrayPocFile,
 		IsNucleiPoc:   x.Config.IsNucleiPoc,
 		NucleiPocFile: x.Config.NucleiPocFile,
+		IsGobyPoc:     x.Config.IsGobyPoc,
 		WorkspaceId:   x.Config.WorkspaceId,
 	}
 	//拆分子任务
@@ -694,6 +741,27 @@ func (x *XScan) NewNucleiScan(taskId, mainTaskId string) (result string, err err
 	return
 }
 
+// NewGobyScan 生成Goby任务
+func (x *XScan) NewGobyScan(taskId, mainTaskId string) (result string, err error) {
+	//拆分子任务
+	ipTarget, domainTarget := MakeSubTaskTarget(&x.ResultIP, &x.ResultDomain)
+	for _, t := range ipTarget {
+		newConfig := XScanConfig{IPPort: t, IsGobyPoc: true, WorkspaceId: x.Config.WorkspaceId}
+		result, err = sendTask(taskId, mainTaskId, newConfig, "xgoby")
+		if err != nil {
+			return
+		}
+	}
+	for _, t := range domainTarget {
+		newConfig := XScanConfig{Domain: t, IsGobyPoc: true, WorkspaceId: x.Config.WorkspaceId}
+		result, err = sendTask(taskId, mainTaskId, newConfig, "xgoby")
+		if err != nil {
+			return
+		}
+	}
+	return
+}
+
 // NucleiScan 调用执行Nuclei扫描任务
 func (x *XScan) NucleiScan(taskId string, mainTaskId string) (result string, err error) {
 	// 生成扫描参数
@@ -719,6 +787,46 @@ func (x *XScan) NucleiScan(taskId string, mainTaskId string) (result string, err
 			swg.Add()
 			go x.doNucleiScan(&swg, runConfig)
 		}
+	}
+	swg.Wait()
+	// 保存结果
+	resultArgs := comm.ScanResultArgs{
+		TaskID:              taskId,
+		MainTaskId:          mainTaskId,
+		VulnerabilityResult: x.ResultVul,
+	}
+	err = comm.CallXClient("SaveVulnerabilityResult", &resultArgs, &result)
+
+	return
+}
+
+// GobyScan 调用执行goby扫描任务
+func (x *XScan) GobyScan(taskId string, mainTaskId string) (result string, err error) {
+	// 生成扫描参数
+	config := pocscan.Config{WorkspaceId: x.Config.WorkspaceId}
+	// goby支持通过,分隔的多个目标
+	swg := sizedwaitgroup.New(xrayscanMaxThreadNum[conf.WorkerPerformanceMode])
+	if len(x.Config.IPPort) > 0 {
+		var targets []string
+		for ip, ports := range x.Config.IPPort {
+			for _, port := range ports {
+				targets = append(targets, fmt.Sprintf("%s:%d", ip, port))
+			}
+		}
+		runConfig := config
+		runConfig.Target = strings.Join(targets, ",")
+		swg.Add()
+		go x.doGobyScan(&swg, runConfig)
+	}
+	if len(x.Config.Domain) > 0 {
+		var targets []string
+		for domain := range x.Config.Domain {
+			targets = append(targets, domain)
+		}
+		runConfig := config
+		runConfig.Target = strings.Join(targets, ",")
+		swg.Add()
+		go x.doGobyScan(&swg, runConfig)
 	}
 	swg.Wait()
 	// 保存结果

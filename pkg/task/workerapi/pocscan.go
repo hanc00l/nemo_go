@@ -43,6 +43,10 @@ func PocScan(taskId, mainTaskId, configJSON string) (result string, err error) {
 		n := pocscan.NewNuclei(config)
 		n.Do()
 		scanResult = n.Result
+	} else if config.CmdBin == "goby" {
+		g := pocscan.NewGoby(config)
+		g.Do()
+		scanResult = g.Result
 	}
 	// 保存结果
 	resultArgs := comm.ScanResultArgs{

@@ -115,7 +115,7 @@ $(function () {
                     }
                 });
         } else {
-            if ($('#checkbox_xray').is(":checked") == false && $('#checkbox_dirsearch').is(":checked") == false && $('#checkbox_nuclei').is(":checked") == false) {
+            if ($('#checkbox_xray').is(":checked") == false && $('#checkbox_dirsearch').is(":checked") == false && $('#checkbox_nuclei').is(":checked") == false && $('#checkbox_goby').is(":checked") == false) {
                 swal('Warning', '请选择要使用的验证工具！', 'error');
                 return;
             }
@@ -137,6 +137,7 @@ $(function () {
                 'xray_poc_file': $('#select_poc_type').val() + '|' + $('#input_xray_poc_file').val(),
                 'nucleiverify': $('#checkbox_nuclei').is(":checked"),
                 'nuclei_poc_file': $('#input_nuclei_poc_file').val(),
+                'gobyverify': $('#checkbox_goby').is(":checked"),
                 'dirsearch': $('#checkbox_dirsearch').is(":checked"),
                 'ext': $('#input_dirsearch_ext').val(),
                 'load_opened_port': false,
@@ -194,23 +195,22 @@ $(function () {
         }
         formData.append("org_id", $('#select_org_id_task_xscan').val());
         formData.append("fingerprint", $('#checkbox_fingerpint_xscan').is(":checked"));
+
         formData.append("xraypoc", $('#checkbox_xraypoc_xscan').is(":checked"));
         formData.append("xraypocfile", $('#select_xray_poc_type_xscan').val() + '|' + $('#input_xray_poc_file_xscan').val());
-
         formData.append("nucleipoc", $('#checkbox_nucleipoc_xscan').is(":checked"));
         formData.append("nucleipocfile", $('#input_nuclei_poc_file_xscan').val());
+        formData.append("gobypoc", $('#checkbox_gobypoc_xscan').is(":checked"));
 
         formData.append("taskcron", $('#checkbox_cron_task_xscan').is(":checked"));
         formData.append("cronrule", cron_rule);
         formData.append("croncomment", $('#input_cron_comment_xscan').val());
-        if (formData.get("xraypoc") === "true" && formData.get("fingerprint") === "false") {
+
+        if ((formData.get("xraypoc") === "true" || formData.get("nucleipoc") === "true" || formData.get("gobypoc") === "true" )&& formData.get("fingerprint") === "false") {
             swal('Warning', '漏洞扫描需要开启指纹扫描步骤选项', 'error');
             return;
         }
-        if (formData.get("nucleipoc") === "true" && formData.get("fingerprint") === "false") {
-            swal('Warning', '漏洞扫描需要开启指纹扫描步骤选项', 'error');
-            return;
-        }
+
         $.ajax({
             url: '/task-start-xscan',
             type: 'POST',

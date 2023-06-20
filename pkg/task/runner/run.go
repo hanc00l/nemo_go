@@ -198,6 +198,14 @@ func StartPocScanTask(req PocscanRequestParam, mainTaskId string, workspaceId in
 			return
 		}
 	}
+	if req.IsGobyVerify {
+		config := pocscan.Config{Target: strings.Join(targetList, ","), CmdBin: "goby", IsLoadOpenedPort: req.IsLoadOpenedPort, WorkspaceId: workspaceId}
+		configJSON, _ := json.Marshal(config)
+		taskId, err = serverapi.NewRunTask("goby", string(configJSON), mainTaskId, "")
+		if err != nil {
+			return
+		}
+	}
 	return taskId, nil
 }
 
@@ -210,6 +218,7 @@ func StartXFofaKeywordTask(req XScanRequestParam, mainTaskId string, workspaceId
 		XrayPocFile:   req.XrayPocFile,
 		IsNucleiPoc:   req.IsNucleiPocscan,
 		NucleiPocFile: req.NucleiPocFile,
+		IsGobyPoc:     req.IsGobyPocscan,
 		WorkspaceId:   workspaceId,
 	}
 	// config.OrgId 为int，默认为0
@@ -243,6 +252,7 @@ func StartXDomainScanTask(req XScanRequestParam, mainTaskId string, workspaceId 
 		XrayPocFile:   req.XrayPocFile,
 		IsNucleiPoc:   req.IsNucleiPocscan,
 		NucleiPocFile: req.NucleiPocFile,
+		IsGobyPoc:     req.IsGobyPocscan,
 		//
 		WorkspaceId: workspaceId,
 	}
@@ -358,6 +368,7 @@ func StartXPortScanTask(req XScanRequestParam, mainTaskId string, workspaceId in
 		IsXrayPoc:     req.IsXrayPocscan,
 		XrayPocFile:   req.XrayPocFile,
 		IsNucleiPoc:   req.IsNucleiPocscan,
+		IsGobyPoc:     req.IsGobyPocscan,
 		NucleiPocFile: req.NucleiPocFile,
 		WorkspaceId:   workspaceId,
 	}
@@ -437,6 +448,7 @@ func StartXOrgScanTask(req XScanRequestParam, mainTaskId string, workspaceId int
 		XrayPocFile:   req.XrayPocFile,
 		IsNucleiPoc:   req.IsNucleiPocscan,
 		NucleiPocFile: req.NucleiPocFile,
+		IsGobyPoc:     req.IsGobyPocscan,
 		//
 		WorkspaceId: workspaceId,
 	}
@@ -804,7 +816,7 @@ func ParseTargetFromKwArgs(taskName, args string) (target string) {
 			}
 			target = strings.Join(allTarget, ",")
 		}
-	} else if taskName == "xportscan" || taskName == "xdomainscan" || taskName == "xonlineapi" || taskName == "xxraypoc" || taskName == "xxray" || taskName == "xfingerprint" || taskName == "xorgscan" {
+	} else if taskName == "xportscan" || taskName == "xdomainscan" || taskName == "xonlineapi" || taskName == "xxraypoc" || taskName == "xxray" || taskName == "xnuclei" || taskName == "xgoby" || taskName == "xfingerprint" || taskName == "xorgscan" {
 		var t XScanConfig
 		err := json.Unmarshal([]byte(args), &t)
 		if err != nil {

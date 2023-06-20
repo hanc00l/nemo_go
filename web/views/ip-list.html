@@ -459,6 +459,8 @@
                                                             </div>
                                                         </div>
                                                     </div>
+
+
                                                     <div class="tab-pane fade" id="vulverify">
                                                         <div class="form-group row bg-light">
                                                             <div class="col-md-12">
@@ -506,13 +508,21 @@
                                                                                id="checkbox_nuclei" type="checkbox"><b>Nuclei</b>
                                                                     </label>
                                                                 </div>
-                                                                <input class="form-control" id="input_nuclei_poc_file"
+                                                                <input class="form-control" id="input_goby_poc_file"
                                                                        type="text"
                                                                        placeholder="--选择poc文件--" value=""
                                                                        list="datalist_nuclei_poc_file">
                                                                 <datalist id="datalist_nuclei_poc_file"
                                                                           style="display:none;">
                                                                 </datalist>
+                                                                <p></p>
+                                                                <div class="form-check form-check-inline">
+                                                                    <label class="form-check-label"
+                                                                           for="checkbox_goby">
+                                                                        <input class="form-check-input"
+                                                                               id="checkbox_goby" type="checkbox"><b>Goby</b>
+                                                                    </label>
+                                                                </div>
                                                                 <p></p>
                                                                 <div class="form-check form-check-inline">
                                                                     <label class="form-check-label"
@@ -539,6 +549,7 @@
                                                             </div>
                                                         </div>
                                                     </div>
+
                                                     <div class="tab-pane fade" id="batchscan">
                                                         <div class="form-group row bg-light">
                                                             <div class="col-md-12">
@@ -925,66 +936,121 @@
                                                                 </label>
                                                             </div>
                                                             <div class="col-md-12">
-                                                                <div class="form-check form-check-inline">
-                                                                    <label class="form-check-label"
-                                                                           for="checkbox_xraypoc_xscan">
-                                                                        <input class="form-check-input"
-                                                                               id="checkbox_xraypoc_xscan"
-                                                                               type="checkbox">Xray<i
-                                                                            class="fa fa-question-circle"
-                                                                            aria-hidden="true"
-                                                                            title="通过调用xray，对获得的ip资产和域名资产进行漏洞验证；可以指定单个POC文件，或者*think*类的通配符；如果不选择poc文件，将使用全部poc进行测试。"></i>
-                                                                    </label>
-                                                                </div>
-                                                                <br/>
-                                                                <label class="col-form-label"
-                                                                       for="select_xray_poc_type_xscan">
-                                                                    Poc类型
-                                                                </label>
-                                                                <select class="form-control"
-                                                                        id="select_xray_poc_type_xscan">
-                                                                    <option value="default">默认的内置Poc</option>
-                                                                    <option value="custom">自定义Poc文件</option>
-                                                                </select>
-                                                                <label class="col-form-label"
-                                                                       for="input_xray_poc_file_xscan">
-                                                                    Poc文件
-                                                                </label>
-                                                                <input class="form-control"
-                                                                       id="input_xray_poc_file_xscan"
-                                                                       type="text"
-                                                                       placeholder="--全部--" value=""
-                                                                       list="datalist_xray_poc_file_xscan">
-                                                                <datalist id="datalist_xray_poc_file_xscan"
-                                                                          style="display:none;">
-                                                                </datalist>
-                                                            </div>
+                                                                <div class="bs-component">
+                                                                    <ul class="nav nav-tabs"
+                                                                        id="nav_tabs_xscan_pocscan">
+                                                                        <li class="nav-item"><a class="nav-link active"
+                                                                                                data-toggle="tab"
+                                                                                                href="#nav_pocscan_xray"
+                                                                                                title="对IP或Domain进行XScan扫描"><strong>Xray</strong></a>
+                                                                        </li>
+                                                                        <li class="nav-item"><a class="nav-link"
+                                                                                                data-toggle="tab"
+                                                                                                href="#nav_pocscan_nuclei"
+                                                                                                title="对数据库中已存在的的组织资产进行XScan扫描"><strong>Nuclei</strong></a>
+                                                                        </li>
+                                                                        </li>
+                                                                        <li class="nav-item"><a class="nav-link"
+                                                                                                data-toggle="tab"
+                                                                                                href="#nav_pocscan_goby"
+                                                                                                title="对数据库中已存在的的组织资产进行XScan扫描"><strong>Goby</strong></a>
+                                                                        </li>
+                                                                    </ul>
+                                                                    <div class="tab-content"
+                                                                         id="myTabContentXscanPocscan">
+                                                                        <div class="tab-pane fade active show"
+                                                                             id="nav_pocscan_xray">
+                                                                            <div class="col-md-12">
+                                                                                <div class="form-check form-check-inline">
+                                                                                    <label class="form-check-label"
+                                                                                           for="checkbox_xraypoc_xscan">
+                                                                                        <input class="form-check-input"
+                                                                                               id="checkbox_xraypoc_xscan"
+                                                                                               type="checkbox">Xray<i
+                                                                                            class="fa fa-question-circle"
+                                                                                            aria-hidden="true"
+                                                                                            title="通过调用xray，对获得的ip资产和域名资产进行漏洞验证；可以指定单个POC文件，或者*think*类的通配符；如果不选择poc文件，将使用全部poc进行测试。"></i>
+                                                                                    </label>
+                                                                                </div>
+                                                                                <br/>
+                                                                                <label class="col-form-label"
+                                                                                       for="select_xray_poc_type_xscan">
+                                                                                    Poc类型
+                                                                                </label>
+                                                                                <select class="form-control"
+                                                                                        id="select_xray_poc_type_xscan">
+                                                                                    <option value="default">
+                                                                                        默认的内置Poc
+                                                                                    </option>
+                                                                                    <option value="custom">
+                                                                                        自定义Poc文件
+                                                                                    </option>
+                                                                                </select>
+                                                                                <label class="col-form-label"
+                                                                                       for="input_xray_poc_file_xscan">
+                                                                                    Poc文件
+                                                                                </label>
+                                                                                <input class="form-control"
+                                                                                       id="input_xray_poc_file_xscan"
+                                                                                       type="text"
+                                                                                       placeholder="--全部--" value=""
+                                                                                       list="datalist_xray_poc_file_xscan">
+                                                                                <datalist
+                                                                                        id="datalist_xray_poc_file_xscan"
+                                                                                        style="display:none;">
+                                                                                </datalist>
+                                                                            </div>
 
-                                                            <div class="col-md-12 col-form-label">
-                                                                <div class="form-check form-check-inline">
-                                                                    <label class="form-check-label"
-                                                                           for="checkbox_nucleipoc_xscan">
-                                                                        <input class="form-check-input"
-                                                                               id="checkbox_nucleipoc_xscan"
-                                                                               type="checkbox">Nuclei<i
-                                                                            class="fa fa-question-circle"
-                                                                            aria-hidden="true"
-                                                                            title="通过调用Nuclei，对获得的ip资产和域名资产进行漏洞验证；可以指定单个POC文件，或者*think*类的通配符；如果不选择poc文件，将使用全部poc进行测试。(Nuclei目前存在5000+漏洞，扫描十分缓慢，大规模扫描请谨慎使用该漏洞扫描技术)"></i>
-                                                                    </label>
+                                                                        </div>
+                                                                        <div class="tab-pane fade"
+                                                                             id="nav_pocscan_nuclei">
+                                                                            <div class="col-md-12 col-form-label">
+                                                                                <div class="form-check form-check-inline">
+                                                                                    <label class="form-check-label"
+                                                                                           for="checkbox_nucleipoc_xscan">
+                                                                                        <input class="form-check-input"
+                                                                                               id="checkbox_nucleipoc_xscan"
+                                                                                               type="checkbox">Nuclei<i
+                                                                                            class="fa fa-question-circle"
+                                                                                            aria-hidden="true"
+                                                                                            title="通过调用Nuclei，对获得的ip资产和域名资产进行漏洞验证；可以指定单个POC文件，或者*think*类的通配符；如果不选择poc文件，将使用全部poc进行测试。(Nuclei目前存在5000+漏洞，扫描十分缓慢，大规模扫描请谨慎使用该漏洞扫描技术)"></i>
+                                                                                    </label>
+                                                                                </div>
+                                                                                <br/>
+                                                                                <label class="col-form-label"
+                                                                                       for="input_nuclei_poc_file_xscan">
+                                                                                    Poc文件
+                                                                                </label>
+                                                                                <input class="form-control"
+                                                                                       id="input_nuclei_poc_file_xscan"
+                                                                                       type="text"
+                                                                                       placeholder="--全部--" value=""
+                                                                                       list="datalist_nuclei_poc_file_xscan">
+                                                                                <datalist
+                                                                                        id="datalist_nuclei_poc_file_xscan"
+                                                                                        style="display:none;">
+                                                                                </datalist>
+                                                                            </div>
+                                                                        </div>
+                                                                        <div class="tab-pane fade"
+                                                                             id="nav_pocscan_goby">
+                                                                            <div class="col-md-12 col-form-label">
+                                                                                <div class="form-check form-check-inline">
+                                                                                    <label class="form-check-label"
+                                                                                           for="checkbox_gobypoc_xscan">
+                                                                                        <input class="form-check-input"
+                                                                                               id="checkbox_gobypoc_xscan"
+                                                                                               type="checkbox">Goby<i
+                                                                                            class="fa fa-question-circle"
+                                                                                            aria-hidden="true"
+                                                                                            title="通过调用Goby，对获得的ip资产和域名资产进行漏洞验证；goby需要部署到服务端以goby-cmd方将启动，将在worker.yml中配置；使用全部poc进行测试。"></i>
+                                                                                    </label>
+                                                                                </div>
+                                                                                <br/>
+                                                                            </div>
+                                                                        </div>
+                                                                    </div>
                                                                 </div>
-                                                                <br/>
-                                                                <label class="col-form-label"
-                                                                       for="input_nuclei_poc_file_xscan">
-                                                                    Poc文件
-                                                                </label>
-                                                                <input class="form-control"
-                                                                       id="input_nuclei_poc_file_xscan"
-                                                                       type="text"
-                                                                       placeholder="--全部--" value=""
-                                                                       list="datalist_nuclei_poc_file_xscan">
-                                                                <datalist id="datalist_nuclei_poc_file_xscan"
-                                                                          style="display:none;">
-                                                                </datalist>
                                                             </div>
                                                         </div>
                                                     </div>

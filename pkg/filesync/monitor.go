@@ -47,7 +47,7 @@ func (n *NotifyFile) WatchDir() {
 
 	fErr = os.Chdir(dir)
 	if fErr != nil {
-		logging.CLILog.Error("Traverse monitor dir failure")
+		logging.CLILog.Errorf("Traverse monitor dir failure:%s", fErr.Error())
 		return
 	}
 	defer os.Chdir(cwd)
@@ -71,7 +71,7 @@ func (n *NotifyFile) WatchDir() {
 		return nil
 	})
 	if err != nil {
-		logging.CLILog.Error("Traverse monitor dir failure")
+		logging.CLILog.Errorf("Traverse monitor dir failure:%s", err.Error())
 		return
 	}
 

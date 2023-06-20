@@ -66,9 +66,11 @@ func filterLoginCheck(ctx *beegoContext.Context) {
 
 func main() {
 	var noFilesync, noRPC bool
-	flag.BoolVar(&noFilesync, "nf", false, "disable file sync")
+	if conf.RunMode == conf.Debug {
+		noFilesync = true
+	}
+	flag.BoolVar(&noFilesync, "nf", noFilesync, "disable file sync")
 	flag.BoolVar(&noRPC, "nr", false, "disable rpc")
-
 	flag.Parse()
 
 	if noFilesync == false {

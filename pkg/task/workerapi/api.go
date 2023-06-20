@@ -31,20 +31,19 @@ var taskMaps = map[string]interface{}{
 	"xray":        PocScan,
 	"dirsearch":   PocScan,
 	"nuclei":      PocScan,
+	"goby":        PocScan,
 	"icpquery":    ICPQuery,
 	"whoisquery":  WhoisQuery,
 	"fingerprint": Fingerprint,
-	//"xraypoc":     XrayPocScan,
 	//xscan:
 	"xonlineapi":   XOnlineAPI,
 	"xportscan":    XPortScan,
 	"xdomainscan":  XDomainscan,
 	"xfingerprint": XFingerPrint,
 	"xxray":        XXray,
+	"xnuclei":      XNuclei,
+	"xgoby":        XGoby,
 	"xorgscan":     XOrganization,
-
-	"xnuclei": XNuclei,
-
 	//test:
 	"test": TaskTest,
 }
