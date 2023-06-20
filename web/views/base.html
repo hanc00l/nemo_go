@@ -33,6 +33,12 @@
             left: 50%;
             transform: translate(-50%, -50%);
         }
+
+        pre {
+            white-space: pre-wrap; /* css-3 */
+            word-wrap: break-word; /* InternetExplorer5.5+ */
+            white-space: -moz-pre-wrap; /* Mozilla,since1999 */
+        }
     </style>
 </head>
 
@@ -57,7 +63,8 @@
         </li>
         <!-- User Menu-->
         <li class="dropdown"><a class="app-nav__item" href="#" data-toggle="dropdown"
-                                aria-label="Open Profile Menu"><i class="fa fa-user fa-lg" title="{{ .User }}/{{ .UserRole }}"></i></a>
+                                aria-label="Open Profile Menu"><i class="fa fa-user fa-lg"
+                                                                  title="{{ .User }}/{{ .UserRole }}"></i></a>
             <ul class="dropdown-menu settings-menu dropdown-menu-right">
                 <li><a class="dropdown-item" href="https://www.github.com/hanc00l/nemo_go" target="_blank"><i
                         class="fa fa-user fa-lg"></i> 关于</a></li>
@@ -124,7 +131,8 @@
             </a>
             <ul class="treeview-menu">
                 <li><a class="treeview-item" href="user-list"><i class="icon fa fa-user fa-fw"></i>用户</a></li>
-                <li><a class="treeview-item" href="workspace-list"><i class="icon fa fa-cubes fa-fw"></i>工作空间</a></li>
+                <li><a class="treeview-item" href="workspace-list"><i class="icon fa fa-cubes fa-fw"></i>工作空间</a>
+                </li>
             </ul>
         </li>
         {{ end }}
@@ -137,7 +145,8 @@
             <ul class="treeview-menu">
                 <li><a class="treeview-item" href="config-list"><i class="icon fa fa-gear fa-fw"></i>配置管理</a></li>
                 {{ if eq .UserRole "superadmin" "admin" }}
-                <li><a class="treeview-item" href="custom-list"><i class="icon fa fa-futbol-o fa-fw"></i>自定义配置</a></li>
+                <li><a class="treeview-item" href="custom-list"><i class="icon fa fa-futbol-o fa-fw"></i>自定义配置</a>
+                </li>
                 <li><a class="treeview-item" href="key-word-list"><i class="icon fa fa-fighter-jet fa-fw"></i>Fofa关键词</a>
                     {{ end }}
                 </li>
