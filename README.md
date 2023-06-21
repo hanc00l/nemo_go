@@ -46,6 +46,7 @@
 
 - [XRay](https://github.com/chaitin/xray)
 - [Nuclei](https://github.com/projectdiscovery/nuclei) && [Nuclei-Templates](https://github.com/projectdiscovery/nuclei-templates)
+- [Goby](https://gobysec.net/)（服务端部署模式）
 - [Dirsearch](https://github.com/evilsocket/dirsearch)
 
 ### 6、分布式任务

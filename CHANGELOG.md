@@ -1,5 +1,26 @@
 # ChangeLog
 
+## 2.9.3
+
+2023-06-21
+
+### Updated
+
+- 集成Goby进行漏洞扫描；需要部署服务器模式的goby，并在worker.yml配置api的地址及认证；docker方式默认会在127.0.0.1:8361启动goby-cmd；
+- 更新thirdparty组件版本；
+
+### Fix
+
+- httpx获取HTTP返回包的header数据，在ip/domain详细显示不自动换行
+
+### Thirdparty版本
+- Xray：1.9.11
+- Nuclei：2.9.6
+- Goby：2.5.2
+- Httpx：1.3.2
+- Subfinder：2.6.0
+- Observe_ward：2023.6.20
+
 ## 2.9.2
 
 2023-04-15
