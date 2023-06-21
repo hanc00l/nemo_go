@@ -154,7 +154,7 @@ func (x *Xray) LoadDefaultPocFile() (pocs []string) {
 	scanner := bufio.NewScanner(inputFile)
 	for scanner.Scan() {
 		text := strings.ToLower(scanner.Text())
-		if text == "" {
+		if text == "" || strings.HasPrefix(text, "#") {
 			continue
 		}
 		pocs = append(pocs, text)
