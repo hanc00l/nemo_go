@@ -1,5 +1,17 @@
 # ChangeLog
 
+## 2.9.4
+
+2023-07-10
+
+### Updated
+
+- Nemo安装及使用文档v1.0；
+
+### Fix
+
+- v2.9.3的release包里，thirdparty/fingerprinthub目录里没有打包二进制文件
+
 ## 2.9.3
 
 2023-06-21
