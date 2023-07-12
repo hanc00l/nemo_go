@@ -87,7 +87,7 @@
                         {{ if .domain_info.IconHashes }}
                         <span class="btn btn-info">IconHash</span>
                         {{ range .domain_info.IconHashes }}
-                        <a href="{{ .FofaUrl }}" target="_blank"><img src="/webfiles/iconimage/{{ .IconImage }}"
+                        <a href="{{ .FofaUrl }}" target="_blank"><img src="/webfiles/{{ $.domain_info.WorkspaceGUID }}/iconimage/{{ .IconImage }}"
                                                                       height="24px" width="24px"
                                                                       title="{{ .IconHash }}"/></a>&nbsp;
                         {{ end }}

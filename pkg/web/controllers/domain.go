@@ -616,7 +616,7 @@ func getDomainInfo(workspaceId int, domainName string, disableFofa, disableBanne
 	}
 	portSet := make(map[int]struct{})
 	//域名的属性
-	domainAttrInfo := getDomainAttrFullInfo(domain.Id, disableFofa, disableBanner)
+	domainAttrInfo := getDomainAttrFullInfo(r.WorkspaceGUID, domain.Id, disableFofa, disableBanner)
 	//遍历域名关联的每一个IP，获取port,title,banner和PortAttrInfo
 	for ipName := range domainAttrInfo.IP {
 		ip := db.Ip{IpName: ipName, WorkspaceId: workspaceId}
@@ -713,7 +713,7 @@ func getDomainInfo(workspaceId int, domainName string, disableFofa, disableBanne
 }
 
 // getDomainAttrFullInfo 获取一个域名的属性集合
-func getDomainAttrFullInfo(id int, disableFofa, disableBanner bool) DomainAttrFullInfo {
+func getDomainAttrFullInfo(workspaceGUID string, id int, disableFofa, disableBanner bool) DomainAttrFullInfo {
 	r := DomainAttrFullInfo{
 		IP:           make(map[string]struct{}),
 		TitleSet:     make(map[string]struct{}),
@@ -780,7 +780,7 @@ func getDomainAttrFullInfo(id int, disableFofa, disableBanner bool) DomainAttrFu
 				fileSuffix := utils.GetFaviconSuffixUrl(strings.TrimSpace(hashAndUrls[1]))
 				if fileSuffix != "" {
 					imageFile := fmt.Sprintf("%s.%s", utils.MD5(hash), fileSuffix)
-					if utils.CheckFileExist(filepath.Join(conf.GlobalServerConfig().Web.WebFiles, "iconimage", imageFile)) {
+					if utils.CheckFileExist(filepath.Join(conf.GlobalServerConfig().Web.WebFiles, workspaceGUID, "iconimage", imageFile)) {
 						if _, ok := r.IconImageSet[hash]; !ok {
 							r.IconImageSet[hash] = imageFile
 						}
