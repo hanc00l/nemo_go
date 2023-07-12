@@ -150,7 +150,7 @@ Worker不会开启任务监听端口（启用goby服务端模式除外），work
   ```bash
   sudo apt-get update \
     && sudo apt-get install vim \
-    mysql-server rabbitmq-server --fix-missing
+    mysql-server rabbitmq-server --fix-missing -y
   ```
 
 - **导入并配置mysql数据库**：
@@ -248,7 +248,7 @@ Worker不会开启任务监听端口（启用goby服务端模式除外），work
 
   ```bash
   sudo apt-get update \
-    && sudo apt-get install vim nmap masscan --fix-missing
+    && sudo apt-get install vim nmap masscan --fix-missing -y
   #docker ubuntu
   curl -LO https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb \
     && sudo apt install -y ./google-chrome-stable_current_amd64.deb \
@@ -329,7 +329,7 @@ Worker不会开启任务监听端口（启用goby服务端模式除外），work
 
 2、Goby的服务端部署模式，需在thirdparty/goby目录下运行：（Docker已自动运行）
 ```bash
- ./goby-cmd-linux -mode api -bind 127.0.0.1:8362 -apiauth goby:goby
+ ./goby-cmd-linux -mode api -bind 127.0.0.1:8361 -apiauth goby:goby
 ```
 - 默认只在127.0.0.1上进行监听
 - 默认的api验证用户名和密码为goby
