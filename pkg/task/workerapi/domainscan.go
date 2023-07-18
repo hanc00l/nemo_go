@@ -179,12 +179,11 @@ func getResultIPList(resultDomainScan *domainscan.Result) (ipResult, ipSubnetRes
 			}
 		}
 	}
-	var ipList, ipSubnetList []string
 	for k, _ := range ips {
-		ipList = append(ipList, k)
+		ipResult = append(ipResult, k)
 	}
 	for k, _ := range ipSubnets {
-		ipSubnetList = append(ipSubnetList, k)
+		ipSubnetResult = append(ipSubnetResult, k)
 	}
 	return
 }
