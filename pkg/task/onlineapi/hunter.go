@@ -87,7 +87,11 @@ func (h *Hunter) RunHunter(domain string) {
 	if utils.CheckIPV4(domain) || utils.CheckIPV4Subnet(domain) {
 		query = fmt.Sprintf("ip=\"%s\"", domain)
 	} else {
-		query = fmt.Sprintf("domain=\"%s\" or cert.subject=\"%s\"", domain, domain)
+		domainCert := domain
+		if strings.HasPrefix(domain, ".") == false {
+			domainCert = "." + domain
+		}
+		query = fmt.Sprintf("domain=\"%s\" or cert=\"%s\" or  cert.subject=\"%s\"", domain, domainCert, domainCert)
 	}
 	if h.Config.IsIgnoreOutofChina {
 		query = fmt.Sprintf("(%s) and ip.country=\"CN\" and ip.province!=\"香港\"", query)

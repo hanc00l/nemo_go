@@ -147,7 +147,11 @@ func (q *Quake) RunQuake(domain string) {
 	if utils.CheckIPV4(domain) || utils.CheckIPV4Subnet(domain) {
 		query = fmt.Sprintf("ip:\"%s\"", domain)
 	} else {
-		query = fmt.Sprintf("domain:\"%s\" OR cert:\"%s\"", domain, domain)
+		domainCert := domain
+		if strings.HasPrefix(domain, ".") == false {
+			domainCert = "." + domain
+		}
+		query = fmt.Sprintf("domain:\"%s\" OR cert:\"%s\"", domain, domainCert)
 	}
 	if q.Config.IsIgnoreOutofChina {
 		query = fmt.Sprintf("(%s) AND country:\"CN\" AND NOT province:\"Hongkong\"", query)

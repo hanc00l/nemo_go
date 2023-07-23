@@ -37,6 +37,7 @@ import (
 	"net/http"
 	"strconv"
 	"strings"
+	"time"
 )
 
 // Fofa a fofa client can be used to make queries
@@ -275,8 +276,12 @@ func (f *Fofa) RunFofa(domain string) {
 			query = fmt.Sprintf("ip=\"%s\"", domain)
 		} else {
 			// cert.subject相比更精准，但信息量更少；cert="xxx.com"干扰太多，暂时不用（没想法好优的方案）
-			// query = fmt.Sprintf("domain=\"%s\" || host=\"%s\" || cert=\"%s\"", domain, domain, domain)
-			query = fmt.Sprintf("domain=\"%s\" || cert.subject=\"%s\"", domain, domain)
+			// 在域名前加.减少模糊匹配带来的部份干扰
+			domainCert := domain
+			if strings.HasPrefix(domain, ".") == false {
+				domainCert = "." + domain
+			}
+			query = fmt.Sprintf("domain=\"%s\" || cert=\"%s\" || cert.subject=\"%s\"", domain, domainCert, domainCert)
 		}
 	}
 	if f.Config.IsIgnoreOutofChina {
@@ -308,6 +313,9 @@ func (f *Fofa) retriedFofaSearch(clt *Fofa, page int, query string, fields strin
 		ret, err := clt.QueryAsJSON(uint(page), []byte(query), []byte(fields))
 		if err != nil {
 			logging.RuntimeLog.Error(err.Error())
+			if strings.Contains(err.Error(), "请求速度过快") {
+				time.Sleep(2 * time.Second)
+			}
 			continue
 		}
 		pageResult, sizeTotal = f.parseFofaSearchResult(ret)
