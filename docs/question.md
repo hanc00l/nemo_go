@@ -83,3 +83,17 @@ Nemo更多的聚焦在资产信息的收集工具和手段，以及为下一步�
 为了提高安全性，Nemo在登录时使用了RSA加密用户名和密码，并且在每次server启动时会重新生成公钥和私钥对，公钥写入login.js文件，私钥保存在内存中。
 
 在确保用户名、密码及验证正确的情况下，如果无法登录到Nemo，原因是由于浏览器缓存的存在导致js文件中的私钥没有更新。可手工清除浏览器的缓存文件即可。
+
+### 8、在VPS上后台运行的server与worker的推荐方式
+
+```bash
+#在命令行下运行：
+screen ./server_linux_amd64
+#或者
+screen ./daemon_worker_linux_amd64
+
+#server或worker的进程不会因为关掉终端而被kill，通过执行命令可以恢复到命令行
+screen -r
+
+#如果没有screen命令，可以通过apt install screen安装；详细使用方式请网上搜索参考文档。
+```

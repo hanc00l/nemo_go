@@ -61,7 +61,7 @@ tar -cvzf release/nemo_windows_amd64.tar \
   --exclude=thirdparty/httpx/httpx_linux_amd64 \
   --exclude=thirdparty/goby/goby-cmd \
   --exclude=thirdparty/goby/goby-cmd-linux \
-  server_windows_amd64.exe worker_windows_amd64.exe version.txt \
+  server_windows_amd64.exe worker_windows_amd64.exe daemon_worker_windows_amd64.exe version.txt \
   conf log thirdparty web
 
 tar -cvzf release/worker_linux_amd64.tar \
