@@ -74,8 +74,9 @@ type ICPInfo struct {
 }
 
 var (
-	userAgent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/84.0.4147.125 Safari/537.36"
-	pageSize  = 10
+	userAgent               = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/84.0.4147.125 Safari/537.36"
+	pageSize                = 10
+	SameIpToDomainFilterMax = 100
 )
 
 // parseFofaSearchResult 转换FOFA搜索结果
@@ -117,6 +118,8 @@ func (ff *Fofa) parseResult() {
 		parseIpPort(ff.IpResult, fsr, "fofa", blackIP)
 		parseDomainIP(ff.DomainResult, fsr, "fofa", blackDomain)
 	}
+
+	checkDomainResult(ff.DomainResult.DomainResult)
 }
 
 // SaveResult 保存搜索的结果
@@ -173,6 +176,8 @@ func (q *Quake) parseResult() {
 		parseIpPort(q.IpResult, fsr, "quake", blackIP)
 		parseDomainIP(q.DomainResult, fsr, "quake", blackDomain)
 	}
+
+	checkDomainResult(q.DomainResult.DomainResult)
 }
 
 // SaveResult 保存搜索结果
@@ -197,6 +202,8 @@ func (h *Hunter) parseResult() {
 		parseIpPort(h.IpResult, fsr, "hunter", blackIP)
 		parseDomainIP(h.DomainResult, fsr, "hunter", blackDomain)
 	}
+
+	checkDomainResult(h.DomainResult.DomainResult)
 }
 
 // SaveResult 保存搜索结果
@@ -293,5 +300,37 @@ func parseDomainIP(domainResult domainscan.Result, fsr onlineSearchResult, sourc
 			Tag:     "banner",
 			Content: fsr.Banner,
 		})
+	}
+}
+
+// checkDomainResult 对域名结果中进行过滤，
+func checkDomainResult(result map[string]*domainscan.DomainResult) {
+	ip2DomainMap := make(map[string]map[string]struct{})
+	// 建立解析ip到domain的反向映射Map
+	for domain, domainResult := range result {
+		for _, attr := range domainResult.DomainAttrs {
+			if attr.Tag == "A" {
+				ip := attr.Content
+				if _, ok := ip2DomainMap[ip]; !ok {
+					ip2DomainMap[ip] = make(map[string]struct{})
+					ip2DomainMap[ip][domain] = struct{}{}
+				} else {
+					if _, ok2 := ip2DomainMap[ip][domain]; !ok2 {
+						ip2DomainMap[ip][domain] = struct{}{}
+					}
+				}
+			}
+		}
+	}
+	// 如果多个域名解析到同一个IP超过阈值，则过滤掉该结果
+	for ip, domains := range ip2DomainMap {
+		domainNumbers := len(domains)
+		if domainNumbers > SameIpToDomainFilterMax {
+			logging.RuntimeLog.Infof("the multiple domain for one same ip:%s,total:%d,ignored!", ip, domainNumbers)
+			logging.CLILog.Infof("the multiple domain for one same ip:%s -- %s,ignored!", ip, utils.SetToString(domains))
+			for domain := range domains {
+				delete(result, domain)
+			}
+		}
 	}
 }
