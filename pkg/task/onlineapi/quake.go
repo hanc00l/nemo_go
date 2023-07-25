@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"crypto/tls"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"github.com/hanc00l/nemo_go/pkg/conf"
 	"github.com/hanc00l/nemo_go/pkg/logging"
@@ -11,7 +12,7 @@ import (
 	"github.com/hanc00l/nemo_go/pkg/task/domainscan"
 	"github.com/hanc00l/nemo_go/pkg/task/portscan"
 	"github.com/hanc00l/nemo_go/pkg/utils"
-	"io/ioutil"
+	"io"
 	"net/http"
 	"strings"
 	"time"
@@ -108,6 +109,8 @@ type QuakeServiceInfo struct {
 		Pagination struct {
 			Count        int    `json:"count"`
 			Total        int    `json:"total"`
+			PageIndex    int    `json:"page_index"`
+			PageSize     int    `json:"page_size"`
 			PaginationID string `json:"pagination_id"`
 		} `json:"pagination"`
 	} `json:"meta"`
@@ -164,9 +167,17 @@ func (q *Quake) RunQuake(domain string) {
 			//Proxy:           http.ProxyURL(proxy),
 		}}
 	// 分页查询
-	maxPage := 10
-	for i := 0; i < maxPage; i++ {
-		pageResult, finish := q.retriedPageSearch(client, query, i)
+	// 查询第1页（quake页数第0开始），并获取总共记录数量
+	pageResult, finish, sizeTotal := q.retriedPageSearch(client, query, 0)
+	if len(pageResult) > 0 {
+		q.Result = append(q.Result, pageResult...)
+	}
+	pageTotalNum := sizeTotal / pageSize
+	if sizeTotal%pageSize > 0 {
+		pageTotalNum++
+	}
+	for i := 1; i < pageTotalNum; i++ {
+		pageResult, finish, _ = q.retriedPageSearch(client, query, i)
 		if len(pageResult) > 0 {
 			q.Result = append(q.Result, pageResult...)
 		}
@@ -177,17 +188,19 @@ func (q *Quake) RunQuake(domain string) {
 	q.parseResult()
 }
 
-func (q *Quake) retriedPageSearch(client *http.Client, query string, page int) (result []onlineSearchResult, finish bool) {
+// retriedPageSearch 分页、N次重试API查询并返回结果
+func (q *Quake) retriedPageSearch(client *http.Client, query string, page int) (result []onlineSearchResult, finish bool, sizeTotal int) {
 	RetryNumber := 3
 	for i := 0; i < RetryNumber; i++ {
 		data := quakePostData{
 			Query:       query,
 			Latest:      true,
 			IgnoreCache: true,
-			//ShorCuts 根据网页版抓包得到
+			//ShorCuts 根据网页版抓包得到，根据反馈可能发生变化导致查询失败，因此暂时不用
 			ShortCuts: []string{
-				"610ce2adb1a2e3e1632e67b1", //数据去重
-				"610ce2fbda6d29df72ac56eb", //排除蜜罐
+				//"610ce2adb1a2e3e1632e67b1", //数据去重
+				//"610ce2fbda6d29df72ac56eb", //排除蜜罐
+				//"635fcb52cc57190bd8826d09", //排除蜜罐
 				//"612f5a5ad6b3bdb87961727f", //排除CDN
 			},
 			Start: page * pageSize,
@@ -211,7 +224,8 @@ func (q *Quake) retriedPageSearch(client *http.Client, query string, page int) (
 			logging.CLILog.Println(err)
 			continue
 		}
-		result, finish = q.parseQuakeSearchResult(searchResult)
+		//fmt.Println(string(searchResult))
+		result, finish, sizeTotal = q.parseQuakeSearchResult(searchResult)
 		if finish || len(result) > 0 {
 			break
 		}
@@ -236,9 +250,12 @@ func (q *Quake) sendRequest(client *http.Client, dataBytes []byte) ([]byte, erro
 	}
 	if response.Body != nil {
 		defer response.Body.Close()
-		body, err := ioutil.ReadAll(response.Body)
+		body, err := io.ReadAll(response.Body)
 		if err != nil {
 			return nil, err
+		}
+		if strings.Contains(string(body), "/quake/login") {
+			return nil, errors.New("quake token invalid")
 		}
 		return body, nil
 	}

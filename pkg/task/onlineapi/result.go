@@ -74,8 +74,10 @@ type ICPInfo struct {
 }
 
 var (
-	userAgent               = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/84.0.4147.125 Safari/537.36"
-	pageSize                = 10
+	userAgent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/84.0.4147.125 Safari/537.36"
+	// pageSize 每次API查询的分页数量
+	pageSize = 100
+	// SameIpToDomainFilterMax 对结果中domain关联的IP进行统计后，当同一IP被域名关联的数量超过阈值后则过滤掉该掉关联的域名
 	SameIpToDomainFilterMax = 100
 )
 
@@ -134,7 +136,7 @@ func (ff *Fofa) SaveResult() string {
 }
 
 // parseQuakeSearchResult 解析Quake搜索结果
-func (q *Quake) parseQuakeSearchResult(queryResult []byte) (result []onlineSearchResult, finish bool) {
+func (q *Quake) parseQuakeSearchResult(queryResult []byte) (result []onlineSearchResult, finish bool, sizeTotal int) {
 	var serviceInfo QuakeServiceInfo
 	err := json.Unmarshal(queryResult, &serviceInfo)
 	if err != nil {
@@ -158,10 +160,12 @@ func (q *Quake) parseQuakeSearchResult(queryResult []byte) (result []onlineSearc
 		}
 		result = append(result, qsr)
 	}
+	sizeTotal = serviceInfo.Meta.Pagination.Total
 	// 如果是API有效、正确获取到数据，count为0，表示已是最后一页了
-	if serviceInfo.Meta.Pagination.Count == 0 {
+	if serviceInfo.Meta.Pagination.Count == 0 || sizeTotal == 0 {
 		finish = true
 	}
+
 	return
 }
 

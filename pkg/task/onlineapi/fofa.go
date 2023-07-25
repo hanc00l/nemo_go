@@ -139,6 +139,7 @@ func (f *Fofa) QueryAsJSON(page uint, args ...[]byte) ([]byte, error) {
 		[]byte("&key="), f.key,
 		[]byte("&qbase64="), q,
 		[]byte("&fields="), fields,
+		[]byte("&size="), []byte(strconv.Itoa(pageSize)),
 		[]byte("&page="), []byte(strconv.Itoa(int(page))),
 	}, []byte(""))
 	//fmt.Printf("%s\n", q)
@@ -313,11 +314,15 @@ func (f *Fofa) retriedFofaSearch(clt *Fofa, page int, query string, fields strin
 		ret, err := clt.QueryAsJSON(uint(page), []byte(query), []byte(fields))
 		if err != nil {
 			logging.RuntimeLog.Error(err.Error())
+			if strings.Contains(err.Error(), "F点余额不足") || strings.Contains(err.Error(), "请按顺序进行翻页查询") {
+				break
+			}
 			if strings.Contains(err.Error(), "请求速度过快") {
 				time.Sleep(2 * time.Second)
 			}
 			continue
 		}
+		//fmt.Println(string(ret))
 		pageResult, sizeTotal = f.parseFofaSearchResult(ret)
 		if len(pageResult) > 0 {
 			break

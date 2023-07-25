@@ -21,8 +21,8 @@ func TestFofa_Run(t *testing.T) {
 	}
 }
 func TestFofa_Run2(t *testing.T) {
-	config2 := OnlineAPIConfig{Target: "800best.com"}
-	//config2 := OnlineAPIConfig{Target: "10086.cn"}
+	//config2 := OnlineAPIConfig{Target: "800best.com"}
+	config2 := OnlineAPIConfig{Target: "shansteelgroup.com"}
 	fofa2 := NewFofa(config2)
 	fofa2.Do()
 	//t.Log(fofa2.SaveResult())
