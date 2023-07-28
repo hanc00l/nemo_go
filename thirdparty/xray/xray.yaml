@@ -1,0 +1,14 @@
+- name: x
+  description: |-
+    A command that enables all plugins.
+    You can customize new commands or modify the plugins enabled by a command in the configuration file.
+  enabled_plugins:
+    - printer
+    - service-scan
+    - target-parser
+    - vuln-scan
+  disabled_plugins: []
+  plugin_path:
+    - ./plugin
+  module_config: module.xray.yaml
+  plugin_config: plugin.xray.yaml
