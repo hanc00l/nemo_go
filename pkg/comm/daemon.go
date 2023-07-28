@@ -16,7 +16,7 @@ var cmd *exec.Cmd
 var WorkerName string
 
 // StartWorkerDaemon 启动worker的daemon
-func StartWorkerDaemon(concurrency int, workerPerformance int, noFilesync bool) {
+func StartWorkerDaemon(workerRunTaskMode, concurrency, workerPerformance int, noFilesync bool) {
 	// 1、worker与server文件同步
 	fileSyncServer := conf.GlobalWorkerConfig().FileSync
 	if noFilesync == false {
@@ -24,7 +24,7 @@ func StartWorkerDaemon(concurrency int, workerPerformance int, noFilesync bool) 
 		filesync.WorkerStartupSync(fileSyncServer.Host, fmt.Sprintf("%d", fileSyncServer.Port), fileSyncServer.AuthKey)
 	}
 	// 2、启动worker
-	if success := StartWorker(concurrency, workerPerformance); success == false {
+	if success := StartWorker(workerRunTaskMode, concurrency, workerPerformance); success == false {
 		return
 	}
 	// 3、心跳并接收命令
@@ -45,7 +45,7 @@ func StartWorkerDaemon(concurrency int, workerPerformance int, noFilesync bool) 
 					filesync.WorkerStartupSync(fileSyncServer.Host, fmt.Sprintf("%d", fileSyncServer.Port), fileSyncServer.AuthKey)
 				}
 				//2、重新启动worker
-				StartWorker(concurrency, workerPerformance)
+				StartWorker(workerRunTaskMode, concurrency, workerPerformance)
 			}
 			// 忽略文件同步（如果有）
 			continue
@@ -79,7 +79,7 @@ func KillWorker() bool {
 }
 
 // StartWorker 启动worker进程
-func StartWorker(concurrency int, workerPerformance int) bool {
+func StartWorker(workerRunTaskMode, concurrency, workerPerformance int) bool {
 	workerBin := utils.GetThirdpartyBinNameByPlatform(utils.Worker)
 	//绝对路径
 	workerPathName, err := filepath.Abs(filepath.Join(conf.GetRootPath(), workerBin))
@@ -87,7 +87,7 @@ func StartWorker(concurrency int, workerPerformance int) bool {
 		logging.CLILog.Error(err.Error())
 		return false
 	}
-	cmd = exec.Command(workerPathName, "-c", fmt.Sprintf("%d", concurrency), "-p", fmt.Sprintf("%d", workerPerformance))
+	cmd = exec.Command(workerPathName, "-c", fmt.Sprintf("%d", concurrency), "-p", fmt.Sprintf("%d", workerPerformance), "-m", fmt.Sprintf("%d", workerRunTaskMode))
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
 	if err = cmd.Start(); err != nil {

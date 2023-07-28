@@ -13,8 +13,13 @@ import (
 
 // NewRunTask 创建一个新执行任务
 func NewRunTask(taskName, configJSON, mainTaskId, lastRunTaskId string) (taskId string, err error) {
-	server := ampq.GetServerTaskAMPQServer()
-	// 延迟5秒后执行
+	topicName := ampq.GetTopicByTaskName(taskName)
+	if topicName == "" {
+		logging.RuntimeLog.Errorf("task %s not defined for topic", taskName)
+		return "", errors.New("task not defined for topic")
+	}
+	server := ampq.GetServerTaskAMPQServer(topicName)
+	// 延迟5秒后执行：如果不延迟，有可能任务在完成数据库之前执行，从而导致task not exist错误
 	eta := time.Now().Add(time.Second * 5)
 	taskId = uuid.New().String()
 	workerTask := tasks.Signature{
@@ -26,6 +31,8 @@ func NewRunTask(taskName, configJSON, mainTaskId, lastRunTaskId string) (taskId 
 			{Name: "mainTaskId", Type: "string", Value: mainTaskId},
 			{Name: "configJSON", Type: "string", Value: configJSON},
 		},
+		//RoutingKey：分发到不同功能的worker队列
+		RoutingKey: ampq.GetRoutingKeyByTopic(topicName),
 	}
 	_, err = server.SendTask(&workerTask)
 	if err != nil {

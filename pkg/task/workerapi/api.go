@@ -8,9 +8,7 @@ import (
 	"github.com/hanc00l/nemo_go/pkg/comm"
 	"github.com/hanc00l/nemo_go/pkg/logging"
 	"github.com/hanc00l/nemo_go/pkg/task/ampq"
-	"github.com/hanc00l/nemo_go/pkg/utils"
 	"github.com/sirupsen/logrus"
-	"os"
 	"time"
 
 	"github.com/RichardKnop/machinery/v2/backends/result"
@@ -19,7 +17,7 @@ import (
 
 var WStatus ampq.WorkerStatus
 
-// taskMaps 定义work执行的任务
+// taskMaps 定义work执行的任务；在添加了对应的任务后，在ampq/api.go中指定任务对应的队列映射：taskTopicDefineMap
 var taskMaps = map[string]interface{}{
 	"portscan":    PortScan,
 	"batchscan":   BatchScan,
@@ -79,26 +77,18 @@ func ParseConfig(configJSON string, config interface{}) (err error) {
 }
 
 // StartWorker 启动worker
-func StartWorker(concurrency int) error {
-	hostIP, _ := utils.GetOutBoundIP()
-	if hostIP == "" {
-		hostIP, _ = utils.GetClientIp()
-	}
-	hostName, _ := os.Hostname()
-	pid := os.Getpid()
-	WStatus.WorkerName = fmt.Sprintf("%s@%s#%d", hostName, hostIP, pid)
-	consumerTag := WStatus.WorkerName //"machinery_worker"
+func StartWorker(workerRunTaskMode int, concurrency int) error {
+	topicName := ampq.GetTopicByWorkerMode(ampq.WorkerRunTaskMode(workerRunTaskMode))
 
-	server := ampq.GetWorkerAMPQServer()
+	server := ampq.GetWorkerAMPQServer(topicName, concurrency)
 	err := server.RegisterTasks(taskMaps)
 	if err != nil {
 		return err
 	}
-	worker := server.NewWorker(consumerTag, concurrency)
+
+	worker := server.NewWorker(WStatus.WorkerName, concurrency)
 	worker.SetPreTaskHandler(preTaskHandler)
 	worker.SetPostTaskHandler(postTaskHandler)
-	WStatus.CreateTime = time.Now()
-	WStatus.UpdateTime = time.Now()
 	//设置machinery的日志和Level
 	logger := logrus.New()
 	logger.SetLevel(logrus.InfoLevel)
@@ -113,7 +103,7 @@ func StartWorker(concurrency int) error {
 // postTaskHandler 任务完成时处理工作
 func postTaskHandler(signature *tasks.Signature) {
 	//log.INFO.Println("I am an end of task handler for:", signature.Name)
-	server := ampq.GetWorkerAMPQServer()
+	server := ampq.GetWorkerAMPQServer(ampq.GetTopicByMQRoutingKey(signature.RoutingKey), 3)
 	r := result.NewAsyncResult(signature, server.GetBackend())
 	rr, _ := r.Get(time.Duration(0) * time.Second)
 	//更新任务的结果和状态

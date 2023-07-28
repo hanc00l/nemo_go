@@ -60,4 +60,4 @@ pocscan:
     authUser: goby
     authPass: goby
     api:
-      - http://127.0.0.1:8361
+    - http://127.0.0.1:8361

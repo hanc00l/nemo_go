@@ -25,6 +25,7 @@ type DashboardStatisticData struct {
 type WorkerStatusData struct {
 	Index                    int    `json:"index"`
 	WorkName                 string `json:"worker_name"`
+	WorkerRunTaskMode        string `json:"worker_mode"`
 	CreateTime               string `json:"create_time"`
 	UpdateTime               string `json:"update_time"`
 	TaskExecutedNumber       int    `json:"task_number"`
@@ -154,6 +155,7 @@ func (c *DashboardController) WorkerAliveListAction() {
 		wsd := WorkerStatusData{
 			Index:              index,
 			WorkName:           v.WorkerName,
+			WorkerRunTaskMode:  c.getWorkerTaskRunModeName(v.WorkerRunTaskMode),
 			CreateTime:         FormatDateTime(v.CreateTime),
 			UpdateTime:         fmt.Sprintf("%s前", time.Now().Sub(v.UpdateTime).Truncate(time.Second).String()),
 			TaskExecutedNumber: v.TaskExecutedNumber,
@@ -268,4 +270,19 @@ func (c *DashboardController) OnlineUserListAction() {
 	resp.RecordsTotal = len(OnlineUser)
 	resp.RecordsFiltered = len(OnlineUser)
 	c.Data["json"] = resp
+}
+
+func (c *DashboardController) getWorkerTaskRunModeName(taskMode string) string {
+	var modeNameMap = map[string]string{
+		"default": "全部任务",
+		"active":  "主动扫描",
+		"finger":  "指纹识别",
+		"passive": "被动收集",
+		"custom":  "自定义",
+	}
+	if modeName, ok := modeNameMap[taskMode]; ok {
+		return modeName
+	} else {
+		return "未知模式"
+	}
 }

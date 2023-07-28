@@ -73,9 +73,10 @@ $(function () {
             columns: [
                 {data: "index", title: "序号", width: "5%"},
                 {data: "worker_name", title: "Worker", width: "30%"},
-                {data: 'create_time', title: '启动时间', width: '20%',},
+                {data: "worker_mode", title: "任务模式", width: "15%"},
+                {data: 'create_time', title: '启动时间', width: '15%',},
                 {
-                    data: 'update_time', title: '心跳时间', width: '20%',
+                    data: 'update_time', title: '心跳时间', width: '10%',
                     render: function (data, type, row, meta) {
                         if (row["heart_color"] === "green") {
                             return '<span class="text-primary">' + data + '</span>';
