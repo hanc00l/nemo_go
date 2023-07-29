@@ -68,7 +68,8 @@ func (ipl *IpLocation) loadQQwry() {
 	res := IPData.InitIPData()
 
 	if v, ok := res.(error); ok {
-		logging.RuntimeLog.Error(v.Error())
+		logging.RuntimeLog.Error(v)
+		logging.CLILog.Error(v)
 	} else {
 		//logging.RuntimeLog.Infof("纯真IP库加载完成,共加载:%d 条 Domain 记录", IPData.IPNum)
 	}
@@ -78,7 +79,8 @@ func (ipl *IpLocation) loadQQwry() {
 func (ipl *IpLocation) loadCustomIP() {
 	content, err := os.ReadFile(filepath.Join(conf.GetRootPath(), "thirdparty/custom/iplocation-custom-B.txt"))
 	if err != nil {
-		logging.RuntimeLog.Error(err.Error())
+		logging.RuntimeLog.Error(err)
+		logging.CLILog.Error(err)
 	} else {
 		for _, line := range strings.Split(string(content), "\n") {
 			txt := strings.TrimSpace(line)
@@ -99,7 +101,8 @@ func (ipl *IpLocation) loadCustomIP() {
 
 	content, err = os.ReadFile(filepath.Join(conf.GetRootPath(), "thirdparty/custom/iplocation-custom-C.txt"))
 	if err != nil {
-		logging.RuntimeLog.Error(err.Error())
+		logging.RuntimeLog.Error(err)
+		logging.CLILog.Error(err)
 	} else {
 		for _, line := range strings.Split(string(content), "\n") {
 			txt := strings.TrimSpace(line)
@@ -120,7 +123,8 @@ func (ipl *IpLocation) loadCustomIP() {
 
 	content, err = os.ReadFile(filepath.Join(conf.GetRootPath(), "thirdparty/custom/iplocation-custom.txt"))
 	if err != nil {
-		logging.RuntimeLog.Error(err.Error())
+		logging.RuntimeLog.Error(err)
+		logging.CLILog.Error(err)
 	} else {
 		for _, line := range strings.Split(string(content), "\n") {
 			txt := strings.TrimSpace(line)

@@ -20,7 +20,9 @@ func WorkerStartupSync(host, port, authKey string) {
 	// 1 连接到server
 	conn, cnErr := net.Dial("tcp", serverAddr)
 	if cnErr != nil {
-		logging.CLILog.Errorf("connect to server fail:%v", cnErr.Error())
+		msg := fmt.Sprintf("connect to server fail:%v", cnErr.Error())
+		logging.CLILog.Error(msg)
+		logging.RuntimeLog.Error(msg)
 		return
 	}
 	defer conn.Close()
@@ -30,6 +32,7 @@ func WorkerStartupSync(host, port, authKey string) {
 	encErr := gbc.gobConnWt(msgSync)
 	if encErr != nil {
 		logging.CLILog.Error(encErr)
+		logging.RuntimeLog.Error(encErr)
 		return
 	}
 	// 3 服务器返回信息
@@ -38,6 +41,7 @@ func WorkerStartupSync(host, port, authKey string) {
 	err = gbc.Dec.Decode(&hostMessage)
 	if err != nil {
 		logging.CLILog.Error(err)
+		logging.RuntimeLog.Error(err)
 		return
 	}
 	if hostMessage.MgType != MsgMd5List {
@@ -55,13 +59,15 @@ func WorkerStartupSync(host, port, authKey string) {
 			logging.CLILog.Infof("%d %s %v", i+1, file, status)
 
 		}
+		logging.RuntimeLog.Info("finish file sync")
 		logging.CLILog.Info("finish file sync")
 	}
 	// 6 结束同步
 	endMsg := Message{MgType: MsgEnd, MgAuthKey: authKey}
 	encErr = gbc.gobConnWt(endMsg)
 	if encErr != nil {
-		logging.CLILog.Println(encErr)
+		logging.CLILog.Error(encErr)
+		logging.RuntimeLog.Error(encErr)
 	}
 }
 
@@ -76,6 +82,7 @@ func doFileMd5List(mg *Message) (transFiles []string, err error) {
 	var srcPath string
 	srcPath, err = filepath.Abs(conf.GetRootPath())
 	if err != nil {
+		logging.RuntimeLog.Error(err)
 		logging.CLILog.Error(err)
 		return
 	}
@@ -83,7 +90,9 @@ func doFileMd5List(mg *Message) (transFiles []string, err error) {
 	localFilesMd5, err := Traverse(srcPath)
 	// DebugInfor(localFilesMd5)
 	if err != nil {
-		logging.CLILog.Error("Traverse in worker failure")
+		msg := "traverse in worker failure"
+		logging.CLILog.Error(msg)
+		logging.RuntimeLog.Error(msg)
 		return
 	}
 	sort.Strings(localFilesMd5)
@@ -150,6 +159,7 @@ func doFileMd5List(mg *Message) (transFiles []string, err error) {
 	fErr := os.Chdir(srcPath)
 	if fErr != nil {
 		logging.CLILog.Error(err)
+		logging.RuntimeLog.Error(err)
 		return nil, fErr
 	}
 	defer os.Chdir(cwd)
@@ -157,6 +167,7 @@ func doFileMd5List(mg *Message) (transFiles []string, err error) {
 	err = localOP(slinkNeedCreat, slinkNeedChange, needDelete, needCreDir)
 	if err != nil {
 		logging.CLILog.Error(err)
+		logging.RuntimeLog.Error(err)
 		return
 	}
 	// do request needTrans files
@@ -177,6 +188,7 @@ func doTranFile(filePathName, authKey string, gbc *GobConn) bool {
 	srcPath, err = filepath.Abs(conf.GetRootPath())
 	if err != nil {
 		logging.CLILog.Error(err)
+		logging.RuntimeLog.Error(err)
 		return false
 	}
 	mg := Message{
@@ -186,12 +198,14 @@ func doTranFile(filePathName, authKey string, gbc *GobConn) bool {
 	}
 	err = gbc.gobConnWt(mg)
 	if err != nil {
+		logging.CLILog.Error(err)
 		logging.RuntimeLog.Error(err)
 		return false
 	}
 	var hostMessage Message
 	err = gbc.Dec.Decode(&hostMessage)
 	if err != nil {
+		logging.CLILog.Error(err)
 		logging.RuntimeLog.Error(err)
 		return false
 	}
@@ -199,11 +213,13 @@ func doTranFile(filePathName, authKey string, gbc *GobConn) bool {
 		dstFilePathName := filepath.Join(srcPath, filePathName)
 		err = os.WriteFile(dstFilePathName, hostMessage.MgByte, hostMessage.MgFileMode)
 		if err != nil {
+			logging.CLILog.Error(err)
 			logging.RuntimeLog.Error(err)
 			return false
 		}
 		return true
 	}
-	logging.RuntimeLog.Errorf("Error:%s", hostMessage.MgString)
+	logging.CLILog.Error(hostMessage.MgString)
+	logging.RuntimeLog.Error(hostMessage.MgString)
 	return false
 }

@@ -324,6 +324,7 @@ func (c *ConfigController) SaveAPITokenAction() {
 	}
 	err = conf.GlobalWorkerConfig().ReloadConfig()
 	if err != nil {
+		logging.RuntimeLog.Error("read config file error:", err)
 		c.FailedStatus(err.Error())
 		return
 	}
@@ -338,6 +339,7 @@ func (c *ConfigController) SaveAPITokenAction() {
 	conf.GlobalWorkerConfig().API.ICP.Key = data.ChinazToken
 	err = conf.GlobalWorkerConfig().WriteConfig()
 	if err != nil {
+		logging.RuntimeLog.Error("save config file error:", err)
 		c.FailedStatus(err.Error())
 		return
 	}
@@ -403,6 +405,7 @@ func (c *ConfigController) SaveFingerprintAction() {
 	}
 	err = conf.GlobalWorkerConfig().ReloadConfig()
 	if err != nil {
+		logging.RuntimeLog.Error("read config file error:", err)
 		c.FailedStatus(err.Error())
 		return
 	}
@@ -413,6 +416,7 @@ func (c *ConfigController) SaveFingerprintAction() {
 	conf.GlobalWorkerConfig().Fingerprint.IsIconHash = data.IsIconHash
 	err = conf.GlobalWorkerConfig().WriteConfig()
 	if err != nil {
+		logging.RuntimeLog.Error("save config file error:", err)
 		c.FailedStatus(err.Error())
 	}
 	c.SucceededStatus("保存配置成功")
@@ -434,6 +438,7 @@ func (c *ConfigController) SaveDomainscanAction() {
 	}
 	err = conf.GlobalWorkerConfig().ReloadConfig()
 	if err != nil {
+		logging.RuntimeLog.Error("read config file error:", err)
 		c.FailedStatus(err.Error())
 		return
 	}
@@ -448,6 +453,7 @@ func (c *ConfigController) SaveDomainscanAction() {
 	conf.GlobalWorkerConfig().Domainscan.IsWhois = data.IsWhois
 	err = conf.GlobalWorkerConfig().WriteConfig()
 	if err != nil {
+		logging.RuntimeLog.Error("save config file error:", err)
 		c.FailedStatus(err.Error())
 	}
 	c.SucceededStatus("保存配置成功")
@@ -472,6 +478,7 @@ func (c *ConfigController) SavePortscanAction() {
 	}
 	err := conf.GlobalWorkerConfig().ReloadConfig()
 	if err != nil {
+		logging.RuntimeLog.Error("read config file error:", err)
 		c.FailedStatus(err.Error())
 		return
 	}
@@ -486,6 +493,7 @@ func (c *ConfigController) SavePortscanAction() {
 	conf.GlobalWorkerConfig().Portscan.IsPing = ping
 	err = conf.GlobalWorkerConfig().WriteConfig()
 	if err != nil {
+		logging.RuntimeLog.Error("save config file error:", err)
 		c.FailedStatus(err.Error())
 	}
 	c.SucceededStatus("保存配置成功")
@@ -501,13 +509,13 @@ func (c *ConfigController) UploadPocAction() {
 
 	pocType := c.GetString("type", "")
 	if len(pocType) == 0 {
-		logging.RuntimeLog.Error("get poc file error ")
+		logging.RuntimeLog.Error("get poc file type error")
 		return
 	}
 	// 获取上传信息
 	f, h, err := c.GetFile("file")
 	if err != nil {
-		logging.RuntimeLog.Error("get file err ", err)
+		logging.RuntimeLog.Error("get upload file error:", err)
 		c.FailedStatus(err.Error())
 		return
 	}
@@ -515,7 +523,7 @@ func (c *ConfigController) UploadPocAction() {
 	// 检查文件后缀
 	fileExt := path.Ext(h.Filename)
 	if fileExt != ".yml" && fileExt != ".yaml" {
-		logging.RuntimeLog.Error("invalid file type!")
+		logging.RuntimeLog.Warning("invalid file type")
 		c.FailedStatus("invalid file type!")
 		return
 	}
@@ -527,13 +535,13 @@ func (c *ConfigController) UploadPocAction() {
 		pocSavedPathName = filepath.Join(conf.GetRootPath(), conf.GlobalWorkerConfig().Pocscan.Nuclei.PocPath, h.Filename)
 	}
 	if pocSavedPathName == "" {
-		logging.RuntimeLog.Error("invalid poc type!")
-		c.FailedStatus("invalid poc type!")
+		logging.RuntimeLog.Error("get poc save path from config file error")
+		c.FailedStatus("get poc save path from config file error")
 		return
 	}
 	err = c.SaveToFile("file", pocSavedPathName)
 	if err != nil {
-		logging.RuntimeLog.Error("save file err ", err)
+		logging.RuntimeLog.Error("save poc file error:", err)
 		c.FailedStatus(err.Error())
 		return
 	}

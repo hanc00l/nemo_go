@@ -40,6 +40,7 @@ func doOnlineAPI(taskId string, mainTaskId string, configJSON string, apiName st
 	// 解析任务参数
 	config := onlineapi.OnlineAPIConfig{}
 	if err = ParseConfig(configJSON, &config); err != nil {
+		logging.RuntimeLog.Error(err)
 		return FailedTask(err.Error()), err
 	}
 	//执行任务
@@ -211,12 +212,12 @@ func addGlobalFilterWord() (globalLocalFilterWords []string) {
 	// 从custom目录中读取定义的过滤词，每一个关键词一行：
 	filterFile := filepath.Join(conf.GetRootPath(), "thirdparty/custom", "fofa_filter_keyword_local.txt")
 	if utils.CheckFileExist(filterFile) == false {
-		logging.RuntimeLog.Errorf("fofa filter file not exist:%s", filterFile)
+		logging.RuntimeLog.Warningf("fofa filter file not exist:%s", filterFile)
 		return
 	}
 	inputFile, err := os.Open(filterFile)
 	if err != nil {
-		logging.RuntimeLog.Errorf("Could not read fofa filter file: %s\n", err)
+		logging.RuntimeLog.Warningf("Could not read fofa filter file: %s", err)
 		return
 	}
 	defer inputFile.Close()

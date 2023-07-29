@@ -157,7 +157,8 @@ func (c *IPController) ListAction() {
 	req := ipRequestParam{}
 	err := c.ParseForm(&req)
 	if err != nil {
-		logging.RuntimeLog.Error(err.Error())
+		logging.RuntimeLog.Error(err)
+		logging.CLILog.Error(err)
 	}
 	c.validateRequestParam(&req)
 	//更新session
@@ -215,7 +216,8 @@ func (c *IPController) DeleteIPAction() {
 
 	id, err := c.GetInt("id")
 	if err != nil {
-		logging.RuntimeLog.Error(err.Error())
+		logging.RuntimeLog.Error(err)
+		logging.CLILog.Error(err)
 		c.FailedStatus(err.Error())
 		return
 	}
@@ -242,7 +244,8 @@ func (c *IPController) DeletePortAttrAction() {
 
 	id, err := c.GetInt("id")
 	if err != nil {
-		logging.RuntimeLog.Error(err.Error())
+		logging.RuntimeLog.Error(err)
+		logging.CLILog.Error(err)
 		c.MakeStatusResponse(false)
 		return
 	}
@@ -255,7 +258,8 @@ func (c *IPController) StatisticsAction() {
 	req := ipRequestParam{}
 	err := c.ParseForm(&req)
 	if err != nil {
-		logging.RuntimeLog.Error(err.Error())
+		logging.RuntimeLog.Error(err)
+		logging.CLILog.Error(err)
 	}
 	c.validateRequestParam(&req)
 	r := c.getStatisticsData(req)
@@ -299,7 +303,8 @@ func (c *IPController) ExportMemoAction() {
 	req := ipRequestParam{}
 	err := c.ParseForm(&req)
 	if err != nil {
-		logging.RuntimeLog.Error(err.Error())
+		logging.RuntimeLog.Error(err)
+		logging.CLILog.Error(err)
 	}
 	c.validateRequestParam(&req)
 	content := c.getMemoData(req)
@@ -958,7 +963,8 @@ func (c *IPController) BlackIPAction() {
 	}
 	id, err := c.GetInt("id")
 	if err != nil {
-		logging.RuntimeLog.Error(err.Error())
+		logging.RuntimeLog.Error(err)
+		logging.CLILog.Error(err)
 		c.FailedStatus(err.Error())
 		return
 	}

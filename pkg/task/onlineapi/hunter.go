@@ -61,7 +61,8 @@ func NewHunter(config OnlineAPIConfig) *Hunter {
 // Do 执行查询
 func (h *Hunter) Do() {
 	if conf.GlobalWorkerConfig().API.Hunter.Key == "" {
-		logging.RuntimeLog.Error("no hunter api key,exit hunter search")
+		logging.RuntimeLog.Warning("no hunter api key,exit hunter search")
+		logging.CLILog.Warning("no hunter api key,exit hunter search")
 		return
 	}
 	blackDomain := custom.NewBlackDomain()
@@ -121,7 +122,8 @@ func (h *Hunter) retriedPageSearch(query string, page int) (pageResult []onlineS
 		var serviceInfo HunterServiceInfo
 		request, err := http.NewRequest(http.MethodGet, "https://hunter.qianxin.com/openApi/search", nil)
 		if err != nil {
-			logging.CLILog.Printf("Hunter Search Error:%s", err.Error())
+			logging.RuntimeLog.Error(err)
+			logging.CLILog.Errorf("Hunter Search Error:%s", err.Error())
 		}
 		params := make(url.Values)
 		params.Add("api-key", conf.GlobalWorkerConfig().API.Hunter.Key)
@@ -134,22 +136,26 @@ func (h *Hunter) retriedPageSearch(query string, page int) (pageResult []onlineS
 		request.URL.RawQuery = params.Encode()
 		resp, err := http.DefaultClient.Do(request)
 		if err != nil {
-			logging.CLILog.Printf("Hunter Search Error:%s", err.Error())
+			logging.RuntimeLog.Error(err)
+			logging.CLILog.Errorf("Hunter Search Error:%s", err.Error())
 			continue
 		}
 		content, err := io.ReadAll(resp.Body)
 		resp.Body.Close()
 		if err != nil {
-			logging.CLILog.Printf("Hunter Search Error:%s", err.Error())
+			logging.RuntimeLog.Error(err)
+			logging.CLILog.Errorf("Hunter Search Error:%s", err.Error())
 			continue
 		}
 		err = json.Unmarshal(content, &serviceInfo)
 		if err != nil {
-			logging.CLILog.Printf("Hunter Search Error:%s", err.Error())
+			logging.RuntimeLog.Error(err)
+			logging.CLILog.Errorf("Hunter Search Error:%s", err.Error())
 			continue
 		}
 		if serviceInfo.Code != 200 {
-			logging.CLILog.Printf("Hunter Search Error:%s", serviceInfo.Message)
+			logging.RuntimeLog.Error(err)
+			logging.CLILog.Errorf("Hunter Search Error:%s", serviceInfo.Message)
 			continue
 		}
 		sizeTotal = serviceInfo.Data.Total

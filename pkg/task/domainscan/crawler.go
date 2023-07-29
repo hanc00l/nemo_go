@@ -82,6 +82,7 @@ func (c *Crawler) RunCrawler(domainUrl string) {
 	var targets []*model2.Request
 	url, err := model2.GetUrl(domainUrl)
 	if err != nil {
+		logging.RuntimeLog.Error(err)
 		logging.CLILog.Error(err)
 		return
 	}
@@ -91,13 +92,14 @@ func (c *Crawler) RunCrawler(domainUrl string) {
 	task, err := pkg.NewCrawlerTask(targets, taskConfig)
 	if err != nil {
 		logging.RuntimeLog.Error(fmt.Sprintf("create crawler task failed:%s.", domainUrl))
+		logging.CLILog.Error(err)
 		return
 	}
 	go handleExit(task, signalChan)
-	logging.CLILog.Info(fmt.Sprintf("Start crawling %s...", domainUrl))
+	logging.CLILog.Info(fmt.Sprintf("start crawling %s...", domainUrl))
 	task.Run()
 	result := task.Result
-	logging.CLILog.Info(fmt.Sprintf("Task finished, %d results, %d requests, %d subdomains, %d domains found.",
+	logging.CLILog.Info(fmt.Sprintf("task finished, %d results, %d requests, %d subdomains, %d domains found.",
 		len(result.ReqList), len(result.AllReqList), len(result.SubDomainList), len(result.AllDomainList)))
 	// 结果解析
 	c.parseResult(result.SubDomainList)
@@ -114,7 +116,7 @@ func (c *Crawler) parseResult(result []string) {
 		if blackDomain.CheckBlack(domain) {
 			continue
 		}
-		logging.CLILog.Println(domain)
+		logging.CLILog.Info(domain)
 		if !c.Result.HasDomain(domain) {
 			c.Result.SetDomain(domain)
 		}

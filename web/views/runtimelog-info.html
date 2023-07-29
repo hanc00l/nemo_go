@@ -1,0 +1,49 @@
+<main class="app-content">
+    <div class="row">
+        <div class="col-md-12">
+            <div class="bs-component">
+                <div class="card">
+                    <h2 class="card-header">
+                        <div class="form-check-inline">
+                            {{ .runtimelog_info.Func }}
+                        </div>
+                    </h2>
+                    <div class="card-body">
+                        <b><span class="btn btn-info">Source</span></b>
+                        <span class="btn btn-warning text-left">
+                            {{ .runtimelog_info.Source }}
+                        </span>
+                        <br><br>
+                        <b><span class="btn btn-info">File</span></b>
+                        <span class="btn btn-warning  text-left">{{ .runtimelog_info.File }}</span>
+                        <b><span class="btn btn-info">Level</span></b>
+                        <span class="btn btn-warning  text-left">{{ .runtimelog_info.Level }}</span>
+                        <br><br>
+                        <b><span class="btn btn-info">Message</span></b>
+                        <span class="btn border-secondary text-left">
+                              <div style="width:100%;white-space:normal;word-wrap:break-word;word-break:break-all;">
+                                  {{ .runtimelog_info.Message }}
+                              </div>
+                        </span>
+                        <br><br>
+                        <b><span class="btn btn-info">创建时间</span></b>
+                        <span class="btn border-success">{{ .runtimelog_info.CreateTime }}</span>
+                        <b><span class="btn btn-info">更新时间</span></b>
+                        <span class="btn border-success">{{ .runtimelog_info.UpdateTime }}</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!--row-->
+</main>
+<script src="static/js/jquery/jquery-3.3.1.min.js"></script>
+<script src="static/js/bootstrap/popper.min.js"></script>
+<script src="static/js/bootstrap/bootstrap.min.js"></script>
+<script src="static/js/main.js"></script>
+<script>
+    $(function () {
+        $("title").html(" {{ .runtimelog_info.Func }}-RuntimeLogInfo");
+        $('#btnsiderbar').click();
+    });
+</script>

@@ -21,6 +21,7 @@ func StartWorkerDaemon(workerRunTaskMode, concurrency, workerPerformance int, no
 	fileSyncServer := conf.GlobalWorkerConfig().FileSync
 	if noFilesync == false {
 		logging.CLILog.Info("start file sync...")
+		logging.RuntimeLog.Info("start file sync...")
 		filesync.WorkerStartupSync(fileSyncServer.Host, fmt.Sprintf("%d", fileSyncServer.Port), fileSyncServer.AuthKey)
 	}
 	// 2、启动worker
@@ -41,7 +42,8 @@ func StartWorkerDaemon(workerRunTaskMode, concurrency, workerPerformance int, no
 			if KillWorker() {
 				//1、同步文件
 				if noFilesync == false {
-					logging.CLILog.Info("start file sync...")
+					logging.CLILog.Info("manual reload to start file sync...")
+					logging.RuntimeLog.Info("manual reload to start file sync...")
 					filesync.WorkerStartupSync(fileSyncServer.Host, fmt.Sprintf("%d", fileSyncServer.Port), fileSyncServer.AuthKey)
 				}
 				//2、重新启动worker
@@ -52,7 +54,8 @@ func StartWorkerDaemon(workerRunTaskMode, concurrency, workerPerformance int, no
 		}
 		if noFilesync == false && replay.ManualFileSyncFlag {
 			//同步文件
-			logging.CLILog.Info("start file sync...")
+			logging.CLILog.Info("manual reload to start file sync...")
+			logging.RuntimeLog.Info("manual reload to start file sync...")
 			filesync.WorkerStartupSync(fileSyncServer.Host, fmt.Sprintf("%d", fileSyncServer.Port), fileSyncServer.AuthKey)
 		}
 	}
@@ -65,14 +68,19 @@ func KillWorker() bool {
 	}
 	err := cmd.Process.Kill()
 	if err != nil {
-		logging.CLILog.Errorf("kill worker fail,pid:%d,%v", cmd.Process.Pid, err)
+		msg := fmt.Sprintf("kill worker fail,pid:%d,%v", cmd.Process.Pid, err)
+		logging.RuntimeLog.Error(msg)
+		logging.CLILog.Error(msg)
 		return false
 	}
 	if err = cmd.Wait(); err != nil {
-		logging.CLILog.Infof("kill worker pid:%d,%v", cmd.Process.Pid, err)
+		msg := fmt.Sprintf("kill worker pid:%d,%v", cmd.Process.Pid, err)
+		logging.RuntimeLog.Error(msg)
+		logging.CLILog.Error(msg)
 	}
-	logging.CLILog.Infof("kill worker ok,pid:%d", cmd.Process.Pid)
-	logging.RuntimeLog.Infof("kill worker ok,pid:%d", cmd.Process.Pid)
+	msg := fmt.Sprintf("kill worker ok,pid:%d", cmd.Process.Pid)
+	logging.RuntimeLog.Info(msg)
+	logging.CLILog.Info(msg)
 
 	cmd = nil
 	return true
@@ -84,7 +92,8 @@ func StartWorker(workerRunTaskMode, concurrency, workerPerformance int) bool {
 	//绝对路径
 	workerPathName, err := filepath.Abs(filepath.Join(conf.GetRootPath(), workerBin))
 	if err != nil {
-		logging.CLILog.Error(err.Error())
+		logging.RuntimeLog.Error(err)
+		logging.CLILog.Error(err)
 		return false
 	}
 	cmd = exec.Command(workerPathName, "-c", fmt.Sprintf("%d", concurrency), "-p", fmt.Sprintf("%d", workerPerformance), "-m", fmt.Sprintf("%d", workerRunTaskMode))
@@ -95,15 +104,26 @@ func StartWorker(workerRunTaskMode, concurrency, workerPerformance int) bool {
 		logging.RuntimeLog.Infof("start worker fail: %v", err)
 		return false
 	}
+	WorkerName = GetWorkerNameByDaemon()
+	logging.CLILog.Infof("start worker pid: %d", cmd.Process.Pid)
+	logging.RuntimeLog.Infof("start worker pid: %d", cmd.Process.Pid)
+	return true
+}
+
+func GetWorkerNameByDaemon() string {
+	return getWorkerName(cmd.Process.Pid)
+}
+
+func GetWorkerNameBySelf() string {
+	return getWorkerName(os.Getpid())
+}
+
+func getWorkerName(pid int) string {
 	hostIP, _ := utils.GetOutBoundIP()
 	if hostIP == "" {
 		hostIP, _ = utils.GetClientIp()
 	}
-
 	hostName, _ := os.Hostname()
-	WorkerName = fmt.Sprintf("%s@%s#%d", hostName, hostIP, cmd.Process.Pid)
 
-	logging.CLILog.Infof("start worker pid: %d", cmd.Process.Pid)
-	logging.RuntimeLog.Infof("start worker pid: %d", cmd.Process.Pid)
-	return true
+	return fmt.Sprintf("%s@%s#%d", hostName, hostIP, pid)
 }

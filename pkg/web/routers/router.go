@@ -129,4 +129,11 @@ func init() {
 	web.CtrlPost("/user-reset-password", (*controllers.UserController).ResetPasswordAction)
 	web.CtrlPost("/user-workspace-list", (*controllers.UserController).ListUserWorkspaceAction)
 	web.CtrlPost("/user-workspace-update", (*controllers.UserController).UpdateUserWorkspaceAction)
+
+	web.CtrlGet("/runtimelog-list", (*controllers.RuntimeLogController).IndexAction)
+	web.CtrlPost("/runtimelog-list", (*controllers.RuntimeLogController).ListAction)
+	web.CtrlGet("/runtimelog-info", (*controllers.RuntimeLogController).InfoAction)
+	web.CtrlPost("/runtimelog-delete", (*controllers.RuntimeLogController).DeleteAction)
+	web.CtrlPost("/runtimelog-batch-delete", (*controllers.RuntimeLogController).BatchDeleteAction)
+
 }

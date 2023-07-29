@@ -125,7 +125,8 @@ func (c *TaskController) ListAction() {
 	req := taskRequestParam{}
 	err := c.ParseForm(&req)
 	if err != nil {
-		logging.RuntimeLog.Error(err.Error())
+		logging.RuntimeLog.Error(err)
+		logging.CLILog.Error(err)
 	}
 	c.validateRequestParam(&req)
 	resp := c.getTaskListData(req)
@@ -139,7 +140,8 @@ func (c *TaskController) ListCronAction() {
 	req := taskCronRequestParam{}
 	err := c.ParseForm(&req)
 	if err != nil {
-		logging.RuntimeLog.Error(err.Error())
+		logging.RuntimeLog.Error(err)
+		logging.CLILog.Error(err)
 	}
 	c.validateRequestParam2(&req)
 	resp := c.getTaskCronListData(req)
@@ -210,7 +212,8 @@ func (c *TaskController) DeleteAction() {
 
 	id, err := c.GetInt("id")
 	if err != nil {
-		logging.RuntimeLog.Error(err.Error())
+		logging.RuntimeLog.Error(err)
+		logging.CLILog.Error(err)
 		c.FailedStatus(err.Error())
 		return
 	}
@@ -237,7 +240,8 @@ func (c *TaskController) DeleteMainAction() {
 
 	id, err := c.GetInt("id")
 	if err != nil {
-		logging.RuntimeLog.Error(err.Error())
+		logging.RuntimeLog.Error(err)
+		logging.CLILog.Error(err)
 		c.FailedStatus(err.Error())
 	} else {
 		task := db.TaskMain{Id: id}
@@ -287,7 +291,8 @@ func (c *TaskController) DeleteCronAction() {
 
 	id, err := c.GetInt("id")
 	if err != nil {
-		logging.RuntimeLog.Error(err.Error())
+		logging.RuntimeLog.Error(err)
+		logging.CLILog.Error(err)
 		c.FailedStatus(err.Error())
 	} else {
 		task := db.TaskCron{Id: id}
@@ -376,7 +381,8 @@ func (c *TaskController) StartPortScanTaskAction() {
 	var req runner.PortscanRequestParam
 	err := c.ParseForm(&req)
 	if err != nil {
-		logging.RuntimeLog.Error(err.Error())
+		logging.RuntimeLog.Error(err)
+		logging.CLILog.Error(err)
 		c.FailedStatus(err.Error())
 		return
 	}
@@ -427,7 +433,8 @@ func (c *TaskController) StartBatchScanTaskAction() {
 	var req runner.PortscanRequestParam
 	err := c.ParseForm(&req)
 	if err != nil {
-		logging.RuntimeLog.Error(err.Error())
+		logging.RuntimeLog.Error(err)
+		logging.CLILog.Error(err)
 		c.FailedStatus(err.Error())
 		return
 	}
@@ -476,7 +483,8 @@ func (c *TaskController) StartDomainScanTaskAction() {
 	var req runner.DomainscanRequestParam
 	err := c.ParseForm(&req)
 	if err != nil {
-		logging.RuntimeLog.Error(err.Error())
+		logging.RuntimeLog.Error(err)
+		logging.CLILog.Error(err)
 		c.FailedStatus(err.Error())
 		return
 	}
@@ -525,7 +533,8 @@ func (c *TaskController) StartPocScanTaskAction() {
 	var req runner.PocscanRequestParam
 	err := c.ParseForm(&req)
 	if err != nil {
-		logging.RuntimeLog.Error(err.Error())
+		logging.RuntimeLog.Error(err)
+		logging.CLILog.Error(err)
 		c.FailedStatus(err.Error())
 		return
 	}
@@ -574,7 +583,8 @@ func (c *TaskController) StartXScanTaskAction() {
 	reqByForm := runner.XScanRequestParam{}
 	err := c.ParseForm(&reqByForm)
 	if err != nil {
-		logging.RuntimeLog.Error(err.Error())
+		logging.RuntimeLog.Error(err)
+		logging.CLILog.Error(err)
 		c.FailedStatus(err.Error())
 		return
 	}

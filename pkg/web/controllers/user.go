@@ -45,7 +45,8 @@ func (c *UserController) ListAction() {
 	req := userRequestParam{}
 	err := c.ParseForm(&req)
 	if err != nil {
-		logging.RuntimeLog.Error(err.Error())
+		logging.RuntimeLog.Error(err)
+		logging.CLILog.Error(err)
 	}
 	c.validateRequestParam(&req)
 	resp := c.getUserListData(req)
@@ -115,7 +116,8 @@ func (c *UserController) AddSaveAction() {
 	userData := UserData{}
 	err := c.ParseForm(&userData)
 	if err != nil {
-		logging.RuntimeLog.Error(err.Error())
+		logging.RuntimeLog.Error(err)
+		logging.CLILog.Error(err)
 		c.FailedStatus(err.Error())
 		return
 	}
@@ -127,6 +129,8 @@ func (c *UserController) AddSaveAction() {
 	user.State = userData.State
 	user.SortOrder = userData.SortOrder
 	c.MakeStatusResponse(user.Add())
+
+	logging.RuntimeLog.Infof("add new user:%s,type:%s", userData.UserName, userData.UserRole)
 }
 
 // GetAction 根据ID获取一个记录
@@ -136,7 +140,8 @@ func (c *UserController) GetAction() {
 
 	id, err := c.GetInt("id")
 	if err != nil {
-		logging.RuntimeLog.Error(err.Error())
+		logging.RuntimeLog.Error(err)
+		logging.CLILog.Error(err)
 		c.FailedStatus(err.Error())
 		return
 	}
@@ -162,14 +167,16 @@ func (c *UserController) UpdateAction() {
 
 	id, err := c.GetInt("id")
 	if err != nil {
-		logging.RuntimeLog.Error(err.Error())
+		logging.RuntimeLog.Error(err)
+		logging.CLILog.Error(err)
 		c.FailedStatus(err.Error())
 		return
 	}
 	userData := UserData{}
 	err = c.ParseForm(&userData)
 	if err != nil {
-		logging.RuntimeLog.Error(err.Error())
+		logging.RuntimeLog.Error(err)
+		logging.CLILog.Error(err)
 		c.FailedStatus(err.Error())
 		return
 	}
@@ -181,6 +188,9 @@ func (c *UserController) UpdateAction() {
 	updateMap["user_description"] = userData.UserDescription
 	updateMap["user_role"] = userData.UserRole
 	c.MakeStatusResponse(user.Update(updateMap))
+
+	logging.RuntimeLog.Infof("update user:%s,type:%s", userData.UserName, userData.UserRole)
+
 }
 
 // DeleteAction 删除一条记录
@@ -190,12 +200,16 @@ func (c *UserController) DeleteAction() {
 
 	id, err := c.GetInt("id")
 	if err != nil {
-		logging.RuntimeLog.Error(err.Error())
+		logging.RuntimeLog.Error(err)
+		logging.CLILog.Error(err)
 		c.FailedStatus(err.Error())
 		return
 	}
 	user := db.User{Id: id}
 	c.MakeStatusResponse(user.Delete())
+
+	logging.RuntimeLog.Infof("delete user:%s,type:%s", user.UserName, user.UserRole)
+
 }
 
 // ResetPasswordAction 重置指定用户的密码
@@ -206,12 +220,13 @@ func (c *UserController) ResetPasswordAction() {
 	userData := UserData{}
 	err := c.ParseForm(&userData)
 	if err != nil {
-		logging.RuntimeLog.Error(err.Error())
+		logging.RuntimeLog.Error(err)
+		logging.CLILog.Error(err)
 		c.FailedStatus(err.Error())
 		return
 	}
 	if userData.Id <= 0 || len(userData.UserPassword) == 0 {
-		logging.RuntimeLog.Error("用户id或密码为空")
+		logging.CLILog.Error("用户id或密码为空")
 		c.FailedStatus("用户id或密码为空")
 		return
 	}
@@ -221,6 +236,8 @@ func (c *UserController) ResetPasswordAction() {
 		updateMap["user_password"] = ProcessPasswordHash(userData.UserPassword)
 		if user.Update(updateMap) {
 			c.SucceededStatus("重置密码成功！")
+			logging.RuntimeLog.Infof("reset user:%s,type:%s", user.UserName, user.UserRole)
+
 			return
 		}
 	}

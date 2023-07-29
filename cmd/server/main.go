@@ -33,6 +33,7 @@ func StartMainTaskDemon() {
 func StartWebServer() {
 	err := logs.SetLogger("file", `{"filename":"log/access.log"}`)
 	if err != nil {
+		logging.RuntimeLog.Error(err)
 		logging.CLILog.Error(err)
 		return
 	}
@@ -40,6 +41,7 @@ func StartWebServer() {
 		web.InsertFilter("/*", web.BeforeRouter, filterLoginCheck)
 	}
 	logging.RuntimeLog.Info("Nemo Server started...")
+	logging.CLILog.Info("Nemo Server started...")
 	addr := fmt.Sprintf("%s:%d", conf.GlobalServerConfig().Web.Host, conf.GlobalServerConfig().Web.Port)
 	web.Run(addr)
 }
@@ -82,6 +84,7 @@ func main() {
 		go comm.StartRPCServer()
 		time.Sleep(time.Second * 1)
 	}
+	go comm.StartSaveRuntimeLog("server@nemo")
 	StartCronTask()
 	StartMainTaskDemon()
 

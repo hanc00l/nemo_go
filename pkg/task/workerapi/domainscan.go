@@ -22,6 +22,7 @@ func DomainScan(taskId, mainTaskId, configJSON string) (result string, err error
 
 	config := domainscan.Config{}
 	if err = ParseConfig(configJSON, &config); err != nil {
+		logging.RuntimeLog.Error(err)
 		return FailedTask(err.Error()), err
 	}
 	resultDomainScan := doDomainScan(config)

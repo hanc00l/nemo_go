@@ -143,11 +143,12 @@ func (q *Quake) parseQuakeSearchResult(queryResult []byte) (result []onlineSearc
 		//json数据反序列化失败
 		//如果是json: cannot unmarshal object into Go struct field QuakeServiceInfo.data of type []struct { Time time.Time "json:\"time\""; Transport string "json:\"transport\""; Service struct { HTTP struct
 		//则基本上是API的key失效，或积分不足无法读取
-		logging.CLILog.Println(err)
+		logging.RuntimeLog.Error(err)
+		logging.CLILog.Error(err)
 		return
 	}
 	if strings.HasPrefix(serviceInfo.Message, "Successful") == false {
-		logging.CLILog.Printf("Quake Search Error:%s", serviceInfo.Message)
+		logging.CLILog.Errorf("Quake Search Error:%s", serviceInfo.Message)
 		return
 	}
 	for _, data := range serviceInfo.Data {

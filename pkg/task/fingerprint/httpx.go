@@ -206,6 +206,7 @@ func (x *Httpx) RunHttpx(domain string) (result []FingerAttrResult, storedRespon
 	err := os.WriteFile(inputTempFile, []byte(domain), 0666)
 	if err != nil {
 		logging.RuntimeLog.Error(err.Error())
+		logging.CLILog.Error(err)
 		return nil, ""
 	}
 	var cmdArgs []string
@@ -224,6 +225,7 @@ func (x *Httpx) RunHttpx(domain string) (result []FingerAttrResult, storedRespon
 	_, err = cmd.CombinedOutput()
 	if err != nil {
 		logging.RuntimeLog.Error(err.Error())
+		logging.CLILog.Error(err)
 		return nil, ""
 	}
 	result, storedResponsePathFile = x.parseHttpxResult(resultTempFile)
@@ -235,12 +237,16 @@ func (x *Httpx) ParseHttpxJson(content []byte) (host string, port int, result []
 	resultJSON := HttpxResult{}
 	err := json.Unmarshal(content, &resultJSON)
 	if err != nil {
+		logging.RuntimeLog.Error(err)
+		logging.CLILog.Error(err)
 		return
 	}
 	// 获取host与port
 	host = resultJSON.Host
 	port, err = strconv.Atoi(resultJSON.Port)
 	if err != nil {
+		logging.RuntimeLog.Error(err)
+		logging.CLILog.Error(err)
 		return
 	}
 	// 保存stored_response_path供fingerprint功能使用，但返回的JSON字符串不需要
@@ -289,6 +295,10 @@ func (x *Httpx) ParseHttpxJson(content []byte) (host string, port int, result []
 func (x *Httpx) parseHttpxResult(outputTempFile string) (result []FingerAttrResult, storedResponsePathFile string) {
 	content, err := os.ReadFile(outputTempFile)
 	if err != nil || len(content) == 0 {
+		if err != nil {
+			logging.RuntimeLog.Error(err)
+			logging.CLILog.Error(err)
+		}
 		return
 	}
 	// host与port这里不需要

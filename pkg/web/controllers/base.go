@@ -118,6 +118,7 @@ func (c *BaseController) setSessionData(key, value string) {
 	err := c.SetSession(key, value)
 	if err != nil {
 		logging.RuntimeLog.Error(err)
+		logging.CLILog.Error(err)
 	}
 }
 

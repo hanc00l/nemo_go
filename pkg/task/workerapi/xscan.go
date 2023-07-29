@@ -92,6 +92,7 @@ func XOrganization(taskId, mainTaskId, configJSON string) (result string, err er
 	// 解析任务参数
 	config := XScanConfig{}
 	if err = ParseConfig(configJSON, &config); err != nil {
+		logging.RuntimeLog.Error(err)
 		return FailedTask(err.Error()), err
 	}
 	// 执行任务
@@ -153,6 +154,7 @@ func XOnlineAPI(taskId, mainTaskId, configJSON string) (result string, err error
 	// 解析任务参数
 	config := XScanConfig{}
 	if err = ParseConfig(configJSON, &config); err != nil {
+		logging.RuntimeLog.Error(err)
 		return FailedTask(err.Error()), err
 	}
 	// 执行任务
@@ -189,6 +191,7 @@ func XPortScan(taskId, mainTaskId, configJSON string) (result string, err error)
 	// 解析任务参数
 	config := XScanConfig{}
 	if err = ParseConfig(configJSON, &config); err != nil {
+		logging.RuntimeLog.Error(err)
 		return FailedTask(err.Error()), err
 	}
 	// 执行任务
@@ -220,6 +223,7 @@ func XDomainscan(taskId, mainTaskId, configJSON string) (result string, err erro
 	// 解析任务参数
 	config := XScanConfig{}
 	if err = ParseConfig(configJSON, &config); err != nil {
+		logging.RuntimeLog.Error(err)
 		return FailedTask(err.Error()), err
 	}
 	// 执行任务
@@ -250,6 +254,7 @@ func XFingerPrint(taskId, mainTaskId, configJSON string) (result string, err err
 	// 解析任务参数
 	config := XScanConfig{}
 	if err = ParseConfig(configJSON, &config); err != nil {
+		logging.RuntimeLog.Error(err)
 		return FailedTask(err.Error()), err
 	}
 	// 执行任务
@@ -263,6 +268,7 @@ func XFingerPrint(taskId, mainTaskId, configJSON string) (result string, err err
 	if config.IsXrayPoc {
 		_, err = scan.NewXrayScan(taskId, mainTaskId)
 		if err != nil {
+			logging.RuntimeLog.Error(err)
 			return FailedTask(err.Error()), err
 		}
 	}
@@ -271,6 +277,7 @@ func XFingerPrint(taskId, mainTaskId, configJSON string) (result string, err err
 	if config.IsNucleiPoc {
 		_, err = scan.NewNucleiScan(taskId, mainTaskId)
 		if err != nil {
+			logging.RuntimeLog.Error(err)
 			return FailedTask(err.Error()), err
 		}
 	}
@@ -279,6 +286,7 @@ func XFingerPrint(taskId, mainTaskId, configJSON string) (result string, err err
 	if config.IsGobyPoc {
 		_, err = scan.NewGobyScan(taskId, mainTaskId)
 		if err != nil {
+			logging.RuntimeLog.Error(err)
 			return FailedTask(err.Error()), err
 		}
 	}
@@ -295,6 +303,7 @@ func XXray(taskId, mainTaskId, configJSON string) (result string, err error) {
 	// 解析任务参数
 	config := XScanConfig{}
 	if err = ParseConfig(configJSON, &config); err != nil {
+		logging.RuntimeLog.Error(err)
 		return FailedTask(err.Error()), err
 	}
 	// 执行任务
@@ -317,6 +326,7 @@ func XNuclei(taskId, mainTaskId, configJSON string) (result string, err error) {
 	// 解析任务参数
 	config := XScanConfig{}
 	if err = ParseConfig(configJSON, &config); err != nil {
+		logging.RuntimeLog.Error(err)
 		return FailedTask(err.Error()), err
 	}
 	// 执行任务
@@ -339,6 +349,7 @@ func XGoby(taskId, mainTaskId, configJSON string) (result string, err error) {
 	// 解析任务参数
 	config := XScanConfig{}
 	if err = ParseConfig(configJSON, &config); err != nil {
+		logging.RuntimeLog.Error(err)
 		return FailedTask(err.Error()), err
 	}
 	// 执行任务
@@ -706,6 +717,7 @@ func (x *XScan) NewFingerprintScan(taskId, mainTaskId string) (result string, er
 		newConfig.IPPort = t
 		result, err = sendTask(taskId, mainTaskId, newConfig, "xfingerprint")
 		if err != nil {
+			logging.RuntimeLog.Error(err)
 			return
 		}
 	}
@@ -714,6 +726,7 @@ func (x *XScan) NewFingerprintScan(taskId, mainTaskId string) (result string, er
 		newConfig.Domain = t
 		result, err = sendTask(taskId, mainTaskId, newConfig, "xfingerprint")
 		if err != nil {
+			logging.RuntimeLog.Error(err)
 			return
 		}
 	}
@@ -728,6 +741,7 @@ func (x *XScan) NewNucleiScan(taskId, mainTaskId string) (result string, err err
 		newConfig := XScanConfig{IPPort: t, IsNucleiPoc: true, NucleiPocFile: x.Config.NucleiPocFile, WorkspaceId: x.Config.WorkspaceId}
 		result, err = sendTask(taskId, mainTaskId, newConfig, "xnuclei")
 		if err != nil {
+			logging.RuntimeLog.Error(err)
 			return
 		}
 	}
@@ -735,6 +749,7 @@ func (x *XScan) NewNucleiScan(taskId, mainTaskId string) (result string, err err
 		newConfig := XScanConfig{Domain: t, IsNucleiPoc: true, NucleiPocFile: x.Config.NucleiPocFile, WorkspaceId: x.Config.WorkspaceId}
 		result, err = sendTask(taskId, mainTaskId, newConfig, "xnuclei")
 		if err != nil {
+			logging.RuntimeLog.Error(err)
 			return
 		}
 	}
@@ -749,6 +764,7 @@ func (x *XScan) NewGobyScan(taskId, mainTaskId string) (result string, err error
 		newConfig := XScanConfig{IPPort: t, IsGobyPoc: true, WorkspaceId: x.Config.WorkspaceId}
 		result, err = sendTask(taskId, mainTaskId, newConfig, "xgoby")
 		if err != nil {
+			logging.RuntimeLog.Error(err)
 			return
 		}
 	}
@@ -756,6 +772,7 @@ func (x *XScan) NewGobyScan(taskId, mainTaskId string) (result string, err error
 		newConfig := XScanConfig{Domain: t, IsGobyPoc: true, WorkspaceId: x.Config.WorkspaceId}
 		result, err = sendTask(taskId, mainTaskId, newConfig, "xgoby")
 		if err != nil {
+			logging.RuntimeLog.Error(err)
 			return
 		}
 	}
@@ -796,7 +813,9 @@ func (x *XScan) NucleiScan(taskId string, mainTaskId string) (result string, err
 		VulnerabilityResult: x.ResultVul,
 	}
 	err = comm.CallXClient("SaveVulnerabilityResult", &resultArgs, &result)
-
+	if err != nil {
+		logging.RuntimeLog.Error(err)
+	}
 	return
 }
 
@@ -836,7 +855,9 @@ func (x *XScan) GobyScan(taskId string, mainTaskId string) (result string, err e
 		VulnerabilityResult: x.ResultVul,
 	}
 	err = comm.CallXClient("SaveVulnerabilityResult", &resultArgs, &result)
-
+	if err != nil {
+		logging.RuntimeLog.Error(err)
+	}
 	return
 }
 
@@ -848,6 +869,7 @@ func (x *XScan) NewXrayScan(taskId, mainTaskId string) (result string, err error
 		newConfig := XScanConfig{IPPort: t, IsXrayPoc: true, XrayPocFile: x.Config.XrayPocFile, WorkspaceId: x.Config.WorkspaceId}
 		result, err = sendTask(taskId, mainTaskId, newConfig, "xxray")
 		if err != nil {
+			logging.RuntimeLog.Error(err)
 			return
 		}
 	}
@@ -855,6 +877,7 @@ func (x *XScan) NewXrayScan(taskId, mainTaskId string) (result string, err error
 		newConfig := XScanConfig{Domain: t, IsXrayPoc: true, XrayPocFile: x.Config.XrayPocFile, WorkspaceId: x.Config.WorkspaceId}
 		result, err = sendTask(taskId, mainTaskId, newConfig, "xxray")
 		if err != nil {
+			logging.RuntimeLog.Error(err)
 			return
 		}
 	}
@@ -895,7 +918,9 @@ func (x *XScan) XrayScan(taskId string, mainTaskId string) (result string, err e
 		VulnerabilityResult: x.ResultVul,
 	}
 	err = comm.CallXClient("SaveVulnerabilityResult", &resultArgs, &result)
-
+	if err != nil {
+		logging.RuntimeLog.Error(err)
+	}
 	return
 }
 

@@ -2,13 +2,11 @@ package main
 
 import (
 	"flag"
-	"fmt"
 	"github.com/hanc00l/nemo_go/pkg/comm"
 	"github.com/hanc00l/nemo_go/pkg/conf"
 	"github.com/hanc00l/nemo_go/pkg/logging"
 	"github.com/hanc00l/nemo_go/pkg/task/ampq"
 	"github.com/hanc00l/nemo_go/pkg/task/workerapi"
-	"github.com/hanc00l/nemo_go/pkg/utils"
 	"github.com/shirou/gopsutil/v3/cpu"
 	"github.com/shirou/gopsutil/v3/mem"
 	"os"
@@ -58,20 +56,14 @@ func setupCloseHandler() {
 	signal.Notify(quitSignal, os.Interrupt, syscall.SIGTERM)
 	//go func() {
 	<-quitSignal
-	logging.CLILog.Warn("Ctrl+C pressed in Terminal,waiting for worker exit...")
-	logging.RuntimeLog.Warn("Ctrl+C pressed in Terminal,waiting for worker exit...")
+	logging.CLILog.Info("Ctrl+C pressed in Terminal,waiting for worker exit...")
+	logging.RuntimeLog.Info("Ctrl+C pressed in Terminal,waiting for worker exit...")
 	os.Exit(0)
 	//}()
 }
 
 func initWorkerStatus(workerRunTaskMode int) {
-	hostIP, _ := utils.GetOutBoundIP()
-	if hostIP == "" {
-		hostIP, _ = utils.GetClientIp()
-	}
-	hostName, _ := os.Hostname()
-	pid := os.Getpid()
-	workerapi.WStatus.WorkerName = fmt.Sprintf("%s@%s#%d", hostName, hostIP, pid)
+	workerapi.WStatus.WorkerName = comm.GetWorkerNameBySelf()
 	workerapi.WStatus.CreateTime = time.Now()
 	workerapi.WStatus.UpdateTime = time.Now()
 	if workerRunTaskMode == 0 {
@@ -124,6 +116,7 @@ func main() {
 	}
 
 	go keepAlive()
+	go comm.StartSaveRuntimeLog(comm.GetWorkerNameBySelf())
 
 	checkWorkerPerformance(workerPerformance)
 	initWorkerStatus(workerRunTaskMode)

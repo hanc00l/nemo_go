@@ -75,6 +75,7 @@ func (nmap *Nmap) Do() {
 func (nmap *Nmap) parseResult(outputTempFile string) {
 	content, err := os.ReadFile(outputTempFile)
 	if err != nil {
+		logging.RuntimeLog.Error(err)
 		return
 	}
 
@@ -105,6 +106,7 @@ func (nmap *Nmap) parseResult(outputTempFile string) {
 			portInfo := strings.Split(strings.TrimSpace(p), "/")
 			portNumber, err := strconv.Atoi(portInfo[0])
 			if err != nil {
+				logging.RuntimeLog.Error(err)
 				continue
 			}
 			if !nmap.Result.HasPort(ip, portNumber) {
@@ -134,6 +136,7 @@ func (nmap *Nmap) parseResult(outputTempFile string) {
 func (nmap *Nmap) ParseXMLResult(outputTempFile string) {
 	content, err := os.ReadFile(outputTempFile)
 	if err != nil {
+		logging.RuntimeLog.Error(err)
 		return
 	}
 	nmap.ParseXMLContentResult(content)
@@ -143,6 +146,7 @@ func (nmap *Nmap) ParseXMLResult(outputTempFile string) {
 func (nmap *Nmap) ParseXMLContentResult(content []byte) {
 	nmapRunner, err := gonmap.Parse(content)
 	if err != nil {
+		logging.RuntimeLog.Error(err)
 		return
 	}
 	if nmap.Result.IPResult == nil {

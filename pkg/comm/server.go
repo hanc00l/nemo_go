@@ -16,13 +16,16 @@ import (
 	"regexp"
 )
 
-var RsaPublicKeyText, RsaPrivateKeyText []byte
+var (
+	RsaPrivateKeyText []byte
+	RsaPublicKeyText  []byte
+)
 
 // StartRPCServer 启动RPC server
 func StartRPCServer() {
 	rpc := conf.GlobalServerConfig().Rpc
-	logging.RuntimeLog.Infof("rpc server running on tcp@%s:%d...", rpc.Host, rpc.Port)
-	logging.CLILog.Infof("rpc server running on tcp@%s:%d...", rpc.Host, rpc.Port)
+	logging.RuntimeLog.Infof("start rpc server running on tcp@%s:%d...", rpc.Host, rpc.Port)
+	logging.CLILog.Infof("start rpc server running on tcp@%s:%d...", rpc.Host, rpc.Port)
 
 	s := server.NewServer()
 	err := s.Register(new(Service), "")
@@ -54,8 +57,8 @@ func auth(ctx context.Context, req *protocol.Message, token string) error {
 // StartFileSyncServer 启动文件同步服务
 func StartFileSyncServer() {
 	fileSyncServer := conf.GlobalServerConfig().FileSync
-	logging.RuntimeLog.Infof("filesync server running on tcp@%s:%d...", fileSyncServer.Host, fileSyncServer.Port)
-	logging.CLILog.Infof("filesync server running on tcp@%s:%d...", fileSyncServer.Host, fileSyncServer.Port)
+	logging.RuntimeLog.Infof("start filesync server running on tcp@%s:%d...", fileSyncServer.Host, fileSyncServer.Port)
+	logging.CLILog.Infof("start filesync server running on tcp@%s:%d...", fileSyncServer.Host, fileSyncServer.Port)
 
 	filesync.StartFileSyncServer(fileSyncServer.Host, fmt.Sprintf("%d", fileSyncServer.Port), fileSyncServer.AuthKey)
 }
@@ -102,4 +105,22 @@ func GenerateRSAKey() (err error) {
 	err = os.WriteFile(webLoginJSFile, newJSText, 0666)
 
 	return
+}
+
+func StartSaveRuntimeLog(source string) {
+	logging.RuntimeLogChan = make(chan []byte, logging.RuntimeLogChanMax)
+	for {
+		select {
+		case msg := <-logging.RuntimeLogChan:
+			resultArgs := RuntimeLogArgs{
+				Source:     source,
+				LogMessage: msg,
+			}
+			var result string
+			err := CallXClient("SaveRuntimeLog", &resultArgs, &result)
+			if err != nil {
+				logging.CLILog.Error(err)
+			}
+		}
+	}
 }

@@ -95,6 +95,11 @@ type MainTaskResultMap struct {
 	VulnerabilityNew int
 }
 
+type RuntimeLogArgs struct {
+	Source     string
+	LogMessage []byte
+}
+
 var (
 	// globalXClient 全局的RPC连接（长连接方式）
 	globalXClient      client.XClient
@@ -253,10 +258,12 @@ func (s *Service) SaveWhoisResult(ctx context.Context, args *map[string]*whoispa
 func (s *Service) CheckTask(ctx context.Context, args *string, replay *TaskStatusArgs) error {
 	taskRun := &db.TaskRun{TaskId: *args}
 	if !taskRun.GetByTaskId() {
+		logging.RuntimeLog.Errorf("task not exists: %s", taskRun.TaskId)
 		return nil
 	}
 	taskMain := &db.TaskMain{TaskId: taskRun.MainTaskId}
 	if !taskMain.GetByTaskId() {
+		logging.RuntimeLog.Errorf("mainTask not exists: %s", taskMain.TaskId)
 		return nil
 	}
 	replay.IsExist = true
@@ -302,7 +309,7 @@ func (s *Service) UpdateTask(ctx context.Context, args *TaskStatusArgs, replay *
 	if task.SaveOrUpdate() {
 		*replay = true
 	} else {
-		logging.RuntimeLog.Errorf("Update task:%s,state:%s fail !", args.TaskID, args.State)
+		logging.RuntimeLog.Errorf("update task:%s,state:%s fail !", args.TaskID, args.State)
 	}
 	return nil
 }
@@ -354,6 +361,7 @@ func (s *Service) NewTask(ctx context.Context, args *NewTaskArgs, replay *string
 	}
 	taskId, err := serverapi.NewRunTask(args.TaskName, args.ConfigJSON, args.MainTaskID, args.LastRunTaskId)
 	if err != nil {
+		logging.RuntimeLog.Error(err)
 		return err
 	}
 	replay = &taskId
@@ -433,6 +441,42 @@ func (s *Service) LoadDomainOpenedPort(ctx context.Context, args *LoadDomainOpen
 		result[domainName] = ports
 	}
 	*replay = result
+	return nil
+}
+
+// SaveRuntimeLog 保存RuntimeLog
+func (s *Service) SaveRuntimeLog(ctx context.Context, args *RuntimeLogArgs, replay *string) error {
+	if len(args.Source) == 0 || len(args.LogMessage) == 0 {
+		msg := "null source or message"
+		replay = &msg
+		return errors.New(msg)
+	}
+	logMessage := logging.RuntimeLogMessage{}
+	err := json.Unmarshal(args.LogMessage, &logMessage)
+	if err != nil {
+		msg := "runtimelog message error"
+		replay = &msg
+		return err
+	}
+	rtlog := db.RuntimeLog{
+		Source: args.Source,
+		File:   logMessage.File,
+		Func:   logMessage.Func,
+		Level:  logMessage.Level,
+	}
+	if len(logMessage.Message) > 500 {
+		rtlog.Message = logMessage.Message[:500]
+	} else {
+		rtlog.Message = logMessage.Message
+	}
+	if rtlog.Add() {
+		msg := "save success"
+		replay = &msg
+	} else {
+		msg := "save fail"
+		replay = &msg
+	}
+
 	return nil
 }
 

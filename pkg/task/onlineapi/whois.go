@@ -80,7 +80,8 @@ func (w *Whois) runWhoisQuery(domain string) (whoisInfoResult *whoisparser.Whois
 func (w *Whois) loadWhoisCache() {
 	content, err := os.ReadFile(filepath.Join(conf.GetRootPath(), "thirdparty/whois/whois.cache"))
 	if err != nil {
-		logging.RuntimeLog.Errorf("Could not open whois cahe file : %v", err)
+		logging.RuntimeLog.Errorf("could not open whois cahe file : %v", err)
+		logging.CLILog.Error(err)
 		return
 	}
 	err = json.Unmarshal(content, &w.WhoisMap)
@@ -95,6 +96,7 @@ func (w *Whois) SaveLocalWhoisInfo() bool {
 	err := os.WriteFile(filepath.Join(conf.GetRootPath(), "thirdparty/whois/whois.cache"), data, 0666)
 	if err != nil {
 		logging.RuntimeLog.Errorf("save whois cache fail:%v", err)
+		logging.CLILog.Error(err)
 		return false
 	}
 	return true

@@ -28,7 +28,9 @@ func Send(message string) {
 		case "feishu":
 			sender = new(Feishu)
 		default:
-			logging.RuntimeLog.Error("invalid notify sender")
+			msg := "invalid notify sender"
+			logging.RuntimeLog.Error(msg)
+			logging.CLILog.Error(msg)
 			continue
 		}
 		//send message

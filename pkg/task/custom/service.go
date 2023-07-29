@@ -32,7 +32,8 @@ func NewService() Service {
 func (s *Service) loadNmapService() {
 	content, err := os.ReadFile(filepath.Join(conf.GetRootPath(), "thirdparty/nmap/nmap-services"))
 	if err != nil {
-		logging.RuntimeLog.Error(err.Error())
+		logging.RuntimeLog.Info(err)
+		logging.CLILog.Info(err)
 	} else {
 		for _, line := range strings.Split(string(content), "\n") {
 			txt := strings.TrimSpace(line)
@@ -48,11 +49,12 @@ func (s *Service) loadNmapService() {
 	}
 }
 
-//loadCustomService 加载自定义service定义文件
+// loadCustomService 加载自定义service定义文件
 func (s *Service) loadCustomService() {
 	content, err := os.ReadFile(filepath.Join(conf.GetRootPath(), "thirdparty/custom/services-custom.txt"))
 	if err != nil {
-		logging.RuntimeLog.Error(err.Error())
+		logging.RuntimeLog.Info(err)
+		logging.CLILog.Info(err)
 	} else {
 		for _, line := range strings.Split(string(content), "\n") {
 			txt := strings.TrimSpace(line)

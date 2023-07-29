@@ -70,6 +70,7 @@ func (m *Masscan) Do() {
 func (m *Masscan) parsResult(outputTempFile string) {
 	content, err := os.ReadFile(outputTempFile)
 	if err != nil {
+		logging.RuntimeLog.Error(err)
 		return
 	}
 
@@ -84,6 +85,7 @@ func (m *Masscan) parsResult(outputTempFile string) {
 			ip := strings.TrimSpace(data[3])
 			portNumber, err := strconv.Atoi(data[2])
 			if err != nil {
+				logging.RuntimeLog.Error(err)
 				continue
 			}
 			if !m.Result.HasIP(ip) {
@@ -106,6 +108,7 @@ func (m *Masscan) parsResult(outputTempFile string) {
 func (m *Masscan) ParseXMLResult(outputTempFile string) {
 	content, err := os.ReadFile(outputTempFile)
 	if err != nil {
+		logging.RuntimeLog.Error(err)
 		return
 	}
 	m.ParseXMLContentResult(content)
@@ -117,6 +120,7 @@ func (m *Masscan) ParseXMLContentResult(content []byte) {
 	// masscan的XML结果兼容Nmap，但是没有service信息
 	nmapRunner, err := gonmap.Parse(content)
 	if err != nil {
+		logging.RuntimeLog.Error(err)
 		return
 	}
 	if m.Result.IPResult == nil {

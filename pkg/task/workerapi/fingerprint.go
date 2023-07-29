@@ -33,6 +33,7 @@ func Fingerprint(taskId, mainTaskId, configJSON string) (result string, err erro
 	}
 	config := FingerprintTaskConfig{}
 	if err = ParseConfig(configJSON, &config); err != nil {
+		logging.RuntimeLog.Error(err)
 		return FailedTask(err.Error()), err
 	}
 	//
@@ -271,6 +272,7 @@ func MakeSubTaskTarget(portScanResult *portscan.Result, domainScanResult *domain
 func sendTask(taskId string, mainTaskId string, config interface{}, taskName string) (result string, err error) {
 	configMarshal, err := json.Marshal(config)
 	if err != nil {
+		logging.RuntimeLog.Error(err)
 		return
 	}
 	newTaskArgs := comm.NewTaskArgs{
@@ -281,8 +283,8 @@ func sendTask(taskId string, mainTaskId string, config interface{}, taskName str
 	}
 	err = comm.CallXClient("NewTask", &newTaskArgs, &result)
 	if err != nil {
-		logging.RuntimeLog.Errorf("Start %s task fail:%v", taskName, err)
-		logging.CLILog.Errorf("Start %s task fail:%v", taskName, err)
+		logging.RuntimeLog.Errorf("start task:%s fail:%v", taskName, err)
+		logging.CLILog.Errorf("start task:%s fail:%v", taskName, err)
 	}
 	return
 }

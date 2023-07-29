@@ -3,6 +3,7 @@ package custom
 import (
 	"bufio"
 	"github.com/hanc00l/nemo_go/pkg/conf"
+	"github.com/hanc00l/nemo_go/pkg/logging"
 	"os"
 	"path/filepath"
 	"regexp"
@@ -26,6 +27,8 @@ func (b *BlackDomain) loadBlankList() {
 
 	inputFile, err := os.Open(filepath.Join(conf.GetRootPath(), "thirdparty/custom/black_domain.txt"))
 	if err != nil {
+		logging.RuntimeLog.Error(err)
+		logging.CLILog.Error(err)
 		return
 	}
 	scanner := bufio.NewScanner(inputFile)
@@ -60,6 +63,8 @@ func (b *BlackDomain) CheckBlack(domain string) bool {
 func (b *BlackDomain) AppendBlackDomain(domain string) error {
 	f, err := os.OpenFile(filepath.Join(conf.GetRootPath(), "thirdparty/custom/black_domain.txt"), os.O_WRONLY|os.O_APPEND, 0666)
 	if err != nil {
+		logging.RuntimeLog.Error(err)
+		logging.CLILog.Error(err)
 		return err
 	}
 	defer f.Close()

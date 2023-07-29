@@ -27,6 +27,7 @@ func PortScan(taskId, mainTaskId, configJSON string) (result string, err error) 
 	}
 	config := portscan.Config{}
 	if err = ParseConfig(configJSON, &config); err != nil {
+		logging.RuntimeLog.Error(err)
 		return FailedTask(err.Error()), err
 	}
 	var resultPortScan portscan.Result

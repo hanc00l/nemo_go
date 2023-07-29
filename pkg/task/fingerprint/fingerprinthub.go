@@ -130,6 +130,7 @@ func (f *FingerprintHub) RunObserverWard(url string) []FingerprintHubReult {
 	_, err := cmd.CombinedOutput()
 	if err != nil {
 		logging.RuntimeLog.Error(err.Error())
+		logging.CLILog.Error(err)
 		return nil
 	}
 	return parseObserverWardResult(resultTempFile)
@@ -139,8 +140,16 @@ func (f *FingerprintHub) RunObserverWard(url string) []FingerprintHubReult {
 func parseObserverWardResult(outputTempFile string) (result []FingerprintHubReult) {
 	content, err := os.ReadFile(outputTempFile)
 	if err != nil || len(content) == 0 {
+		if err != nil {
+			logging.RuntimeLog.Error(err)
+			logging.CLILog.Error(err)
+		}
 		return
 	}
-	json.Unmarshal(content, &result)
+	if err = json.Unmarshal(content, &result); err != nil {
+		logging.RuntimeLog.Error(err)
+		logging.CLILog.Error(err)
+	}
+
 	return
 }

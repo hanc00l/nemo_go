@@ -12,7 +12,6 @@ import (
 	"github.com/hanc00l/nemo_go/pkg/task/portscan"
 	"github.com/hanc00l/nemo_go/pkg/utils"
 	"github.com/remeh/sizedwaitgroup"
-	"io/ioutil"
 	"log"
 	"os"
 	"path/filepath"
@@ -113,6 +112,7 @@ func (s *ScreenShot) LoadResult() (result []ScreenshotFileInfo) {
 			sfi.Content, err = os.ReadFile(si.FilePathName)
 			if err != nil {
 				logging.RuntimeLog.Error(err)
+				logging.CLILog.Error(err)
 				continue
 			}
 			result = append(result, sfi)
@@ -236,8 +236,9 @@ func DoFullScreenshot(url, path string) bool {
 		return false
 	}
 	// 保存文件
-	if err := ioutil.WriteFile(path, buf, 0644); err != nil {
+	if err := os.WriteFile(path, buf, 0644); err != nil {
 		logging.RuntimeLog.Error(err)
+		logging.CLILog.Error(err)
 		return false
 	}
 
@@ -259,6 +260,7 @@ func fullScreenshot(url string, quality int64, res *[]byte) chromedp.Tasks {
 				Scale:  1,
 			}).Do(ctx)
 			if err != nil {
+				logging.CLILog.Error(err)
 				return err
 			}
 			return nil

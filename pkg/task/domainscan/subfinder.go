@@ -61,13 +61,15 @@ func (s *SubFinder) RunSubFinder(domain string) {
 	cmd := exec.Command(binPath, cmdArgs...)
 	_, err := cmd.CombinedOutput()
 	if err != nil {
-		logging.RuntimeLog.Error(err.Error())
+		logging.RuntimeLog.Error(err)
+		logging.CLILog.Error(err)
 		return
 	}
 	//读取结果
 	data, err := os.ReadFile(resultTempFile)
 	if err != nil {
 		logging.RuntimeLog.Error(err)
+		logging.CLILog.Error(err)
 		return
 	}
 	s.parseResultContent(data)
@@ -77,6 +79,8 @@ func (s *SubFinder) RunSubFinder(domain string) {
 func (s *SubFinder) parseResult(outputTempFile string) {
 	content, err := os.ReadFile(outputTempFile)
 	if err != nil {
+		logging.RuntimeLog.Error(err)
+		logging.CLILog.Error(err)
 		return
 	}
 

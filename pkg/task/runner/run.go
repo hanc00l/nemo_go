@@ -36,30 +36,35 @@ func StartPortScanTask(req PortscanRequestParam, mainTaskId string, workspaceId 
 		for _, p := range ports {
 			// 端口扫描
 			if taskId, err = doPortscan(workspaceId, mainTaskId, t, p, req); err != nil {
+				logging.RuntimeLog.Error(err)
 				return
 			}
 			// IP归属地：如果有端口执行任务，则IP归属地任务在端口扫描中执行，否则单独执行
 			// 如果IP地址是带掩码的子网（如192.168.1.0/24）则不进行归属地查询（在实际中容易出现误操作，导致整段IP地址无意义地进行归属地查询）
 			if !req.IsPortScan && req.IsIPLocation && utils.CheckIPV4Subnet(t) == false {
 				if taskId, err = doIPLocation(mainTaskId, t, &req.OrgId); err != nil {
+					logging.RuntimeLog.Error(err)
 					return
 				}
 			}
 			// FOFA
 			if req.IsFofa {
 				if taskId, err = doOnlineAPISearch(workspaceId, mainTaskId, "fofa", t, &req.OrgId, req.IsIPLocation, req.IsHttpx, req.IsFingerprintHub, req.IsScreenshot, req.IsIconHash, req.IsIgnoreCDN, req.IsIgnoreOutofChina); err != nil {
+					logging.RuntimeLog.Error(err)
 					return
 				}
 			}
 			// Quake
 			if req.IsQuake {
 				if taskId, err = doOnlineAPISearch(workspaceId, mainTaskId, "quake", t, &req.OrgId, req.IsIPLocation, req.IsHttpx, req.IsFingerprintHub, req.IsScreenshot, req.IsIconHash, req.IsIgnoreCDN, req.IsIgnoreOutofChina); err != nil {
+					logging.RuntimeLog.Error(err)
 					return
 				}
 			}
 			// Hunter
 			if req.IsHunter {
 				if taskId, err = doOnlineAPISearch(workspaceId, mainTaskId, "hunter", t, &req.OrgId, req.IsIPLocation, req.IsHttpx, req.IsFingerprintHub, req.IsScreenshot, req.IsIconHash, req.IsIgnoreCDN, req.IsIgnoreOutofChina); err != nil {
+					logging.RuntimeLog.Error(err)
 					return
 				}
 			}
@@ -82,6 +87,7 @@ func StartBatchScanTask(req PortscanRequestParam, mainTaskId string, workspaceId
 		for _, p := range ports {
 			// 端口扫描
 			if taskId, err = doBatchScan(workspaceId, mainTaskId, t, p, req); err != nil {
+				logging.RuntimeLog.Error(err)
 				return
 			}
 		}
@@ -109,6 +115,7 @@ func StartDomainScanTask(req DomainscanRequestParam, mainTaskId string, workspac
 			subConfig.IsSubdomainBrute = false
 			subConfig.IsCrawler = false
 			if taskId, err = doDomainscan(workspaceId, mainTaskId, t, subConfig); err != nil {
+				logging.RuntimeLog.Error(err)
 				return
 			}
 			taskStarted = true
@@ -118,6 +125,7 @@ func StartDomainScanTask(req DomainscanRequestParam, mainTaskId string, workspac
 			subConfig.IsSubfinder = false
 			subConfig.IsCrawler = false
 			if taskId, err = doDomainscan(workspaceId, mainTaskId, t, subConfig); err != nil {
+				logging.RuntimeLog.Error(err)
 				return
 			}
 			taskStarted = true
@@ -127,6 +135,7 @@ func StartDomainScanTask(req DomainscanRequestParam, mainTaskId string, workspac
 			subConfig.IsSubfinder = false
 			subConfig.IsSubdomainBrute = false
 			if taskId, err = doDomainscan(workspaceId, mainTaskId, t, subConfig); err != nil {
+				logging.RuntimeLog.Error(err)
 				return
 			}
 			taskStarted = true
@@ -134,31 +143,37 @@ func StartDomainScanTask(req DomainscanRequestParam, mainTaskId string, workspac
 		// 如果没有子域名任务，则至少启动一个域名解析任务
 		if !taskStarted {
 			if taskId, err = doDomainscan(workspaceId, mainTaskId, t, req); err != nil {
+				logging.RuntimeLog.Error(err)
 				return
 			}
 		}
 		if req.IsFofa {
 			if taskId, err = doOnlineAPISearch(workspaceId, mainTaskId, "fofa", t, &req.OrgId, true, req.IsHttpx, req.IsFingerprintHub, req.IsScreenshot, req.IsIconHash, req.IsIgnoreCDN, req.IsIgnoreOutofChina); err != nil {
+				logging.RuntimeLog.Error(err)
 				return
 			}
 		}
 		if req.IsQuake {
 			if taskId, err = doOnlineAPISearch(workspaceId, mainTaskId, "quake", t, &req.OrgId, true, req.IsHttpx, req.IsFingerprintHub, req.IsScreenshot, req.IsIconHash, req.IsIgnoreCDN, req.IsIgnoreOutofChina); err != nil {
+				logging.RuntimeLog.Error(err)
 				return
 			}
 		}
 		if req.IsHunter {
 			if taskId, err = doOnlineAPISearch(workspaceId, mainTaskId, "hunter", t, &req.OrgId, true, req.IsHttpx, req.IsFingerprintHub, req.IsScreenshot, req.IsIconHash, req.IsIgnoreCDN, req.IsIgnoreOutofChina); err != nil {
+				logging.RuntimeLog.Error(err)
 				return
 			}
 		}
 		if req.IsICPQuery {
 			if taskId, err = doICPQuery(mainTaskId, t); err != nil {
+				logging.RuntimeLog.Error(err)
 				return
 			}
 		}
 		if req.IsWhoisQuery {
 			if taskId, err = doWhoisQuery(mainTaskId, t); err != nil {
+				logging.RuntimeLog.Error(err)
 				return
 			}
 		}
@@ -179,6 +194,7 @@ func StartPocScanTask(req PocscanRequestParam, mainTaskId string, workspaceId in
 		configJSON, _ := json.Marshal(config)
 		taskId, err = serverapi.NewRunTask("xray", string(configJSON), mainTaskId, "")
 		if err != nil {
+			logging.RuntimeLog.Error(err)
 			return
 		}
 	}
@@ -187,6 +203,7 @@ func StartPocScanTask(req PocscanRequestParam, mainTaskId string, workspaceId in
 		configJSON, _ := json.Marshal(config)
 		taskId, err = serverapi.NewRunTask("nuclei", string(configJSON), mainTaskId, "")
 		if err != nil {
+			logging.RuntimeLog.Error(err)
 			return
 		}
 	}
@@ -195,6 +212,7 @@ func StartPocScanTask(req PocscanRequestParam, mainTaskId string, workspaceId in
 		configJSON, _ := json.Marshal(config)
 		taskId, err = serverapi.NewRunTask("dirsearch", string(configJSON), mainTaskId, "")
 		if err != nil {
+			logging.RuntimeLog.Error(err)
 			return
 		}
 	}
@@ -203,6 +221,7 @@ func StartPocScanTask(req PocscanRequestParam, mainTaskId string, workspaceId in
 		configJSON, _ := json.Marshal(config)
 		taskId, err = serverapi.NewRunTask("goby", string(configJSON), mainTaskId, "")
 		if err != nil {
+			logging.RuntimeLog.Error(err)
 			return
 		}
 	}
@@ -235,7 +254,7 @@ func StartXFofaKeywordTask(req XScanRequestParam, mainTaskId string, workspaceId
 		configJSONRun, _ := json.Marshal(configRun)
 		taskId, err = serverapi.NewRunTask("xonlineapi", string(configJSONRun), mainTaskId, "")
 		if err != nil {
-			logging.RuntimeLog.Errorf("start xonlineapi fail:%s", err.Error())
+			logging.RuntimeLog.Errorf("start xfofakeyword task fail:%s", err.Error())
 			return "", err
 		}
 	}
@@ -875,12 +894,12 @@ func addGlobalFilterWord(rule string) string {
 	// 从custom目录中读取定义的过滤词，每一个关键词一行：
 	filterFile := filepath.Join(conf.GetRootPath(), "thirdparty/custom", "fofa_filter_keyword.txt")
 	if utils.CheckFileExist(filterFile) == false {
-		logging.RuntimeLog.Errorf("fofa filter file not exist:%s", filterFile)
+		logging.RuntimeLog.Warningf("fofa filter file not exist:%s", filterFile)
 		return rule
 	}
 	inputFile, err := os.Open(filterFile)
 	if err != nil {
-		logging.RuntimeLog.Errorf("Could not read fofa filter file: %s\n", err)
+		logging.RuntimeLog.Warningf("Could not read fofa filter file: %s", err)
 		return rule
 	}
 	defer inputFile.Close()

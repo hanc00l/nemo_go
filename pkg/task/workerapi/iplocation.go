@@ -18,6 +18,7 @@ func IPLocation(taskId, mainTaskId, configJSON string) (result string, err error
 
 	config := custom.Config{}
 	if err = ParseConfig(configJSON, &config); err != nil {
+		logging.RuntimeLog.Error(err)
 		return FailedTask(err.Error()), err
 	}
 

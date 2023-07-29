@@ -2,6 +2,7 @@ package custom
 
 import (
 	"github.com/hanc00l/nemo_go/pkg/conf"
+	"github.com/hanc00l/nemo_go/pkg/logging"
 	"github.com/oschwald/geoip2-golang"
 	"github.com/yl2chen/cidranger"
 	"net"
@@ -14,7 +15,7 @@ type CDNCheck struct {
 	ranger cidranger.Ranger
 }
 
-//Inspired by https://github.com/timwhitez/Frog-checkCDN
+// Inspired by https://github.com/timwhitez/Frog-checkCDN
 // CDN厂商的CNAME
 var cnames = []string{
 	"cdn.net", "fwdns.net", "bitgravity.com", "21okglb.cn", "kxcdn", "fastwebcdn.com", "cachefly.net",
@@ -181,6 +182,8 @@ func (c *CDNCheck) CheckASN(ip string) (isCDN bool) {
 	geo2DBPath := filepath.Join(conf.GetRootPath(), "thirdparty/geolite2/GeoLite2-ASN.mmdb")
 	db, err := geoip2.Open(geo2DBPath)
 	if err != nil {
+		logging.RuntimeLog.Error(err)
+		logging.CLILog.Error(err)
 		return false
 	}
 	defer db.Close()

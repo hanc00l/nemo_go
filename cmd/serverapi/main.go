@@ -37,6 +37,7 @@ func StartMainTaskDemon() {
 func StartWebAPIServer() {
 	err := logs.SetLogger("file", `{"filename":"log/access.log"}`)
 	if err != nil {
+		logging.RuntimeLog.Error(err)
 		logging.CLILog.Error(err)
 		return
 	}
@@ -48,6 +49,7 @@ func StartWebAPIServer() {
 		web.InsertFilter("/*", web.BeforeRouter, filterLoginCheck)
 	}
 	logging.RuntimeLog.Info("Nemo API Server started...")
+	logging.CLILog.Info("Nemo API Server started...")
 	addr := fmt.Sprintf("%s:%d", conf.GlobalServerConfig().WebAPI.Host, conf.GlobalServerConfig().WebAPI.Port)
 	web.Run(addr)
 }

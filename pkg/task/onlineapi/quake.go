@@ -124,7 +124,8 @@ func NewQuake(config OnlineAPIConfig) *Quake {
 // Do 执行Quake查询
 func (q *Quake) Do() {
 	if conf.GlobalWorkerConfig().API.Quake.Key == "" {
-		logging.RuntimeLog.Error("no quake api key,exit quake search")
+		logging.RuntimeLog.Warning("no quake api key,exit quake search")
+		logging.CLILog.Warning("no quake api key,exit quake search")
 		return
 	}
 	blackDomain := custom.NewBlackDomain()
@@ -221,7 +222,8 @@ func (q *Quake) retriedPageSearch(client *http.Client, query string, page int) (
 		jsonData, _ := json.Marshal(data)
 		searchResult, err := q.sendRequest(client, jsonData)
 		if err != nil {
-			logging.CLILog.Println(err)
+			logging.RuntimeLog.Error(err)
+			logging.CLILog.Error(err)
 			continue
 		}
 		//fmt.Println(string(searchResult))
@@ -238,6 +240,7 @@ func (q *Quake) sendRequest(client *http.Client, dataBytes []byte) ([]byte, erro
 	request, err := http.NewRequest("POST", "https://quake.360.cn/api/v3/search/quake_service", bytes.NewBuffer(dataBytes))
 	defer request.Body.Close()
 	if err != nil {
+		logging.RuntimeLog.Error(err)
 		return nil, err
 	}
 	defer request.Body.Close()
@@ -246,12 +249,14 @@ func (q *Quake) sendRequest(client *http.Client, dataBytes []byte) ([]byte, erro
 	request.Header.Add("User-Agent", userAgent)
 	response, err := client.Do(request)
 	if err != nil {
+		logging.RuntimeLog.Error(err)
 		return nil, err
 	}
 	if response.Body != nil {
 		defer response.Body.Close()
 		body, err := io.ReadAll(response.Body)
 		if err != nil {
+			logging.RuntimeLog.Error(err)
 			return nil, err
 		}
 		if strings.Contains(string(body), "/quake/login") {

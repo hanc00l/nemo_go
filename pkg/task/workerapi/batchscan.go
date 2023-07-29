@@ -19,11 +19,13 @@ func BatchScan(taskId, mainTaskId, configJSON string) (result string, err error)
 	}
 	config := portscan.Config{}
 	if err = ParseConfig(configJSON, &config); err != nil {
+		logging.RuntimeLog.Error(err)
 		return FailedTask(err.Error()), err
 	}
 	// 提取两个阶段的port
 	ports := strings.Split(config.Port, "|")
 	if len(ports) != 2 || strings.TrimSpace(ports[0]) == "" || strings.TrimSpace(ports[1]) == "" {
+		logging.RuntimeLog.Warning("ports error")
 		return FailedTask("ports error"), errors.New("ports error:" + config.Port)
 	}
 	var resultPortScan portscan.Result
@@ -78,6 +80,7 @@ func BatchScan(taskId, mainTaskId, configJSON string) (result string, err error)
 		WorkspaceId:      config.WorkspaceId,
 	})
 	if err != nil {
+		logging.RuntimeLog.Error(err)
 		return FailedTask(err.Error()), err
 	}
 

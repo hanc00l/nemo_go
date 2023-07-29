@@ -137,7 +137,8 @@ func (c *DomainController) ListAction() {
 	req := domainRequestParam{}
 	err := c.ParseForm(&req)
 	if err != nil {
-		logging.RuntimeLog.Error(err.Error())
+		logging.RuntimeLog.Error(err)
+		logging.CLILog.Error(err)
 	}
 	c.validateRequestParam(&req)
 	if !c.IsServerAPI {
@@ -189,7 +190,8 @@ func (c *DomainController) DeleteDomainAction() {
 
 	id, err := c.GetInt("id")
 	if err != nil {
-		logging.RuntimeLog.Error(err.Error())
+		logging.RuntimeLog.Error(err)
+		logging.CLILog.Error(err)
 		c.FailedStatus(err.Error())
 		return
 	}
@@ -216,7 +218,8 @@ func (c *DomainController) DeleteDomainAttrAction() {
 
 	id, err := c.GetInt("id")
 	if err != nil {
-		logging.RuntimeLog.Error(err.Error())
+		logging.RuntimeLog.Error(err)
+		logging.CLILog.Error(err)
 		c.MakeStatusResponse(false)
 		return
 	}
@@ -234,7 +237,8 @@ func (c *DomainController) DeleteDomainOnlineAPIAttrAction() {
 
 	id, err := c.GetInt("id")
 	if err != nil {
-		logging.RuntimeLog.Error(err.Error())
+		logging.RuntimeLog.Error(err)
+		logging.CLILog.Error(err)
 		c.MakeStatusResponse(false)
 		return
 	}
@@ -249,7 +253,8 @@ func (c *DomainController) ExportMemoAction() {
 	req := domainRequestParam{}
 	err := c.ParseForm(&req)
 	if err != nil {
-		logging.RuntimeLog.Error(err.Error())
+		logging.RuntimeLog.Error(err)
+		logging.CLILog.Error(err)
 	}
 	c.validateRequestParam(&req)
 	content := c.getMemoData(req)
@@ -332,7 +337,8 @@ func (c *DomainController) StatisticsAction() {
 	req := domainRequestParam{}
 	err := c.ParseForm(&req)
 	if err != nil {
-		logging.RuntimeLog.Error(err.Error())
+		logging.RuntimeLog.Error(err)
+		logging.CLILog.Error(err)
 	}
 	c.validateRequestParam(&req)
 	r := c.getDomainStatisticsData(req)
@@ -902,7 +908,8 @@ func (c *DomainController) BlockDomainAction() {
 
 	id, err := c.GetInt("id")
 	if err != nil {
-		logging.RuntimeLog.Error(err.Error())
+		logging.RuntimeLog.Error(err)
+		logging.CLILog.Error(err)
 		c.FailedStatus(err.Error())
 		return
 	}

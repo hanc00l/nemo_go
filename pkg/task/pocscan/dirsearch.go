@@ -63,6 +63,7 @@ func NewDirsearch(config Config) *Dirsearch {
 func (d *Dirsearch) readBlankList(file string) (blackList []string) {
 	inputFile, err := os.Open(filepath.Join(conf.GetRootPath(), "thirdparty/dict", file))
 	if err != nil {
+		logging.CLILog.Error(err)
 		return
 	}
 	scanner := bufio.NewScanner(inputFile)
@@ -118,7 +119,7 @@ func (d *Dirsearch) RunDirsearch(url string) {
 		return
 	}
 	m = brutemachine.New(consumers, wordlist, d.DoRequest, d.OnResult)
-	logging.CLILog.Printf("Start dirsearch %s", url)
+	logging.CLILog.Infof("start dirsearch:%s", url)
 	if err := m.Start(); err != nil {
 		logging.CLILog.Error(err)
 	}
@@ -168,16 +169,16 @@ func (d *Dirsearch) OnResult(res interface{}) {
 	switch {
 	// error not due to 404 response
 	case result.err != nil && result.status != 404:
-		logging.CLILog.Printf("[???] %s : %v", result.url, result.err)
+		logging.CLILog.Infof("[???] %s : %v", result.url, result.err)
 	// 2xx
 	case result.status >= 200 && result.status < 300:
-		logging.CLILog.Printf("[%d] %s", result.status, result.url)
+		logging.CLILog.Infof("[%d] %s", result.status, result.url)
 		d.resultMutex.Lock()
 		d.resultUrl = append(d.resultUrl, fmt.Sprintf("[%d] %s", result.status, result.url))
 		d.resultMutex.Unlock()
 	// 3xx
 	case !only200 && result.status >= 300 && result.status < 400:
-		logging.CLILog.Printf("[%d] %s -> %s", result.status, result.url, result.location)
+		logging.CLILog.Infof("[%d] %s -> %s", result.status, result.url, result.location)
 		d.resultMutex.Lock()
 		d.resultUrl = append(d.resultUrl, fmt.Sprintf("[%d] %s -> %s", result.status, result.url, result.location))
 		d.resultMutex.Unlock()
@@ -185,14 +186,14 @@ func (d *Dirsearch) OnResult(res interface{}) {
 	case result.status >= 400 && result.status < 500 && result.status != 404:
 		// 401、403
 		if result.status > 400 && checkBlackList(result.url, d.http403BlackList) == false && checkBlackList(result.url, d.http400BlackList) == false {
-			logging.CLILog.Printf("[%d] %s", result.status, result.url)
+			logging.CLILog.Infof("[%d] %s", result.status, result.url)
 			d.resultMutex.Lock()
 			d.resultUrl = append(d.resultUrl, fmt.Sprintf("[%d] %s", result.status, result.url))
 			d.resultMutex.Unlock()
 		}
 	// 5xx
 	case result.status >= 500 && result.status < 600:
-		logging.CLILog.Printf("[%d] %s", result.status, result.url)
+		logging.CLILog.Infof("[%d] %s", result.status, result.url)
 	}
 }
 
@@ -203,7 +204,7 @@ func (d *Dirsearch) initDirsearch(url string) bool {
 	base = url
 	ext = d.Config.PocFile
 	if d.checkHttp(url) == false {
-		logging.CLILog.Printf("check %s http fail,skip... ", url)
+		logging.CLILog.Infof("check %s http fail,skip... ", url)
 		return false
 	}
 	return true
@@ -234,7 +235,7 @@ func (d *Dirsearch) checkHttp(url string) bool {
 // printStats Print some stats
 func printStats(url string) {
 	m.UpdateStats()
-	logging.CLILog.Printf("%s -> Requests:%d, Errors:%d, Results:%d, Time:%fs,Req/s: %f",
+	logging.CLILog.Infof("%s -> Requests:%d, Errors:%d, Results:%d, Time:%fs,Req/s: %f",
 		url, m.Stats.Execs, errorsInt, m.Stats.Results, m.Stats.Total.Seconds(), m.Stats.Eps)
 }
 

@@ -45,6 +45,7 @@ func DoKeepAlive(ws ampq.WorkerStatus) bool {
 
 	if err := CallXClient("KeepAlive", &kari, &syncMap); err != nil {
 		logging.RuntimeLog.Errorf("keep alive fail:%v", err)
+		logging.CLILog.Errorf("keep alive fail:%v", err)
 		return false
 	}
 	// 自定义配置文件的同步
@@ -56,6 +57,7 @@ func DoKeepAlive(ws ampq.WorkerStatus) bool {
 func DoDaemonKeepAlive() (replay WorkerDaemonManualInfo, err error) {
 	if err = CallXClient("KeepDaemonAlive", &WorkerName, &replay); err != nil {
 		logging.CLILog.Errorf("keep daemon alive fail:%v", err)
+		logging.RuntimeLog.Errorf("keep daemon alive fail:%v", err)
 		return
 	}
 	return
@@ -90,6 +92,7 @@ func newKeepAliveResponseInfo(req map[string]string) map[string]string {
 		content, err := os.ReadFile(filepath.Join(conf.GetRootPath(), file))
 		if err != nil || len(content) == 0 {
 			logging.RuntimeLog.Errorf("load custom file %s fail", file)
+			logging.CLILog.Errorf("load custom file %s fail", file)
 			continue
 		}
 		fileHash := utils.MD5(string(content))
@@ -109,6 +112,7 @@ func syncCustomFiles(cf map[string]string) {
 		}
 		if err := os.WriteFile(filepath.Join(conf.GetRootPath(), file), []byte(cf[file]), 0666); err != nil {
 			logging.RuntimeLog.Error(err)
+			logging.CLILog.Error(err)
 		}
 	}
 }

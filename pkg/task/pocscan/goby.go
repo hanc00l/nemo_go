@@ -214,8 +214,8 @@ func (g *Goby) Do() {
 	    	whether enable hostListMode, which targets is hostinfo list, aka Fast mode
 	*/
 	if len(conf.GlobalWorkerConfig().Pocscan.Goby.API) <= 0 {
-		logging.CLILog.Error("no goby api set")
-		logging.RuntimeLog.Error("no goby api set")
+		logging.CLILog.Warning("no goby api set")
+		logging.RuntimeLog.Warning("no goby api set")
 		return
 	}
 	ips := strings.Split(g.Config.Target, ",")
@@ -242,7 +242,7 @@ func (g *Goby) GetTaskList(api string) (err error) {
 		logging.RuntimeLog.Error(err)
 		return
 	}
-	fmt.Println(string(respBody))
+	//fmt.Println(string(respBody))
 	if string(respBody) == "Not authorized" {
 		err = errors.New("not authorized")
 	}
@@ -288,14 +288,14 @@ func (g *Goby) StartScan(ips []string) (taskId string, api string, err error) {
 			// goby正在执行扫描任务，当前接口不可用
 			//{"statusCode":500,"messages":"task launch failed, instance already running","data":null}
 			if result.StatusCode == 500 {
-				logging.CLILog.Infof("Goby api:%s is busy", api)
+				logging.CLILog.Infof("goby api:%s is busy", api)
 				err = errors.New(result.Messages)
 				time.Sleep(3 * SleepDelayTimeSecond * time.Second)
 				continue
 			}
 			// 任务成功执行，等待执行完成
 			taskId = result.Data.TaskId
-			logging.CLILog.Infof("Goby scan task:%s,ips:%s started", taskId, strings.Join(ips, ","))
+			logging.CLILog.Infof("goby scan task:%s,ips:%s started", taskId, strings.Join(ips, ","))
 			g.notice = make(chan int, 0)
 			go g.tickListen(api, taskId)
 			for {
@@ -353,6 +353,7 @@ func (g *Goby) postData(method string, apiUrl string, data []byte) (body []byte,
 	var req *http.Request
 	req, err = http.NewRequest(method, apiUrl, bytes.NewBuffer(data))
 	if err != nil {
+		logging.RuntimeLog.Error(err)
 		return
 	}
 	apiAuth := base64.URLEncoding.EncodeToString([]byte(fmt.Sprintf("%s:%s", conf.GlobalWorkerConfig().Pocscan.Goby.AuthUser, conf.GlobalWorkerConfig().Pocscan.Goby.AuthPass)))
@@ -362,16 +363,19 @@ func (g *Goby) postData(method string, apiUrl string, data []byte) (body []byte,
 	var resp *http.Response
 	resp, err = client.Do(req)
 	if err != nil {
+		logging.RuntimeLog.Error(err)
 		return
 	}
 	defer resp.Body.Close()
 	body, err = io.ReadAll(resp.Body)
 	if err != nil {
+		logging.RuntimeLog.Error(err)
 		return
 	}
 	// 检查是否是验证错误
 	if resp.StatusCode == http.StatusUnauthorized || string(body) == "Not authorized" {
 		err = errors.New("not authorized")
+		logging.RuntimeLog.Warning(err)
 	}
 	return
 }
@@ -386,11 +390,11 @@ func (g *Goby) tickListen(api string, taskId string) {
 		case <-timer.C:
 			pNow, _ := g.checkGobyTaskProgress(api, taskId)
 			if pNow-progress >= 10 {
-				logging.CLILog.Infof("Goby scan task:%s,progress:%d%% ", taskId, pNow)
+				logging.CLILog.Infof("goby scan task:%s,progress:%d%% ", taskId, pNow)
 				progress = pNow
 			}
 			if progress >= 100 {
-				logging.CLILog.Infof("Goby scan task:%s finish", taskId)
+				logging.CLILog.Infof("goby scan task:%s finish", taskId)
 				g.notice <- 1
 				return
 			}
@@ -431,6 +435,7 @@ func (g *Goby) parseAssertResult(content []byte) (err error) {
 	var result GobyAssetSearchResponse
 	err = json.Unmarshal(content, &result)
 	if err != nil {
+		logging.RuntimeLog.Error(err)
 		return
 	}
 	for _, ipAsset := range result.Data.Ips {
@@ -447,6 +452,7 @@ func (g *Goby) parseVulnerabilityResult(content []byte) (err error) {
 	var result GobyVulnerabilityResponse
 	err = json.Unmarshal(content, &result)
 	if err != nil {
+		logging.RuntimeLog.Error(err)
 		return
 	}
 	for _, vul := range result.Data.Lists {

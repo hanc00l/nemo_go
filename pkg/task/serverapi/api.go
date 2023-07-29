@@ -15,7 +15,7 @@ import (
 func NewRunTask(taskName, configJSON, mainTaskId, lastRunTaskId string) (taskId string, err error) {
 	topicName := ampq.GetTopicByTaskName(taskName)
 	if topicName == "" {
-		logging.RuntimeLog.Errorf("task %s not defined for topic", taskName)
+		logging.RuntimeLog.Errorf("task not defined for topic:%s", taskName)
 		return "", errors.New("task not defined for topic")
 	}
 	server := ampq.GetServerTaskAMPQServer(topicName)
@@ -48,13 +48,13 @@ func NewRunTask(taskName, configJSON, mainTaskId, lastRunTaskId string) (taskId 
 func RevokeUnexcusedTask(taskId string) (isRevoked bool, err error) {
 	task := &db.TaskRun{TaskId: taskId}
 	if !task.GetByTaskId() {
-		logging.RuntimeLog.Errorf("Task not exists when revoked: %s", taskId)
+		logging.RuntimeLog.Errorf("task not exists when revoked:%s", taskId)
 		return false, errors.New("task not exists")
 	}
 	//检查状态，只有CREATED状态的才能取消
 	if task.State == ampq.CREATED {
 		updateRevokedTask(taskId)
-		logging.RuntimeLog.Infof("Task revoked: %s", taskId)
+		logging.RuntimeLog.Infof("task revoked:%s", taskId)
 		return true, nil
 	}
 	return false, nil
@@ -85,7 +85,7 @@ func addTask(taskId, taskName, kwArgs, mainTaskId, lastRunTaskId string) {
 		task.KwArgs = fmt.Sprintf("%s...", kwArgs[:argsLength])
 	}
 	if !task.Add() {
-		logging.RuntimeLog.Errorf("Add new task fail: %s,%s,%s", taskId, taskName, kwArgs)
+		logging.RuntimeLog.Errorf("add new task fail: %s,%s,%s", taskId, taskName, kwArgs)
 	}
 }
 
@@ -98,6 +98,6 @@ func updateRevokedTask(taskId string) {
 		RevokedTime: &dt,
 	}
 	if !task.SaveOrUpdate() {
-		logging.RuntimeLog.Errorf("Update task:%s,state:%s fail !", taskId, ampq.REVOKED)
+		logging.RuntimeLog.Errorf("update task:%s,state:%s fail !", taskId, ampq.REVOKED)
 	}
 }

@@ -3,6 +3,7 @@ package custom
 import (
 	"bufio"
 	"github.com/hanc00l/nemo_go/pkg/conf"
+	"github.com/hanc00l/nemo_go/pkg/logging"
 	"github.com/hanc00l/nemo_go/pkg/utils"
 	"os"
 	"path/filepath"
@@ -24,6 +25,8 @@ func (b *BlackIP) loadBlackIPList() {
 	b.blackIPMap = make(map[string]struct{})
 	inputFile, err := os.Open(filepath.Join(conf.GetRootPath(), "thirdparty/custom/black_ip.txt"))
 	if err != nil {
+		logging.RuntimeLog.Error(err)
+		logging.CLILog.Error(err)
 		return
 	}
 	scanner := bufio.NewScanner(inputFile)
@@ -54,6 +57,8 @@ func (b *BlackIP) CheckBlack(ip string) bool {
 func (b *BlackIP) AppendBlackIP(ip string) error {
 	f, err := os.OpenFile(filepath.Join(conf.GetRootPath(), "thirdparty/custom/black_ip.txt"), os.O_WRONLY|os.O_APPEND, 0666)
 	if err != nil {
+		logging.RuntimeLog.Error(err)
+		logging.CLILog.Error(err)
 		return err
 	}
 	defer f.Close()

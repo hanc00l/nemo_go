@@ -63,10 +63,12 @@ func (h *HttpxFinger) loadFingerprintHub() {
 	fingerprintJsonPathFile := path.Join(conf.GetRootPath(), "thirdparty/fingerprinthub", "web_fingerprint_v3.json")
 	fingerContent, err := os.ReadFile(fingerprintJsonPathFile)
 	if err != nil {
+		logging.RuntimeLog.Error(err)
 		logging.CLILog.Error(err)
 		return
 	}
 	if err = json.Unmarshal(fingerContent, &h.fpWebFingerprintHub); err != nil {
+		logging.RuntimeLog.Error(err)
 		logging.CLILog.Error(err)
 		return
 	}
@@ -81,10 +83,11 @@ func (h *HttpxFinger) loadCustomFingerprint() {
 	fingerprintJsonPathFile := path.Join(conf.GetRootPath(), "thirdparty/custom", "web_fingerprint.json")
 	fingerContent, err := os.ReadFile(fingerprintJsonPathFile)
 	if err != nil {
-		logging.CLILog.Error(err)
+		logging.CLILog.Warning(err)
 		return
 	}
 	if err = json.Unmarshal(fingerContent, &h.fpCustom); err != nil {
+		logging.RuntimeLog.Error(err)
 		logging.CLILog.Error(err)
 		return
 	}
@@ -229,6 +232,10 @@ func (h *HttpxFinger) fingerPrintFuncForSaveHttpHeaderAndBody(domain string, ip 
 func (h *HttpxFinger) getStoredResponseContent(storedResponsePathFile string) string {
 	content, err := os.ReadFile(storedResponsePathFile)
 	if err != nil || len(content) == 0 {
+		if err != nil {
+			logging.RuntimeLog.Error(err)
+			logging.CLILog.Error(err)
+		}
 		return ""
 	}
 	return string(content)

@@ -237,7 +237,8 @@ func NewFofa(config OnlineAPIConfig) *Fofa {
 // Do 执行fofa
 func (f *Fofa) Do() {
 	if conf.GlobalWorkerConfig().API.Fofa.Key == "" || conf.GlobalWorkerConfig().API.Fofa.Name == "" {
-		logging.RuntimeLog.Error("no fofa api key,exit fofa search")
+		logging.RuntimeLog.Warning("no fofa api key,exit fofa search")
+		logging.CLILog.Warning("no fofa api key,exit fofa search")
 		return
 	}
 	blackDomain := custom.NewBlackDomain()
@@ -264,7 +265,7 @@ func (f *Fofa) RunFofa(domain string) {
 
 	clt := NewFofaClient([]byte(email), []byte(key))
 	if clt == nil {
-		logging.RuntimeLog.Error("create fofa clien")
+		logging.RuntimeLog.Error("create fofa client error")
 		return
 	}
 	// QueryAsJSON

@@ -122,7 +122,7 @@ func (n *Nuclei) parseNucleiContentResult(content []byte) {
 func (n *Nuclei) parseNucleiResult(outputTempFile string) {
 	inputFile, err := os.Open(outputTempFile)
 	if err != nil {
-		logging.RuntimeLog.Errorf("Could not read nuclei result: %s\n", err)
+		logging.RuntimeLog.Errorf("could not read nuclei result: %s", err)
 		return
 	}
 	defer inputFile.Close()
@@ -142,6 +142,7 @@ func (n *Nuclei) LoadPocFile() (pocs []string) {
 	err := filepath.Walk(pocBase,
 		func(path string, info os.FileInfo, err error) error {
 			if err != nil {
+				logging.RuntimeLog.Error(err)
 				return err
 			}
 			//统一路径为“/”

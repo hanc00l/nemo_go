@@ -6,6 +6,7 @@ import (
 	"bytes"
 	"compress/zlib"
 	"encoding/binary"
+	"fmt"
 	"github.com/hanc00l/nemo_go/pkg/logging"
 	"io"
 	"net"
@@ -109,14 +110,20 @@ func (f *fileData) InitIPData() (rs interface{}) {
 	// 判断文件是否存在
 	_, err := os.Stat(f.FilePath)
 	if err != nil && os.IsNotExist(err) {
-		logging.RuntimeLog.Info("文件不存在，尝试从网络获取最新纯真 Domain 库")
+		msg := "文件不存在，尝试从网络获取最新纯真 Domain 库"
+		logging.RuntimeLog.Info(msg)
+		logging.CLILog.Info(msg)
 		tmpData, err = GetOnline()
 		if err != nil {
+			logging.RuntimeLog.Info(err)
+			logging.CLILog.Info(err)
 			rs = err
 			return
 		} else {
 			if err := os.WriteFile(f.FilePath, tmpData, 0644); err == nil {
-				logging.RuntimeLog.Infof("已将最新的纯真 Domain 库保存到本地 %s ", f.FilePath)
+				msg = fmt.Sprintf("已将最新的纯真 Domain 库保存到本地 %s ", f.FilePath)
+				logging.RuntimeLog.Info(msg)
+				logging.CLILog.Info(msg)
 			}
 		}
 	} else {
@@ -124,6 +131,8 @@ func (f *fileData) InitIPData() (rs interface{}) {
 		// logging.RuntimeLog.Infof("从本地数据库文件 %s 打开\n", f.FilePath)
 		f.Path, err = os.OpenFile(f.FilePath, os.O_RDONLY, 0400)
 		if err != nil {
+			logging.RuntimeLog.Info(err)
+			logging.CLILog.Info(err)
 			rs = err
 			return
 		}
@@ -131,7 +140,8 @@ func (f *fileData) InitIPData() (rs interface{}) {
 
 		tmpData, err = io.ReadAll(f.Path)
 		if err != nil {
-			logging.RuntimeLog.Info(err.Error())
+			logging.RuntimeLog.Info(err)
+			logging.CLILog.Info(err)
 			rs = err
 			return
 		}

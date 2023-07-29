@@ -85,7 +85,8 @@ func (i *ICPQuery) SaveLocalICPInfo() bool {
 // RunICPQuery 通过API在线查询一个域名的ICP备案信息
 func (i *ICPQuery) RunICPQuery(domain string) *ICPInfo {
 	if conf.GlobalWorkerConfig().API.ICP.Key == "" {
-		logging.RuntimeLog.Error("query key is empty")
+		logging.RuntimeLog.Warning("no icp query key,search exit")
+		logging.CLILog.Warning("no icp query key,search exit")
 		return nil
 	}
 	url := fmt.Sprintf("https://apidatav2.chinaz.com/single/icp?key=%s&domain=%s", conf.GlobalWorkerConfig().API.ICP.Key, domain)
@@ -119,7 +120,7 @@ func (i *ICPQuery) RunICPQuery(domain string) *ICPInfo {
 func (i *ICPQuery) loadICPCache() {
 	content, err := os.ReadFile(filepath.Join(conf.GetRootPath(), "thirdparty/icp/icp.cache"))
 	if err != nil {
-		logging.RuntimeLog.Errorf("Could not open icp cahe file : %v", err)
+		logging.RuntimeLog.Errorf("could not open icp cahe file : %v", err)
 		return
 	}
 	err = json.Unmarshal(content, &i.ICPMap)

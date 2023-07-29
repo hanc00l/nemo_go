@@ -19,6 +19,7 @@ func init() {
 	var err error
 	cwd, err = os.Getwd()
 	if err != nil {
+		logging.RuntimeLog.Error(err)
 		logging.CLILog.Error(err)
 	}
 }
@@ -62,6 +63,7 @@ func StartFileSyncServer(host, port, authKey string) {
 	for {
 		conn, err := srv.Accept()
 		if err != nil {
+			logging.RuntimeLog.Error(err)
 			logging.CLILog.Error(err)
 			continue
 		}
@@ -77,13 +79,14 @@ func handleSync(conn net.Conn, authKey string) {
 		mg := Message{}
 		err := gbc.Dec.Decode(&mg)
 		if err != nil {
+			logging.RuntimeLog.Error(err)
 			logging.CLILog.Error(err)
 			return
 		}
 		// 检查authKey，如果不通过直接返回
 		if success := checkSyncAuthKey(authKey, mg.MgAuthKey, gbc); success == false {
-			logging.RuntimeLog.Warnf("Invalid auth from %s", conn.RemoteAddr().String())
-			logging.CLILog.Warnf("Invalid auth from %s", conn.RemoteAddr().String())
+			logging.RuntimeLog.Warnf("invalid auth from %s", conn.RemoteAddr().String())
+			logging.CLILog.Warnf("invalid auth from %s", conn.RemoteAddr().String())
 			return
 		}
 		switch mg.MgType {
@@ -110,6 +113,7 @@ func handleSync(conn net.Conn, authKey string) {
 func hdSync(gbc *GobConn) {
 	srcPath, err := filepath.Abs(conf.GetRootPath())
 	if err != nil {
+		logging.RuntimeLog.Error(err)
 		logging.CLILog.Error(err)
 		writeErrorMg(err.Error(), gbc)
 		return
@@ -117,6 +121,7 @@ func hdSync(gbc *GobConn) {
 	//srcPath := "/tmp/test/src"
 	fileMd5List, err := Traverse(srcPath)
 	if err != nil {
+		logging.RuntimeLog.Error(err)
 		logging.CLILog.Error(err)
 		writeErrorMg(err.Error(), gbc)
 		return
@@ -132,6 +137,7 @@ func hdSync(gbc *GobConn) {
 	}
 	err = gbc.gobConnWt(cr)
 	if err != nil {
+		logging.RuntimeLog.Error(err)
 		logging.CLILog.Error(err)
 		return
 	}
@@ -151,6 +157,7 @@ func hdTranFile(mg *Message, gbc *GobConn) {
 	//srcPath := "/tmp/test/src"
 	srcPath, err := filepath.Abs(conf.GetRootPath())
 	if err != nil {
+		logging.RuntimeLog.Error(err)
 		logging.CLILog.Error(err)
 		writeErrorMg(err.Error(), gbc)
 		return
@@ -171,6 +178,7 @@ func hdTranFile(mg *Message, gbc *GobConn) {
 	cr.MgType = MsgTranData
 	err = gbc.gobConnWt(cr)
 	if err != nil {
+		logging.RuntimeLog.Error(err)
 		logging.CLILog.Error(err)
 	}
 }
@@ -187,6 +195,7 @@ func writeErrorMg(message string, gbc *GobConn) {
 	errMsg.MgString = message
 	sendErr := gbc.gobConnWt(errMsg)
 	if sendErr != nil {
+		logging.RuntimeLog.Error(sendErr)
 		logging.CLILog.Error(sendErr)
 	}
 }

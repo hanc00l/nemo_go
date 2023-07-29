@@ -1,6 +1,7 @@
 package domainscan
 
 import (
+	"fmt"
 	"github.com/hanc00l/nemo_go/pkg/conf"
 	"github.com/hanc00l/nemo_go/pkg/logging"
 	"github.com/hanc00l/nemo_go/pkg/task/custom"
@@ -70,7 +71,8 @@ func (m *Massdns) parseResult(outputTempFile string) {
 func (m *Massdns) RunMassdns(domain string) {
 	//massdns不支持windows平台
 	if runtime.GOOS == "windows" {
-		logging.RuntimeLog.Error("Widnows don't support to run massdns!")
+		logging.RuntimeLog.Warning("Windows don't support to run massdns")
+		logging.CLILog.Warning("Windows don't support to run massdns")
 		return
 	}
 	tempOutputFile := utils.GetTempPathFileName()
@@ -78,6 +80,8 @@ func (m *Massdns) RunMassdns(domain string) {
 
 	tempDir, err := os.MkdirTemp(filepath.Join(conf.GetRootPath(), "thirdparty/massdns/temp"), utils.GetRandomString2(8))
 	if err != nil {
+		logging.RuntimeLog.Error(err)
+		logging.CLILog.Error(err)
 		return
 	}
 	defer os.RemoveAll(tempDir)
@@ -106,7 +110,9 @@ func (m *Massdns) RunMassdns(domain string) {
 	}
 	massdnsRunner, err := runner.New(options)
 	if err != nil {
-		logging.RuntimeLog.Errorf("Could not create runner: %s\n", err)
+		msg := fmt.Sprintf("Could not create runner: %s", err)
+		logging.RuntimeLog.Errorf(msg)
+		logging.CLILog.Errorf(msg)
 	}
 
 	massdnsRunner.RunEnumeration()

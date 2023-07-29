@@ -83,6 +83,7 @@ func StartWorker(workerRunTaskMode int, concurrency int) error {
 	server := ampq.GetWorkerAMPQServer(topicName, concurrency)
 	err := server.RegisterTasks(taskMaps)
 	if err != nil {
+		logging.RuntimeLog.Error(err)
 		return err
 	}
 
@@ -94,8 +95,8 @@ func StartWorker(workerRunTaskMode int, concurrency int) error {
 	logger.SetLevel(logrus.InfoLevel)
 	logger.SetFormatter(logging.GetCustomLoggerFormatter())
 	log.Set(logger)
-	logging.RuntimeLog.Infof("Starting Worker: %s", WStatus.WorkerName)
-	logging.CLILog.Infof("Starting Worker: %s", WStatus.WorkerName)
+	logging.RuntimeLog.Infof("starting worker: %s", WStatus.WorkerName)
+	logging.CLILog.Infof("starting worker: %s", WStatus.WorkerName)
 
 	return worker.Launch()
 }
@@ -144,10 +145,11 @@ func preTaskHandler(signature *tasks.Signature) {
 func CheckTaskStatus(taskId string) (ok bool, result string, err error) {
 	var taskStatus comm.TaskStatusArgs
 	if err = comm.CallXClient("CheckTask", &taskId, &taskStatus); err != nil {
+		logging.RuntimeLog.Error(err)
 		return false, FailedTask(err.Error()), err
 	}
 	if !taskStatus.IsExist {
-		logging.RuntimeLog.Errorf("task not exists: %s", taskId)
+		logging.RuntimeLog.Warningf("task not exists: %s", taskId)
 		return false, FailedTask("task not exist"), errors.New("task not exist")
 	}
 	if taskStatus.IsRevoked {

@@ -9,11 +9,15 @@ import (
 	"strings"
 )
 
+const RuntimeLogChanMax = 100
+
 var (
 	//RuntimeLog 系统运行时日志，记录发生的异常和错误
 	RuntimeLog = logrus.New()
 	// CLILog 控制台日志
 	CLILog = logrus.New()
+	// RuntimeLogChan 系统运行日志的chan，用于将日志通过chan的方式发送到其它地方
+	RuntimeLogChan chan []byte
 )
 
 func init() {
@@ -33,6 +37,18 @@ func init() {
 		os.O_APPEND|os.O_WRONLY|os.O_CREATE, 0666); err == nil {
 		RuntimeLog.SetOutput(file)
 	}
+
+	RuntimeLog.AddHook(&RuntimeLogHook{
+		Writer: RuntimeLogWriter{},
+		LogLevels: []logrus.Level{
+			logrus.PanicLevel,
+			logrus.FatalLevel,
+			logrus.ErrorLevel,
+			logrus.WarnLevel,
+			logrus.InfoLevel,
+		},
+	})
+
 	CLILog.SetFormatter(GetCustomLoggerFormatter())
 }
 

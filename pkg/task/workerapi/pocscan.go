@@ -14,6 +14,7 @@ func PocScan(taskId, mainTaskId, configJSON string) (result string, err error) {
 	}
 	config := pocscan.Config{}
 	if err = ParseConfig(configJSON, &config); err != nil {
+		logging.RuntimeLog.Error(err)
 		return FailedTask(err.Error()), err
 	}
 	//读取资产开放端口

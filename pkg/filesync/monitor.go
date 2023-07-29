@@ -1,6 +1,7 @@
 package filesync
 
 import (
+	"fmt"
 	"github.com/fsnotify/fsnotify"
 	"github.com/hanc00l/nemo_go/pkg/conf"
 	"github.com/hanc00l/nemo_go/pkg/logging"
@@ -27,11 +28,13 @@ func (n *NotifyFile) WatchDir() {
 	var err error
 	srcPath, err = filepath.Abs(conf.GetRootPath())
 	if err != nil {
+		logging.RuntimeLog.Error(err)
 		logging.CLILog.Error(err)
 		return
 	}
 	f, fErr := os.Lstat(srcPath)
 	if fErr != nil {
+		logging.RuntimeLog.Error(err)
 		logging.CLILog.Error(err)
 		return
 	}
@@ -47,7 +50,9 @@ func (n *NotifyFile) WatchDir() {
 
 	fErr = os.Chdir(dir)
 	if fErr != nil {
-		logging.CLILog.Errorf("Traverse monitor dir failure:%s", fErr.Error())
+		msg := fmt.Sprintf("traverse monitor dir failure:%s", fErr.Error())
+		logging.RuntimeLog.Error(msg)
+		logging.CLILog.Error(msg)
 		return
 	}
 	defer os.Chdir(cwd)
@@ -71,7 +76,9 @@ func (n *NotifyFile) WatchDir() {
 		return nil
 	})
 	if err != nil {
-		logging.CLILog.Errorf("Traverse monitor dir failure:%s", err.Error())
+		msg := fmt.Sprintf("traverse monitor dir failure:%s", err.Error())
+		logging.RuntimeLog.Error(msg)
+		logging.CLILog.Error(msg)
 		return
 	}
 

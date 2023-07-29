@@ -62,7 +62,7 @@ func (x *Xray) Do() {
 	}
 	// check poc file name
 	if strings.Contains(pocFile, "..") || strings.Contains(pocFile, "/") || strings.Contains(pocFile, "\\") {
-		logging.RuntimeLog.Errorf("invalid poc file:%s", pocFile)
+		logging.RuntimeLog.Warningf("invalid poc file:%s", pocFile)
 		return
 	}
 	// format xray cmdline
@@ -146,7 +146,7 @@ func (x *Xray) LoadPocFile() (pocs []string) {
 func (x *Xray) LoadDefaultPocFile() (pocs []string) {
 	inputFile, err := os.Open(filepath.Join(conf.GetRootPath(), "thirdparty/xray", "poc.list"))
 	if err != nil {
-		logging.RuntimeLog.Errorf("Could not read poc.list: %s", err)
+		logging.RuntimeLog.Errorf("could not read poc.list: %s", err)
 		return
 	}
 	defer inputFile.Close()

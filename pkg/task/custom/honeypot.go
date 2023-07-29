@@ -31,7 +31,8 @@ func (hp *HoneyPot) loadHoneyPot() {
 	hp.honeypotMap = make(map[string]*HoneyDef)
 	content, err := os.ReadFile(filepath.Join(conf.GetRootPath(), "thirdparty/custom/honeypot.txt"))
 	if err != nil {
-		logging.RuntimeLog.Error(err.Error())
+		logging.RuntimeLog.Error(err)
+		logging.CLILog.Error(err)
 	} else {
 		for _, line := range strings.Split(string(content), "\n") {
 			txt := strings.TrimSpace(line)
@@ -54,6 +55,8 @@ func (hp *HoneyPot) loadHoneyPot() {
 			for _, p := range ports {
 				port, err := strconv.Atoi(p)
 				if err != nil {
+					logging.RuntimeLog.Error(err)
+					logging.CLILog.Error(err)
 					continue
 				}
 				hp.honeypotMap[domain].PortDef[port] = system
@@ -73,6 +76,8 @@ func (hp *HoneyPot) CheckHoneyPot(domain, ports string) (isChecked bool, systemL
 	for _, p := range strings.Split(ports, ",") {
 		port, err := strconv.Atoi(p)
 		if err != nil {
+			logging.RuntimeLog.Error(err)
+			logging.CLILog.Error(err)
 			continue
 		}
 		if _, ok := hp.honeypotMap[domain].PortDef[port]; !ok {

@@ -191,7 +191,9 @@ func (i *IconHash) SaveFile(localSavePath string, result []IconHashInfo) string 
 		filePathName := filepath.Join(localSavePath, fmt.Sprintf("%s.%s", utils.MD5(ihf.Hash), fileSuffix))
 		err := os.WriteFile(filePathName, ihf.ImageData, 0666)
 		if err != nil {
-			logging.RuntimeLog.Errorf("write file %s fail:%v", filePathName, err)
+			msg := fmt.Sprintf("write icon file %s fail:%v", filePathName, err)
+			logging.RuntimeLog.Error(msg)
+			logging.CLILog.Error(msg)
 			continue
 		}
 		count++

@@ -140,7 +140,8 @@ func (c *DashboardController) WorkerAliveListAction() {
 	req := DatableRequestParam{}
 	err := c.ParseForm(&req)
 	if err != nil {
-		logging.RuntimeLog.Error(err.Error())
+		logging.RuntimeLog.Error(err)
+		logging.CLILog.Error(err)
 	}
 	index := 1
 	resp := DataTableResponseData{}
@@ -239,7 +240,8 @@ func (c *DashboardController) OnlineUserListAction() {
 	req := DatableRequestParam{}
 	err := c.ParseForm(&req)
 	if err != nil {
-		logging.RuntimeLog.Error(err.Error())
+		logging.RuntimeLog.Error(err)
+		logging.CLILog.Error(err)
 	}
 	index := 1
 	resp := DataTableResponseData{}

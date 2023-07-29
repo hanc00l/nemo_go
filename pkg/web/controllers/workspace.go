@@ -160,7 +160,8 @@ func (c *WorkspaceController) ListAction() {
 	req := workspaceRequestParam{}
 	err := c.ParseForm(&req)
 	if err != nil {
-		logging.RuntimeLog.Error(err.Error())
+		logging.RuntimeLog.Error(err)
+		logging.CLILog.Error(err)
 	}
 	c.validateRequestParam(&req)
 	resp := c.getWorkspaceListData(req)
@@ -223,7 +224,8 @@ func (c *WorkspaceController) AddSaveAction() {
 	wData := WorkspaceData{}
 	err := c.ParseForm(&wData)
 	if err != nil {
-		logging.RuntimeLog.Error(err.Error())
+		logging.RuntimeLog.Error(err)
+		logging.CLILog.Error(err)
 		c.FailedStatus(err.Error())
 		return
 	}
@@ -233,6 +235,8 @@ func (c *WorkspaceController) AddSaveAction() {
 	workspace.SortOrder = wData.SortOrder
 	workspace.WorkspaceDescription = wData.WorkspaceDescription
 	c.MakeStatusResponse(workspace.Add())
+	logging.RuntimeLog.Infof("add workspace:%s,GUID:%s", workspace.WorkspaceName, workspace.WorkspaceGUID)
+
 }
 
 // GetAction 根据ID获取一个记录
@@ -242,7 +246,8 @@ func (c *WorkspaceController) GetAction() {
 
 	id, err := c.GetInt("id")
 	if err != nil {
-		logging.RuntimeLog.Error(err.Error())
+		logging.RuntimeLog.Error(err)
+		logging.CLILog.Error(err)
 		c.FailedStatus(err.Error())
 		return
 	}
@@ -268,14 +273,16 @@ func (c *WorkspaceController) UpdateAction() {
 
 	id, err := c.GetInt("id")
 	if err != nil {
-		logging.RuntimeLog.Error(err.Error())
+		logging.RuntimeLog.Error(err)
+		logging.CLILog.Error(err)
 		c.FailedStatus(err.Error())
 		return
 	}
 	wData := WorkspaceData{}
 	err = c.ParseForm(&wData)
 	if err != nil {
-		logging.RuntimeLog.Error(err.Error())
+		logging.RuntimeLog.Error(err)
+		logging.CLILog.Error(err)
 		c.FailedStatus(err.Error())
 		return
 	}
@@ -286,6 +293,8 @@ func (c *WorkspaceController) UpdateAction() {
 	updateMap["state"] = wData.State
 	updateMap["workspace_description"] = wData.WorkspaceDescription
 	c.MakeStatusResponse(workspace.Update(updateMap))
+	logging.RuntimeLog.Infof("update workspace:%s,GUID:%s", workspace.WorkspaceName, workspace.WorkspaceGUID)
+
 }
 
 // DeleteAction 删除一条记录
@@ -295,7 +304,8 @@ func (c *WorkspaceController) DeleteAction() {
 
 	id, err := c.GetInt("id")
 	if err != nil {
-		logging.RuntimeLog.Error(err.Error())
+		logging.RuntimeLog.Error(err)
+		logging.CLILog.Error(err)
 		c.FailedStatus(err.Error())
 		return
 	}
@@ -306,4 +316,6 @@ func (c *WorkspaceController) DeleteAction() {
 		c.MakeStatusResponse(workspace.Delete())
 	}
 	c.MakeStatusResponse(false)
+	logging.RuntimeLog.Infof("delete workspace:%s,GUID:%s", workspace.WorkspaceName, workspace.WorkspaceGUID)
+
 }
