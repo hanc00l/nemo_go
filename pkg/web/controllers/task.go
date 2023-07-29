@@ -265,18 +265,18 @@ func (c *TaskController) DeleteBatchAction() {
 		c.FailedStatus("当前用户权限不允许！")
 		return
 	}
-
+	workspaceId := c.GetCurrentWorkspace()
 	taskType := c.GetString("type", "")
 	taskTotal := 0
 	if taskType == "created" {
-		taskTotal += batchDeleteTaskByState(ampq.CREATED)
+		taskTotal += batchDeleteTaskByState(ampq.CREATED, workspaceId)
 	} else if taskType == "unfinished" {
-		taskTotal += batchDeleteTaskByState(ampq.CREATED)
-		taskTotal += batchDeleteTaskByState(ampq.STARTED)
+		taskTotal += batchDeleteTaskByState(ampq.CREATED, workspaceId)
+		taskTotal += batchDeleteTaskByState(ampq.STARTED, workspaceId)
 	} else if taskType == "finished" {
-		taskTotal += batchDeleteTaskByState(ampq.REVOKED)
-		taskTotal += batchDeleteTaskByState(ampq.FAILURE)
-		taskTotal += batchDeleteTaskByState(ampq.SUCCESS)
+		taskTotal += batchDeleteTaskByState(ampq.REVOKED, workspaceId)
+		taskTotal += batchDeleteTaskByState(ampq.FAILURE, workspaceId)
+		taskTotal += batchDeleteTaskByState(ampq.SUCCESS, workspaceId)
 	}
 	c.SucceededStatus(fmt.Sprintf("共删除任务:%d", taskTotal))
 }
@@ -1024,9 +1024,12 @@ func getResultMsg(resultJSON string) (msg string) {
 }
 
 // batchDeleteTaskByState 批量删除指定状态的任务
-func batchDeleteTaskByState(taskState string) (total int) {
+func batchDeleteTaskByState(taskState string, workspaceId int) (total int) {
 	searchMap := make(map[string]interface{})
 	searchMap["state"] = taskState
+	if workspaceId > 0 {
+		searchMap["workspace_id"] = workspaceId
+	}
 	task := db.TaskMain{}
 	results, _ := task.Gets(searchMap, -1, -1)
 	workspaceGUIDCacheMap := make(map[int]string)
