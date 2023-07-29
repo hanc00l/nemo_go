@@ -258,12 +258,12 @@ func (s *Service) SaveWhoisResult(ctx context.Context, args *map[string]*whoispa
 func (s *Service) CheckTask(ctx context.Context, args *string, replay *TaskStatusArgs) error {
 	taskRun := &db.TaskRun{TaskId: *args}
 	if !taskRun.GetByTaskId() {
-		logging.RuntimeLog.Errorf("task not exists: %s", taskRun.TaskId)
+		logging.RuntimeLog.Warningf("task not exists: %s", taskRun.TaskId)
 		return nil
 	}
 	taskMain := &db.TaskMain{TaskId: taskRun.MainTaskId}
 	if !taskMain.GetByTaskId() {
-		logging.RuntimeLog.Errorf("mainTask not exists: %s", taskMain.TaskId)
+		logging.RuntimeLog.Warningf("mainTask not exists: %s", taskMain.TaskId)
 		return nil
 	}
 	replay.IsExist = true
@@ -282,7 +282,7 @@ func (s *Service) CheckTask(ctx context.Context, args *string, replay *TaskStatu
 func (s *Service) UpdateTask(ctx context.Context, args *TaskStatusArgs, replay *bool) error {
 	taskCheck := &db.TaskRun{TaskId: args.TaskID}
 	if !taskCheck.GetByTaskId() {
-		logging.RuntimeLog.Errorf("task not exists: %s", args.TaskID)
+		logging.RuntimeLog.Warningf("task not exists: %s", args.TaskID)
 		return nil
 	}
 	dt := time.Now()

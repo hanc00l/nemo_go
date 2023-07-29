@@ -293,7 +293,7 @@ func (c *WorkspaceController) UpdateAction() {
 	updateMap["state"] = wData.State
 	updateMap["workspace_description"] = wData.WorkspaceDescription
 	c.MakeStatusResponse(workspace.Update(updateMap))
-	logging.RuntimeLog.Infof("update workspace:%s,GUID:%s", workspace.WorkspaceName, workspace.WorkspaceGUID)
+	logging.RuntimeLog.Infof("update workspace:%s", wData.WorkspaceName)
 
 }
 

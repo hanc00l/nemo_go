@@ -48,7 +48,7 @@ func NewRunTask(taskName, configJSON, mainTaskId, lastRunTaskId string) (taskId 
 func RevokeUnexcusedTask(taskId string) (isRevoked bool, err error) {
 	task := &db.TaskRun{TaskId: taskId}
 	if !task.GetByTaskId() {
-		logging.RuntimeLog.Errorf("task not exists when revoked:%s", taskId)
+		logging.RuntimeLog.Warningf("task not exists when revoked:%s", taskId)
 		return false, errors.New("task not exists")
 	}
 	//检查状态，只有CREATED状态的才能取消

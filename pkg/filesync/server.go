@@ -85,8 +85,8 @@ func handleSync(conn net.Conn, authKey string) {
 		}
 		// 检查authKey，如果不通过直接返回
 		if success := checkSyncAuthKey(authKey, mg.MgAuthKey, gbc); success == false {
-			logging.RuntimeLog.Warnf("invalid auth from %s", conn.RemoteAddr().String())
-			logging.CLILog.Warnf("invalid auth from %s", conn.RemoteAddr().String())
+			logging.RuntimeLog.Warningf("invalid auth from %s", conn.RemoteAddr().String())
+			logging.CLILog.Warningf("invalid auth from %s", conn.RemoteAddr().String())
 			return
 		}
 		switch mg.MgType {

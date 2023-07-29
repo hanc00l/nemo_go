@@ -48,8 +48,8 @@ func StartWebAPIServer() {
 	if conf.RunMode == conf.Release {
 		web.InsertFilter("/*", web.BeforeRouter, filterLoginCheck)
 	}
-	logging.RuntimeLog.Info("Nemo API Server started...")
-	logging.CLILog.Info("Nemo API Server started...")
+	logging.RuntimeLog.Info("nemo API server started...")
+	logging.CLILog.Info("nemo API server started...")
 	addr := fmt.Sprintf("%s:%d", conf.GlobalServerConfig().WebAPI.Host, conf.GlobalServerConfig().WebAPI.Port)
 	web.Run(addr)
 }

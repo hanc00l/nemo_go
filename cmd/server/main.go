@@ -40,8 +40,8 @@ func StartWebServer() {
 	if conf.RunMode == conf.Release {
 		web.InsertFilter("/*", web.BeforeRouter, filterLoginCheck)
 	}
-	logging.RuntimeLog.Info("Nemo Server started...")
-	logging.CLILog.Info("Nemo Server started...")
+	logging.RuntimeLog.Info("nemo server started...")
+	logging.CLILog.Info("nemo server started...")
 	addr := fmt.Sprintf("%s:%d", conf.GlobalServerConfig().Web.Host, conf.GlobalServerConfig().Web.Port)
 	web.Run(addr)
 }
