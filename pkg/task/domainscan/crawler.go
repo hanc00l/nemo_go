@@ -55,11 +55,12 @@ func (c *Crawler) Do() {
 		if blackDomain.CheckBlack(domain) {
 			continue
 		}
+		protocol := utils.GetProtocol(domain, 5)
 		swg.Add()
 		go func(d string) {
 			defer swg.Done()
 			c.RunCrawler(d)
-		}(fmt.Sprintf("%s://%s", "http", domain))
+		}(fmt.Sprintf("%s://%s", protocol, domain))
 	}
 	swg.Wait()
 }

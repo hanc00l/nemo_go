@@ -118,9 +118,10 @@ func Socks5Dailer(forward *net.Dialer) (proxy.Dialer, error) {
 func GetProtocol(host string, Timeout int64) (protocol string) {
 	protocol = "http"
 	//如果端口是80或443,跳过Protocol判断
-	if strings.HasSuffix(host, ":80") || !strings.Contains(host, ":") {
-		return
-	} else if strings.HasSuffix(host, ":443") {
+	//if strings.HasSuffix(host, ":80") || !strings.Contains(host, ":") {
+	//	return
+	//} else
+	if strings.HasSuffix(host, ":443") {
 		protocol = "https"
 		return
 	}
