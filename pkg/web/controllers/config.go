@@ -49,17 +49,19 @@ type DefaultConfig struct {
 	IsFingerprintHub bool `json:"fingerprinthub" form:"fingerprinthub"`
 	IsIconHash       bool `json:"iconhash" form:"iconhash"`
 	// onlineapi
-	IsFofa          bool   `json:"fofa" form:"fofa"`
-	IsQuake         bool   `json:"quake" form:"quake"`
-	IsHunter        bool   `json:"hunter" form:"hunter"`
-	ServerChanToken string `json:"serverchan" form:"serverchan"`
-	DingTalkToken   string `json:"dingtalk" form:"dingtalk"`
-	FeishuToken     string `json:"feishu" form:"feishu"`
-	FofaUser        string `json:"fofauser" form:"fofauser"`
-	FofaToken       string `json:"fofatoken" form:"fofatoken"`
-	HunterToken     string `json:"huntertoken" form:"huntertoken"`
-	QuakeToken      string `json:"quaketoken" form:"quaketoken"`
-	ChinazToken     string `json:"chinaztoken" form:"chinaztoken"`
+	IsFofa           bool   `json:"fofa" form:"fofa"`
+	IsQuake          bool   `json:"quake" form:"quake"`
+	IsHunter         bool   `json:"hunter" form:"hunter"`
+	ServerChanToken  string `json:"serverchan" form:"serverchan"`
+	DingTalkToken    string `json:"dingtalk" form:"dingtalk"`
+	FeishuToken      string `json:"feishu" form:"feishu"`
+	FofaUser         string `json:"fofauser" form:"fofauser"`
+	FofaToken        string `json:"fofatoken" form:"fofatoken"`
+	HunterToken      string `json:"huntertoken" form:"huntertoken"`
+	QuakeToken       string `json:"quaketoken" form:"quaketoken"`
+	ChinazToken      string `json:"chinaztoken" form:"chinaztoken"`
+	SearchPageSize   int    `json:"pagesize" form:"pagesize"`
+	SearchLimitCount int    `json:"limitcount" form:"limitcount"`
 	// domainscan
 	Wordlist           string `json:"wordlist" form:"wordlist"`
 	IsSubDomainFinder  bool   `json:"subfinder" form:"subfinder"`
@@ -135,9 +137,11 @@ func (c *ConfigController) LoadDefaultConfigAction() {
 		IsWhois:            domainscan.IsWhois,
 		IsICP:              domainscan.IsICP,
 		//onlineAPI:
-		IsFofa:   onlineapi.IsFofa,
-		IsHunter: onlineapi.IsHunter,
-		IsQuake:  onlineapi.IsQuake,
+		IsFofa:           onlineapi.IsFofa,
+		IsHunter:         onlineapi.IsHunter,
+		IsQuake:          onlineapi.IsQuake,
+		SearchPageSize:   apiConfig.SearchPageSize,
+		SearchLimitCount: apiConfig.SearchLimitCount,
 	}
 	if fileContent, err1 := os.ReadFile(filepath.Join(conf.GetRootPath(), "version.txt")); err1 == nil {
 		data.Version = strings.TrimSpace(string(fileContent))
@@ -337,6 +341,8 @@ func (c *ConfigController) SaveAPITokenAction() {
 	conf.GlobalWorkerConfig().API.Hunter.Key = data.HunterToken
 	conf.GlobalWorkerConfig().API.Quake.Key = data.QuakeToken
 	conf.GlobalWorkerConfig().API.ICP.Key = data.ChinazToken
+	conf.GlobalWorkerConfig().API.SearchLimitCount = data.SearchLimitCount
+	conf.GlobalWorkerConfig().API.SearchPageSize = data.SearchPageSize
 	err = conf.GlobalWorkerConfig().WriteConfig()
 	if err != nil {
 		logging.RuntimeLog.Error("save config file error:", err)

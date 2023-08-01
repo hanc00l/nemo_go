@@ -20,9 +20,9 @@ func TestHunter_RunHunter(t *testing.T) {
 
 func TestHunter_RunHunter2(t *testing.T) {
 	domain := "shansteelgroup.com"
-	hunter := NewHunter(OnlineAPIConfig{})
+	hunter := NewHunter(OnlineAPIConfig{Target: domain})
 
-	hunter.RunHunter(domain)
+	hunter.Do()
 	for ip, ipr := range hunter.IpResult.IPResult {
 		t.Log(ip, ipr)
 		for port, pat := range ipr.Ports {

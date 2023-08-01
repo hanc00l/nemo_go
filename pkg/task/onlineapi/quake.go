@@ -128,6 +128,10 @@ func (q *Quake) Do() {
 		logging.CLILog.Warning("no quake api key,exit quake search")
 		return
 	}
+	q.Config.SearchLimitCount = conf.GlobalWorkerConfig().API.SearchLimitCount
+	if q.Config.SearchPageSize = conf.GlobalWorkerConfig().API.SearchPageSize; q.Config.SearchPageSize <= 0 {
+		q.Config.SearchPageSize = pageSizeDefault
+	}
 	blackDomain := custom.NewBlackDomain()
 	blackIP := custom.NewBlackIP()
 	for _, line := range strings.Split(q.Config.Target, ",") {
@@ -170,11 +174,17 @@ func (q *Quake) RunQuake(domain string) {
 	// 分页查询
 	// 查询第1页（quake页数第0开始），并获取总共记录数量
 	pageResult, finish, sizeTotal := q.retriedPageSearch(client, query, 0)
+	if q.Config.SearchLimitCount > 0 && sizeTotal > q.Config.SearchLimitCount {
+		msg := fmt.Sprintf("search %s result total:%d, limited to:%d", domain, sizeTotal, q.Config.SearchLimitCount)
+		logging.RuntimeLog.Warning(msg)
+		logging.CLILog.Warning(msg)
+		sizeTotal = q.Config.SearchLimitCount
+	}
 	if len(pageResult) > 0 {
 		q.Result = append(q.Result, pageResult...)
 	}
-	pageTotalNum := sizeTotal / pageSize
-	if sizeTotal%pageSize > 0 {
+	pageTotalNum := sizeTotal / q.Config.SearchPageSize
+	if sizeTotal%q.Config.SearchPageSize > 0 {
 		pageTotalNum++
 	}
 	for i := 1; i < pageTotalNum; i++ {
@@ -197,15 +207,9 @@ func (q *Quake) retriedPageSearch(client *http.Client, query string, page int) (
 			Query:       query,
 			Latest:      true,
 			IgnoreCache: true,
-			//ShorCuts 根据网页版抓包得到，根据反馈可能发生变化导致查询失败，因此暂时不用
-			ShortCuts: []string{
-				//"610ce2adb1a2e3e1632e67b1", //数据去重
-				//"610ce2fbda6d29df72ac56eb", //排除蜜罐
-				//"635fcb52cc57190bd8826d09", //排除蜜罐
-				//"612f5a5ad6b3bdb87961727f", //排除CDN
-			},
-			Start: page * pageSize,
-			Size:  pageSize,
+			ShortCuts:   []string{},
+			Start:       page * q.Config.SearchPageSize,
+			Size:        q.Config.SearchPageSize,
 			/**
 			include 和 exclude参数，可传参字段从获取可筛选服务字段接口获取
 			注册用户：

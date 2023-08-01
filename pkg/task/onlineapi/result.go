@@ -26,6 +26,7 @@ type OnlineAPIConfig struct {
 	IsIgnoreOutofChina bool   `json:"ignoreoutofchina"`
 	SearchByKeyWord    bool   `json:"keywordsearch"`
 	SearchLimitCount   int    `json:"searchlimitcount"`
+	SearchPageSize     int    `json:"searchpagesize"`
 	WorkspaceId        int    `json:"workspaceId"`
 }
 
@@ -75,14 +76,14 @@ type ICPInfo struct {
 
 var (
 	userAgent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/84.0.4147.125 Safari/537.36"
-	// pageSize 每次API查询的分页数量
-	pageSize = 100
+	// pageSizeDefault 缺省的每次API查询的分页数量
+	pageSizeDefault = 100
 	// SameIpToDomainFilterMax 对结果中domain关联的IP进行统计后，当同一IP被域名关联的数量超过阈值后则过滤掉该掉关联的域名
 	SameIpToDomainFilterMax = 100
 )
 
 // parseFofaSearchResult 转换FOFA搜索结果
-func (ff *Fofa) parseFofaSearchResult(queryResult []byte) (result []onlineSearchResult, sizeTotal int) {
+func (f *Fofa) parseFofaSearchResult(queryResult []byte) (result []onlineSearchResult, sizeTotal int) {
 	r := fofaQueryResult{}
 	err := json.Unmarshal(queryResult, &r)
 	if err != nil {
@@ -110,27 +111,27 @@ func (ff *Fofa) parseFofaSearchResult(queryResult []byte) (result []onlineSearch
 }
 
 // parseResult 解析搜索结果
-func (ff *Fofa) parseResult() {
-	ff.IpResult = portscan.Result{IPResult: make(map[string]*portscan.IPResult)}
-	ff.DomainResult = domainscan.Result{DomainResult: make(map[string]*domainscan.DomainResult)}
+func (f *Fofa) parseResult() {
+	f.IpResult = portscan.Result{IPResult: make(map[string]*portscan.IPResult)}
+	f.DomainResult = domainscan.Result{DomainResult: make(map[string]*domainscan.DomainResult)}
 
 	blackDomain := custom.NewBlackDomain()
 	blackIP := custom.NewBlackIP()
-	for _, fsr := range ff.Result {
-		parseIpPort(ff.IpResult, fsr, "fofa", blackIP)
-		parseDomainIP(ff.DomainResult, fsr, "fofa", blackDomain)
+	for _, fsr := range f.Result {
+		parseIpPort(f.IpResult, fsr, "fofa", blackIP)
+		parseDomainIP(f.DomainResult, fsr, "fofa", blackDomain)
 	}
 
-	checkDomainResult(ff.DomainResult.DomainResult)
+	checkDomainResult(f.DomainResult.DomainResult)
 }
 
 // SaveResult 保存搜索的结果
-func (ff *Fofa) SaveResult() string {
+func (f *Fofa) SaveResult() string {
 	if conf.GlobalWorkerConfig().API.Fofa.Key == "" || conf.GlobalWorkerConfig().API.Fofa.Name == "" {
 		return "no fofa api"
 	}
-	ips := ff.IpResult.SaveResult(portscan.Config{OrgId: ff.Config.OrgId, WorkspaceId: ff.Config.WorkspaceId})
-	domains := ff.DomainResult.SaveResult(domainscan.Config{OrgId: ff.Config.OrgId, WorkspaceId: ff.Config.WorkspaceId})
+	ips := f.IpResult.SaveResult(portscan.Config{OrgId: f.Config.OrgId, WorkspaceId: f.Config.WorkspaceId})
+	domains := f.DomainResult.SaveResult(domainscan.Config{OrgId: f.Config.OrgId, WorkspaceId: f.Config.WorkspaceId})
 
 	return fmt.Sprintf("%s,%s", ips, domains)
 }

@@ -141,6 +141,8 @@ $(function () {
                 "huntertoken": $('#input_hunter_token').val(),
                 "quaketoken": $('#input_quake_token').val(),
                 "chinaztoken": $('#input_chinaz_token').val(),
+                "pagesize": $('#input_pagesize').val(),
+                "limitcount": $('#input_limitcount').val(),
             }, function (data, e) {
                 if (e === "success" && data['status'] == 'success') {
                     swal({
@@ -327,6 +329,8 @@ function load_config() {
         $('#checkbox_fofa').prop("checked", data['fofa']);
         $('#checkbox_hunter').prop("checked", data['hunter']);
         $('#checkbox_quake').prop("checked", data['quake']);
+        $('#input_pagesize').val(data['pagesize']);
+        $('#input_limitcount').val(data['limitcount']);
     });
 }
 

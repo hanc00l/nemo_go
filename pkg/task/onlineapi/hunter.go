@@ -34,7 +34,7 @@ type Hunter struct {
 // HunterServiceInfo 查询结果的返回数据
 type HunterServiceInfo struct {
 	Code    int    `json:"code"`
-	Message string `json:"msg"`
+	Message string `json:"message"`
 	Data    struct {
 		Total        int    `json:"total"`
 		ConsumeQuota string `json:"consume_quota"`
@@ -64,6 +64,10 @@ func (h *Hunter) Do() {
 		logging.RuntimeLog.Warning("no hunter api key,exit hunter search")
 		logging.CLILog.Warning("no hunter api key,exit hunter search")
 		return
+	}
+	h.Config.SearchLimitCount = conf.GlobalWorkerConfig().API.SearchLimitCount
+	if h.Config.SearchPageSize = conf.GlobalWorkerConfig().API.SearchPageSize; h.Config.SearchPageSize <= 0 {
+		h.Config.SearchPageSize = pageSizeDefault
 	}
 	blackDomain := custom.NewBlackDomain()
 	blackIP := custom.NewBlackIP()
@@ -99,10 +103,16 @@ func (h *Hunter) RunHunter(domain string) {
 	}
 	// 查询第1页，并获取总共记录数量
 	pageResult, sizeTotal := h.retriedPageSearch(query, 1)
+	if h.Config.SearchLimitCount > 0 && sizeTotal > h.Config.SearchLimitCount {
+		msg := fmt.Sprintf("search %s result total:%d, limited to:%d", domain, sizeTotal, h.Config.SearchLimitCount)
+		logging.RuntimeLog.Warning(msg)
+		logging.CLILog.Warning(msg)
+		sizeTotal = h.Config.SearchLimitCount
+	}
 	h.Result = append(h.Result, pageResult...)
 	// 计算需要查询的页数
-	pageTotalNum := sizeTotal / pageSize
-	if sizeTotal%pageSize > 0 {
+	pageTotalNum := sizeTotal / h.Config.SearchPageSize
+	if sizeTotal%h.Config.SearchPageSize > 0 {
 		pageTotalNum++
 	}
 	for i := 2; i <= pageTotalNum; i++ {
@@ -129,7 +139,7 @@ func (h *Hunter) retriedPageSearch(query string, page int) (pageResult []onlineS
 		params.Add("api-key", conf.GlobalWorkerConfig().API.Hunter.Key)
 		params.Add("search", base64.URLEncoding.EncodeToString([]byte(query)))
 		params.Add("page", strconv.Itoa(page))
-		params.Add("page_size", strconv.Itoa(pageSize))
+		params.Add("page_size", strconv.Itoa(h.Config.SearchPageSize))
 		params.Add("is_web", "3") //资产类型，1代表”web资产“，2代表”非web资产“，3代表”全部“
 		params.Add("start_time", startTime.Format("2006-01-02 15:04:05"))
 		params.Add("end_time", endTime.Format("2006-01-02 15:04:05"))
@@ -154,7 +164,7 @@ func (h *Hunter) retriedPageSearch(query string, page int) (pageResult []onlineS
 			continue
 		}
 		if serviceInfo.Code != 200 {
-			logging.RuntimeLog.Error(err)
+			logging.RuntimeLog.Errorf("Hunter Search Error:%s", serviceInfo.Message)
 			logging.CLILog.Errorf("Hunter Search Error:%s", serviceInfo.Message)
 			continue
 		}

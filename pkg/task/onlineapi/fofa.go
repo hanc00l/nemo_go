@@ -132,14 +132,13 @@ func (f *Fofa) QueryAsJSON(page uint, args ...[]byte) ([]byte, error) {
 		query = args[0]
 		fields = args[1]
 	}
-
 	q = []byte(base64.StdEncoding.EncodeToString(query))
 	q = bytes.Join([][]byte{[]byte(defaultAPIUrl),
 		[]byte("email="), f.email,
 		[]byte("&key="), f.key,
 		[]byte("&qbase64="), q,
 		[]byte("&fields="), fields,
-		[]byte("&size="), []byte(strconv.Itoa(pageSize)),
+		[]byte("&size="), []byte(strconv.Itoa(f.Config.SearchPageSize)),
 		[]byte("&page="), []byte(strconv.Itoa(int(page))),
 	}, []byte(""))
 	//fmt.Printf("%s\n", q)
@@ -182,7 +181,6 @@ func (f *Fofa) QueryAsArray(page uint, args ...[]byte) (result Results, err erro
 // UserInfo get user information
 func (f *Fofa) UserInfo() (user *User, err error) {
 	user = new(User)
-	//queryStr := strings.Join([]string{"https://fofa.so/api/v1/info/my?email=", string(f.email), "&key=", string(f.key)}, "")
 	queryStr := strings.Join([]string{"https://fofa.info/api/v1/info/my?email=", string(f.email), "&key=", string(f.key)}, "")
 
 	content, err := f.Get(queryStr)
@@ -241,6 +239,11 @@ func (f *Fofa) Do() {
 		logging.CLILog.Warning("no fofa api key,exit fofa search")
 		return
 	}
+	f.Config.SearchLimitCount = conf.GlobalWorkerConfig().API.SearchLimitCount
+	f.Config.SearchPageSize = conf.GlobalWorkerConfig().API.SearchPageSize
+	if f.Config.SearchPageSize <= 0 {
+		f.Config.SearchPageSize = pageSizeDefault
+	}
 	blackDomain := custom.NewBlackDomain()
 	blackIP := custom.NewBlackIP()
 	for _, line := range strings.Split(f.Config.Target, ",") {
@@ -268,6 +271,8 @@ func (f *Fofa) RunFofa(domain string) {
 		logging.RuntimeLog.Error("create fofa client error")
 		return
 	}
+	clt.Config.SearchLimitCount = f.Config.SearchLimitCount
+	clt.Config.SearchPageSize = f.Config.SearchPageSize
 	// QueryAsJSON
 	var query string
 	fields := "domain,host,ip,port,title,country,city,server,banner"
@@ -292,13 +297,16 @@ func (f *Fofa) RunFofa(domain string) {
 	// 查询第1页，并获取总共记录数量
 	pageResult, sizeTotal := f.retriedFofaSearch(clt, 1, query, fields)
 	if f.Config.SearchLimitCount > 0 && sizeTotal > f.Config.SearchLimitCount {
+		msg := fmt.Sprintf("search %s result total:%d, limited to:%d", domain, sizeTotal, f.Config.SearchLimitCount)
+		logging.RuntimeLog.Warning(msg)
+		logging.CLILog.Warning(msg)
 		sizeTotal = f.Config.SearchLimitCount
 	}
 	//fmt.Println(sizeTotal)
 	f.Result = append(f.Result, pageResult...)
 	// 计算需要查询的页数
-	pageTotalNum := sizeTotal / pageSize
-	if sizeTotal%pageSize > 0 {
+	pageTotalNum := sizeTotal / f.Config.SearchPageSize
+	if sizeTotal%f.Config.SearchPageSize > 0 {
 		pageTotalNum++
 	}
 	for i := 2; i <= pageTotalNum; i++ {
