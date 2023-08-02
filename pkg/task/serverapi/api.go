@@ -13,10 +13,23 @@ import (
 
 // NewRunTask 创建一个新执行任务
 func NewRunTask(taskName, configJSON, mainTaskId, lastRunTaskId string) (taskId string, err error) {
-	topicName := ampq.GetTopicByTaskName(taskName)
+	dbMTask := db.TaskMain{TaskId: mainTaskId}
+	if dbMTask.GetByTaskId() == false {
+		msg := fmt.Sprintf("maintask %s not exist", mainTaskId)
+		logging.RuntimeLog.Error(msg)
+		return "", errors.New(msg)
+	}
+	dbWorkspace := db.Workspace{Id: dbMTask.WorkspaceId}
+	if dbWorkspace.Get() == false {
+		msg := fmt.Sprintf("maintask %s workspace %d not exist", mainTaskId, dbMTask.WorkspaceId)
+		logging.RuntimeLog.Error(msg)
+		return "", errors.New(msg)
+	}
+	topicName := ampq.GetTopicByTaskName(taskName, dbWorkspace.WorkspaceGUID)
 	if topicName == "" {
-		logging.RuntimeLog.Errorf("task not defined for topic:%s", taskName)
-		return "", errors.New("task not defined for topic")
+		msg := fmt.Sprintf("task not defined for topic:%s", taskName)
+		logging.RuntimeLog.Error(msg)
+		return "", errors.New(msg)
 	}
 	server := ampq.GetServerTaskAMPQServer(topicName)
 	// 延迟5秒后执行：如果不延迟，有可能任务在完成数据库之前执行，从而导致task not exist错误
@@ -39,7 +52,7 @@ func NewRunTask(taskName, configJSON, mainTaskId, lastRunTaskId string) (taskId 
 		logging.RuntimeLog.Error(err)
 		return "", err
 	}
-	addTask(taskId, taskName, configJSON, mainTaskId, lastRunTaskId)
+	addTask(taskId, taskName, configJSON, mainTaskId, lastRunTaskId, dbWorkspace.Id)
 
 	return taskId, nil
 }
@@ -61,13 +74,7 @@ func RevokeUnexcusedTask(taskId string) (isRevoked bool, err error) {
 }
 
 // addTask 将任务写入到数据库中
-func addTask(taskId, taskName, kwArgs, mainTaskId, lastRunTaskId string) {
-	taskMain := db.TaskMain{TaskId: mainTaskId}
-	if taskMain.GetByTaskId() == false {
-		logging.RuntimeLog.Errorf("add new task fail: main task %s not exist", taskId)
-		logging.CLILog.Errorf("add new task fail: main task %s not exist", taskId)
-		return
-	}
+func addTask(taskId, taskName, kwArgs, mainTaskId, lastRunTaskId string, workspaceId int) {
 	dt := time.Now()
 	task := &db.TaskRun{
 		TaskId:        taskId,
@@ -77,12 +84,13 @@ func addTask(taskId, taskName, kwArgs, mainTaskId, lastRunTaskId string) {
 		ReceivedTime:  &dt,
 		MainTaskId:    mainTaskId,
 		LastRunTaskId: lastRunTaskId,
-		WorkspaceId:   taskMain.WorkspaceId,
+		WorkspaceId:   workspaceId,
 	}
 	//kwargs可能因为target很多导致超过数据库中的字段设计长度，因此作一个长度截取
 	const argsLength = 6000
 	if len(kwArgs) > argsLength {
 		task.KwArgs = fmt.Sprintf("%s...", kwArgs[:argsLength])
+		logging.RuntimeLog.Warningf("task:%s args too long:%d", taskId, len(kwArgs))
 	}
 	if !task.Add() {
 		logging.RuntimeLog.Errorf("add new task fail: %s,%s,%s", taskId, taskName, kwArgs)

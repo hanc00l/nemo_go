@@ -55,9 +55,9 @@ func GlobalWorkerConfig() *Worker {
 
 type Server struct {
 	Web      Web               `yaml:"web"`
-	WebAPI   WebAPI            `yaml:"api"`
 	Rpc      RPC               `yaml:"rpc"`
 	FileSync RPC               `yaml:"fileSync"`
+	WebAPI   WebAPI            `yaml:"api"`
 	Database Database          `yaml:"database"`
 	Rabbitmq Rabbitmq          `yaml:"rabbitmq"`
 	Task     Task              `yaml:"task"`
@@ -113,10 +113,12 @@ type Task struct {
 }
 
 type API struct {
-	Fofa   APIKey `yaml:"fofa"`
-	ICP    APIKey `yaml:"icp"`
-	Quake  APIKey `yaml:"quake"`
-	Hunter APIKey `yaml:"hunter"`
+	SearchPageSize   int    `yaml:"searchPageSize"`
+	SearchLimitCount int    `yaml:"searchLimitCount"`
+	Fofa             APIKey `yaml:"fofa"`
+	ICP              APIKey `yaml:"icp"`
+	Quake            APIKey `yaml:"quake"`
+	Hunter           APIKey `yaml:"hunter"`
 }
 
 type APIKey struct {

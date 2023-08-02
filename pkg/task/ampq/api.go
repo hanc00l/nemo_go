@@ -24,23 +24,13 @@ const (
 	PENDING  string = tasks.StatePending  //未使用
 	RETRY    string = tasks.StateRetry    //未使用
 
-	TopicActive     = "active"
-	TopicFinger     = "finger"
-	TopicPassive    = "passive"
-	TopicCustom     = "custom"
-	TopicDefaultAll = "*"
+	TopicActive  = "active"
+	TopicFinger  = "finger"
+	TopicPassive = "passive"
+	TopicPocscan = "pocscan"
+	TopicCustom  = "custom"
 
 	TopicMQPrefix = "nemo_mq"
-)
-
-type WorkerRunTaskMode int
-
-const (
-	TaskModeDefault WorkerRunTaskMode = iota
-	TaskModeActive
-	TaskModeFinger
-	TaskModePassive
-	TaskModeCustom
 )
 
 type TaskResult struct {
@@ -51,7 +41,7 @@ type TaskResult struct {
 type WorkerStatus struct {
 	sync.Mutex             `json:"-"`
 	WorkerName             string    `json:"worker_name"`
-	WorkerRunTaskMode      string    `json:"worker_mode"`
+	WorkerTopics           string    `json:"worker_topic"`
 	CreateTime             time.Time `json:"create_time"`
 	UpdateTime             time.Time `json:"update_time"`
 	TaskExecutedNumber     int       `json:"task_number"`
@@ -60,46 +50,59 @@ type WorkerStatus struct {
 	WorkerDaemonUpdateTime time.Time `json:"worker_daemon_update_time"`
 }
 
+type WorkerRunTaskMode int
+
+const (
+	TaskModeDefault WorkerRunTaskMode = iota
+	TaskModeActive
+	TaskModeFinger
+	TaskModePassive
+	TaskModePocscan
+	TaskModeCustom
+)
+
 // taskTopicDefineMap 每个task对应的队列名称，以便分配到执行不同任务的worker
 var taskTopicDefineMap = map[string]string{
-	"portscan":    TopicActive,
-	"batchscan":   TopicActive,
-	"domainscan":  TopicActive,
-	"iplocation":  TopicPassive,
-	"fofa":        TopicPassive,
-	"quake":       TopicPassive,
-	"hunter":      TopicPassive,
-	"xray":        TopicActive,
-	"dirsearch":   TopicActive,
-	"nuclei":      TopicActive,
-	"goby":        TopicActive,
-	"icpquery":    TopicPassive,
-	"whoisquery":  TopicPassive,
-	"fingerprint": TopicFinger,
-	//xscan:
-	"xonlineapi":   TopicPassive,
-	"xportscan":    TopicActive,
-	"xdomainscan":  TopicActive,
-	"xfingerprint": TopicFinger,
-	"xxray":        TopicActive,
-	"xnuclei":      TopicActive,
-	"xgoby":        TopicActive,
-	"xorgscan":     TopicActive,
+	"portscan":          TopicActive,
+	"batchscan":         TopicActive,
+	"domainscan":        TopicActive,
+	"subfinder":         TopicPassive,
+	"subdomainbrute":    TopicPassive,
+	"subdomaincralwer":  TopicActive,
+	"iplocation":        TopicPassive,
+	"fofa":              TopicPassive,
+	"quake":             TopicPassive,
+	"hunter":            TopicPassive,
+	"xray":              TopicPocscan,
+	"dirsearch":         TopicPocscan,
+	"nuclei":            TopicPocscan,
+	"goby":              TopicPocscan,
+	"icpquery":          TopicPassive,
+	"whoisquery":        TopicPassive,
+	"fingerprint":       TopicFinger,
+	"xportscan":         TopicActive,
+	"xonlineapi":        TopicPassive,
+	"xfofa":             TopicPassive,
+	"xquake":            TopicPassive,
+	"xhunter":           TopicPassive,
+	"xdomainscan":       TopicPassive,
+	"xsubfinder":        TopicPassive,
+	"xsubdomainbrute":   TopicPassive,
+	"xsubdomaincralwer": TopicActive,
+	"xfingerprint":      TopicFinger,
+	"xxray":             TopicPocscan,
+	"xnuclei":           TopicPocscan,
+	"xgoby":             TopicPocscan,
+	"xorgscan":          TopicActive,
 	//test:
 	"test": TopicCustom,
 }
 
-// workerTopicDefineMap 每个不同工作模式的worker，对应队列
-var workerTopicDefineMap = map[WorkerRunTaskMode]string{
-	TaskModeDefault: TopicDefaultAll,
-	TaskModeActive:  TopicActive,
-	TaskModeFinger:  TopicFinger,
-	TaskModePassive: TopicPassive,
-	TaskModeCustom:  TopicCustom,
-}
-
 // taskServer 复用的全局AMQP连接
 var taskServerConn = make(map[string]*machinery.Server)
+
+// CustomTaskWorkspaceMap 自定义任务关联的工作空间GUID
+var CustomTaskWorkspaceMap = make(map[string]struct{})
 
 // GetServerTaskAMPQServer 根据server配置文件，获取到消息中心的连接
 func GetServerTaskAMPQServer(topicName string) *machinery.Server {
@@ -122,16 +125,16 @@ func GetWorkerAMPQServer(topicName string, prefetchCount int) *machinery.Server 
 // startAMQPServer 连接到AMQP消息队列服务器
 func startAMQPServer(username, password, host string, port int, topicName string, prefetchCount int) *machinery.Server {
 	amqpConfig := fmt.Sprintf("amqp://%s:%s@%s:%d/", username, password, host, port)
-	queueName := fmt.Sprintf("%s.%s", TopicMQPrefix, topicName)
+	routingKey := GetRoutingKeyByTopic(topicName)
 	cnf := &config.Config{
 		Broker:          amqpConfig,
-		DefaultQueue:    queueName,
+		DefaultQueue:    routingKey,
 		ResultBackend:   amqpConfig,
 		ResultsExpireIn: 300,
 		AMQP: &config.AMQPConfig{
 			Exchange:      "nemo_mq_exchange",
 			ExchangeType:  "topic",
-			BindingKey:    queueName,
+			BindingKey:    routingKey,
 			PrefetchCount: prefetchCount,
 		},
 	}
@@ -144,20 +147,25 @@ func startAMQPServer(username, password, host string, port int, topicName string
 	return server
 }
 
-func GetTopicByTaskName(taskName string) string {
+func GetTopicByTaskName(taskName string, workspaceGUID string) string {
+	if _, ok := CustomTaskWorkspaceMap[workspaceGUID]; ok {
+		// custom.1a0ca919-7960-4067-9981-9abcb4eaa735
+		return fmt.Sprintf("%s.%s", TopicCustom, workspaceGUID)
+	}
 	if queueName, ok := taskTopicDefineMap[taskName]; ok {
+		// active、finger...
 		return queueName
 	}
 	return ""
 }
 
-func GetTopicByWorkerMode(workerMode WorkerRunTaskMode) string {
-	return workerTopicDefineMap[workerMode]
-}
-
 func GetTopicByMQRoutingKey(routingKey string) string {
 	keys := strings.Split(routingKey, ".")
-	if len(keys) >= 2 {
+	if len(keys) == 3 {
+		// nemo_mq.custom.1a0ca919-7960-4067-9981-9abcb4eaa735
+		return fmt.Sprintf("%s.%s", keys[1], keys[2])
+	} else if len(keys) == 2 {
+		// nemo_mq.active...
 		return keys[1]
 	}
 	return ""

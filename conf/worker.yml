@@ -12,6 +12,8 @@ rabbitmq:
   username: guest
   password: guest
 api:
+  searchPageSize: 100
+  searchLimitCount: 1000
   fofa:
     name: ""
     key: ""
@@ -25,7 +27,7 @@ api:
     name: ""
     key: ""
 portscan:
-  ping: true
+  ping: false
   port: --top-ports 1000
   rate: 1000
   tech: -sS

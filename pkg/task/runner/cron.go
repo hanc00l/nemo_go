@@ -119,7 +119,9 @@ func (j CronTaskJob) Run() {
 		logging.RuntimeLog.Error(err)
 		return
 	}
-	logging.CLILog.Infof("start cron task:%s,main taskId:%s", j.TaskId, taskId)
+	logging.CLILog.Infof("start cron task:%s,maintask Id:%s", j.TaskId, taskId)
+	logging.RuntimeLog.Debugf("start cron task:%s,maintask Id:%s", j.TaskId, taskId)
+
 	// 更新数据库
 	updateMap := make(map[string]interface{})
 	updateMap["lastrun_datetime"] = time.Now()

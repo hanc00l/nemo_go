@@ -50,14 +50,15 @@ func SaveMainTask(taskName, configJSON, cronTaskId string, workspaceId int) (tas
 	//kwargs可能因为target很多导致超过数据库中的字段设计长度，因此作一个长度截取
 	const argsLength = 6000
 	if len(task.KwArgs) > argsLength {
-		task.KwArgs = fmt.Sprintf("%s...", task.KwArgs[:argsLength])
 		//kwargs可能因为target很多导致超过数据库中的字段设计长度，直接返回错误，不保存任务信息
-		err = errors.New(fmt.Sprintf("arguments too long: %s,%s,%s", taskId, taskName, task.KwArgs))
-		logging.RuntimeLog.Error(err)
+		err = errors.New(fmt.Sprintf("maintask %s:%s arguments too long:%s", taskName, taskId, task.KwArgs))
+		logging.CLILog.Error(err)
+		logging.RuntimeLog.Error(fmt.Sprintf("maintask %s:%s arguments too long:%d", taskName, taskId, len(task.KwArgs)))
 		return
 	}
 	if !task.Add() {
-		err = errors.New(fmt.Sprintf("add new main task fail: %s,%s,%s", taskId, taskName, task.KwArgs))
+		err = errors.New(fmt.Sprintf("save new maintask fail: %s,%s,%s", taskName, taskId, task.KwArgs))
+		logging.CLILog.Error(err)
 		logging.RuntimeLog.Error(err)
 	}
 	return
@@ -76,7 +77,6 @@ func runMainTask(taskName, taskId, kwArgs string, workspaceId int) (err error) {
 			logging.RuntimeLog.Error(err)
 			return
 		}
-		logging.CLILog.Infof("start %s task:%s,running taskRunId:%s", taskName, taskId, taskRunId)
 	} else if taskName == "batchscan" {
 		var req PortscanRequestParam
 		if err = json.Unmarshal([]byte(kwArgs), &req); err != nil {
@@ -87,7 +87,6 @@ func runMainTask(taskName, taskId, kwArgs string, workspaceId int) (err error) {
 			logging.RuntimeLog.Error(err)
 			return
 		}
-		logging.CLILog.Infof("start %s task:%s,running taskRunId:%s", taskName, taskId, taskRunId)
 	} else if taskName == "domainscan" {
 		var req DomainscanRequestParam
 		if err = json.Unmarshal([]byte(kwArgs), &req); err != nil {
@@ -98,7 +97,6 @@ func runMainTask(taskName, taskId, kwArgs string, workspaceId int) (err error) {
 			logging.RuntimeLog.Error(err)
 			return
 		}
-		logging.CLILog.Infof("start %s task:%s,running taskRunId:%s", taskName, taskId, taskRunId)
 	} else if taskName == "pocscan" {
 		var req PocscanRequestParam
 		if err = json.Unmarshal([]byte(kwArgs), &req); err != nil {
@@ -109,7 +107,6 @@ func runMainTask(taskName, taskId, kwArgs string, workspaceId int) (err error) {
 			logging.RuntimeLog.Error(err)
 			return
 		}
-		logging.CLILog.Infof("start %s task:%s,running taskRunId:%s", taskName, taskId, taskRunId)
 	} else if taskName == "xportscan" || taskName == "xdomainscan" || taskName == "xorgscan" || taskName == "xonlineapi" {
 		var req XScanRequestParam
 		if err = json.Unmarshal([]byte(kwArgs), &req); err != nil {
@@ -130,10 +127,13 @@ func runMainTask(taskName, taskId, kwArgs string, workspaceId int) (err error) {
 			logging.RuntimeLog.Error(err)
 			return
 		}
-		logging.CLILog.Infof("start %s task:%s,running taskRunId:%s", taskName, taskId, taskRunId)
 	} else {
 		logging.RuntimeLog.Errorf("invalid task name:%s in %s...", taskName, taskId)
+		return
 	}
+	logging.CLILog.Infof("start %s task:%s,running taskRunId:%s", taskName, taskId, taskRunId)
+	logging.RuntimeLog.Debugf("start %s task:%s,running taskRunId:%s", taskName, taskId, taskRunId)
+
 	return
 }
 
@@ -158,7 +158,7 @@ func processCreatedTask() (err error) {
 		}
 		// 更新任务状态
 		if updateMainTask(&t, ampq.STARTED, "", "") == false {
-			msg := fmt.Sprintf("update main task state fail:%s", t.TaskId)
+			msg := fmt.Sprintf("update maintask state fail:%s", t.TaskId)
 			logging.RuntimeLog.Error(msg)
 			return errors.New(msg)
 		}
@@ -201,7 +201,7 @@ func processStartedTask() (err error) {
 		// 更新任务
 		if updatedState != "" || updatedProgress != "" || updatedResult != "" {
 			if updateMainTask(&t, updatedState, updatedProgress, updatedResult) == false {
-				msg := fmt.Sprintf("update main task status fail:%s", t.TaskId)
+				msg := fmt.Sprintf("update maintask status fail:%s", t.TaskId)
 				logging.RuntimeLog.Error(msg)
 				return errors.New(msg)
 			}

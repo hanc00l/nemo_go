@@ -19,29 +19,37 @@ var WStatus ampq.WorkerStatus
 
 // taskMaps 定义work执行的任务；在添加了对应的任务后，在ampq/api.go中指定任务对应的队列映射：taskTopicDefineMap
 var taskMaps = map[string]interface{}{
-	"portscan":    PortScan,
-	"batchscan":   BatchScan,
-	"domainscan":  DomainScan,
-	"iplocation":  IPLocation,
-	"fofa":        Fofa,
-	"quake":       Quake,
-	"hunter":      Hunter,
-	"xray":        PocScan,
-	"dirsearch":   PocScan,
-	"nuclei":      PocScan,
-	"goby":        PocScan,
-	"icpquery":    ICPQuery,
-	"whoisquery":  WhoisQuery,
-	"fingerprint": Fingerprint,
-	//xscan:
-	"xonlineapi":   XOnlineAPI,
-	"xportscan":    XPortScan,
-	"xdomainscan":  XDomainscan,
-	"xfingerprint": XFingerPrint,
-	"xxray":        XXray,
-	"xnuclei":      XNuclei,
-	"xgoby":        XGoby,
-	"xorgscan":     XOrganization,
+	"portscan":          PortScan,
+	"batchscan":         BatchScan,
+	"domainscan":        DomainScan,
+	"subfinder":         DomainScan,
+	"subdomainbrute":    DomainScan,
+	"subdomaincralwer":  DomainScan,
+	"iplocation":        IPLocation,
+	"fofa":              Fofa,
+	"quake":             Quake,
+	"hunter":            Hunter,
+	"xray":              PocScan,
+	"dirsearch":         PocScan,
+	"nuclei":            PocScan,
+	"goby":              PocScan,
+	"icpquery":          ICPQuery,
+	"whoisquery":        WhoisQuery,
+	"fingerprint":       Fingerprint,
+	"xportscan":         XPortScan,
+	"xonlineapi":        XOnlineAPI,
+	"xfofa":             XOnlineAPI,
+	"xquake":            XOnlineAPI,
+	"xhunter":           XOnlineAPI,
+	"xdomainscan":       XDomainscan,
+	"xsubfinder":        XDomainscan,
+	"xsubdomainbrute":   XDomainscan,
+	"xsubdomaincralwer": XDomainscan,
+	"xfingerprint":      XFingerPrint,
+	"xxray":             XXray,
+	"xnuclei":           XNuclei,
+	"xgoby":             XGoby,
+	"xorgscan":          XOrganization,
 	//test:
 	"test": TaskTest,
 }
@@ -77,9 +85,7 @@ func ParseConfig(configJSON string, config interface{}) (err error) {
 }
 
 // StartWorker 启动worker
-func StartWorker(workerRunTaskMode int, concurrency int) error {
-	topicName := ampq.GetTopicByWorkerMode(ampq.WorkerRunTaskMode(workerRunTaskMode))
-
+func StartWorker(topicName string, concurrency int) error {
 	server := ampq.GetWorkerAMPQServer(topicName, concurrency)
 	err := server.RegisterTasks(taskMaps)
 	if err != nil {

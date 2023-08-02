@@ -26,7 +26,8 @@ func init() {
 	web.CtrlPost("/config-test-api", (*controllers.ConfigController).OnlineTestAPITokenAction)
 	web.CtrlPost("/config-test-notify", (*controllers.ConfigController).TestTaskNotifyAction)
 	web.CtrlPost("/config-save-domainscan", (*controllers.ConfigController).SaveDomainscanAction)
-
+	web.CtrlPost("/custom-save-taskworkspace", (*controllers.ConfigController).SaveCustomTaskWorkspaceConfigAction)
+	
 	web.CtrlGet("/dashboard", (*controllers.DashboardController).IndexAction)
 	web.CtrlPost("/dashboard", (*controllers.DashboardController).GetStatisticDataAction)
 	web.CtrlPost("/dashboard-task-info", (*controllers.DashboardController).GetTaskInfoAction)

@@ -114,7 +114,7 @@ func StartDomainScanTask(req DomainscanRequestParam, mainTaskId string, workspac
 			subConfig := req
 			subConfig.IsSubdomainBrute = false
 			subConfig.IsCrawler = false
-			if taskId, err = doDomainscan(workspaceId, mainTaskId, t, subConfig); err != nil {
+			if taskId, err = doDomainscan(workspaceId, mainTaskId, t, subConfig, "subfinder"); err != nil {
 				logging.RuntimeLog.Error(err)
 				return
 			}
@@ -124,7 +124,7 @@ func StartDomainScanTask(req DomainscanRequestParam, mainTaskId string, workspac
 			subConfig := req
 			subConfig.IsSubfinder = false
 			subConfig.IsCrawler = false
-			if taskId, err = doDomainscan(workspaceId, mainTaskId, t, subConfig); err != nil {
+			if taskId, err = doDomainscan(workspaceId, mainTaskId, t, subConfig, "subdomainbrute"); err != nil {
 				logging.RuntimeLog.Error(err)
 				return
 			}
@@ -134,7 +134,7 @@ func StartDomainScanTask(req DomainscanRequestParam, mainTaskId string, workspac
 			subConfig := req
 			subConfig.IsSubfinder = false
 			subConfig.IsSubdomainBrute = false
-			if taskId, err = doDomainscan(workspaceId, mainTaskId, t, subConfig); err != nil {
+			if taskId, err = doDomainscan(workspaceId, mainTaskId, t, subConfig, "subdomaincrawler"); err != nil {
 				logging.RuntimeLog.Error(err)
 				return
 			}
@@ -142,7 +142,7 @@ func StartDomainScanTask(req DomainscanRequestParam, mainTaskId string, workspac
 		}
 		// 如果没有子域名任务，则至少启动一个域名解析任务
 		if !taskStarted {
-			if taskId, err = doDomainscan(workspaceId, mainTaskId, t, req); err != nil {
+			if taskId, err = doDomainscan(workspaceId, mainTaskId, t, req, "domainscan"); err != nil {
 				logging.RuntimeLog.Error(err)
 				return
 			}
@@ -252,7 +252,7 @@ func StartXFofaKeywordTask(req XScanRequestParam, mainTaskId string, workspaceId
 		configRun.FofaKeyword = keyword
 		configRun.FofaSearchLimit = count
 		configJSONRun, _ := json.Marshal(configRun)
-		taskId, err = serverapi.NewRunTask("xonlineapi", string(configJSONRun), mainTaskId, "")
+		taskId, err = serverapi.NewRunTask("xfofa", string(configJSONRun), mainTaskId, "")
 		if err != nil {
 			logging.RuntimeLog.Errorf("start xfofakeyword task fail:%s", err.Error())
 			return "", err
@@ -293,7 +293,7 @@ func StartXDomainScanTask(req XScanRequestParam, mainTaskId string, workspaceId 
 			configRun.Domain[target] = struct{}{}
 			configRun.IsSubDomainFinder = true
 			configJSON, _ := json.Marshal(configRun)
-			taskId, err = serverapi.NewRunTask("xdomainscan", string(configJSON), mainTaskId, "")
+			taskId, err = serverapi.NewRunTask("xsubfinder", string(configJSON), mainTaskId, "")
 			if err != nil {
 				logging.RuntimeLog.Errorf("start xdomainscan fail:%s", err.Error())
 				return "", err
@@ -305,7 +305,7 @@ func StartXDomainScanTask(req XScanRequestParam, mainTaskId string, workspaceId 
 			configRun.Domain[target] = struct{}{}
 			configRun.IsSubDomainBrute = true
 			configJSON, _ := json.Marshal(configRun)
-			taskId, err = serverapi.NewRunTask("xdomainscan", string(configJSON), mainTaskId, "")
+			taskId, err = serverapi.NewRunTask("xsubdomainbrute", string(configJSON), mainTaskId, "")
 			if err != nil {
 				logging.RuntimeLog.Errorf("start xdomainscan fail:%s", err.Error())
 				return "", err
@@ -317,7 +317,7 @@ func StartXDomainScanTask(req XScanRequestParam, mainTaskId string, workspaceId 
 			configRun.Domain[target] = struct{}{}
 			configRun.IsSubDomainCrawler = true
 			configJSON, _ := json.Marshal(configRun)
-			taskId, err = serverapi.NewRunTask("xdomainscan", string(configJSON), mainTaskId, "")
+			taskId, err = serverapi.NewRunTask("xsubdomaincrawler", string(configJSON), mainTaskId, "")
 			if err != nil {
 				logging.RuntimeLog.Errorf("start xdomainscan fail:%s", err.Error())
 				return "", err
@@ -344,7 +344,7 @@ func StartXDomainScanTask(req XScanRequestParam, mainTaskId string, workspaceId 
 				configRun.FofaTarget = target
 				configRun.IsFofa = true
 				configJSONRun, _ := json.Marshal(configRun)
-				taskId, err = serverapi.NewRunTask("xonlineapi", string(configJSONRun), mainTaskId, "")
+				taskId, err = serverapi.NewRunTask("xfofa", string(configJSONRun), mainTaskId, "")
 				if err != nil {
 					logging.RuntimeLog.Errorf("start xonlineapi fail:%s", err.Error())
 					return "", err
@@ -355,7 +355,7 @@ func StartXDomainScanTask(req XScanRequestParam, mainTaskId string, workspaceId 
 				configRun.FofaTarget = target
 				configRun.IsHunter = true
 				configJSONRun, _ := json.Marshal(configRun)
-				taskId, err = serverapi.NewRunTask("xonlineapi", string(configJSONRun), mainTaskId, "")
+				taskId, err = serverapi.NewRunTask("xhunter", string(configJSONRun), mainTaskId, "")
 				if err != nil {
 					logging.RuntimeLog.Errorf("start xonlineapi fail:%s", err.Error())
 					return "", err
@@ -366,7 +366,7 @@ func StartXDomainScanTask(req XScanRequestParam, mainTaskId string, workspaceId 
 				configRun.FofaTarget = target
 				configRun.IsQuake = true
 				configJSONRun, _ := json.Marshal(configRun)
-				taskId, err = serverapi.NewRunTask("xonlineapi", string(configJSONRun), mainTaskId, "")
+				taskId, err = serverapi.NewRunTask("xquake", string(configJSONRun), mainTaskId, "")
 				if err != nil {
 					logging.RuntimeLog.Errorf("start xonlineapi fail:%s", err.Error())
 					return "", err
@@ -421,7 +421,7 @@ func StartXPortScanTask(req XScanRequestParam, mainTaskId string, workspaceId in
 				configRunAPI.FofaTarget = target
 				configRunAPI.IsFofa = true
 				configJSONRun, _ := json.Marshal(configRunAPI)
-				taskId, err = serverapi.NewRunTask("xonlineapi", string(configJSONRun), mainTaskId, "")
+				taskId, err = serverapi.NewRunTask("xfofa", string(configJSONRun), mainTaskId, "")
 				if err != nil {
 					logging.RuntimeLog.Errorf("start xonlineapi fail:%s", err.Error())
 					return "", err
@@ -432,7 +432,7 @@ func StartXPortScanTask(req XScanRequestParam, mainTaskId string, workspaceId in
 				configRunAPI.FofaTarget = target
 				configRunAPI.IsHunter = true
 				configJSONRun, _ := json.Marshal(configRunAPI)
-				taskId, err = serverapi.NewRunTask("xonlineapi", string(configJSONRun), mainTaskId, "")
+				taskId, err = serverapi.NewRunTask("xhunter", string(configJSONRun), mainTaskId, "")
 				if err != nil {
 					logging.RuntimeLog.Errorf("start xonlineapi fail:%s", err.Error())
 					return "", err
@@ -443,7 +443,7 @@ func StartXPortScanTask(req XScanRequestParam, mainTaskId string, workspaceId in
 				configRunAPI.FofaTarget = target
 				configRunAPI.IsQuake = true
 				configJSONRun, _ := json.Marshal(configRunAPI)
-				taskId, err = serverapi.NewRunTask("xonlineapi", string(configJSONRun), mainTaskId, "")
+				taskId, err = serverapi.NewRunTask("xquake", string(configJSONRun), mainTaskId, "")
 				if err != nil {
 					logging.RuntimeLog.Errorf("start xonlineapi fail:%s", err.Error())
 					return "", err
@@ -579,7 +579,7 @@ func doBatchScan(workspaceId int, mainTaskId string, target string, port string,
 }
 
 // doDomainscan 域名任务
-func doDomainscan(workspaceId int, mainTaskId string, target string, req DomainscanRequestParam) (taskId string, err error) {
+func doDomainscan(workspaceId int, mainTaskId string, target string, req DomainscanRequestParam, taskName string) (taskId string, err error) {
 	config := domainscan.Config{
 		Target:             target,
 		OrgId:              &req.OrgId,
@@ -602,12 +602,12 @@ func doDomainscan(workspaceId int, mainTaskId string, target string, req Domains
 	}
 	configJSON, err := json.Marshal(config)
 	if err != nil {
-		logging.RuntimeLog.Errorf("start domainscan fail:%s", err.Error())
+		logging.RuntimeLog.Errorf("start %s fail:%s", taskName, err.Error())
 		return "", err
 	}
-	taskId, err = serverapi.NewRunTask("domainscan", string(configJSON), mainTaskId, "")
+	taskId, err = serverapi.NewRunTask(taskName, string(configJSON), mainTaskId, "")
 	if err != nil {
-		logging.RuntimeLog.Errorf("start domainscan fail:%s", err.Error())
+		logging.RuntimeLog.Errorf("start %s fail:%s", taskName, err.Error())
 		return "", err
 	}
 	return taskId, nil
@@ -818,24 +818,8 @@ func ParseTargetFromKwArgs(taskName, args string) (target string) {
 			}
 			target = strings.Join(allTarget, ",")
 		}
-	} else if taskName == "xraypoc" {
-		var t XrayPocStrut
-		err := json.Unmarshal([]byte(args), &t)
-		if err != nil {
-			target = args
-		} else {
-			var allTarget []string
-			for ip, ports := range t.IPPortResult {
-				for _, port := range ports {
-					allTarget = append(allTarget, fmt.Sprintf("%s:%d", ip, port))
-				}
-			}
-			for _, domain := range t.DomainResult {
-				allTarget = append(allTarget, domain)
-			}
-			target = strings.Join(allTarget, ",")
-		}
-	} else if taskName == "xportscan" || taskName == "xdomainscan" || taskName == "xonlineapi" || taskName == "xxraypoc" || taskName == "xxray" || taskName == "xnuclei" || taskName == "xgoby" || taskName == "xfingerprint" || taskName == "xorgscan" {
+	} else if taskName != "xray" && strings.HasPrefix(taskName, "x") {
+		//taskName == "xportscan" || taskName == "xdomainscan" || taskName == "xonlineapi" || taskName == "xxray" || taskName == "xnuclei" || taskName == "xgoby" || taskName == "xfingerprint" || taskName == "xorgscan"
 		var t XScanConfig
 		err := json.Unmarshal([]byte(args), &t)
 		if err != nil {

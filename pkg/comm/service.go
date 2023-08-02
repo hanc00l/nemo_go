@@ -258,12 +258,10 @@ func (s *Service) SaveWhoisResult(ctx context.Context, args *map[string]*whoispa
 func (s *Service) CheckTask(ctx context.Context, args *string, replay *TaskStatusArgs) error {
 	taskRun := &db.TaskRun{TaskId: *args}
 	if !taskRun.GetByTaskId() {
-		logging.RuntimeLog.Warningf("task not exists: %s", taskRun.TaskId)
 		return nil
 	}
 	taskMain := &db.TaskMain{TaskId: taskRun.MainTaskId}
 	if !taskMain.GetByTaskId() {
-		logging.RuntimeLog.Warningf("mainTask not exists: %s", taskMain.TaskId)
 		return nil
 	}
 	replay.IsExist = true
@@ -282,7 +280,6 @@ func (s *Service) CheckTask(ctx context.Context, args *string, replay *TaskStatu
 func (s *Service) UpdateTask(ctx context.Context, args *TaskStatusArgs, replay *bool) error {
 	taskCheck := &db.TaskRun{TaskId: args.TaskID}
 	if !taskCheck.GetByTaskId() {
-		logging.RuntimeLog.Warningf("task not exists: %s", args.TaskID)
 		return nil
 	}
 	dt := time.Now()
@@ -315,7 +312,7 @@ func (s *Service) UpdateTask(ctx context.Context, args *TaskStatusArgs, replay *
 }
 
 // KeepAlive worker通过RPC，保持与server的心跳与同步
-func (s *Service) KeepAlive(ctx context.Context, args *KeepAliveInfo, replay *map[string]string) error {
+func (s *Service) KeepAlive(ctx context.Context, args *KeepAliveInfo, replay *string) error {
 	if args.WorkerStatus.WorkerName == "" {
 		logging.RuntimeLog.Error("no worker name")
 		return nil
@@ -324,8 +321,9 @@ func (s *Service) KeepAlive(ctx context.Context, args *KeepAliveInfo, replay *ma
 	WorkerStatus[args.WorkerStatus.WorkerName] = &args.WorkerStatus
 	WorkerStatus[args.WorkerStatus.WorkerName].UpdateTime = time.Now()
 	WorkerStatusMutex.Unlock()
+	msg := "ok"
+	*replay = msg
 
-	*replay = newKeepAliveResponseInfo(args.CustomFiles)
 	return nil
 }
 

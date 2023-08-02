@@ -2,8 +2,8 @@ package main
 
 import (
 	"flag"
-	"fmt"
 	"github.com/hanc00l/nemo_go/pkg/comm"
+	"github.com/hanc00l/nemo_go/pkg/conf"
 	"github.com/hanc00l/nemo_go/pkg/filesync"
 	"github.com/hanc00l/nemo_go/pkg/logging"
 	"os"
@@ -11,7 +11,36 @@ import (
 	"syscall"
 )
 
-func SetupCloseHandler() {
+type WorkerDaemonOption struct {
+	Concurrency       int
+	WorkerPerformance int
+	NoFilesync        bool
+	WorkerRunTaskMode string
+	ManualSyncHost    string
+	ManualSyncPort    string
+	ManualSyncAuth    string
+	TaskWorkspaceGUID string
+}
+
+func parseDaemonWorkerOption() *WorkerDaemonOption {
+	option := &WorkerDaemonOption{}
+	if conf.RunMode == conf.Debug {
+		option.NoFilesync = true
+	}
+	flag.IntVar(&option.Concurrency, "c", 3, "concurrent number of tasks")
+	flag.IntVar(&option.WorkerPerformance, "p", 0, "worker performance,default is autodetect (0:autodetect, 1:high, 2:normal)")
+	flag.StringVar(&option.WorkerRunTaskMode, "m", "0", "worker run task mode; 0: all, 1:active, 2:finger, 3:passive, 4:pocscan, 5:custom; run multiple mode separated by \",\"")
+	flag.StringVar(&option.TaskWorkspaceGUID, "w", "", "workspace guid for custom task; multiple workspace separated by \",\"")
+	flag.StringVar(&option.ManualSyncHost, "mh", "", "manual file sync host address")
+	flag.StringVar(&option.ManualSyncPort, "mp", "", "manual file sync port,default is 5002")
+	flag.StringVar(&option.ManualSyncAuth, "ma", "", "manual file sync auth key")
+	flag.BoolVar(&option.NoFilesync, "nf", option.NoFilesync, "disable file sync")
+	flag.Parse()
+
+	return option
+}
+
+func setupCloseHandler() {
 	quitSignal := make(chan os.Signal, 1)
 	signal.Notify(quitSignal, os.Interrupt, syscall.SIGTERM)
 	go func() {
@@ -24,31 +53,18 @@ func SetupCloseHandler() {
 }
 
 func main() {
-	var concurrency, workerPerformance int
-	var noFilesync bool
-	var workerRunTaskMode int
-	flag.IntVar(&concurrency, "c", 3, "concurrent number of tasks")
-	flag.IntVar(&workerPerformance, "p", 0, "worker performance,default is autodetect(0: autodetect, 1:high, 2:normal)")
-	flag.BoolVar(&noFilesync, "nf", false, "disable file sync")
-	flag.IntVar(&workerRunTaskMode, "m", 0, "worker run task mode,default is 0(0: all, 1:active scan, 2:finger, 3:passive collect, 4:custom)")
-	// manual sync for worker by command line
-	var manualSyncHost, manualSyncPort, manualSyncAuth string
-	flag.StringVar(&manualSyncHost, "mh", "", "manual file sync host address")
-	flag.StringVar(&manualSyncPort, "mp", "", "manual file sync port,default is 5002")
-	flag.StringVar(&manualSyncAuth, "ma", "", "manual file sync auth key")
-	flag.Parse()
+	option := parseDaemonWorkerOption()
+	if option == nil {
+		return
+	}
 
-	if workerRunTaskMode < 0 || workerRunTaskMode > 4 {
-		fmt.Println("error workerRunTaskMode!")
+	if option.ManualSyncHost != "" && option.ManualSyncPort != "" && option.ManualSyncAuth != "" {
+		logging.RuntimeLog.Info("start onetime file sync...")
+		logging.CLILog.Info("start onetime file sync...")
+		filesync.WorkerStartupSync(option.ManualSyncHost, option.ManualSyncPort, option.ManualSyncAuth)
 		return
 	}
 	go comm.StartSaveRuntimeLog(comm.GetWorkerNameBySelf())
-	if manualSyncHost != "" && manualSyncPort != "" && manualSyncAuth != "" {
-		logging.RuntimeLog.Info("start onetime file sync...")
-		logging.CLILog.Info("start onetime file sync...")
-		filesync.WorkerStartupSync(manualSyncHost, manualSyncPort, manualSyncAuth)
-		return
-	}
-	go SetupCloseHandler()
-	comm.StartWorkerDaemon(workerRunTaskMode, concurrency, workerPerformance, noFilesync)
+	go setupCloseHandler()
+	comm.StartWorkerDaemon(option.WorkerRunTaskMode, option.TaskWorkspaceGUID, option.Concurrency, option.WorkerPerformance, option.NoFilesync)
 }

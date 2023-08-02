@@ -6,6 +6,8 @@ import (
 	"github.com/hanc00l/nemo_go/pkg/conf"
 	"github.com/hanc00l/nemo_go/pkg/logging"
 	"github.com/hanc00l/nemo_go/pkg/notify"
+	"github.com/hanc00l/nemo_go/pkg/task/ampq"
+	"github.com/hanc00l/nemo_go/pkg/task/custom"
 	"github.com/hanc00l/nemo_go/pkg/task/onlineapi"
 	"github.com/hanc00l/nemo_go/pkg/utils"
 	"os"
@@ -19,17 +21,20 @@ type ConfigController struct {
 }
 
 const (
-	HoneyPot    string = "honeypot"
-	IPLocation  string = "iplocation"
-	IPLocationB string = "iplocationB"
-	IPLocationC string = "iplocationC"
-	Service     string = "service"
-	Xray        string = "xray.yaml"
-	XrayConfig  string = "config.yaml"
-	XrayPlugin  string = "plugin.xray.yaml"
-	XrayModule  string = "module.xray.yaml"
-	BlackDomain string = "black_domain.txt"
-	BlackIP     string = "black_ip.txt"
+	HoneyPot               string = "honeypot"
+	IPLocation             string = "iplocation"
+	IPLocationB            string = "iplocationB"
+	IPLocationC            string = "iplocationC"
+	Service                string = "service"
+	Xray                   string = "xray"
+	XrayConfig             string = "config.xray"
+	XrayPlugin             string = "plugin.xray"
+	XrayModule             string = "module.xray"
+	BlackDomain            string = "black_domain"
+	BlackIP                string = "black_ip"
+	TaskWorkspace          string = "task_workspace"
+	FOFAFilterKeyword      string = "fofa_filter_keyword"
+	FOFAFilterKeywordLocal string = "fofa_filter_keyword_local"
 )
 
 type DefaultConfig struct {
@@ -43,6 +48,7 @@ type DefaultConfig struct {
 	IpSliceNumber   int    `json:"ipslicenumber" form:"ipslicenumber"`
 	PortSliceNumber int    `json:"portslicenumber" form:"portslicenumber"`
 	Version         string `json:"version" form:"version"`
+	TaskWorkspace   string `json:"taskworkspace" form:"taskworkspace"`
 	//fingerprint
 	IsHttpx          bool `json:"httpx" form:"httpx"`
 	IsScreenshot     bool `json:"screenshot" form:"screenshot"`
@@ -201,6 +207,7 @@ func (c *ConfigController) LoadCustomConfigAction() {
 	}
 	customFile := getCustomFilename(customType)
 	if customFile == "" {
+		logging.RuntimeLog.Errorf("error custom file:%s", customType)
 		c.FailedStatus("错误的类型")
 		return
 	}
@@ -222,12 +229,13 @@ func (c *ConfigController) SaveCustomConfigAction() {
 
 	customType := c.GetString("type", "")
 	customContent := c.GetString("content", "")
-	if customType == "" || customContent == "" {
-		c.FailedStatus("未指定类型或内容")
+	if customType == "" {
+		c.FailedStatus("未指定类型")
 		return
 	}
 	customFile := getCustomFilename(customType)
 	if customFile == "" {
+		logging.RuntimeLog.Errorf("get custom file type:%s fail", customType)
 		c.FailedStatus("错误的类型")
 		return
 	}
@@ -237,6 +245,12 @@ func (c *ConfigController) SaveCustomConfigAction() {
 		return
 	}
 	c.SucceededStatus("保存配置成功")
+}
+
+// SaveCustomTaskWorkspaceConfigAction 保存自定义任务的GUID，然后server重新加载
+func (c *ConfigController) SaveCustomTaskWorkspaceConfigAction() {
+	c.SaveCustomConfigAction()
+	ampq.CustomTaskWorkspaceMap = custom.LoadCustomTaskWorkspace()
 }
 
 // SaveTaskSliceNumberAction 保存任务切分设置
@@ -579,6 +593,13 @@ func getCustomFilename(customType string) (customFile string) {
 		customFile = "custom/black_domain.txt"
 	case BlackIP:
 		customFile = "custom/black_ip.txt"
+	case TaskWorkspace:
+		customFile = "custom/task_workspace.txt"
+	case FOFAFilterKeyword:
+		customFile = "custom/fofa_filter_keyword.txt"
+	case FOFAFilterKeywordLocal:
+		customFile = "custom/fofa_filter_keyword_local.txt"
 	}
+
 	return
 }

@@ -8,6 +8,8 @@ import (
 	"github.com/hanc00l/nemo_go/pkg/task/ampq"
 	"github.com/hanc00l/nemo_go/pkg/task/custom"
 	"github.com/hanc00l/nemo_go/pkg/task/runner"
+	"github.com/hanc00l/nemo_go/pkg/utils"
+	"strings"
 	"time"
 )
 
@@ -25,7 +27,7 @@ type DashboardStatisticData struct {
 type WorkerStatusData struct {
 	Index                    int    `json:"index"`
 	WorkName                 string `json:"worker_name"`
-	WorkerRunTaskMode        string `json:"worker_mode"`
+	WorkerTopic              string `json:"worker_topic"`
 	CreateTime               string `json:"create_time"`
 	UpdateTime               string `json:"update_time"`
 	TaskExecutedNumber       int    `json:"task_number"`
@@ -156,7 +158,7 @@ func (c *DashboardController) WorkerAliveListAction() {
 		wsd := WorkerStatusData{
 			Index:              index,
 			WorkName:           v.WorkerName,
-			WorkerRunTaskMode:  c.getWorkerTaskRunModeName(v.WorkerRunTaskMode),
+			WorkerTopic:        c.getWorkerTopicDescription(v.WorkerTopics),
 			CreateTime:         FormatDateTime(v.CreateTime),
 			UpdateTime:         fmt.Sprintf("%s前", time.Now().Sub(v.UpdateTime).Truncate(time.Second).String()),
 			TaskExecutedNumber: v.TaskExecutedNumber,
@@ -274,17 +276,28 @@ func (c *DashboardController) OnlineUserListAction() {
 	c.Data["json"] = resp
 }
 
-func (c *DashboardController) getWorkerTaskRunModeName(taskMode string) string {
+func (c *DashboardController) getWorkerTopicDescription(taskMode string) string {
 	var modeNameMap = map[string]string{
 		"default": "全部任务",
 		"active":  "主动扫描",
 		"finger":  "指纹识别",
 		"passive": "被动收集",
-		"custom":  "自定义",
+		"pocscan": "漏洞验证",
+		"custom":  "自定义任务",
 	}
-	if modeName, ok := modeNameMap[taskMode]; ok {
-		return modeName
-	} else {
-		return "未知模式"
+	workerTopicDescription := make(map[string]struct{})
+	topicsArray := strings.Split(taskMode, ",")
+	if len(topicsArray) >= 4 {
+		return modeNameMap["default"]
 	}
+	for _, v := range topicsArray {
+		if modeName, ok := modeNameMap[v]; ok {
+			workerTopicDescription[modeName] = struct{}{}
+		} else if strings.HasPrefix(v, "custom") {
+			workerTopicDescription[modeNameMap["custom"]] = struct{}{}
+		} else {
+			return "未知模式"
+		}
+	}
+	return utils.SetToString(workerTopicDescription)
 }

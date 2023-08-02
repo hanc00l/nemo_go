@@ -9,13 +9,32 @@ import (
 	"github.com/hanc00l/nemo_go/pkg/comm"
 	"github.com/hanc00l/nemo_go/pkg/conf"
 	"github.com/hanc00l/nemo_go/pkg/logging"
+	"github.com/hanc00l/nemo_go/pkg/task/ampq"
+	"github.com/hanc00l/nemo_go/pkg/task/custom"
 	"github.com/hanc00l/nemo_go/pkg/task/runner"
 	_ "github.com/hanc00l/nemo_go/pkg/web/routers"
 	"net/http"
 	"time"
 )
 
+type ServerOption struct {
+	NoFilesync bool
+	NoRPC      bool
+}
+
 var UrlFilterWhiteList = []string{"/"}
+
+func parseServerOption() *ServerOption {
+	option := &ServerOption{}
+	if conf.RunMode == conf.Debug {
+		option.NoFilesync = true
+	}
+	flag.BoolVar(&option.NoFilesync, "nf", option.NoFilesync, "disable file sync")
+	flag.BoolVar(&option.NoRPC, "nr", false, "disable rpc")
+	flag.Parse()
+
+	return option
+}
 
 // StartCronTask 启动定时任务
 func StartCronTask() {
@@ -66,29 +85,30 @@ func filterLoginCheck(ctx *beegoContext.Context) {
 	}
 }
 
-func main() {
-	var noFilesync, noRPC bool
-	if conf.RunMode == conf.Debug {
-		noFilesync = true
-	}
-	flag.BoolVar(&noFilesync, "nf", noFilesync, "disable file sync")
-	flag.BoolVar(&noRPC, "nr", false, "disable rpc")
-	flag.Parse()
+func loadCustomTaskWorkspace() {
+	ampq.CustomTaskWorkspaceMap = custom.LoadCustomTaskWorkspace()
+}
 
-	if noFilesync == false {
+func main() {
+	option := parseServerOption()
+	if option == nil {
+		return
+	}
+	if !option.NoFilesync {
 		go comm.StartFileSyncServer()
 		go comm.StartFileSyncMonitor()
 		time.Sleep(time.Second * 1)
 	}
-	if noRPC == false {
+	if !option.NoRPC {
 		go comm.StartRPCServer()
 		time.Sleep(time.Second * 1)
 	}
 	go comm.StartSaveRuntimeLog("server@nemo")
+	loadCustomTaskWorkspace()
 	StartCronTask()
 	StartMainTaskDemon()
-
 	time.Sleep(time.Second * 1)
+
 	err := comm.GenerateRSAKey()
 	if err != nil {
 		logging.CLILog.Error(err)
