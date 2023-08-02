@@ -1,20 +1,7 @@
 $(function () {
     $('#btnsiderbar').click();
     load_config();
-    load_custom('honeypot', $('#text_honeypot'));
-    load_custom('service', $('#text_service'));
-    load_custom('iplocation', $('#text_iplocation'));
-    $('#select_iplocation_filename').change(function () {
-        load_custom($('#select_iplocation_filename').val(), $('#text_iplocation'));
-    });
-    load_custom('config.yaml', $('#text_xray_config'));
-    $('#select_xray_config_filename').change(function () {
-        load_custom($('#select_xray_config_filename').val(), $('#text_xray_config'));
-    });
-    load_custom('black_domain.txt', $('#text_black_domain_ip'));
-    $('#select_black_filename').change(function () {
-        load_custom($('#select_black_filename').val(), $('#text_black_domain_ip'));
-    });
+    load_custom('task_workspace', $('#text_task_workspace'));
     $("#buttonSaveNmap").click(function () {
         $.post("/config-save-portscan",
             {
@@ -39,7 +26,6 @@ $(function () {
                 }
             });
     });
-
     $("#buttonSaveFingerprint").click(function () {
         $.post("/config-save-fingerprint",
             {
@@ -64,7 +50,6 @@ $(function () {
                 }
             });
     });
-
     $("#buttonSaveTaskSlice").click(function () {
         if ($('#input_ipslicenumber').val() === '' || $('#input_portslicenumber').val() === '') {
             swal('Warning', "请输入数量", 'error');
@@ -90,7 +75,6 @@ $(function () {
                 }
             });
     });
-
     $("#buttonSaveNotify").click(function () {
         $.post("/config-save-notify",
             {
@@ -129,7 +113,6 @@ $(function () {
             }
         });
     });
-
     $("#buttonSaveAPIToken").click(function () {
         $.post("/config-save-api",
             {
@@ -175,7 +158,6 @@ $(function () {
             }
         });
     });
-
     $("#buttonSaveDomainscan").click(function () {
         $.post("/config-save-domainscan",
             {
@@ -204,90 +186,45 @@ $(function () {
                 }
             });
     });
-});
-$("#buttonSaveHoneypot").click(function () {
-    save_custom("honeypot", $('#text_honeypot').val())
-});
-$("#buttonSaveService").click(function () {
-    save_custom("service", $('#text_service').val())
-});
-$("#buttonSaveIPLocation").click(function () {
-    save_custom($("#select_iplocation_filename").val(), $('#text_iplocation').val())
-});
-$("#buttonSaveBlackDomainIP").click(function () {
-    save_custom($("#select_black_filename").val(), $('#text_black_domain_ip').val())
-});
-$("#buttonUploadPoc").click(function () {
-    let formData = new FormData();
-    formData.append('type', $('#select_poc_type').val());
-    formData.append('file', $('#file_poc')[0].files[0]);
-    if (formData.get("file") === "undefined") {
-        swal('Warning', '请选择要上传的文件！', 'error');
-        return;
-    }
-    $.ajax({
-        url: "/config-upload-poc",
-        type: "post",
-        data: formData,
-        //十分重要，不能省略
-        cache: false,
-        processData: false,
-        contentType: false,
-        success: function (data, e) {
-            if (e === "success" && data['status'] == 'success') {
-                swal({
-                    title: "保存成功！",
-                    text: data['msg'],
-                    type: "success",
-                    confirmButtonText: "确定",
-                    confirmButtonColor: "#41b883",
-                    closeOnConfirm: true,
-                    timer: 3000
-                });
-            } else {
-                swal('Warning', data['msg'], 'error');
-            }
+    $("#buttonChangPassword").click(function () {
+        if ($('#input_oldpass').val() === '' || $('#input_password1').val() === '' || $('#input_password2').val() === '') {
+            swal('Warning', "请输入密码！", 'error');
+            return;
         }
+        if ($('#input_password1').val() !== $('#input_password2').val()) {
+            swal('Warning', "两次新密码不一致！", 'error');
+            return;
+        }
+        let encryptor = new JSEncrypt();
+        encryptor.setPublicKey(pubKey);
+        let oldpass = encryptor.encrypt($('#input_oldpass').val());
+        let newpass = encryptor.encrypt($('#input_password1').val());
+        $.post("/config-change-password",
+            {
+                "oldpass": oldpass,
+                "newpass": newpass,
+            }, function (data, e) {
+                if (e === "success" && data['status'] == 'success') {
+                    $('#input_oldpass').val('');
+                    $('#input_password1').val('');
+                    $('#input_password2').val('');
+                    swal({
+                        title: "密码修改成功！",
+                        text: "",
+                        type: "success",
+                        confirmButtonText: "确定",
+                        confirmButtonColor: "#41b883",
+                        closeOnConfirm: true,
+                        timer: 3000
+                    });
+                } else {
+                    swal('Warning', data['msg'], 'error');
+                }
+            });
     });
-});
-$("#buttonSaveXrayConfig").click(function () {
-    save_custom($('#select_xray_config_filename').val(), $('#text_xray_config').val())
-});
-$("#buttonChangPassword").click(function () {
-    if ($('#input_oldpass').val() === '' || $('#input_password1').val() === '' || $('#input_password2').val() === '') {
-        swal('Warning', "请输入密码！", 'error');
-        return;
-    }
-    if ($('#input_password1').val() !== $('#input_password2').val()) {
-        swal('Warning', "两次新密码不一致！", 'error');
-        return;
-    }
-    let encryptor = new JSEncrypt();
-    encryptor.setPublicKey(pubKey);
-    let oldpass = encryptor.encrypt($('#input_oldpass').val());
-    let newpass = encryptor.encrypt($('#input_password1').val());
-    $.post("/config-change-password",
-        {
-            "oldpass": oldpass,
-            "newpass": newpass,
-        }, function (data, e) {
-            if (e === "success" && data['status'] == 'success') {
-                $('#input_oldpass').val('');
-                $('#input_password1').val('');
-                $('#input_password2').val('');
-                swal({
-                    title: "密码修改成功！",
-                    text: "",
-                    type: "success",
-                    confirmButtonText: "确定",
-                    confirmButtonColor: "#41b883",
-                    closeOnConfirm: true,
-                    timer: 3000
-                });
-            } else {
-                swal('Warning', data['msg'], 'error');
-            }
-        });
+    $("#buttonSaveTaskWorkspace").click(function () {
+        save_custom("task_workspace", $('#text_task_workspace').val(), "/custom-save-taskworkspace")
+    });
 });
 
 function load_config() {
@@ -347,12 +284,12 @@ function load_custom(type, textCtl) {
         });
 }
 
-function save_custom(type, content) {
-    if (content === "") {
-        swal('Warning', "空的配置！", 'error');
+function save_custom(type, content, url = "/custom-save") {
+    if (type === "") {
+        swal('Warning', "类型为空！", 'error');
         return;
     }
-    $.post("/custom-save",
+    $.post(url,
         {
             "type": type,
             "content": content

@@ -14,7 +14,6 @@
             <div class="tile">
                 <h3 class="tile-title">IP归属地</h3>
                 <div class="tile-body">
-
                     <label class="col-form-label" for="select_iplocation_filename">
                         <b>配置文件</b>
                     </label>
@@ -28,13 +27,13 @@
                             <label class="col-form-label" for="text_iplocation">
                                 <b>配置参数</b>
                             </label>
-                            <textarea class="form-control" id="text_iplocation" rows="8"></textarea>
+                            <textarea class="form-control" id="text_iplocation" rows="6"></textarea>
                         </div>
                     </form>
                     <div class="tile-footer">
                         <button class="btn btn-primary" type="button" id="buttonSaveIPLocation"><i
                                 class="fa fa-fw fa-lg fa-check-circle"></i>保存IP设置
-                        </button>&nbsp;&nbsp;&nbsp;
+                        </button>
                     </div>
                 </div>
             </div>
@@ -43,7 +42,7 @@
                 <div class="tile-body">
                     <form>
                         <div class="form-group">
-                            <textarea class="form-control" id="text_service" rows="8"></textarea>
+                            <textarea class="form-control" id="text_service" rows="4"></textarea>
                         </div>
                     </form>
                 </div>
@@ -58,7 +57,7 @@
                 <div class="tile-body">
                     <form>
                         <div class="form-group">
-                            <textarea class="form-control" id="text_honeypot" rows="8"></textarea>
+                            <textarea class="form-control" id="text_honeypot" rows="4"></textarea>
                         </div>
                     </form>
                 </div>
@@ -66,6 +65,32 @@
                     <button class="btn btn-primary" type="button" id="buttonSaveHoneypot"><i
                             class="fa fa-fw fa-lg fa-check-circle"></i>保存设置
                     </button>&nbsp;&nbsp;&nbsp;
+                </div>
+            </div>
+            <div class="tile">
+                <h3 class="tile-title">FOFA过滤关键词</h3>
+                <small class="form-text text-muted">对FOFA请求及返回结果中的title进行过滤，每行一个关键词。</small>
+                <div class="tile-body">
+                    <label class="col-form-label" for="select_fofa_filter_keyword_type">
+                        <b>配置文件</b>
+                    </label>
+                    <select class="form-control" id="select_fofa_filter_keyword_type">
+                        <option value="fofa_filter_keyword">查询关键词</option>
+                        <option value="fofa_filter_keyword_local">搜索结果关键词</option>
+                    </select>
+                    <form>
+                        <div class="form-group">
+                            <label class="col-form-label" for="text_fofa_filter_keyword">
+                                <b>关键词</b>
+                            </label>
+                            <textarea class="form-control" id="text_fofa_filter_keyword" rows="6"></textarea>
+                        </div>
+                    </form>
+                    <div class="tile-footer">
+                        <button class="btn btn-primary" type="button" id="buttonSaveFOFAFilterKeyword"><i
+                                class="fa fa-fw fa-lg fa-check-circle"></i>保存设置
+                        </button>&nbsp;&nbsp;&nbsp;
+                    </div>
                 </div>
             </div>
         </div>
@@ -78,15 +103,15 @@
                         <b>配置文件</b>
                     </label>
                     <select class="form-control" id="select_black_filename">
-                        <option value="black_domain.txt">域名</option>
-                        <option value="black_ip.txt">IP</option>
+                        <option value="black_domain">域名</option>
+                        <option value="black_ip">IP</option>
                     </select>
                     <form>
                         <div class="form-group">
                             <label class="col-form-label" for="text_black_domain_ip">
                                 <b>黑名单列表</b>
                             </label>
-                            <textarea class="form-control" id="text_black_domain_ip" rows="8"></textarea>
+                            <textarea class="form-control" id="text_black_domain_ip" rows="6"></textarea>
                         </div>
                     </form>
                     <div class="tile-footer">
@@ -130,10 +155,10 @@
                         <b>配置文件</b>
                     </label>
                     <select class="form-control" id="select_xray_config_filename">
-                        <option value="config.yaml">config.yaml</option>
-                        <option value="module.xray.yaml">module.xray.yaml</option>
-                        <option value="plugin.xray.yaml">plugin.xray.yaml</option>
-                        <option value="xray.yaml">xray.yaml</option>
+                        <option value="config.xray">config.yaml</option>
+                        <option value="module.xray">module.xray.yaml</option>
+                        <option value="plugin.xray">plugin.xray.yaml</option>
+                        <option value="xray">xray.yaml</option>
                     </select>
                     <form>
                         <div class="form-group">
@@ -163,7 +188,7 @@
 <script src="static/js/plugins/dataTables.bootstrap.min.js"></script>
 <script src="static/js/sweetalert/sweetalert.min.js"></script>
 <script src="static/js/jquery/jquery.bootstrap-duallistbox.js"></script>
-<script src="static/js/server/config.js"></script>
+<script src="static/js/server/custom.js"></script>
 <script>
     $(function () {
         $("title").html("Custom-Nemo");

@@ -177,6 +177,21 @@
                     </button>&nbsp;&nbsp;&nbsp;
                 </div>
             </div>
+            <div class="tile">
+                <h3 class="tile-title">自定义任务的工作空间</h3>
+                <div class="tile-body">
+                    <form>
+                        <div class="form-group">
+                            <textarea class="form-control" id="text_task_workspace" rows="4"></textarea>
+                        </div>
+                    </form>
+                </div>
+                <div class="tile-footer">
+                    <button class="btn btn-primary" type="button" id="buttonSaveTaskWorkspace"><i
+                            class="fa fa-fw fa-lg fa-check-circle"></i>保存设置
+                    </button>&nbsp;&nbsp;&nbsp;
+                </div>
+            </div>
             {{ end }}
             <div class="tile">
                 <h3 class="tile-title">Version&nbsp;<span id="nemo_version"></span></h3>
@@ -259,7 +274,7 @@
                     </button>&nbsp;&nbsp;&nbsp;
                     <button class="btn btn-primary" type="button" id="buttonTestAPIToken"><i
                             class="fa fa-fw fa-lg fa-podcast"></i>测试API
-                    </button>&nbsp;&nbsp;&nbsp;
+                    </button>（点击测试后需要一定时间，请等待...）&nbsp;&nbsp;&nbsp;
                 </div>
             </div>
             <div class="tile">

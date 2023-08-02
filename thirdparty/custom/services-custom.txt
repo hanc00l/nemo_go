@@ -1,2 +1,1 @@
-#port/tcp service_name
-10022/tcp SSH_Custom
+#port/tcp service_name，如10022/tcp SSH_Custom
