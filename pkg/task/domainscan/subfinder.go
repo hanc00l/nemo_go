@@ -56,6 +56,7 @@ func (s *SubFinder) RunSubFinder(domain string) {
 		"-rlist", filepath.Join(conf.GetRootPath(), "thirdparty/dict", conf.GlobalWorkerConfig().Domainscan.Resolver),
 		"-provider-config", filepath.Join(conf.GetRootPath(), "thirdparty/dict", conf.GlobalWorkerConfig().Domainscan.ProviderConfig),
 		"-no-color", "-v",
+		"-active", //RemoveWildcard
 	)
 	binPath := filepath.Join(conf.GetRootPath(), "thirdparty/subfinder", utils.GetThirdpartyBinNameByPlatform(utils.Subfinder))
 	cmd := exec.Command(binPath, cmdArgs...)
