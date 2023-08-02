@@ -245,11 +245,12 @@ func (g *Gogo) ParseJsonContentResult(content []byte) {
 		}
 		for _, v := range r.Vulns {
 			g.VulResult = append(g.VulResult, pocscan.Result{
-				Target:  r.Ip,
-				Url:     r.Uri,
-				PocFile: v.Name,
-				Source:  "gogo",
-				Extra:   v.String(),
+				Target:      r.Ip,
+				Url:         r.Uri,
+				PocFile:     v.Name,
+				Source:      "gogo",
+				Extra:       v.String(),
+				WorkspaceId: g.Config.WorkspaceId,
 			})
 		}
 	}

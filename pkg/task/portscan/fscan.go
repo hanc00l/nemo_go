@@ -44,8 +44,9 @@ func (f *FScan) ParseTxtContentResult(content []byte) {
 				f.Result.SetIP(hosts[1])
 			}
 		} else if strings.HasPrefix(line, "[*] WebTitle") {
+			//[*] WebTitle: https://10.192.117.161:15093 code:200 len:3773   title:一张表
 			//[*] WebTitle:http://192.168.3.242      code:200 len:86     title:None
-			patternWebTitle := "\\[\\*\\] WebTitle:(http.?://.+) +code:(\\d{1,3}) +len:\\d+ +title:(.+)"
+			patternWebTitle := "\\[\\*\\] WebTitle: *(http.?://.+) +code:(\\d{1,3}) +len:\\d+ +title:(.+)"
 			regWebTitle, _ := regexp.Compile(patternWebTitle)
 			titles := regWebTitle.FindStringSubmatch(line)
 			if len(titles) != 4 {
@@ -84,6 +85,8 @@ func (f *FScan) ParseTxtContentResult(content []byte) {
 				f.Result.SetPortAttr(ip, port, par)
 			}
 		} else if strings.HasPrefix(line, "[+] ") {
+			//[+] mysql:10.192.117.150:3306:root Aa123456
+			//[+] https://10.192.117.122:10008 poc-yaml-go-pprof-leak
 			//[+] http://192.168.10.237:8085 poc-yaml-vmware-vcenter-cve-2021-21985-rce
 			//[+] SSH:192.168.10.236:22:root root@123
 			patternHostPort := "(\\d{1,3}.\\d{1,3}.\\d{1,3}.\\d{1,3}):(\\d{1,5})"
@@ -101,11 +104,12 @@ func (f *FScan) ParseTxtContentResult(content []byte) {
 				lineSeps := strings.Split(line, " ")
 				if len(lineSeps) >= 3 && strings.HasPrefix(lineSeps[2], "poc-yaml") {
 					f.VulResult = append(f.VulResult, pocscan.Result{
-						Target:  ip,
-						Url:     lineSeps[1],
-						PocFile: lineSeps[2],
-						Source:  "fscan",
-						Extra:   line,
+						Target:      ip,
+						Url:         lineSeps[1],
+						PocFile:     lineSeps[2],
+						Source:      "fscan",
+						Extra:       line,
+						WorkspaceId: f.Config.WorkspaceId,
 					})
 				}
 			}
