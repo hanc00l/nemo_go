@@ -24,7 +24,7 @@ var taskMaps = map[string]interface{}{
 	"domainscan":        DomainScan,
 	"subfinder":         DomainScan,
 	"subdomainbrute":    DomainScan,
-	"subdomaincralwer":  DomainScan,
+	"subdomaincrawler":  DomainScan,
 	"iplocation":        IPLocation,
 	"fofa":              Fofa,
 	"quake":             Quake,

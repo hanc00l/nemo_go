@@ -68,7 +68,7 @@ var taskTopicDefineMap = map[string]string{
 	"domainscan":        TopicActive,
 	"subfinder":         TopicPassive,
 	"subdomainbrute":    TopicPassive,
-	"subdomaincralwer":  TopicActive,
+	"subdomaincrawler":  TopicActive,
 	"iplocation":        TopicPassive,
 	"fofa":              TopicPassive,
 	"quake":             TopicPassive,
