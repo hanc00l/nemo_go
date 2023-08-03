@@ -1034,7 +1034,7 @@ func (c *IPController) ExportIPResultAction() {
 	content := c.writeToCSVData(c.getIPExportData(req))
 	rw := c.Ctx.ResponseWriter
 	rw.Header().Set("Content-Disposition", "attachment; filename=ip-result.csv")
-	rw.Header().Set("Content-Type", "text/csv")
+	rw.Header().Set("Content-Type", "text/csv; charset=utf-8")
 	rw.WriteHeader(http.StatusOK)
 
 	http.ServeContent(rw, c.Ctx.Request, "ip-result.csv", time.Now(), bytes.NewReader(content))
@@ -1106,7 +1106,7 @@ func (c *IPController) writeToCSVData(exportInfo []IPExportInfo) []byte {
 	var buf bytes.Buffer
 	bufWrite := bufio.NewWriter(&buf)
 	csvWriter := csv.NewWriter(bufWrite)
-	csvWriter.Write([]string{"index", "url", "ip", "port", "location", "status-code", "title", "finger", "banner", "tlsdata", "httpx", "source"})
+	csvWriter.Write([]string{"index", "url", "ip", "port", "location", "status-code", "title", "finger", "tlsdata", "httpx", "source"})
 	for i, v := range exportInfo {
 		csvWriter.Write([]string{
 			strconv.Itoa(i + 1),
@@ -1117,7 +1117,6 @@ func (c *IPController) writeToCSVData(exportInfo []IPExportInfo) []byte {
 			v.StatusCode,
 			utils.SetToString(v.TitleSet),
 			utils.SetToString(v.FingerSet),
-			utils.SetToString(v.BannerSet),
 			utils.SetToString(v.TlsDataSet),
 			utils.SetToString(v.HttpxSet),
 			utils.SetToString(v.SourceSet),

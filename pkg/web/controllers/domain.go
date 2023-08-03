@@ -1030,7 +1030,7 @@ func (c *DomainController) ExportDomainResultAction() {
 	content := c.writeToCSVData(c.getDomainExportData(req))
 	rw := c.Ctx.ResponseWriter
 	rw.Header().Set("Content-Disposition", "attachment; filename=domain-result.csv")
-	rw.Header().Set("Content-Type", "text/csv")
+	rw.Header().Set("Content-Type", "text/csv; charset=utf-8")
 	rw.WriteHeader(http.StatusOK)
 
 	http.ServeContent(rw, c.Ctx.Request, "domain-result.csv", time.Now(), bytes.NewReader(content))
@@ -1073,7 +1073,7 @@ func (c *DomainController) writeToCSVData(exportInfo []DomainExportInfo) []byte 
 	var buf bytes.Buffer
 	bufWrite := bufio.NewWriter(&buf)
 	csvWriter := csv.NewWriter(bufWrite)
-	csvWriter.Write([]string{"index", "domain", "ip", "port", "status-code", "isCDN", "cdnName", "CNName", "title", "finger", "banner", "tlsdata", "source"})
+	csvWriter.Write([]string{"index", "domain", "ip", "port", "status-code", "isCDN", "cdnName", "CNName", "title", "finger", "tlsdata", "source"})
 	for i, v := range exportInfo {
 		csvWriter.Write([]string{
 			strconv.Itoa(i + 1),
@@ -1086,7 +1086,6 @@ func (c *DomainController) writeToCSVData(exportInfo []DomainExportInfo) []byte 
 			v.DomainCNAME,
 			strings.Join(v.Title, ","),
 			strings.Join(v.Finger, ","),
-			strings.Join(v.Banner, ","),
 			strings.Join(v.TlsData, ","),
 			strings.Join(v.Source, ","),
 		})
