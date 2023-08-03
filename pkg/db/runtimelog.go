@@ -145,10 +145,11 @@ func (l *RuntimeLog) makeWhere(searchMap map[string]interface{}) *gorm.DB {
 		case "message":
 			db = db.Where("message like ?", fmt.Sprintf("%%%s%%", value))
 		case "date_delta":
+			// 筛选指定日期之前的日志（注意：与其它查询时间之类的有所区别）
 			daysToHour := 24 * value.(int)
 			dayDelta, err := time.ParseDuration(fmt.Sprintf("-%dh", daysToHour))
 			if err == nil {
-				db = db.Where("update_datetime between ? and ?", time.Now().Add(dayDelta), time.Now())
+				db = db.Where("update_datetime < ?", time.Now().Add(dayDelta))
 			}
 		default:
 			db = db.Where(column, value)
