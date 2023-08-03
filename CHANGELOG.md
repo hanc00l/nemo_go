@@ -1,5 +1,33 @@
 # ChangeLog
 
+## 2.10.0
+
+2023-08-04
+
+### Updated
+
+- 增加runtimelog数据库表，worker的runtime日志通过RPC调用上传并保存，在web增加日志查看和管理功能（需要SuperAdmin权限），*
+  *从v2.9升级需导入runtimelog.sql**；
+- 新增worker按任务功能分别运行的模式（见安装手册）；
+- 增加根据工作空间对Worker进行自定义任务的实现；
+- 导出IP与Domain资产功能；
+- 对Fofa、quake及hunter的API增加查询限额；
+- subfinder对子域名去除泛解析；
+
+### Fix
+
+- quake查询API参数服务器调整导致无法正确搜索结果；Fofa默认分页数与实际不一致导致的重复调用API；
+- subfinder v2.6.0异常退出bug
+- 导入离线扫描的gogo和fscan
+-  域名一键拉黑的时候删除不彻底
+
+### Thirdparty版本
+
+- Httpx：1.3.4
+- Subfinder：2.6.1
+- Nuclei：2.9.10
+- Observe_ward：2023.8.3
+
 ## 2.9.4
 
 2023-07-10
@@ -18,7 +46,8 @@
 
 ### Updated
 
-- 集成Goby进行漏洞扫描；需要部署服务器模式的goby，并在worker.yml配置api的地址及认证；docker方式默认会在127.0.0.1:8361启动goby-cmd；
+- 集成Goby进行漏洞扫描；需要部署服务器模式的goby，并在worker.yml配置api的地址及认证；docker方式默认会在127.0.0.1:
+  8361启动goby-cmd；
 - 更新thirdparty组件版本；
 
 ### Fix
@@ -26,6 +55,7 @@
 - httpx获取HTTP返回包的header数据，在ip/domain详细显示不自动换行
 
 ### Thirdparty版本
+
 - Xray：1.9.11
 - Nuclei：2.9.6
 - Goby：2.5.2
@@ -52,12 +82,12 @@
 
 - 子域名被动枚举（Subfinder）配置的provider-config.yaml未生效
 
-
-
 ## 历史ChangeLog
 
 - 2.9.1：2023-3-10，增加用Httpx获取网站指纹信息时，保存HTTP响应的header与body到数据库及查询功能（由于新增加了数据库表，从v2.9.0升级需导入http.sql）。
-- 2.9.0：2023-3-7，增加用户与角色、权限管理，增加工作空间功能，支持多用户和多项目的资源隔离；增加ip/domain资产的置顶功能；更新xray扫描调用的poc规则和使用方式；参数配置增加xray配置、api与token的测试。由于数据库的表有重大调整，从v2.8升级需导入**user_workspace.sql**，并在webfiles目录下新建**b0c79065-7ff7-32ae-cc18-864ccd8f7717**目录（默认的workspace），将原webfiles目录下文件迁移至该默认workspace目录下。
+- 2.9.0：2023-3-7，增加用户与角色、权限管理，增加工作空间功能，支持多用户和多项目的资源隔离；增加ip/domain资产的置顶功能；更新xray扫描调用的poc规则和使用方式；参数配置增加xray配置、api与token的测试。由于数据库的表有重大调整，从v2.8升级需导入
+**user_workspace.sql**，并在webfiles目录下新建**b0c79065-7ff7-32ae-cc18-864ccd8f7717**
+目录（默认的workspace），将原webfiles目录下文件迁移至该默认workspace目录下。
 - 2.8.3：2022-12-14，增加按worker的CPU及内存数量设置不同的性能模式（HighPerformance：4核4G内存及以上），降低docker及一般的VPS的并发线程数量（任务执行时间将增加）。
 - 2.8.2：2022-12-12，修复Httpx库使用leveldb时，缓存不释放导致的内存泄露；增加fofa结果的关键词全局过滤；修复XSCAN任务的taskId未能显示、漏洞扫描任务结果不能在maintask正常显示。
 - 2.8.1：2022-11-30，增加在任务结果里显示新增加资产的数量。
@@ -67,17 +97,24 @@
 - 2.6.1：2022-10-17，在Windows平台运行Nemo的Server与Worker（只测试在win10里代码及功能运行正常，server及worker的依赖环境的安装和配置请参考linux平台；子域名爆破使用的massdns暂不支持在windows平台上运行）；
 - 2.6.0：2022-8-30，增加Server与Worker之间的文件自动同步功能，重启worker进程（增加后台守护进程功能）；
 - 2.5.7：2022-8-16，更新crawlergo的代码；移除部份未用的旧代码；增加导入FOFA、Hunter的查询结果的导出文件；
-- 2.5.6：2022-8-4，增加导入TXPortMap扫描的文本结果及零零信安（0.zone）导出的csv格式资产；增加资产列表查询时"不看Banner信息"的选项，可以减少无效信息的干扰；在IP资产列表显示增加不看中国大地以外地区信息的选项，以及方便ip和domain列表查询筛选一些需要删除的信息；fofa查询将cert修改为cert.subject以减少干扰信息；
+- 2.5.6：2022-8-4，增加导入TXPortMap扫描的文本结果及零零信安（0.zone）导出的csv格式资产；增加资产列表查询时"不看Banner信息"
+  的选项，可以减少无效信息的干扰；在IP资产列表显示增加不看中国大地以外地区信息的选项，以及方便ip和domain列表查询筛选一些需要删除的信息；fofa查询将cert修改为cert.subject以减少干扰信息；
 - 2.5.5：2022-7-24，修复IP扫描和漏洞扫描时，读取目标资产所有开放端口时不能正确读取子网掩码目标的bug（2.5.4版本只需替换server_linux_amd64文件）。
 - 2.5.4：2022-7-23，修复ObserverWard不能正确被调用的Bug（2.5.3只需要替换worker_linux_amd64即可）。
 - 2.5.3：2022-7-20，增加导入Naabu和Httpx扫描结果导入到平台，以方便在内网渗透时的信息收集和协同；支持IP任务时跳过端口扫描，读取资产已探测的全部端口进行指纹和信息收集；去除效果不太用好的Wappalyzer功能；修复ObserverWard设置工作目录以正确加载指纹库，升级到2022年7月最新版本。
 - 2.5.2：2022-7-14，增加域名的Whois查询。注意：由2.5.1版本升级时，需在thirdparty中增加whois目录用于存放whois查询的缓存信息。
-- 2.5.1：2022-6-12，更新beego框架至v2.0.3，sessionOn属性修改至app.conf中，更新chromedp至v0.8.2；增加version.txt，记录每次更新后的版本号并在web的“系统设置”-“配置管理”中显示当前的version；导入fscan扫描结果时将结果中的poc-yaml-*漏洞加入到vulnerability中。注意：由2.5.0版本升级时，需在conf/app.conf中增加对应的sessionOn属性。
+- 2.5.1：2022-6-12，更新beego框架至v2.0.3，sessionOn属性修改至app.conf中，更新chromedp至v0.8.2；增加version.txt，记录每次更新后的版本号并在web的“系统设置”-“配置管理”中显示当前的version；导入fscan扫描结果时将结果中的poc-yaml-*
+漏洞加入到vulnerability中。注意：由2.5.0版本升级时，需在conf/app.conf中增加对应的sessionOn属性。
 - 2.5.0：2022-5-30，新增定时任务执行；Docker的Ubuntun升级为20.04LTS、调整Docker时区；新增webfiles路径映射，统一处理server的web目录访问，取消原screenshot、taskresult与imageicon目录映射；注意：本次累积升级有较大的改动，由v2.4.21升级需导入task.sql与task_cron.sql，并修改app.conf与server.yml中staticdir字段。
-- 2.4.21：2022-5-25，修复对域名进行查询时没有释放数据库连接，导致在进行大量资产查询后出现数据库连接Too many connecitons导致服务端退出的BUG ；
-- 2.4.20：2022-5-24，增加mysql.cnf配置项：max_connections为1000，解决mysql在docker中经常出现连接达上限导致nemo退出；保存icon图标在本地，并在ip和domain的资产列表中进行显示（需要app.conf的staticdir中增加iconimage:/tmp/iconimage，在server.conf的web中增加iconimagePath: /tmp/iconimage，路径可以自定义）；
-- 2.4.19：2022-4-29，增加[Nuclei](https://github.com/projectdiscovery/nuclei) 漏洞验证方式，默认poc使用[Nuclei-Templates](https://github.com/projectdiscovery/nuclei-templates)，worker.yml增加了相关配置选项；增加验证漏洞时读取指定IP已探测的开放端口作为目标的功能；
-- 2.4.18：2022-4-27，更新httpx与subfinder，subfinder增加provider-config配置文件（thirdpary/dict/provider-config.yml，对应worker.yml配置文件增加了 providerConfig: provider-config.yml字段，可增加被动收集平台的key）；更新xray pocs、fingperprinthub指纹与observer程序；
+- 2.4.21：2022-5-25，修复对域名进行查询时没有释放数据库连接，导致在进行大量资产查询后出现数据库连接Too many
+  connecitons导致服务端退出的BUG ；
+- 2.4.20：2022-5-24，增加mysql.cnf配置项：max_connections为1000，解决mysql在docker中经常出现连接达上限导致nemo退出；保存icon图标在本地，并在ip和domain的资产列表中进行显示（需要app.conf的staticdir中增加iconimage:
+/tmp/iconimage，在server.conf的web中增加iconimagePath: /tmp/iconimage，路径可以自定义）；
+- 2.4.19：2022-4-29，增加[Nuclei](https://github.com/projectdiscovery/nuclei)
+  漏洞验证方式，默认poc使用[Nuclei-Templates](https://github.com/projectdiscovery/nuclei-templates)
+  ，worker.yml增加了相关配置选项；增加验证漏洞时读取指定IP已探测的开放端口作为目标的功能；
+- 2.4.18：2022-4-27，更新httpx与subfinder，subfinder增加provider-config配置文件（thirdpary/dict/provider-config.yml，对应worker.yml配置文件增加了
+providerConfig: provider-config.yml字段，可增加被动收集平台的key）；更新xray pocs、fingperprinthub指纹与observer程序；
 - 2.4.17：2022-3-8，增加[Hunter](https://hunter.qianxin.com/)资产接口（在worker.yml中增加hunter的key）；
 - 2.4.16：2022-2-18，修改Fofa的API接口（fofa.so->fofa.info），去除只获取前1000条的限制（获取的记录数量由API的会员等级决定）；
 - 2.4.15：2022-1-25，增加[Quake](https://quake.360.cn/)资产接口（需要“会员”级别的API KEY；在worker.yml中增加quake的key）；

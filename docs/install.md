@@ -1,8 +1,8 @@
 # Nemo安装手册
 
-## v1.0
+## v1.1
 
-2023-7-8
+2023-8-3
 
 
 Nemo分为**Server**端和**Worker**端两部份。Server提供Http访问、API接口、RPC接口、消息中间件服务以及文件同步接口。Worker是通过消息中间件从Worker接收任务并执行，通过RPC接口上传任务的结果，并通过文件同步接口接收Server的文件。
@@ -307,10 +307,12 @@ Worker不会开启任务监听端口（启用goby服务端模式除外），work
 ```bash
 ./daemon_worker_linux_amd64
 ```
-1、可选参数：
+#### 1、可选参数
 ```bash
   -c int
     	concurrent number of tasks (default 3)
+  -m string
+    	worker run task mode; 0: all, 1:active, 2:finger, 3:passive, 4:pocscan, 5:custom; run multiple mode separated by "," (default "0")
   -ma string
     	manual file sync auth key
   -mh string
@@ -318,16 +320,21 @@ Worker不会开启任务监听端口（启用goby服务端模式除外），work
   -mp string
     	manual file sync port,default is 5002
   -nf
-    	disable file sync
+    	disable file sync (default true)
   -p int
-    	worker performance,default is autodetect (0: autodetect,1:high,2:normal)
+    	worker performance,default is autodetect (0:autodetect, 1:high, 2:normal)
+  -w string
+    	workspace guid for custom task; multiple workspace separated by ","
 ```
 - -c参数：worker并发的任务数量，默认为3。
 - -mh、mp及ma参数：Server文件同步的host、port及authKey，如果同时指定这三个参数，将执行文件同步功能，从server同步文件到worker。
 - nf参数：指定参数则禁用文件同步功能。
 - -p参数：worker的的性能模式，默认为0；根据worker的性能模式（1：高性能，2：普通）不同，在任务的并发线程数会有所区别；参数为0则自动判断，判断规则为CPU>=4核、内存>=4G为高性能模式。
+- -m worker执行的任务类型
+- -w worker执行自定义任务（-m 5）时，自定义任务所在的工作空间GUID
 
-2、Goby的服务端部署模式，需在thirdparty/goby目录下运行：（Docker已自动运行）
+#### 2、Goby的服务端部署模式
+需在thirdparty/goby目录下运行：（Docker已自动运行）
 ```bash
  ./goby-cmd-linux -mode api -bind 127.0.0.1:8361 -apiauth goby:goby
 ```
@@ -347,3 +354,61 @@ pocscan:
 - 除了本地部署外，可将goby远程部署。
 - goby同时只能并发执行一个扫描任务，因此多个任务下worker会查找配置文件中空闲可用的goby，并通过sleep的方式每隔一定间隔测试是否可用。
 - 如果goby不可用，goby任务将一直显示执行中，不会被自动结束。
+
+#### 3、worker任务模式
+
+Nemo将任务分为5种类型，worker启动时通过参数-m指定worker执行的任务类型，可以指定一种或多种任务类型；参数分别用1-5，如果为0则表示可执行类型为1-4的任务。
+对自定义的任务：-m 5，需要用-w参数指定任务关联的工作空间GUID。
+
+任务类型及数值：
+- 1：Active，主动扫描类的任务
+- 2：Finger，获取指纹类的任务
+- 3：Passive，被动收集信息的任务
+- 4：Pocscan，漏洞验证类的任务
+- 5：Custom，自定义任务
+- 0：同时包含1-4种类型的任务
+
+|  |1:Active|2:Finger|3:Passive|4:Pocscan|  
+| --- | --- | --- | --- | --- | --- 
+|portscan| √ |  |  |  |          
+|batchscan|  √|  |  |  |         
+|domainscan| √ |  |  |  |        
+|subfinder|  |  |  √|  |         
+|subdomainbrute|  |  | √ |  |    
+|subdomaincrawler| √ |  |  |  |  
+|iplocation|  |  | √ |  |        
+|fofa|  |  | √ |  |              
+|quake|  |  | √ |  |             
+|hunter|  |  | √ |  |            
+|xray|  |  |  |  √|              
+|dirsearch|  |  |  | √ |         
+|nuclei|  |  |  | √ |            
+|goby|  |  |  | √ |              
+|icpquery|  |  | √ |  |          
+|whoisquery|  |  |  √|  |        
+|fingerprint|  |  |  |  |       
+|xportscan| √ |  |  |  |         
+|xonlineapi|  |  | √ |  |        
+|xfofa|  |  |√  |  |             
+|xquake|  |  | √ |  |            
+|xhunter|  |  | √ |  |           
+|xdomainscan|  | |  √ |  |       
+|xsubfinder|  |  | √  |  |        
+|xsubdomainbrute|  |  | √  |  |   
+|xsubdomaincralwer|  √ |  |  |  | 
+|xfingerprint|  |  √ |  |  |      
+|xxray|  |  |  | √  |             
+|xnuclei|  |  |  | √  |           
+|xgoby|  |  |  | √  |             
+|xorgscan|  |  |  | √  |          
+
+Worker默认启动时参数为-m 0，将会执行所有类型（除custom）的任务；分布式部署的vps可以合理分配资源，如专用于扫描类vps：-m 1，被动信息搜索指纹可以同时执行任务：-m 2,3。
+
+如果需要使用自定义任务，需进行以下配置：
+- 在Config-自定义任务工作空间配置中，指定工作空间的GUID并保存；格式为：GUID 备注，如：1a0ca919-7960-4067-9981-9abcb4eaa735 172网段；
+- 在命令行启动worker时，指定任务模式为-m 5，同时-w参数指定在上一步中配置的工作空间的GUID；
+- 在Nemo的IP或Domain列表视图中，切换到第一步配置的工作空间，在新建任务或XScan任务后，只有启动命令为：-m 5 -w 1a0ca919-7960-4067-9981-9abcb4eaa735的worker才会收到任务并执行。
+
+## 分布式部署的典型架构
+
+![nemo_vps](./image/nemo_vps.png)

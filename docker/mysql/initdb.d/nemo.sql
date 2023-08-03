@@ -386,6 +386,27 @@ LOCK TABLES `port_attr` WRITE;
 UNLOCK TABLES;
 
 --
+-- Table structure for table `runtimelog`
+--
+
+DROP TABLE IF EXISTS `runtimelog`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `runtimelog` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `source` varchar(40) NOT NULL,
+  `file` varchar(80) DEFAULT NULL,
+  `func` varchar(80) DEFAULT NULL,
+  `level` varchar(20) NOT NULL,
+  `level_int` int(11) NOT NULL,
+  `message` varchar(1000) NOT NULL,
+  `create_datetime` datetime NOT NULL,
+  `update_datetime` datetime NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=1208 DEFAULT CHARSET=utf8mb4;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
 -- Table structure for table `task_cron`
 --
 

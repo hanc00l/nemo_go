@@ -39,10 +39,10 @@
 
 ### 4、API接口 （需提供相应的Key)
 
-- [Fofa](https://fofa.info/) 
-- [ICP备案信息](http://icp.chinaz.com/) 
+- [Fofa](https://fofa.info/)
 - [Quake](https://quake.360.cn)
 - [Hunter](https://hunter.qianxin.com/)
+- [ICP备案信息](http://icp.chinaz.com/)
 
 ### 5、Poc验证与目录扫描
 
@@ -53,24 +53,29 @@
 
 ### 6、分布式任务
 
-- 分布式、异步任务执行
+- 分布式、异步任务执行与定时任务执行
 - 多维度任务切分
-- 定时任务执行
-- Server与Worker通过 [RPC](https://github.com/smallnest/rpcx) 同步
+- Server与Worker通过 [RPC](https://github.com/smallnest/rpcx)及消息队列实现通信和解耦
 - Server与Worker文件自动同步
+- Worker按不同类型的任务分离和组合部署
 - 任务执行完成消息通知（钉钉、飞书群机器人及Server酱）
+
+**典型VPS部署架构：**
+![nemo_vps](docs/image/nemo_vps.png)
+
 
 
 ### 7、团队在线协作
 
-- 多用户/角色、多工作空间（项目）支持
+- 多用户/角色、多工作空间（项目）支持及资产隔离
 - 资产颜色标记、置顶、备忘录协作
 - IP/Domain黑名单、一键拉黑
 
 ### 8、其它
 
 - Docker支持
-- 资产流程化扫描（XSCAN）
+- 资产流程化扫描（XSCAN）![xscan](docs/image/9-1.xscan2.png)
+- 导出IP与Domain资产
 
 ## 演示页面
 
