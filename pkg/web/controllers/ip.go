@@ -1,7 +1,10 @@
 package controllers
 
 import (
+	"bufio"
+	"bytes"
 	"encoding/base64"
+	"encoding/csv"
 	"fmt"
 	"github.com/hanc00l/nemo_go/pkg/conf"
 	"github.com/hanc00l/nemo_go/pkg/db"
@@ -140,6 +143,20 @@ type IPStatisticInfo struct {
 	IPSubnet map[string]int
 	Port     map[string]int
 	Location map[string]int
+}
+
+// IPExportInfo 用于导出IP数据的信息
+type IPExportInfo struct {
+	IP         string
+	Port       int
+	Location   string
+	StatusCode string
+	TitleSet   map[string]struct{}
+	BannerSet  map[string]struct{}
+	FingerSet  map[string]struct{}
+	TlsDataSet map[string]struct{}
+	HttpxSet   map[string]struct{}
+	SourceSet  map[string]struct{}
 }
 
 // IndexAction GET请求显示页面
@@ -1002,4 +1019,111 @@ func (c *IPController) BlackIPAction() {
 		}
 	}
 	c.SucceededStatus("success")
+}
+
+// ExportIPResultAction 导出IP资产
+func (c *IPController) ExportIPResultAction() {
+	req := ipRequestParam{}
+	err := c.ParseForm(&req)
+	if err != nil {
+		logging.RuntimeLog.Error(err)
+		logging.CLILog.Error(err)
+		return
+	}
+	c.validateRequestParam(&req)
+	content := c.writeToCSVData(c.getIPExportData(req))
+	rw := c.Ctx.ResponseWriter
+	rw.Header().Set("Content-Disposition", "attachment; filename=ip-result.csv")
+	rw.Header().Set("Content-Type", "text/csv")
+	rw.WriteHeader(http.StatusOK)
+
+	http.ServeContent(rw, c.Ctx.Request, "ip-result.csv", time.Now(), bytes.NewReader(content))
+}
+
+// getIPExportData 获取IP的资产
+func (c *IPController) getIPExportData(req ipRequestParam) (result []IPExportInfo) {
+	ip := db.Ip{}
+	searchMap := c.getSearchMap(req)
+	ipResult, _ := ip.Gets(searchMap, -1, -1, req.OrderByDate)
+	for _, ipRow := range ipResult {
+		port := db.Port{IpId: ipRow.Id}
+		portData := port.GetsByIPId()
+		for _, pd := range portData {
+			eInfo := IPExportInfo{
+				IP:         ipRow.IpName,
+				Port:       pd.PortNum,
+				Location:   ipRow.Location,
+				StatusCode: pd.Status,
+				TitleSet:   make(map[string]struct{}),
+				BannerSet:  make(map[string]struct{}),
+				FingerSet:  make(map[string]struct{}),
+				TlsDataSet: make(map[string]struct{}),
+				HttpxSet:   make(map[string]struct{}),
+				SourceSet:  make(map[string]struct{}),
+			}
+			//port attr
+			portAttr := db.PortAttr{RelatedId: pd.Id}
+			portAttrData := portAttr.GetsByRelatedId()
+			for _, pad := range portAttrData {
+				if pad.Tag == "title" {
+					if _, ok := eInfo.TitleSet[pad.Content]; !ok {
+						eInfo.TitleSet[pad.Content] = struct{}{}
+					}
+				} else if pad.Tag == "fingerprint" {
+					if _, ok := eInfo.FingerSet[pad.Content]; !ok {
+						eInfo.FingerSet[pad.Content] = struct{}{}
+					}
+
+				} else if pad.Tag == "banner" || pad.Tag == "server" || pad.Tag == "tag" {
+					if pad.Content == "unknown" || pad.Content == "" {
+						continue
+					}
+					if _, ok := eInfo.BannerSet[pad.Content]; !ok {
+						eInfo.BannerSet[pad.Content] = struct{}{}
+					}
+
+				} else if pad.Tag == "tlsdata" {
+					if _, ok := eInfo.TlsDataSet[pad.Content]; !ok {
+						eInfo.TlsDataSet[pad.Content] = struct{}{}
+					}
+				} else if pad.Tag == "httpx" {
+					if _, ok := eInfo.HttpxSet[pad.Content]; !ok {
+						eInfo.HttpxSet[pad.Content] = struct{}{}
+					}
+				}
+				if _, ok := eInfo.SourceSet[pad.Source]; !ok {
+					eInfo.SourceSet[pad.Source] = struct{}{}
+				}
+			}
+			result = append(result, eInfo)
+		}
+	}
+	return
+}
+
+// writeToCSVData 输出为csv格式
+func (c *IPController) writeToCSVData(exportInfo []IPExportInfo) []byte {
+	var buf bytes.Buffer
+	bufWrite := bufio.NewWriter(&buf)
+	csvWriter := csv.NewWriter(bufWrite)
+	csvWriter.Write([]string{"index", "url", "ip", "port", "location", "status-code", "title", "finger", "banner", "tlsdata", "httpx", "source"})
+	for i, v := range exportInfo {
+		csvWriter.Write([]string{
+			strconv.Itoa(i + 1),
+			fmt.Sprintf("%s:%d", v.IP, v.Port),
+			v.IP,
+			strconv.Itoa(v.Port),
+			v.Location,
+			v.StatusCode,
+			utils.SetToString(v.TitleSet),
+			utils.SetToString(v.FingerSet),
+			utils.SetToString(v.BannerSet),
+			utils.SetToString(v.TlsDataSet),
+			utils.SetToString(v.HttpxSet),
+			utils.SetToString(v.SourceSet),
+		})
+	}
+	csvWriter.Flush()
+	bufWrite.Flush()
+	return buf.Bytes()
 }

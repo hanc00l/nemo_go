@@ -27,7 +27,7 @@ func init() {
 	web.CtrlPost("/config-test-notify", (*controllers.ConfigController).TestTaskNotifyAction)
 	web.CtrlPost("/config-save-domainscan", (*controllers.ConfigController).SaveDomainscanAction)
 	web.CtrlPost("/custom-save-taskworkspace", (*controllers.ConfigController).SaveCustomTaskWorkspaceConfigAction)
-	
+
 	web.CtrlGet("/dashboard", (*controllers.DashboardController).IndexAction)
 	web.CtrlPost("/dashboard", (*controllers.DashboardController).GetStatisticDataAction)
 	web.CtrlPost("/dashboard-task-info", (*controllers.DashboardController).GetTaskInfoAction)
@@ -51,6 +51,7 @@ func init() {
 	web.CtrlPost("/ip-pin-top", (*controllers.IPController).PinTopAction)
 	web.CtrlPost("/ip-info-http", (*controllers.IPController).InfoHttpAction)
 	web.CtrlPost("/ip-block", (*controllers.IPController).BlackIPAction)
+	web.CtrlGet("/ip-export", (*controllers.IPController).ExportIPResultAction)
 
 	web.CtrlGet("/domain-list", (*controllers.DomainController).IndexAction)
 	web.CtrlPost("/domain-list", (*controllers.DomainController).ListAction)
@@ -66,6 +67,7 @@ func init() {
 	web.CtrlPost("/domain-pin-top", (*controllers.DomainController).PinTopAction)
 	web.CtrlPost("/domain-info-http", (*controllers.DomainController).InfoHttpAction)
 	web.CtrlPost("/domain-block", (*controllers.DomainController).BlockDomainAction)
+	web.CtrlGet("/domain-export", (*controllers.DomainController).ExportDomainResultAction)
 
 	web.CtrlGet("/vulnerability-list", (*controllers.VulController).IndexAction)
 	web.CtrlPost("/vulnerability-list", (*controllers.VulController).ListAction)

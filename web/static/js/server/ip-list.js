@@ -376,13 +376,18 @@ $(function () {
             $("#label_cron_rule_xscan").prop("disabled", true);
         }
     })
+    $("#ip_export").click(function () {
+        let url = 'ip-export?';
+        url += get_export_options();
+
+        window.open(url);
+    });
     $("#ip_statistics").click(function () {
         let url = 'ip-statistics?';
         url += get_export_options();
 
         window.open(url);
     });
-
     $("#ip_memo_export").click(function () {
         let url = 'ip-memo-export?';
         url += get_export_options();
@@ -583,7 +588,7 @@ $(function () {
 });
 
 function get_export_options() {
-    var url = '';
+    let url = '';
     url += 'org_id=' + encodeURI($('#select_org_id_search').val());
     url += '&domain_address=' + encodeURI($('#domain_address').val());
     url += '&ip_address=' + encodeURI($('#ip_address').val());
@@ -595,6 +600,9 @@ function get_export_options() {
     url += '&memo_content=' + encodeURI($('#memo_content').val());
     url += '&date_delta=' + encodeURI($('#date_delta').val());
     url += '&disable_fofa=' + encodeURI($('#checkbox_disable_fofa').is(":checked"));
+    url += '&create_date_delta=' + encodeURI($('#create_date_delta').val());
+    url += '&ip_http=' + encodeURI($('#http_content').val());
+    url += '&select_order_by_date=' + encodeURI($('#checkbox_select_order_by_date').is(":checked"));
 
     return url;
 }

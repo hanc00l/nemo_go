@@ -206,7 +206,7 @@ $(function () {
         formData.append("cronrule", cron_rule);
         formData.append("croncomment", $('#input_cron_comment_xscan').val());
 
-        if ((formData.get("xraypoc") === "true" || formData.get("nucleipoc") === "true" || formData.get("gobypoc") === "true" )&& formData.get("fingerprint") === "false") {
+        if ((formData.get("xraypoc") === "true" || formData.get("nucleipoc") === "true" || formData.get("gobypoc") === "true") && formData.get("fingerprint") === "false") {
             swal('Warning', '漏洞扫描需要开启指纹扫描步骤选项', 'error');
             return;
         }
@@ -261,6 +261,12 @@ $(function () {
             $("#label_cron_rule_xscan").prop("disabled", true);
         }
     })
+    $("#domain_export").click(function () {
+        let url = 'domain-export?';
+        url += get_export_options();
+
+        window.open(url);
+    });
     $("#domain_statistics").click(function () {
         let url = 'domain-statistics?';
         url += get_export_options();
@@ -365,6 +371,9 @@ $(function () {
                         if (row["domaincname"].length > 0) {
                             strData += "&nbsp;<span class=\"badge badge-pill badge-info\" title=\"" + row["domaincname"] + "\">CNAME</span>\n";
                         }
+                        if (row["statuscode"].length>0){
+                            strData +="<br>[" + row["statuscode"] + "]";
+                        }
                         return strData;
                     }
                 },
@@ -453,7 +462,7 @@ $(function () {
 });
 
 function get_export_options() {
-    var url = "";
+    let url = "";
     url += 'org_id=' + encodeURI($('#select_org_id_search').val());
     url += '&ip_address=' + encodeURI($('#ip_address').val());
     url += '&domain_address=' + encodeURI($('#domain_address').val());
@@ -461,6 +470,10 @@ function get_export_options() {
     url += '&memo_content=' + encodeURI($('#memo_content').val());
     url += '&date_delta=' + encodeURI($('#date_delta').val());
     url += '&disable_fofa=' + encodeURI($('#checkbox_disable_fofa').is(":checked"));
+    url += "&select_order_by_date=" + encodeURI($('#checkbox_select_order_by_date').is(":checked"));
+    url += "&content=" + encodeURI($('#content').val());
+    url += "&create_date_delta=" + encodeURI($('#create_date_delta').val());
+    url += "&domain_http=" + encodeURI($('#http_content').val());
 
     return url;
 }

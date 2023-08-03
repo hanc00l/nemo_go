@@ -1,7 +1,10 @@
 package controllers
 
 import (
+	"bufio"
+	"bytes"
 	"encoding/base64"
+	"encoding/csv"
 	"encoding/json"
 	"fmt"
 	"github.com/hanc00l/nemo_go/pkg/conf"
@@ -15,6 +18,7 @@ import (
 	"net/http"
 	"path/filepath"
 	"sort"
+	"strconv"
 	"strings"
 	"time"
 )
@@ -47,6 +51,7 @@ type DomainListData struct {
 	Index          int      `json:"index"`
 	Domain         string   `json:"domain"`
 	IP             []string `json:"ip"`
+	StatusCode     []string `json:"statuscode"`
 	Title          string   `json:"title"`
 	Banner         string   `json:"banner"`
 	ColorTag       string   `json:"color_tag"`
@@ -71,6 +76,8 @@ type DomainInfo struct {
 	IP            []string
 	Port          []int
 	PortAttr      []PortAttrInfo
+	Finger        []string
+	StatusCode    []string
 	Title         []string
 	Banner        []string
 	ColorTag      string
@@ -88,6 +95,7 @@ type DomainInfo struct {
 	Workspace     string
 	WorkspaceGUID string
 	PinIndex      string
+	Source        []string
 }
 
 // DomainAttrInfo domain属性
@@ -103,14 +111,17 @@ type DomainAttrInfo struct {
 
 // DomainAttrFullInfo domain属性数据的聚合
 type DomainAttrFullInfo struct {
-	IP           map[string]struct{}
-	TitleSet     map[string]struct{}
-	BannerSet    map[string]struct{}
-	DomainAttr   []DomainAttrInfo
-	IconImageSet map[string]string
-	TlsData      map[string]struct{}
-	DomainCDN    string
-	DomainCNAME  string
+	IP            map[string]struct{}
+	TitleSet      map[string]struct{}
+	BannerSet     map[string]struct{}
+	FingerSet     map[string]struct{}
+	StatusCodeSet map[string]struct{}
+	DomainAttr    []DomainAttrInfo
+	IconImageSet  map[string]string
+	TlsData       map[string]struct{}
+	SourceSet     map[string]struct{}
+	DomainCDN     string
+	DomainCNAME   string
 }
 
 // DomainStatisticInfo domain统计信息
@@ -120,6 +131,22 @@ type DomainStatisticInfo struct {
 	Subdomain map[string]int
 	IP        map[string]int
 	IPSubnet  map[string]int
+}
+
+// DomainExportInfo domain输出的详细数据聚合
+type DomainExportInfo struct {
+	Domain      string
+	IP          []string
+	Port        []string
+	StatusCode  []string
+	Title       []string
+	Finger      []string
+	Banner      []string
+	TlsData     []string
+	Source      []string
+	IsIPCDN     bool
+	DomainCDN   string
+	DomainCNAME string
 }
 
 // IndexAction index
@@ -539,6 +566,7 @@ func (c *DomainController) getDomainListData(req domainRequestParam) (resp DataT
 		//domainData.Banner = strings.Join(utils.RemoveDuplicationElement(append(domainInfo.Title, domainInfo.Banner...)), ", ")
 		domainData.Title = strings.Join(domainInfo.Title, ", ")
 		domainData.Banner = strings.Join(domainInfo.Banner, ", ")
+		domainData.StatusCode = domainInfo.StatusCode
 		domainData.ScreenshotFile = ss.LoadScreenshotFile(domainData.WorkspaceGUID, domainRow.DomainName)
 		if domainData.ScreenshotFile == nil {
 			domainData.ScreenshotFile = make([]string, 0)
@@ -652,6 +680,9 @@ func getDomainInfo(workspaceId int, domainName string, disableFofa, disableBanne
 	r.Title = utils.SetToSlice(domainAttrInfo.TitleSet)
 	r.Banner = utils.SetToSlice(domainAttrInfo.BannerSet)
 	r.DomainAttr = domainAttrInfo.DomainAttr
+	r.Source = utils.SetToSlice(domainAttrInfo.SourceSet)
+	r.StatusCode = utils.SetToSlice(domainAttrInfo.StatusCodeSet)
+	r.Finger = utils.SetToSlice(domainAttrInfo.FingerSet)
 	icp := onlineapi.NewICPQuery(onlineapi.ICPQueryConfig{})
 	if icpInfo := icp.LookupICP(domainName); icpInfo != nil {
 		icpContent, _ := json.Marshal(*icpInfo)
@@ -721,11 +752,14 @@ func getDomainInfo(workspaceId int, domainName string, disableFofa, disableBanne
 // getDomainAttrFullInfo 获取一个域名的属性集合
 func getDomainAttrFullInfo(workspaceGUID string, id int, disableFofa, disableBanner bool) DomainAttrFullInfo {
 	r := DomainAttrFullInfo{
-		IP:           make(map[string]struct{}),
-		TitleSet:     make(map[string]struct{}),
-		BannerSet:    make(map[string]struct{}),
-		TlsData:      make(map[string]struct{}),
-		IconImageSet: make(map[string]string),
+		IP:            make(map[string]struct{}),
+		TitleSet:      make(map[string]struct{}),
+		BannerSet:     make(map[string]struct{}),
+		TlsData:       make(map[string]struct{}),
+		IconImageSet:  make(map[string]string),
+		SourceSet:     make(map[string]struct{}),
+		FingerSet:     make(map[string]struct{}),
+		StatusCodeSet: make(map[string]struct{}),
 	}
 	fofaInfo := make(map[string]string)
 	domainAttr := db.DomainAttr{RelatedId: id}
@@ -755,6 +789,9 @@ func getDomainAttrFullInfo(workspaceGUID string, id int, disableFofa, disableBan
 				r.BannerSet[da.Content] = struct{}{}
 			}
 			if da.Tag == "fingerprint" {
+				if _, ok := r.FingerSet[da.Content]; !ok {
+					r.FingerSet[da.Content] = struct{}{}
+				}
 				r.DomainAttr = append(r.DomainAttr, DomainAttrInfo{
 					Id:         da.Id,
 					Tag:        da.Tag,
@@ -804,6 +841,13 @@ func getDomainAttrFullInfo(workspaceGUID string, id int, disableFofa, disableBan
 				CreateTime: FormatDateTime(da.CreateDatetime),
 				UpdateTime: FormatDateTime(da.UpdateDatetime),
 			})
+		} else if da.Tag == "status" {
+			if _, ok := r.StatusCodeSet[da.Content]; !ok {
+				r.StatusCodeSet[da.Content] = struct{}{}
+			}
+		}
+		if _, ok := r.SourceSet[da.Source]; !ok {
+			r.SourceSet[da.Source] = struct{}{}
 		}
 	}
 	if len(fofaInfo) > 0 {
@@ -971,4 +1015,83 @@ func (c *DomainController) BlockDomainAction() {
 		ss.Delete(workspace.WorkspaceGUID, ip)
 	}
 	c.SucceededStatus("success")
+}
+
+// ExportDomainResultAction 导出Domain资产
+func (c *DomainController) ExportDomainResultAction() {
+	req := domainRequestParam{}
+	err := c.ParseForm(&req)
+	if err != nil {
+		logging.RuntimeLog.Error(err)
+		logging.CLILog.Error(err)
+		return
+	}
+	c.validateRequestParam(&req)
+	content := c.writeToCSVData(c.getDomainExportData(req))
+	rw := c.Ctx.ResponseWriter
+	rw.Header().Set("Content-Disposition", "attachment; filename=domain-result.csv")
+	rw.Header().Set("Content-Type", "text/csv")
+	rw.WriteHeader(http.StatusOK)
+
+	http.ServeContent(rw, c.Ctx.Request, "domain-result.csv", time.Now(), bytes.NewReader(content))
+}
+
+// getDomainExportData 获取域名输出数据
+func (c *DomainController) getDomainExportData(req domainRequestParam) (result []DomainExportInfo) {
+	domain := db.Domain{}
+	searchMap := c.getSearchMap(req)
+	domainResults, _ := domain.Gets(searchMap, -1, -1, req.OrderByDate)
+	cdn := custom.NewCDNCheck()
+	for _, domainRow := range domainResults {
+		domainInfo := getDomainInfo(domainRow.WorkspaceId, domainRow.DomainName, req.DisableFofa, req.DisableBanner)
+		eInfo := DomainExportInfo{Domain: domainRow.DomainName}
+		eInfo.IP = domainInfo.IP
+		for _, p := range domainInfo.Port {
+			eInfo.Port = append(eInfo.Port, strconv.Itoa(p))
+		}
+		eInfo.Title = domainInfo.Title
+		eInfo.Banner = domainInfo.Banner
+		eInfo.TlsData = domainInfo.TlsData
+		eInfo.Source = domainInfo.Source
+		eInfo.StatusCode = domainInfo.StatusCode
+		eInfo.Finger = domainInfo.Finger
+		eInfo.DomainCDN = domainInfo.DomainCDN
+		eInfo.DomainCNAME = domainInfo.DomainCNAME
+		for _, ip := range eInfo.IP {
+			if cdn.CheckIP(ip) || cdn.CheckASN(ip) {
+				eInfo.IsIPCDN = true
+				break
+			}
+		}
+		result = append(result, eInfo)
+	}
+	return
+}
+
+// writeToCSVData 输出为csv格式
+func (c *DomainController) writeToCSVData(exportInfo []DomainExportInfo) []byte {
+	var buf bytes.Buffer
+	bufWrite := bufio.NewWriter(&buf)
+	csvWriter := csv.NewWriter(bufWrite)
+	csvWriter.Write([]string{"index", "domain", "ip", "port", "status-code", "isCDN", "cdnName", "CNName", "title", "finger", "banner", "tlsdata", "source"})
+	for i, v := range exportInfo {
+		csvWriter.Write([]string{
+			strconv.Itoa(i + 1),
+			v.Domain,
+			strings.Join(v.IP, ","),
+			strings.Join(v.Port, ","),
+			strings.Join(v.StatusCode, ","),
+			fmt.Sprintf("%v", v.IsIPCDN),
+			v.DomainCDN,
+			v.DomainCNAME,
+			strings.Join(v.Title, ","),
+			strings.Join(v.Finger, ","),
+			strings.Join(v.Banner, ","),
+			strings.Join(v.TlsData, ","),
+			strings.Join(v.Source, ","),
+		})
+	}
+	csvWriter.Flush()
+	bufWrite.Flush()
+	return buf.Bytes()
 }
