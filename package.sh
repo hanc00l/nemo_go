@@ -51,7 +51,7 @@ tar -cvzf release/nemo_linux_amd64.tar \
   --exclude=thirdparty/massdns/massdns_windows_amd64.exe \
   --exclude=thirdparty/massdns/cygwin1.dll \
   --exclude=thirdparty/massdns/massdns_darwin_amd64 \
-  server_linux_amd64 worker_linux_amd64 daemon_worker_linux_amd64 package_worker.sh version.txt \
+  server_linux_amd64 worker_linux_amd64 daemon_worker_linux_amd64 version.txt \
   conf log thirdparty web docker* Dockerfile*
 
 tar -cvzf release/nemo_windows_amd64.tar \

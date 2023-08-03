@@ -403,6 +403,48 @@ func (s *Service) LoadOpenedPort(ctx context.Context, args *LoadIPOpenedPortArgs
 	return nil
 }
 
+// LoadIpByOrgId 根据组织ID读取IP资产
+func (s *Service) LoadIpByOrgId(ctx context.Context, args *int, replay *map[string]*portscan.IPResult) error {
+	if args == nil || *args == 0 {
+		return errors.New("null orgId")
+	}
+	result := portscan.Result{IPResult: make(map[string]*portscan.IPResult)}
+	searchMap := make(map[string]interface{})
+	searchMap["org_id"] = *args
+	ipDb := db.Ip{}
+	ipResults, _ := ipDb.Gets(searchMap, 1, 1000000, false)
+	for _, ipRow := range ipResults {
+		result.SetIP(ipRow.IpName)
+		portDb := db.Port{IpId: ipRow.Id}
+		portResults := portDb.GetsByIPId()
+		for _, port := range portResults {
+			result.SetPort(ipRow.IpName, port.PortNum)
+		}
+	}
+
+	*replay = result.IPResult
+	return nil
+}
+
+// LoadDomainByOrgId 根据组织ID读取Domain资产
+func (s *Service) LoadDomainByOrgId(ctx context.Context, args *int, replay *map[string]*domainscan.DomainResult) error {
+	if args == nil || *args == 0 {
+		return errors.New("null orgId")
+	}
+
+	result := domainscan.Result{DomainResult: make(map[string]*domainscan.DomainResult)}
+	searchMap := make(map[string]interface{})
+	searchMap["org_id"] = *args
+	domainDb := db.Domain{}
+	domainResults, _ := domainDb.Gets(searchMap, 1, 1000000, false)
+	for _, domainRow := range domainResults {
+		result.SetDomain(domainRow.DomainName)
+	}
+
+	*replay = result.DomainResult
+	return nil
+}
+
 // LoadDomainOpenedPort 获取域名关联的IP的端口
 func (s *Service) LoadDomainOpenedPort(ctx context.Context, args *LoadDomainOpenedPortArgs, replay *map[string]map[int]struct{}) error {
 	result := make(map[string]map[int]struct{})

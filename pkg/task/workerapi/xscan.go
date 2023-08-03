@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"github.com/hanc00l/nemo_go/pkg/comm"
 	"github.com/hanc00l/nemo_go/pkg/conf"
-	"github.com/hanc00l/nemo_go/pkg/db"
 	"github.com/hanc00l/nemo_go/pkg/logging"
 	"github.com/hanc00l/nemo_go/pkg/task/domainscan"
 	"github.com/hanc00l/nemo_go/pkg/task/onlineapi"
@@ -102,14 +101,21 @@ func XOrganization(taskId, mainTaskId, configJSON string) (result string, err er
 	}
 	scan := NewXScan(config)
 	// 根据ID读取资产
-	if scan.Config.IsOrgIP && scan.Config.IsOrgDomain {
-		LoadIpAndDomainByOrgId(*config.OrgId, &scan.ResultIP, &scan.ResultDomain)
-		result = fmt.Sprintf("ip:%d,domain:%d", len(scan.ResultIP.IPResult), len(scan.ResultDomain.DomainResult))
-	} else if scan.Config.IsOrgIP {
-		LoadIpAndDomainByOrgId(*config.OrgId, &scan.ResultIP, nil)
+	if scan.Config.IsOrgIP {
+		err = comm.CallXClient("LoadIpByOrgId", *config.OrgId, &scan.ResultIP.IPResult)
+		if err != nil {
+			logging.RuntimeLog.Error(err)
+			return FailedTask("load org ip fail"), err
+		}
 		result = fmt.Sprintf("ip:%d", len(scan.ResultIP.IPResult))
-	} else if scan.Config.IsOrgDomain {
-		LoadIpAndDomainByOrgId(*config.OrgId, nil, &scan.ResultDomain)
+	}
+	if scan.Config.IsOrgDomain {
+		err = comm.CallXClient("LoadDomainByOrgId", *config.OrgId, &scan.ResultDomain.DomainResult)
+		if err != nil {
+			logging.RuntimeLog.Error(err)
+			return FailedTask("load org domain fail"), err
+
+		}
 		result = fmt.Sprintf("domain:%d", len(scan.ResultDomain.DomainResult))
 	}
 	// 执行portscan与domainscan
@@ -920,35 +926,6 @@ func (x *XScan) XrayScan(taskId string, mainTaskId string) (result string, err e
 	err = comm.CallXClient("SaveVulnerabilityResult", &resultArgs, &result)
 	if err != nil {
 		logging.RuntimeLog.Error(err)
-	}
-	return
-}
-
-// LoadIpAndDomainByOrgId 根据组织ID获取ip与域名资产
-func LoadIpAndDomainByOrgId(orgId int, portScanResult *portscan.Result, domainScanResult *domainscan.Result) {
-	searchMap := make(map[string]interface{})
-	searchMap["org_id"] = orgId
-
-	if portScanResult != nil {
-		portScanResult.IPResult = make(map[string]*portscan.IPResult)
-		ipDb := db.Ip{}
-		ipResults, _ := ipDb.Gets(searchMap, 1, 1000000, false)
-		for _, ipRow := range ipResults {
-			portScanResult.SetIP(ipRow.IpName)
-			portDb := db.Port{IpId: ipRow.Id}
-			portResults := portDb.GetsByIPId()
-			for _, port := range portResults {
-				portScanResult.SetPort(ipRow.IpName, port.PortNum)
-			}
-		}
-	}
-	if domainScanResult != nil {
-		domainScanResult.DomainResult = make(map[string]*domainscan.DomainResult)
-		domainDb := db.Domain{}
-		domainResults, _ := domainDb.Gets(searchMap, 1, 1000000, false)
-		for _, domainRow := range domainResults {
-			domainScanResult.SetDomain(domainRow.DomainName)
-		}
 	}
 	return
 }
