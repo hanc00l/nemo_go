@@ -3,6 +3,7 @@ package comm
 import (
 	"bytes"
 	"context"
+	"crypto/tls"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -110,6 +111,10 @@ var (
 	// MainTaskResult 缓存汇总各个子任务、保存任务的结果
 	MainTaskResult      map[string]MainTaskResultMap
 	MainTaskResultMutex sync.Mutex
+	// TLSEnabled 是否启用TLS加密
+	TLSEnabled  bool
+	TLSCertFile string
+	TLSKeyFile  string
 )
 
 // CallXClient RPC远程调用
@@ -122,8 +127,12 @@ func CallXClient(serviceMethod string, args interface{}, reply interface{}) erro
 		if conf.RunMode == conf.Debug || host == "0.0.0.0" {
 			host = "127.0.0.1"
 		}
+		option := client.DefaultOption
+		if TLSEnabled {
+			option.TLSConfig = &tls.Config{InsecureSkipVerify: true}
+		}
 		d, _ := client.NewPeer2PeerDiscovery(fmt.Sprintf("tcp@%s:%d", host, conf.GlobalWorkerConfig().Rpc.Port), "")
-		globalXClient = client.NewXClient("Service", client.Failtry, client.RandomSelect, d, client.DefaultOption)
+		globalXClient = client.NewXClient("Service", client.Failtry, client.RandomSelect, d, option)
 		globalXClient.Auth(conf.GlobalWorkerConfig().Rpc.AuthKey)
 	}
 

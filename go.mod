@@ -31,7 +31,7 @@ require (
 	github.com/robfig/cron/v3 v3.0.1
 	github.com/shirou/gopsutil/v3 v3.22.11
 	github.com/sirupsen/logrus v1.9.3
-	github.com/smallnest/rpcx v1.8.7
+	github.com/smallnest/rpcx v1.8.11
 	github.com/tidwall/pretty v1.2.0
 	github.com/twmb/murmur3 v1.1.6
 	github.com/yl2chen/cidranger v1.0.2
@@ -80,6 +80,7 @@ require (
 	github.com/gobwas/httphead v0.1.0 // indirect
 	github.com/gobwas/pool v0.2.1 // indirect
 	github.com/gobwas/ws v1.1.0 // indirect
+	github.com/godzie44/go-uring v0.0.0-20220926161041-69611e8b13d5 // indirect
 	github.com/gogf/gf v1.16.6 // indirect
 	github.com/gogo/protobuf v1.3.2 // indirect
 	github.com/golang/groupcache v0.0.0-20210331224755-41bb18bfe9da // indirect
@@ -106,6 +107,7 @@ require (
 	github.com/klauspost/compress v1.15.5 // indirect
 	github.com/klauspost/cpuid/v2 v2.2.4 // indirect
 	github.com/klauspost/reedsolomon v1.11.7 // indirect
+	github.com/libp2p/go-sockaddr v0.1.1 // indirect
 	github.com/likexian/gokit v0.25.9 // indirect
 	github.com/logrusorgru/aurora v2.0.3+incompatible // indirect
 	github.com/lufia/plan9stats v0.0.0-20211012122336-39d0f177ccd0 // indirect

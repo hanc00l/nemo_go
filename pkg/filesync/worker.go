@@ -3,6 +3,7 @@
 package filesync
 
 import (
+	"crypto/tls"
 	"fmt"
 	"github.com/hanc00l/nemo_go/pkg/conf"
 	"github.com/hanc00l/nemo_go/pkg/logging"
@@ -18,14 +19,20 @@ import (
 func WorkerStartupSync(host, port, authKey string) {
 	serverAddr := fmt.Sprintf("%s:%s", host, port)
 	// 1 连接到server
-	conn, cnErr := net.Dial("tcp", serverAddr)
-	if cnErr != nil {
-		msg := fmt.Sprintf("connect to server fail:%v", cnErr.Error())
-		logging.CLILog.Error(msg)
-		logging.RuntimeLog.Error(msg)
+	var conn net.Conn
+	var err error
+	if TLSEnabled {
+		conn, err = tls.Dial("tcp", serverAddr, &tls.Config{InsecureSkipVerify: true})
+	} else {
+		conn, err = net.Dial("tcp", serverAddr)
+	}
+	if err != nil {
+		logging.CLILog.Error(err)
+		logging.RuntimeLog.Error(err)
 		return
 	}
 	defer conn.Close()
+
 	gbc := initGobConn(conn)
 	// 2 发送SYNC请求
 	msgSync := Message{MgType: MsgSync, MgAuthKey: authKey}
@@ -37,7 +44,6 @@ func WorkerStartupSync(host, port, authKey string) {
 	}
 	// 3 服务器返回信息
 	var hostMessage Message
-	var err error
 	err = gbc.Dec.Decode(&hostMessage)
 	if err != nil {
 		logging.CLILog.Error(err)

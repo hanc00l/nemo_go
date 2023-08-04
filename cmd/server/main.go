@@ -7,6 +7,7 @@ import (
 	beegoContext "github.com/beego/beego/v2/server/web/context"
 	"github.com/hanc00l/nemo_go/pkg/comm"
 	"github.com/hanc00l/nemo_go/pkg/conf"
+	"github.com/hanc00l/nemo_go/pkg/filesync"
 	"github.com/hanc00l/nemo_go/pkg/logging"
 	"github.com/hanc00l/nemo_go/pkg/task/ampq"
 	"github.com/hanc00l/nemo_go/pkg/task/custom"
@@ -17,11 +18,11 @@ import (
 )
 
 type ServerOption struct {
-	NoFilesync    bool
-	NoRPC         bool
-	HTTPSEnabled  bool
-	HTTPSCertFile string
-	HTTPSKeyFile  string
+	NoFilesync  bool
+	NoRPC       bool
+	TLSEnabled  bool
+	TLSCertFile string
+	TLSKeyFile  string
 }
 
 var UrlFilterWhiteList = []string{"/"}
@@ -33,10 +34,9 @@ func parseServerOption() *ServerOption {
 	}
 	flag.BoolVar(&option.NoFilesync, "nf", option.NoFilesync, "disable file sync")
 	flag.BoolVar(&option.NoRPC, "nr", false, "disable rpc")
-	flag.BoolVar(&option.HTTPSEnabled, "https", false, "HTTPS enabled")
-	flag.StringVar(&option.HTTPSKeyFile, "key", "server.key", "HTTPS private key file")
-	flag.StringVar(&option.HTTPSCertFile, "cert", "server.crt", "HTTPS cert file")
-
+	flag.BoolVar(&option.TLSEnabled, "tls", false, "use TLS for web、RPC and filesync")
+	flag.StringVar(&option.TLSKeyFile, "key", "server.key", "TLS private key file")
+	flag.StringVar(&option.TLSCertFile, "cert", "server.crt", "TLS cert file")
 	flag.Parse()
 
 	return option
@@ -65,13 +65,14 @@ func StartWebServer(option *ServerOption) {
 	if conf.RunMode == conf.Release {
 		web.InsertFilter("/*", web.BeforeRouter, filterLoginCheck)
 	}
+
 	logging.RuntimeLog.Info("nemo server started...")
 	logging.CLILog.Info("nemo server started...")
-	if option.HTTPSEnabled {
+	if option.TLSEnabled {
 		web.BConfig.Listen.EnableHTTP = false
 		web.BConfig.Listen.EnableHTTPS = true
-		web.BConfig.Listen.HTTPSCertFile = option.HTTPSCertFile
-		web.BConfig.Listen.HTTPSKeyFile = option.HTTPSKeyFile
+		web.BConfig.Listen.HTTPSCertFile = option.TLSCertFile
+		web.BConfig.Listen.HTTPSKeyFile = option.TLSKeyFile
 		web.BConfig.Listen.HTTPSAddr = conf.GlobalServerConfig().Web.Host
 		web.BConfig.Listen.HTTPSPort = conf.GlobalServerConfig().Web.Port
 	} else {
@@ -112,12 +113,19 @@ func main() {
 	if option == nil {
 		return
 	}
+
 	if !option.NoFilesync {
+		filesync.TLSEnabled = option.TLSEnabled
+		filesync.TLSCertFile = option.TLSCertFile
+		filesync.TLSKeyFile = option.TLSKeyFile
 		go comm.StartFileSyncServer()
 		go comm.StartFileSyncMonitor()
 		time.Sleep(time.Second * 1)
 	}
 	if !option.NoRPC {
+		comm.TLSEnabled = option.TLSEnabled
+		comm.TLSCertFile = option.TLSCertFile
+		comm.TLSKeyFile = option.TLSKeyFile
 		go comm.StartRPCServer()
 		time.Sleep(time.Second * 1)
 	}

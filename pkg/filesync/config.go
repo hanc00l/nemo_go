@@ -10,6 +10,13 @@ var syncFileList = []string{"worker_linux_amd64", "version.txt", "conf", "thirdp
 // syncFileBlackList 不需要、禁止同步的文件黑名单
 var syncFileBlackList = []string{"thirdparty/massdns/temp", "conf/server.yml", "conf/app.conf"}
 
+var (
+	// TLSEnabled 是否启用TLS加密
+	TLSEnabled  bool
+	TLSCertFile string
+	TLSKeyFile  string
+)
+
 // checkFileIsSyncWhileList 同步文件的白名单校验
 func checkFileIsSyncWhileList(filePathName string) bool {
 	if strings.Contains(filePathName, "..") {

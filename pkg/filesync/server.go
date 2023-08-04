@@ -4,6 +4,7 @@ package filesync
 
 import (
 	"bufio"
+	"crypto/tls"
 	"encoding/gob"
 	"fmt"
 	"github.com/hanc00l/nemo_go/pkg/conf"
@@ -54,12 +55,27 @@ func (gbc *GobConn) gobConnWt(mg interface{}) error {
 // StartFileSyncServer 启动文件同步服务监听
 func StartFileSyncServer(host, port, authKey string) {
 	serverAddr := fmt.Sprintf("%s:%s", host, port)
-	srv, err := net.Listen("tcp", serverAddr)
+	var srv net.Listener
+	var err error
+
+	if TLSEnabled {
+		cert, errTls := tls.LoadX509KeyPair(TLSCertFile, TLSKeyFile)
+		if errTls != nil {
+			logging.RuntimeLog.Infof("load tls cert fail:%s", errTls)
+			logging.CLILog.Infof("load tls cert fail:%s", errTls)
+			return
+		}
+		configs := &tls.Config{Certificates: []tls.Certificate{cert}}
+		srv, err = tls.Listen("tcp", serverAddr, configs)
+	} else {
+		srv, err = net.Listen("tcp", serverAddr)
+	}
 	if err != nil {
 		logging.CLILog.Error(err)
 		logging.RuntimeLog.Error(err)
 		return
 	}
+
 	for {
 		conn, err := srv.Accept()
 		if err != nil {

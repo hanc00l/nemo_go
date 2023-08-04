@@ -25,6 +25,7 @@ type WorkerOption struct {
 	Concurrency       int
 	WorkerPerformance int
 	WorkerTopic       map[string]struct{}
+	TLSEnabled        bool
 }
 
 func parseWorkerOptions() *WorkerOption {
@@ -38,7 +39,7 @@ func parseWorkerOptions() *WorkerOption {
 	flag.IntVar(&option.WorkerPerformance, "p", 0, "worker performance,default is autodetect (0:autodetect, 1:high, 2:normal)")
 	flag.StringVar(&workerRunTaskMode, "m", "0", "worker run task mode; 0: all, 1:active, 2:finger, 3:passive, 4:pocscan, 5:custom; run multiple mode separated by \",\"")
 	flag.StringVar(&taskWorkspaceGUID, "w", "", "workspace guid for custom task; multiple workspace separated by \",\"")
-
+	flag.BoolVar(&option.TLSEnabled, "tls", false, "use TLS for RPC and filesync")
 	flag.Parse()
 
 	if workerRunTaskMode == "0" {
@@ -160,6 +161,7 @@ func main() {
 		return
 	}
 
+	comm.TLSEnabled = option.TLSEnabled
 	go keepAlive()
 	go comm.StartSaveRuntimeLog(comm.GetWorkerNameBySelf())
 	checkWorkerPerformance(option.WorkerPerformance)

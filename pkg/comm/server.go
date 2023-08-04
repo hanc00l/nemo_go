@@ -3,6 +3,7 @@ package comm
 import (
 	"bytes"
 	"context"
+	"crypto/tls"
 	"errors"
 	"fmt"
 	"github.com/hanc00l/nemo_go/pkg/conf"
@@ -27,7 +28,19 @@ func StartRPCServer() {
 	logging.RuntimeLog.Infof("start rpc server running on tcp@%s:%d...", rpc.Host, rpc.Port)
 	logging.CLILog.Infof("start rpc server running on tcp@%s:%d...", rpc.Host, rpc.Port)
 
-	s := server.NewServer()
+	var s *server.Server
+	if TLSEnabled {
+		cert, err := tls.LoadX509KeyPair(TLSCertFile, TLSKeyFile)
+		if err != nil {
+			logging.RuntimeLog.Infof("load tls cert fail:%s", err)
+			logging.CLILog.Infof("load tls cert fail:%s", err)
+			return
+		}
+		configs := &tls.Config{Certificates: []tls.Certificate{cert}}
+		s = server.NewServer(server.WithTLSConfig(configs))
+	} else {
+		s = server.NewServer()
+	}
 	err := s.Register(new(Service), "")
 	if err != nil {
 		logging.RuntimeLog.Error(err)
