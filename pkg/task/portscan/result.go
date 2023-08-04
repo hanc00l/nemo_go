@@ -123,7 +123,7 @@ func (r *Result) SaveResult(config Config) string {
 			continue
 		}
 		if len(ipResult.Ports) > IpOpenedPortFilterNumber {
-			logging.RuntimeLog.Infof("ip:%s has too much open port:%d,discard to save!", ipName, len(ipResult.Ports))
+			logging.RuntimeLog.Warningf("ip:%s has too much open port:%d,discard to save!", ipName, len(ipResult.Ports))
 			continue
 		}
 		//save ip
@@ -207,7 +207,7 @@ func FilterIPHasTooMuchPort(result *Result, isOnline bool) {
 	}
 	for ipName, ipResult := range result.IPResult {
 		if len(ipResult.Ports) > MaxNumber {
-			logging.RuntimeLog.Infof("ip:%s has too much open port:%d,discard to save!", ipName, len(ipResult.Ports))
+			logging.RuntimeLog.Warningf("ip:%s has too much open port:%d,discard to save!", ipName, len(ipResult.Ports))
 			delete(result.IPResult, ipName)
 		}
 	}
