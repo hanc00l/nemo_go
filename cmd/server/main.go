@@ -2,7 +2,6 @@ package main
 
 import (
 	"flag"
-	"fmt"
 	"github.com/beego/beego/v2/core/logs"
 	"github.com/beego/beego/v2/server/web"
 	beegoContext "github.com/beego/beego/v2/server/web/context"
@@ -18,8 +17,11 @@ import (
 )
 
 type ServerOption struct {
-	NoFilesync bool
-	NoRPC      bool
+	NoFilesync    bool
+	NoRPC         bool
+	HTTPSEnabled  bool
+	HTTPSCertFile string
+	HTTPSKeyFile  string
 }
 
 var UrlFilterWhiteList = []string{"/"}
@@ -31,6 +33,10 @@ func parseServerOption() *ServerOption {
 	}
 	flag.BoolVar(&option.NoFilesync, "nf", option.NoFilesync, "disable file sync")
 	flag.BoolVar(&option.NoRPC, "nr", false, "disable rpc")
+	flag.BoolVar(&option.HTTPSEnabled, "https", false, "HTTPS enabled")
+	flag.StringVar(&option.HTTPSKeyFile, "key", "server.key", "HTTPS private key file")
+	flag.StringVar(&option.HTTPSCertFile, "cert", "server.crt", "HTTPS cert file")
+
 	flag.Parse()
 
 	return option
@@ -49,7 +55,7 @@ func StartMainTaskDemon() {
 }
 
 // StartWebServer 启动web server
-func StartWebServer() {
+func StartWebServer(option *ServerOption) {
 	err := logs.SetLogger("file", `{"filename":"log/access.log"}`)
 	if err != nil {
 		logging.RuntimeLog.Error(err)
@@ -61,8 +67,20 @@ func StartWebServer() {
 	}
 	logging.RuntimeLog.Info("nemo server started...")
 	logging.CLILog.Info("nemo server started...")
-	addr := fmt.Sprintf("%s:%d", conf.GlobalServerConfig().Web.Host, conf.GlobalServerConfig().Web.Port)
-	web.Run(addr)
+	if option.HTTPSEnabled {
+		web.BConfig.Listen.EnableHTTP = false
+		web.BConfig.Listen.EnableHTTPS = true
+		web.BConfig.Listen.HTTPSCertFile = option.HTTPSCertFile
+		web.BConfig.Listen.HTTPSKeyFile = option.HTTPSKeyFile
+		web.BConfig.Listen.HTTPSAddr = conf.GlobalServerConfig().Web.Host
+		web.BConfig.Listen.HTTPSPort = conf.GlobalServerConfig().Web.Port
+	} else {
+		web.BConfig.Listen.EnableHTTP = true
+		web.BConfig.Listen.EnableHTTPS = false
+		web.BConfig.Listen.HTTPAddr = conf.GlobalServerConfig().Web.Host
+		web.BConfig.Listen.HTTPPort = conf.GlobalServerConfig().Web.Port
+	}
+	web.Run()
 }
 
 // filterLoginCheck 全局的登录验证
@@ -115,5 +133,5 @@ func main() {
 		logging.RuntimeLog.Error(err)
 		return
 	}
-	StartWebServer()
+	StartWebServer(option)
 }
