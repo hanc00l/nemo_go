@@ -308,7 +308,7 @@ Worker不会开启任务监听端口（启用goby服务端模式除外），work
 
 **启用TLS**
 
-Server的Web（5000）、RPC（5001）及文件同步（5002）默认不使用TLS；为提高安全性，可配置好SSL证书和私钥文件后，通过命令行-tls启用HTTPS和TLS加密。 自签名证书及密钥生成方法见后面的文档。
+Server的Web（5000）、RPC（5001）及文件同步（5002）默认不使用TLS；为提高安全性，可配置好SSL证书和私钥文件后，通过命令行-tls启用HTTPS和TLS加密。 如果没有配置默认的server.crt和server.key，将生成并使用自签名证书。
 
 **特别提醒：**
 
@@ -425,65 +425,6 @@ Worker默认启动时参数为-m 0，将会执行所有类型（除custom）的�
 - 在命令行启动worker时，指定任务模式为-m 5，同时-w参数指定在上一步中配置的工作空间的GUID；
 - 在Nemo的IP或Domain列表视图中，切换到第一步配置的工作空间，在新建任务或XScan任务后，只有启动命令为：-m 5 -w 1a0ca919-7960-4067-9981-9abcb4eaa735的worker才会收到任务并执行。
 
-## TLS的自签名证书流程
-
->参考：https://blog.51cto.com/u_1345992/4831645
-
-### 1、生成私钥
-```bash
-[root@htas-master ~]# openssl genrsa -des3 -out server.key 2048
-Generating RSA private key, 2048 bit long modulus
-................................................................+++
-..............+++
-e is 65537 (0x10001)
-Enter pass phrase for server.key:
-Verifying - Enter pass phrase for server.key:
-```
-设置一个密码（要记住，后面会用）。
-
-### 2、生成CSR（证书签名请求）
-
-```bash
-[root@htas-master ~]# openssl req -new -key server.key -out server.csr
-Enter pass phrase for server.key:
-You are about to be asked to enter information that will be incorporated
-into your certificate request.
-What you are about to enter is what is called a Distinguished Name or a DN.
-There are quite a few fields but you can leave some blank
-For some fields there will be a default value,
-If you enter '.', the field will be left blank.
------
-Country Name (2 letter code) [XX]:CN
-State or Province Name (full name) []:BeiJing
-Locality Name (eg, city) [Default City]:BeiJing  
-Organization Name (eg, company) [Default Company Ltd]:         
-Organizational Unit Name (eg, section) []:
-Common Name (eg, your name or your server's hostname) []:localhsot
-Email Address []:
-Please enter the following 'extra' attributes
-to be sent with your certificate request
-A challenge password []:
-An optional company name []:
-```
-根据提示输入相关信息，Common Name可以填localhost。
-
-### 3、删除私钥中的密码
-
-```bash
-[root@htas-master ~]# openssl rsa -in server.key -out server.key
-Enter pass phrase for server.key:
-writing RSA key
-```
-
-### 4、生成自签名证书
-
-```bash
-[root@htas-master ~]# openssl x509 -req -days 365 -in server.csr -signkey server.key -out server.crt
-Signature ok
-subject=/C=CN/ST=BeiJing/L=BeiJing/O=ht/OU=ht/CN=htas-master/emailAddress=435695323@qq.com
-Getting Private authKey
-```
-证书制作完成，只需将**server.key和server.crt**拷贝server的目录下。
 
 ## 分布式部署的典型架构
 

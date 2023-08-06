@@ -5,6 +5,7 @@ import (
 	"github.com/beego/beego/v2/core/logs"
 	"github.com/beego/beego/v2/server/web"
 	beegoContext "github.com/beego/beego/v2/server/web/context"
+	"github.com/hanc00l/nemo_go/pkg/cert"
 	"github.com/hanc00l/nemo_go/pkg/comm"
 	"github.com/hanc00l/nemo_go/pkg/conf"
 	"github.com/hanc00l/nemo_go/pkg/filesync"
@@ -12,8 +13,10 @@ import (
 	"github.com/hanc00l/nemo_go/pkg/task/ampq"
 	"github.com/hanc00l/nemo_go/pkg/task/custom"
 	"github.com/hanc00l/nemo_go/pkg/task/runner"
+	"github.com/hanc00l/nemo_go/pkg/utils"
 	_ "github.com/hanc00l/nemo_go/pkg/web/routers"
 	"net/http"
+	"path/filepath"
 	"time"
 )
 
@@ -114,6 +117,15 @@ func main() {
 		return
 	}
 
+	if option.TLSEnabled {
+		if !utils.CheckFileExist(filepath.Join(conf.GetRootPath(), option.TLSCertFile)) || !utils.CheckFileExist(filepath.Join(conf.GetRootPath(), option.TLSKeyFile)) {
+			if err := cert.GenerateSelfSignedCert(option.TLSCertFile, option.TLSKeyFile); err != nil {
+				logging.CLILog.Error(err)
+				return
+			}
+			logging.CLILog.Info("generate selfsigned cert...")
+		}
+	}
 	if !option.NoFilesync {
 		filesync.TLSEnabled = option.TLSEnabled
 		filesync.TLSCertFile = option.TLSCertFile

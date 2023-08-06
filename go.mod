@@ -42,6 +42,7 @@ require (
 	gopkg.in/yaml.v3 v3.0.1
 	gorm.io/driver/mysql v1.3.3
 	gorm.io/gorm v1.24.6
+	k8s.io/client-go v0.27.4
 )
 
 require (
@@ -185,4 +186,5 @@ require (
 	google.golang.org/grpc v1.46.2 // indirect
 	google.golang.org/protobuf v1.30.0 // indirect
 	gopkg.in/djherbis/times.v1 v1.3.0 // indirect
+	k8s.io/utils v0.0.0-20230209194617-a36077c30491 // indirect
 )
