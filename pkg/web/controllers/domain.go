@@ -51,6 +51,7 @@ type DomainListData struct {
 	Index          int      `json:"index"`
 	Domain         string   `json:"domain"`
 	IP             []string `json:"ip"`
+	Port           []int    `json:"port"`
 	StatusCode     []string `json:"statuscode"`
 	Title          string   `json:"title"`
 	Banner         string   `json:"banner"`
@@ -563,10 +564,10 @@ func (c *DomainController) getDomainListData(req domainRequestParam) (resp DataT
 		}
 		domainData.MemoContent = domainInfo.Memo
 		domainData.ColorTag = domainInfo.ColorTag
-		//domainData.Banner = strings.Join(utils.RemoveDuplicationElement(append(domainInfo.Title, domainInfo.Banner...)), ", ")
 		domainData.Title = strings.Join(domainInfo.Title, ", ")
 		domainData.Banner = strings.Join(domainInfo.Banner, ", ")
 		domainData.StatusCode = domainInfo.StatusCode
+		domainData.Port = domainInfo.Port
 		domainData.ScreenshotFile = ss.LoadScreenshotFile(domainData.WorkspaceGUID, domainRow.DomainName)
 		if domainData.ScreenshotFile == nil {
 			domainData.ScreenshotFile = make([]string, 0)

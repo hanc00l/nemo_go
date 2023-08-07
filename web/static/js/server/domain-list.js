@@ -371,20 +371,19 @@ $(function () {
                         if (row["domaincname"].length > 0) {
                             strData += "&nbsp;<span class=\"badge badge-pill badge-info\" title=\"" + row["domaincname"] + "\">CNAME</span>\n";
                         }
-                        if (row["statuscode"].length>0){
-                            strData +="<br>[" + row["statuscode"] + "]";
+                        if (row["statuscode"].length > 0) {
+                            strData += "<br>[" + row["statuscode"] + "]";
                         }
                         return strData;
                     }
                 },
                 {
-                    data: "ip", title: "IP地址", width: "20%",
+                    data: "ip", title: "IP && Port", width: "20%",
                     "render": function (data, type, row, meta) {
                         let strData = '<div style="width:100%;white-space:normal;word-wrap:break-word;word-break:break-all;">';
                         let pre_link = "";
-                        let j = 0, len = data.length;
                         let disable_fofa = $('#checkbox_disable_fofa').is(":checked");
-                        for (; j < len; j++) {
+                        for (let j = 0; j < data.length; j++) {
                             strData += pre_link
                             strData += '<a href="ip-info?workspace=' + row['workspace'] + '&&ip=' + data[j] + '&&disable_fofa=' + disable_fofa + '" target="_blank">' + data[j] + '</a>';
                             pre_link = ",";
@@ -392,6 +391,22 @@ $(function () {
                         if (row["ipcdn"]) {
                             strData += "&nbsp;<span class=\"badge badge-pill badge-warning\" title=\"IP可能使用了CDN\">CDN</span>\n";
                         }
+                        if (row["port"].length > 0) {
+                            pre_link = "";
+                            strData += "<br>[";
+                            for (let j = 0; j < row["port"].length; j++) {
+                                strData += pre_link;
+                                let port = row["port"][j];
+                                if (port === 443 || port === 8443) {
+                                    strData += '<a href="https://' + row["domain"] + ":" + port + '"  target="_blank">' + port + '</a>';
+                                } else {
+                                    strData += '<a href="http://' + row["domain"] + ":" + port + '"  target="_blank">' + port + '</a>';
+                                }
+                                pre_link = "&nbsp;"
+                            }
+                            strData += "]";
+                        }
+
                         strData += '</div>';
                         return strData;
                     }
