@@ -91,7 +91,7 @@ func (s *OnlineSearch) Query(domain string) {
 		logging.CLILog.Error(err)
 		return
 	}
-	if s.Config.SearchLimitCount > 0 && sizeTotal > s.Config.SearchPageSize {
+	if s.Config.SearchLimitCount > 0 && sizeTotal > s.Config.SearchLimitCount {
 		msg := fmt.Sprintf("%s search %s result total:%d, limited to:%d", s.apiName, domain, sizeTotal, s.Config.SearchLimitCount)
 		logging.RuntimeLog.Warning(msg)
 		logging.CLILog.Warning(msg)
