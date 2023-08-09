@@ -6,7 +6,6 @@ require (
 	github.com/Qianlitp/crawlergo v0.4.4
 	github.com/RichardKnop/machinery/v2 v2.0.11
 	github.com/beego/beego/v2 v2.1.1
-	github.com/buger/jsonparser v1.1.1
 	github.com/chromedp/cdproto v0.0.0-20221126224343-3a0787b8dd28
 	github.com/chromedp/chromedp v0.8.6
 	github.com/disintegration/imaging v1.6.2
@@ -38,6 +37,7 @@ require (
 	golang.org/x/net v0.10.0
 	golang.org/x/text v0.10.0
 	google.golang.org/genproto v0.0.0-20220527130721-00d5c0f3be58
+	gopkg.in/errgo.v2 v2.1.0
 	gopkg.in/yaml.v2 v2.4.0
 	gopkg.in/yaml.v3 v3.0.1
 	gorm.io/driver/mysql v1.3.3

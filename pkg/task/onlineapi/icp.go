@@ -7,10 +7,12 @@ import (
 	"github.com/hanc00l/nemo_go/pkg/logging"
 	"github.com/hanc00l/nemo_go/pkg/task/domainscan"
 	"io"
+	"math/rand"
 	"net/http"
 	"os"
 	"path/filepath"
 	"strings"
+	"time"
 )
 
 type ICPQuery struct {
@@ -84,12 +86,12 @@ func (i *ICPQuery) SaveLocalICPInfo() bool {
 
 // RunICPQuery 通过API在线查询一个域名的ICP备案信息
 func (i *ICPQuery) RunICPQuery(domain string) *ICPInfo {
-	if conf.GlobalWorkerConfig().API.ICP.Key == "" {
-		logging.RuntimeLog.Warning("no icp query key,search exit")
-		logging.CLILog.Warning("no icp query key,search exit")
+	if len(conf.GlobalWorkerConfig().API.ICP.Key) == 0 {
+		logging.RuntimeLog.Warning("no icp searchEngine key,search exit")
+		logging.CLILog.Warning("no icp searchEngine key,search exit")
 		return nil
 	}
-	url := fmt.Sprintf("https://apidatav2.chinaz.com/single/icp?key=%s&domain=%s", conf.GlobalWorkerConfig().API.ICP.Key, domain)
+	url := fmt.Sprintf("https://apidatav2.chinaz.com/single/icp?key=%s&domain=%s", i.selectOneAPIKey(), domain)
 	resp, err := http.Get(url)
 	if resp.StatusCode != 200 {
 		logging.RuntimeLog.Errorf("get api status code:%v", resp.Status)
@@ -114,6 +116,16 @@ func (i *ICPQuery) RunICPQuery(domain string) *ICPInfo {
 		logging.RuntimeLog.Error(r)
 	}
 	return nil
+}
+
+func (i *ICPQuery) selectOneAPIKey() string {
+	keys := conf.GlobalWorkerConfig().API.ICP.Key
+	if len(keys) == 0 {
+		return ""
+	}
+	r := rand.New(rand.NewSource(time.Now().UnixNano()))
+	n := r.Intn(len(keys))
+	return keys[n]
 }
 
 // loadICPCache 从本地缓存中加载ICP备案信息

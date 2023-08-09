@@ -15,17 +15,17 @@ api:
   searchPageSize: 100
   searchLimitCount: 1000
   fofa:
-    name: ""
-    key: ""
+    key:
+    -
   icp:
-    name: chinaz
-    key: ""
+    key:
+    -
   quake:
-    name: ""
-    key: ""
+    key:
+    -
   hunter:
-    name: ""
-    key: ""
+    key:
+    -
 portscan:
   ping: false
   port: --top-ports 1000
@@ -51,8 +51,8 @@ domainscan:
   icp: true
 onlineapi:
   fofa: true
-  quake: false
-  hunter: false
+  quake: true
+  hunter: true
 pocscan:
   xray:
     pocPath: thirdparty/xray/xray/pocs

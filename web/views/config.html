@@ -242,28 +242,26 @@
                                 <b>搜索结果数量限制（0表示不限制）：</b>
                             </label>
                             <input class="form-control" id="input_limitcount" type="text" value="">
-                            <label class="col-form-label" for="input_fofa_user">
-                                <b>FOFA Token</b>
-                            </label>
-                            <input class="form-control" id="input_fofa_user" type="text" placeholder="fofa token email"
-                                   value="">
-                            <input class="form-control" id="input_fofa_token" type="text" placeholder="fofa token"
+                            <input class="form-control" id="input_fofa_token" type="text"
+                                   placeholder="fofa token，格式为email:token，多个token以,分隔"
                                    value="">
                             <label class="col-form-label" for="input_hunter_token">
                                 <b>Hunter Token</b>
                             </label>
-                            <input class="form-control" id="input_hunter_token" type="text" placeholder="hunter token"
+                            <input class="form-control" id="input_hunter_token" type="text"
+                                   placeholder="hunter token，多个token以,分隔"
                                    value="">
                             <label class="col-form-label" for="input_quake_token">
                                 <b>Quake Token</b>
                             </label>
-                            <input class="form-control" id="input_quake_token" type="text" placeholder="quake token"
+                            <input class="form-control" id="input_quake_token" type="text"
+                                   placeholder="quake token，多个token以,分隔"
                                    value="">
                             <label class="col-form-label" for="input_chinaz_token">
                                 <b>Chinaz ICP Token</b>
                             </label>
                             <input class="form-control" id="input_chinaz_token" type="text"
-                                   placeholder="chinaz icp token"
+                                   placeholder="chinaz icp token，多个token以,分隔"
                                    value="">
                         </div>
                     </form>
@@ -274,7 +272,8 @@
                     </button>&nbsp;&nbsp;&nbsp;
                     <button class="btn btn-primary" type="button" id="buttonTestAPIToken"><i
                             class="fa fa-fw fa-lg fa-podcast"></i>测试API
-                    </button>（点击测试后需要一定时间，请等待...）&nbsp;&nbsp;&nbsp;
+                    </button>
+                    （点击测试后需要一定时间，请等待...）&nbsp;&nbsp;&nbsp;
                 </div>
             </div>
             <div class="tile">

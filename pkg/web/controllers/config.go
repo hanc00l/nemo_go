@@ -8,7 +8,6 @@ import (
 	"github.com/hanc00l/nemo_go/pkg/notify"
 	"github.com/hanc00l/nemo_go/pkg/task/ampq"
 	"github.com/hanc00l/nemo_go/pkg/task/custom"
-	"github.com/hanc00l/nemo_go/pkg/task/onlineapi"
 	"github.com/hanc00l/nemo_go/pkg/utils"
 	"os"
 	"path"
@@ -61,7 +60,6 @@ type DefaultConfig struct {
 	ServerChanToken  string `json:"serverchan" form:"serverchan"`
 	DingTalkToken    string `json:"dingtalk" form:"dingtalk"`
 	FeishuToken      string `json:"feishu" form:"feishu"`
-	FofaUser         string `json:"fofauser" form:"fofauser"`
 	FofaToken        string `json:"fofatoken" form:"fofatoken"`
 	HunterToken      string `json:"huntertoken" form:"huntertoken"`
 	QuakeToken       string `json:"quaketoken" form:"quaketoken"`
@@ -127,11 +125,10 @@ func (c *ConfigController) LoadDefaultConfigAction() {
 		DingTalkToken:   notify["dingtalk"].Token,
 		FeishuToken:     notify["feishu"].Token,
 		//
-		FofaUser:    apiConfig.Fofa.Name,
-		FofaToken:   apiConfig.Fofa.Key,
-		HunterToken: apiConfig.Hunter.Key,
-		QuakeToken:  apiConfig.Quake.Key,
-		ChinazToken: apiConfig.ICP.Key,
+		FofaToken:   strings.Join(apiConfig.Fofa.Key, ","),
+		HunterToken: strings.Join(apiConfig.Hunter.Key, ","),
+		QuakeToken:  strings.Join(apiConfig.Quake.Key, ","),
+		ChinazToken: strings.Join(apiConfig.ICP.Key, ","),
 		//
 		Wordlist:           domainscan.Wordlist,
 		IsSubDomainFinder:  domainscan.IsSubDomainFinder,
@@ -350,11 +347,10 @@ func (c *ConfigController) SaveAPITokenAction() {
 	conf.GlobalWorkerConfig().OnlineAPI.IsFofa = data.IsFofa
 	conf.GlobalWorkerConfig().OnlineAPI.IsQuake = data.IsQuake
 	conf.GlobalWorkerConfig().OnlineAPI.IsHunter = data.IsHunter
-	conf.GlobalWorkerConfig().API.Fofa.Name = data.FofaUser
-	conf.GlobalWorkerConfig().API.Fofa.Key = data.FofaToken
-	conf.GlobalWorkerConfig().API.Hunter.Key = data.HunterToken
-	conf.GlobalWorkerConfig().API.Quake.Key = data.QuakeToken
-	conf.GlobalWorkerConfig().API.ICP.Key = data.ChinazToken
+	conf.GlobalWorkerConfig().API.Fofa.Key = strings.Split(data.FofaToken, ",")
+	conf.GlobalWorkerConfig().API.Hunter.Key = strings.Split(data.HunterToken, ",")
+	conf.GlobalWorkerConfig().API.Quake.Key = strings.Split(data.QuakeToken, ",")
+	conf.GlobalWorkerConfig().API.ICP.Key = strings.Split(data.ChinazToken, ",")
 	conf.GlobalWorkerConfig().API.SearchLimitCount = data.SearchLimitCount
 	conf.GlobalWorkerConfig().API.SearchPageSize = data.SearchPageSize
 	err = conf.GlobalWorkerConfig().WriteConfig()
@@ -373,41 +369,44 @@ func (c *ConfigController) OnlineTestAPITokenAction() {
 		c.FailedStatus("当前用户权限不允许！")
 		return
 	}
-	sb := strings.Builder{}
-	//FOFA
-	config := onlineapi.OnlineAPIConfig{Target: "fofa.info"}
-	fofa := onlineapi.NewFofa(config)
-	fofa.Do()
-	if len(fofa.DomainResult.DomainResult) > 0 || len(fofa.IpResult.IPResult) > 0 {
-		sb.WriteString("Fofa: OK!\n")
-	} else {
-		sb.WriteString("Fofa: Fail!\n")
-	}
-	//HUNTER
-	hunter := onlineapi.NewHunter(config)
-	hunter.Do()
-	if len(hunter.DomainResult.DomainResult) > 0 || len(hunter.IpResult.IPResult) > 0 {
-		sb.WriteString("Hunter: OK!\n")
-	} else {
-		sb.WriteString("Hunter: Fail!\n")
-	}
-	//Quake
-	quake := onlineapi.NewQuake(config)
-	quake.Do()
-	if len(quake.DomainResult.DomainResult) > 0 || len(quake.IpResult.IPResult) > 0 {
-		sb.WriteString("Quake: OK!\n")
-	} else {
-		sb.WriteString("Quake: Fail!\n")
-	}
-	//ICP
-	icp := onlineapi.NewICPQuery(onlineapi.ICPQueryConfig{})
-	if icp.RunICPQuery("10086.cn") != nil {
-		sb.WriteString("ICP: OK!\n")
-	} else {
-		sb.WriteString("ICP: Fail!\n")
-	}
+	/*
+		sb := strings.Builder{}
 
-	c.SucceededStatus(sb.String())
+		//FOFA
+		config := onlineapi.OnlineAPIConfig{Target: "fofa.info"}
+		fofa := onlineapi.NewFofa(config)
+		fofa.Do()
+		if len(fofa.DomainResult.DomainResult) > 0 || len(fofa.IpResult.IPResult) > 0 {
+			sb.WriteString("Fofa: OK!\n")
+		} else {
+			sb.WriteString("Fofa: Fail!\n")
+		}
+		//HUNTER
+		hunter := onlineapi.NewHunter(config)
+		hunter.Do()
+		if len(hunter.DomainResult.DomainResult) > 0 || len(hunter.IpResult.IPResult) > 0 {
+			sb.WriteString("Hunter: OK!\n")
+		} else {
+			sb.WriteString("Hunter: Fail!\n")
+		}
+		//Quake
+		quake := onlineapi.NewQuake(config)
+		quake.Do()
+		if len(quake.DomainResult.DomainResult) > 0 || len(quake.IpResult.IPResult) > 0 {
+			sb.WriteString("Quake: OK!\n")
+		} else {
+			sb.WriteString("Quake: Fail!\n")
+		}
+		//ICP
+		icp := onlineapi.NewICPQuery(onlineapi.ICPQueryConfig{})
+		if icp.RunICPQuery("10086.cn") != nil {
+			sb.WriteString("ICP: OK!\n")
+		} else {
+			sb.WriteString("ICP: Fail!\n")
+		}
+
+		c.SucceededStatus(sb.String())*/
+	c.SucceededStatus("稍后晚点再写代码。。。")
 }
 
 // SaveFingerprintAction 保存默认指纹设置

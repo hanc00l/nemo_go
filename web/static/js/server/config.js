@@ -119,7 +119,6 @@ $(function () {
                 "fofa": $('#checkbox_fofa').is(":checked"),
                 "hunter": $('#checkbox_hunter').is(":checked"),
                 "quake": $('#checkbox_quake').is(":checked"),
-                "fofauser": $('#input_fofa_user').val(),
                 "fofatoken": $('#input_fofa_token').val(),
                 "huntertoken": $('#input_hunter_token').val(),
                 "quaketoken": $('#input_quake_token').val(),
@@ -247,7 +246,6 @@ function load_config() {
         $('#input_serverchan').val(data['serverchan']);
         $('#input_dingtalk').val(data['dingtalk']);
         $('#input_feishu').val(data['feishu']);
-        $('#input_fofa_user').val(data['fofauser']);
         $('#input_fofa_token').val(data['fofatoken']);
         $('#input_hunter_token').val(data['huntertoken']);
         $('#input_quake_token').val(data['quaketoken']);

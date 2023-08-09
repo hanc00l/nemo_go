@@ -532,26 +532,12 @@ func (c *IPController) ImportPortscanResultAction() {
 		portscan.FilterIPHasTooMuchPort(&tx.Result, true)
 		resultIpPort := tx.Result.SaveResult(config)
 		result = fmt.Sprintf("%s", resultIpPort)
-	} else if bin == "0zone" {
-		z := onlineapi.NewZeroZone(onlineapi.OnlineAPIConfig{})
-		z.ParseCSVContentResult(fileContent)
-		portscan.FilterIPHasTooMuchPort(&z.IpResult, true)
-		resultIpPort := z.IpResult.SaveResult(config)
-		resultDomain := z.DomainResult.SaveResult(domainscan.Config{OrgId: config.OrgId, WorkspaceId: workspaceId})
-		result = fmt.Sprintf("%s,%s", resultDomain, resultIpPort)
-	} else if bin == "fofa" {
-		z := onlineapi.NewFofa(onlineapi.OnlineAPIConfig{})
-		z.ParseCSVContentResult(fileContent)
-		portscan.FilterIPHasTooMuchPort(&z.IpResult, true)
-		resultIpPort := z.IpResult.SaveResult(config)
-		resultDomain := z.DomainResult.SaveResult(domainscan.Config{OrgId: config.OrgId, WorkspaceId: workspaceId})
-		result = fmt.Sprintf("%s,%s", resultDomain, resultIpPort)
-	} else if bin == "hunter" {
-		z := onlineapi.NewHunter(onlineapi.OnlineAPIConfig{})
-		z.ParseCSVContentResult(fileContent)
-		portscan.FilterIPHasTooMuchPort(&z.IpResult, true)
-		resultIpPort := z.IpResult.SaveResult(config)
-		resultDomain := z.DomainResult.SaveResult(domainscan.Config{OrgId: config.OrgId, WorkspaceId: workspaceId})
+	} else if bin == "0zone" || bin == "fofa" || bin == "hunter" {
+		s := onlineapi.NewOnlineAPISearch(onlineapi.OnlineAPIConfig{}, bin)
+		s.ParseContentResult(fileContent)
+		portscan.FilterIPHasTooMuchPort(&s.IpResult, true)
+		resultIpPort := s.IpResult.SaveResult(config)
+		resultDomain := s.DomainResult.SaveResult(domainscan.Config{OrgId: config.OrgId, WorkspaceId: workspaceId})
 		result = fmt.Sprintf("%s,%s", resultDomain, resultIpPort)
 	} else {
 		c.FailedStatus("未知的扫描方法")

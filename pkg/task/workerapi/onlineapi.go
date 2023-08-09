@@ -65,22 +65,10 @@ func doOnlineAPI(taskId string, mainTaskId string, configJSON string, apiName st
 
 // doOnlineAPIAndSave 执行fofa、hunter及quake的资产搜索，并保存结果
 func doOnlineAPIAndSave(taskId string, mainTaskId string, apiName string, config onlineapi.OnlineAPIConfig) (ipResult portscan.Result, domainResult domainscan.Result, result string, err error) {
-	if apiName == "fofa" {
-		fofa := onlineapi.NewFofa(config)
-		fofa.Do()
-		ipResult = fofa.IpResult
-		domainResult = fofa.DomainResult
-	} else if apiName == "quake" {
-		quake := onlineapi.NewQuake(config)
-		quake.Do()
-		ipResult = quake.IpResult
-		domainResult = quake.DomainResult
-	} else if apiName == "hunter" {
-		hunter := onlineapi.NewHunter(config)
-		hunter.Do()
-		ipResult = hunter.IpResult
-		domainResult = hunter.DomainResult
-	}
+	s := onlineapi.NewOnlineAPISearch(config, apiName)
+	s.Do()
+	ipResult = s.IpResult
+	domainResult = s.DomainResult
 	portscan.FilterIPHasTooMuchPort(&ipResult, true)
 	checkIgnoreResult(&ipResult, &domainResult, config)
 

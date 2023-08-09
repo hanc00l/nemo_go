@@ -6,12 +6,11 @@ import (
 	"encoding/csv"
 	"encoding/json"
 	"fmt"
-	"github.com/hanc00l/nemo_go/pkg/conf"
-	"github.com/hanc00l/nemo_go/pkg/logging"
 	"github.com/hanc00l/nemo_go/pkg/task/custom"
 	"github.com/hanc00l/nemo_go/pkg/task/domainscan"
 	"github.com/hanc00l/nemo_go/pkg/task/portscan"
 	"github.com/hanc00l/nemo_go/pkg/utils"
+	"gopkg.in/errgo.v2/fmt/errors"
 	"io"
 	"net/http"
 	"net/url"
@@ -21,14 +20,6 @@ import (
 )
 
 type Hunter struct {
-	//Config 配置参数：查询的目标、关联的组织
-	Config OnlineAPIConfig
-	//Result quake api查询后的结果
-	Result []onlineSearchResult
-	//DomainResult 整理后的域名结果
-	DomainResult domainscan.Result
-	//IpResult 整理后的IP结果
-	IpResult portscan.Result
 }
 
 // HunterServiceInfo 查询结果的返回数据
@@ -53,148 +44,78 @@ type HunterServiceInfo struct {
 	} `json:"data"`
 }
 
-// NewHunter 创建Hunter对像
-func NewHunter(config OnlineAPIConfig) *Hunter {
-	return &Hunter{Config: config}
-}
-
-// Do 执行查询
-func (h *Hunter) Do() {
-	if conf.GlobalWorkerConfig().API.Hunter.Key == "" {
-		logging.RuntimeLog.Warning("no hunter api key,exit hunter search")
-		logging.CLILog.Warning("no hunter api key,exit hunter search")
-		return
-	}
-	h.Config.SearchLimitCount = conf.GlobalWorkerConfig().API.SearchLimitCount
-	if h.Config.SearchPageSize = conf.GlobalWorkerConfig().API.SearchPageSize; h.Config.SearchPageSize <= 0 {
-		h.Config.SearchPageSize = pageSizeDefault
-	}
-	blackDomain := custom.NewBlackDomain()
-	blackIP := custom.NewBlackIP()
-	for _, line := range strings.Split(h.Config.Target, ",") {
-		domain := strings.TrimSpace(line)
-		if domain == "" {
-			continue
-		}
-		if utils.CheckIPV4(domain) && blackIP.CheckBlack(domain) {
-			continue
-		}
-		if utils.CheckDomain(domain) && blackDomain.CheckBlack(domain) {
-			continue
-		}
-		h.RunHunter(domain)
-	}
-}
-
-// RunHunter 调用API查询一个IP或域名
-func (h *Hunter) RunHunter(domain string) {
-	var query string
+func (h *Hunter) GetQueryString(domain string, config OnlineAPIConfig) (query string) {
 	if utils.CheckIPV4(domain) || utils.CheckIPV4Subnet(domain) {
 		query = fmt.Sprintf("ip=\"%s\"", domain)
 	} else {
-		domainCert := domain
-		if strings.HasPrefix(domain, ".") == false {
-			domainCert = "." + domain
-		}
-		query = fmt.Sprintf("domain=\"%s\" or cert=\"%s\" or  cert.subject=\"%s\"", domain, domainCert, domainCert)
+		//domainCert := domain
+		//if strings.HasPrefix(domain, ".") == false {
+		//	domainCert = "." + domain
+		//}
+		//query = fmt.Sprintf("domain=\"%s\" or cert=\"%s\" or  cert.subject=\"%s\"", domain, domainCert, domainCert)
+		query = fmt.Sprintf("domain=\"%s\"", domain)
 	}
-	if h.Config.IsIgnoreOutofChina {
+	if config.IsIgnoreOutofChina {
 		query = fmt.Sprintf("(%s) and ip.country=\"CN\" and ip.province!=\"香港\"", query)
-	}
-	// 查询第1页，并获取总共记录数量
-	pageResult, sizeTotal := h.retriedPageSearch(query, 1)
-	if h.Config.SearchLimitCount > 0 && sizeTotal > h.Config.SearchLimitCount {
-		msg := fmt.Sprintf("search %s result total:%d, limited to:%d", domain, sizeTotal, h.Config.SearchLimitCount)
-		logging.RuntimeLog.Warning(msg)
-		logging.CLILog.Warning(msg)
-		sizeTotal = h.Config.SearchLimitCount
-	}
-	h.Result = append(h.Result, pageResult...)
-	// 计算需要查询的页数
-	pageTotalNum := sizeTotal / h.Config.SearchPageSize
-	if sizeTotal%h.Config.SearchPageSize > 0 {
-		pageTotalNum++
-	}
-	for i := 2; i <= pageTotalNum; i++ {
-		time.Sleep(1 * time.Second)
-		pageResult, _ = h.retriedPageSearch(query, i)
-		h.Result = append(h.Result, pageResult...)
-	}
-	h.parseResult()
-}
-
-func (h *Hunter) retriedPageSearch(query string, page int) (pageResult []onlineSearchResult, sizeTotal int) {
-	RETRIED := 3
-	//查询的起始时间段：最近3个月数据
-	endTime := time.Now()
-	startTime := endTime.AddDate(0, -3, 0)
-	for i := 0; i < RETRIED; i++ {
-		var serviceInfo HunterServiceInfo
-		request, err := http.NewRequest(http.MethodGet, "https://hunter.qianxin.com/openApi/search", nil)
-		if err != nil {
-			logging.RuntimeLog.Error(err)
-			logging.CLILog.Errorf("Hunter Search Error:%s", err.Error())
-		}
-		params := make(url.Values)
-		params.Add("api-key", conf.GlobalWorkerConfig().API.Hunter.Key)
-		params.Add("search", base64.URLEncoding.EncodeToString([]byte(query)))
-		params.Add("page", strconv.Itoa(page))
-		params.Add("page_size", strconv.Itoa(h.Config.SearchPageSize))
-		params.Add("is_web", "3") //资产类型，1代表”web资产“，2代表”非web资产“，3代表”全部“
-		params.Add("start_time", startTime.Format("2006-01-02 15:04:05"))
-		params.Add("end_time", endTime.Format("2006-01-02 15:04:05"))
-		request.URL.RawQuery = params.Encode()
-		resp, err := http.DefaultClient.Do(request)
-		if err != nil {
-			logging.RuntimeLog.Error(err)
-			logging.CLILog.Errorf("Hunter Search Error:%s", err.Error())
-			continue
-		}
-		content, err := io.ReadAll(resp.Body)
-		resp.Body.Close()
-		if err != nil {
-			logging.RuntimeLog.Error(err)
-			logging.CLILog.Errorf("Hunter Search Error:%s", err.Error())
-			continue
-		}
-		err = json.Unmarshal(content, &serviceInfo)
-		if err != nil {
-			logging.RuntimeLog.Error(err)
-			logging.CLILog.Errorf("Hunter Search Error:%s", err.Error())
-			continue
-		}
-		if serviceInfo.Code != 200 {
-			logging.RuntimeLog.Errorf("Hunter Search Error:%s", serviceInfo.Message)
-			logging.CLILog.Errorf("Hunter Search Error:%s", serviceInfo.Message)
-			continue
-		}
-		sizeTotal = serviceInfo.Data.Total
-		for _, data := range serviceInfo.Data.Arr {
-			qsr := onlineSearchResult{
-				IP:     data.IP,
-				Domain: data.Domain,
-				Host:   data.Domain,
-				Port:   fmt.Sprintf("%d", data.Port),
-				Title:  data.Title,
-			}
-			pageResult = append(pageResult, qsr)
-		}
-		if len(pageResult) > 0 {
-			break
-		}
 	}
 	return
 }
 
-// ParseCSVContentResult 解析零零信安中导出的CSV文本结果
-func (h *Hunter) ParseCSVContentResult(content []byte) {
+func (h *Hunter) Run(query string, apiKey string, pageIndex int, pageSize int, config OnlineAPIConfig) (pageResult []onlineSearchResult, sizeTotal int, err error) {
+	//查询的起始时间段：最近3个月数据
+	endTime := time.Now()
+	startTime := endTime.AddDate(0, -3, 0)
+	var serviceInfo HunterServiceInfo
+	request, err := http.NewRequest(http.MethodGet, "https://hunter.qianxin.com/openApi/search", nil)
+	if err != nil {
+		return
+	}
+	params := make(url.Values)
+	params.Add("api-key", apiKey)
+	params.Add("search", base64.URLEncoding.EncodeToString([]byte(query)))
+	params.Add("page", strconv.Itoa(pageIndex))
+	params.Add("page_size", strconv.Itoa(pageSize))
+	params.Add("is_web", "3") //资产类型，1代表”web资产“，2代表”非web资产“，3代表”全部“
+	params.Add("start_time", startTime.Format("2006-01-02 15:04:05"))
+	params.Add("end_time", endTime.Format("2006-01-02 15:04:05"))
+	request.URL.RawQuery = params.Encode()
+	resp, err := http.DefaultClient.Do(request)
+	if err != nil {
+		return
+	}
+	content, err := io.ReadAll(resp.Body)
+	resp.Body.Close()
+	if err != nil {
+		return
+	}
+	err = json.Unmarshal(content, &serviceInfo)
+	if err != nil {
+		return
+	}
+	if serviceInfo.Code != 200 {
+		err = errors.Newf("Hunter Search Error:%s", serviceInfo.Message)
+		return
+	}
+	sizeTotal = serviceInfo.Data.Total
+	for _, data := range serviceInfo.Data.Arr {
+		qsr := onlineSearchResult{
+			IP:     data.IP,
+			Domain: data.Domain,
+			Host:   data.Domain,
+			Port:   fmt.Sprintf("%d", data.Port),
+			Title:  data.Title,
+		}
+		pageResult = append(pageResult, qsr)
+	}
+
+	return
+}
+
+func (h *Hunter) ParseContentResult(content []byte) (ipResult portscan.Result, domainResult domainscan.Result) {
 	s := custom.NewService()
-	if h.IpResult.IPResult == nil {
-		h.IpResult.IPResult = make(map[string]*portscan.IPResult)
-	}
-	if h.DomainResult.DomainResult == nil {
-		h.DomainResult.DomainResult = make(map[string]*domainscan.DomainResult)
-	}
+	ipResult.IPResult = make(map[string]*portscan.IPResult)
+	domainResult.DomainResult = make(map[string]*domainscan.DomainResult)
+
 	r := csv.NewReader(bytes.NewReader(content))
 	for index := 0; ; index++ {
 		row, err := r.Read()
@@ -214,18 +135,18 @@ func (h *Hunter) ParseCSVContentResult(content []byte) {
 
 		//域名属性：
 		if len(domain) > 0 && utils.CheckIPV4(domain) == false {
-			if h.DomainResult.HasDomain(domain) == false {
-				h.DomainResult.SetDomain(domain)
+			if domainResult.HasDomain(domain) == false {
+				domainResult.SetDomain(domain)
 			}
 			if len(ip) > 0 {
-				h.DomainResult.SetDomainAttr(domain, domainscan.DomainAttrResult{
+				domainResult.SetDomainAttr(domain, domainscan.DomainAttrResult{
 					Source:  "hunter",
 					Tag:     "A",
 					Content: ip,
 				})
 			}
 			if len(title) > 0 {
-				h.DomainResult.SetDomainAttr(domain, domainscan.DomainAttrResult{
+				domainResult.SetDomainAttr(domain, domainscan.DomainAttrResult{
 					Source:  "hunter",
 					Tag:     "title",
 					Content: title,
@@ -234,7 +155,7 @@ func (h *Hunter) ParseCSVContentResult(content []byte) {
 			if len(banners) > 0 {
 				for _, banner := range banners {
 					if len(banner) > 0 {
-						h.DomainResult.SetDomainAttr(domain, domainscan.DomainAttrResult{
+						domainResult.SetDomainAttr(domain, domainscan.DomainAttrResult{
 							Source:  "hunter",
 							Tag:     "banner",
 							Content: banner,
@@ -247,14 +168,14 @@ func (h *Hunter) ParseCSVContentResult(content []byte) {
 		if len(ip) == 0 || utils.CheckIPV4(ip) == false || portErr != nil {
 			continue
 		}
-		if h.IpResult.HasIP(ip) == false {
-			h.IpResult.SetIP(ip)
+		if ipResult.HasIP(ip) == false {
+			ipResult.SetIP(ip)
 		}
-		if h.IpResult.HasPort(ip, port) == false {
-			h.IpResult.SetPort(ip, port)
+		if ipResult.HasPort(ip, port) == false {
+			ipResult.SetPort(ip, port)
 		}
 		if len(title) > 0 {
-			h.IpResult.SetPortAttr(ip, port, portscan.PortAttrResult{
+			ipResult.SetPortAttr(ip, port, portscan.PortAttrResult{
 				Source:  "hunter",
 				Tag:     "title",
 				Content: title,
@@ -264,7 +185,7 @@ func (h *Hunter) ParseCSVContentResult(content []byte) {
 			service = s.FindService(port, "")
 		}
 		if len(service) > 0 {
-			h.IpResult.SetPortAttr(ip, port, portscan.PortAttrResult{
+			ipResult.SetPortAttr(ip, port, portscan.PortAttrResult{
 				Source:  "hunter",
 				Tag:     "service",
 				Content: service,
@@ -273,7 +194,7 @@ func (h *Hunter) ParseCSVContentResult(content []byte) {
 		if len(banners) > 0 {
 			for _, banner := range banners {
 				if len(banner) > 0 {
-					h.IpResult.SetPortAttr(ip, port, portscan.PortAttrResult{
+					ipResult.SetPortAttr(ip, port, portscan.PortAttrResult{
 						Source:  "hunter",
 						Tag:     "banner",
 						Content: banner,
@@ -282,4 +203,5 @@ func (h *Hunter) ParseCSVContentResult(content []byte) {
 			}
 		}
 	}
+	return
 }

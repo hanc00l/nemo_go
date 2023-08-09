@@ -68,16 +68,16 @@ func TestZeroZone_ParseCSVContentResult(t *testing.T) {
 	   4 [4 http://ps.csg.cn:8000 8000  112.94.221.2 首页 200 nginx  联通 中国广东广州 [] 中国南方电网有限责任公司]
 	   5 [5 http://xxqa.gmp.csg.cn:8000 8000  112.94.221.2 首页 200 nginx  联通 中国广东广州 [] 中国南方电网有限责任公司]
 	*/
-	z := NewZeroZone(OnlineAPIConfig{})
-	z.ParseCSVContentResult([]byte(data))
-	for kk, ip := range z.IpResult.IPResult {
+	s := NewOnlineAPISearch(OnlineAPIConfig{}, "0zone")
+	s.ParseContentResult([]byte(data))
+	for kk, ip := range s.IpResult.IPResult {
 		t.Log(kk)
 		for kk, port := range ip.Ports {
 			t.Log(kk, port.Status)
 			t.Log(port.PortAttrs)
 		}
 	}
-	for kk, d := range z.DomainResult.DomainResult {
+	for kk, d := range s.DomainResult.DomainResult {
 		t.Log(kk)
 		for kk, da := range d.DomainAttrs {
 			t.Log(kk, da)

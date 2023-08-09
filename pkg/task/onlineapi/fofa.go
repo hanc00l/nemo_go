@@ -1,354 +1,115 @@
 package onlineapi
 
-// forked from https://github.com/fofapro/fofa-go
-
-// Copyright (c) 2016 baimaohui
-
-// Permission is hereby granted, free of charge, to any person obtaining a
-// copy of this software and associated documentation files (the "Software"),
-// to deal in the Software without restriction, including without limitation
-// the rights to use, copy, modify, merge, publish, distribute, sublicense,
-// and/or sell copies of the Software, and to permit persons to whom the
-// Software is furnished to do so, subject to the following conditions:
-
-// The above copyright notice and this permission notice shall be included
-// in all copies or substantial portions of the Software.
-
-// Package fofa implements some fofa-api utility functions.
-
 import (
 	"bytes"
-	"crypto/tls"
 	"encoding/base64"
 	"encoding/csv"
 	"encoding/json"
-	"errors"
 	"fmt"
-	"github.com/buger/jsonparser"
-	"github.com/hanc00l/nemo_go/pkg/conf"
-	"github.com/hanc00l/nemo_go/pkg/logging"
 	"github.com/hanc00l/nemo_go/pkg/task/custom"
 	"github.com/hanc00l/nemo_go/pkg/task/domainscan"
 	"github.com/hanc00l/nemo_go/pkg/task/portscan"
 	"github.com/hanc00l/nemo_go/pkg/utils"
+	"gopkg.in/errgo.v2/fmt/errors"
 	"io"
-	"io/ioutil"
-	"log"
 	"net/http"
+	"net/url"
+	"regexp"
 	"strconv"
 	"strings"
-	"time"
 )
 
-// Fofa a fofa client can be used to make queries
-type Fofa struct {
-	email []byte
-	key   []byte
-	*http.Client
-
-	//Config 配置参数：查询的目标、关联的组织
-	Config OnlineAPIConfig
-	//Result 查询结果
-	Result []onlineSearchResult
-	//DomainResult 整理后的域名结果
-	DomainResult domainscan.Result
-	//IpResult 整理后的IP结果
-	IpResult portscan.Result
+type FOFANew struct {
 }
 
-// Domain represents a record of the query results
-// contain domain host  ip  port title country city
-type result struct {
-	Domain  string `json:"domain,omitempty"`
-	Host    string `json:"host,omitempty"`
-	IP      string `json:"ip,omitempty"`
-	Port    string `json:"port,omitempty"`
-	Title   string `json:"title,omitempty"`
-	Country string `json:"country,omitempty"`
-	City    string `json:"city,omitempty"`
-}
-
-// User struct for fofa user
-type User struct {
-	Email  string `json:"email,omitempty"`
-	Fcoin  int    `json:"fcoin,omitempty"`
-	Vip    bool   `json:"bool,omitempty"`
-	Avatar string `json:"avatar,omitempty"`
-	Err    string `json:"errmsg,omitempty"`
-}
-
-// Results fofa result set
-type Results []result
-
-//
-
-const (
-	// fofa api changed:
-	defaultAPIUrl = "https://fofa.info/api/v1/search/all?"
-)
-
-// NewFofaClient create a fofa client
-func NewFofaClient(email, key []byte) *Fofa {
-	transCfg := &http.Transport{
-		TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
-	}
-	return &Fofa{
-		email: email,
-		key:   key,
-		Client: &http.Client{
-			Transport: transCfg, // disable tls verify
-		},
-	}
-}
-
-// Get overwrite http.Get
-func (f *Fofa) Get(u string) ([]byte, error) {
-	body, err := f.Client.Get(u)
-	if err != nil {
-		return nil, err
-	}
-	defer body.Body.Close()
-	content, err := ioutil.ReadAll(body.Body)
-	if err != nil {
-		return nil, err
-	}
-	return content, nil
-}
-
-// QueryAsJSON make a fofa query and return json data as result
-// echo 'domain="nosec.org"' | base64 - | xargs -I{}
-// curl "https://fofa.info/api/v1/search/all?email=${FOFA_EMAIL}&key=${FOFA_KEY}&qbase64={}"
-// host title ip domain port country city
-func (f *Fofa) QueryAsJSON(page uint, args ...[]byte) ([]byte, error) {
-	var (
-		query  = []byte(nil)
-		fields = []byte("domain,host,ip,port,title,country,city")
-		q      = []byte(nil)
-	)
-	switch {
-	case len(args) == 1 || (len(args) == 2 && args[1] == nil):
-		query = args[0]
-	case len(args) == 2:
-		query = args[0]
-		fields = args[1]
-	}
-	q = []byte(base64.StdEncoding.EncodeToString(query))
-	q = bytes.Join([][]byte{[]byte(defaultAPIUrl),
-		[]byte("email="), f.email,
-		[]byte("&key="), f.key,
-		[]byte("&qbase64="), q,
-		[]byte("&fields="), fields,
-		[]byte("&size="), []byte(strconv.Itoa(f.Config.SearchPageSize)),
-		[]byte("&page="), []byte(strconv.Itoa(int(page))),
-	}, []byte(""))
-	//fmt.Printf("%s\n", q)
-	content, err := f.Get(string(q))
-	if err != nil {
-		return nil, err
-	}
-	errmsg, err := jsonparser.GetString(content, "errmsg")
-	if err == nil {
-		err = errors.New(errmsg)
-	} else {
-		err = nil
-	}
-	return content, err
-}
-
-// QueryAsArray make a fofa query and
-// return array data as result
-// echo 'domain="nosec.org"' | base64 - | xargs -I{}
-// curl "https://fofa.info/api/v1/search/all?email=${FOFA_EMAIL}&key=${FOFA_KEY}&qbase64={}"
-func (f *Fofa) QueryAsArray(page uint, args ...[]byte) (result Results, err error) {
-
-	var content []byte
-
-	content, err = f.QueryAsJSON(page, args...)
-	if err != nil {
-		return nil, err
-	}
-
-	errmsg, err := jsonparser.GetString(content, "errmsg")
-	// err equals to nil on error
-	if err == nil {
-		return nil, errors.New(errmsg)
-	}
-	err = json.Unmarshal(content, &result)
-
-	return
-}
-
-// UserInfo get user information
-func (f *Fofa) UserInfo() (user *User, err error) {
-	user = new(User)
-	queryStr := strings.Join([]string{"https://fofa.info/api/v1/info/my?email=", string(f.email), "&key=", string(f.key)}, "")
-
-	content, err := f.Get(queryStr)
-
-	if err != nil {
-		return nil, err
-	}
-
-	if err = json.Unmarshal(content, user); err != nil {
-		return nil, err
-	}
-
-	if len(user.Err) != 0 {
-		return nil, errors.New(user.Err)
-	}
-
-	return user, nil
-}
-
-func (u *User) String() string {
-	data, err := json.Marshal(u)
-	if err != nil {
-		log.Fatalf("json marshal failed. err: %s\n", err)
-		return ""
-	}
-	return string(data)
-}
-
-func (r *result) String() string {
-	data, err := json.Marshal(r)
-	if err != nil {
-		log.Fatalf("json marshal failed. err: %s\n", err)
-		return ""
-	}
-	return string(data)
-}
-
-func (r *Results) String() string {
-	data, err := json.Marshal(r)
-	if err != nil {
-		log.Fatalf("json marshal failed. err: %s\n", err)
-		return ""
-	}
-	return string(data)
-}
-
-// NewFofa 创建Fofa对象
-func NewFofa(config OnlineAPIConfig) *Fofa {
-	return &Fofa{Config: config}
-}
-
-// Do 执行fofa
-func (f *Fofa) Do() {
-	if conf.GlobalWorkerConfig().API.Fofa.Key == "" || conf.GlobalWorkerConfig().API.Fofa.Name == "" {
-		logging.RuntimeLog.Warning("no fofa api key,exit fofa search")
-		logging.CLILog.Warning("no fofa api key,exit fofa search")
-		return
-	}
-	f.Config.SearchLimitCount = conf.GlobalWorkerConfig().API.SearchLimitCount
-	f.Config.SearchPageSize = conf.GlobalWorkerConfig().API.SearchPageSize
-	if f.Config.SearchPageSize <= 0 {
-		f.Config.SearchPageSize = pageSizeDefault
-	}
-	blackDomain := custom.NewBlackDomain()
-	blackIP := custom.NewBlackIP()
-	for _, line := range strings.Split(f.Config.Target, ",") {
-		domain := strings.TrimSpace(line)
-		if domain == "" {
-			continue
-		}
-		if utils.CheckIPV4(domain) && blackIP.CheckBlack(domain) {
-			continue
-		}
-		if utils.CheckDomain(domain) && blackDomain.CheckBlack(domain) {
-			continue
-		}
-		f.RunFofa(domain)
-	}
-}
-
-// RunFofa 调用fofa搜索
-func (f *Fofa) RunFofa(domain string) {
-	email := conf.GlobalWorkerConfig().API.Fofa.Name
-	key := conf.GlobalWorkerConfig().API.Fofa.Key
-
-	clt := NewFofaClient([]byte(email), []byte(key))
-	if clt == nil {
-		logging.RuntimeLog.Error("create fofa client error")
-		return
-	}
-	clt.Config.SearchLimitCount = f.Config.SearchLimitCount
-	clt.Config.SearchPageSize = f.Config.SearchPageSize
-	// QueryAsJSON
-	var query string
-	fields := "domain,host,ip,port,title,country,city,server,banner"
-	if f.Config.SearchByKeyWord {
-		query = f.Config.Target
+func (f *FOFANew) GetQueryString(domain string, config OnlineAPIConfig) (query string) {
+	if config.SearchByKeyWord {
+		query = config.Target
 	} else {
 		if utils.CheckIPV4(domain) || utils.CheckIPV4Subnet(domain) {
 			query = fmt.Sprintf("ip=\"%s\"", domain)
 		} else {
 			// cert.subject相比更精准，但信息量更少；cert="xxx.com"干扰太多，暂时不用（没想法好优的方案）
 			// 在域名前加.减少模糊匹配带来的部份干扰
-			domainCert := domain
-			if strings.HasPrefix(domain, ".") == false {
-				domainCert = "." + domain
-			}
-			query = fmt.Sprintf("domain=\"%s\" || cert=\"%s\" || cert.subject=\"%s\"", domain, domainCert, domainCert)
+			//domainCert := domain
+			//if strings.HasPrefix(domain, ".") == false {
+			//	domainCert = "." + domain
+			//}
+			//query = fmt.Sprintf("domain=\"%s\" || cert=\"%s\" || cert.subject=\"%s\"", domain, domainCert, domainCert)
+			query = fmt.Sprintf("domain=\"%s\"", domain)
 		}
 	}
-	if f.Config.IsIgnoreOutofChina {
+	if config.IsIgnoreOutofChina {
 		query = fmt.Sprintf("(%s) && country=\"CN\" && region!=\"HK\" && region!=\"TW\"  && region!=\"MO\"", query)
 	}
-	// 查询第1页，并获取总共记录数量
-	pageResult, sizeTotal := f.retriedFofaSearch(clt, 1, query, fields)
-	if f.Config.SearchLimitCount > 0 && sizeTotal > f.Config.SearchLimitCount {
-		msg := fmt.Sprintf("search %s result total:%d, limited to:%d", domain, sizeTotal, f.Config.SearchLimitCount)
-		logging.RuntimeLog.Warning(msg)
-		logging.CLILog.Warning(msg)
-		sizeTotal = f.Config.SearchLimitCount
-	}
-	//fmt.Println(sizeTotal)
-	f.Result = append(f.Result, pageResult...)
-	// 计算需要查询的页数
-	pageTotalNum := sizeTotal / f.Config.SearchPageSize
-	if sizeTotal%f.Config.SearchPageSize > 0 {
-		pageTotalNum++
-	}
-	for i := 2; i <= pageTotalNum; i++ {
-		pageResult, _ = f.retriedFofaSearch(clt, i, query, fields)
-		f.Result = append(f.Result, pageResult...)
-	}
-	// 解析结果
-	f.parseResult()
-}
 
-func (f *Fofa) retriedFofaSearch(clt *Fofa, page int, query string, fields string) (pageResult []onlineSearchResult, sizeTotal int) {
-	RETRIED := 3
-	for j := 0; j < RETRIED; j++ {
-		ret, err := clt.QueryAsJSON(uint(page), []byte(query), []byte(fields))
-		if err != nil {
-			logging.RuntimeLog.Error(err.Error())
-			if strings.Contains(err.Error(), "F点余额不足") || strings.Contains(err.Error(), "请按顺序进行翻页查询") {
-				break
-			}
-			if strings.Contains(err.Error(), "请求速度过快") {
-				time.Sleep(2 * time.Second)
-			}
-			continue
-		}
-		//fmt.Println(string(ret))
-		pageResult, sizeTotal = f.parseFofaSearchResult(ret)
-		if len(pageResult) > 0 {
-			break
-		}
-	}
 	return
 }
 
-// ParseCSVContentResult 解析导出的CSV文本结果
-func (f *Fofa) ParseCSVContentResult(content []byte) {
+func (f *FOFANew) Run(query string, apiKey string, pageIndex int, pageSize int, config OnlineAPIConfig) (pageResult []onlineSearchResult, sizeTotal int, err error) {
+	fields := "domain,host,ip,port,title,country,city,server,banner"
+	arr := strings.Split(apiKey, ":")
+	if len(arr) != 2 {
+		err = errors.Newf("invalid fofa key:%s", apiKey)
+		return
+	}
+	request, err := http.NewRequest(http.MethodGet, "https://fofa.info/api/v1/search/all", nil)
+	if err != nil {
+		return
+	}
+	params := make(url.Values)
+	params.Add("email", arr[0])
+	params.Add("key", arr[1])
+	params.Add("qbase64", base64.URLEncoding.EncodeToString([]byte(query)))
+	params.Add("fields", fields)
+	params.Add("page", strconv.Itoa(pageIndex))
+	params.Add("size", strconv.Itoa(pageSize))
+	request.URL.RawQuery = params.Encode()
+	resp, err := http.DefaultClient.Do(request)
+	if err != nil {
+		return
+	}
+	content, err := io.ReadAll(resp.Body)
+	resp.Body.Close()
+	pageResult, sizeTotal, err = f.parseFofaSearchResult(content)
+
+	return
+}
+
+func (f *FOFANew) parseFofaSearchResult(queryResult []byte) (result []onlineSearchResult, sizeTotal int, err error) {
+	r := fofaQueryResult{}
+	err = json.Unmarshal(queryResult, &r)
+	if err != nil {
+		return
+	}
+	if r.IsError {
+		err = errors.New(r.ErrorMessage)
+		return
+	}
+	sizeTotal = r.Size
+	for _, line := range r.Results {
+		fsr := onlineSearchResult{
+			Domain: line[0], Host: line[1], IP: line[2], Port: line[3], Title: line[4],
+			Country: line[5], City: line[6], Server: line[7], Banner: line[8],
+		}
+		lowerBanner := strings.ToLower(fsr.Banner)
+		//过滤部份无意义的banner
+		if strings.HasPrefix(fsr.Banner, "HTTP/") || strings.HasPrefix(lowerBanner, "<html>") || strings.HasPrefix(lowerBanner, "<!doctype html>") {
+			fsr.Banner = ""
+		}
+		//过滤所有的\x00 \x15等不可见字符
+		re := regexp.MustCompile("\\\\x[0-9a-f]{2}")
+		fsr.Banner = re.ReplaceAllString(fsr.Banner, "")
+		result = append(result, fsr)
+	}
+
+	return
+}
+
+func (f *FOFANew) ParseContentResult(content []byte) (ipResult portscan.Result, domainResult domainscan.Result) {
+	ipResult.IPResult = make(map[string]*portscan.IPResult)
+	domainResult.DomainResult = make(map[string]*domainscan.DomainResult)
 	s := custom.NewService()
-	if f.IpResult.IPResult == nil {
-		f.IpResult.IPResult = make(map[string]*portscan.IPResult)
-	}
-	if f.DomainResult.DomainResult == nil {
-		f.DomainResult.DomainResult = make(map[string]*domainscan.DomainResult)
-	}
 	r := csv.NewReader(bytes.NewReader(content))
 	for index := 0; ; index++ {
 		row, err := r.Read()
@@ -366,18 +127,18 @@ func (f *Fofa) ParseCSVContentResult(content []byte) {
 		service := strings.TrimSpace(row[6])
 		//域名属性：
 		if len(domain) > 0 && utils.CheckIPV4(domain) == false {
-			if f.DomainResult.HasDomain(domain) == false {
-				f.DomainResult.SetDomain(domain)
+			if domainResult.HasDomain(domain) == false {
+				domainResult.SetDomain(domain)
 			}
 			if len(ip) > 0 {
-				f.DomainResult.SetDomainAttr(domain, domainscan.DomainAttrResult{
+				domainResult.SetDomainAttr(domain, domainscan.DomainAttrResult{
 					Source:  "fofa",
 					Tag:     "A",
 					Content: ip,
 				})
 			}
 			if len(title) > 0 {
-				f.DomainResult.SetDomainAttr(domain, domainscan.DomainAttrResult{
+				domainResult.SetDomainAttr(domain, domainscan.DomainAttrResult{
 					Source:  "fofa",
 					Tag:     "title",
 					Content: title,
@@ -388,14 +149,14 @@ func (f *Fofa) ParseCSVContentResult(content []byte) {
 		if len(ip) == 0 || utils.CheckIPV4(ip) == false || portErr != nil {
 			continue
 		}
-		if f.IpResult.HasIP(ip) == false {
-			f.IpResult.SetIP(ip)
+		if ipResult.HasIP(ip) == false {
+			ipResult.SetIP(ip)
 		}
-		if f.IpResult.HasPort(ip, port) == false {
-			f.IpResult.SetPort(ip, port)
+		if ipResult.HasPort(ip, port) == false {
+			ipResult.SetPort(ip, port)
 		}
 		if len(title) > 0 {
-			f.IpResult.SetPortAttr(ip, port, portscan.PortAttrResult{
+			ipResult.SetPortAttr(ip, port, portscan.PortAttrResult{
 				Source:  "fofa",
 				Tag:     "title",
 				Content: title,
@@ -405,11 +166,12 @@ func (f *Fofa) ParseCSVContentResult(content []byte) {
 			service = s.FindService(port, "")
 		}
 		if len(service) > 0 {
-			f.IpResult.SetPortAttr(ip, port, portscan.PortAttrResult{
+			ipResult.SetPortAttr(ip, port, portscan.PortAttrResult{
 				Source:  "fofa",
 				Tag:     "service",
 				Content: service,
 			})
 		}
 	}
+	return
 }

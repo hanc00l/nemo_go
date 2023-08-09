@@ -13,26 +13,20 @@ import (
 )
 
 type ZeroZone struct {
-	Config OnlineAPIConfig
-	//DomainResult 整理后的域名结果
-	DomainResult domainscan.Result
-	//IpResult 整理后的IP结果
-	IpResult portscan.Result
 }
 
-func NewZeroZone(config OnlineAPIConfig) *ZeroZone {
-	return &ZeroZone{Config: config}
+func (z *ZeroZone) GetQueryString(domain string, config OnlineAPIConfig) (query string) {
+	return
 }
 
-// ParseCSVContentResult 解析零零信安中导出的CSV文本结果
-func (z *ZeroZone) ParseCSVContentResult(content []byte) {
+func (z *ZeroZone) Run(domain string, apiKey string, pageIndex int, pageSize int, config OnlineAPIConfig) (pageResult []onlineSearchResult, sizeTotal int, err error) {
+	return
+}
+
+func (z *ZeroZone) ParseContentResult(content []byte) (ipResult portscan.Result, domainResult domainscan.Result) {
+	ipResult.IPResult = make(map[string]*portscan.IPResult)
+	domainResult.DomainResult = make(map[string]*domainscan.DomainResult)
 	s := custom.NewService()
-	if z.IpResult.IPResult == nil {
-		z.IpResult.IPResult = make(map[string]*portscan.IPResult)
-	}
-	if z.DomainResult.DomainResult == nil {
-		z.DomainResult.DomainResult = make(map[string]*domainscan.DomainResult)
-	}
 	blackDomain := custom.NewBlackDomain()
 	blackIP := custom.NewBlackIP()
 	r := csv.NewReader(bytes.NewReader(content))
@@ -55,18 +49,18 @@ func (z *ZeroZone) ParseCSVContentResult(content []byte) {
 			if blackDomain.CheckBlack(domain) {
 				continue
 			}
-			if z.DomainResult.HasDomain(domain) == false {
-				z.DomainResult.SetDomain(domain)
+			if domainResult.HasDomain(domain) == false {
+				domainResult.SetDomain(domain)
 			}
 			if len(ip) > 0 {
-				z.DomainResult.SetDomainAttr(domain, domainscan.DomainAttrResult{
+				domainResult.SetDomainAttr(domain, domainscan.DomainAttrResult{
 					Source:  "0zone",
 					Tag:     "A",
 					Content: ip,
 				})
 			}
 			if len(title) > 0 {
-				z.DomainResult.SetDomainAttr(domain, domainscan.DomainAttrResult{
+				domainResult.SetDomainAttr(domain, domainscan.DomainAttrResult{
 					Source:  "0zone",
 					Tag:     "title",
 					Content: title,
@@ -80,14 +74,14 @@ func (z *ZeroZone) ParseCSVContentResult(content []byte) {
 		if blackIP.CheckBlack(ip) {
 			continue
 		}
-		if z.IpResult.HasIP(ip) == false {
-			z.IpResult.SetIP(ip)
+		if ipResult.HasIP(ip) == false {
+			ipResult.SetIP(ip)
 		}
-		if z.IpResult.HasPort(ip, port) == false {
-			z.IpResult.SetPort(ip, port)
+		if ipResult.HasPort(ip, port) == false {
+			ipResult.SetPort(ip, port)
 		}
 		if len(title) > 0 {
-			z.IpResult.SetPortAttr(ip, port, portscan.PortAttrResult{
+			ipResult.SetPortAttr(ip, port, portscan.PortAttrResult{
 				Source:  "0zone",
 				Tag:     "title",
 				Content: title,
@@ -97,11 +91,12 @@ func (z *ZeroZone) ParseCSVContentResult(content []byte) {
 			service = s.FindService(port, "")
 		}
 		if len(service) > 0 {
-			z.IpResult.SetPortAttr(ip, port, portscan.PortAttrResult{
+			ipResult.SetPortAttr(ip, port, portscan.PortAttrResult{
 				Source:  "0zone",
 				Tag:     "service",
 				Content: service,
 			})
 		}
 	}
+	return
 }

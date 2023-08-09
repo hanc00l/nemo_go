@@ -2,38 +2,6 @@ package onlineapi
 
 import "testing"
 
-func TestHunter_RunHunter(t *testing.T) {
-	domain := "47.98.181.116"
-	hunter := NewHunter(OnlineAPIConfig{})
-
-	hunter.RunHunter(domain)
-	for ip, ipr := range hunter.IpResult.IPResult {
-		t.Log(ip, ipr)
-		for port, pat := range ipr.Ports {
-			t.Log(port, pat)
-		}
-	}
-	for d, dar := range hunter.DomainResult.DomainResult {
-		t.Log(d, dar)
-	}
-}
-
-func TestHunter_RunHunter2(t *testing.T) {
-	domain := "shansteelgroup.com"
-	hunter := NewHunter(OnlineAPIConfig{Target: domain})
-
-	hunter.Do()
-	for ip, ipr := range hunter.IpResult.IPResult {
-		t.Log(ip, ipr)
-		for port, pat := range ipr.Ports {
-			t.Log(port, pat)
-		}
-	}
-	for d, dar := range hunter.DomainResult.DomainResult {
-		t.Log(d, dar)
-	}
-}
-
 func TestHunter_ParseCSVContentResult(t *testing.T) {
 	data := `url,资产标签,IP,IP标签,端口,网站标题,域名,高危协议,协议,通讯协议,网站状态码,应用/组件,操作系统,备案单位,备案号,国家,省份,市区,探查时间,Web资产,运营商,注册机构
 http://video.qlid.cn:9900,"远程会议系统,登录页面",58.17.157.11,,9900,网动统一通信平台(Active UC),video.qlid.cn,,http,tcp,200,"jQuery,网动统一通信平台",,庆铃汽车股份有限公司,渝ICP备10202574号-8,中国,重庆市,重庆市,2022-08-14,是,中国联通,中国联通
@@ -57,16 +25,16 @@ https://office.qlid.cn,,183.67.39.60,,443,,office.qlid.cn,,https,tcp,200,"Nginx/
 https://www.qlid.cn,,183.67.39.60,,443,,www.qlid.cn,,https,tcp,200,Nginx/1.17.5,,庆铃汽车股份有限公司,渝ICP备10202574号-8,中国,重庆市,重庆市,2022-08-12,是,中国电信,中国电信
 https://dmsqg.qlcv.cn,,183.67.39.60,,443,,dmsqg.qlcv.cn,,https,tcp,200,Nginx/1.17.5,,庆铃汽车股份有限公司,渝ICP备10202574号-12,中国,重庆市,重庆市,2022-08-12,是,中国电信,中国电信
 `
-	f := NewHunter(OnlineAPIConfig{})
-	f.ParseCSVContentResult([]byte(data))
-	for kk, ip := range f.IpResult.IPResult {
+	s := NewOnlineAPISearch(OnlineAPIConfig{}, "hunter")
+	s.ParseContentResult([]byte(data))
+	for kk, ip := range s.IpResult.IPResult {
 		t.Log(kk)
 		for kk, port := range ip.Ports {
 			t.Log(kk, port.Status)
 			t.Log(port.PortAttrs)
 		}
 	}
-	for kk, d := range f.DomainResult.DomainResult {
+	for kk, d := range s.DomainResult.DomainResult {
 		t.Log(kk)
 		for kk, da := range d.DomainAttrs {
 			t.Log(kk, da)

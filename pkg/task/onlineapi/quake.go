@@ -6,9 +6,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"github.com/hanc00l/nemo_go/pkg/conf"
 	"github.com/hanc00l/nemo_go/pkg/logging"
-	"github.com/hanc00l/nemo_go/pkg/task/custom"
 	"github.com/hanc00l/nemo_go/pkg/task/domainscan"
 	"github.com/hanc00l/nemo_go/pkg/task/portscan"
 	"github.com/hanc00l/nemo_go/pkg/utils"
@@ -19,14 +17,6 @@ import (
 )
 
 type Quake struct {
-	//Config 配置参数：查询的目标、关联的组织
-	Config OnlineAPIConfig
-	//Result quake api查询后的结果
-	Result []onlineSearchResult
-	//DomainResult 整理后的域名结果
-	DomainResult domainscan.Result
-	//IpResult 整理后的IP结果
-	IpResult portscan.Result
 }
 
 type quakePostData struct {
@@ -116,157 +106,105 @@ type QuakeServiceInfo struct {
 	} `json:"meta"`
 }
 
-// NewQuake 创建Quake对象
-func NewQuake(config OnlineAPIConfig) *Quake {
-	return &Quake{Config: config}
-}
-
-// Do 执行Quake查询
-func (q *Quake) Do() {
-	if conf.GlobalWorkerConfig().API.Quake.Key == "" {
-		logging.RuntimeLog.Warning("no quake api key,exit quake search")
-		logging.CLILog.Warning("no quake api key,exit quake search")
-		return
-	}
-	q.Config.SearchLimitCount = conf.GlobalWorkerConfig().API.SearchLimitCount
-	if q.Config.SearchPageSize = conf.GlobalWorkerConfig().API.SearchPageSize; q.Config.SearchPageSize <= 0 {
-		q.Config.SearchPageSize = pageSizeDefault
-	}
-	blackDomain := custom.NewBlackDomain()
-	blackIP := custom.NewBlackIP()
-	for _, line := range strings.Split(q.Config.Target, ",") {
-		domain := strings.TrimSpace(line)
-		if domain == "" {
-			continue
-		}
-		if utils.CheckIPV4(domain) && blackIP.CheckBlack(domain) {
-			continue
-		}
-		if utils.CheckDomain(domain) && blackDomain.CheckBlack(domain) {
-			continue
-		}
-		q.RunQuake(domain)
-	}
-}
-
-// RunQuake 调用API接口查询一个ip或域名
-func (q *Quake) RunQuake(domain string) {
-	var query string
+func (q *Quake) GetQueryString(domain string, config OnlineAPIConfig) (query string) {
 	if utils.CheckIPV4(domain) || utils.CheckIPV4Subnet(domain) {
 		query = fmt.Sprintf("ip:\"%s\"", domain)
 	} else {
-		domainCert := domain
-		if strings.HasPrefix(domain, ".") == false {
-			domainCert = "." + domain
-		}
-		query = fmt.Sprintf("domain:\"%s\" OR cert:\"%s\"", domain, domainCert)
+		//domainCert := domain
+		//if strings.HasPrefix(domain, ".") == false {
+		//	domainCert = "." + domain
+		//}
+		//query = fmt.Sprintf("domain:\"%s\" OR cert:\"%s\"", domain, domainCert)
+		query = fmt.Sprintf("domain:\"%s\"", domain)
 	}
-	if q.Config.IsIgnoreOutofChina {
+	if config.IsIgnoreOutofChina {
 		query = fmt.Sprintf("(%s) AND country:\"CN\" AND NOT province:\"Hongkong\"", query)
-	}
-	//proxy, _ := url.Parse("http://127.0.0.1:8080")
-	client := &http.Client{
-		Timeout: time.Duration(30) * time.Second,
-		Transport: &http.Transport{
-			TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
-			//Proxy:           http.ProxyURL(proxy),
-		}}
-	// 分页查询
-	// 查询第1页（quake页数第0开始），并获取总共记录数量
-	pageResult, finish, sizeTotal := q.retriedPageSearch(client, query, 0)
-	if q.Config.SearchLimitCount > 0 && sizeTotal > q.Config.SearchLimitCount {
-		msg := fmt.Sprintf("search %s result total:%d, limited to:%d", domain, sizeTotal, q.Config.SearchLimitCount)
-		logging.RuntimeLog.Warning(msg)
-		logging.CLILog.Warning(msg)
-		sizeTotal = q.Config.SearchLimitCount
-	}
-	if len(pageResult) > 0 {
-		q.Result = append(q.Result, pageResult...)
-	}
-	pageTotalNum := sizeTotal / q.Config.SearchPageSize
-	if sizeTotal%q.Config.SearchPageSize > 0 {
-		pageTotalNum++
-	}
-	for i := 1; i < pageTotalNum; i++ {
-		pageResult, finish, _ = q.retriedPageSearch(client, query, i)
-		if len(pageResult) > 0 {
-			q.Result = append(q.Result, pageResult...)
-		}
-		if finish {
-			break
-		}
-	}
-	q.parseResult()
-}
-
-// retriedPageSearch 分页、N次重试API查询并返回结果
-func (q *Quake) retriedPageSearch(client *http.Client, query string, page int) (result []onlineSearchResult, finish bool, sizeTotal int) {
-	RetryNumber := 3
-	for i := 0; i < RetryNumber; i++ {
-		data := quakePostData{
-			Query:       query,
-			Latest:      true,
-			IgnoreCache: true,
-			ShortCuts:   []string{},
-			Start:       page * q.Config.SearchPageSize,
-			Size:        q.Config.SearchPageSize,
-			/**
-			include 和 exclude参数，可传参字段从获取可筛选服务字段接口获取
-			注册用户：
-				服务数据：ip，port，hostname，transport，asn，org，service.name，location.country_cn，location.province_cn，location.city_cn、service.http.host
-				主机数据：ip、asn，org，location.country_cn，location.province_cn，location.city_cn
-			会员用户：
-				服务数据：ip，port，hostname，transport，asn，org，service.name，location.country_cn，location.province_cn，location.city_cn，service.http.host，time，service.http.title，service.response，service.cert，components.product_catalog，components.product_type，components.product_level，components.product_vendor，location.country_en，location.province_en，location.city_en，location.district_en，location.district_cn，location.isp，service.http.body
-				主机数据：ip、asn，org，location.country_cn，location.province_cn，location.city_cn，hostname，time，location.country_en，location.province_en，location.city_en，location.street_en，location.street_cn，location.owner，location.gps
-			*/
-			Include: []string{"ip", "port", "hostname", "transport", "service.name", "service.http.host", "service.http.title"},
-			//"components.product_catalog", "components.product_type", "components.product_level", "components.product_vendor",
-			//"location.country_cn", "location.province_cn", "location.city_cn"
-		}
-		jsonData, _ := json.Marshal(data)
-		searchResult, err := q.sendRequest(client, jsonData)
-		if err != nil {
-			logging.RuntimeLog.Error(err)
-			logging.CLILog.Error(err)
-			continue
-		}
-		//fmt.Println(string(searchResult))
-		result, finish, sizeTotal = q.parseQuakeSearchResult(searchResult)
-		if finish || len(result) > 0 {
-			break
-		}
 	}
 	return
 }
 
-// sendRequest 发送查询的HTTP请求
-func (q *Quake) sendRequest(client *http.Client, dataBytes []byte) ([]byte, error) {
-	request, err := http.NewRequest("POST", "https://quake.360.cn/api/v3/search/quake_service", bytes.NewBuffer(dataBytes))
-	defer request.Body.Close()
-	if err != nil {
-		logging.RuntimeLog.Error(err)
-		return nil, err
+func (q *Quake) Run(query string, apiKey string, pageIndex int, pageSize int, config OnlineAPIConfig) (pageResult []onlineSearchResult, sizeTotal int, err error) {
+	client := &http.Client{
+		Timeout: time.Duration(30) * time.Second,
+		Transport: &http.Transport{
+			TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
+		}}
+	data := quakePostData{
+		Query:       query,
+		Latest:      true,
+		IgnoreCache: true,
+		ShortCuts:   []string{},
+		Start:       (pageIndex - 1) * pageSize,
+		Size:        pageSize,
+		Include:     []string{"ip", "port", "hostname", "transport", "service.name", "service.http.host", "service.http.title"},
 	}
-	defer request.Body.Close()
-	request.Header.Set("Content-Type", "application/json")
-	request.Header.Set("X-QuakeToken", conf.GlobalWorkerConfig().API.Quake.Key)
-	request.Header.Add("User-Agent", userAgent)
-	response, err := client.Do(request)
+	jsonData, _ := json.Marshal(data)
+	var request *http.Request
+	request, err = http.NewRequest("POST", "https://quake.360.cn/api/v3/search/quake_service", bytes.NewBuffer(jsonData))
 	if err != nil {
-		logging.RuntimeLog.Error(err)
-		return nil, err
+		return
+	}
+	request.Header.Set("Content-Type", "application/json")
+	request.Header.Set("X-QuakeToken", apiKey)
+	request.Header.Add("User-Agent", userAgent)
+	var response *http.Response
+	response, err = client.Do(request)
+	if err != nil {
+		return
 	}
 	if response.Body != nil {
 		defer response.Body.Close()
-		body, err := io.ReadAll(response.Body)
+		var body []byte
+		body, err = io.ReadAll(response.Body)
 		if err != nil {
-			logging.RuntimeLog.Error(err)
-			return nil, err
+			return
 		}
 		if strings.Contains(string(body), "/quake/login") {
-			return nil, errors.New("quake token invalid")
+			return nil, 0, errors.New("quake token invalid")
 		}
-		return body, nil
+		pageResult, _, sizeTotal = q.parseQuakeSearchResult(body)
 	}
-	return nil, nil
+
+	return
+}
+
+func (q *Quake) parseQuakeSearchResult(queryResult []byte) (result []onlineSearchResult, finish bool, sizeTotal int) {
+	var serviceInfo QuakeServiceInfo
+	err := json.Unmarshal(queryResult, &serviceInfo)
+	if err != nil {
+		//json数据反序列化失败
+		//如果是json: cannot unmarshal object into Go struct field QuakeServiceInfo.data of type []struct { Time time.Time "json:\"time\""; Transport string "json:\"transport\""; Service struct { HTTP struct
+		//则基本上是API的key失效，或积分不足无法读取
+		logging.RuntimeLog.Error(err)
+		logging.CLILog.Error(err)
+		return
+	}
+	if strings.HasPrefix(serviceInfo.Message, "Successful") == false {
+		logging.CLILog.Errorf("Quake Search Error:%s", serviceInfo.Message)
+		return
+	}
+	for _, data := range serviceInfo.Data {
+		qsr := onlineSearchResult{
+			Host:   data.Service.HTTP.Host,
+			IP:     data.IP,
+			Port:   fmt.Sprintf("%d", data.Port),
+			Title:  data.Service.HTTP.Title,
+			Server: data.Service.HTTP.Server,
+		}
+		result = append(result, qsr)
+	}
+	sizeTotal = serviceInfo.Meta.Pagination.Total
+	// 如果是API有效、正确获取到数据，count为0，表示已是最后一页了
+	if serviceInfo.Meta.Pagination.Count == 0 || sizeTotal == 0 {
+		finish = true
+	}
+
+	return
+}
+
+func (q *Quake) ParseContentResult(content []byte) (ipResult portscan.Result, domainResult domainscan.Result) {
+	logging.RuntimeLog.Error("not apply")
+	logging.CLILog.Error("not apply")
+
+	return
 }

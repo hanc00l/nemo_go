@@ -1,15 +1,11 @@
 package onlineapi
 
 import (
-	"encoding/json"
-	"fmt"
-	"github.com/hanc00l/nemo_go/pkg/conf"
 	"github.com/hanc00l/nemo_go/pkg/logging"
 	"github.com/hanc00l/nemo_go/pkg/task/custom"
 	"github.com/hanc00l/nemo_go/pkg/task/domainscan"
 	"github.com/hanc00l/nemo_go/pkg/task/portscan"
 	"github.com/hanc00l/nemo_go/pkg/utils"
-	"regexp"
 	"strconv"
 	"strings"
 )
@@ -51,10 +47,12 @@ type onlineSearchResult struct {
 }
 
 type fofaQueryResult struct {
-	Results [][]string `json:"results"`
-	Size    int        `json:"size"`
-	Page    int        `json:"page"`
-	Mode    string     `json:"mode"`
+	Results      [][]string `json:"results"`
+	Size         int        `json:"size"`
+	Page         int        `json:"page"`
+	Mode         string     `json:"mode"`
+	IsError      bool       `json:"error"`
+	ErrorMessage string     `json:"errmsg"`
 }
 
 type icpQueryResult struct {
@@ -81,147 +79,6 @@ var (
 	// SameIpToDomainFilterMax 对结果中domain关联的IP进行统计后，当同一IP被域名关联的数量超过阈值后则过滤掉该掉关联的域名
 	SameIpToDomainFilterMax = 100
 )
-
-// parseFofaSearchResult 转换FOFA搜索结果
-func (f *Fofa) parseFofaSearchResult(queryResult []byte) (result []onlineSearchResult, sizeTotal int) {
-	r := fofaQueryResult{}
-	err := json.Unmarshal(queryResult, &r)
-	if err != nil {
-		logging.RuntimeLog.Error(err.Error())
-		return
-	}
-	sizeTotal = r.Size
-	for _, line := range r.Results {
-		fsr := onlineSearchResult{
-			Domain: line[0], Host: line[1], IP: line[2], Port: line[3], Title: line[4],
-			Country: line[5], City: line[6], Server: line[7], Banner: line[8],
-		}
-		lowerBanner := strings.ToLower(fsr.Banner)
-		//过滤部份无意义的banner
-		if strings.HasPrefix(fsr.Banner, "HTTP/") || strings.HasPrefix(lowerBanner, "<html>") || strings.HasPrefix(lowerBanner, "<!doctype html>") {
-			fsr.Banner = ""
-		}
-		//过滤所有的\x00 \x15等不可见字符
-		re := regexp.MustCompile("\\\\x[0-9a-f]{2}")
-		fsr.Banner = re.ReplaceAllString(fsr.Banner, "")
-		result = append(result, fsr)
-	}
-
-	return
-}
-
-// parseResult 解析搜索结果
-func (f *Fofa) parseResult() {
-	f.IpResult = portscan.Result{IPResult: make(map[string]*portscan.IPResult)}
-	f.DomainResult = domainscan.Result{DomainResult: make(map[string]*domainscan.DomainResult)}
-
-	blackDomain := custom.NewBlackDomain()
-	blackIP := custom.NewBlackIP()
-	for _, fsr := range f.Result {
-		parseIpPort(f.IpResult, fsr, "fofa", blackIP)
-		parseDomainIP(f.DomainResult, fsr, "fofa", blackDomain)
-	}
-
-	checkDomainResult(f.DomainResult.DomainResult)
-}
-
-// SaveResult 保存搜索的结果
-func (f *Fofa) SaveResult() string {
-	if conf.GlobalWorkerConfig().API.Fofa.Key == "" || conf.GlobalWorkerConfig().API.Fofa.Name == "" {
-		return "no fofa api"
-	}
-	ips := f.IpResult.SaveResult(portscan.Config{OrgId: f.Config.OrgId, WorkspaceId: f.Config.WorkspaceId})
-	domains := f.DomainResult.SaveResult(domainscan.Config{OrgId: f.Config.OrgId, WorkspaceId: f.Config.WorkspaceId})
-
-	return fmt.Sprintf("%s,%s", ips, domains)
-}
-
-// parseQuakeSearchResult 解析Quake搜索结果
-func (q *Quake) parseQuakeSearchResult(queryResult []byte) (result []onlineSearchResult, finish bool, sizeTotal int) {
-	var serviceInfo QuakeServiceInfo
-	err := json.Unmarshal(queryResult, &serviceInfo)
-	if err != nil {
-		//json数据反序列化失败
-		//如果是json: cannot unmarshal object into Go struct field QuakeServiceInfo.data of type []struct { Time time.Time "json:\"time\""; Transport string "json:\"transport\""; Service struct { HTTP struct
-		//则基本上是API的key失效，或积分不足无法读取
-		logging.RuntimeLog.Error(err)
-		logging.CLILog.Error(err)
-		return
-	}
-	if strings.HasPrefix(serviceInfo.Message, "Successful") == false {
-		logging.CLILog.Errorf("Quake Search Error:%s", serviceInfo.Message)
-		return
-	}
-	for _, data := range serviceInfo.Data {
-		qsr := onlineSearchResult{
-			Host:   data.Service.HTTP.Host,
-			IP:     data.IP,
-			Port:   fmt.Sprintf("%d", data.Port),
-			Title:  data.Service.HTTP.Title,
-			Server: data.Service.HTTP.Server,
-		}
-		result = append(result, qsr)
-	}
-	sizeTotal = serviceInfo.Meta.Pagination.Total
-	// 如果是API有效、正确获取到数据，count为0，表示已是最后一页了
-	if serviceInfo.Meta.Pagination.Count == 0 || sizeTotal == 0 {
-		finish = true
-	}
-
-	return
-}
-
-// parseResult 解析搜索结果
-func (q *Quake) parseResult() {
-	q.IpResult = portscan.Result{IPResult: make(map[string]*portscan.IPResult)}
-	q.DomainResult = domainscan.Result{DomainResult: make(map[string]*domainscan.DomainResult)}
-
-	blackDomain := custom.NewBlackDomain()
-	blackIP := custom.NewBlackIP()
-	for _, fsr := range q.Result {
-		parseIpPort(q.IpResult, fsr, "quake", blackIP)
-		parseDomainIP(q.DomainResult, fsr, "quake", blackDomain)
-	}
-
-	checkDomainResult(q.DomainResult.DomainResult)
-}
-
-// SaveResult 保存搜索结果
-func (q *Quake) SaveResult() string {
-	if conf.GlobalWorkerConfig().API.Quake.Key == "" {
-		return "no quake api"
-	}
-	ips := q.IpResult.SaveResult(portscan.Config{OrgId: q.Config.OrgId, WorkspaceId: q.Config.WorkspaceId})
-	domains := q.DomainResult.SaveResult(domainscan.Config{OrgId: q.Config.OrgId, WorkspaceId: q.Config.WorkspaceId})
-
-	return fmt.Sprintf("%s,%s", ips, domains)
-}
-
-// parseResult
-func (h *Hunter) parseResult() {
-	h.IpResult = portscan.Result{IPResult: make(map[string]*portscan.IPResult)}
-	h.DomainResult = domainscan.Result{DomainResult: make(map[string]*domainscan.DomainResult)}
-
-	blackDomain := custom.NewBlackDomain()
-	blackIP := custom.NewBlackIP()
-	for _, fsr := range h.Result {
-		parseIpPort(h.IpResult, fsr, "hunter", blackIP)
-		parseDomainIP(h.DomainResult, fsr, "hunter", blackDomain)
-	}
-
-	checkDomainResult(h.DomainResult.DomainResult)
-}
-
-// SaveResult 保存搜索结果
-func (h *Hunter) SaveResult() string {
-	if conf.GlobalWorkerConfig().API.Hunter.Key == "" {
-		return "no hunter api"
-	}
-	ips := h.IpResult.SaveResult(portscan.Config{OrgId: h.Config.OrgId, WorkspaceId: h.Config.WorkspaceId})
-	domains := h.DomainResult.SaveResult(domainscan.Config{OrgId: h.Config.OrgId, WorkspaceId: h.Config.WorkspaceId})
-
-	return fmt.Sprintf("%s,%s", ips, domains)
-}
 
 // parseIpPort 解析搜索结果中的IP记录
 func parseIpPort(ipResult portscan.Result, fsr onlineSearchResult, source string, blackIP *custom.BlackIP) {
