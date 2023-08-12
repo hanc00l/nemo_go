@@ -374,31 +374,31 @@ func (c *ConfigController) TestOnlineAPIKeyAction() {
 	}
 	sb := strings.Builder{}
 	swg := sizedwaitgroup.New(4)
-	testMsgChan := make(chan string)
-	testFinishChan := make(chan struct{})
-	go func(sb *strings.Builder) {
+	msgChan := make(chan string)
+	done := make(chan struct{})
+	go func() {
 		for {
 			select {
-			case msg := <-testMsgChan:
+			case msg := <-msgChan:
 				sb.WriteString(msg)
-			case <-testFinishChan:
+			case <-done:
 				return
 			}
 		}
-	}(&sb)
+	}()
 
 	apiKeys := conf.GlobalWorkerConfig().API
 	if len(apiKeys.Fofa.Key) > 0 {
 		swg.Add()
-		go testOnineAPI("fofa", &swg, testMsgChan)
+		go testOnineAPI("fofa", &swg, msgChan)
 	}
 	if len(apiKeys.Hunter.Key) > 0 {
 		swg.Add()
-		go testOnineAPI("hunter", &swg, testMsgChan)
+		go testOnineAPI("hunter", &swg, msgChan)
 	}
 	if len(apiKeys.Quake.Key) > 0 {
 		swg.Add()
-		go testOnineAPI("quake", &swg, testMsgChan)
+		go testOnineAPI("quake", &swg, msgChan)
 	}
 	if len(apiKeys.ICP.Key) > 0 {
 		swg.Add()
@@ -411,10 +411,10 @@ func (c *ConfigController) TestOnlineAPIKeyAction() {
 			} else {
 				testMsgChan <- "icp: fail\n"
 			}
-		}(&swg, testMsgChan)
+		}(&swg, msgChan)
 	}
 	swg.Wait()
-	testFinishChan <- struct{}{}
+	done <- struct{}{}
 	if sb.Len() > 0 {
 		c.SucceededStatus(sb.String())
 	} else {
@@ -617,10 +617,12 @@ func getCustomFilename(customType string) (customFile string) {
 }
 
 // testOnineAPI 多线程方式测试在线接口的可用性
-func testOnineAPI(apiName string, swg *sizedwaitgroup.SizedWaitGroup, testMsgChan chan string) (result string) {
+func testOnineAPI(apiName string, swg *sizedwaitgroup.SizedWaitGroup, testMsgChan chan string) {
 	defer swg.Done()
 
 	s := onlineapi.NewOnlineAPISearch(onlineapi.OnlineAPIConfig{Target: "fofa.info"}, apiName)
+	s.Config.SearchPageSize = 100
+	s.Config.SearchLimitCount = 100
 	s.Do()
 
 	if len(s.DomainResult.DomainResult) > 0 || len(s.IpResult.IPResult) > 0 {
