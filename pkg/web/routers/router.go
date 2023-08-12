@@ -23,7 +23,7 @@ func init() {
 	web.CtrlPost("/config-upload-poc", (*controllers.ConfigController).UploadPocAction)
 	web.CtrlPost("/config-save-notify", (*controllers.ConfigController).SaveTaskNotifyAction)
 	web.CtrlPost("/config-save-api", (*controllers.ConfigController).SaveAPITokenAction)
-	web.CtrlPost("/config-test-api", (*controllers.ConfigController).OnlineTestAPITokenAction)
+	web.CtrlPost("/config-test-api", (*controllers.ConfigController).TestOnlineAPIKeyAction)
 	web.CtrlPost("/config-test-notify", (*controllers.ConfigController).TestTaskNotifyAction)
 	web.CtrlPost("/config-save-domainscan", (*controllers.ConfigController).SaveDomainscanAction)
 	web.CtrlPost("/custom-save-taskworkspace", (*controllers.ConfigController).SaveCustomTaskWorkspaceConfigAction)

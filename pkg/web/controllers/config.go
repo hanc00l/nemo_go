@@ -2,13 +2,16 @@ package controllers
 
 import (
 	"encoding/base64"
+	"fmt"
 	"github.com/hanc00l/nemo_go/pkg/comm"
 	"github.com/hanc00l/nemo_go/pkg/conf"
 	"github.com/hanc00l/nemo_go/pkg/logging"
 	"github.com/hanc00l/nemo_go/pkg/notify"
 	"github.com/hanc00l/nemo_go/pkg/task/ampq"
 	"github.com/hanc00l/nemo_go/pkg/task/custom"
+	"github.com/hanc00l/nemo_go/pkg/task/onlineapi"
 	"github.com/hanc00l/nemo_go/pkg/utils"
+	"github.com/remeh/sizedwaitgroup"
 	"os"
 	"path"
 	"path/filepath"
@@ -362,51 +365,61 @@ func (c *ConfigController) SaveAPITokenAction() {
 	c.SucceededStatus("保存配置成功")
 }
 
-// OnlineTestAPITokenAction 在线测试API的Token是否可用
-func (c *ConfigController) OnlineTestAPITokenAction() {
+// TestOnlineAPIKeyAction 在线测试API的key是否可用
+func (c *ConfigController) TestOnlineAPIKeyAction() {
 	defer c.ServeJSON()
 	if c.CheckMultiAccessRequest([]RequestRole{SuperAdmin, Admin}, false) == false {
 		c.FailedStatus("当前用户权限不允许！")
 		return
 	}
-	/*
-		sb := strings.Builder{}
+	sb := strings.Builder{}
+	swg := sizedwaitgroup.New(4)
+	testMsgChan := make(chan string)
+	testFinishChan := make(chan struct{})
+	go func(sb *strings.Builder) {
+		for {
+			select {
+			case msg := <-testMsgChan:
+				sb.WriteString(msg)
+			case <-testFinishChan:
+				return
+			}
+		}
+	}(&sb)
 
-		//FOFA
-		config := onlineapi.OnlineAPIConfig{Target: "fofa.info"}
-		fofa := onlineapi.NewFofa(config)
-		fofa.Do()
-		if len(fofa.DomainResult.DomainResult) > 0 || len(fofa.IpResult.IPResult) > 0 {
-			sb.WriteString("Fofa: OK!\n")
-		} else {
-			sb.WriteString("Fofa: Fail!\n")
-		}
-		//HUNTER
-		hunter := onlineapi.NewHunter(config)
-		hunter.Do()
-		if len(hunter.DomainResult.DomainResult) > 0 || len(hunter.IpResult.IPResult) > 0 {
-			sb.WriteString("Hunter: OK!\n")
-		} else {
-			sb.WriteString("Hunter: Fail!\n")
-		}
-		//Quake
-		quake := onlineapi.NewQuake(config)
-		quake.Do()
-		if len(quake.DomainResult.DomainResult) > 0 || len(quake.IpResult.IPResult) > 0 {
-			sb.WriteString("Quake: OK!\n")
-		} else {
-			sb.WriteString("Quake: Fail!\n")
-		}
-		//ICP
-		icp := onlineapi.NewICPQuery(onlineapi.ICPQueryConfig{})
-		if icp.RunICPQuery("10086.cn") != nil {
-			sb.WriteString("ICP: OK!\n")
-		} else {
-			sb.WriteString("ICP: Fail!\n")
-		}
+	apiKeys := conf.GlobalWorkerConfig().API
+	if len(apiKeys.Fofa.Key) > 0 {
+		swg.Add()
+		go testOnineAPI("fofa", &swg, testMsgChan)
+	}
+	if len(apiKeys.Hunter.Key) > 0 {
+		swg.Add()
+		go testOnineAPI("hunter", &swg, testMsgChan)
+	}
+	if len(apiKeys.Quake.Key) > 0 {
+		swg.Add()
+		go testOnineAPI("quake", &swg, testMsgChan)
+	}
+	if len(apiKeys.ICP.Key) > 0 {
+		swg.Add()
+		go func(swg *sizedwaitgroup.SizedWaitGroup, testMsgChan chan string) {
+			defer swg.Done()
 
-		c.SucceededStatus(sb.String())*/
-	c.SucceededStatus("稍后晚点再写代码。。。")
+			icp := onlineapi.NewICPQuery(onlineapi.ICPQueryConfig{})
+			if icp.RunICPQuery("10086.cn") != nil {
+				testMsgChan <- "icp: OK!\n"
+			} else {
+				testMsgChan <- "icp: fail\n"
+			}
+		}(&swg, testMsgChan)
+	}
+	swg.Wait()
+	testFinishChan <- struct{}{}
+	if sb.Len() > 0 {
+		c.SucceededStatus(sb.String())
+	} else {
+		c.FailedStatus("api接口没有可用的key！")
+	}
 }
 
 // SaveFingerprintAction 保存默认指纹设置
@@ -598,6 +611,22 @@ func getCustomFilename(customType string) (customFile string) {
 		customFile = "custom/fofa_filter_keyword.txt"
 	case FOFAFilterKeywordLocal:
 		customFile = "custom/fofa_filter_keyword_local.txt"
+	}
+
+	return
+}
+
+// testOnineAPI 多线程方式测试在线接口的可用性
+func testOnineAPI(apiName string, swg *sizedwaitgroup.SizedWaitGroup, testMsgChan chan string) (result string) {
+	defer swg.Done()
+
+	s := onlineapi.NewOnlineAPISearch(onlineapi.OnlineAPIConfig{Target: "fofa.info"}, apiName)
+	s.Do()
+
+	if len(s.DomainResult.DomainResult) > 0 || len(s.IpResult.IPResult) > 0 {
+		testMsgChan <- fmt.Sprintf("%s: OK!\n", apiName)
+	} else {
+		testMsgChan <- fmt.Sprintf("%s: fail\n", apiName)
 	}
 
 	return
