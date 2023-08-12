@@ -45,7 +45,7 @@ func NewCrawler(config Config) *Crawler {
 func (c *Crawler) Do() {
 	c.Result.DomainResult = make(map[string]*DomainResult)
 	swg := sizedwaitgroup.New(crawlerThreadNumber[conf.WorkerPerformanceMode])
-	blackDomain := custom.NewBlackDomain()
+	blackDomain := custom.NewBlackTargetCheck(custom.CheckDomain)
 
 	for _, line := range strings.Split(c.Config.Target, ",") {
 		domain := strings.TrimSpace(line)
@@ -53,6 +53,7 @@ func (c *Crawler) Do() {
 			continue
 		}
 		if blackDomain.CheckBlack(domain) {
+			logging.RuntimeLog.Warningf("%s is in blacklist,skip...", domain)
 			continue
 		}
 		protocol := utils.GetProtocol(domain, 5)
@@ -108,13 +109,14 @@ func (c *Crawler) RunCrawler(domainUrl string) {
 
 // parseResult 解析子域名枚举结果文件
 func (c *Crawler) parseResult(result []string) {
-	blackDomain := custom.NewBlackDomain()
+	blackDomain := custom.NewBlackTargetCheck(custom.CheckDomain)
 	for _, line := range result {
 		domain := strings.TrimSpace(line)
 		if domain == "" {
 			continue
 		}
 		if blackDomain.CheckBlack(domain) {
+			logging.RuntimeLog.Warningf("%s is in blacklist,skip...", domain)
 			continue
 		}
 		logging.CLILog.Info(domain)

@@ -536,6 +536,7 @@ func (c *IPController) ImportPortscanResultAction() {
 		s := onlineapi.NewOnlineAPISearch(onlineapi.OnlineAPIConfig{}, bin)
 		s.ParseContentResult(fileContent)
 		portscan.FilterIPHasTooMuchPort(&s.IpResult, true)
+		domainscan.FilterDomainHasTooMuchIP(&s.DomainResult)
 		resultIpPort := s.IpResult.SaveResult(config)
 		resultDomain := s.DomainResult.SaveResult(domainscan.Config{OrgId: config.OrgId, WorkspaceId: workspaceId})
 		result = fmt.Sprintf("%s,%s", resultDomain, resultIpPort)
@@ -982,8 +983,8 @@ func (c *IPController) BlackIPAction() {
 		return
 	}
 	// 将IP追加到黑名单文件
-	blackIP := custom.NewBlackIP()
-	err = blackIP.AppendBlackIP(ip.IpName)
+	blackIP := custom.NewBlackTargetCheck(custom.CheckIP)
+	err = blackIP.AppendBlackTarget(ip.IpName)
 	if err != nil {
 		c.FailedStatus(err.Error())
 		return

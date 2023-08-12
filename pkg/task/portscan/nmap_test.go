@@ -16,7 +16,7 @@ func TestNmap_Run(t *testing.T) {
 	}
 	nmap := NewNmap(config)
 	nmap.Do()
-	nmap.Result.SaveResult(nmap.Config)
+	//nmap.Result.SaveResult(nmap.Config)
 
 	t.Log(nmap.Result)
 	for ip, ipa := range nmap.Result.IPResult {

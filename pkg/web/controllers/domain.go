@@ -979,8 +979,8 @@ func (c *DomainController) BlockDomainAction() {
 		fldDomain = "." + fldDomain
 	}
 	// 将主域名增加到黑名单文件中
-	blackDomain := custom.NewBlackDomain()
-	if err = blackDomain.AppendBlackDomain(fldDomain); err != nil {
+	blackDomain := custom.NewBlackTargetCheck(custom.CheckDomain)
+	if err = blackDomain.AppendBlackTarget(fldDomain); err != nil {
 		c.FailedStatus(err.Error())
 		return
 	}

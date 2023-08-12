@@ -1,6 +1,7 @@
 package domainscan
 
 import (
+	"bytes"
 	"github.com/hanc00l/nemo_go/pkg/conf"
 	"github.com/hanc00l/nemo_go/pkg/logging"
 	"github.com/hanc00l/nemo_go/pkg/task/custom"
@@ -26,7 +27,7 @@ func NewSubFinder(config Config) *SubFinder {
 func (s *SubFinder) Do() {
 	s.Result.DomainResult = make(map[string]*DomainResult)
 	swg := sizedwaitgroup.New(subfinderThreadNumber[conf.WorkerPerformanceMode])
-	blackDomain := custom.NewBlackDomain()
+	blackDomain := custom.NewBlackTargetCheck(custom.CheckDomain)
 
 	for _, line := range strings.Split(s.Config.Target, ",") {
 		domain := strings.TrimSpace(line)
@@ -34,6 +35,7 @@ func (s *SubFinder) Do() {
 			continue
 		}
 		if blackDomain.CheckBlack(domain) {
+			logging.RuntimeLog.Warningf("%s is in blacklist,skip...", domain)
 			continue
 		}
 		swg.Add()
@@ -60,10 +62,13 @@ func (s *SubFinder) RunSubFinder(domain string) {
 	)
 	binPath := filepath.Join(conf.GetRootPath(), "thirdparty/subfinder", utils.GetThirdpartyBinNameByPlatform(utils.Subfinder))
 	cmd := exec.Command(binPath, cmdArgs...)
-	_, err := cmd.CombinedOutput()
+	var stderr bytes.Buffer
+	cmd.Stdout = os.Stdout
+	cmd.Stderr = &stderr
+	err := cmd.Run()
 	if err != nil {
-		logging.RuntimeLog.Error(err)
-		logging.CLILog.Error(err)
+		logging.RuntimeLog.Error(err, stderr)
+		logging.CLILog.Error(err, stderr)
 		return
 	}
 	//读取结果
@@ -90,13 +95,14 @@ func (s *SubFinder) parseResult(outputTempFile string) {
 
 // parseResult 解析子域名枚举结果
 func (s *SubFinder) parseResultContent(content []byte) {
-	blackDomain := custom.NewBlackDomain()
+	blackDomain := custom.NewBlackTargetCheck(custom.CheckDomain)
 	for _, line := range strings.Split(string(content), "\n") {
 		domain := strings.TrimSpace(line)
 		if domain == "" {
 			continue
 		}
 		if blackDomain.CheckBlack(domain) {
+			logging.RuntimeLog.Warningf("%s is in blacklist,skip...", domain)
 			continue
 		}
 		if !s.Result.HasDomain(domain) {

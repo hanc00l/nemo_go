@@ -27,13 +27,14 @@ func NewMassdns(config Config) *Massdns {
 func (m *Massdns) Do() {
 	m.Result.DomainResult = make(map[string]*DomainResult)
 	swg := sizedwaitgroup.New(massdnsThreadNumber[conf.WorkerPerformanceMode])
-	blackDomain := custom.NewBlackDomain()
+	blackDomain := custom.NewBlackTargetCheck(custom.CheckDomain)
 	for _, line := range strings.Split(m.Config.Target, ",") {
 		domain := strings.TrimSpace(line)
 		if domain == "" || utils.CheckIPV4(domain) || utils.CheckIPV4Subnet(domain) {
 			continue
 		}
 		if blackDomain.CheckBlack(domain) {
+			logging.RuntimeLog.Warningf("%s is in blacklist,skip...", domain)
 			continue
 		}
 		swg.Add()
@@ -51,13 +52,14 @@ func (m *Massdns) parseResult(outputTempFile string) {
 	if err != nil {
 		return
 	}
-	blackDomain := custom.NewBlackDomain()
+	blackDomain := custom.NewBlackTargetCheck(custom.CheckDomain)
 	for _, line := range strings.Split(string(content), "\n") {
 		domain := strings.TrimSpace(line)
 		if domain == "" {
 			continue
 		}
 		if blackDomain.CheckBlack(domain) {
+			logging.RuntimeLog.Warningf("%s is in blacklist,skip...", domain)
 			continue
 		}
 		if !m.Result.HasDomain(domain) {
@@ -71,7 +73,7 @@ func (m *Massdns) RunMassdns(domain string) {
 	tempOutputFile := utils.GetTempPathFileName()
 	defer os.Remove(tempOutputFile)
 
-	tempDir, err := os.MkdirTemp(filepath.Join(conf.GetRootPath(), "thirdparty/massdns/temp"), utils.GetRandomString2(8))
+	tempDir, err := os.MkdirTemp("", utils.GetRandomString2(8))
 	if err != nil {
 		logging.RuntimeLog.Error(err)
 		logging.CLILog.Error(err)

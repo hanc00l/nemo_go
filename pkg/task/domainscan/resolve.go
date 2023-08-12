@@ -2,6 +2,7 @@ package domainscan
 
 import (
 	"github.com/hanc00l/nemo_go/pkg/conf"
+	"github.com/hanc00l/nemo_go/pkg/logging"
 	"github.com/hanc00l/nemo_go/pkg/task/custom"
 	"github.com/hanc00l/nemo_go/pkg/utils"
 	"github.com/remeh/sizedwaitgroup"
@@ -22,11 +23,12 @@ func NewResolve(config Config) *Resolve {
 // Do 执行域名解析
 func (r *Resolve) Do() {
 	swg := sizedwaitgroup.New(resolveThreadNumber[conf.WorkerPerformanceMode])
-	blackDomain := custom.NewBlackDomain()
+	blackDomain := custom.NewBlackTargetCheck(custom.CheckDomain)
 	// 如果Result中已有map[domain]*DomainResult，则遍历并解析域名
 	if r.Result.DomainResult != nil {
 		for domain, _ := range r.Result.DomainResult {
 			if blackDomain.CheckBlack(domain) {
+				logging.RuntimeLog.Warningf("%s is in blacklist,skip...", domain)
 				continue
 			}
 			swg.Add()
@@ -44,6 +46,7 @@ func (r *Resolve) Do() {
 				continue
 			}
 			if blackDomain.CheckBlack(domain) {
+				logging.RuntimeLog.Warningf("%s is in blacklist,skip...", domain)
 				continue
 			}
 			swg.Add()

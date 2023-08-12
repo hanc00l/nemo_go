@@ -2,6 +2,7 @@ package pocscan
 
 import (
 	"bufio"
+	"bytes"
 	"encoding/json"
 	"github.com/hanc00l/nemo_go/pkg/conf"
 	"github.com/hanc00l/nemo_go/pkg/logging"
@@ -30,14 +31,11 @@ func (x *Xray) Do() {
 	defer os.Remove(resultTempFile)
 	defer os.Remove(inputTargetFile)
 
-	blackDomain := custom.NewBlackDomain()
-	blackIP := custom.NewBlackIP()
+	btc := custom.NewBlackTargetCheck(custom.CheckAll)
 	urls := strings.Split(x.Config.Target, ",")
 	for idx, url := range urls {
-		if utils.CheckDomain(utils.HostStrip(url)) && blackDomain.CheckBlack(utils.HostStrip(url)) {
-			continue
-		}
-		if utils.CheckIPV4(utils.HostStrip(url)) && blackIP.CheckBlack(utils.HostStrip(url)) {
+		if btc.CheckBlack(utils.HostStrip(url)) {
+			logging.RuntimeLog.Warningf("%s is in blacklist,skip...", url)
 			continue
 		}
 		if strings.HasSuffix(url, ":443") {
@@ -91,9 +89,13 @@ func (x *Xray) Do() {
 	cmd := exec.Command(cmdBin, cmdArgs...)
 	//Fix:必须指定绝对路径，才能正确读取到配置文件
 	cmd.Dir = filepath.Join(conf.GetAbsRootPath(), "thirdparty/xray")
-	_, err = cmd.CombinedOutput()
+	var stderr bytes.Buffer
+	cmd.Stdout = os.Stdout
+	cmd.Stderr = &stderr
+	err = cmd.Run()
 	if err != nil {
-		logging.RuntimeLog.Error(err.Error())
+		logging.RuntimeLog.Error(err, stderr)
+		logging.CLILog.Error(err, stderr)
 		return
 	}
 	x.parseXrayResult(resultTempFile)

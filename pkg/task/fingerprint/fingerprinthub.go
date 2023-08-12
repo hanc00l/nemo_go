@@ -1,6 +1,7 @@
 package fingerprint
 
 import (
+	"bytes"
 	"encoding/json"
 	"fmt"
 	"github.com/hanc00l/nemo_go/pkg/conf"
@@ -39,11 +40,11 @@ func NewFingerprintHub() *FingerprintHub {
 // Do 调用ObserverWard，获取指纹
 func (f *FingerprintHub) Do() {
 	swg := sizedwaitgroup.New(fpObserverWardThreadNumber[conf.WorkerPerformanceMode])
-
+	btc := custom.NewBlackTargetCheck(custom.CheckAll)
 	if f.ResultPortScan.IPResult != nil {
-		blackIP := custom.NewBlackIP()
 		for ipName, ipResult := range f.ResultPortScan.IPResult {
-			if blackIP.CheckBlack(ipName) {
+			if btc.CheckBlack(ipName) {
+				logging.RuntimeLog.Warningf("%s is in blacklist,skip...", ipName)
 				continue
 			}
 			for portNumber := range ipResult.Ports {
@@ -75,9 +76,9 @@ func (f *FingerprintHub) Do() {
 		if f.DomainTargetPort == nil {
 			f.DomainTargetPort = make(map[string]map[int]struct{})
 		}
-		blackDomain := custom.NewBlackDomain()
 		for domain := range f.ResultDomainScan.DomainResult {
-			if blackDomain.CheckBlack(domain) {
+			if btc.CheckBlack(domain) {
+				logging.RuntimeLog.Warningf("%s is in blacklist,skip...", domain)
 				continue
 			}
 			//如果无域名对应的端口，默认80和443
@@ -127,10 +128,13 @@ func (f *FingerprintHub) RunObserverWard(url string) []FingerprintHubReult {
 	//Fix:指定当前路径，这样才会正确调用web_fingerprint_v3.json
 	//Fix:必须指定绝对路径
 	cmd.Dir = filepath.Join(conf.GetAbsRootPath(), "thirdparty/fingerprinthub")
-	_, err := cmd.CombinedOutput()
+	var stderr bytes.Buffer
+	cmd.Stdout = os.Stdout
+	cmd.Stderr = &stderr
+	err := cmd.Run()
 	if err != nil {
-		logging.RuntimeLog.Error(err.Error())
-		logging.CLILog.Error(err)
+		logging.RuntimeLog.Error(err, stderr)
+		logging.CLILog.Error(err, stderr)
 		return nil
 	}
 	return parseObserverWardResult(resultTempFile)

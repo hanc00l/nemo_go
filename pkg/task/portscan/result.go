@@ -117,9 +117,10 @@ func (r *Result) SetPortHttpInfo(ip string, port int, result HttpResult) {
 func (r *Result) SaveResult(config Config) string {
 	var resultIPCount, resultPortCount int
 	var newIP, newPort int
-	blackIP := custom.NewBlackIP()
+	blackIP := custom.NewBlackTargetCheck(custom.CheckIP)
 	for ipName, ipResult := range r.IPResult {
 		if blackIP.CheckBlack(ipName) {
+			logging.RuntimeLog.Warningf("%s is in blacklist,skip...", ipName)
 			continue
 		}
 		if len(ipResult.Ports) > IpOpenedPortFilterNumber {

@@ -2,6 +2,7 @@ package pocscan
 
 import (
 	"bufio"
+	"bytes"
 	"crypto/tls"
 	"encoding/json"
 	"fmt"
@@ -36,16 +37,13 @@ func (n *Nuclei) Do() {
 	defer os.Remove(resultTempFile)
 	defer os.Remove(inputTargetFile)
 
-	blackDomain := custom.NewBlackDomain()
-	blackIP := custom.NewBlackIP()
+	btc := custom.NewBlackTargetCheck(custom.CheckAll)
 	urls := strings.Split(n.Config.Target, ",")
 	var urlsFormatted []string
 	//由于nuclei要求url要http或https开始，非http/https协议不进行漏洞检测，节约扫描时间
 	for _, u := range urls {
-		if utils.CheckDomain(utils.HostStrip(u)) && blackDomain.CheckBlack(utils.HostStrip(u)) {
-			continue
-		}
-		if utils.CheckIPV4(utils.HostStrip(u)) && blackIP.CheckBlack(utils.HostStrip(u)) {
+		if btc.CheckBlack(utils.HostStrip(u)) {
+			logging.RuntimeLog.Warningf("%s is in blacklist,skip...", u)
 			continue
 		}
 		if strings.HasPrefix(u, "http") == false {
@@ -88,9 +86,13 @@ func (n *Nuclei) Do() {
 		"-json", "-o", resultTempFile, "-l", inputTargetFile,
 	)
 	cmd := exec.Command(cmdBin, cmdArgs...)
-	_, err = cmd.CombinedOutput()
+	var stderr bytes.Buffer
+	cmd.Stdout = os.Stdout
+	cmd.Stderr = &stderr
+	err = cmd.Run()
 	if err != nil {
-		logging.RuntimeLog.Error(err.Error())
+		logging.RuntimeLog.Error(err, stderr)
+		logging.CLILog.Error(err, stderr)
 		return
 	}
 	n.parseNucleiResult(resultTempFile)

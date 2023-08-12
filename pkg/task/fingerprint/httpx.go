@@ -89,11 +89,11 @@ func NewHttpx() *Httpx {
 // Do 执行httpx
 func (x *Httpx) Do() {
 	swg := sizedwaitgroup.New(fpHttpxThreadNumber[conf.WorkerPerformanceMode])
-
+	btc := custom.NewBlackTargetCheck(custom.CheckAll)
 	if x.ResultPortScan.IPResult != nil {
-		blackIP := custom.NewBlackIP()
 		for ipName, ipResult := range x.ResultPortScan.IPResult {
-			if blackIP.CheckBlack(ipName) {
+			if btc.CheckBlack(ipName) {
+				logging.RuntimeLog.Warningf("%s is in blacklist,skip...", ipName)
 				continue
 			}
 			for portNumber, _ := range ipResult.Ports {
@@ -143,9 +143,9 @@ func (x *Httpx) Do() {
 		if x.DomainTargetPort == nil {
 			x.DomainTargetPort = make(map[string]map[int]struct{})
 		}
-		blackDomain := custom.NewBlackDomain()
 		for domain := range x.ResultDomainScan.DomainResult {
-			if blackDomain.CheckBlack(domain) {
+			if btc.CheckBlack(domain) {
+				logging.RuntimeLog.Warningf("%s is in blacklist,skip...", domain)
 				continue
 			}
 			//如果无域名对应的端口，默认80和443
@@ -222,10 +222,13 @@ func (x *Httpx) RunHttpx(domain string) (result []FingerAttrResult, storedRespon
 	}
 	binPath := filepath.Join(conf.GetRootPath(), "thirdparty/httpx", utils.GetThirdpartyBinNameByPlatform(utils.Httpx))
 	cmd := exec.Command(binPath, cmdArgs...)
-	_, err = cmd.CombinedOutput()
+	var stderr bytes.Buffer
+	cmd.Stdout = os.Stdout
+	cmd.Stderr = &stderr
+	err = cmd.Run()
 	if err != nil {
-		logging.RuntimeLog.Error(err.Error())
-		logging.CLILog.Error(err)
+		logging.RuntimeLog.Error(err, stderr)
+		logging.CLILog.Error(err, stderr)
 		return nil, ""
 	}
 	result, storedResponsePathFile = x.parseHttpxResult(resultTempFile)

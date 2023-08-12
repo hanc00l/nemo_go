@@ -1,6 +1,7 @@
 package portscan
 
 import (
+	"bytes"
 	"github.com/hanc00l/nemo_go/pkg/logging"
 	"github.com/hanc00l/nemo_go/pkg/task/custom"
 	"github.com/hanc00l/nemo_go/pkg/utils"
@@ -29,13 +30,30 @@ func NewMasscan(config Config) *Masscan {
 // Do 执行masscan
 func (m *Masscan) Do() {
 	m.Result.IPResult = make(map[string]*IPResult)
+	inputTargetFile := utils.GetTempPathFileName()
 	resultTempFile := utils.GetTempPathFileName()
+	defer os.Remove(inputTargetFile)
 	defer os.Remove(resultTempFile)
 
+	btc := custom.NewBlackTargetCheck(custom.CheckIP)
+	var targets []string
+	for _, target := range strings.Split(m.Config.Target, ",") {
+		t := strings.TrimSpace(target)
+		if btc.CheckBlack(t) {
+			logging.RuntimeLog.Warningf("%s is in blacklist,skip...", t)
+			continue
+		}
+		targets = append(targets, t)
+	}
+	err := os.WriteFile(inputTargetFile, []byte(strings.Join(targets, "\n")), 0666)
+	if err != nil {
+		logging.RuntimeLog.Error(err.Error())
+		return
+	}
 	var cmdArgs []string
 	cmdArgs = append(
 		cmdArgs,
-		"--open", "--rate", strconv.Itoa(m.Config.Rate), "-oL", resultTempFile,
+		"--open", "--rate", strconv.Itoa(m.Config.Rate), "-iL", inputTargetFile, "-oL", resultTempFile,
 	)
 	if strings.HasPrefix(m.Config.Port, "--top-ports") {
 		cmdArgs = append(cmdArgs, "-p")
@@ -55,11 +73,14 @@ func (m *Masscan) Do() {
 	if m.Config.ExcludeTarget != "" {
 		cmdArgs = append(cmdArgs, "--exclude", m.Config.ExcludeTarget)
 	}
-	cmdArgs = append(cmdArgs, m.Config.Target)
 	cmd := exec.Command(m.Config.CmdBin, cmdArgs...)
-	_, err := cmd.CombinedOutput()
+	var stderr bytes.Buffer
+	cmd.Stdout = os.Stdout
+	cmd.Stderr = &stderr
+	err = cmd.Run()
 	if err != nil {
-		logging.RuntimeLog.Error(err.Error())
+		logging.RuntimeLog.Error(err, stderr)
+		logging.CLILog.Error(err, stderr)
 		return
 	}
 	m.parsResult(resultTempFile)

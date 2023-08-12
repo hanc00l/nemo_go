@@ -1,6 +1,7 @@
 package portscan
 
 import (
+	"bytes"
 	"github.com/hanc00l/nemo_go/pkg/logging"
 	"github.com/hanc00l/nemo_go/pkg/task/custom"
 	"os"
@@ -36,7 +37,16 @@ func (nmap *Nmap) Do() {
 	defer os.Remove(inputTargetFile)
 	defer os.Remove(resultTempFile)
 
-	targets := strings.Split(nmap.Config.Target, ",")
+	btc := custom.NewBlackTargetCheck(custom.CheckIP)
+	var targets []string
+	for _, target := range strings.Split(nmap.Config.Target, ",") {
+		t := strings.TrimSpace(target)
+		if btc.CheckBlack(t) {
+			logging.RuntimeLog.Warningf("%s is in blacklist,skip...", t)
+			continue
+		}
+		targets = append(targets, t)
+	}
 	err := os.WriteFile(inputTargetFile, []byte(strings.Join(targets, "\n")), 0666)
 	if err != nil {
 		logging.RuntimeLog.Error(err.Error())
@@ -62,9 +72,13 @@ func (nmap *Nmap) Do() {
 		cmdArgs = append(cmdArgs, "--exclude", nmap.Config.ExcludeTarget)
 	}
 	cmd := exec.Command(nmap.Config.CmdBin, cmdArgs...)
-	_, err = cmd.CombinedOutput()
+	var stderr bytes.Buffer
+	cmd.Stdout = os.Stdout
+	cmd.Stderr = &stderr
+	err = cmd.Run()
 	if err != nil {
-		logging.RuntimeLog.Error(err.Error())
+		logging.RuntimeLog.Error(err, stderr)
+		logging.CLILog.Error(err, stderr)
 		return
 	}
 	nmap.parseResult(resultTempFile)

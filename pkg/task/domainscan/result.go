@@ -4,9 +4,15 @@ import (
 	"fmt"
 	"github.com/hanc00l/nemo_go/pkg/conf"
 	"github.com/hanc00l/nemo_go/pkg/db"
+	"github.com/hanc00l/nemo_go/pkg/logging"
 	"github.com/hanc00l/nemo_go/pkg/task/custom"
+	"github.com/hanc00l/nemo_go/pkg/utils"
 	"strings"
 	"sync"
+)
+
+const (
+	SameIpToDomainFilterMax = 100
 )
 
 var (
@@ -117,9 +123,10 @@ func (r *Result) SetHttpInfo(domain string, result HttpResult) {
 func (r *Result) SaveResult(config Config) string {
 	var resultDomainCount int
 	var newDomain int
-	blackDomain := custom.NewBlackDomain()
+	blackDomain := custom.NewBlackTargetCheck(custom.CheckDomain)
 	for domainName, domainResult := range r.DomainResult {
 		if blackDomain.CheckBlack(domainName) {
+			logging.RuntimeLog.Warningf("%s is in blacklist,skip...", domainName)
 			continue
 		}
 		domain := &db.Domain{
@@ -172,4 +179,36 @@ func (r *Result) SaveResult(config Config) string {
 		sb.WriteString(fmt.Sprintf(",domainNew:%d", newDomain))
 	}
 	return sb.String()
+}
+
+// FilterDomainHasTooMuchIP 对域名结果中同一个IP对应太多进行过滤
+func FilterDomainHasTooMuchIP(result *Result) { //result map[string]*DomainResult) {
+	ip2DomainMap := make(map[string]map[string]struct{})
+	// 建立解析ip到domain的反向映射Map
+	for domain, domainResult := range result.DomainResult {
+		for _, attr := range domainResult.DomainAttrs {
+			if attr.Tag == "A" {
+				ip := attr.Content
+				if _, ok := ip2DomainMap[ip]; !ok {
+					ip2DomainMap[ip] = make(map[string]struct{})
+					ip2DomainMap[ip][domain] = struct{}{}
+				} else {
+					if _, ok2 := ip2DomainMap[ip][domain]; !ok2 {
+						ip2DomainMap[ip][domain] = struct{}{}
+					}
+				}
+			}
+		}
+	}
+	// 如果多个域名解析到同一个IP超过阈值，则过滤掉该结果
+	for ip, domains := range ip2DomainMap {
+		domainNumbers := len(domains)
+		if domainNumbers > SameIpToDomainFilterMax {
+			logging.RuntimeLog.Infof("the multiple domain for one same ip:%s,total:%d,ignored!", ip, domainNumbers)
+			logging.CLILog.Infof("the multiple domain for one same ip:%s -- %s,ignored!", ip, utils.SetToString(domains))
+			for domain := range domains {
+				delete(result.DomainResult, domain)
+			}
+		}
+	}
 }

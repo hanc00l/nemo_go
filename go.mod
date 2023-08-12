@@ -16,7 +16,6 @@ require (
 	github.com/golang/protobuf v1.5.3
 	github.com/google/cel-go v0.11.4
 	github.com/google/uuid v1.3.0
-	github.com/jacenr/filediff v0.0.0-20180211101743-12022ff612c0
 	github.com/joeguo/tldextract v0.0.0-20210326083850-1ec7be2de68a
 	github.com/lair-framework/go-nmap v0.0.0-20191202052157-3507e0b03523
 	github.com/likexian/whois v1.14.2

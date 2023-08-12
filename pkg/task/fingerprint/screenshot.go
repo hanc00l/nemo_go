@@ -53,10 +53,11 @@ func NewScreenShot() *ScreenShot {
 func (s *ScreenShot) Do() {
 	swg := sizedwaitgroup.New(fpScreenshotThreadNum[conf.WorkerPerformanceMode])
 
+	btc := custom.NewBlackTargetCheck(custom.CheckAll)
 	if s.ResultPortScan.IPResult != nil {
-		blackIP := custom.NewBlackIP()
 		for ipName, ipResult := range s.ResultPortScan.IPResult {
-			if blackIP.CheckBlack(ipName) {
+			if btc.CheckBlack(ipName) {
+				logging.RuntimeLog.Warningf("%s is in blacklist,skip...", ipName)
 				continue
 			}
 			for portNumber := range ipResult.Ports {
@@ -74,9 +75,9 @@ func (s *ScreenShot) Do() {
 		if s.DomainTargetPort == nil {
 			s.DomainTargetPort = make(map[string]map[int]struct{})
 		}
-		blackDomain := custom.NewBlackDomain()
 		for domain := range s.ResultDomainScan.DomainResult {
-			if blackDomain.CheckBlack(domain) {
+			if btc.CheckBlack(domain) {
+				logging.RuntimeLog.Warningf("%s is in blacklist,skip...", domain)
 				continue
 			}
 			//如果无域名对应的端口，默认80和443
