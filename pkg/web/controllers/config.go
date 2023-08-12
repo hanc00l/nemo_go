@@ -102,7 +102,7 @@ func (c *ConfigController) LoadDefaultConfigAction() {
 	portscan := conf.GlobalWorkerConfig().Portscan
 	task := conf.GlobalServerConfig().Task
 	fingerprint := conf.GlobalWorkerConfig().Fingerprint
-	notify := conf.GlobalServerConfig().Notify
+	notifyToken := conf.GlobalServerConfig().Notify
 	apiConfig := conf.GlobalWorkerConfig().API
 	onlineapi := conf.GlobalWorkerConfig().OnlineAPI
 	domainscan := conf.GlobalWorkerConfig().Domainscan
@@ -121,14 +121,14 @@ func (c *ConfigController) LoadDefaultConfigAction() {
 		IsFingerprintHub: fingerprint.IsFingerprintHub,
 		IsIconHash:       fingerprint.IsIconHash,
 		//
-		ServerChanToken: notify["serverchan"].Token,
-		DingTalkToken:   notify["dingtalk"].Token,
-		FeishuToken:     notify["feishu"].Token,
+		ServerChanToken: notifyToken["serverchan"].Token,
+		DingTalkToken:   notifyToken["dingtalk"].Token,
+		FeishuToken:     notifyToken["feishu"].Token,
 		//
-		FofaToken:   strings.Join(apiConfig.Fofa.Key, ","),
-		HunterToken: strings.Join(apiConfig.Hunter.Key, ","),
-		QuakeToken:  strings.Join(apiConfig.Quake.Key, ","),
-		ChinazToken: strings.Join(apiConfig.ICP.Key, ","),
+		FofaToken:   apiConfig.Fofa.Key,
+		HunterToken: apiConfig.Hunter.Key,
+		QuakeToken:  apiConfig.Quake.Key,
+		ChinazToken: apiConfig.ICP.Key,
 		//
 		Wordlist:           domainscan.Wordlist,
 		IsSubDomainFinder:  domainscan.IsSubDomainFinder,
@@ -347,10 +347,10 @@ func (c *ConfigController) SaveAPITokenAction() {
 	conf.GlobalWorkerConfig().OnlineAPI.IsFofa = data.IsFofa
 	conf.GlobalWorkerConfig().OnlineAPI.IsQuake = data.IsQuake
 	conf.GlobalWorkerConfig().OnlineAPI.IsHunter = data.IsHunter
-	conf.GlobalWorkerConfig().API.Fofa.Key = strings.Split(data.FofaToken, ",")
-	conf.GlobalWorkerConfig().API.Hunter.Key = strings.Split(data.HunterToken, ",")
-	conf.GlobalWorkerConfig().API.Quake.Key = strings.Split(data.QuakeToken, ",")
-	conf.GlobalWorkerConfig().API.ICP.Key = strings.Split(data.ChinazToken, ",")
+	conf.GlobalWorkerConfig().API.Fofa.Key = data.FofaToken
+	conf.GlobalWorkerConfig().API.Hunter.Key = data.HunterToken
+	conf.GlobalWorkerConfig().API.Quake.Key = data.QuakeToken
+	conf.GlobalWorkerConfig().API.ICP.Key = data.ChinazToken
 	conf.GlobalWorkerConfig().API.SearchLimitCount = data.SearchLimitCount
 	conf.GlobalWorkerConfig().API.SearchPageSize = data.SearchPageSize
 	err = conf.GlobalWorkerConfig().WriteConfig()

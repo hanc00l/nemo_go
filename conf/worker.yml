@@ -15,17 +15,13 @@ api:
   searchPageSize: 100
   searchLimitCount: 1000
   fofa:
-    key:
-    -
+    key: ""
   icp:
-    key:
-    -
+    key: ""
   quake:
-    key:
-    -
+    key: ""
   hunter:
-    key:
-    -
+    key: ""
 portscan:
   ping: false
   port: --top-ports 1000

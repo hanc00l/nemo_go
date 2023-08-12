@@ -76,16 +76,15 @@ var (
 	userAgent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/84.0.4147.125 Safari/537.36"
 	// pageSizeDefault 缺省的每次API查询的分页数量
 	pageSizeDefault = 100
-	// SameIpToDomainFilterMax 对结果中domain关联的IP进行统计后，当同一IP被域名关联的数量超过阈值后则过滤掉该掉关联的域名
-	SameIpToDomainFilterMax = 100
 )
 
 // parseIpPort 解析搜索结果中的IP记录
-func parseIpPort(ipResult portscan.Result, fsr onlineSearchResult, source string, blackIP *custom.BlackIP) {
-	if fsr.IP == "" || !utils.CheckIPV4(fsr.IP) {
+func parseIpPort(ipResult portscan.Result, fsr onlineSearchResult, source string, btc *custom.BlackTargetCheck) {
+	if fsr.IP == "" || utils.CheckIPV4(fsr.IP) == false {
 		return
 	}
-	if blackIP != nil && blackIP.CheckBlack(fsr.IP) {
+	if btc != nil && btc.CheckBlack(fsr.IP) {
+		logging.RuntimeLog.Warningf("%s is in blacklist,skip...", fsr.IP)
 		return
 	}
 	if fsr.IP == "0.0.0.0" {
@@ -123,7 +122,7 @@ func parseIpPort(ipResult portscan.Result, fsr onlineSearchResult, source string
 }
 
 // parseDomainIP 解析搜索结果中的域名记录
-func parseDomainIP(domainResult domainscan.Result, fsr onlineSearchResult, source string, blackDomain *custom.BlackDomain) {
+func parseDomainIP(domainResult domainscan.Result, fsr onlineSearchResult, source string, btc *custom.BlackTargetCheck) {
 	host := strings.Replace(fsr.Host, "https://", "", -1)
 	host = strings.Replace(host, "http://", "", -1)
 	host = strings.Replace(host, "/", "", -1)
@@ -131,10 +130,10 @@ func parseDomainIP(domainResult domainscan.Result, fsr onlineSearchResult, sourc
 	if domain == "" || utils.CheckIPV4(domain) || utils.CheckDomain(domain) == false {
 		return
 	}
-	if blackDomain != nil && blackDomain.CheckBlack(domain) {
+	if btc != nil && btc.CheckBlack(domain) {
+		logging.RuntimeLog.Warningf("%s is in blacklist,skip...", domain)
 		return
 	}
-
 	if !domainResult.HasDomain(domain) {
 		domainResult.SetDomain(domain)
 	}
@@ -163,37 +162,5 @@ func parseDomainIP(domainResult domainscan.Result, fsr onlineSearchResult, sourc
 			Tag:     "banner",
 			Content: fsr.Banner,
 		})
-	}
-}
-
-// checkDomainResult 对域名结果中进行过滤，
-func checkDomainResult(result map[string]*domainscan.DomainResult) {
-	ip2DomainMap := make(map[string]map[string]struct{})
-	// 建立解析ip到domain的反向映射Map
-	for domain, domainResult := range result {
-		for _, attr := range domainResult.DomainAttrs {
-			if attr.Tag == "A" {
-				ip := attr.Content
-				if _, ok := ip2DomainMap[ip]; !ok {
-					ip2DomainMap[ip] = make(map[string]struct{})
-					ip2DomainMap[ip][domain] = struct{}{}
-				} else {
-					if _, ok2 := ip2DomainMap[ip][domain]; !ok2 {
-						ip2DomainMap[ip][domain] = struct{}{}
-					}
-				}
-			}
-		}
-	}
-	// 如果多个域名解析到同一个IP超过阈值，则过滤掉该结果
-	for ip, domains := range ip2DomainMap {
-		domainNumbers := len(domains)
-		if domainNumbers > SameIpToDomainFilterMax {
-			logging.RuntimeLog.Infof("the multiple domain for one same ip:%s,total:%d,ignored!", ip, domainNumbers)
-			logging.CLILog.Infof("the multiple domain for one same ip:%s -- %s,ignored!", ip, utils.SetToString(domains))
-			for domain := range domains {
-				delete(result, domain)
-			}
-		}
 	}
 }

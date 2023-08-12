@@ -119,7 +119,7 @@ func (i *ICPQuery) RunICPQuery(domain string) *ICPInfo {
 }
 
 func (i *ICPQuery) selectOneAPIKey() string {
-	keys := conf.GlobalWorkerConfig().API.ICP.Key
+	keys := strings.Split(conf.GlobalWorkerConfig().API.ICP.Key, ",")
 	if len(keys) == 0 {
 		return ""
 	}

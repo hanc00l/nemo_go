@@ -19,10 +19,10 @@ import (
 	"strings"
 )
 
-type FOFANew struct {
+type FOFA struct {
 }
 
-func (f *FOFANew) GetQueryString(domain string, config OnlineAPIConfig) (query string) {
+func (f *FOFA) GetQueryString(domain string, config OnlineAPIConfig) (query string) {
 	if config.SearchByKeyWord {
 		query = config.Target
 	} else {
@@ -46,7 +46,7 @@ func (f *FOFANew) GetQueryString(domain string, config OnlineAPIConfig) (query s
 	return
 }
 
-func (f *FOFANew) Run(query string, apiKey string, pageIndex int, pageSize int, config OnlineAPIConfig) (pageResult []onlineSearchResult, sizeTotal int, err error) {
+func (f *FOFA) Run(query string, apiKey string, pageIndex int, pageSize int, config OnlineAPIConfig) (pageResult []onlineSearchResult, sizeTotal int, err error) {
 	fields := "domain,host,ip,port,title,country,city,server,banner"
 	arr := strings.Split(apiKey, ":")
 	if len(arr) != 2 {
@@ -76,7 +76,7 @@ func (f *FOFANew) Run(query string, apiKey string, pageIndex int, pageSize int, 
 	return
 }
 
-func (f *FOFANew) parseFofaSearchResult(queryResult []byte) (result []onlineSearchResult, sizeTotal int, err error) {
+func (f *FOFA) parseFofaSearchResult(queryResult []byte) (result []onlineSearchResult, sizeTotal int, err error) {
 	r := fofaQueryResult{}
 	err = json.Unmarshal(queryResult, &r)
 	if err != nil {
@@ -94,7 +94,7 @@ func (f *FOFANew) parseFofaSearchResult(queryResult []byte) (result []onlineSear
 		}
 		lowerBanner := strings.ToLower(fsr.Banner)
 		//过滤部份无意义的banner
-		if strings.HasPrefix(fsr.Banner, "HTTP/") || strings.HasPrefix(lowerBanner, "<html>") || strings.HasPrefix(lowerBanner, "<!doctype html>") {
+		if strings.HasPrefix(fsr.Banner, "HTTP/") || strings.HasPrefix(lowerBanner, "<html>") || strings.HasPrefix(lowerBanner, "<!doctype html") || strings.HasPrefix(lowerBanner, "<?xml version") {
 			fsr.Banner = ""
 		}
 		//过滤所有的\x00 \x15等不可见字符
@@ -106,7 +106,7 @@ func (f *FOFANew) parseFofaSearchResult(queryResult []byte) (result []onlineSear
 	return
 }
 
-func (f *FOFANew) ParseContentResult(content []byte) (ipResult portscan.Result, domainResult domainscan.Result) {
+func (f *FOFA) ParseContentResult(content []byte) (ipResult portscan.Result, domainResult domainscan.Result) {
 	ipResult.IPResult = make(map[string]*portscan.IPResult)
 	domainResult.DomainResult = make(map[string]*domainscan.DomainResult)
 	s := custom.NewService()

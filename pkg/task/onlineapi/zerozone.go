@@ -3,6 +3,7 @@ package onlineapi
 import (
 	"bytes"
 	"encoding/csv"
+	"github.com/hanc00l/nemo_go/pkg/logging"
 	"github.com/hanc00l/nemo_go/pkg/task/custom"
 	"github.com/hanc00l/nemo_go/pkg/task/domainscan"
 	"github.com/hanc00l/nemo_go/pkg/task/portscan"
@@ -27,8 +28,7 @@ func (z *ZeroZone) ParseContentResult(content []byte) (ipResult portscan.Result,
 	ipResult.IPResult = make(map[string]*portscan.IPResult)
 	domainResult.DomainResult = make(map[string]*domainscan.DomainResult)
 	s := custom.NewService()
-	blackDomain := custom.NewBlackDomain()
-	blackIP := custom.NewBlackIP()
+	btc := custom.NewBlackTargetCheck(custom.CheckAll)
 	r := csv.NewReader(bytes.NewReader(content))
 	for index := 0; ; index++ {
 		row, err := r.Read()
@@ -46,7 +46,8 @@ func (z *ZeroZone) ParseContentResult(content []byte) (ipResult portscan.Result,
 		service := strings.TrimSpace(row[7])
 		//域名属性：
 		if len(domain) > 0 && utils.CheckIPV4(domain) == false {
-			if blackDomain.CheckBlack(domain) {
+			if btc.CheckBlack(domain) {
+				logging.RuntimeLog.Warningf("%s is in blacklist,skip...", domain)
 				continue
 			}
 			if domainResult.HasDomain(domain) == false {
@@ -71,7 +72,8 @@ func (z *ZeroZone) ParseContentResult(content []byte) (ipResult portscan.Result,
 		if len(ip) == 0 || utils.CheckIPV4(ip) == false || portErr != nil {
 			continue
 		}
-		if blackIP.CheckBlack(ip) {
+		if btc.CheckBlack(ip) {
+			logging.RuntimeLog.Warningf("%s is in blacklist,skip...", domain)
 			continue
 		}
 		if ipResult.HasIP(ip) == false {

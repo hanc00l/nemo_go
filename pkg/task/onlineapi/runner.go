@@ -8,7 +8,6 @@ import (
 	"github.com/hanc00l/nemo_go/pkg/task/custom"
 	"github.com/hanc00l/nemo_go/pkg/task/domainscan"
 	"github.com/hanc00l/nemo_go/pkg/task/portscan"
-	"github.com/hanc00l/nemo_go/pkg/utils"
 	"math/rand"
 	"strings"
 	"time"
@@ -16,7 +15,7 @@ import (
 
 type OnlineSearch struct {
 	apiName      string
-	apiKey       conf.APIKey
+	apiKey       string
 	apiKeyInUse  string
 	searchEngine Engine
 	//Config 配置参数：查询的目标、关联的组织
@@ -33,14 +32,14 @@ func NewOnlineAPISearch(config OnlineAPIConfig, apiName string) *OnlineSearch {
 	s := &OnlineSearch{Config: config, apiName: apiName}
 	switch apiName {
 	case "fofa":
-		s.searchEngine = new(FOFANew)
-		s.apiKey = conf.GlobalWorkerConfig().API.Fofa
+		s.searchEngine = new(FOFA)
+		s.apiKey = conf.GlobalWorkerConfig().API.Fofa.Key
 	case "hunter":
 		s.searchEngine = new(Hunter)
-		s.apiKey = conf.GlobalWorkerConfig().API.Hunter
+		s.apiKey = conf.GlobalWorkerConfig().API.Hunter.Key
 	case "quake":
 		s.searchEngine = new(Quake)
-		s.apiKey = conf.GlobalWorkerConfig().API.Quake
+		s.apiKey = conf.GlobalWorkerConfig().API.Quake.Key
 	case "0zone":
 		s.searchEngine = new(ZeroZone)
 	}
@@ -59,22 +58,19 @@ func (s *OnlineSearch) Do() {
 		logging.CLILog.Errorf("invalid api:%s,exit search", s.apiName)
 		return
 	}
-	if len(s.apiKey.Key) == 0 {
+	if len(s.apiKey) == 0 {
 		logging.RuntimeLog.Warningf("no %s api key,exit search", s.apiName)
 		logging.CLILog.Warningf("no %s api key,exit search", s.apiName)
 		return
 	}
-	blackDomain := custom.NewBlackDomain()
-	blackIP := custom.NewBlackIP()
+	btc := custom.NewBlackTargetCheck(custom.CheckAll)
 	for _, line := range strings.Split(s.Config.Target, ",") {
 		domain := strings.TrimSpace(line)
 		if domain == "" {
 			continue
 		}
-		if utils.CheckIPV4(domain) && blackIP.CheckBlack(domain) {
-			continue
-		}
-		if utils.CheckDomain(domain) && blackDomain.CheckBlack(domain) {
+		if btc.CheckBlack(domain) {
+			logging.RuntimeLog.Warningf("%s is in blacklist,skip...", domain)
 			continue
 		}
 		s.Query(domain)
@@ -122,8 +118,9 @@ func (s *OnlineSearch) ParseContentResult(content []byte) {
 // retriedQuery 执行一次查询，允许重试N次
 func (s *OnlineSearch) retriedQuery(query string, pageIndex int, pageSize int) (pageResult []onlineSearchResult, sizeTotal int, err error) {
 	RETRIED := 3
-	if len(s.apiKey.Key) > 1 {
-		RETRIED = 2 * len(s.apiKey.Key)
+	allKeys := strings.Split(s.apiKey, ",")
+	if len(allKeys) > 1 {
+		RETRIED = 2 * len(allKeys)
 	}
 	if s.apiKeyInUse == "" {
 		if s.apiKeyInUse = s.getOneAPIKey(); s.apiKeyInUse == "" {
@@ -136,8 +133,10 @@ func (s *OnlineSearch) retriedQuery(query string, pageIndex int, pageSize int) (
 		if err == nil {
 			return
 		}
-		logging.RuntimeLog.Error(err)
-		logging.CLILog.Error(err)
+		msg := fmt.Sprintf("api %s with key %s has error:%v", s.apiName, s.desensitizationAPIKey(), err)
+		logging.RuntimeLog.Error(msg)
+		logging.CLILog.Error(msg)
+
 		if s.apiKeyInUse = s.getOneAPIKey(); s.apiKeyInUse == "" {
 			return nil, 0, errors.New(fmt.Sprintf("%s no  key to available", s.apiName))
 		}
@@ -148,19 +147,45 @@ func (s *OnlineSearch) retriedQuery(query string, pageIndex int, pageSize int) (
 	return
 }
 
-// getOneAPIKey 选择一个查询的key
-func (s *OnlineSearch) getOneAPIKey() string {
-	if len(s.apiKey.Key) == 0 {
+// desensitizationAPIKey 脱敏APIKey，格式为xxxx****xxxx或者xxxx****
+func (s *OnlineSearch) desensitizationAPIKey() string {
+	l := len(s.apiKeyInUse)
+	if l == 0 {
 		return ""
 	}
-	if len(s.apiKey.Key) == 1 {
-		return s.apiKey.Key[0]
+	if l >= 4 {
+		keyPre := s.apiKeyInUse[:4]
+		if l >= 8 {
+			var keyMid, keyEnd string
+			if l >= 12 {
+				keyMid = "****"
+				keyEnd = s.apiKeyInUse[l-4:]
+			} else {
+				keyMid = ""
+				keyEnd = "****"
+			}
+			return fmt.Sprintf("%s%s%s", keyPre, keyMid, keyEnd)
+		}
+		return fmt.Sprintf("%s****", keyPre)
+	}
+	return "****"
+}
+
+// getOneAPIKey 选择一个查询的key
+func (s *OnlineSearch) getOneAPIKey() string {
+	allKeys := strings.Split(s.apiKey, ",")
+
+	if len(allKeys) == 0 {
+		return ""
+	}
+	if len(allKeys) == 1 {
+		return allKeys[0]
 	}
 	r := rand.New(rand.NewSource(time.Now().UnixNano()))
 	for {
-		n := r.Intn(len(s.apiKey.Key))
-		if s.apiKey.Key[n] != s.apiKeyInUse {
-			return s.apiKey.Key[n]
+		n := r.Intn(len(allKeys))
+		if allKeys[n] != s.apiKeyInUse {
+			return allKeys[n]
 		}
 	}
 }
@@ -170,12 +195,11 @@ func (s *OnlineSearch) processResult() {
 	s.IpResult = portscan.Result{IPResult: make(map[string]*portscan.IPResult)}
 	s.DomainResult = domainscan.Result{DomainResult: make(map[string]*domainscan.DomainResult)}
 
-	blackDomain := custom.NewBlackDomain()
-	blackIP := custom.NewBlackIP()
+	btc := custom.NewBlackTargetCheck(custom.CheckAll)
 	for _, fsr := range s.Result {
-		parseIpPort(s.IpResult, fsr, s.apiName, blackIP)
-		parseDomainIP(s.DomainResult, fsr, s.apiName, blackDomain)
+		parseIpPort(s.IpResult, fsr, s.apiName, btc)
+		parseDomainIP(s.DomainResult, fsr, s.apiName, btc)
 	}
 
-	checkDomainResult(s.DomainResult.DomainResult)
+	domainscan.FilterDomainHasTooMuchIP(&s.DomainResult)
 }

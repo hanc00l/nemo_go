@@ -122,7 +122,7 @@ type API struct {
 }
 
 type APIKey struct {
-	Key []string `yaml:"key"`
+	Key string `yaml:"key"`
 }
 
 type Portscan struct {
