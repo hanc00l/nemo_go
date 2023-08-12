@@ -7,7 +7,6 @@ import (
 	"fmt"
 	"github.com/hanc00l/nemo_go/pkg/conf"
 	"github.com/hanc00l/nemo_go/pkg/logging"
-	"github.com/jacenr/filediff/diff"
 	"net"
 	"os"
 	"path/filepath"
@@ -79,11 +78,6 @@ func WorkerStartupSync(host, port, authKey string) {
 
 // doFileMd5List 读取worker本地文件列表及md5值，并与服务端进行对比，确定需要同步的文件列表
 func doFileMd5List(mg *Message) (transFiles []string, err error) {
-	var slinkNeedCreat = make(map[string]string)
-	var slinkNeedChange = make(map[string]string)
-	var needDelete = make([]string, 0)
-	var needCreDir = make([]string, 0)
-
 	//srcPath := "/tmp/test/dst"
 	var srcPath string
 	srcPath, err = filepath.Abs(conf.GetRootPath())
@@ -102,65 +96,11 @@ func doFileMd5List(mg *Message) (transFiles []string, err error) {
 		return
 	}
 	sort.Strings(localFilesMd5)
-	var diffrm []string
-	var diffadd []string
-	if len(localFilesMd5) != 0 {
-		diffrm, diffadd = diff.DiffOnly(mg.MgStrings, localFilesMd5)
-	} else {
-		diffrm, diffadd = mg.MgStrings, localFilesMd5
-	}
-	if len(diffrm) == 0 && len(diffadd) == 0 {
-		logging.CLILog.Info("No file need be transfored.")
-		return
-	}
-	//fmt.Println(diffrm)
-	//fmt.Println(diffadd)
-	// 重组成map
-	diffrmM := make(map[string]string)
-	diffaddM := make(map[string]string)
-	for _, v := range diffrm {
-		s := strings.Split(v, ",,")
-		if len(s) != 1 {
-			diffrmM[s[0]] = s[1]
-		}
-	}
-	for _, v := range diffadd {
-		s := strings.Split(v, ",,")
-		if len(s) != 1 {
-			diffaddM[s[0]] = s[1]
-		}
-	}
-	// 整理
-	for k, _ := range diffaddM {
-		v2, ok := diffrmM[k]
-		if ok {
-			if !mg.Overwrite {
-				delete(diffrmM, k)
-			}
-			if mg.Overwrite {
-				if strings.HasPrefix(v2, "symbolLink&&") {
-					slinkNeedChange[k] = strings.TrimPrefix(v2, "symbolLink&&")
-					delete(diffrmM, k)
-				}
-				needDelete = append(needDelete, k)
-			}
-		}
-		if !ok && mg.Del {
-			needDelete = append(needDelete, k)
-		}
-
-	}
-	for k, v := range diffrmM {
-		if strings.HasPrefix(v, "symbolLink&&") {
-			slinkNeedCreat[k] = strings.TrimPrefix(v, "symbolLink&&")
-			delete(diffrmM, k)
-			continue
-		}
-		if v == "Directory" {
-			needCreDir = append(needCreDir, k)
-			delete(diffrmM, k)
-		}
-	}
+	var needCreateDir []string
+	needCreateDir, _, transFiles = doDiff(mg.MgStrings, localFilesMd5)
+	//fmt.Println("need add:", needCreateDir)
+	//fmt.Println("need delete:", needDelete)
+	//fmt.Println("need transfer:", transFiles)
 	// 接收新文件的本地操作
 	fErr := os.Chdir(srcPath)
 	if fErr != nil {
@@ -170,17 +110,12 @@ func doFileMd5List(mg *Message) (transFiles []string, err error) {
 	}
 	defer os.Chdir(cwd)
 
-	err = localOP(slinkNeedCreat, slinkNeedChange, needDelete, needCreDir)
+	err = localOP(nil, nil, nil, needCreateDir)
 	if err != nil {
 		logging.CLILog.Error(err)
 		logging.RuntimeLog.Error(err)
 		return
 	}
-	// do request needTrans files
-	for k, _ := range diffrmM {
-		transFiles = append(transFiles, k)
-	}
-	//DebugInfor(transFiles)
 	sort.Strings(transFiles)
 
 	return
@@ -228,4 +163,60 @@ func doTranFile(filePathName, authKey string, gbc *GobConn) bool {
 	logging.CLILog.Error(hostMessage.MgString)
 	logging.RuntimeLog.Error(hostMessage.MgString)
 	return false
+}
+
+// doDiff 对比需要同步的文件列表
+func doDiff(src []string, dst []string) (needCreate []string, needDelete []string, needTransfer []string) {
+	srcFileMap := make(map[string]struct{})
+	srcDifMap := make(map[string]string)
+	dstDifMap := make(map[string]string)
+	//1，先过滤掉完全相同的条件（文件名,,md5/Directory）,并生成src与dst中不同的项（可能是文件名不同，也可能是md5值不同）
+	for _, s := range src {
+		srcFileMap[s] = struct{}{}
+	}
+	for _, d := range dst {
+		_, ok := srcFileMap[d]
+		if ok {
+			// 删除src与dst相同的条目
+			delete(srcFileMap, d)
+		} else {
+			arr := strings.Split(d, ",,")
+			if len(arr) == 2 {
+				dstDifMap[arr[0]] = arr[1]
+			}
+		}
+	}
+	for k := range srcFileMap {
+		arr := strings.Split(k, ",,")
+		if len(arr) == 2 {
+			srcDifMap[arr[0]] = arr[1]
+		}
+	}
+	//2. 检查map中的源的文件名称
+	srcFileName := make([]string, 0, len(srcDifMap))
+	for s := range srcDifMap {
+		srcFileName = append(srcFileName, s)
+	}
+	for _, s := range srcFileName {
+		// 文件名存在于源和目的
+		_, ok := dstDifMap[s]
+		if ok {
+			// md5不一样，需传输
+			needTransfer = append(needTransfer, s)
+			delete(dstDifMap, s)
+		} else {
+			//目的中不存在：如果是目录，则需创建；如果不是目录，需要传输
+			if srcDifMap[s] == "Directory" {
+				needCreate = append(needCreate, s)
+			} else {
+				needTransfer = append(needTransfer, s)
+			}
+		}
+	}
+	//3. 需删除的文件/路径
+	for k := range dstDifMap {
+		needDelete = append(needDelete, k)
+	}
+
+	return
 }
