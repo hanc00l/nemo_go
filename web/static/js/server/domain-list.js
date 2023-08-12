@@ -432,7 +432,14 @@ $(function () {
                     data: "screenshot", title: "ScreenShot", width: "20%",
                     "render": function (data, type, row, meta) {
                         let title = '';
+                        let index = 0;
                         for (let i in data) {
+                            index++;
+                            if (index > 5) {
+                                let disable_fofa = $('#checkbox_disable_fofa').is(":checked");
+                                title += '<a href=/domain-info?workspace=' + row['workspace'] + '&&domain=' + row['domain'] + '&&disable_fofa=' + disable_fofa + ' target="_blank">' + '<img src="/static/images/more.png" class="img"  style="margin-bottom: 5px;margin-left: 5px;" title="点击查看更多>" /></a>';
+                                break;
+                            }
                             let thumbnailFile = data[i].replace('.png', '_thumbnail.png');
                             let imgTitle = data[i].replace(".png", "").replace("_", ":");
                             title += '<img src="/webfiles/' + row['workspace_guid'] + '/screenshot/' + row['domain'] + '/' + thumbnailFile + '" class="img"  style="margin-bottom: 5px;margin-left: 5px;" title="' + imgTitle + '" onclick="show_bigpic(\'/webfiles/' + row['workspace_guid'] + '/screenshot/' + row['domain'] + '/' + data[i] + '\')"/>'
