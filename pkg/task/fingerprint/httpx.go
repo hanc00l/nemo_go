@@ -310,12 +310,10 @@ func (x *Httpx) parseHttpxResult(outputTempFile string) (result []FingerAttrResu
 	return
 }
 
-// ParseJSONContentResult 解析httpx扫描的JSON格式文件结果
-func (x *Httpx) ParseJSONContentResult(content []byte) {
+// ParseContentResult 解析httpx扫描的JSON格式文件结果
+func (x *Httpx) ParseContentResult(content []byte) (result portscan.Result) {
+	result.IPResult = make(map[string]*portscan.IPResult)
 	s := custom.NewService()
-	if x.ResultPortScan.IPResult == nil {
-		x.ResultPortScan.IPResult = make(map[string]*portscan.IPResult)
-	}
 	scanner := bufio.NewScanner(bytes.NewReader(content))
 	for scanner.Scan() {
 		data := scanner.Bytes()
@@ -323,14 +321,14 @@ func (x *Httpx) ParseJSONContentResult(content []byte) {
 		if host == "" || port == 0 || len(fas) == 0 || utils.CheckIPV4(host) == false {
 			continue
 		}
-		if !x.ResultPortScan.HasIP(host) {
-			x.ResultPortScan.SetIP(host)
+		if !result.HasIP(host) {
+			result.SetIP(host)
 		}
-		if !x.ResultPortScan.HasPort(host, port) {
-			x.ResultPortScan.SetPort(host, port)
+		if !result.HasPort(host, port) {
+			result.SetPort(host, port)
 		}
 		service := s.FindService(port, "")
-		x.ResultPortScan.SetPortAttr(host, port, portscan.PortAttrResult{
+		result.SetPortAttr(host, port, portscan.PortAttrResult{
 			Source:  "httpx",
 			Tag:     "service",
 			Content: service,
@@ -342,10 +340,11 @@ func (x *Httpx) ParseJSONContentResult(content []byte) {
 				Tag:       fa.Tag,
 				Content:   fa.Content,
 			}
-			x.ResultPortScan.SetPortAttr(host, port, par)
+			result.SetPortAttr(host, port, par)
 			if fa.Tag == "status" {
-				x.ResultPortScan.IPResult[host].Ports[port].Status = fa.Content
+				result.IPResult[host].Ports[port].Status = fa.Content
 			}
 		}
 	}
+	return
 }

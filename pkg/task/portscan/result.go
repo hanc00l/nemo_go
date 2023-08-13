@@ -69,6 +69,48 @@ type Result struct {
 	IPResult map[string]*IPResult
 }
 
+type OfflineResult interface {
+	ParseContentResult(content []byte) (ipResult Result)
+}
+
+type ImportOfflineResult struct {
+	resultType       string
+	offlineInterface OfflineResult
+	IpResult         Result
+}
+
+func NewImportOfflineResult(resultType string) *ImportOfflineResult {
+	i := &ImportOfflineResult{resultType: resultType}
+	switch resultType {
+	case "nmap":
+		i.offlineInterface = new(Nmap)
+	case "masscan":
+		i.offlineInterface = new(Masscan)
+	case "fscan":
+		i.offlineInterface = new(FScan)
+	case "gogo":
+		i.offlineInterface = new(Gogo)
+	case "goby":
+		i.offlineInterface = new(Goby)
+	}
+	return i
+}
+
+func NewImportOfflineResultWithInterface(resultType string, resultInterface OfflineResult) *ImportOfflineResult {
+	i := &ImportOfflineResult{resultType: resultType}
+	i.offlineInterface = resultInterface
+
+	return i
+}
+
+func (i *ImportOfflineResult) Parse(content []byte) {
+	if i.offlineInterface == nil {
+		logging.RuntimeLog.Errorf("invalid offline result:%s", i.resultType)
+		return
+	}
+	i.IpResult = i.offlineInterface.ParseContentResult(content)
+}
+
 func (r *Result) HasIP(ip string) bool {
 	r.RLock()
 	defer r.RUnlock()

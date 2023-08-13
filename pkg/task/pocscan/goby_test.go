@@ -1,13 +1,17 @@
 package pocscan
 
-import "testing"
+import (
+	"fmt"
+	"testing"
+)
 
 func TestGoby_StartScan(t *testing.T) {
 	g := Goby{}
 	ips := []string{"127.0.0.1:8161"}
 	id, api, err := g.StartScan(ips)
 	t.Log(id, err)
-	err = g.GetAsset(api, id)
+	content, err := g.GetAsset(api, id)
+	fmt.Println(string(content))
 	t.Log(err)
 	err = g.GetVulnerability(api, id)
 	for _, v := range g.Result {

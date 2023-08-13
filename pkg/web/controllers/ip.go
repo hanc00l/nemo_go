@@ -490,47 +490,25 @@ func (c *IPController) ImportPortscanResultAction() {
 		config.OrgId = nil
 	}
 	var result string
-	if bin == "nmap" {
-		nmap := portscan.NewNmap(config)
-		nmap.ParseXMLContentResult(fileContent)
-		portscan.FilterIPHasTooMuchPort(&nmap.Result, true)
-		result = nmap.Result.SaveResult(config)
-	} else if bin == "masscan" {
-		m := portscan.NewMasscan(config)
-		m.ParseXMLContentResult(fileContent)
-		portscan.FilterIPHasTooMuchPort(&m.Result, true)
-		result = m.Result.SaveResult(config)
-	} else if bin == "fscan" {
-		f := portscan.NewFScan(config)
-		f.ParseTxtContentResult(fileContent)
-		portscan.FilterIPHasTooMuchPort(&f.Result, true)
-		resultIpPort := f.Result.SaveResult(config)
-		resultVul := pocscan.SaveResult(f.VulResult)
-		result = fmt.Sprintf("%s,%s", resultIpPort, resultVul)
-	} else if bin == "gogo" {
-		g := portscan.NewGogo(config)
-		g.ParseJsonContentResult(fileContent)
-		portscan.FilterIPHasTooMuchPort(&g.Result, true)
-		resultIpPort := g.Result.SaveResult(config)
-		resultVul := pocscan.SaveResult(g.VulResult)
-		result = fmt.Sprintf("%s,%s", resultIpPort, resultVul)
-	} else if bin == "naabu" {
-		n := portscan.NewNaabu(config)
-		n.ParseTxtContentResult(fileContent)
-		portscan.FilterIPHasTooMuchPort(&n.Result, true)
-		resultIpPort := n.Result.SaveResult(config)
+	if bin == "nmap" || bin == "masscan" || bin == "fscan" || bin == "gogo" {
+		// 导入IP资产
+		i := portscan.NewImportOfflineResult(bin)
+		i.Parse(fileContent)
+		portscan.FilterIPHasTooMuchPort(&i.IpResult, false)
+		resultIpPort := i.IpResult.SaveResult(config)
 		result = fmt.Sprintf("%s", resultIpPort)
+		// 导入漏洞资产
+		if bin == "fscan" || bin == "gogo" {
+			v := pocscan.NewImportOfflineResult(bin, workspaceId)
+			v.Parse(fileContent)
+			resultVul := pocscan.SaveResult(v.VulResult)
+			result = fmt.Sprintf("%s,%s", resultIpPort, resultVul)
+		}
 	} else if bin == "httpx" {
-		n := fingerprint.NewHttpx()
-		n.ParseJSONContentResult(fileContent)
-		portscan.FilterIPHasTooMuchPort(&n.ResultPortScan, true)
-		resultIpPort := n.ResultPortScan.SaveResult(config)
-		result = fmt.Sprintf("%s", resultIpPort)
-	} else if bin == "txportmap" {
-		tx := portscan.NewTXPortMap(config)
-		tx.ParseTxtContentResult(fileContent)
-		portscan.FilterIPHasTooMuchPort(&tx.Result, true)
-		resultIpPort := tx.Result.SaveResult(config)
+		i := portscan.NewImportOfflineResultWithInterface("httpx", new(fingerprint.Httpx))
+		i.Parse(fileContent)
+		portscan.FilterIPHasTooMuchPort(&i.IpResult, false)
+		resultIpPort := i.IpResult.SaveResult(config)
 		result = fmt.Sprintf("%s", resultIpPort)
 	} else if bin == "0zone" || bin == "fofa" || bin == "hunter" {
 		s := onlineapi.NewOnlineAPISearch(onlineapi.OnlineAPIConfig{}, bin)

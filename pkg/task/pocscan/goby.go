@@ -16,9 +16,10 @@ import (
 )
 
 type Goby struct {
-	Config Config
-	Result []Result
-	notice chan int
+	Config        Config
+	Result        []Result
+	AssertContent []byte
+	notice        chan int
 }
 
 // goby服务端部署：
@@ -231,6 +232,12 @@ func (g *Goby) Do() {
 		logging.RuntimeLog.Error(err)
 		return
 	}
+	g.AssertContent, err = g.GetAsset(api, taskId)
+	if err != nil {
+		logging.CLILog.Error(err)
+		logging.RuntimeLog.Error(err)
+		return
+	}
 }
 
 // GetTaskList 获取任务列表
@@ -309,22 +316,19 @@ func (g *Goby) StartScan(ips []string) (taskId string, api string, err error) {
 	return
 }
 
-// GetAsset 获取扫描结果
-// 由于存在递归调用的情况，只能放弃goby的端口扫描信息
-func (g *Goby) GetAsset(api string, taskId string) (err error) {
+// GetAsset 获取扫描结果的资产信息，返回[]byte的结果
+func (g *Goby) GetAsset(api string, taskId string) (content []byte, err error) {
 	req := GobyAssetSearchRequest{}
 	req.Query = fmt.Sprintf("taskId=%s", taskId)
 	req.Options.Page.Page = 1
 	req.Options.Page.Size = 100000
 	dataBytes, _ := json.Marshal(req)
-	var respBody []byte
-	respBody, err = g.postData("POST", fmt.Sprintf("%s%s", api, APIGetAsset), dataBytes)
+	content, err = g.postData("POST", fmt.Sprintf("%s%s", api, APIGetAsset), dataBytes)
 	if err != nil {
 		logging.CLILog.Error(err)
 		logging.RuntimeLog.Error(err)
 		return
 	}
-	err = g.parseAssertResult(respBody)
 	return
 }
 

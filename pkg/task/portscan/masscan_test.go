@@ -1,6 +1,10 @@
 package portscan
 
-import "testing"
+import (
+	"github.com/hanc00l/nemo_go/pkg/logging"
+	"os"
+	"testing"
+)
 
 func TestMasscan_Run(t *testing.T) {
 	config := Config{
@@ -24,9 +28,14 @@ func TestMasscan_Run(t *testing.T) {
 }
 
 func TestMasscan_ParseXMLResult(t *testing.T) {
-	m := NewMasscan(Config{})
-	m.ParseXMLResult("/Users/user/Downloads/masscan.xml")
-	for ip, ipa := range m.Result.IPResult {
+	content, err := os.ReadFile("/Users/user/Downloads/masscan.xml")
+	if err != nil {
+		logging.RuntimeLog.Error(err)
+		return
+	}
+	i := NewImportOfflineResult("masscan")
+	i.Parse(content)
+	for ip, ipa := range i.IpResult.IPResult {
 		t.Log(ip, ipa)
 		for port, pa := range ipa.Ports {
 			t.Log(port, pa)

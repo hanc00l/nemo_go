@@ -146,25 +146,13 @@ func (nmap *Nmap) parseResult(outputTempFile string) {
 	}
 }
 
-// ParseXMLResult 解析nmap的XML文件
-func (nmap *Nmap) ParseXMLResult(outputTempFile string) {
-	content, err := os.ReadFile(outputTempFile)
-	if err != nil {
-		logging.RuntimeLog.Error(err)
-		return
-	}
-	nmap.ParseXMLContentResult(content)
-}
-
-// ParseXMLContentResult 解析nmap的XML文件
-func (nmap *Nmap) ParseXMLContentResult(content []byte) {
+// ParseContentResult 解析nmap的XML文件
+func (nmap *Nmap) ParseContentResult(content []byte) (result Result) {
+	result.IPResult = make(map[string]*IPResult)
 	nmapRunner, err := gonmap.Parse(content)
 	if err != nil {
 		logging.RuntimeLog.Error(err)
 		return
-	}
-	if nmap.Result.IPResult == nil {
-		nmap.Result.IPResult = make(map[string]*IPResult)
 	}
 	s := custom.NewService()
 	for _, host := range nmapRunner.Hosts {
@@ -181,26 +169,26 @@ func (nmap *Nmap) ParseXMLContentResult(content []byte) {
 		if ip == "" {
 			continue
 		}
-		if !nmap.Result.HasIP(ip) {
-			nmap.Result.SetIP(ip)
+		if !result.HasIP(ip) {
+			result.SetIP(ip)
 		}
 		for _, port := range host.Ports {
 			if port.State.State == "open" && port.Protocol == "tcp" {
-				if !nmap.Result.HasPort(ip, port.PortId) {
-					nmap.Result.SetPort(ip, port.PortId)
+				if !result.HasPort(ip, port.PortId) {
+					result.SetPort(ip, port.PortId)
 				}
 				service := port.Service.Name
 				if service == "" {
 					service = s.FindService(port.PortId, ip)
 				}
-				nmap.Result.SetPortAttr(ip, port.PortId, PortAttrResult{
+				result.SetPortAttr(ip, port.PortId, PortAttrResult{
 					Source:  "portscan",
 					Tag:     "service",
 					Content: service,
 				})
 				banner := strings.Join([]string{port.Service.Product, port.Service.Version}, " ")
 				if strings.TrimSpace(banner) != "" {
-					nmap.Result.SetPortAttr(ip, port.PortId, PortAttrResult{
+					result.SetPortAttr(ip, port.PortId, PortAttrResult{
 						Source:  "portscan",
 						Tag:     "banner",
 						Content: banner,
@@ -209,4 +197,5 @@ func (nmap *Nmap) ParseXMLContentResult(content []byte) {
 			}
 		}
 	}
+	return
 }

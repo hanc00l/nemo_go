@@ -1,4 +1,4 @@
-package portscan
+package pocscan
 
 import (
 	"bytes"
@@ -6,17 +6,12 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/hanc00l/nemo_go/pkg/logging"
-	"github.com/hanc00l/nemo_go/pkg/task/pocscan"
 	"io"
-	"strconv"
 	"strings"
 )
 
 // Gogo 导入gogo的扫描结果
 type Gogo struct {
-	Config    Config
-	Result    Result
-	VulResult []pocscan.Result
 }
 
 // forked from https://github.com/chainreactors/gogo
@@ -171,11 +166,6 @@ func UnFlat(input []byte) []byte {
 	return s
 }
 
-// NewGogo 创建gogo对象
-func NewGogo(config Config) *Gogo {
-	return &Gogo{Config: config}
-}
-
 // loadGOGOResultData 读取并解析gogo的json类型的结果文件，支持压缩格式
 func (g *Gogo) loadGOGOResultData(input []byte) (gogoData *GOGOData) {
 	gogoData = &GOGOData{}
@@ -193,63 +183,19 @@ func (g *Gogo) loadGOGOResultData(input []byte) (gogoData *GOGOData) {
 }
 
 // ParseContentResult 解析gogo扫描的文本结果
-func (g *Gogo) ParseContentResult(content []byte) (result Result) {
-	result.IPResult = make(map[string]*IPResult)
-
+func (g *Gogo) ParseContentResult(content []byte) (result []Result) {
 	gogoData := g.loadGOGOResultData(content)
 	if gogoData == nil {
 		return
 	}
 	for _, r := range gogoData.Data {
-		if !result.HasIP(r.Ip) {
-			result.SetIP(r.Ip)
-		}
-		port, err := strconv.Atoi(r.Port)
-		if err != nil {
-			continue
-		}
-		if !result.HasPort(r.Ip, port) {
-			result.SetPort(r.Ip, port)
-		}
-		if len(r.Title) > 0 {
-			result.SetPortAttr(r.Ip, port, PortAttrResult{
-				Source:  "gogo",
-				Tag:     "title",
-				Content: r.Title,
-			})
-		}
-		if len(r.Protocol) > 0 {
-			result.SetPortAttr(r.Ip, port, PortAttrResult{
-				Source:  "gogo",
-				Tag:     "protocol",
-				Content: r.Protocol,
-			})
-		}
-		if (r.Protocol == "http" || r.Protocol == "https") && len(r.Status) > 0 {
-			result.IPResult[r.Ip].Ports[port].Status = r.Status
-		}
-		if len(r.Midware) > 0 {
-			result.SetPortAttr(r.Ip, port, PortAttrResult{
-				Source:  "gogo",
-				Tag:     "midware",
-				Content: r.Midware,
-			})
-		}
-		for _, f := range r.Frameworks {
-			result.SetPortAttr(r.Ip, port, PortAttrResult{
-				Source:  "gogo",
-				Tag:     "banner",
-				Content: f.String(),
-			})
-		}
 		for _, v := range r.Vulns {
-			g.VulResult = append(g.VulResult, pocscan.Result{
-				Target:      r.Ip,
-				Url:         r.Uri,
-				PocFile:     v.Name,
-				Source:      "gogo",
-				Extra:       v.String(),
-				WorkspaceId: g.Config.WorkspaceId,
+			result = append(result, Result{
+				Target:  r.Ip,
+				Url:     r.Uri,
+				PocFile: v.Name,
+				Source:  "gogo",
+				Extra:   v.String(),
 			})
 		}
 	}

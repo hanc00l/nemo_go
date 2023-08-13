@@ -1,10 +1,9 @@
-package portscan
+package pocscan
 
-import (
-	"testing"
-)
+import "testing"
 
-var fscanResult = `(ping) Target 192.168.3.183   is alive
+func TestFScan_ParseContentResult(t *testing.T) {
+	var fscanResult = `(ping) Target 192.168.3.183   is alive
 (ping) Target 192.168.3.184   is alive
 (icmp) Target 192.168.3.1     is alive
 (icmp) Target 192.168.3.15    is alive
@@ -58,13 +57,9 @@ NetInfo:
 已完成 5/5
 scan end`
 
-func TestFScan_ParseTxtContentResult2(t *testing.T) {
-	i := NewImportOfflineResult("fscan")
+	i := NewImportOfflineResult("fscan", 1)
 	i.Parse([]byte(fscanResult))
-	for ip, ipa := range i.IpResult.IPResult {
-		t.Log(ip, ipa)
-		for port, pa := range ipa.Ports {
-			t.Log(port, pa)
-		}
+	for _, v := range i.VulResult {
+		t.Log(v)
 	}
 }

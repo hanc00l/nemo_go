@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/hanc00l/nemo_go/pkg/conf"
 	"github.com/hanc00l/nemo_go/pkg/db"
+	"github.com/hanc00l/nemo_go/pkg/logging"
 	"github.com/hanc00l/nemo_go/pkg/utils"
 	"strings"
 	"sync"
@@ -94,9 +95,43 @@ type PortscanVulResult struct {
 	IPResult     map[string]*IPResult
 }
 
+type OfflineVulResult interface {
+	ParseContentResult(content []byte) (vulResult []Result)
+}
+
+type ImportOfflineResult struct {
+	resultType       string
+	workspaceId      int
+	offlineInterface OfflineVulResult
+	VulResult        []Result
+}
+
 func init() {
 	nucleiConcurrencyThreadNumber[conf.HighPerformance] = 20
 	nucleiConcurrencyThreadNumber[conf.NormalPerformance] = 10
+}
+
+func NewImportOfflineResult(resultType string, workspaceId int) *ImportOfflineResult {
+	i := &ImportOfflineResult{resultType: resultType, workspaceId: workspaceId}
+	switch resultType {
+	case "fscan":
+		i.offlineInterface = new(FScan)
+	case "gogo":
+		i.offlineInterface = new(Gogo)
+	case "goby":
+	}
+	return i
+}
+
+func (i *ImportOfflineResult) Parse(content []byte) {
+	if i.offlineInterface == nil {
+		logging.RuntimeLog.Errorf("invalid offline result:%s", i.resultType)
+		return
+	}
+	i.VulResult = i.offlineInterface.ParseContentResult(content)
+	for k := 0; k < len(i.VulResult); k++ {
+		i.VulResult[k].WorkspaceId = i.workspaceId
+	}
 }
 
 func (r *PortscanVulResult) HasIP(ip string) bool {

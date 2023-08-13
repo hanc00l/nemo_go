@@ -1,10 +1,9 @@
-package portscan
+package pocscan
 
-import (
-	"testing"
-)
+import "testing"
 
-var gogoResult = `{
+func TestGogo_ParseContentResult(t *testing.T) {
+	var gogoResult = `{
     "config": {
         "ip": "192.168.3.1/24",
         "ips": null,
@@ -137,14 +136,9 @@ var gogoResult = `{
         }
     ]
 }`
-
-func TestGogo_ParseJsonContentResult(t *testing.T) {
-	i := NewImportOfflineResult("gogo")
+	i := NewImportOfflineResult("gogo", 1)
 	i.Parse([]byte(gogoResult))
-	for ip, ipa := range i.IpResult.IPResult {
-		t.Log(ip, ipa)
-		for port, pa := range ipa.Ports {
-			t.Log(port, pa)
-		}
+	for _, v := range i.VulResult {
+		t.Log(v)
 	}
 }

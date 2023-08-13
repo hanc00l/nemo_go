@@ -3,7 +3,6 @@ package portscan
 import (
 	"fmt"
 	"github.com/hanc00l/nemo_go/pkg/task/custom"
-	"github.com/hanc00l/nemo_go/pkg/task/pocscan"
 	"github.com/hanc00l/nemo_go/pkg/utils"
 	"net/url"
 	"regexp"
@@ -13,22 +12,14 @@ import (
 
 // FScan 导入fscan的扫描结果
 type FScan struct {
-	Config    Config
-	Result    Result
-	VulResult []pocscan.Result
+	//VulResult []pocscan.Result
 }
 
-// NewFScan 创建FScan对象
-func NewFScan(config Config) *FScan {
-	return &FScan{Config: config}
-}
+// ParseContentResult 解析fscan扫描的文本结果
+func (f *FScan) ParseContentResult(content []byte) (result Result) {
+	result.IPResult = make(map[string]*IPResult)
 
-// ParseTxtContentResult 解析fscan扫描的文本结果
-func (f *FScan) ParseTxtContentResult(content []byte) {
 	s := custom.NewService()
-	if f.Result.IPResult == nil {
-		f.Result.IPResult = make(map[string]*IPResult)
-	}
 	lines := strings.Split(string(content), "\n")
 	for _, l := range lines {
 		line := strings.TrimSpace(strings.Trim(l, "\r"))
@@ -40,8 +31,8 @@ func (f *FScan) ParseTxtContentResult(content []byte) {
 			if len(hosts) != 2 || utils.CheckIPV4(hosts[1]) == false {
 				continue
 			}
-			if !f.Result.HasIP(hosts[1]) {
-				f.Result.SetIP(hosts[1])
+			if !result.HasIP(hosts[1]) {
+				result.SetIP(hosts[1])
 			}
 		} else if strings.HasPrefix(line, "[*] WebTitle") {
 			//[*] WebTitle: https://10.192.117.161:15093 code:200 len:3773   title:一张表
@@ -55,15 +46,15 @@ func (f *FScan) ParseTxtContentResult(content []byte) {
 			url := titles[1]
 			statusCode := titles[2]
 			title := titles[3]
-			if ok, ip, port := f.parseUrlForIPPortResult(url); ok {
-				f.Result.IPResult[ip].Ports[port].Status = statusCode
+			if ok, ip, port := f.parseUrlForIPPortResult(url, &result); ok {
+				result.IPResult[ip].Ports[port].Status = statusCode
 				if title != "None" {
 					par := PortAttrResult{
 						Source:  "fscan",
 						Tag:     "title",
 						Content: title,
 					}
-					f.Result.SetPortAttr(ip, port, par)
+					result.SetPortAttr(ip, port, par)
 				}
 			}
 		} else if strings.HasPrefix(line, "[+] InfoScan") {
@@ -76,15 +67,15 @@ func (f *FScan) ParseTxtContentResult(content []byte) {
 			}
 			url := titles[1]
 			info := titles[2]
-			if ok, ip, port := f.parseUrlForIPPortResult(url); ok {
+			if ok, ip, port := f.parseUrlForIPPortResult(url, &result); ok {
 				par := PortAttrResult{
 					Source:  "fscan",
 					Tag:     "fingerprint",
 					Content: info,
 				}
-				f.Result.SetPortAttr(ip, port, par)
+				result.SetPortAttr(ip, port, par)
 			}
-		} else if strings.HasPrefix(line, "[+] ") {
+			/*} else if strings.HasPrefix(line, "[+] ") {
 			//[+] mysql:10.192.117.150:3306:root Aa123456
 			//[+] https://10.192.117.122:10008 poc-yaml-go-pprof-leak
 			//[+] http://192.168.10.237:8085 poc-yaml-vmware-vcenter-cve-2021-21985-rce
@@ -96,7 +87,7 @@ func (f *FScan) ParseTxtContentResult(content []byte) {
 				continue
 			}
 			if ok, ip, port := f.parseUrlForIPPortResult(fmt.Sprintf("http://%s:%s", hostPort[1], hostPort[2])); ok {
-				f.Result.SetPortAttr(ip, port, PortAttrResult{
+				result.SetPortAttr(ip, port, PortAttrResult{
 					Source:  "fscan",
 					Tag:     "banner",
 					Content: strings.TrimLeft(line, "[+] "),
@@ -112,7 +103,7 @@ func (f *FScan) ParseTxtContentResult(content []byte) {
 						WorkspaceId: f.Config.WorkspaceId,
 					})
 				}
-			}
+			}*/
 		} else {
 			//192.168.3.242:80 open
 			patternHostPort := "^(.+):(\\d{1,5}) +open"
@@ -121,9 +112,9 @@ func (f *FScan) ParseTxtContentResult(content []byte) {
 			if len(hostPort) != 3 || utils.CheckIPV4(hostPort[1]) == false {
 				continue
 			}
-			if ok, ip, port := f.parseUrlForIPPortResult(fmt.Sprintf("http://%s:%s", hostPort[1], hostPort[2])); ok {
+			if ok, ip, port := f.parseUrlForIPPortResult(fmt.Sprintf("http://%s:%s", hostPort[1], hostPort[2]), &result); ok {
 				service := s.FindService(port, ip)
-				f.Result.SetPortAttr(ip, port, PortAttrResult{
+				result.SetPortAttr(ip, port, PortAttrResult{
 					Source:  "fscan",
 					Tag:     "service",
 					Content: service,
@@ -131,9 +122,10 @@ func (f *FScan) ParseTxtContentResult(content []byte) {
 			}
 		}
 	}
+	return
 }
 
-func (f *FScan) parseUrlForIPPortResult(httpUrl string) (ok bool, ip string, port int) {
+func (f *FScan) parseUrlForIPPortResult(httpUrl string, result *Result) (ok bool, ip string, port int) {
 	u, err := url.Parse(strings.TrimSpace(httpUrl))
 	if err != nil {
 		return
@@ -151,11 +143,11 @@ func (f *FScan) parseUrlForIPPortResult(httpUrl string) (ok bool, ip string, por
 	if err != nil || utils.CheckIPV4(ip) == false {
 		return
 	}
-	if !f.Result.HasIP(ip) {
-		f.Result.SetIP(ip)
+	if !result.HasIP(ip) {
+		result.SetIP(ip)
 	}
-	if !f.Result.HasPort(ip, port) {
-		f.Result.SetPort(ip, port)
+	if !result.HasPort(ip, port) {
+		result.SetPort(ip, port)
 	}
 
 	ok = true

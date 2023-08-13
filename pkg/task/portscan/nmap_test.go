@@ -1,6 +1,8 @@
 package portscan
 
 import (
+	"github.com/hanc00l/nemo_go/pkg/logging"
+	"os"
 	"testing"
 )
 
@@ -28,9 +30,14 @@ func TestNmap_Run(t *testing.T) {
 }
 
 func TestNmap_ParseXMLResult(t *testing.T) {
-	nmap := NewNmap(Config{})
-	nmap.ParseXMLResult("/Users/user/Downloads/nmap2.xml")
-	for ip, ipa := range nmap.Result.IPResult {
+	i := NewImportOfflineResult("nmap")
+	content, err := os.ReadFile("/Users/user/Downloads/nmap2.xml")
+	if err != nil {
+		logging.RuntimeLog.Error(err)
+		return
+	}
+	i.Parse(content)
+	for ip, ipa := range i.IpResult.IPResult {
 		t.Log(ip, ipa)
 		for port, pa := range ipa.Ports {
 			t.Log(port, pa)
