@@ -257,7 +257,9 @@
                         </td>
                         <td>
                             {{ if eq .Tag "http_header" }}
-                            <pre>{{ .Content }}</pre>
+                            <div style="width:100%;white-space:normal;word-wrap:break-word;word-break:break-all;">
+                                <pre>{{ .Content }}</pre>
+                            </div>
                             {{ else }}
                             <div id="div_content"
                                  style="width:100%;white-space:normal;word-wrap:break-word;word-break:break-all;">

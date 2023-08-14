@@ -87,9 +87,10 @@
                         {{ if .domain_info.IconHashes }}
                         <span class="btn btn-info">IconHash</span>
                         {{ range .domain_info.IconHashes }}
-                        <a href="{{ .FofaUrl }}" target="_blank"><img src="/webfiles/{{ $.domain_info.WorkspaceGUID }}/iconimage/{{ .IconImage }}"
-                                                                      height="24px" width="24px"
-                                                                      title="{{ .IconHash }}"/></a>&nbsp;
+                        <a href="{{ .FofaUrl }}" target="_blank"><img
+                                src="/webfiles/{{ $.domain_info.WorkspaceGUID }}/iconimage/{{ .IconImage }}"
+                                height="24px" width="24px"
+                                title="{{ .IconHash }}"/></a>&nbsp;
                         {{ end }}
                         {{ end }}
                         {{ if .domain_info.TlsData }}
@@ -213,7 +214,9 @@
                         </td>
                         <td>
                             {{ if eq .Tag "http_header" }}
-                            <pre>{{ .Content }}</pre>
+                            <div style="width:100%;white-space:normal;word-wrap:break-word;word-break:break-all;">
+                                <pre>{{ .Content }}</pre>
+                            </div>
                             {{ else }}
                             <div id="div_domainattr"
                                  style="width:100%;white-space:normal;word-wrap:break-word;word-break:break-all;">
@@ -304,7 +307,9 @@
                         </td>
                         <td>
                             {{ if eq .Tag "http_header" }}
-                            <pre>{{ .Content }}</pre>
+                            <div style="width:100%;white-space:normal;word-wrap:break-word;word-break:break-all;">
+                                <pre>{{ .Content }}</pre>
+                            </div>
                             {{ else }}
                             <div id="div_content"
                                  style="width:100%;white-space:normal;word-wrap:break-word;word-break:break-all;">

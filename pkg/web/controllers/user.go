@@ -206,10 +206,12 @@ func (c *UserController) DeleteAction() {
 		return
 	}
 	user := db.User{Id: id}
-	c.MakeStatusResponse(user.Delete())
-
-	logging.RuntimeLog.Infof("delete user:%s,type:%s", user.UserName, user.UserRole)
-
+	if user.Get() {
+		logging.RuntimeLog.Infof("delete user:%s,type:%s", user.UserName, user.UserRole)
+		c.MakeStatusResponse(user.Delete())
+	} else {
+		c.FailedStatus("delete user error: user not exist")
+	}
 }
 
 // ResetPasswordAction 重置指定用户的密码
