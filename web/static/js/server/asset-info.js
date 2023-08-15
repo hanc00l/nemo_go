@@ -1,5 +1,5 @@
 $(function () {
-    $('#btnsiderbar').click();
+    //$('#btnsiderbar').click();
     // 点击关闭大图显示
     $('.imgPreview').click(function () {
         $('.imgPreview').hide();

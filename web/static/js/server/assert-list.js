@@ -1,5 +1,5 @@
 $(function () {
-    $('#btnsiderbar').click();
+    //$('#btnsiderbar').click();
     load_org_list();
     // //获取任务的状态信息
     get_task_status();

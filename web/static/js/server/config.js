@@ -1,5 +1,5 @@
 $(function () {
-    $('#btnsiderbar').click();
+    //$('#btnsiderbar').click();
     load_config();
     load_custom('task_workspace', $('#text_task_workspace'));
     $("#buttonSaveNmap").click(function () {

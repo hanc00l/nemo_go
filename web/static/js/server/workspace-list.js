@@ -1,5 +1,5 @@
 $(function () {
-    $('#btnsiderbar').click();
+    //$('#btnsiderbar').click();
     $('#workspace_table').DataTable(
         {
             "paging": true,

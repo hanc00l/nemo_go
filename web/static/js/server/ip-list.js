@@ -1,5 +1,5 @@
 $(function () {
-    load_portscan_config();
+    //load_portscan_config();
     //搜索
     $("#search").click(function () {
         $("#hidden_org_id").val($("#select_org_id_search").val())

@@ -1,5 +1,5 @@
 $(function () {
-    $('#btnsiderbar').click();
+    //$('#btnsiderbar').click();
     load_custom('honeypot', $('#text_honeypot'));
     load_custom('service', $('#text_service'));
     load_custom('iplocation', $('#text_iplocation'));

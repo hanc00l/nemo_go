@@ -1,5 +1,5 @@
 $(function () {
-    $('#btnsiderbar').click();
+    //$('#btnsiderbar').click();
     $('#runtimelog_table').DataTable(
         {
             "paging": true,
