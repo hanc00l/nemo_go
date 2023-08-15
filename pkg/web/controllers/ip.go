@@ -200,7 +200,11 @@ func (c *IPController) InfoAction() {
 	workspaceId, err := c.GetInt("workspace")
 	disableFofa, _ := c.GetBool("disable_fofa", false)
 	if ipName != "" && err == nil && workspaceId > 0 {
-		ipInfo = getIPInfo(workspaceId, ipName, disableFofa, false)
+		ip := db.Ip{WorkspaceId: workspaceId, IpName: ipName}
+		if !ip.GetByIp() {
+			return
+		}
+		ipInfo = getIPInfo(&ip, true, disableFofa, false)
 		// 修改背景色为交叉显示
 		if len(ipInfo.PortAttr) > 0 {
 			tableBackgroundSet := false
@@ -607,7 +611,7 @@ func (c *IPController) GetIPListData(req ipRequestParam) (resp DataTableResponse
 		ipData.IP = ipRow.IpName
 		ipData.Location = ipRow.Location
 		ipData.PinIndex = ipRow.PinIndex
-		ipInfo := getIPInfo(ipRow.WorkspaceId, ipRow.IpName, req.DisableFofa, req.DisableBanner)
+		ipInfo := getIPInfo(&ipRow, false, req.DisableFofa, req.DisableBanner)
 		// 筛选满足指定条件的IP
 		// 只看没有开放端口的IP：
 		if req.SelectNoOpenedPort && len(ipInfo.Port) > 0 {
@@ -778,12 +782,8 @@ func getPortInfo(workspaceGUID string, ip string, ipId int, disableFofa, disable
 }
 
 // getIPInfo 获取一个IP的信息集合
-func getIPInfo(workspaceId int, ipName string, disableFofa, disableBanner bool) (r IPInfo) {
-	ip := db.Ip{IpName: ipName, WorkspaceId: workspaceId}
-	if !ip.GetByIp() {
-		return r
-	}
-	r.IP = ipName
+func getIPInfo(ip *db.Ip, getReleatedDomain, disableFofa, disableBanner bool) (r IPInfo) {
+	r.IP = ip.IpName
 	r.Id = ip.Id
 	r.Location = ip.Location
 	r.Status = ip.Status
@@ -796,9 +796,9 @@ func getIPInfo(workspaceId int, ipName string, disableFofa, disableBanner bool) 
 		r.WorkspaceGUID = workspace.WorkspaceGUID
 	}
 	//screenshot
-	for _, v := range fingerprint.NewScreenShot().LoadScreenshotFile(workspace.WorkspaceGUID, ipName) {
-		sfp := fmt.Sprintf("/webfiles/%s/screenshot/%s/%s", r.WorkspaceGUID, ipName, v)
-		filepathThumbnail := fmt.Sprintf("/webfiles/%s/screenshot/%s/%s", r.WorkspaceGUID, ipName, strings.ReplaceAll(v, ".png", "_thumbnail.png"))
+	for _, v := range fingerprint.NewScreenShot().LoadScreenshotFile(workspace.WorkspaceGUID, ip.IpName) {
+		sfp := fmt.Sprintf("/webfiles/%s/screenshot/%s/%s", r.WorkspaceGUID, ip.IpName, v)
+		filepathThumbnail := fmt.Sprintf("/webfiles/%s/screenshot/%s/%s", r.WorkspaceGUID, ip.IpName, strings.ReplaceAll(v, ".png", "_thumbnail.png"))
 		r.Screenshot = append(r.Screenshot, ScreenshotFileInfo{
 			ScreenShotFile:          sfp,
 			ScreenShotThumbnailFile: filepathThumbnail,
@@ -816,7 +816,7 @@ func getIPInfo(workspaceId int, ipName string, disableFofa, disableBanner bool) 
 		}
 	}
 	// port
-	portInfo := getPortInfo(r.WorkspaceGUID, ipName, ip.Id, disableFofa, disableBanner)
+	portInfo := getPortInfo(r.WorkspaceGUID, ip.IpName, ip.Id, disableFofa, disableBanner)
 	r.PortAttr = portInfo.PortAttr
 	r.Title = utils.SetToSlice(portInfo.TitleSet)
 	r.Banner = utils.SetToSlice(portInfo.BannerSet)
@@ -831,7 +831,7 @@ func getIPInfo(workspaceId int, ipName string, disableFofa, disableBanner bool) 
 		r.Memo = memo.Content
 	}
 	// vul
-	vul := db.Vulnerability{Target: ipName}
+	vul := db.Vulnerability{Target: ip.IpName}
 	vulData := vul.GetsByTarget()
 	for _, v := range vulData {
 		r.Vulnerability = append(r.Vulnerability, VulnerabilityInfo{
@@ -852,7 +852,9 @@ func getIPInfo(workspaceId int, ipName string, disableFofa, disableBanner bool) 
 		})
 	}
 	r.TlsData = utils.SetToSlice(portInfo.TlsDataSet)
-	r.Domain = getIpRelatedDomain(workspaceId, ipName)
+	if getReleatedDomain {
+		r.Domain = getIpRelatedDomain(ip.WorkspaceId, ip.IpName)
+	}
 	return
 }
 

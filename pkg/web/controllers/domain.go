@@ -191,7 +191,12 @@ func (c *DomainController) InfoAction() {
 	workspaceId, err := c.GetInt("workspace")
 	disableFofa, _ := c.GetBool("disable_fofa", false)
 	if domainName != "" && err == nil && workspaceId > 0 {
-		domainInfo = getDomainInfo(workspaceId, domainName, disableFofa, false)
+		domain := db.Domain{DomainName: domainName, WorkspaceId: workspaceId}
+		if !domain.GetByDomain() {
+			return
+		}
+		portInfoCacheMap := make(map[int]PortInfo)
+		domainInfo = getDomainInfo(&domain, portInfoCacheMap, disableFofa, false)
 		if len(domainInfo.PortAttr) > 0 {
 			tableBackgroundSet := false
 			for i, _ := range domainInfo.PortAttr {
@@ -523,6 +528,7 @@ func (c *DomainController) getDomainListData(req domainRequestParam) (resp DataT
 	ss := fingerprint.NewScreenShot()
 	cdn := custom.NewCDNCheck()
 	workspaceCacheMap := make(map[int]string)
+	portInfoCacheMap := make(map[int]PortInfo)
 	for i, domainRow := range results {
 		domainData := DomainListData{}
 		domainData.Id = domainRow.Id
@@ -539,7 +545,7 @@ func (c *DomainController) getDomainListData(req domainRequestParam) (resp DataT
 		if _, ok := workspaceCacheMap[domainData.WorkspaceId]; ok {
 			domainData.WorkspaceGUID = workspaceCacheMap[domainData.WorkspaceId]
 		}
-		domainInfo := getDomainInfo(domainRow.WorkspaceId, domainRow.DomainName, req.DisableFofa, req.DisableBanner)
+		domainInfo := getDomainInfo(&domainRow, portInfoCacheMap, req.DisableFofa, req.DisableBanner)
 		// 筛选没有域名的解析IP的记录：
 		if req.SelectNoResolvedIP && len(domainInfo.IP) > 0 {
 			continue
@@ -616,24 +622,20 @@ func (c *DomainController) getMemoData(req domainRequestParam) (r []string) {
 }
 
 // getDomainInfo获取一个域名的数据集合
-func getDomainInfo(workspaceId int, domainName string, disableFofa, disableBanner bool) (r DomainInfo) {
-	domain := db.Domain{DomainName: domainName, WorkspaceId: workspaceId}
-	if !domain.GetByDomain() {
-		return
-	}
+func getDomainInfo(domain *db.Domain, portInfoCacheMap map[int]PortInfo, disableFofa, disableBanner bool) (r DomainInfo) {
 	r.Id = domain.Id
 	r.Domain = domain.DomainName
 	r.CreateTime = FormatDateTime(domain.CreateDatetime)
 	r.UpdateTime = FormatDateTime(domain.UpdateDatetime)
 	r.PinIndex = fmt.Sprintf("%d", domain.PinIndex)
 	r.Workspace = fmt.Sprintf("%d", domain.WorkspaceId)
-	workspace := db.Workspace{Id: workspaceId}
+	workspace := db.Workspace{Id: domain.WorkspaceId}
 	if workspace.Get() {
 		r.WorkspaceGUID = workspace.WorkspaceGUID
 	}
-	for _, v := range fingerprint.NewScreenShot().LoadScreenshotFile(workspace.WorkspaceGUID, domainName) {
-		screenFilePath := fmt.Sprintf("/webfiles/%s/screenshot/%s/%s", r.WorkspaceGUID, domainName, v)
-		filepathThumbnail := fmt.Sprintf("/webfiles/%s/screenshot/%s/%s", r.WorkspaceGUID, domainName, strings.ReplaceAll(v, ".png", "_thumbnail.png"))
+	for _, v := range fingerprint.NewScreenShot().LoadScreenshotFile(workspace.WorkspaceGUID, domain.DomainName) {
+		screenFilePath := fmt.Sprintf("/webfiles/%s/screenshot/%s/%s", r.WorkspaceGUID, domain.DomainName, v)
+		filepathThumbnail := fmt.Sprintf("/webfiles/%s/screenshot/%s/%s", r.WorkspaceGUID, domain.DomainName, strings.ReplaceAll(v, ".png", "_thumbnail.png"))
 		r.Screenshot = append(r.Screenshot, ScreenshotFileInfo{
 			ScreenShotFile:          screenFilePath,
 			ScreenShotThumbnailFile: filepathThumbnail,
@@ -654,11 +656,14 @@ func getDomainInfo(workspaceId int, domainName string, disableFofa, disableBanne
 	domainAttrInfo := getDomainAttrFullInfo(r.WorkspaceGUID, domain.Id, disableFofa, disableBanner)
 	//遍历域名关联的每一个IP，获取port,title,banner和PortAttrInfo
 	for ipName := range domainAttrInfo.IP {
-		ip := db.Ip{IpName: ipName, WorkspaceId: workspaceId}
+		ip := db.Ip{IpName: ipName, WorkspaceId: domain.WorkspaceId}
 		if !ip.GetByIp() {
 			continue
 		}
-		pi := getPortInfo(r.WorkspaceGUID, ipName, ip.Id, disableFofa, disableBanner)
+		if _, ok := portInfoCacheMap[ip.Id]; !ok {
+			portInfoCacheMap[ip.Id] = getPortInfo(r.WorkspaceGUID, ipName, ip.Id, disableFofa, disableBanner)
+		}
+		pi := portInfoCacheMap[ip.Id]
 		for _, portNumber := range pi.PortNumbers {
 			if _, ok := portSet[portNumber]; !ok {
 				portSet[portNumber] = struct{}{}
@@ -685,7 +690,7 @@ func getDomainInfo(workspaceId int, domainName string, disableFofa, disableBanne
 	r.StatusCode = utils.SetToSlice(domainAttrInfo.StatusCodeSet)
 	r.Finger = utils.SetToSlice(domainAttrInfo.FingerSet)
 	icp := onlineapi.NewICPQuery(onlineapi.ICPQueryConfig{})
-	if icpInfo := icp.LookupICP(domainName); icpInfo != nil {
+	if icpInfo := icp.LookupICP(domain.DomainName); icpInfo != nil {
 		icpContent, _ := json.Marshal(*icpInfo)
 		r.DomainAttr = append(r.DomainAttr, DomainAttrInfo{
 			Tag:     "ICP",
@@ -693,7 +698,7 @@ func getDomainInfo(workspaceId int, domainName string, disableFofa, disableBanne
 		})
 	}
 	whois := onlineapi.NewWhois(onlineapi.WhoisQueryConfig{})
-	if whoisInfo := whois.LookupWhois(domainName); whoisInfo != nil {
+	if whoisInfo := whois.LookupWhois(domain.DomainName); whoisInfo != nil {
 		whoisContent, _ := json.Marshal(*whoisInfo)
 		r.DomainAttr = append(r.DomainAttr, DomainAttrInfo{
 			Tag:     "Whois",
@@ -708,7 +713,7 @@ func getDomainInfo(workspaceId int, domainName string, disableFofa, disableBanne
 	if memo.GetByRelatedId() {
 		r.Memo = memo.Content
 	}
-	vul := db.Vulnerability{Target: domainName}
+	vul := db.Vulnerability{Target: domain.DomainName}
 	vulData := vul.GetsByTarget()
 	for _, v := range vulData {
 		r.Vulnerability = append(r.Vulnerability, VulnerabilityInfo{
@@ -1043,8 +1048,9 @@ func (c *DomainController) getDomainExportData(req domainRequestParam) (result [
 	searchMap := c.getSearchMap(req)
 	domainResults, _ := domain.Gets(searchMap, -1, -1, req.OrderByDate)
 	cdn := custom.NewCDNCheck()
+	portInfoCacheMap := make(map[int]PortInfo)
 	for _, domainRow := range domainResults {
-		domainInfo := getDomainInfo(domainRow.WorkspaceId, domainRow.DomainName, req.DisableFofa, req.DisableBanner)
+		domainInfo := getDomainInfo(&domainRow, portInfoCacheMap, req.DisableFofa, req.DisableBanner)
 		eInfo := DomainExportInfo{Domain: domainRow.DomainName}
 		eInfo.IP = domainInfo.IP
 		for _, p := range domainInfo.Port {
