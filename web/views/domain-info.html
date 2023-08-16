@@ -180,7 +180,12 @@
                         {{ end }}
                     </div>
                     <div class="card-footer text-muted">
-                        <h5>域名相关信息</h5>
+                        <button class="btn btn-secondary" type="button" data-toggle="collapse"
+                                data-target="#collapseDomainAttr" aria-expanded="false"
+                                aria-controls="collapseDomainAttr">
+                            域名相关信息
+                        </button>
+
                     </div>
                 </div>
             </div>
@@ -190,57 +195,60 @@
         <div class="col-md-12">
             <div class="tile">
                 {{ if .domain_info.DomainAttr }}
-                <table class="table table-bordered">
-                    <thead>
-                    <tr class="alert-dark">
-                        <th width="8%">属性</th>
-                        <th width="50%">内容</th>
-                        <th width="8%">创建时间</th>
-                        <th width="8%">更新时间</th>
-                        <th width="5%">操作</th>
-                    </tr>
-                    </thead>
-                    <tbody>
-                    {{ range .domain_info.DomainAttr }}
-                    <tr>
-                        <td>
-                            {{ if eq .Tag "http_header" }}
-                            http_header<br/> {{ .Port }} <a
-                                href="javascript:show_http_content('domain',{{ .DomainId }},{{ .Port }})">
-                            <i class="fa fa-file-code-o" title="网站正文"></i></a>
-                            {{ else }}
-                            {{ .Tag }}
-                            {{ end }}
-                        </td>
-                        <td>
-                            {{ if eq .Tag "http_header" }}
-                            <div style="width:100%;white-space:normal;word-wrap:break-word;word-break:break-all;">
-                                <pre>{{ .Content }}</pre>
-                            </div>
-                            {{ else }}
-                            <div id="div_domainattr"
-                                 style="width:100%;white-space:normal;word-wrap:break-word;word-break:break-all;">
-                                {{ .Content }}
-                            </div>
-                            {{ end }}
-                        </td>
-                        <td>{{ .CreateTime }}</td>
-                        <td>{{ .UpdateTime }}</td>
-                        <td>
-                            {{ if eq .Tag "OnlineAPI" }}
-                            <a class="btn btn-sm btn-danger" href="javascript:delete_domain_onlineapi_attr({{ .Id }})"
-                               role="button" title="Delete"><i class="fa fa-trash-o"></i></a>
-                            {{ else if eq .Tag "ICP" "Whois" "http_header" }}
-                            &nbsp;
-                            {{ else }}
-                            <a class="btn btn-sm btn-danger" href="javascript:delete_domain_attr({{ .Id }})"
-                               role="button" title="Delete"><i class="fa fa-trash-o"></i></a>
-                            {{ end }}
-                        </td>
-                    </tr>
-                    {{ end }}
-                    </tbody>
-                </table>
+                <div class="collapse.show" id="collapseDomainAttr">
+                    <table class="table table-bordered">
+                        <thead>
+                        <tr class="alert-dark">
+                            <th width="8%">属性</th>
+                            <th width="50%">内容</th>
+                            <th width="8%">创建时间</th>
+                            <th width="8%">更新时间</th>
+                            <th width="5%">操作</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        {{ range .domain_info.DomainAttr }}
+                        <tr>
+                            <td>
+                                {{ if eq .Tag "http_header" }}
+                                http_header<br/> {{ .Port }} <a
+                                    href="javascript:show_http_content('domain',{{ .DomainId }},{{ .Port }})">
+                                <i class="fa fa-file-code-o" title="网站正文"></i></a>
+                                {{ else }}
+                                {{ .Tag }}
+                                {{ end }}
+                            </td>
+                            <td>
+                                {{ if eq .Tag "http_header" }}
+                                <div style="width:100%;white-space:normal;word-wrap:break-word;word-break:break-all;">
+                                    <pre>{{ .Content }}</pre>
+                                </div>
+                                {{ else }}
+                                <div id="div_domainattr"
+                                     style="width:100%;white-space:normal;word-wrap:break-word;word-break:break-all;">
+                                    {{ .Content }}
+                                </div>
+                                {{ end }}
+                            </td>
+                            <td>{{ .CreateTime }}</td>
+                            <td>{{ .UpdateTime }}</td>
+                            <td>
+                                {{ if eq .Tag "OnlineAPI" }}
+                                <a class="btn btn-sm btn-danger"
+                                   href="javascript:delete_domain_onlineapi_attr({{ .Id }})"
+                                   role="button" title="Delete"><i class="fa fa-trash-o"></i></a>
+                                {{ else if eq .Tag "ICP" "Whois" "http_header" }}
+                                &nbsp;
+                                {{ else }}
+                                <a class="btn btn-sm btn-danger" href="javascript:delete_domain_attr({{ .Id }})"
+                                   role="button" title="Delete"><i class="fa fa-trash-o"></i></a>
+                                {{ end }}
+                            </td>
+                        </tr>
+                        {{ end }}
+                        </tbody>
+                    </table>
+                </div>
                 {{ end }}
                 {{ if .domain_info.PortAttr }}
                 <table class="table table-bordered">
