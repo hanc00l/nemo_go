@@ -11,7 +11,7 @@ type Port struct {
 	UpdateDatetime time.Time `gorm:"column:update_datetime"`
 }
 
-func (Port) TableName() string {
+func (*Port) TableName() string {
 	return "port"
 }
 

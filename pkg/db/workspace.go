@@ -16,7 +16,7 @@ type Workspace struct {
 	UpdateDatetime       time.Time `gorm:"column:update_datetime"`
 }
 
-func (Workspace) TableName() string {
+func (*Workspace) TableName() string {
 	return "workspace"
 }
 

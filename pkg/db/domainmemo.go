@@ -10,18 +10,18 @@ type DomainMemo struct {
 	UpdateDatetime time.Time `gorm:"column:update_datetime"`
 }
 
-func (DomainMemo) TableName() string {
+func (*DomainMemo) TableName() string {
 	return "domain_memo"
 }
 
-//Add 插入一条新的记录
+// Add 插入一条新的记录
 func (domainMemo *DomainMemo) Add() (success bool) {
 	domainMemo.CreateDatetime = time.Now()
 	domainMemo.UpdateDatetime = time.Now()
 
 	db := GetDB()
 	defer CloseDB(db)
-	if result := db.Create(domainMemo);result.RowsAffected > 0 {
+	if result := db.Create(domainMemo); result.RowsAffected > 0 {
 		return true
 	} else {
 		return false
@@ -44,7 +44,7 @@ func (domainMemo *DomainMemo) GetByRelatedId() (success bool) {
 func (domainMemo *DomainMemo) DeleteByRelatedId() (success bool) {
 	db := GetDB()
 	defer CloseDB(db)
-	if result := db.Where("r_id",domainMemo.RelatedId).Delete(domainMemo);result.RowsAffected > 0 {
+	if result := db.Where("r_id", domainMemo.RelatedId).Delete(domainMemo); result.RowsAffected > 0 {
 		return true
 	} else {
 		return false
@@ -56,7 +56,7 @@ func (domainMemo *DomainMemo) Update(updateMap map[string]interface{}) (success 
 	updateMap["update_datetime"] = time.Now()
 	db := GetDB()
 	defer CloseDB(db)
-	if result := db.Model(domainMemo).Updates(updateMap);result.RowsAffected > 0 {
+	if result := db.Model(domainMemo).Updates(updateMap); result.RowsAffected > 0 {
 		return true
 	} else {
 		return false

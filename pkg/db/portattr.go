@@ -17,11 +17,11 @@ type PortAttr struct {
 	UpdateDatetime time.Time `gorm:"column:update_datetime"`
 }
 
-func (PortAttr) TableName() string {
+func (*PortAttr) TableName() string {
 	return "port_attr"
 }
 
-//Add 插入一条新的记录，返回主键ID及成功标志
+// Add 插入一条新的记录，返回主键ID及成功标志
 func (portAttr *PortAttr) Add() (success bool) {
 	portAttr.CreateDatetime = time.Now()
 	portAttr.UpdateDatetime = time.Now()

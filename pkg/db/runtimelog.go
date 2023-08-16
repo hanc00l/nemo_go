@@ -19,7 +19,7 @@ type RuntimeLog struct {
 	UpdateDatetime time.Time `gorm:"column:update_datetime"`
 }
 
-func (RuntimeLog) TableName() string {
+func (*RuntimeLog) TableName() string {
 	return "runtimelog"
 }
 
@@ -133,17 +133,15 @@ func (l *RuntimeLog) makeWhere(searchMap map[string]interface{}) *gorm.DB {
 	for column, value := range searchMap {
 		switch column {
 		case "source":
-			db = db.Where("source like ?", fmt.Sprintf("%%%s%%", value))
+			db = makeLike(value, column, db)
 		case "file":
-			db = db.Where("file like ?", fmt.Sprintf("%%%s%%", value))
+			db = makeLike(value, column, db)
 		case "func":
-			db = db.Where("func like ?", fmt.Sprintf("%%%s%%", value))
-		case "level":
-			db = db.Where("level", value)
+			db = makeLike(value, column, db)
 		case "level_int":
 			db = db.Where("level_int <= ?", value)
 		case "message":
-			db = db.Where("message like ?", fmt.Sprintf("%%%s%%", value))
+			db = makeLike(value, column, db)
 		case "date_delta":
 			// 筛选指定日期之前的日志（注意：与其它查询时间之类的有所区别）
 			daysToHour := 24 * value.(int)

@@ -1,7 +1,6 @@
 package db
 
 import (
-	"fmt"
 	"gorm.io/gorm"
 	"time"
 )
@@ -21,7 +20,7 @@ type TaskCron struct {
 	Comment         string    `gorm:"column:comment"`
 }
 
-func (TaskCron) TableName() string {
+func (*TaskCron) TableName() string {
 	return "task_cron"
 }
 
@@ -104,11 +103,9 @@ func (t *TaskCron) makeWhere(searchMap map[string]interface{}) *gorm.DB {
 	for column, value := range searchMap {
 		switch column {
 		case "task_name":
-			db = db.Where("task_name like ?", fmt.Sprintf("%%%s%%", value))
+			db = makeLike(value, column, db)
 		case "kwargs":
-			db = db.Where("kwargs like ?", fmt.Sprintf("%%%s%%", value))
-		case "workspace_id":
-			db = db.Where("workspace_id", value)
+			db = makeLike(value, column, db)
 		default:
 			db = db.Where(column, value)
 		}

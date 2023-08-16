@@ -1,7 +1,6 @@
 package db
 
 import (
-	"fmt"
 	"gorm.io/gorm"
 	"time"
 )
@@ -28,7 +27,7 @@ type TaskRun struct {
 	WorkspaceId     int        `gorm:"column:workspace_id"`
 }
 
-func (TaskRun) TableName() string {
+func (*TaskRun) TableName() string {
 	return "task_run"
 }
 
@@ -93,7 +92,7 @@ func (t *TaskRun) Delete() (success bool) {
 	}
 }
 
-// Delete 删除指定主键ID的一条记录
+// DeleteByMainTaskId 根据任务ID删除记录
 func (t *TaskRun) DeleteByMainTaskId() (success bool) {
 	db := GetDB()
 	defer CloseDB(db)
@@ -120,27 +119,15 @@ func (t *TaskRun) makeWhere(searchMap map[string]interface{}) *gorm.DB {
 	for column, value := range searchMap {
 		switch column {
 		case "task_name":
-			db = db.Where("task_name like ?", fmt.Sprintf("%%%s%%", value))
+			db = makeLike(value, column, db)
 		case "kwargs":
-			db = db.Where("kwargs like ?", fmt.Sprintf("%%%s%%", value))
+			db = makeLike(value, column, db)
 		case "result":
-			db = db.Where("result like ?", fmt.Sprintf("%%%s%%", value))
-		case "state":
-			db = db.Where("state", value)
+			db = makeLike(value, column, db)
 		case "worker":
-			db = db.Where("worker like ?", fmt.Sprintf("%%%s%%", value))
+			db = makeLike(value, column, db)
 		case "date_delta":
-			daysToHour := 24 * value.(int)
-			dayDelta, err := time.ParseDuration(fmt.Sprintf("-%dh", daysToHour))
-			if err == nil {
-				db = db.Where("update_datetime between ? and ?", time.Now().Add(dayDelta), time.Now())
-			}
-		case "main_id":
-			db = db.Where("main_id", value)
-		case "last_run_id":
-			db = db.Where("last_run_id", value)
-		case "workspace_id":
-			db = db.Where("workspace_id", value)
+			db = makeDateDelta(value.(int), "update_datetime", db)
 		default:
 			db = db.Where(column, value)
 		}

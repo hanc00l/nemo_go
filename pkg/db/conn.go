@@ -69,4 +69,5 @@ func CloseDB(db *gorm.DB) {
 	//全局长连接模式不能关闭数据库连接
 	//sql, _ := db.DB()
 	//defer sql.Close()
+	return
 }

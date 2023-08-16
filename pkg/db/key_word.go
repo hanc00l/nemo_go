@@ -1,7 +1,6 @@
 package db
 
 import (
-	"fmt"
 	"gorm.io/gorm"
 	"time"
 )
@@ -20,7 +19,7 @@ type KeyWord struct {
 	UpdateDatetime time.Time `gorm:"column:update_datetime"`
 }
 
-func (KeyWord) TableName() string {
+func (*KeyWord) TableName() string {
 	return "key_word"
 }
 
@@ -100,25 +99,16 @@ func (t *KeyWord) makeWhere(searchMap map[string]interface{}) *gorm.DB {
 	for column, value := range searchMap {
 		switch column {
 		case "key_word":
-			db = db.Where("key_word like ?", fmt.Sprintf("%%%s%%", value))
+			db = makeLike(value, column, db)
 		case "search_time":
-			db = db.Where("search_time like ?", fmt.Sprintf("%%%s%%", value))
+			db = makeLike(value, column, db)
 		case "exclude_words":
-			db = db.Where("exclude_words like ?", fmt.Sprintf("%%%s%%", value))
-		case "org_id":
-			db = db.Where("org_id", value)
+			db = makeLike(value, column, db)
 		case "check_mod":
-			db = db.Where("check_mod like ?", fmt.Sprintf("%%%s%%", value))
+			db = makeLike(value, column, db)
 		case "date_delta":
-			daysToHour := 24 * value.(int)
-			dayDelta, err := time.ParseDuration(fmt.Sprintf("-%dh", daysToHour))
-			if err == nil {
-				db = db.Where("update_datetime between ? and ?", time.Now().Add(dayDelta), time.Now())
-			}
-		case "workspace_id":
-			db = db.Where("workspace_id", value)
+			db = makeDateDelta(value.(int), "update_datetime", db)
 		default:
-
 			db = db.Where(column, value)
 		}
 	}

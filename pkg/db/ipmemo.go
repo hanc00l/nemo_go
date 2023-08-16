@@ -10,18 +10,18 @@ type IpMemo struct {
 	UpdateDatetime time.Time `gorm:"column:update_datetime"`
 }
 
-func (IpMemo) TableName() string {
+func (*IpMemo) TableName() string {
 	return "ip_memo"
 }
 
-//Add 插入一条新的记录
+// Add 插入一条新的记录
 func (ipmemo *IpMemo) Add() (success bool) {
 	ipmemo.CreateDatetime = time.Now()
 	ipmemo.UpdateDatetime = time.Now()
 
 	db := GetDB()
 	defer CloseDB(db)
-	if result := db.Create(ipmemo);result.RowsAffected > 0 {
+	if result := db.Create(ipmemo); result.RowsAffected > 0 {
 		return true
 	} else {
 		return false
@@ -43,7 +43,7 @@ func (ipmemo *IpMemo) GetByRelatedId() (success bool) {
 func (ipmemo *IpMemo) DeleteByRelatedId() (success bool) {
 	db := GetDB()
 	defer CloseDB(db)
-	if result := db.Where("r_id",ipmemo.RelatedId).Delete(ipmemo);result.RowsAffected > 0 {
+	if result := db.Where("r_id", ipmemo.RelatedId).Delete(ipmemo); result.RowsAffected > 0 {
 		return true
 	} else {
 		return false
@@ -56,7 +56,7 @@ func (ipmemo *IpMemo) Update(updateMap map[string]interface{}) (success bool) {
 
 	db := GetDB()
 	defer CloseDB(db)
-	if result := db.Model(ipmemo).Updates(updateMap);result.RowsAffected > 0 {
+	if result := db.Model(ipmemo).Updates(updateMap); result.RowsAffected > 0 {
 		return true
 	} else {
 		return false

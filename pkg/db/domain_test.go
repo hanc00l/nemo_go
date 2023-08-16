@@ -19,9 +19,10 @@ func TestDomain_Add(t *testing.T) {
 func TestDomain_GetsBySearch(t *testing.T) {
 	searchMap := map[string]interface{}{}
 	searchMap["domain"] = "10086"
-
+	searchMap["create_date_delta"] = 2
 	domain := &Domain{}
-	domainLists, _ := domain.Gets(searchMap, 1, 10, false)
+	domainLists, count := domain.Gets(searchMap, 1, 10, false)
+	t.Log(count)
 	for _, o := range domainLists {
 		t.Log(o)
 	}

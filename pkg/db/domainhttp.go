@@ -17,7 +17,7 @@ type DomainHttp struct {
 	UpdateDatetime time.Time `gorm:"column:update_datetime"`
 }
 
-func (DomainHttp) TableName() string {
+func (*DomainHttp) TableName() string {
 	return "domain_http"
 }
 

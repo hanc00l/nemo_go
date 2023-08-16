@@ -15,7 +15,7 @@ type User struct {
 }
 
 // TableName 设置数据库关联的表名
-func (User) TableName() string {
+func (*User) TableName() string {
 	return "user"
 }
 

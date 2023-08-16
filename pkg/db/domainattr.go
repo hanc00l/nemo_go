@@ -19,7 +19,7 @@ type DomainAttr struct {
 	UpdateDatetime time.Time `gorm:"column:update_datetime"`
 }
 
-func (DomainAttr) TableName() string {
+func (*DomainAttr) TableName() string {
 	return "domain_attr"
 }
 

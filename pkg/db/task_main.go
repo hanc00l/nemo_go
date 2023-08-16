@@ -1,7 +1,6 @@
 package db
 
 import (
-	"fmt"
 	"gorm.io/gorm"
 	"time"
 )
@@ -23,7 +22,7 @@ type TaskMain struct {
 	UpdateDatetime  time.Time  `gorm:"column:update_datetime"`
 }
 
-func (TaskMain) TableName() string {
+func (*TaskMain) TableName() string {
 	return "task_main"
 }
 
@@ -105,23 +104,13 @@ func (t *TaskMain) makeWhere(searchMap map[string]interface{}) *gorm.DB {
 	for column, value := range searchMap {
 		switch column {
 		case "task_name":
-			db = db.Where("task_name like ?", fmt.Sprintf("%%%s%%", value))
+			db = makeLike(value, column, db)
 		case "kwargs":
-			db = db.Where("kwargs like ?", fmt.Sprintf("%%%s%%", value))
+			db = makeLike(value, column, db)
 		case "result":
-			db = db.Where("result like ?", fmt.Sprintf("%%%s%%", value))
-		case "state":
-			db = db.Where("state", value)
+			db = makeLike(value, column, db)
 		case "date_delta":
-			daysToHour := 24 * value.(int)
-			dayDelta, err := time.ParseDuration(fmt.Sprintf("-%dh", daysToHour))
-			if err == nil {
-				db = db.Where("update_datetime between ? and ?", time.Now().Add(dayDelta), time.Now())
-			}
-		case "cron_id":
-			db = db.Where("cron_id", value)
-		case "workspace_id":
-			db = db.Where("workspace_id", value)
+			db = makeDateDelta(value.(int), "update_datetime", db)
 		default:
 			db = db.Where(column, value)
 		}

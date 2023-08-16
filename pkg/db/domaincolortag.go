@@ -10,11 +10,11 @@ type DomainColorTag struct {
 	UpdateDatetime time.Time `gorm:"column:update_datetime"`
 }
 
-func (DomainColorTag) TableName() string {
+func (*DomainColorTag) TableName() string {
 	return "domain_color_tag"
 }
 
-//Add 插入一条新的记录
+// Add 插入一条新的记录
 func (dct *DomainColorTag) Add() (success bool) {
 	dct.CreateDatetime = time.Now()
 	dct.UpdateDatetime = time.Now()

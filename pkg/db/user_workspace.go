@@ -10,7 +10,7 @@ type UserWorkspace struct {
 	UpdateDatetime time.Time `gorm:"column:update_datetime"`
 }
 
-func (UserWorkspace) TableName() string {
+func (*UserWorkspace) TableName() string {
 	return "user_workspace"
 }
 
@@ -70,4 +70,3 @@ func (u *UserWorkspace) RemoveUserWorkspace(userId int) {
 
 	db.Where("user_id", userId).Delete(u)
 }
-

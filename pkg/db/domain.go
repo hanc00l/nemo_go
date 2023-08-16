@@ -18,7 +18,7 @@ type Domain struct {
 }
 
 // TableName 设置数据库关联的表名
-func (Domain) TableName() string {
+func (*Domain) TableName() string {
 	return "domain"
 }
 
@@ -101,10 +101,8 @@ func (domain *Domain) makeWhere(searchMap map[string]interface{}) *gorm.DB {
 	//根据查询条件的不同的字段，组合生成查询条件
 	for column, value := range searchMap {
 		switch column {
-		case "org_id":
-			db = db.Where("org_id", value)
 		case "domain":
-			db = db.Where("domain like ?", fmt.Sprintf("%%%s%%", value))
+			db = makeLike(value, column, db)
 		case "ip":
 			domainAttr := GetDB().Model(&DomainAttr{}).Select("r_id").Distinct("r_id").Where("tag", "A").Where("content", value)
 			db = db.Where("id in (?)", domainAttr)
@@ -118,23 +116,13 @@ func (domain *Domain) makeWhere(searchMap map[string]interface{}) *gorm.DB {
 			db = db.Where("id in (?)", memoContent)
 			CloseDB(memoContent)
 		case "date_delta":
-			daysToHour := 24 * value.(int)
-			dayDelta, err := time.ParseDuration(fmt.Sprintf("-%dh", daysToHour))
-			if err == nil {
-				db = db.Where("update_datetime between ? and ?", time.Now().Add(dayDelta), time.Now())
-			}
+			db = makeDateDelta(value.(int), "update_datetime", db)
 		case "create_date_delta":
-			daysToHour := 24 * value.(int)
-			dayDelta, err := time.ParseDuration(fmt.Sprintf("-%dh", daysToHour))
-			if err == nil {
-				db = db.Where("create_datetime between ? and ?", time.Now().Add(dayDelta), time.Now())
-			}
+			db = makeDateDelta(value.(int), "create_datetime", db)
 		case "content":
 			domainAttr := GetDB().Model(&DomainAttr{}).Select("r_id").Where("content like ?", fmt.Sprintf("%%%s%%", value))
 			db = db.Where("id in (?)", domainAttr)
 			CloseDB(domainAttr)
-		case "workspace_id":
-			db = db.Where("workspace_id", value)
 		case "domain_http":
 			http := GetDB().Model(&DomainHttp{}).Select("r_id").Where("content like ?", fmt.Sprintf("%%%s%%", value))
 			db = db.Where("id in (?)", http)
@@ -192,4 +180,17 @@ func (domain *Domain) GetsForBlackListDomain(blackDomain string, workspaceId int
 	//sql语句为 select * from domain where domain like "%.qq.com" or domain="qq.com"，只匹配子域名
 	db.Where("workspace_id", workspaceId).Where("domain like ? or domain = ?", fmt.Sprintf("%%%s", blackDomain), strings.TrimLeft(blackDomain, ".")).Model(domain).Find(&results)
 	return
+}
+
+func makeDateDelta(days int, columnName string, db *gorm.DB) *gorm.DB {
+	daysToHour := 24 * days
+	dayDelta, err := time.ParseDuration(fmt.Sprintf("-%dh", daysToHour))
+	if err == nil {
+		return db.Where(fmt.Sprintf("%s between ? and ?", columnName), time.Now().Add(dayDelta), time.Now())
+	}
+	return db
+}
+
+func makeLike(value interface{}, columnName string, db *gorm.DB) *gorm.DB {
+	return db.Where(fmt.Sprintf("%s like ?", columnName), fmt.Sprintf("%%%s%%", value))
 }

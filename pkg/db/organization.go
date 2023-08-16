@@ -15,7 +15,7 @@ type Organization struct {
 }
 
 // TableName 设置数据库关联的表名
-func (Organization) TableName() string {
+func (*Organization) TableName() string {
 	return "organization"
 }
 

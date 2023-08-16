@@ -23,7 +23,7 @@ type Ip struct {
 }
 
 // TableName 设置数据库关联的表名
-func (Ip) TableName() string {
+func (*Ip) TableName() string {
 	return "ip"
 }
 
@@ -152,10 +152,8 @@ func (ip *Ip) makeWhere(searchMap map[string]interface{}) *gorm.DB {
 	//根据查询条件的不同的字段，组合生成查询条件
 	for column, value := range searchMap {
 		switch column {
-		case "org_id":
-			db = db.Where("org_id", value)
 		case "location":
-			db = db.Where("location like ?", fmt.Sprintf("%%%s%%", value))
+			db = makeLike(value, column, db)
 		case "domain":
 			dbDomains := GetDB().Model(&Domain{}).Select("id").Where("domain like ?", fmt.Sprintf("%%%s%%", value))
 			dbContent := GetDB().Model(&DomainAttr{}).Select("content").Where("tag", "A").Where("r_id in (?)", dbDomains)
@@ -199,11 +197,7 @@ func (ip *Ip) makeWhere(searchMap map[string]interface{}) *gorm.DB {
 			db = db.Where("id in (?)", memoContent)
 			CloseDB(memoContent)
 		case "date_delta":
-			daysToHour := 24 * value.(int)
-			dayDelta, err := time.ParseDuration(fmt.Sprintf("-%dh", daysToHour))
-			if err == nil {
-				db = db.Where("update_datetime between ? and ?", time.Now().Add(dayDelta), time.Now())
-			}
+			db = makeDateDelta(value.(int), "update_datetime", db)
 		case "create_date_delta":
 			daysToHour := 24 * value.(int)
 			dayDelta, err := time.ParseDuration(fmt.Sprintf("-%dh", daysToHour))
@@ -212,8 +206,6 @@ func (ip *Ip) makeWhere(searchMap map[string]interface{}) *gorm.DB {
 				db = db.Where("id in (?)", dbPorts)
 				CloseDB(dbPorts)
 			}
-		case "workspace_id":
-			db = db.Where("workspace_id", value)
 		case "ip_http":
 			http := GetDB().Model(&IpHttp{}).Select("r_id").Where("content like ?", fmt.Sprintf("%%%s%%", value))
 			port := GetDB().Model(&Port{}).Select("ip_id").Where("id in (?)", http)

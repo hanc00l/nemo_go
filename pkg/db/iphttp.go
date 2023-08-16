@@ -14,7 +14,7 @@ type IpHttp struct {
 	UpdateDatetime time.Time `gorm:"column:update_datetime"`
 }
 
-func (IpHttp) TableName() string {
+func (*IpHttp) TableName() string {
 	return "ip_http"
 }
 

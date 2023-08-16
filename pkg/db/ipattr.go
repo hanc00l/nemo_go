@@ -17,11 +17,11 @@ type IpAttr struct {
 	UpdateDatetime time.Time `gorm:"column:update_datetime"`
 }
 
-func (IpAttr) TableName() string {
+func (*IpAttr) TableName() string {
 	return "ip_attr"
 }
 
-//Add 插入一条新的记录，返回主键ID及成功标志
+// Add 插入一条新的记录，返回主键ID及成功标志
 func (ipAttr *IpAttr) Add() (success bool) {
 	ipAttr.CreateDatetime = time.Now()
 	ipAttr.UpdateDatetime = time.Now()
@@ -29,14 +29,14 @@ func (ipAttr *IpAttr) Add() (success bool) {
 
 	db := GetDB()
 	defer CloseDB(db)
-	if result := db.Create(ipAttr);result.RowsAffected > 0 {
+	if result := db.Create(ipAttr); result.RowsAffected > 0 {
 		return true
 	} else {
 		return false
 	}
 }
 
-//Get 查询指定主键ID的一条记录
+// Get 查询指定主键ID的一条记录
 func (ipAttr *IpAttr) Get() (success bool) {
 	db := GetDB()
 	defer CloseDB(db)
@@ -79,7 +79,7 @@ func (ipAttr *IpAttr) Update(updatedMap map[string]interface{}) (success bool) {
 
 	db := GetDB()
 	defer CloseDB(db)
-	if result := db.Model(&ipAttr).Updates(updatedMap);result.RowsAffected > 0 {
+	if result := db.Model(&ipAttr).Updates(updatedMap); result.RowsAffected > 0 {
 		return true
 	} else {
 		return false
