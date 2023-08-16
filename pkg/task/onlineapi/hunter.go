@@ -72,7 +72,7 @@ func (h *Hunter) Run(query string, apiKey string, pageIndex int, pageSize int, c
 	}
 	params := make(url.Values)
 	params.Add("api-key", apiKey)
-	params.Add("search", base64.URLEncoding.EncodeToString([]byte(query)))
+	params.Add("search", base64.StdEncoding.EncodeToString([]byte(query)))
 	params.Add("page", strconv.Itoa(pageIndex))
 	params.Add("page_size", strconv.Itoa(pageSize))
 	params.Add("is_web", "3") //资产类型，1代表”web资产“，2代表”非web资产“，3代表”全部“

@@ -60,7 +60,7 @@ func (f *FOFA) Run(query string, apiKey string, pageIndex int, pageSize int, con
 	params := make(url.Values)
 	params.Add("email", arr[0])
 	params.Add("key", arr[1])
-	params.Add("qbase64", base64.URLEncoding.EncodeToString([]byte(query)))
+	params.Add("qbase64", base64.StdEncoding.EncodeToString([]byte(query)))
 	params.Add("fields", fields)
 	params.Add("page", strconv.Itoa(pageIndex))
 	params.Add("size", strconv.Itoa(pageSize))
