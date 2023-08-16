@@ -15,7 +15,11 @@
                         </div>
                         <div class="form-group col-md-2">
                             <label class="control-label" for="check_mod">检索模式</label>
-                            <input class="form-control" type="text" id="check_mod" placeholder="检索模式">
+                            <select class="form-control" id="check_mod">
+                                <option value="">--检索模式--</option>
+                                <option value="title">标题</option>
+                                <option value="self">自定义的语法</option>
+                            </select>
                         </div>
                         <div class="form-group col-md-2">
                             <label class="control-label" for="search_time">最后检索日期</label>
@@ -274,14 +278,13 @@
                     <div class="modal-dialog">
                         <div class="modal-content">
                             <div class="modal-header card-header bg-primary">
-                                <h4 class="modal-title" id="myModalLabel">
+                                <h4 class="modal-title" id="keywordActionType">
                                     新建关键词
                                 </h4>
                             </div>
                             <div class="modal-body ">
                                 <form class="form-horizontal" role="form">
                                     <div class="form-group">
-
                                         <div class="form-group row ">
                                             <div class="col-md-12">
                                                 <label for="select_import_org_id_task"><b><span
@@ -289,45 +292,31 @@
                                                 <select class="form-control"
                                                         id="select_import_org_id_task">
                                                 </select>
-                                                <p></p>
-                                                <div class="form-check form-check-inline">
-                                                    <label class="form-check-label"
-                                                    ><span class="text-danger">*</span>
-                                                        <b>关键词</b><i
-                                                                class="fa fa-info-circle" aria-hidden="true"
-                                                                title="需要采集的关键词，如：xx公司，xxx系统等"></i>
-                                                    </label>
-                                                </div>
-                                                <input class="form-control" id="add_key_word" type="text"
-                                                       placeholder=""
-                                                       value="">
-                                                <label for="add_exclude_words">
-                                                    <b>过滤词组:</b>
+                                                <label for="add_key_word">
+                                                    <b><span class="text-danger">*</span>关键词</b>
+                                                </label>
+                                                <textarea class="form-control" id="add_key_word" rows="2"
+                                                          placeholder='需要采集的关键词，如：xx公司，xxx系统等；或者自定义的搜索语法，如：icon_hash="12345678" || body="12306.cn"'></textarea>
+                                                <label for="add_exclude_words">过滤词组
                                                 </label>
                                                 <textarea class="form-control" id="add_exclude_words" rows="4"
                                                           placeholder="对该关键词需要反向过滤的词组，以||分隔，如想检索“中国银行”关键词，需要过滤”中国银行保险监督“，”中国银行卡“等非目标词，即填:中国银行保险监督||中国银行卡"></textarea>
                                                 <div class=" form-check-inline">
-                                                    <label class="form-check-label"
-                                                           for="add_search_time">
-                                                        检索日期
+                                                    <label class="form-check-label" for="add_search_time">检索日期
                                                     </label>
                                                 </div>
                                                 <input class="form-control" id="add_search_time" type="text"
                                                        placeholder="检索日期，如:2020-01-01" value="">
-                                                <div class=" form-check-inline">
-                                                    <label class="form-check-label"
-                                                           for="add_check_mod">
-                                                        检索模式
-                                                    </label>
-                                                </div>
-                                                <input class="form-control" id="add_check_mod" type="text"
-                                                       placeholder="关键词检索模式" value="title">
-                                                <div class=" form-check-inline">
-                                                    <label class="form-check-label"
-                                                           for="add_count">
-                                                        检索数量
-                                                    </label>
-                                                </div>
+                                                <label class="form-check-label" for="add_check_mod">检索模式
+                                                </label>
+                                                <select class="form-control" id="add_check_mod">
+                                                    <option value="title">标题</option>
+                                                    <option value="self">自定义的语法</option>
+                                                </select>
+                                                <label class="form-check-label"
+                                                       for="add_count">
+                                                    检索数量
+                                                </label>
                                                 <input class="form-control" id="add_count" type="text"
                                                        placeholder="关键词单次检索数量" value="100">
                                             </div>
@@ -336,11 +325,12 @@
                                 </form>
                             </div>
                             <div class="modal-footer">
+                                <input type="hidden" id="key_word_id" value="0"/>
                                 <button type="button" class="btn btn-secondary" data-dismiss="modal"
                                         aria-hidden="true">取消
                                 </button>
                                 <button class="btn btn-primary org-update" type="button" id="start_add_key_search_word">
-                                    新增
+                                    保存
                                 </button>
                             </div>
                         </div><!-- /.modal-content -->

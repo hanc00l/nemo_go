@@ -119,6 +119,67 @@ func (c *KeySearchController) ListAction() {
 	c.Data["json"] = resp
 }
 
+// GetAction 一个记录的详细情况
+func (c *KeySearchController) GetAction() {
+	defer c.ServeJSON()
+
+	id, err := c.GetInt("id")
+	if err != nil {
+		logging.RuntimeLog.Error(err.Error())
+		c.FailedStatus(err.Error())
+		return
+	}
+	kw := db.KeyWord{Id: id}
+	if kw.Get() {
+		kwi := KeyWordInfo{
+			Id:           kw.Id,
+			OrgId:        kw.OrgId,
+			KeyWord:      kw.KeyWord,
+			SearchTime:   kw.SearchTime,
+			ExcludeWords: kw.ExcludeWords,
+			CheckMod:     kw.CheckMod,
+			Count:        kw.Count,
+		}
+		c.Data["json"] = kwi
+	} else {
+		c.Data["json"] = KeyWordInfo{}
+	}
+}
+
+// UpdateAction 更新记录
+func (c *KeySearchController) UpdateAction() {
+	defer c.ServeJSON()
+	if c.CheckMultiAccessRequest([]RequestRole{SuperAdmin, Admin}, false) == false {
+		c.FailedStatus("当前用户权限不允许！")
+		return
+	}
+
+	id, err := c.GetInt("id")
+	if err != nil {
+		logging.RuntimeLog.Error(err)
+		logging.CLILog.Error(err)
+		c.FailedStatus(err.Error())
+		return
+	}
+	kwi := keyWordInitRequestParam{}
+	err = c.ParseForm(&kwi)
+	if err != nil {
+		logging.RuntimeLog.Error(err)
+		logging.CLILog.Error(err)
+		c.FailedStatus(err.Error())
+		return
+	}
+	kw := db.KeyWord{Id: id}
+	updateMap := make(map[string]interface{})
+	updateMap["org_id"] = kwi.AddOrgId
+	updateMap["key_word"] = kwi.AddKeyWord
+	updateMap["search_time"] = kwi.AddSearchTime
+	updateMap["exclude_words"] = kwi.AddExcludeWords
+	updateMap["check_mod"] = kwi.AddCheckMod
+	updateMap["count"] = kwi.AddCount
+	c.MakeStatusResponse(kw.Update(updateMap))
+}
+
 // DeleteKeyWordAction 删除一个记录
 func (c *KeySearchController) DeleteKeyWordAction() {
 	defer c.ServeJSON()
@@ -181,7 +242,13 @@ func (c *KeySearchController) getKeyWordListData(req keySearchRequestParam) (res
 		r.Id = keyWordRow.Id
 		r.KeyWord = keyWordRow.KeyWord
 		r.Index = req.Start + i + 1
-		r.CheckMod = keyWordRow.CheckMod
+		if keyWordRow.CheckMod == "title" {
+			r.CheckMod = "标题"
+		} else if keyWordRow.CheckMod == "self" {
+			r.CheckMod = "自定义的语法"
+		} else {
+			r.CheckMod = "未知错误"
+		}
 		r.ExcludeWords = keyWordRow.ExcludeWords
 		r.SearchTime = keyWordRow.SearchTime
 		r.WorkspaceId = keyWordRow.WorkspaceId

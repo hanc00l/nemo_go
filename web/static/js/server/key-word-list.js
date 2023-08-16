@@ -29,8 +29,7 @@ $(function () {
                     className: "dt-body-center",
                     title: '<input  type="checkbox" class="checkall" />',
                     "render": function (data, type, row) {
-                        var strData = '<input type="checkbox" class="checkchild" value="' + row['id'] + '"/>';
-                        return strData;
+                        return '<input type="checkbox" class="checkchild" value="' + row['id'] + '"/>';
                     }
                 },
                 {
@@ -44,13 +43,19 @@ $(function () {
                     width: "8%",
                 },
                 {
-                    data: "key_word", title: "关键词", width: "8%",
+                    data: "key_word", title: "关键词", width: "20%",
+                    "render": function (data, type, row) {
+                        return '<div style="width:100%;white-space:normal;word-wrap:break-word;word-break:break-all;">' + data + '</div>'
+                    }
                 },
                 {
                     data: 'search_time', title: '检索日期', width: '8%',
                 },
                 {
                     data: 'exclude_words', title: '过滤词', width: '20%',
+                    "render": function (data, type, row) {
+                        return '<div style="width:100%;white-space:normal;word-wrap:break-word;word-break:break-all;">' + data + '</div>'
+                    }
                 },
                 {data: 'check_mod', title: '检索模式', width: '8%'},
                 {data: 'count', title: '检索数量', width: '8%'},
@@ -58,8 +63,9 @@ $(function () {
                     title: "操作",
                     width: "8%",
                     "render": function (data, type, row, meta) {
-                        const strDelete = "<a class=\"btn btn-sm btn-danger\" href=javascript:delete_key_word(\"" + row["id"] + "\") role=\"button\" title=\"Delete\"><i class=\"fa fa-trash-o\"></i></a>";
-                        return strDelete;
+                        let strButton = "<a class=\"btn btn-sm btn-primary\" href=javascript:edit_key_word(\"" + row["id"] + "\") role=\"button\" title=\"Edit\"><i class=\"fa fa-edit\"></i></a>";
+                        strButton += "&nbsp;<a class=\"btn btn-sm btn-danger\" href=javascript:delete_key_word(\"" + row["id"] + "\") role=\"button\" title=\"Delete\"><i class=\"fa fa-trash\"></i></a>";
+                        return strButton;
                     }
                 }
             ],
@@ -119,7 +125,7 @@ $(function () {
             $("#label_cron_rule_xscan").prop("disabled", true);
         }
     })
-    load_pocfile_list(true,true,"default")
+    load_pocfile_list(true, true, "default")
     $('#select_xray_poc_type_xscan').change(function () {
         load_pocfile_list(true, false, $('#select_xray_poc_type_xscan').val())
     });
@@ -142,6 +148,16 @@ function init_dataTables_defaultParam(param) {
 //新建关键词窗口
 $("#create_key_word").click(function () {
     $('#new_key_word').modal('toggle');
+    $('#keywordActionType').html("新建关键词");
+    $('#key_word_id').val("0");
+    $('#add_key_word').val("");
+    $('#add_exclude_words').val("");
+    const date = new Date();
+    // 减一天
+    date.setDate(date.getDate() - 1);
+    $('#add_search_time').val(dateFormat("YYYY-mm-dd", date));
+    $('#add_check_mod').val("title");
+    $('#add_count').val("100");
 });
 
 //新建任务创建
@@ -149,9 +165,11 @@ $("#create_key_word_task").click(function () {
     $('#new_key_word_task').modal('toggle');
     load_pocfile_list(true, false, "default")
 });
+
 $('#select_poc_type_xscan').change(function () {
     load_pocfile_list(true, false, $('#select_poc_type_xscan').val())
 });
+
 $("#start_xscan_task").click(function () {
     const formData = new FormData();
     if ($('#select_org_id_task_xscan').val() === "") {
@@ -213,10 +231,17 @@ $("#start_xscan_task").click(function () {
 });
 
 $("#start_add_key_search_word").click(function () {
-    var formData = new FormData();
-    if ($('#select_import_org_id_task').val() == "") {
+    let formData = new FormData();
+    if ($('#select_import_org_id_task').val() === "") {
         swal('Warning', '必须选择归属组织！', 'error');
         return
+    }
+    let url;
+    if ($('#key_word_id').val() === "0") {
+        url = "/key-word-add";
+    } else {
+        url = "/key-word-update";
+        formData.append("id", $('#key_word_id').val());
     }
     formData.append("add_key_word", $('#add_key_word').val());
     formData.append("add_exclude_words", $('#add_exclude_words').val());
@@ -226,7 +251,7 @@ $("#start_add_key_search_word").click(function () {
     formData.append("add_org_id", $('#select_import_org_id_task').val());
 
     $.ajax({
-        url: '/key-word-add',
+        url: url,
         type: 'POST',
         cache: false,
         data: formData,
@@ -235,7 +260,7 @@ $("#start_add_key_search_word").click(function () {
     }).done(function (res) {
         if (res['status'] == "success") {
             swal({
-                    title: "导入成功！",
+                    title: "保存成功！",
                     text: res['msg'],
                     type: "success",
                     confirmButtonText: "确定",
@@ -244,14 +269,36 @@ $("#start_add_key_search_word").click(function () {
                 },
                 function () {
                     $('#new_key_word').modal('hide');
+                    $('#key_word_table').DataTable().draw(false);
                 });
         } else {
-            swal('Warning', '导入失败！' + res['msg'], 'error');
+            swal('Warning', '保存失败！' + res['msg'], 'error');
         }
     }).fail(function (res) {
-        swal('Warning', '导入失败！' + res['msg'], 'error');
+        swal('Warning', '保存失败！' + res['msg'], 'error');
     });
 });
+
+function edit_key_word(id) {
+    $('#new_key_word').modal('toggle');
+    $('#keywordActionType').html("编辑关键词");
+    $.post("/key-word-get",
+        {
+            "id": id,
+        }, function (data, e) {
+            if (e === "success") {
+                if (e === "success") {
+                    $('#key_word_id').val(data["id"]);
+                    $('#add_key_word').val(data["key_word"]);
+                    $('#add_exclude_words').val(data["exclude_words"]);
+                    $('#add_search_time').val(data["search_time"]);
+                    $('#add_check_mod').val(data["check_mod"]);
+                    $('#add_count').val(data["count"]);
+                    $('#select_import_org_id_task').val(data["org_id"]);
+                }
+            }
+        });
+}
 
 function delete_key_word(id) {
     swal({
@@ -274,4 +321,24 @@ function delete_key_word(id) {
                     }
                 });
         });
+}
+
+function dateFormat(fmt, date) {
+    let ret;
+    const opt = {
+        "Y+": date.getFullYear().toString(),        // 年
+        "m+": (date.getMonth() + 1).toString(),     // 月
+        "d+": date.getDate().toString(),            // 日
+        "H+": date.getHours().toString(),           // 时
+        "M+": date.getMinutes().toString(),         // 分
+        "S+": date.getSeconds().toString()          // 秒
+        // 有其他格式化字符需求可以继续添加，必须转化成字符串
+    };
+    for (let k in opt) {
+        ret = new RegExp("(" + k + ")").exec(fmt);
+        if (ret) {
+            fmt = fmt.replace(ret[1], (ret[1].length == 1) ? (opt[k]) : (opt[k].padStart(ret[1].length, "0")))
+        }
+    }
+    return fmt;
 }

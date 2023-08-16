@@ -111,6 +111,8 @@ func init() {
 	web.CtrlPost("/key-word-list", (*controllers.KeySearchController).ListAction)
 	web.CtrlPost("/key-word-add", (*controllers.KeySearchController).AddSaveAction)
 	web.CtrlPost("/key-word-del", (*controllers.KeySearchController).DeleteKeyWordAction)
+	web.CtrlPost("/key-word-get", (*controllers.KeySearchController).GetAction)
+	web.CtrlPost("/key-word-update", (*controllers.KeySearchController).UpdateAction)
 
 	web.CtrlPost("/workspace-user-list", (*controllers.WorkspaceController).UserWorkspaceAction)
 	web.CtrlPost("/workspace-user-change", (*controllers.WorkspaceController).ChangeWorkspaceSelectAction)
