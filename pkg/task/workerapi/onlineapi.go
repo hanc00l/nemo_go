@@ -169,7 +169,7 @@ func checkIgnoreResult(portScanResult *portscan.Result, domainScanResult *domain
 				for port := range ipInfo.Ports {
 					portInfo := ipInfo.Ports[port]
 					for _, attr := range portInfo.PortAttrs {
-						if attr.Source == "fofa" && attr.Tag == "title" {
+						if (attr.Source == "fofa" || attr.Source == "hunter" || attr.Source == "quake") && attr.Tag == "title" {
 							if len(attr.Content) > 100 {
 								needDelete = true
 								break
@@ -202,7 +202,7 @@ func checkIgnoreResult(portScanResult *portscan.Result, domainScanResult *domain
 
 func addGlobalFilterWord() (globalLocalFilterWords []string) {
 	// 从custom目录中读取定义的过滤词，每一个关键词一行：
-	filterFile := filepath.Join(conf.GetRootPath(), "thirdparty/custom", "fofa_filter_keyword_local.txt")
+	filterFile := filepath.Join(conf.GetRootPath(), "thirdparty/custom", "onlineapi_filter_keyword_local.txt")
 	if utils.CheckFileExist(filterFile) == false {
 		logging.RuntimeLog.Warningf("fofa filter file not exist:%s", filterFile)
 		return
@@ -216,7 +216,7 @@ func addGlobalFilterWord() (globalLocalFilterWords []string) {
 	scanner := bufio.NewScanner(inputFile)
 	for scanner.Scan() {
 		text := strings.TrimSpace(scanner.Text())
-		if text == "" {
+		if text == "" || strings.HasPrefix(text, "#") {
 			continue
 		}
 		globalLocalFilterWords = append(globalLocalFilterWords, text)

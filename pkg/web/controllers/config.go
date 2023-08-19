@@ -610,7 +610,7 @@ func getCustomFilename(customType string) (customFile string) {
 	case FOFAFilterKeyword:
 		customFile = "custom/onlineapi_filter_keyword.txt"
 	case FOFAFilterKeywordLocal:
-		customFile = "custom/fofa_filter_keyword_local.txt"
+		customFile = "custom/onlineapi_filter_keyword_local.txt"
 	}
 
 	return
