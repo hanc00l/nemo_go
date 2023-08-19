@@ -3,6 +3,7 @@ package controllers
 import (
 	"github.com/hanc00l/nemo_go/pkg/db"
 	"github.com/hanc00l/nemo_go/pkg/logging"
+	"strings"
 )
 
 type KeySearchController struct {
@@ -15,6 +16,9 @@ type keyWordInitRequestParam struct {
 	AddExcludeWords string `form:"add_exclude_words"`
 	AddCheckMod     string `form:"add_check_mod"`
 	AddCount        int    `form:"add_count"`
+	AddFOFA         bool   `form:"fofa"`
+	AddHunter       bool   `form:"hunter"`
+	AddQuake        bool   `form:"quake"`
 }
 
 type keySearchRequestParam struct {
@@ -31,6 +35,7 @@ type KeyWordList struct {
 	Index          int    `json:"index"`
 	OrgId          string `json:"org_id"`
 	KeyWord        string `json:"key_word"`
+	Engine         string `json:"engine"`
 	SearchTime     string `json:"search_time"`
 	ExcludeWords   string `json:"exclude_words"`
 	CheckMod       string `json:"check_mod"`
@@ -40,10 +45,14 @@ type KeyWordList struct {
 	UpdateDatetime string `json:"update_datetime"`
 	WorkspaceId    int    `json:"workspace"`
 }
+
 type KeyWordInfo struct {
 	Id             int    `json:"id"`
 	OrgId          int    `json:"org_id"`
 	KeyWord        string `json:"key_word"`
+	IsFofa         bool   `json:"fofa"`
+	IsHunter       bool   `json:"hunter"`
+	IsQuake        bool   `json:"quake"`
 	SearchTime     string `json:"search_time"`
 	ExcludeWords   string `json:"exclude_words"`
 	CheckMod       string `json:"check_mod"`
@@ -91,6 +100,17 @@ func (c *KeySearchController) AddSaveAction() {
 	kw.CheckMod = keyWordData.AddCheckMod
 	kw.Count = keyWordData.AddCount
 	kw.WorkspaceId = workspaceId
+	var engines []string
+	if keyWordData.AddFOFA {
+		engines = append(engines, "xfofa")
+	}
+	if keyWordData.AddHunter {
+		engines = append(engines, "xhunter")
+	}
+	if keyWordData.AddQuake {
+		engines = append(engines, "xquake")
+	}
+	kw.Engine = strings.Join(engines, ",")
 	c.MakeStatusResponse(kw.Add())
 }
 
@@ -140,6 +160,17 @@ func (c *KeySearchController) GetAction() {
 			CheckMod:     kw.CheckMod,
 			Count:        kw.Count,
 		}
+		engines := strings.Split(kw.Engine, ",")
+		for _, e := range engines {
+			switch e {
+			case "fofa", "xfofa":
+				kwi.IsFofa = true
+			case "hunter", "xhunter":
+				kwi.IsHunter = true
+			case "quake", "xquake":
+				kwi.IsQuake = true
+			}
+		}
 		c.Data["json"] = kwi
 	} else {
 		c.Data["json"] = KeyWordInfo{}
@@ -177,6 +208,17 @@ func (c *KeySearchController) UpdateAction() {
 	updateMap["exclude_words"] = kwi.AddExcludeWords
 	updateMap["check_mod"] = kwi.AddCheckMod
 	updateMap["count"] = kwi.AddCount
+	var engines []string
+	if kwi.AddFOFA {
+		engines = append(engines, "xfofa")
+	}
+	if kwi.AddHunter {
+		engines = append(engines, "xhunter")
+	}
+	if kwi.AddQuake {
+		engines = append(engines, "xquake")
+	}
+	updateMap["engine"] = strings.Join(engines, ",")
 	c.MakeStatusResponse(kw.Update(updateMap))
 }
 
@@ -241,11 +283,14 @@ func (c *KeySearchController) getKeyWordListData(req keySearchRequestParam) (res
 		r := KeyWordList{}
 		r.Id = keyWordRow.Id
 		r.KeyWord = keyWordRow.KeyWord
+		r.Engine = keyWordRow.Engine
 		r.Index = req.Start + i + 1
 		if keyWordRow.CheckMod == "title" {
-			r.CheckMod = "标题"
+			r.CheckMod = "title"
+		} else if keyWordRow.CheckMod == "body" {
+			r.CheckMod = "body"
 		} else if keyWordRow.CheckMod == "self" {
-			r.CheckMod = "自定义的语法"
+			r.CheckMod = "自定义"
 		} else {
 			r.CheckMod = "未知错误"
 		}

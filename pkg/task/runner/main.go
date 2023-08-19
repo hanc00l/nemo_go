@@ -107,7 +107,7 @@ func runMainTask(taskName, taskId, kwArgs string, workspaceId int) (err error) {
 			logging.RuntimeLog.Error(err)
 			return
 		}
-	} else if taskName == "xportscan" || taskName == "xdomainscan" || taskName == "xorgscan" || taskName == "xonlineapi" {
+	} else if taskName == "xportscan" || taskName == "xdomainscan" || taskName == "xorgscan" || taskName == "xonlineapi" || taskName == "xonlineapi_custom" {
 		var req XScanRequestParam
 		if err = json.Unmarshal([]byte(kwArgs), &req); err != nil {
 			logging.RuntimeLog.Error(err)
@@ -119,7 +119,9 @@ func runMainTask(taskName, taskId, kwArgs string, workspaceId int) (err error) {
 		case "xdomainscan":
 			taskRunId, err = StartXDomainScanTask(req, taskId, workspaceId)
 		case "xonlineapi":
-			taskRunId, err = StartXFofaKeywordTask(req, taskId, workspaceId)
+			taskRunId, err = StartXOnlineAPIKeywordTask(req, taskId, workspaceId)
+		case "xonlineapi_custom":
+			taskRunId, err = StartXOnlineAPIKeywordCustomTask(req, taskId, workspaceId)
 		case "xorgscan":
 			taskRunId, err = StartXOrgScanTask(req, taskId, workspaceId)
 		}

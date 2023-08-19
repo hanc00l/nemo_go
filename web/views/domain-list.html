@@ -584,6 +584,10 @@
                                                                                     href="#nav_organization"
                                                                                     title="对数据库中已存在的的组织资产进行XScan扫描"><strong>组织</strong></a>
                                                             </li>
+                                                            <li class="nav-item"><a class="nav-link" data-toggle="tab"
+                                                                                    href="#nav_onlineapi"
+                                                                                    title="调用在线API查询资产并进行XScan扫描"><strong>API</strong></a>
+                                                            </li>
                                                         </ul>
                                                         <div class="tab-content" id="myTabContentXscan">
                                                             <div class="tab-pane fade active show" id="nav_ipdomain">
@@ -618,6 +622,28 @@
                                                             </div>
                                                             <div class="tab-pane fade" id="nav_organization">
                                                                 <br/>
+                                                            </div>
+                                                            <div class="tab-pane fade" id="nav_onlineapi">
+                                                                <div class="form-group row ">
+                                                                    <div class="col-md-12">
+                                                                        <label for="text_target_onlineapi_xscan">
+                                                                            <b><span
+                                                                                    class="text-danger">*</span>Targets:</b>
+                                                                        </label>
+                                                                        <textarea class="form-control"
+                                                                                  id="text_target_onlineapi_xscan"
+                                                                                  rows="3"
+                                                                                  placeholder="调用在线API获取资产，需输入使用API的完整的搜索语法。比如FOFA的搜索：title=&quot;百度&quot; && icon_hash=&quot;-1588080585&quot;"></textarea>
+                                                                        <label for="select_onlineapi_engine_xscan"><b><span
+                                                                                class="text-danger">*</span>API:</b></label>
+                                                                        <select class="form-control"
+                                                                                id="select_onlineapi_engine_xscan">
+                                                                            <option value="xfofa">FOFA</option>
+                                                                            <option value="xhunter">Hunter</option>
+                                                                            <option value="xquake">Quake</option>
+                                                                        </select>
+                                                                    </div>
+                                                                </div>
                                                             </div>
                                                         </div>
                                                     </div>

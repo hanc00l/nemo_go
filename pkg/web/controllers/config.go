@@ -608,7 +608,7 @@ func getCustomFilename(customType string) (customFile string) {
 	case TaskWorkspace:
 		customFile = "custom/task_workspace.txt"
 	case FOFAFilterKeyword:
-		customFile = "custom/fofa_filter_keyword.txt"
+		customFile = "custom/onlineapi_filter_keyword.txt"
 	case FOFAFilterKeywordLocal:
 		customFile = "custom/fofa_filter_keyword_local.txt"
 	}

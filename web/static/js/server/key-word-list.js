@@ -40,7 +40,7 @@ $(function () {
                 {
                     data: "org_id",
                     title: "组织名称",
-                    width: "8%",
+                    width: "6%",
                 },
                 {
                     data: "key_word", title: "关键词", width: "20%",
@@ -52,13 +52,14 @@ $(function () {
                     data: 'search_time', title: '检索日期', width: '8%',
                 },
                 {
-                    data: 'exclude_words', title: '过滤词', width: '20%',
+                    data: 'exclude_words', title: '过滤词', width: '15%',
                     "render": function (data, type, row) {
                         return '<div style="width:100%;white-space:normal;word-wrap:break-word;word-break:break-all;">' + data + '</div>'
                     }
                 },
-                {data: 'check_mod', title: '检索模式', width: '8%'},
-                {data: 'count', title: '检索数量', width: '8%'},
+                {data: 'engine', title: 'API', width: '8%'},
+                {data: 'check_mod', title: '检索模式', width: '6%'},
+                {data: 'count', title: '检索数量', width: '6%'},
                 {
                     title: "操作",
                     width: "8%",
@@ -184,7 +185,7 @@ $("#start_xscan_task").click(function () {
             return;
         }
     }
-    formData.append("xscan_type", "xonlineapi");
+    formData.append("xscan_type", "xonlineapi_custom");
     formData.append("org_id", $('#select_org_id_task_xscan').val());
     formData.append("fingerprint", $('#checkbox_fingerpint_xscan').is(":checked"));
 
@@ -249,6 +250,9 @@ $("#start_add_key_search_word").click(function () {
     formData.append("add_check_mod", $('#add_check_mod').val());
     formData.append("add_count", $('#add_count').val());
     formData.append("add_org_id", $('#select_import_org_id_task').val());
+    formData.append("fofa", $('#checkbox_fofasearch').is(":checked"));
+    formData.append("hunter", $('#checkbox_huntersearch').is(":checked"));
+    formData.append("quake", $('#checkbox_quakesearch').is(":checked"));
 
     $.ajax({
         url: url,
@@ -295,6 +299,9 @@ function edit_key_word(id) {
                     $('#add_check_mod').val(data["check_mod"]);
                     $('#add_count').val(data["count"]);
                     $('#select_import_org_id_task').val(data["org_id"]);
+                    $('#checkbox_fofasearch').prop("checked", data['fofa']);
+                    $('#checkbox_huntersearch').prop("checked", data['hunter']);
+                    $('#checkbox_quakesearch').prop("checked", data['quake']);
                 }
             }
         });

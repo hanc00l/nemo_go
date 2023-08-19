@@ -259,7 +259,6 @@ $(function () {
 
     $("#start_xscan_task").click(function () {
         const formData = new FormData();
-        let port = $('#input_port_xscan').val();
         if (getCurrentTabIndex('#nav_tabs_xscan') === 0) {
             const target = $('#text_target_xscan').val();
             if (!target) {
@@ -271,14 +270,29 @@ $(function () {
                 return;
             }
             formData.append("xscan_type", "xportscan");
-            formData.append("target", target)
+            formData.append("target", target);
             formData.append("onlineapi", $('#checkbox_onlineapi_xscan').is(":checked"));
+            formData.append("port", $('#input_port_xscan').val());
+        } else if (getCurrentTabIndex('#nav_tabs_xscan') === 2) {
+            const target = $('#text_target_onlineapi_xscan').val();
+            if (!target) {
+                swal('Warning', '请输入查询的语法', 'error');
+                return;
+            }
+            if (target.length > 5000) {
+                swal('Warning', 'Targets长度不能超过5000', 'error');
+                return;
+            }
+            formData.append("xscan_type", "xonlineapi");
+            formData.append("target", target);
+            formData.append("onlineapi_engine", $('#select_onlineapi_engine_xscan').val())
         } else {
             if ($('#select_org_id_task_xscan').val() === "") {
                 swal('Warning', '必须选择要执行任务的组织！', 'error');
                 return
             }
             formData.append("xscan_type", "xorgipscan");
+            formData.append("port", $('#input_port_org_xscan').val());
         }
         let cron_rule = "";
         if ($('#checkbox_cron_task_xscan').is(":checked")) {
@@ -288,7 +302,7 @@ $(function () {
                 return;
             }
         }
-        formData.append("port", port);
+
         formData.append("org_id", $('#select_org_id_task_xscan').val());
         formData.append("fingerprint", $('#checkbox_fingerpint_xscan').is(":checked"));
 

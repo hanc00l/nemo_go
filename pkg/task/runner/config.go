@@ -74,6 +74,7 @@ type XScanRequestParam struct {
 	Target          string `form:"target"`
 	Port            string `form:"port"`
 	OrgId           int    `form:"org_id"`
+	OnlineAPIEngine string `form:"onlineapi_engine"`
 	IsOrgIP         bool
 	IsOrgDomain     bool
 	IsOnlineAPI     bool   `form:"onlineapi"`
@@ -90,6 +91,7 @@ type XScanRequestParam struct {
 
 type taskKeySearchParam struct {
 	KeyWord      string `json:"key_word"`
+	Engine       string `json:"engine"`
 	SearchTime   string `json:"search_time"`
 	ExcludeWords string `json:"exclude_words"`
 	CheckMod     string `json:"check_mod"`

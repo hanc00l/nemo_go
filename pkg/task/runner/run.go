@@ -1,7 +1,6 @@
 package runner
 
 import (
-	"bufio"
 	"encoding/json"
 	"fmt"
 	"github.com/hanc00l/nemo_go/pkg/conf"
@@ -15,8 +14,6 @@ import (
 	"github.com/hanc00l/nemo_go/pkg/task/serverapi"
 	"github.com/hanc00l/nemo_go/pkg/task/workerapi"
 	"github.com/hanc00l/nemo_go/pkg/utils"
-	"os"
-	"path/filepath"
 	"strings"
 	"time"
 )
@@ -228,8 +225,8 @@ func StartPocScanTask(req PocscanRequestParam, mainTaskId string, workspaceId in
 	return taskId, nil
 }
 
-// StartXFofaKeywordTask xscan任务，根据fofa关键字查询资产
-func StartXFofaKeywordTask(req XScanRequestParam, mainTaskId string, workspaceId int) (taskId string, err error) {
+// StartXOnlineAPIKeywordTask xscan任务，根据API的语法查询资产
+func StartXOnlineAPIKeywordTask(req XScanRequestParam, mainTaskId string, workspaceId int) (taskId string, err error) {
 	config := workerapi.XScanConfig{
 		OrgId:         &req.OrgId,
 		IsFingerprint: req.IsFingerprint,
@@ -246,16 +243,67 @@ func StartXFofaKeywordTask(req XScanRequestParam, mainTaskId string, workspaceId
 		config.OrgId = nil
 	}
 	// 生成查询语法
-	keywords := searchKeyword(req)
-	for keyword, count := range keywords {
-		configRun := config
-		configRun.FofaKeyword = keyword
-		configRun.FofaSearchLimit = count
+	//keywords := makeSearchTaskConfig(req)
+	switch req.OnlineAPIEngine {
+	case "xfofa":
+		config.IsFofa = true
+	case "xhunter":
+		config.IsHunter = true
+	case "xquake":
+		config.IsQuake = true
+	}
+	config.OnlineAPIKeyword = req.Target
+	config.OnlineAPISearchLimit = conf.GlobalWorkerConfig().API.SearchLimitCount
+	configJSONRun, _ := json.Marshal(config)
+	taskId, err = serverapi.NewRunTask(req.OnlineAPIEngine, string(configJSONRun), mainTaskId, "")
+	if err != nil {
+		logging.RuntimeLog.Errorf("start xonlinekeyword task fail:%s", err.Error())
+		return "", err
+	}
+
+	return
+}
+
+// StartXOnlineAPIKeywordCustomTask xscan任务，根据API的语法查询资产
+func StartXOnlineAPIKeywordCustomTask(req XScanRequestParam, mainTaskId string, workspaceId int) (taskId string, err error) {
+	config := workerapi.XScanConfig{
+		OrgId:         &req.OrgId,
+		IsFingerprint: req.IsFingerprint,
+		IsXrayPoc:     req.IsXrayPocscan,
+		XrayPocFile:   req.XrayPocFile,
+		IsNucleiPoc:   req.IsNucleiPocscan,
+		NucleiPocFile: req.NucleiPocFile,
+		IsGobyPoc:     req.IsGobyPocscan,
+		WorkspaceId:   workspaceId,
+	}
+	// config.OrgId 为int，默认为0
+	// db.Organization.OrgId为指针，默认nil
+	if *config.OrgId == 0 {
+		config.OrgId = nil
+	}
+	configTaskRuns := makeSearchTaskConfig(config)
+	for _, configRun := range configTaskRuns {
 		configJSONRun, _ := json.Marshal(configRun)
-		taskId, err = serverapi.NewRunTask("xfofa", string(configJSONRun), mainTaskId, "")
-		if err != nil {
-			logging.RuntimeLog.Errorf("start xfofakeyword task fail:%s", err.Error())
-			return "", err
+		if configRun.IsFofa {
+			taskId, err = serverapi.NewRunTask("xfofa", string(configJSONRun), mainTaskId, "")
+			if err != nil {
+				logging.RuntimeLog.Errorf("start xfofa task fail:%s", err.Error())
+				return "", err
+			}
+		}
+		if configRun.IsHunter {
+			taskId, err = serverapi.NewRunTask("xhunter", string(configJSONRun), mainTaskId, "")
+			if err != nil {
+				logging.RuntimeLog.Errorf("start xhunter task fail:%s", err.Error())
+				return "", err
+			}
+		}
+		if configRun.IsQuake {
+			taskId, err = serverapi.NewRunTask("xquake", string(configJSONRun), mainTaskId, "")
+			if err != nil {
+				logging.RuntimeLog.Errorf("start xquake task fail:%s", err.Error())
+				return "", err
+			}
 		}
 	}
 	return
@@ -341,7 +389,7 @@ func StartXDomainScanTask(req XScanRequestParam, mainTaskId string, workspaceId 
 		if req.IsOnlineAPI {
 			if conf.GlobalWorkerConfig().OnlineAPI.IsFofa {
 				configRun := config
-				configRun.FofaTarget = target
+				configRun.OnlineAPITarget = target
 				configRun.IsFofa = true
 				configJSONRun, _ := json.Marshal(configRun)
 				taskId, err = serverapi.NewRunTask("xfofa", string(configJSONRun), mainTaskId, "")
@@ -352,7 +400,7 @@ func StartXDomainScanTask(req XScanRequestParam, mainTaskId string, workspaceId 
 			}
 			if conf.GlobalWorkerConfig().OnlineAPI.IsHunter {
 				configRun := config
-				configRun.FofaTarget = target
+				configRun.OnlineAPITarget = target
 				configRun.IsHunter = true
 				configJSONRun, _ := json.Marshal(configRun)
 				taskId, err = serverapi.NewRunTask("xhunter", string(configJSONRun), mainTaskId, "")
@@ -363,7 +411,7 @@ func StartXDomainScanTask(req XScanRequestParam, mainTaskId string, workspaceId 
 			}
 			if conf.GlobalWorkerConfig().OnlineAPI.IsQuake {
 				configRun := config
-				configRun.FofaTarget = target
+				configRun.OnlineAPITarget = target
 				configRun.IsQuake = true
 				configJSONRun, _ := json.Marshal(configRun)
 				taskId, err = serverapi.NewRunTask("xquake", string(configJSONRun), mainTaskId, "")
@@ -418,7 +466,7 @@ func StartXPortScanTask(req XScanRequestParam, mainTaskId string, workspaceId in
 		if req.IsOnlineAPI {
 			if conf.GlobalWorkerConfig().OnlineAPI.IsFofa {
 				configRunAPI := config
-				configRunAPI.FofaTarget = target
+				configRunAPI.OnlineAPITarget = target
 				configRunAPI.IsFofa = true
 				configJSONRun, _ := json.Marshal(configRunAPI)
 				taskId, err = serverapi.NewRunTask("xfofa", string(configJSONRun), mainTaskId, "")
@@ -429,7 +477,7 @@ func StartXPortScanTask(req XScanRequestParam, mainTaskId string, workspaceId in
 			}
 			if conf.GlobalWorkerConfig().OnlineAPI.IsHunter {
 				configRunAPI := config
-				configRunAPI.FofaTarget = target
+				configRunAPI.OnlineAPITarget = target
 				configRunAPI.IsHunter = true
 				configJSONRun, _ := json.Marshal(configRunAPI)
 				taskId, err = serverapi.NewRunTask("xhunter", string(configJSONRun), mainTaskId, "")
@@ -440,7 +488,7 @@ func StartXPortScanTask(req XScanRequestParam, mainTaskId string, workspaceId in
 			}
 			if conf.GlobalWorkerConfig().OnlineAPI.IsQuake {
 				configRunAPI := config
-				configRunAPI.FofaTarget = target
+				configRunAPI.OnlineAPITarget = target
 				configRunAPI.IsQuake = true
 				configJSONRun, _ := json.Marshal(configRunAPI)
 				taskId, err = serverapi.NewRunTask("xquake", string(configJSONRun), mainTaskId, "")
@@ -791,13 +839,13 @@ func ParseTargetFromKwArgs(taskName, args string) (target string) {
 		DomainResult []string
 	}
 	type XScanConfig struct {
-		OrgId        *int                `json:"orgid"`
-		FofaTarget   string              `json:"fofatarget"`
-		FofaKeyword  string              `json:"fofaKeyword"`
-		IPPort       map[string][]int    `json:"ipport"`
-		IPPortString map[string]string   `json:"ipportstring"`
-		Domain       map[string]struct{} `json:"domain"`
-		Target       string              `json:"target"`
+		OrgId            *int                `json:"orgid"`
+		OnlineAPITarget  string              `json:"onlineapiTarget"`
+		OnlineAPIKeyword string              `json:"onlineapiKeyword"`
+		IPPort           map[string][]int    `json:"ipport"`
+		IPPortString     map[string]string   `json:"ipportstring"`
+		Domain           map[string]struct{} `json:"domain"`
+		Target           string              `json:"target"`
 	}
 	if taskName == "fingerprint" {
 		var t FingerTargetStrut
@@ -826,11 +874,11 @@ func ParseTargetFromKwArgs(taskName, args string) (target string) {
 			target = args
 		} else {
 			var allTarget []string
-			if len(t.FofaKeyword) > 0 {
-				allTarget = append(allTarget, t.FofaKeyword)
+			if len(t.OnlineAPITarget) > 0 {
+				allTarget = append(allTarget, t.OnlineAPITarget)
 			}
-			if len(t.FofaTarget) > 0 {
-				allTarget = append(allTarget, t.FofaTarget)
+			if len(t.OnlineAPIKeyword) > 0 {
+				allTarget = append(allTarget, t.OnlineAPIKeyword)
 			}
 			if len(t.IPPort) > 0 {
 				for tip := range t.IPPort {
@@ -850,7 +898,7 @@ func ParseTargetFromKwArgs(taskName, args string) (target string) {
 			if len(t.Target) > 0 {
 				allTarget = append(allTarget, t.Target)
 			}
-			if taskName == "xorgscan" {
+			if taskName == "xorgscan" || taskName == "xonlineapi_custom" {
 				orgDb := db.Organization{Id: *t.OrgId}
 				if orgDb.Get() {
 					allTarget = append(allTarget, orgDb.OrgName)
@@ -874,106 +922,82 @@ func ParseTargetFromKwArgs(taskName, args string) (target string) {
 	return
 }
 
-func addGlobalFilterWord(rule string) string {
-	// 从custom目录中读取定义的过滤词，每一个关键词一行：
-	filterFile := filepath.Join(conf.GetRootPath(), "thirdparty/custom", "fofa_filter_keyword.txt")
-	if utils.CheckFileExist(filterFile) == false {
-		logging.RuntimeLog.Warningf("fofa filter file not exist:%s", filterFile)
-		return rule
-	}
-	inputFile, err := os.Open(filterFile)
-	if err != nil {
-		logging.RuntimeLog.Warningf("Could not read fofa filter file: %s", err)
-		return rule
-	}
-	defer inputFile.Close()
-	scanner := bufio.NewScanner(inputFile)
-	for scanner.Scan() {
-		text := strings.TrimSpace(scanner.Text())
-		if text == "" {
-			continue
-		}
-		rule = rule + "&& body !=\"" + text + "\""
-	}
-	//globalFilterWords := strings.Split(GlobalFilterWords, "||")
-	//if len(globalFilterWords) > 0 {
-	//	for _, globalFilterWord := range globalFilterWords {
-	//		rule = rule + "&& body !=\"" + globalFilterWord + "\""
-	//	}
-	//}
-	return rule
-}
-
-func addFoFaSearchRule(searchkey taskKeySearchParam) []string {
-	defaultCheckMod := "title"
-	var rules []string
-
-	if searchkey.CheckMod == "" {
-		searchkey.CheckMod = defaultCheckMod
-	}
-
-	CheckMods := strings.Split(searchkey.CheckMod, "&&")
-	for _, checkMod := range CheckMods {
-		rule := ""
-		if checkMod != "" {
-			if checkMod == "self" {
-				rule = searchkey.KeyWord
-			} else {
-				rule = searchkey.CheckMod + "=\"" + searchkey.KeyWord + "\""
-			}
-		}
-		//添加反向匹配词
-		if searchkey.ExcludeWords != "" {
-			exclude_words := strings.Split(searchkey.ExcludeWords, "||")
-			for _, exclude_word := range exclude_words {
-				rule += " && body!=\"" + exclude_word + "\""
-			}
-		}
-		//是否大陆地区
-		if searchkey.IsCN {
-			rule += "&& country=\"CN\" && region!=\"HK\" && region!=\"TW\"  && region!=\"MO\""
-		}
-		rule = addGlobalFilterWord(rule)
-
-		//判断检索日期
-		if searchkey.SearchTime == "" {
-
-		} else if searchkey.SearchTime == time.Now().Format("2006-01-02") {
-			break
-		} else {
-			rule += " && after=\"" + searchkey.SearchTime + "\""
-		}
-		rules = append(rules, rule)
-	}
-
-	return rules
-}
-
-func searchKeyword(req XScanRequestParam) (fofaKeyword map[string]int) {
-	fofaKeyword = make(map[string]int)
+func makeSearchTaskConfig(config workerapi.XScanConfig) (configs []workerapi.XScanConfig) {
 	keyWords := db.KeyWord{}
 	//传入org_id
 	searchMap := make(map[string]interface{})
-	if req.OrgId > 0 {
-		searchMap["org_id"] = req.OrgId
+	if *config.OrgId > 0 {
+		searchMap["org_id"] = *config.OrgId
 	}
 	results, _ := keyWords.Gets(searchMap, 0, 99999)
-	//fofa检索词拼接
-	for _, searchkey := range results {
-		taskSearchKey := taskKeySearchParam{}
-		taskSearchKey.KeyWord = searchkey.KeyWord
-		taskSearchKey.ExcludeWords = searchkey.ExcludeWords
-		taskSearchKey.ExcludeWords = searchkey.ExcludeWords
-		taskSearchKey.SearchTime = searchkey.SearchTime
-		taskSearchKey.CheckMod = searchkey.CheckMod
-		rules := addFoFaSearchRule(taskSearchKey)
-		for _, rule := range rules {
-			fofaKeyword[rule] = searchkey.Count
+	//检索拼接：允许同时多个API接口，检索模式（title，body及self）限一种
+	for _, row := range results {
+		//判断日期
+		if len(row.SearchTime) == 0 || row.SearchTime == time.Now().Format("2006-01-02") {
+			continue
 		}
-		kw := db.KeyWord{Id: searchkey.Id}
+		//更新日期戳
+		kw := db.KeyWord{Id: row.Id}
 		updateMap := make(map[string]interface{})
 		updateMap["search_time"] = time.Now().Format("2006-01-02")
 		kw.Update(updateMap)
+		// 根据API生成任务
+		engines := strings.Split(row.Engine, ",")
+		for _, api := range engines {
+			var engineInterface onlineapi.Engine
+			configRun := config
+			if api == "xfofa" {
+				configRun.IsFofa = true
+				engineInterface = new(onlineapi.FOFA)
+			} else if api == "xhunter" {
+				configRun.IsHunter = true
+				engineInterface = new(onlineapi.Hunter)
+			} else if api == "xquake" {
+				configRun.IsQuake = true
+				engineInterface = new(onlineapi.Quake)
+			}
+			configRun.OnlineAPIKeyword = makeSearchKeyword(engineInterface, api, row.CheckMod, row.KeyWord, row.ExcludeWords, row.SearchTime)
+			configRun.OnlineAPISearchLimit = row.Count
+			configs = append(configs, configRun)
+		}
 	}
 	return
+}
+
+func makeSearchKeyword(engine onlineapi.Engine, engineName, checkMod, keyword, excludeWord, searchTime string) string {
+	syntaxMap := engine.GetSyntaxMap()
+	//关键字
+	var result []string
+	if checkMod == "self" {
+		result = append(result, fmt.Sprintf("(%s)", keyword))
+	} else {
+		var cm onlineapi.SyntaxType
+		switch checkMod {
+		case "title":
+			cm = onlineapi.Title
+		case "body":
+			cm = onlineapi.Body
+		default:
+			cm = onlineapi.Title
+		}
+		var rule []string
+		for _, kw := range strings.Split(keyword, "||") {
+			rule = append(rule, engine.MakeSearchSyntax(syntaxMap, onlineapi.Equal, cm, kw))
+		}
+		result = append(result, fmt.Sprintf("(%s)", strings.Join(rule, fmt.Sprintf(" %s ", syntaxMap[onlineapi.Or]))))
+	}
+	//反向关键字
+	if len(excludeWord) > 0 {
+		var rule []string
+		for _, kw := range strings.Split(excludeWord, "||") {
+			rule = append(rule, engine.MakeSearchSyntax(syntaxMap, onlineapi.Not, onlineapi.Body, kw))
+		}
+		result = append(result, fmt.Sprintf("(%s)", strings.Join(rule, fmt.Sprintf(" %s ", syntaxMap[onlineapi.And]))))
+	}
+	//日期，目前只有FOFA，其它的还没查到资料后面再完善
+	if engineName == "xfofa" {
+		result = append(result, fmt.Sprintf("after=\"%s\"", searchTime))
+	}
+
+	return strings.Join(result, fmt.Sprintf(" %s ", syntaxMap[onlineapi.And]))
 }

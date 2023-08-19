@@ -9,6 +9,7 @@ type KeyWord struct {
 	Id             int       `gorm:"primaryKey"`
 	OrgId          int       `gorm:"column:org_id"`
 	KeyWord        string    `gorm:"column:key_word"`
+	Engine         string    `gorm:"column:engine"`
 	SearchTime     string    `gorm:"column:search_time"`
 	ExcludeWords   string    `gorm:"column:exclude_words"`
 	CheckMod       string    `gorm:"column:check_mod"`
@@ -79,6 +80,8 @@ func (t *KeyWord) makeWhere(searchMap map[string]interface{}) *gorm.DB {
 	for column, value := range searchMap {
 		switch column {
 		case "key_word":
+			db = makeLike(value, column, db)
+		case "engine":
 			db = makeLike(value, column, db)
 		case "search_time":
 			db = makeLike(value, column, db)

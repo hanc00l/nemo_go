@@ -1,6 +1,7 @@
 package onlineapi
 
 import (
+	"bufio"
 	"errors"
 	"fmt"
 	"github.com/hanc00l/nemo_go/pkg/conf"
@@ -9,6 +10,8 @@ import (
 	"github.com/hanc00l/nemo_go/pkg/task/domainscan"
 	"github.com/hanc00l/nemo_go/pkg/task/portscan"
 	"math/rand"
+	"os"
+	"path/filepath"
 	"strings"
 	"time"
 )
@@ -63,6 +66,7 @@ func (s *OnlineSearch) Do() {
 		logging.CLILog.Warningf("no %s api key,exit search", s.apiName)
 		return
 	}
+	filterKeyword := s.loadFilterKeyword()
 	btc := custom.NewBlackTargetCheck(custom.CheckAll)
 	for _, line := range strings.Split(s.Config.Target, ",") {
 		domain := strings.TrimSpace(line)
@@ -73,14 +77,14 @@ func (s *OnlineSearch) Do() {
 			logging.RuntimeLog.Warningf("%s is in blacklist,skip...", domain)
 			continue
 		}
-		s.Query(domain)
+		s.Query(domain, filterKeyword)
 	}
 	s.processResult()
 }
 
 // Query 查询一个domain
-func (s *OnlineSearch) Query(domain string) {
-	query := s.searchEngine.GetQueryString(domain, s.Config)
+func (s *OnlineSearch) Query(domain string, filterKeyword map[string]struct{}) {
+	query := s.searchEngine.GetQueryString(domain, s.Config, filterKeyword)
 	pageResult, sizeTotal, err := s.retriedQuery(query, 1, s.Config.SearchPageSize)
 	if err != nil {
 		logging.RuntimeLog.Error(err)
@@ -202,4 +206,29 @@ func (s *OnlineSearch) processResult() {
 	}
 
 	domainscan.FilterDomainHasTooMuchIP(&s.DomainResult)
+}
+
+// loadFilterKeyword 从文件中加载需要过滤的标题关键词
+func (s *OnlineSearch) loadFilterKeyword() (filterKeyword map[string]struct{}) {
+	filterKeyword = make(map[string]struct{})
+	inputFile, err := os.Open(filepath.Join(conf.GetRootPath(), "thirdparty/custom/onlineapi_filter_keyword.txt"))
+	if err != nil {
+		logging.RuntimeLog.Error(err)
+		logging.CLILog.Error(err)
+		return
+	}
+	defer inputFile.Close()
+
+	scanner := bufio.NewScanner(inputFile)
+	for scanner.Scan() {
+		text := strings.ToLower(scanner.Text())
+		if text == "" || strings.HasPrefix(text, "#") {
+			continue
+		}
+		if _, ok := filterKeyword[text]; !ok {
+			filterKeyword[text] = struct{}{}
+		}
+	}
+
+	return
 }

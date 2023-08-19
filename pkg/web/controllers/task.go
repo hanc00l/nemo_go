@@ -651,6 +651,8 @@ func (c *TaskController) StartXScanTaskAction() {
 			}
 		} else if req.XScanType == "xonlineapi" {
 			taskName = "xonlineapi"
+		} else if req.XScanType == "xonlineapi_custom" {
+			taskName = "xonlineapi_custom"
 		} else {
 			c.FailedStatus("invalide xscan type")
 			return

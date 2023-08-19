@@ -22,28 +22,51 @@ import (
 type FOFA struct {
 }
 
-func (f *FOFA) GetQueryString(domain string, config OnlineAPIConfig) (query string) {
+func (f *FOFA) MakeSearchSyntax(syntax map[SyntaxType]string, condition SyntaxType, checkMod SyntaxType, value string) string {
+	// title="百度"
+	return fmt.Sprintf("%s%s\"%s\"", syntax[checkMod], syntax[condition], value)
+}
+
+func (f *FOFA) GetSyntaxMap() (syntax map[SyntaxType]string) {
+	syntax = make(map[SyntaxType]string)
+	syntax[And] = "&&"
+	syntax[Or] = "||"
+	syntax[Equal] = "="
+	syntax[Not] = "!="
+	syntax[After] = "after"
+	syntax[Title] = "title"
+	syntax[Body] = "body"
+
+	return
+}
+
+func (f *FOFA) GetQueryString(domain string, config OnlineAPIConfig, filterKeyword map[string]struct{}) (query string) {
 	if config.SearchByKeyWord {
 		query = config.Target
 	} else {
 		if utils.CheckIPV4(domain) || utils.CheckIPV4Subnet(domain) {
 			query = fmt.Sprintf("ip=\"%s\"", domain)
 		} else {
-			// cert.subject相比更精准，但信息量更少；cert="xxx.com"干扰太多，暂时不用（没想法好优的方案）
-			// 在域名前加.减少模糊匹配带来的部份干扰
-			//domainCert := domain
-			//if strings.HasPrefix(domain, ".") == false {
-			//	domainCert = "." + domain
-			//}
-			//query = fmt.Sprintf("domain=\"%s\" || cert=\"%s\" || cert.subject=\"%s\"", domain, domainCert, domainCert)
 			query = fmt.Sprintf("domain=\"%s\"", domain)
 		}
 	}
+	if words := f.getFilterTitleKeyword(filterKeyword); len(words) > 0 {
+		query = fmt.Sprintf("(%s) && (%s)", query, filterKeyword)
+	}
 	if config.IsIgnoreOutofChina {
-		query = fmt.Sprintf("(%s) && country=\"CN\" && region!=\"HK\" && region!=\"TW\"  && region!=\"MO\"", query)
+		query = fmt.Sprintf("(%s) && (country=\"CN\" && region!=\"HK\" && region!=\"TW\"  && region!=\"MO\")", query)
 	}
 
 	return
+}
+
+func (f *FOFA) getFilterTitleKeyword(filterKeyword map[string]struct{}) string {
+	var words []string
+	for k := range filterKeyword {
+		words = append(words, fmt.Sprintf("body!=\"%s\"", k))
+	}
+
+	return strings.Join(words, " && ")
 }
 
 func (f *FOFA) Run(query string, apiKey string, pageIndex int, pageSize int, config OnlineAPIConfig) (pageResult []onlineSearchResult, sizeTotal int, err error) {

@@ -24,9 +24,9 @@ type XScanConfig struct {
 	IsOrgDomain bool   `json:"orgdomain,omitempty"` //XOrganizaiton：domain资产
 	OrgIPPort   string `json:"orgport,omitempty"`   // Org扫描时，是否指定IP的端口
 	// onlineapi
-	FofaTarget      string `json:"fofatarget,omitempty"`
-	FofaKeyword     string `json:"fofaKeyword,omitempty"`
-	FofaSearchLimit int    `json:"fofaSearchLimit,omitempty"`
+	OnlineAPITarget      string `json:"onlineapiTarget,omitempty"`
+	OnlineAPIKeyword     string `json:"onlineapiKeyword,omitempty"`
+	OnlineAPISearchLimit int    `json:"onlineapiSearchLimit,omitempty"`
 	// xonlineapi 任务需要区分是哪一个api
 	IsFofa   bool `json:"fofa,omitempty"`
 	IsHunter bool `json:"hunter,omitempty"`
@@ -531,22 +531,22 @@ func (x *XScan) OnlineAPISearch(taskId string, mainTaskId string) (result string
 	//fofa任务支持两种模式：
 	//一种是关键词，需设置SearchByKeyWord为true，只支持fofa
 	//另一种是ip/domain，同时支持fofa、quake、hunter
-	if len(x.Config.FofaKeyword) > 0 {
+	if len(x.Config.OnlineAPIKeyword) > 0 {
 		config.SearchByKeyWord = true
-		config.Target = x.Config.FofaKeyword
-		config.SearchLimitCount = x.Config.FofaSearchLimit
+		config.Target = x.Config.OnlineAPIKeyword
+		config.SearchLimitCount = x.Config.OnlineAPISearchLimit
+		//x.ResultIP, x.ResultDomain, result, err = doOnlineAPIAndSave(taskId, mainTaskId, x.Config.On, config)
+	} else if len(x.Config.OnlineAPITarget) > 0 {
+		config.Target = x.Config.OnlineAPITarget
+	}
+	if x.Config.IsFofa {
 		x.ResultIP, x.ResultDomain, result, err = doOnlineAPIAndSave(taskId, mainTaskId, "fofa", config)
-	} else if len(x.Config.FofaTarget) > 0 {
-		config.Target = x.Config.FofaTarget
-		if x.Config.IsFofa {
-			x.ResultIP, x.ResultDomain, result, err = doOnlineAPIAndSave(taskId, mainTaskId, "fofa", config)
-		}
-		if x.Config.IsQuake {
-			x.ResultIP, x.ResultDomain, result, err = doOnlineAPIAndSave(taskId, mainTaskId, "quake", config)
-		}
-		if x.Config.IsHunter {
-			x.ResultIP, x.ResultDomain, result, err = doOnlineAPIAndSave(taskId, mainTaskId, "hunter", config)
-		}
+	}
+	if x.Config.IsQuake {
+		x.ResultIP, x.ResultDomain, result, err = doOnlineAPIAndSave(taskId, mainTaskId, "quake", config)
+	}
+	if x.Config.IsHunter {
+		x.ResultIP, x.ResultDomain, result, err = doOnlineAPIAndSave(taskId, mainTaskId, "hunter", config)
 	}
 	return
 }

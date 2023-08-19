@@ -44,21 +44,45 @@ type HunterServiceInfo struct {
 	} `json:"data"`
 }
 
-func (h *Hunter) GetQueryString(domain string, config OnlineAPIConfig) (query string) {
+func (h *Hunter) MakeSearchSyntax(syntax map[SyntaxType]string, condition SyntaxType, checkMod SyntaxType, value string) string {
+	return fmt.Sprintf("%s%s\"%s\"", syntax[checkMod], syntax[condition], value)
+}
+
+func (h *Hunter) GetSyntaxMap() (syntax map[SyntaxType]string) {
+	syntax = make(map[SyntaxType]string)
+	syntax[And] = "and"
+	syntax[Or] = "or"
+	syntax[Equal] = "="
+	syntax[Not] = "!="
+	syntax[After] = "(NOT SUPPORT YET)"
+	syntax[Title] = "web.title"
+	syntax[Body] = "web.body"
+
+	return
+}
+
+func (h *Hunter) GetQueryString(domain string, config OnlineAPIConfig, filterKeyword map[string]struct{}) (query string) {
 	if utils.CheckIPV4(domain) || utils.CheckIPV4Subnet(domain) {
 		query = fmt.Sprintf("ip=\"%s\"", domain)
 	} else {
-		//domainCert := domain
-		//if strings.HasPrefix(domain, ".") == false {
-		//	domainCert = "." + domain
-		//}
-		//query = fmt.Sprintf("domain=\"%s\" or cert=\"%s\" or  cert.subject=\"%s\"", domain, domainCert, domainCert)
 		query = fmt.Sprintf("domain=\"%s\"", domain)
 	}
+	if words := h.getFilterTitleKeyword(filterKeyword); len(words) > 0 {
+		query = fmt.Sprintf("(%s) and (%s)", query, words)
+	}
 	if config.IsIgnoreOutofChina {
-		query = fmt.Sprintf("(%s) and ip.country=\"CN\" and ip.province!=\"香港\"", query)
+		query = fmt.Sprintf("(%s) and (ip.country=\"CN\" and ip.province!=\"香港\")", query)
 	}
 	return
+}
+
+func (h *Hunter) getFilterTitleKeyword(filterKeyword map[string]struct{}) string {
+	var words []string
+	for k := range filterKeyword {
+		words = append(words, fmt.Sprintf("web.body!=\"%s\"", k))
+	}
+
+	return strings.Join(words, " and ")
 }
 
 func (h *Hunter) Run(query string, apiKey string, pageIndex int, pageSize int, config OnlineAPIConfig) (pageResult []onlineSearchResult, sizeTotal int, err error) {

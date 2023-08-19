@@ -16,14 +16,20 @@ import (
 type ZeroZone struct {
 }
 
-func (z *ZeroZone) GetQueryString(domain string, config OnlineAPIConfig) (query string) {
+func (*ZeroZone) GetQueryString(domain string, config OnlineAPIConfig, filterKeyword map[string]struct{}) (query string) {
 	return
 }
 
-func (z *ZeroZone) Run(domain string, apiKey string, pageIndex int, pageSize int, config OnlineAPIConfig) (pageResult []onlineSearchResult, sizeTotal int, err error) {
+func (*ZeroZone) Run(domain string, apiKey string, pageIndex int, pageSize int, config OnlineAPIConfig) (pageResult []onlineSearchResult, sizeTotal int, err error) {
 	return
 }
 
+func (*ZeroZone) MakeSearchSyntax(syntax map[SyntaxType]string, condition SyntaxType, checkMod SyntaxType, value string) string {
+	return ""
+}
+func (*ZeroZone) GetSyntaxMap() (syntax map[SyntaxType]string) {
+	return
+}
 func (z *ZeroZone) ParseContentResult(content []byte) (ipResult portscan.Result, domainResult domainscan.Result) {
 	ipResult.IPResult = make(map[string]*portscan.IPResult)
 	domainResult.DomainResult = make(map[string]*domainscan.DomainResult)

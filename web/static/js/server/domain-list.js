@@ -178,7 +178,20 @@ $(function () {
             formData.append("xscan_type", "xdomainscan");
             formData.append("target", target)
             formData.append("onlineapi", $('#checkbox_onlineapi_xscan').is(":checked"));
-        } else {
+        } else if (getCurrentTabIndex('#nav_tabs_xscan') === 2) {
+            const target = $('#text_target_onlineapi_xscan').val();
+            if (!target) {
+                swal('Warning', '请输入查询的语法', 'error');
+                return;
+            }
+            if (target.length > 5000) {
+                swal('Warning', 'Targets长度不能超过5000', 'error');
+                return;
+            }
+            formData.append("xscan_type", "xonlineapi");
+            formData.append("target", target);
+            formData.append("onlineapi_engine", $('#select_onlineapi_engine_xscan').val())
+        }else {
             if ($('#select_org_id_task_xscan').val() === "") {
                 swal('Warning', '必须选择要执行任务的组织！', 'error');
                 return

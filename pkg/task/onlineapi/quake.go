@@ -106,21 +106,50 @@ type QuakeServiceInfo struct {
 	} `json:"meta"`
 }
 
-func (q *Quake) GetQueryString(domain string, config OnlineAPIConfig) (query string) {
+func (q *Quake) MakeSearchSyntax(syntax map[SyntaxType]string, condition SyntaxType, checkMod SyntaxType, value string) string {
+	if condition == Not {
+		// NOT title:"百度"
+		return fmt.Sprintf("%s %s:\"%s\"", syntax[condition], syntax[checkMod], value)
+	}
+	// body:"百度"
+	return fmt.Sprintf("%s%s\"%s\"", syntax[checkMod], syntax[condition], value)
+}
+
+func (q *Quake) GetSyntaxMap() (syntax map[SyntaxType]string) {
+	syntax = make(map[SyntaxType]string)
+	syntax[And] = "AND"
+	syntax[Or] = "OR"
+	syntax[Equal] = ":"
+	syntax[Not] = "NOT"
+	syntax[After] = "(NOT SUPPORT YET)"
+	syntax[Title] = "title"
+	syntax[Body] = "body"
+
+	return
+}
+
+func (q *Quake) GetQueryString(domain string, config OnlineAPIConfig, filterKeyword map[string]struct{}) (query string) {
 	if utils.CheckIPV4(domain) || utils.CheckIPV4Subnet(domain) {
 		query = fmt.Sprintf("ip:\"%s\"", domain)
 	} else {
-		//domainCert := domain
-		//if strings.HasPrefix(domain, ".") == false {
-		//	domainCert = "." + domain
-		//}
-		//query = fmt.Sprintf("domain:\"%s\" OR cert:\"%s\"", domain, domainCert)
 		query = fmt.Sprintf("domain:\"%s\"", domain)
+	}
+	if words := q.getFilterTitleKeyword(filterKeyword); len(words) > 0 {
+		query = fmt.Sprintf("(%s) AND (%s)", query, filterKeyword)
 	}
 	if config.IsIgnoreOutofChina {
 		query = fmt.Sprintf("(%s) AND country:\"CN\" AND NOT province:\"Hongkong\"", query)
 	}
 	return
+}
+
+func (q *Quake) getFilterTitleKeyword(filterKeyword map[string]struct{}) string {
+	var words []string
+	for k := range filterKeyword {
+		words = append(words, fmt.Sprintf("NOT body:\"%s\"", k))
+	}
+
+	return strings.Join(words, " AND ")
 }
 
 func (q *Quake) Run(query string, apiKey string, pageIndex int, pageSize int, config OnlineAPIConfig) (pageResult []onlineSearchResult, sizeTotal int, err error) {
