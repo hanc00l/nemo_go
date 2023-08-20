@@ -24,6 +24,7 @@ type XScanConfig struct {
 	IsOrgDomain bool   `json:"orgdomain,omitempty"` //XOrganizaiton：domain资产
 	OrgIPPort   string `json:"orgport,omitempty"`   // Org扫描时，是否指定IP的端口
 	// onlineapi
+	OnlineAPIStartTime   string `json:"onlineapiStartTime,omitempty"`
 	OnlineAPITarget      string `json:"onlineapiTarget,omitempty"`
 	OnlineAPIKeyword     string `json:"onlineapiKeyword,omitempty"`
 	OnlineAPISearchLimit int    `json:"onlineapiSearchLimit,omitempty"`
@@ -515,8 +516,9 @@ func (x *XScan) doGobyScan(swg *sizedwaitgroup.SizedWaitGroup, config pocscan.Co
 func (x *XScan) OnlineAPISearch(taskId string, mainTaskId string) (result string, err error) {
 	conf.GlobalWorkerConfig().ReloadConfig()
 	config := onlineapi.OnlineAPIConfig{
-		OrgId:        x.Config.OrgId,
-		IsIPLocation: true,
+		OrgId:           x.Config.OrgId,
+		IsIPLocation:    true,
+		SearchStartTime: x.Config.OnlineAPIStartTime,
 		// 从配置文件默认参数获取：
 		IsIgnoreCDN:        conf.GlobalWorkerConfig().Domainscan.IsIgnoreCDN,
 		IsIgnoreOutofChina: conf.GlobalWorkerConfig().Domainscan.IsIgnoreOutofChina,

@@ -27,6 +27,7 @@ type quakePostData struct {
 	IgnoreCache bool     `json:"ignore_cache"`
 	ShortCuts   []string `json:"shortcuts"`
 	Include     []string `json:"include"`
+	StartTime   string   `json:"start_time,omitempty"`
 }
 
 // QuakeServiceInfo Quake查询返回数据 from https://github.com/YetClass/QuakeAPI
@@ -129,13 +130,17 @@ func (q *Quake) GetSyntaxMap() (syntax map[SyntaxType]string) {
 }
 
 func (q *Quake) GetQueryString(domain string, config OnlineAPIConfig, filterKeyword map[string]struct{}) (query string) {
-	if utils.CheckIPV4(domain) || utils.CheckIPV4Subnet(domain) {
-		query = fmt.Sprintf("ip:\"%s\"", domain)
+	if config.SearchByKeyWord {
+		query = config.Target
 	} else {
-		query = fmt.Sprintf("domain:\"%s\"", domain)
+		if utils.CheckIPV4(domain) || utils.CheckIPV4Subnet(domain) {
+			query = fmt.Sprintf("ip:\"%s\"", domain)
+		} else {
+			query = fmt.Sprintf("domain:\"%s\"", domain)
+		}
 	}
 	if words := q.getFilterTitleKeyword(filterKeyword); len(words) > 0 {
-		query = fmt.Sprintf("(%s) AND (%s)", query, filterKeyword)
+		query = fmt.Sprintf("(%s) AND %s", query, words)
 	}
 	if config.IsIgnoreOutofChina {
 		query = fmt.Sprintf("(%s) AND country:\"CN\" AND NOT province:\"Hongkong\"", query)
@@ -166,6 +171,7 @@ func (q *Quake) Run(query string, apiKey string, pageIndex int, pageSize int, co
 		Start:       (pageIndex - 1) * pageSize,
 		Size:        pageSize,
 		Include:     []string{"ip", "port", "hostname", "transport", "service.name", "service.http.host", "service.http.title"},
+		StartTime:   config.SearchStartTime,
 	}
 	jsonData, _ := json.Marshal(data)
 	var request *http.Request
@@ -190,6 +196,9 @@ func (q *Quake) Run(query string, apiKey string, pageIndex int, pageSize int, co
 		}
 		if strings.Contains(string(body), "/quake/login") {
 			return nil, 0, errors.New("quake token invalid")
+		}
+		if strings.Contains(string(body), "暂不支持搜索该内容") {
+			return nil, 0, errors.New("暂不支持搜索该内容")
 		}
 		pageResult, _, sizeTotal = q.parseQuakeSearchResult(body)
 	}

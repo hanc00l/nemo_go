@@ -62,10 +62,14 @@ func (h *Hunter) GetSyntaxMap() (syntax map[SyntaxType]string) {
 }
 
 func (h *Hunter) GetQueryString(domain string, config OnlineAPIConfig, filterKeyword map[string]struct{}) (query string) {
-	if utils.CheckIPV4(domain) || utils.CheckIPV4Subnet(domain) {
-		query = fmt.Sprintf("ip=\"%s\"", domain)
+	if config.SearchByKeyWord {
+		query = config.Target
 	} else {
-		query = fmt.Sprintf("domain=\"%s\"", domain)
+		if utils.CheckIPV4(domain) || utils.CheckIPV4Subnet(domain) {
+			query = fmt.Sprintf("ip=\"%s\"", domain)
+		} else {
+			query = fmt.Sprintf("domain=\"%s\"", domain)
+		}
 	}
 	if words := h.getFilterTitleKeyword(filterKeyword); len(words) > 0 {
 		query = fmt.Sprintf("(%s) and (%s)", query, words)
@@ -86,9 +90,19 @@ func (h *Hunter) getFilterTitleKeyword(filterKeyword map[string]struct{}) string
 }
 
 func (h *Hunter) Run(query string, apiKey string, pageIndex int, pageSize int, config OnlineAPIConfig) (pageResult []onlineSearchResult, sizeTotal int, err error) {
-	//查询的起始时间段：最近3个月数据
-	endTime := time.Now()
-	startTime := endTime.AddDate(0, -3, 0)
+	var startTime, endTime string
+	if len(config.SearchStartTime) > 0 {
+		//指定了查询的开始时间
+		et := time.Now()
+		endTime = et.Format("2006-01-02")
+		startTime = config.SearchStartTime
+	} else {
+		//查询的起始时间段：最近3个月数据
+		et := time.Now()
+		endTime = et.Format("2006-01-02")
+		st := et.AddDate(0, -3, 0)
+		startTime = st.Format("2006-01-02")
+	}
 	var serviceInfo HunterServiceInfo
 	request, err := http.NewRequest(http.MethodGet, "https://hunter.qianxin.com/openApi/search", nil)
 	if err != nil {
@@ -100,8 +114,8 @@ func (h *Hunter) Run(query string, apiKey string, pageIndex int, pageSize int, c
 	params.Add("page", strconv.Itoa(pageIndex))
 	params.Add("page_size", strconv.Itoa(pageSize))
 	params.Add("is_web", "3") //资产类型，1代表”web资产“，2代表”非web资产“，3代表”全部“
-	params.Add("start_time", startTime.Format("2006-01-02 15:04:05"))
-	params.Add("end_time", endTime.Format("2006-01-02 15:04:05"))
+	params.Add("start_time", startTime)
+	params.Add("end_time", endTime)
 	request.URL.RawQuery = params.Encode()
 	resp, err := http.DefaultClient.Do(request)
 	if err != nil {

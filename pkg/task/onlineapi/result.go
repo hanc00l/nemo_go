@@ -21,6 +21,7 @@ type OnlineAPIConfig struct {
 	IsIgnoreCDN        bool   `json:"ignorecdn"`
 	IsIgnoreOutofChina bool   `json:"ignoreoutofchina"`
 	SearchByKeyWord    bool   `json:"keywordsearch"`
+	SearchStartTime    string `json:"searchstarttime"`
 	SearchLimitCount   int    `json:"searchlimitcount"`
 	SearchPageSize     int    `json:"searchpagesize"`
 	WorkspaceId        int    `json:"workspaceId"`

@@ -958,6 +958,7 @@ func makeSearchTaskConfig(config workerapi.XScanConfig) (configs []workerapi.XSc
 			}
 			configRun.OnlineAPIKeyword = makeSearchKeyword(engineInterface, api, row.CheckMod, row.KeyWord, row.ExcludeWords, row.SearchTime)
 			configRun.OnlineAPISearchLimit = row.Count
+			configRun.OnlineAPIStartTime = row.SearchTime
 			configs = append(configs, configRun)
 		}
 	}
@@ -994,10 +995,5 @@ func makeSearchKeyword(engine onlineapi.Engine, engineName, checkMod, keyword, e
 		}
 		result = append(result, fmt.Sprintf("(%s)", strings.Join(rule, fmt.Sprintf(" %s ", syntaxMap[onlineapi.And]))))
 	}
-	//日期，目前只有FOFA，其它的还没查到资料后面再完善
-	if engineName == "xfofa" {
-		result = append(result, fmt.Sprintf("after=\"%s\"", searchTime))
-	}
-
 	return strings.Join(result, fmt.Sprintf(" %s ", syntaxMap[onlineapi.And]))
 }

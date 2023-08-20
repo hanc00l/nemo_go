@@ -51,10 +51,13 @@ func (f *FOFA) GetQueryString(domain string, config OnlineAPIConfig, filterKeywo
 		}
 	}
 	if words := f.getFilterTitleKeyword(filterKeyword); len(words) > 0 {
-		query = fmt.Sprintf("(%s) && (%s)", query, filterKeyword)
+		query = fmt.Sprintf("(%s) && (%s)", query, words)
 	}
 	if config.IsIgnoreOutofChina {
 		query = fmt.Sprintf("(%s) && (country=\"CN\" && region!=\"HK\" && region!=\"TW\"  && region!=\"MO\")", query)
+	}
+	if len(config.SearchStartTime) > 0 {
+		query = fmt.Sprintf("(%s) && after=\"%s\"", query, config.SearchStartTime)
 	}
 
 	return

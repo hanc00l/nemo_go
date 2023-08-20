@@ -19,7 +19,7 @@
 -- Table structure for table `key_word`
 --
 
-alter table key_word add engine varchar(40) not null after key_word;
+alter table key_word add engine varchar(40)  after key_word;
 update key_word set engine="xfofa" where 1=1;
 alter table key_word modify engine varchar(40) not null;
 
