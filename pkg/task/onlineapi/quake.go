@@ -175,7 +175,7 @@ func (q *Quake) Run(query string, apiKey string, pageIndex int, pageSize int, co
 	}
 	jsonData, _ := json.Marshal(data)
 	var request *http.Request
-	request, err = http.NewRequest("POST", "https://quake.360.cn/api/v3/search/quake_service", bytes.NewBuffer(jsonData))
+	request, err = http.NewRequest("POST", "https://quake.360.net/api/v3/search/quake_service", bytes.NewBuffer(jsonData))
 	if err != nil {
 		return
 	}
