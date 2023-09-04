@@ -74,16 +74,16 @@
                         {{ end }}
                         <span class="btn btn-info">端口信息</span>
                         <span class="btn btn-warning  text-left">{{ .ip_info.Port }}</span>
-                        {{ if or .ip_info.Title .ip_info.Banner }}
+                        {{ if or .ip_info.TitleString .ip_info.BannerString }}
                         <br><br>
                         {{ end }}
-                        {{ if .ip_info.Title }}
+                        {{ if .ip_info.TitleString }}
                         <span class="btn btn-info">站点标题</span>
-                        <span style="margin: 10px;"><strong>{{ .ip_info.Title }}</strong></span>
+                        <span style="margin: 10px;"><strong>{{ .ip_info.TitleString }}</strong></span>
                         {{ end }}
-                        {{ if .ip_info.Banner }}
+                        {{ if .ip_info.BannerString }}
                         <span class="btn btn-info">Banner</span>
-                        <span style="margin: 10px;"><strong>{{ .ip_info.Banner }}</strong></span>
+                        <span style="margin: 10px;"><strong>{{ .ip_info.BannerString }}</strong></span>
                         {{ end }}
                         {{ if .ip_info.IconHashes }}
                         <span class="btn btn-info">IconHash</span>

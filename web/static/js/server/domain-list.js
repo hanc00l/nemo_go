@@ -191,7 +191,7 @@ $(function () {
             formData.append("xscan_type", "xonlineapi");
             formData.append("target", target);
             formData.append("onlineapi_engine", $('#select_onlineapi_engine_xscan').val())
-        }else {
+        } else {
             if ($('#select_org_id_task_xscan').val() === "") {
                 swal('Warning', '必须选择要执行任务的组织！', 'error');
                 return
@@ -431,14 +431,25 @@ $(function () {
                         for (let i in row['iconimage']) {
                             icons += '<img src=/webfiles/' + row['workspace_guid'] + '/iconimage/' + row['iconimage'][i] + ' width="24px" height="24px"/>&nbsp;';
                         }
-                        if (icons != "") icons += "<br>";
-                        let title = encodeHtml(row['title'].substr(0, 200));
-                        if (row['title'].length > 200) title += '......';
-                        if (title != "") title += "<br>";
-                        let banner = encodeHtml(row['banner'].substr(0, 200));
-                        if (row['banner'].length > 200) banner += '......';
-                        const strData = '<div style="width:100%;white-space:normal;word-wrap:break-word;word-break:break-all;">' + icons + title + banner + '</div>';
-                        return strData;
+                        if (icons !== "") icons += "<br>";
+
+                        let title_array = [];
+                        for (let key of Object.keys(row['title'])) {
+                            title_array.push(key)
+                        }
+                        let titles_all = title_array.toString();
+                        let title = encodeHtml(titles_all.substr(0, 200));
+                        if (titles_all.length > 200) title += '......';
+                        if (title !== "") title += "<br>";
+
+                        let banner_array = [];
+                        for (let key of Object.keys(row['banner'])) {
+                            banner_array.push(key)
+                        }
+                        let banner_all = banner_array.toString();
+                        let banner = encodeHtml(banner_all.substr(0, 200));
+                        if (banner_all.length > 200) banner += '......';
+                        return '<div style="width:100%;white-space:normal;word-wrap:break-word;word-break:break-all;">' + icons + title + banner + '</div>';
                     }
                 },
                 {
@@ -457,8 +468,7 @@ $(function () {
                             let imgTitle = data[i].replace(".png", "").replace("_", ":");
                             title += '<img src="/webfiles/' + row['workspace_guid'] + '/screenshot/' + row['domain'] + '/' + thumbnailFile + '" class="img"  style="margin-bottom: 5px;margin-left: 5px;" title="' + imgTitle + '" onclick="show_bigpic(\'/webfiles/' + row['workspace_guid'] + '/screenshot/' + row['domain'] + '/' + data[i] + '\')"/>'
                         }
-                        const strData = '<div style="width:100%;white-space:normal;word-wrap:break-word;word-break:break-all;">' + title + '</div>';
-                        return strData;
+                        return '<div style="width:100%;white-space:normal;word-wrap:break-word;word-break:break-all;">' + title + '</div>';
                     }
                 },
             ],
@@ -466,22 +476,33 @@ $(function () {
                 return "共<b>" + total + "</b>条记录，当前显示" + start + "到" + end + "记录";
             },
             drawCallback: function (setting) {
-                var _this = $(this);
-                var tableId = _this.attr('id');
-                var pageDiv = $('#' + tableId + '_paginate');
+                if ($('#checkbox_select_statistic').is(":checked")) {
+                    process_statistic_data_domain(setting)
+                    process_statistic_data_ip(setting);
+                    process_statistic_data_port(setting);
+                    process_statistic_data_icon(setting);
+                    process_statistic_data_title(setting);
+                    process_statistic_data_banner(setting);
+                    $('#div_show_statistic').attr("style", "display:block");
+                } else {
+                    $('#div_show_statistic').attr("style", "display:none");
+                }
+                const _this = $(this);
+                const tableId = _this.attr('id');
+                const pageDiv = $('#' + tableId + '_paginate');
                 pageDiv.append(
+                    '<a class="paginate_button" href="#divTop">UP</a>' +
                     '<i class="fa fa-arrow-circle-o-right fa-lg" aria-hidden="true"></i><input id="' + tableId + '_gotoPage" type="text" style="height:20px;line-height:20px;width:40px;"/>' +
-                    '<a class="paginate_button" aria-controls="' + tableId + '" tabindex="0" id="' + tableId + '_goto">Go</a>')
+                    '<a class="paginate_button" aria-controls="' + tableId + '" tabindex="0" id="' + tableId + '_goto">GO</a>')
                 $('#' + tableId + '_goto').click(function (obj) {
-                    var page = $('#' + tableId + '_gotoPage').val();
-                    var thisDataTable = $('#' + tableId).DataTable();
-                    var pageInfo = thisDataTable.page.info();
+                    let page = $('#' + tableId + '_gotoPage').val();
+                    const thisDataTable = $('#' + tableId).DataTable();
+                    const pageInfo = thisDataTable.page.info();
                     if (isNaN(page)) {
                         $('#' + tableId + '_gotoPage').val('');
-                        return;
                     } else {
-                        var maxPage = pageInfo.pages;
-                        var page = Number(page) - 1;
+                        const maxPage = pageInfo.pages;
+                        page = Number(page) - 1;
                         if (page < 0) {
                             page = 0;
                         } else if (page >= maxPage) {
@@ -534,4 +555,94 @@ function load_domainscan_config() {
         $('#checkbox_iconhash').prop("checked", data['iconhash']);
 
     });
+}
+
+function process_statistic_data_domain(setting) {
+    let obj_map = new Map()
+    for (const data of setting.json.data) {
+        if (obj_map.has(data.fld_domain)) {
+            obj_map.set(data.fld_domain, obj_map.get(data.fld_domain) + 1)
+        } else {
+            obj_map.set(data.fld_domain, 1)
+        }
+    }
+    $('#statistic_domain').html(get_result_output(obj_map));
+}
+
+function process_statistic_data_ip(setting) {
+    let obj_map = new Map()
+    for (const data of setting.json.data) {
+        for (const ip of data.ip) {
+            let ip_Nums = ip.split(".")
+            if ((ip_Nums.length) === 4) {
+                const ip_C = ip_Nums[0] + "." + ip_Nums[1] + "." + ip_Nums[2] + ".0/24";
+                if (obj_map.has(ip_C)) {
+                    obj_map.set(ip_C, obj_map.get(ip_C) + 1)
+                } else {
+                    obj_map.set(ip_C, 1)
+                }
+            }
+        }
+    }
+    $('#statistic_ip').html(get_result_output(obj_map));
+}
+
+function process_statistic_data_port(setting) {
+    let obj_map = new Map()
+    for (const data of setting.json.data) {
+        for (const port of data.port) {
+            if (obj_map.has(port)) {
+                obj_map.set(port, obj_map.get(port) + 1)
+            } else {
+                obj_map.set(port, 1)
+            }
+        }
+    }
+    $('#statistic_port').html(get_result_output(obj_map));
+}
+
+function process_statistic_data_icon(setting) {
+    let obj_map = new Map()
+    for (const data of setting.json.data) {
+        for (let i in data.iconimage) {
+            let icon = '<img src=/webfiles/' + data.workspace_guid + '/iconimage/' + data.iconimage[i] + ' width="24px" height="24px"/>';
+            if (obj_map.has(icon)) {
+                obj_map.set(icon, obj_map.get(icon) + 1)
+            } else {
+                obj_map.set(icon, 1)
+            }
+        }
+    }
+    $('#statistic_icon').html(get_result_output(obj_map, false));
+}
+
+
+function process_statistic_data_title(setting) {
+    let obj_map = new Map()
+
+    for (const data of setting.json.data) {
+        for (let title of Object.keys(data['title'])) {
+            if (obj_map.has(title)) {
+                obj_map.set(title, obj_map.get(title) + data['title'][title])
+            } else {
+                obj_map.set(title, 1)
+            }
+        }
+    }
+    $('#statistic_title').html(get_result_output(obj_map));
+}
+
+function process_statistic_data_banner(setting) {
+    let obj_map = new Map()
+
+    for (const data of setting.json.data) {
+        for (let banner of Object.keys(data['banner'])) {
+            if (obj_map.has(banner)) {
+                obj_map.set(banner, obj_map.get(banner) + data['banner'][banner])
+            } else {
+                obj_map.set(banner, 1)
+            }
+        }
+    }
+    $('#statistic_banner').html(get_result_output(obj_map));
 }

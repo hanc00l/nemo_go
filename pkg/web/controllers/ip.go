@@ -53,23 +53,23 @@ type ipRequestParam struct {
 
 // IPListData 列表中每一行显示的IP数据
 type IPListData struct {
-	Id             int      `json:"id"`
-	Index          int      `json:"index"`
-	IP             string   `json:"ip"`
-	Location       string   `json:"location"`
-	Port           []string `json:"port"`
-	Title          string   `json:"title"`
-	Banner         string   `json:"banner"`
-	ColorTag       string   `json:"color_tag"`
-	MemoContent    string   `json:"memo_content"`
-	Vulnerability  string   `json:"vulnerability"`
-	HoneyPot       string   `json:"honeypot"`
-	ScreenshotFile []string `json:"screenshot"`
-	IsCDN          bool     `json:"cdn"`
-	IconImage      []string `json:"iconimage"`
-	WorkspaceId    int      `json:"workspace"`
-	WorkspaceGUID  string   `json:"workspace_guid"`
-	PinIndex       int      `json:"pinindex"`
+	Id             int            `json:"id"`
+	Index          int            `json:"index"`
+	IP             string         `json:"ip"`
+	Location       string         `json:"location"`
+	Port           []string       `json:"port"`
+	Title          map[string]int `json:"title"`
+	Banner         map[string]int `json:"banner"`
+	ColorTag       string         `json:"color_tag"`
+	MemoContent    string         `json:"memo_content"`
+	Vulnerability  string         `json:"vulnerability"`
+	HoneyPot       string         `json:"honeypot"`
+	ScreenshotFile []string       `json:"screenshot"`
+	IsCDN          bool           `json:"cdn"`
+	IconImage      []string       `json:"iconimage"`
+	WorkspaceId    int            `json:"workspace"`
+	WorkspaceGUID  string         `json:"workspace_guid"`
+	PinIndex       int            `json:"pinindex"`
 }
 
 type IconHashWithFofa struct {
@@ -86,8 +86,10 @@ type IPInfo struct {
 	Status        string
 	Location      string
 	Port          []int
-	Title         []string
-	Banner        []string
+	Title         map[string]int
+	Banner        map[string]int
+	TitleString   string
+	BannerString  string
 	PortAttr      []PortAttrInfo
 	Domain        []string
 	ColorTag      string
@@ -130,8 +132,8 @@ type ScreenshotFileInfo struct {
 type PortInfo struct {
 	PortNumbers      []int
 	PortStatus       map[int]string
-	TitleSet         map[string]struct{}
-	BannerSet        map[string]struct{}
+	TitleSet         map[string]int
+	BannerSet        map[string]int
 	PortAttr         []PortAttrInfo
 	IconHashImageSet map[string]string
 	TlsDataSet       map[string]struct{}
@@ -619,8 +621,8 @@ func (c *IPController) GetIPListData(req ipRequestParam) (resp DataTableResponse
 		}
 		ipData.ColorTag = ipInfo.ColorTag
 		ipData.MemoContent = ipInfo.Memo
-		ipData.Title = strings.Join(ipInfo.Title, ", ")
-		ipData.Banner = strings.Join(ipInfo.Banner, ", ")
+		ipData.Title = ipInfo.Title
+		ipData.Banner = ipInfo.Banner
 		ipData.WorkspaceId = ipRow.WorkspaceId
 		if _, ok := workspaceCacheMap[ipRow.WorkspaceId]; !ok {
 			workspace := db.Workspace{Id: ipRow.WorkspaceId}
@@ -678,8 +680,8 @@ func (c *IPController) GetIPListData(req ipRequestParam) (resp DataTableResponse
 // getPortInfo 获取一个IP的所有端口信息集合
 func getPortInfo(workspaceGUID string, ip string, ipId int, disableFofa, disableBanner bool) (r PortInfo) {
 	r.PortStatus = make(map[int]string)
-	r.BannerSet = make(map[string]struct{})
-	r.TitleSet = make(map[string]struct{})
+	r.BannerSet = make(map[string]int)
+	r.TitleSet = make(map[string]int)
 	r.TlsDataSet = make(map[string]struct{})
 	r.IconHashImageSet = make(map[string]string)
 
@@ -721,19 +723,22 @@ func getPortInfo(workspaceGUID string, ip string, ipId int, disableFofa, disable
 			r.PortAttr = append(r.PortAttr, pai)
 			if pad.Tag == "title" {
 				if _, ok := r.TitleSet[pad.Content]; !ok {
-					r.TitleSet[pad.Content] = struct{}{}
+					r.TitleSet[pad.Content] = 1
+				} else {
+					r.TitleSet[pad.Content]++
 				}
 			} else if pad.Tag == "banner" || pad.Tag == "server" || pad.Tag == "tag" || pad.Tag == "fingerprint" {
 				if pad.Tag == "banner" && disableBanner {
 					continue
 				}
-				if pad.Content == "unknown" || pad.Content == "" {
+				if isUnusefulBanner(pad.Content) { //pad.Content == "unknown" || pad.Content == "" {
 					continue
 				}
 				if _, ok := r.BannerSet[pad.Content]; !ok {
-					r.BannerSet[pad.Content] = struct{}{}
+					r.BannerSet[pad.Content] = 1
+				} else {
+					r.BannerSet[pad.Content]++
 				}
-
 			} else if pad.Tag == "favicon" {
 				hashAndUrls := strings.Split(pad.Content, "|")
 				if len(hashAndUrls) == 2 {
@@ -818,8 +823,10 @@ func getIPInfo(ip *db.Ip, getReleatedDomain, disableFofa, disableBanner bool) (r
 	// port
 	portInfo := getPortInfo(r.WorkspaceGUID, ip.IpName, ip.Id, disableFofa, disableBanner)
 	r.PortAttr = portInfo.PortAttr
-	r.Title = utils.SetToSlice(portInfo.TitleSet)
-	r.Banner = utils.SetToSlice(portInfo.BannerSet)
+	r.Title = portInfo.TitleSet
+	r.Banner = portInfo.BannerSet
+	r.TitleString = strings.Join(utils.SetToSliceStringInt(portInfo.TitleSet), ", ")
+	r.BannerString = strings.Join(utils.SetToSliceStringInt(portInfo.BannerSet), ", ")
 	r.Port = portInfo.PortNumbers
 	colorTag := db.IpColorTag{RelatedId: ip.Id}
 	if colorTag.GetByRelatedId() {
@@ -1007,6 +1014,16 @@ func (c *IPController) ExportIPResultAction() {
 	http.ServeContent(rw, c.Ctx.Request, "ip-result.csv", time.Now(), bytes.NewReader(content))
 }
 
+func isUnusefulBanner(bannerInfo string) bool {
+	unusefulBannerList := []string{"", "java", "php", "jsp", "unknown", "digicert-cert", "jquery", "jquery-ui", "core", "cdnjs"}
+	for _, b := range unusefulBannerList {
+		if b == strings.ToLower(bannerInfo) {
+			return true
+		}
+	}
+	return false
+}
+
 // getIPExportData 获取IP的资产
 func (c *IPController) getIPExportData(req ipRequestParam) (result []IPExportInfo) {
 	ip := db.Ip{}
@@ -1042,7 +1059,7 @@ func (c *IPController) getIPExportData(req ipRequestParam) (result []IPExportInf
 					}
 
 				} else if pad.Tag == "banner" || pad.Tag == "server" || pad.Tag == "tag" {
-					if pad.Content == "unknown" || pad.Content == "" {
+					if isUnusefulBanner(pad.Content) { //pad.Content == "unknown" || pad.Content == "" {
 						continue
 					}
 					if _, ok := eInfo.BannerSet[pad.Content]; !ok {

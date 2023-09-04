@@ -1,4 +1,4 @@
-<main class="app-content">
+<main class="app-content" id="divTop">
     <div class="row">
         <div class="col-md-12">
             <div class="imgPreview"><img src="#" alt="" id="imgPreview">
@@ -66,8 +66,6 @@
                         </div>
                         <input type="hidden" value="{{ .data.OrgId }}" id="hidden_org_id">
                     </form>
-                </div>
-                <div>
                     <div class="collapse" id="collapseExample">
                         <form class="row">
                             <div class="form-group col-md-2">
@@ -159,6 +157,13 @@
                                                id="checkbox_select_order_by_date" type="checkbox" checked>按更新时间排序
                                     </label>
                                 </div>
+                                <div class="form-check form-check-inline">
+                                    <label class="form-check-label"
+                                           for="checkbox_select_statistic">
+                                        <input class="form-check-input"
+                                               id="checkbox_select_statistic" type="checkbox" checked>显示当前页统计信息
+                                    </label>
+                                </div>
                             </div>
                         </form>
                         <form class="row">
@@ -197,6 +202,37 @@
                                     <option value="7">一周内</option>
                                     <option value="1">一天内</option>
                                 </select>
+                            </div>
+                        </form>
+                    </div>
+                    <div id="div_show_statistic">
+                        <form class="row">
+                            <div class="form-group col-md-2" style="margin-bottom: 0">
+                                <label class="control-label"
+                                       for="statistic_location"><strong>归属地排名</strong></label>
+                                <span id="statistic_location"></span>
+                            </div>
+                            <div class="form-group col-md-1" style="margin-bottom: 0">
+                                <label class="control-label" for="statistic_port"><strong>端口排名</strong></label>
+                                <span id="statistic_port"></span>
+                            </div>
+                            <div class="form-group col-md-2" style="margin-bottom: 0">
+                                <label class="control-label" for="statistic_ip"><strong>IP排名</strong></label>
+                                <span id="statistic_ip"></span>
+                            </div>
+                            <div class="form-group col-md-3" style="margin-bottom: 0">
+                                <label class="control-label"
+                                       for="statistic_title"><strong>网站Title排名</strong></label>
+                                <span id="statistic_title"></span>
+                            </div>
+                            <div class="form-group col-md-3" style="margin-bottom: 0">
+                                <label class="control-label"
+                                       for="statistic_banner"><strong>网站Banner排名</strong></label>
+                                <span id="statistic_banner"></span>
+                            </div>
+                            <div class="form-group col-md-1" style="margin-bottom: 0">
+                                <label class="control-label" for="statistic_icon"><strong>Icon排名</strong></label>
+                                <span id="statistic_icon"></span>
                             </div>
                         </form>
                     </div>

@@ -47,26 +47,27 @@ type domainRequestParam struct {
 
 // DomainListData datable显示的每一行数据
 type DomainListData struct {
-	Id             int      `json:"id"`
-	Index          int      `json:"index"`
-	Domain         string   `json:"domain"`
-	IP             []string `json:"ip"`
-	Port           []int    `json:"port"`
-	StatusCode     []string `json:"statuscode"`
-	Title          string   `json:"title"`
-	Banner         string   `json:"banner"`
-	ColorTag       string   `json:"color_tag"`
-	MemoContent    string   `json:"memo_content"`
-	Vulnerability  string   `json:"vulnerability"`
-	HoneyPot       string   `json:"honeypot"`
-	ScreenshotFile []string `json:"screenshot"`
-	DomainCDN      string   `json:"domaincdn"`
-	DomainCNAME    string   `json:"domaincname"`
-	IsIPCDN        bool     `json:"ipcdn"`
-	IconImage      []string `json:"iconimage"`
-	WorkspaceId    int      `json:"workspace"`
-	WorkspaceGUID  string   `json:"workspace_guid"`
-	PinIndex       int      `json:"pinindex"`
+	Id             int            `json:"id"`
+	Index          int            `json:"index"`
+	FldDomain      string         `json:"fld_domain"`
+	Domain         string         `json:"domain"`
+	IP             []string       `json:"ip"`
+	Port           []int          `json:"port"`
+	StatusCode     []string       `json:"statuscode"`
+	Title          map[string]int `json:"title"`
+	Banner         map[string]int `json:"banner"`
+	ColorTag       string         `json:"color_tag"`
+	MemoContent    string         `json:"memo_content"`
+	Vulnerability  string         `json:"vulnerability"`
+	HoneyPot       string         `json:"honeypot"`
+	ScreenshotFile []string       `json:"screenshot"`
+	DomainCDN      string         `json:"domaincdn"`
+	DomainCNAME    string         `json:"domaincname"`
+	IsIPCDN        bool           `json:"ipcdn"`
+	IconImage      []string       `json:"iconimage"`
+	WorkspaceId    int            `json:"workspace"`
+	WorkspaceGUID  string         `json:"workspace_guid"`
+	PinIndex       int            `json:"pinindex"`
 }
 
 // DomainInfo domain详细数据聚合
@@ -79,8 +80,10 @@ type DomainInfo struct {
 	PortAttr      []PortAttrInfo
 	Finger        []string
 	StatusCode    []string
-	Title         []string
-	Banner        []string
+	Title         map[string]int
+	Banner        map[string]int
+	TitleString   string
+	BannerString  string
 	ColorTag      string
 	Memo          string
 	Vulnerability []VulnerabilityInfo
@@ -113,8 +116,8 @@ type DomainAttrInfo struct {
 // DomainAttrFullInfo domain属性数据的聚合
 type DomainAttrFullInfo struct {
 	IP            map[string]struct{}
-	TitleSet      map[string]struct{}
-	BannerSet     map[string]struct{}
+	TitleSet      map[string]int
+	BannerSet     map[string]int
 	FingerSet     map[string]struct{}
 	StatusCodeSet map[string]struct{}
 	DomainAttr    []DomainAttrInfo
@@ -529,11 +532,13 @@ func (c *DomainController) getDomainListData(req domainRequestParam) (resp DataT
 	cdn := custom.NewCDNCheck()
 	workspaceCacheMap := make(map[int]string)
 	portInfoCacheMap := make(map[int]PortInfo)
+	fld := domainscan.NewTldExtract()
 	for i, domainRow := range results {
 		domainData := DomainListData{}
 		domainData.Id = domainRow.Id
 		domainData.Index = req.Start + i + 1
 		domainData.Domain = domainRow.DomainName
+		domainData.FldDomain = fld.ExtractFLD(domainRow.DomainName)
 		domainData.PinIndex = domainRow.PinIndex
 		domainData.WorkspaceId = domainRow.WorkspaceId
 		if _, ok := workspaceCacheMap[domainData.WorkspaceId]; !ok {
@@ -570,8 +575,8 @@ func (c *DomainController) getDomainListData(req domainRequestParam) (resp DataT
 		}
 		domainData.MemoContent = domainInfo.Memo
 		domainData.ColorTag = domainInfo.ColorTag
-		domainData.Title = strings.Join(domainInfo.Title, ", ")
-		domainData.Banner = strings.Join(domainInfo.Banner, ", ")
+		domainData.Title = domainInfo.Title
+		domainData.Banner = domainInfo.Banner
 		domainData.StatusCode = domainInfo.StatusCode
 		domainData.Port = domainInfo.Port
 		domainData.ScreenshotFile = ss.LoadScreenshotFile(domainData.WorkspaceGUID, domainRow.DomainName)
@@ -669,22 +674,16 @@ func getDomainInfo(domain *db.Domain, portInfoCacheMap map[int]PortInfo, disable
 				portSet[portNumber] = struct{}{}
 			}
 		}
-		for k, _ := range pi.TitleSet {
-			if _, ok := domainAttrInfo.TitleSet[k]; !ok {
-				domainAttrInfo.TitleSet[k] = struct{}{}
-			}
-		}
-		for k, _ := range pi.BannerSet {
-			if _, ok := domainAttrInfo.BannerSet[k]; !ok {
-				domainAttrInfo.BannerSet[k] = struct{}{}
-			}
-		}
+		utils.MergeMapStringInt(domainAttrInfo.TitleSet, pi.TitleSet)
+		utils.MergeMapStringInt(domainAttrInfo.BannerSet, pi.BannerSet)
 		r.PortAttr = append(r.PortAttr, pi.PortAttr...)
 	}
 	r.Port = utils.SetToSliceInt(portSet)
 	r.IP = utils.SetToSlice(domainAttrInfo.IP)
-	r.Title = utils.SetToSlice(domainAttrInfo.TitleSet)
-	r.Banner = utils.SetToSlice(domainAttrInfo.BannerSet)
+	r.Title = domainAttrInfo.TitleSet
+	r.Banner = domainAttrInfo.BannerSet
+	r.TitleString = strings.Join(utils.SetToSliceStringInt(domainAttrInfo.TitleSet), ", ")
+	r.BannerString = strings.Join(utils.SetToSliceStringInt(domainAttrInfo.BannerSet), ", ")
 	r.DomainAttr = domainAttrInfo.DomainAttr
 	r.Source = utils.SetToSlice(domainAttrInfo.SourceSet)
 	r.StatusCode = utils.SetToSlice(domainAttrInfo.StatusCodeSet)
@@ -759,8 +758,8 @@ func getDomainInfo(domain *db.Domain, portInfoCacheMap map[int]PortInfo, disable
 func getDomainAttrFullInfo(workspaceGUID string, id int, disableFofa, disableBanner bool) DomainAttrFullInfo {
 	r := DomainAttrFullInfo{
 		IP:            make(map[string]struct{}),
-		TitleSet:      make(map[string]struct{}),
-		BannerSet:     make(map[string]struct{}),
+		TitleSet:      make(map[string]int),
+		BannerSet:     make(map[string]int),
 		TlsData:       make(map[string]struct{}),
 		IconImageSet:  make(map[string]string),
 		SourceSet:     make(map[string]struct{}),
@@ -787,24 +786,30 @@ func getDomainAttrFullInfo(workspaceGUID string, id int, disableFofa, disableBan
 			r.DomainCNAME = da.Content
 		} else if da.Tag == "title" {
 			if _, ok := r.TitleSet[da.Content]; !ok {
-				r.TitleSet[da.Content] = struct{}{}
+				r.TitleSet[da.Content] = 1
+			} else {
+				r.TitleSet[da.Content]++
 			}
 		} else if da.Tag == "server" || da.Tag == "fingerprint" {
 			// banner信息：server、fingerpinter
-			if _, ok := r.BannerSet[da.Content]; !ok {
-				r.BannerSet[da.Content] = struct{}{}
-			}
-			if da.Tag == "fingerprint" {
-				if _, ok := r.FingerSet[da.Content]; !ok {
-					r.FingerSet[da.Content] = struct{}{}
+			if !isUnusefulBanner(da.Content) {
+				if _, ok := r.BannerSet[da.Content]; !ok {
+					r.BannerSet[da.Content] = 1
+				} else {
+					r.BannerSet[da.Content]++
 				}
-				r.DomainAttr = append(r.DomainAttr, DomainAttrInfo{
-					Id:         da.Id,
-					Tag:        da.Tag,
-					Content:    da.Content,
-					CreateTime: FormatDateTime(da.CreateDatetime),
-					UpdateTime: FormatDateTime(da.UpdateDatetime),
-				})
+				if da.Tag == "fingerprint" {
+					if _, ok := r.FingerSet[da.Content]; !ok {
+						r.FingerSet[da.Content] = struct{}{}
+					}
+					r.DomainAttr = append(r.DomainAttr, DomainAttrInfo{
+						Id:         da.Id,
+						Tag:        da.Tag,
+						Content:    da.Content,
+						CreateTime: FormatDateTime(da.CreateDatetime),
+						UpdateTime: FormatDateTime(da.UpdateDatetime),
+					})
+				}
 			}
 		} else if da.Tag == "httpx" {
 			r.DomainAttr = append(r.DomainAttr, DomainAttrInfo{
@@ -1056,8 +1061,8 @@ func (c *DomainController) getDomainExportData(req domainRequestParam) (result [
 		for _, p := range domainInfo.Port {
 			eInfo.Port = append(eInfo.Port, strconv.Itoa(p))
 		}
-		eInfo.Title = domainInfo.Title
-		eInfo.Banner = domainInfo.Banner
+		eInfo.Title = utils.SetToSliceStringInt(domainInfo.Title)
+		eInfo.Banner = utils.SetToSliceStringInt(domainInfo.Banner)
 		eInfo.TlsData = domainInfo.TlsData
 		eInfo.Source = domainInfo.Source
 		eInfo.StatusCode = domainInfo.StatusCode

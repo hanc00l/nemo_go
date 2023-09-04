@@ -271,3 +271,30 @@ function change_user_workspace(dataTableId) {
         }
     });
 }
+
+function get_result_output(obj_map, limit_length = true) {
+    var arrayObj = Array.from(obj_map);
+    arrayObj.sort(function (a, b) {
+        return b[1] - a[1]
+    });
+    let index = 0;
+    let output = "";
+    let output_prefix = "<br>";
+    for (let [key, value] of arrayObj) {
+        index++;
+        output += output_prefix;
+        output += '<span class="badge badge-pill badge-info">' + value + '</span>';
+        if (value < 10) {
+            output += "&nbsp;";
+        }
+        if (limit_length) {
+            let showed_key = encodeHtml(String(key).substr(0, 40));
+            if (String(key).length > 40) showed_key += '...';
+            output += showed_key;
+        } else {
+            output += key;
+        }
+        if (index >= 5) break;
+    }
+    return output
+}

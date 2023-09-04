@@ -1,4 +1,4 @@
-<main class="app-content">
+<main class="app-content" id="divTop">
     <div class="row">
         <div class="col-md-12">
             <div class="imgPreview"><img src="#" alt="" id="imgPreview">
@@ -40,7 +40,6 @@
                             <button class="btn btn-primary" type="button" id="create_task"><i
                                     class="fa fa-plus"></i>任务
                             </button>
-                            </button>
                             <button class="btn btn-primary" type="button" id="create_xscan_task"><i
                                     class="fa fa-fighter-jet"></i>XScan
                             </button>
@@ -71,8 +70,6 @@
                         </div>
                         <input type="hidden" value="{{ .data.OrgId }}" id="hidden_org_id">
                     </form>
-                </div>
-                <div>
                     <div class="collapse" id="collapseExample">
                         <form class="row">
                             <div class="form-group col-md-2">
@@ -125,6 +122,8 @@
                                                id="checkbox_disable_banner" type="checkbox">不看Banner信息
                                     </label>
                                 </div>
+                            </div>
+                            <div class="form-group col-md-2">
                                 <div class="form-check form-check-inline">
                                     <label class="form-check-label"
                                            for="checkbox_select_no_ip">
@@ -132,13 +131,18 @@
                                                id="checkbox_select_no_ip" type="checkbox">筛选没有IP解析的域名
                                     </label>
                                 </div>
-                            </div>
-                            <div class="form-group col-md-2">
                                 <div class="form-check form-check-inline">
                                     <label class="form-check-label"
                                            for="checkbox_select_order_by_date">
                                         <input class="form-check-input"
                                                id="checkbox_select_order_by_date" type="checkbox" checked>按更新时间排序
+                                    </label>
+                                </div>
+                                <div class="form-check form-check-inline">
+                                    <label class="form-check-label"
+                                           for="checkbox_select_statistic">
+                                        <input class="form-check-input"
+                                               id="checkbox_select_statistic" type="checkbox" checked>显示当前页统计信息
                                     </label>
                                 </div>
                             </div>
@@ -149,6 +153,36 @@
                                 <input class="form-control" type="text" id="http_content"
                                        placeholder="HTTP信息(模糊搜索）"
                                        value="">
+                            </div>
+                        </form>
+                    </div>
+                    <div id="div_show_statistic">
+                        <form class="row">
+                            <div class="form-group col-md-1" style="margin-bottom: 0">
+                                <label class="control-label" for="statistic_port"><strong>端口排名</strong></label>
+                                <span id="statistic_port"></span>
+                            </div>
+                            <div class="form-group col-md-2" style="margin-bottom: 0">
+                                <label class="control-label" for="statistic_ip"><strong>IP排名</strong></label>
+                                <span id="statistic_ip"></span>
+                            </div>
+                            <div class="form-group col-md-2" style="margin-bottom: 0">
+                                <label class="control-label"
+                                       for="statistic_domain"><strong>子域名排名</strong></label>
+                                <span id="statistic_domain"></span>
+                            </div>
+                            <div class="form-group col-md-3" style="margin-bottom: 0">
+                                <label class="control-label" for="statistic_title"><strong>网站Title排名</strong></label>
+                                <span id="statistic_title"></span>
+                            </div>
+                            <div class="form-group col-md-3" style="margin-bottom: 0">
+                                <label class="control-label"
+                                       for="statistic_banner"><strong>网站Banner排名</strong></label>
+                                <span id="statistic_banner"></span>
+                            </div>
+                            <div class="form-group col-md-1" style="margin-bottom: 0">
+                                <label class="control-label" for="statistic_icon"><strong>Icon排名</strong></label>
+                                <span id="statistic_icon"></span>
                             </div>
                         </form>
                     </div>

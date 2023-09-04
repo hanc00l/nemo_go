@@ -78,3 +78,25 @@ func SetToSliceInt(setMap map[int]struct{}) (list []int) {
 	}
 	return
 }
+
+// SetToSliceStringInt 将Set（由map模拟实现）结果转化为列表结果
+func SetToSliceStringInt(setMap map[string]int) (list []string) {
+	list = make([]string, len(setMap))
+	i := 0
+	for k, _ := range setMap {
+		list[i] = k
+		i++
+	}
+	return
+}
+
+func MergeMapStringInt(dstMap map[string]int, srcMap map[string]int) {
+	for k, v := range srcMap {
+		if _, ok := dstMap[k]; !ok {
+			dstMap[k] = v
+		} else {
+			dstMap[k] += v
+		}
+	}
+	return
+}
