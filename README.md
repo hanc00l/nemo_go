@@ -76,6 +76,7 @@
 - Docker支持
 - 资产流程化扫描（XSCAN）![xscan](docs/image/9-1.xscan2.png)
 - 导出IP与Domain资产
+- 当前页面资产信息统计
 
 ## 演示页面
 
