@@ -1,8 +1,8 @@
 # Nemo安装手册
 
-## v1.1
+## v1.2
 
-2023-8-3
+2023-9-18
 
 
 Nemo分为**Server**端和**Worker**端两部份。Server提供Http访问、API接口、RPC接口、消息中间件服务以及文件同步接口。Worker是通过消息中间件从Worker接收任务并执行，通过RPC接口上传任务的结果，并通过文件同步接口接收Server的文件。
@@ -429,3 +429,111 @@ Worker默认启动时参数为-m 0，将会执行所有类型（除custom）的�
 ## 分布式部署的典型架构
 
 ![nemo_vps](./image/nemo_vps.png)
+
+
+## Worker使用Socks5代理
+
+在实战的高强度对抗中，使用代理可以降低IP被安设备BAN导致的信息收集不全。由于Nemo的特点是大量使用第三方组件，每个组件对代理的支持的方式和能力都不尽相同，因此建议通过第三方工具和技术，通过全局代理的方式来达到代理Worker的网络流量的目的。
+
+目前从实战中总结来说，经过比较和测试，比较推荐的方式为：
+- Windows/MacOS：proxifier+socks5代理
+- Linux：iptables+redsocks+socks5代理
+
+proxifier在实战对抗中通过反向代理进行内网渗透的利器，具有GUI界面的易用性、规则配置的灵活性，具体使用方法可参照网上的教程。
+
+**iptables+redsocks的使用方法**
+
+- 安装：
+
+```bash
+sudo apt-get install redsocks
+```
+
+- 配置：
+
+```bash
+配置文件：/etc/redsocks.conf
+
+redsocks下的local_ip, local_port，这两个是本地映射出的tcp端口，默认127.0.0.1:12345，可不用修改。
+修改redsocks下的ip, port, type，这三个是远程代理服务器的配置，type默认为socks5，需要修改为实际使用的楼socks代理服务器的地址和端口；如果有认证，需修改login和password。
+```
+- 重启服务：
+```bash
+sudo systemctl restart redsocks
+```
+
+- 配置iptables规则文件（redsocks.rules）：
+```bash
+# Transparent SOCKS proxy
+# See: http://darkk.net.ru/redsocks/
+
+*nat
+:PREROUTING ACCEPT [0:0]
+:INPUT ACCEPT [0:0]
+:OUTPUT ACCEPT [0:0]
+:POSTROUTING ACCEPT [0:0]
+:REDSOCKS - [0:0]
+
+# Redirect all output through redsocks
+-A OUTPUT -p tcp -j REDSOCKS
+
+# Whitelist LANs and some other reserved addresses.
+# https://en.wikipedia.org/wiki/Reserved_IP_addresses#Reserved_IPv4_addresses
+-A REDSOCKS -d 0.0.0.0/8 -j RETURN
+-A REDSOCKS -d 10.0.0.0/8 -j RETURN
+-A REDSOCKS -d 127.0.0.0/8 -j RETURN
+-A REDSOCKS -d 169.254.0.0/16 -j RETURN
+-A REDSOCKS -d 172.16.0.0/12 -j RETURN
+-A REDSOCKS -d 192.168.0.0/16 -j RETURN
+-A REDSOCKS -d 224.0.0.0/4 -j RETURN
+-A REDSOCKS -d 240.0.0.0/4 -j RETURN
+
+# 这里改为socks5代理服务器的地址
+# -A REDSOCKS -d socks5_proxy_ip -j RETURN
+
+# 将Nemo的Server地址，也要加入到白名单中
+# -A REDSOCKS -d nemo_server_ip -j RETURN
+
+# Redirect everything else to redsocks port
+-A REDSOCKS -p tcp -j REDIRECT --to-ports 12345
+
+COMMIT
+
+```
+- 应用规则：
+```bash
+sudo iptables-restore ./redsocks.rules
+```
+
+- 查看规则：
+```bash
+sudo iptables -t nat -L
+
+Chain REDSOCKS (1 references)
+target     prot opt source               destination
+RETURN     all  --  anywhere             0.0.0.0/8
+RETURN     all  --  anywhere             10.0.0.0/8
+RETURN     all  --  anywhere             localhost/8
+RETURN     all  --  anywhere             169.254.0.0/16
+RETURN     all  --  anywhere             172.16.0.0/12
+RETURN     all  --  anywhere             192.168.0.0/16
+RETURN     all  --  anywhere             base-address.mcast.net/4
+RETURN     all  --  anywhere             240.0.0.0/4
+RETURN     all  --  anywhere             x.x.x.x
+REDIRECT   tcp  --  anywhere             anywhere             redir ports 12345
+```
+
+- 清空规则：
+```bash
+sudo iptables -t nat -F
+```
+
+> 参考文档：https://www.coder4.com/archives/7290
+
+关于使用代理的注意事项 ：
+- socks5代理为网络层代理，主要用于TCP协议代理，如果需代理udp，请修改redsocks.rules配置以及iptables规则文件，具体请自行参考文档；
+- nmap与masscan的SYN扫描不支持在socks5代理下使用，所以使用代理的worker尽量不要分配active类型的任务（-m 参数为1或0）；如果必须要使用，只能使用nmap的-sT的扫描类型；
+- 对于在线API接口的任务（比如FOFA、Hunter、ICP查询等），不建议使用代理功能，防止因源IP导致访问被限；
+- 使用代理功能时，建议合理分配worker的任务类型；
+- 推荐使用gost实现自已搭建的多个代理的负载均衡；如果要更多的代理池功能，建议购买第三方的代理服务（比如快代理的隧道代理）；
+- 以上测试只在UbuntuLTS 22.04中测试稳定运行，在其它linux版本及docker中请自行参考网上文档。
