@@ -42,7 +42,7 @@ func (r *Resolve) Do() {
 		r.Result.DomainResult = make(map[string]*DomainResult)
 		for _, line := range strings.Split(r.Config.Target, ",") {
 			domain := strings.TrimSpace(line)
-			if domain == "" || utils.CheckIPV4(domain) || utils.CheckIPV4Subnet(domain) {
+			if domain == "" || utils.CheckIPOrSubnet(domain) {
 				continue
 			}
 			if blackDomain.CheckBlack(domain) {
@@ -67,11 +67,19 @@ func (r *Resolve) RunResolve(domain string) {
 	_, host := ResolveDomain(domain)
 	if len(host) > 0 {
 		for _, h := range host {
-			r.Result.SetDomainAttr(domain, DomainAttrResult{
+			dar := DomainAttrResult{
 				Source:  "domainscan",
-				Tag:     "A",
 				Content: h,
-			})
+			}
+			if utils.CheckIPV4(h) {
+				dar.Tag = "A"
+			} else if utils.CheckIPV6(h) {
+				dar.Tag = "AAAA"
+				dar.Content = utils.GetIPV6ParsedFormat(h)
+			}
+			if dar.Tag == "A" || dar.Tag == "AAAA" {
+				r.Result.SetDomainAttr(domain, dar)
+			}
 		}
 	}
 	//CDN检查
@@ -95,12 +103,7 @@ func (r *Resolve) RunResolve(domain string) {
 
 // ResolveDomain 解析一个域名的A记录和CNAME记录
 func ResolveDomain(domain string) (CName string, Host []string) {
-	//CName, _ = net.LookupCNAME(domain)
-	host, _ := net.LookupHost(domain)
-	for _, h := range host {
-		if utils.CheckIPV4(h) {
-			Host = append(Host, h)
-		}
-	}
+	CName, _ = net.LookupCNAME(domain)
+	Host, _ = net.LookupHost(domain)
 	return
 }

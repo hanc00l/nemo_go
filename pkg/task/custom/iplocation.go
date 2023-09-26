@@ -1,6 +1,7 @@
 package custom
 
 import (
+	"fmt"
 	"github.com/hanc00l/nemo_go/pkg/conf"
 	"github.com/hanc00l/nemo_go/pkg/logging"
 	"github.com/hanc00l/nemo_go/pkg/utils"
@@ -9,20 +10,26 @@ import (
 	"strings"
 )
 
+var cloudNameList = []string{
+	"阿里云", "华为云", "腾讯云",
+	"天翼云", "金山云", "UCloud", "青云", "QingCloud", "百度云", "盛大云", "世纪互联蓝云",
+	"Azure", "Amazon", "Microsoft", "Google", "vultr", "CloudFlare", "Choopa",
+}
+
 type Config struct {
 	Target string `json:"target"`
 	OrgId  *int   `json:"orgId"`
 }
 
-type IpLocation struct {
+type Ipv4Location struct {
 	customMap  map[string]string
 	customBMap map[string]string
 	customCMap map[string]string
 }
 
-// NewIPLocation 创建iplocation对象
-func NewIPLocation() *IpLocation {
-	ipl := &IpLocation{
+// NewIPv4Location 创建iplocation对象
+func NewIPv4Location() *Ipv4Location {
+	ipl := &Ipv4Location{
 		customMap:  make(map[string]string),
 		customBMap: make(map[string]string),
 		customCMap: make(map[string]string),
@@ -33,15 +40,22 @@ func NewIPLocation() *IpLocation {
 }
 
 // FindPublicIP 查询纯真数据库获取公网IP归属地
-func (ipl *IpLocation) FindPublicIP(ip string) string {
+func (ipl *Ipv4Location) FindPublicIP(ip string) string {
 	qqWry := NewQQwry()
 	result := qqWry.Find(ip)
 
+	if len(result.Area) > 0 {
+		for _, v := range cloudNameList {
+			if strings.Index(result.Area, v) >= 0 {
+				return fmt.Sprintf("%s [%s]", result.Country, result.Area)
+			}
+		}
+	}
 	return result.Country
 }
 
 // FindCustomIP 查询自定义IP归属地
-func (ipl *IpLocation) FindCustomIP(ip string) string {
+func (ipl *Ipv4Location) FindCustomIP(ip string) string {
 	result, ok := ipl.customMap[ip]
 	if ok {
 		return result
@@ -63,7 +77,7 @@ func (ipl *IpLocation) FindCustomIP(ip string) string {
 }
 
 // loadQQwry 加载纯真IP数据库
-func (ipl *IpLocation) loadQQwry() {
+func (ipl *Ipv4Location) loadQQwry() {
 	IPData.FilePath = filepath.Join(conf.GetRootPath(), "thirdparty/qqwry/qqwry.dat")
 	res := IPData.InitIPData()
 
@@ -76,7 +90,7 @@ func (ipl *IpLocation) loadQQwry() {
 }
 
 // loadCustomIP 加载自定义IP归属地库
-func (ipl *IpLocation) loadCustomIP() {
+func (ipl *Ipv4Location) loadCustomIP() {
 	content, err := os.ReadFile(filepath.Join(conf.GetRootPath(), "thirdparty/custom/iplocation-custom-B.txt"))
 	if err != nil {
 		logging.RuntimeLog.Error(err)

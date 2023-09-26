@@ -56,10 +56,10 @@
                                 </div>
                             </div>
                             {{ if .ip_info.ColorTag }}
-                            <a href="http://{{ .ip_info.IP }}" class="badge {{ .ip_info.ColorTag }}"
+                            <a href="http://{{ .ip_info.IPFormatted }}" class="badge {{ .ip_info.ColorTag }}"
                                target="_blank">{{ .ip_info.IP }}</a>
                             {{ else }}
-                            <a href="http://{{.ip_info.IP }}" target="_blank">{{ .ip_info.IP }}</a>
+                            <a href="http://{{.ip_info.IPFormatted }}" target="_blank">{{ .ip_info.IP }}</a>
                             {{ end }}
                         </div>
                     </h2>
@@ -219,9 +219,9 @@
                         <td>
                             {{ if and .IP .Port }}
                             {{ if eq .Port "443" "8443" }}
-                            <a href="https://{{.IP}}:{{.Port}}" target="_blank">{{.Port}}</a>
+                            <a href="https://{{.IPFormatted}}:{{.Port}}" target="_blank">{{.Port}}</a>
                             {{ else }}
-                            <a href="http://{{.IP}}:{{.Port}}" target="_blank">{{.Port}}</a>
+                            <a href="http://{{.IPFormatted}}:{{.Port}}" target="_blank">{{.Port}}</a>
                             {{ end }}
                             {{ else }}
                             {{ .Port }}

@@ -96,7 +96,7 @@ func doPortScanAndSave(taskId string, mainTaskId string, config portscan.Config)
 				}
 				ip := dataArray[0]
 				port, err := strconv.Atoi(dataArray[1])
-				if utils.CheckIPV4(ip) == false || err != nil {
+				if !utils.CheckIP(ip) || err != nil {
 					continue
 				}
 				if !resultPortScan.HasIP(ip) {

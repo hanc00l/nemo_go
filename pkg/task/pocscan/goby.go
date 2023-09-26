@@ -23,7 +23,7 @@ type Goby struct {
 }
 
 // goby服务端部署：
-// goby-cmd -mode api -bind 127.0.0.1:8362 -apiauth goby:goby
+// goby-cmd -mode api -bind 127.0.0.1:8361 -apiauth goby:goby
 
 // GobyStartScanRequest 扫描任务请求参数
 type GobyStartScanRequest struct {
@@ -219,8 +219,11 @@ func (g *Goby) Do() {
 		logging.RuntimeLog.Warning("no goby api set")
 		return
 	}
-	ips := strings.Split(g.Config.Target, ",")
-	taskId, api, err := g.StartScan(ips)
+	var urlsFormatted []string
+	if urlsFormatted = checkAndFormatUrl(g.Config.Target, false); len(urlsFormatted) == 0 {
+		return
+	}
+	taskId, api, err := g.StartScan(urlsFormatted)
 	if err != nil {
 		logging.CLILog.Error(err)
 		logging.RuntimeLog.Error(err)

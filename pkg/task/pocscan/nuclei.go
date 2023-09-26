@@ -37,30 +37,12 @@ func (n *Nuclei) Do() {
 	defer os.Remove(resultTempFile)
 	defer os.Remove(inputTargetFile)
 
-	btc := custom.NewBlackTargetCheck(custom.CheckAll)
-	urls := strings.Split(n.Config.Target, ",")
 	var urlsFormatted []string
 	//由于nuclei要求url要http或https开始，非http/https协议不进行漏洞检测，节约扫描时间
-	for _, u := range urls {
-		if btc.CheckBlack(utils.HostStrip(u)) {
-			logging.RuntimeLog.Warningf("%s is in blacklist,skip...", u)
-			continue
-		}
-		if strings.HasPrefix(u, "http") == false {
-			protocol := getProtocol(u, 4)
-			if protocol == "" || protocol == "tcp" {
-				continue
-			}
-			urlsFormatted = append(urlsFormatted, fmt.Sprintf("%s://%s", protocol, u))
-		} else {
-			urlsFormatted = append(urlsFormatted, u)
-		}
-	}
 	//没有需要检测的端口,直接返回
-	if len(urlsFormatted) == 0 {
+	if urlsFormatted = checkAndFormatUrl(n.Config.Target, true); len(urlsFormatted) == 0 {
 		return
 	}
-
 	err := os.WriteFile(inputTargetFile, []byte(strings.Join(urlsFormatted, "\n")), 0666)
 	if err != nil {
 		logging.RuntimeLog.Error(err.Error())
@@ -83,7 +65,7 @@ func (n *Nuclei) Do() {
 		"-bs", fmt.Sprintf("%d", nucleiConcurrencyThreadNumber[conf.WorkerPerformanceMode]),
 		"-rl", fmt.Sprintf("%d", nucleiConcurrencyThreadNumber[conf.WorkerPerformanceMode]*6),
 		"-t", filepath.Join(conf.GetAbsRootPath(), conf.GlobalWorkerConfig().Pocscan.Nuclei.PocPath, n.Config.PocFile),
-		"-json", "-o", resultTempFile, "-l", inputTargetFile,
+		"-j", "-o", resultTempFile, "-l", inputTargetFile,
 	)
 	cmd := exec.Command(cmdBin, cmdArgs...)
 	var stderr bytes.Buffer
@@ -106,7 +88,7 @@ func (n *Nuclei) parseNucleiContentResult(content []byte) {
 		logging.RuntimeLog.Error(err.Error())
 		return
 	}
-	host := utils.HostStrip(xr.Host)
+	host := utils.ParseHost(xr.Host)
 	if host == "" {
 		return
 	}
@@ -201,4 +183,35 @@ func getProtocol(host string, Timeout int64) string {
 		protocol = "tcp"
 	}
 	return protocol
+}
+
+// checkAndFormatUrl 对调用poc工具前对目标（ipv4/ipv6及域名）黑名单检查、格式统一化处理
+func checkAndFormatUrl(targets string, checkHttpProtocol bool) (results []string) {
+	btc := custom.NewBlackTargetCheck(custom.CheckAll)
+	for _, target := range strings.Split(targets, ",") {
+		var host string
+		var port int
+		host = utils.ParseHost(target)
+		if btc.CheckBlack(host) {
+			logging.RuntimeLog.Warningf("%s is in blacklist,skip...", target)
+			continue
+		}
+		var url string
+		if utils.CheckDomain(host) {
+			url = target
+		} else {
+			_, host, port = utils.ParseHostUrl(target)
+			url = utils.FormatHostUrl("", host, port)
+		}
+		if checkHttpProtocol && !strings.HasPrefix(target, "http") {
+			protocol := getProtocol(url, 4)
+			if protocol == "" || protocol == "tcp" {
+				continue
+			}
+			results = append(results, fmt.Sprintf("%s://%s", protocol, url))
+		} else {
+			results = append(results, url)
+		}
+	}
+	return
 }

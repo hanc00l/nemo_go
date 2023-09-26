@@ -81,7 +81,7 @@ var (
 
 // parseIpPort 解析搜索结果中的IP记录
 func parseIpPort(ipResult portscan.Result, fsr onlineSearchResult, source string, btc *custom.BlackTargetCheck) {
-	if fsr.IP == "" || utils.CheckIPV4(fsr.IP) == false {
+	if fsr.IP == "" || !utils.CheckIP(fsr.IP) {
 		return
 	}
 	if btc != nil && btc.CheckBlack(fsr.IP) {
@@ -128,7 +128,7 @@ func parseDomainIP(domainResult domainscan.Result, fsr onlineSearchResult, sourc
 	host = strings.Replace(host, "http://", "", -1)
 	host = strings.Replace(host, "/", "", -1)
 	domain := strings.Split(host, ":")[0]
-	if domain == "" || utils.CheckIPV4(domain) || utils.CheckDomain(domain) == false {
+	if domain == "" || utils.CheckIP(domain) || !utils.CheckDomain(domain) {
 		return
 	}
 	if btc != nil && btc.CheckBlack(domain) {

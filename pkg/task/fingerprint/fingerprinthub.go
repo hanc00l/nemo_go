@@ -3,7 +3,6 @@ package fingerprint
 import (
 	"bytes"
 	"encoding/json"
-	"fmt"
 	"github.com/hanc00l/nemo_go/pkg/conf"
 	"github.com/hanc00l/nemo_go/pkg/logging"
 	"github.com/hanc00l/nemo_go/pkg/task/custom"
@@ -51,7 +50,7 @@ func (f *FingerprintHub) Do() {
 				if _, ok := blankPort[portNumber]; ok {
 					continue
 				}
-				url := fmt.Sprintf("%v:%v", ipName, portNumber)
+				url := utils.FormatHostUrl("", ipName, portNumber)
 				swg.Add()
 				go func(ip string, port int, u string) {
 					defer swg.Done()
@@ -91,7 +90,7 @@ func (f *FingerprintHub) Do() {
 				if _, ok := blankPort[port]; ok {
 					continue
 				}
-				url := fmt.Sprintf("%s:%d", domain, port)
+				url := utils.FormatHostUrl("", domain, port)
 				swg.Add()
 				go func(d string, u string) {
 					defer swg.Done()

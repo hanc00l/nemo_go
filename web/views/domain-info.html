@@ -277,9 +277,9 @@
                         <td>
                             {{ if and .IP .Port }}
                             {{ if eq .Port "443" "8443" }}
-                            <a href="https://{{.IP}}:{{.Port}}" target="_blank">{{.Port}}</a>
+                            <a href="https://{{.IPFormatted}}:{{.Port}}" target="_blank">{{.Port}}</a>
                             {{ else }}
-                            <a href="http://{{.IP}}:{{.Port}}" target="_blank">{{.Port}}</a>
+                            <a href="http://{{.IPFormatted}}:{{.Port}}" target="_blank">{{.Port}}</a>
                             {{ end }}
                             {{ else }}
                             {{ .Port }}

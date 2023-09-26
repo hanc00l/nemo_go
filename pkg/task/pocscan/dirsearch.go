@@ -8,7 +8,6 @@ import (
 	"github.com/evilsocket/dirsearch"
 	"github.com/hanc00l/nemo_go/pkg/conf"
 	"github.com/hanc00l/nemo_go/pkg/logging"
-	"github.com/hanc00l/nemo_go/pkg/task/custom"
 	"github.com/hanc00l/nemo_go/pkg/utils"
 	"net/http"
 	"net/url"
@@ -80,32 +79,23 @@ func (d *Dirsearch) readBlankList(file string) (blackList []string) {
 
 // Do 执行Dirsearch
 func (d *Dirsearch) Do() {
-	btc := custom.NewBlackTargetCheck(custom.CheckAll)
-	for _, line := range strings.Split(d.Config.Target, ",") {
-		target := strings.TrimSpace(line)
-		if target == "" {
-			continue
-		}
-		if btc.CheckBlack(utils.HostStrip(target)) {
-			logging.RuntimeLog.Warningf("%s is in blacklist,skip...", target)
-			continue
-		}
-		for _, protocol := range []string{"http", "https"} {
-			//清空上一次暂存的结果
-			d.resultUrl = []string{}
-			url := fmt.Sprintf("%s://%s/", protocol, target) //注意最后要加/
-			d.RunDirsearch(url)
-			//保存结果
-			if len(d.resultUrl) > 0 {
-				d.Result = append(d.Result, Result{
-					Target:      target,
-					Url:         url,
-					PocFile:     d.Config.PocFile,
-					Source:      "dirsearch",
-					Extra:       strings.Join(d.resultUrl, "\n"),
-					WorkspaceId: d.Config.WorkspaceId,
-				})
-			}
+	var urlsFormatted []string
+	urlsFormatted = checkAndFormatUrl(d.Config.Target, true)
+	for _, url := range urlsFormatted {
+		target := utils.ParseHost(url)
+		//清空上一次暂存的结果
+		d.resultUrl = []string{}
+		d.RunDirsearch(url)
+		//保存结果
+		if len(d.resultUrl) > 0 {
+			d.Result = append(d.Result, Result{
+				Target:      target,
+				Url:         url,
+				PocFile:     d.Config.PocFile,
+				Source:      "dirsearch",
+				Extra:       strings.Join(d.resultUrl, "\n"),
+				WorkspaceId: d.Config.WorkspaceId,
+			})
 		}
 	}
 }
@@ -139,7 +129,11 @@ func (d *Dirsearch) DoRequest(page string) interface{} {
 		}}
 
 	// Create HEAD request with random user agent.
-	req, _ := http.NewRequest("HEAD", url, nil)
+	req, err := http.NewRequest("HEAD", url, nil)
+	if err != nil {
+		logging.RuntimeLog.Error(err)
+		return nil
+	}
 	req.Header.Set("User-Agent", dirsearch.GetRandomUserAgent())
 
 	if resp, err := client.Do(req); err == nil {

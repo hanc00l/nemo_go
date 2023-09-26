@@ -12,7 +12,7 @@ import (
 type Ip struct {
 	Id             int       `gorm:"primaryKey"`
 	IpName         string    `gorm:"column:ip"`
-	IpInt          int       `gorm:"column:ip_int"`
+	IpInt          uint64    `gorm:"column:ip_int"`
 	OrgId          *int      `gorm:"column:org_id"` //使用指针可以处理数据库的NULL（go中传递nil）
 	Location       string    `gorm:"column:location"`
 	Status         string    `gorm:"column:status"`
@@ -43,7 +43,12 @@ func (ip *Ip) Get() (success bool) {
 func (ip *Ip) Add() (success bool) {
 	ip.CreateDatetime = time.Now()
 	ip.UpdateDatetime = time.Now()
-	ip.IpInt = int(utils.IPToUInt32(ip.IpName))
+	if utils.CheckIPV4(ip.IpName) {
+		ip.IpInt = uint64(utils.IPV4ToUInt32(ip.IpName))
+	} else if utils.CheckIPV6(ip.IpName) {
+		ip.IpInt = utils.IPV6Prefix64ToUInt64(ip.IpName)
+		ip.IpName = utils.GetIPV6ParsedFormat(ip.IpName)
+	}
 
 	db := GetDB()
 	defer CloseDB(db)
@@ -156,19 +161,24 @@ func (ip *Ip) makeWhere(searchMap map[string]interface{}) *gorm.DB {
 			db = makeLike(value, column, db)
 		case "domain":
 			dbDomains := GetDB().Model(&Domain{}).Select("id").Where("domain like ?", fmt.Sprintf("%%%s%%", value))
-			dbContent := GetDB().Model(&DomainAttr{}).Select("content").Where("tag", "A").Where("r_id in (?)", dbDomains)
+			dbContent := GetDB().Model(&DomainAttr{}).Select("content").Where("tag='A' or tag='AAAA'").Where("r_id in (?)", dbDomains)
 			db = db.Where("ip in (?)", dbContent)
 			CloseDB(dbDomains)
 			CloseDB(dbContent)
 		case "ip":
-			_ip, _ipNet, err := net.ParseCIDR(value.(string))
-			if err != nil {
-				db = db.Where("ip", value)
+			if utils.CheckIPV4(value.(string)) || utils.CheckIPV4Subnet(value.(string)) {
+				_ip, _ipNet, err := net.ParseCIDR(value.(string))
+				if err != nil {
+					db = db.Where("ip", value)
+				} else {
+					ones, bits := _ipNet.Mask.Size()
+					_ipStart := utils.IPV4ToUInt32(_ip.String())
+					_ipEnd := _ipStart + (1 << (bits - ones)) - 1
+					db = db.Where("ip_int between ? and ?", _ipStart, _ipEnd)
+				}
 			} else {
-				ones, bits := _ipNet.Mask.Size()
-				_ipStart := utils.IPToUInt32(_ip.String())
-				_ipEnd := _ipStart + (1 << (bits - ones)) - 1
-				db = db.Where("ip_int between ? and ?", _ipStart, _ipEnd)
+				// ipv6是模糊查询
+				db = makeLike(value, column, db)
 			}
 		case "port":
 			ports := strings.Split(value.(string), ",")

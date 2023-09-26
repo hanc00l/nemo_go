@@ -19,7 +19,7 @@
                         </div>
                         <div class="form-group col-md-2">
                             <label class="control-label" for="ip_address">IP</label>
-                            <input class="form-control" type="text" id="ip_address" placeholder="IP（单个或IP/掩码）"
+                            <input class="form-control" type="text" id="ip_address" placeholder="IPv4（单个或掩码）、IPv6模糊匹配"
                                    value="{{ .data.IpAddressIp }}">
                         </div>
                         <div class="form-group col-md-2">
@@ -546,7 +546,7 @@
                                                                                id="checkbox_nuclei" type="checkbox"><b>Nuclei</b>
                                                                     </label>
                                                                 </div>
-                                                                <input class="form-control" id="input_goby_poc_file"
+                                                                <input class="form-control" id="input_nuclei_poc_file"
                                                                        type="text"
                                                                        placeholder="--选择poc文件--" value=""
                                                                        list="datalist_nuclei_poc_file">

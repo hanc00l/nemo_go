@@ -44,7 +44,7 @@ func (f *FOFA) GetQueryString(domain string, config OnlineAPIConfig, filterKeywo
 	if config.SearchByKeyWord {
 		query = config.Target
 	} else {
-		if utils.CheckIPV4(domain) || utils.CheckIPV4Subnet(domain) {
+		if utils.CheckIPOrSubnet(domain) {
 			query = fmt.Sprintf("ip=\"%s\"", domain)
 		} else {
 			query = fmt.Sprintf("domain=\"%s\"", domain)
@@ -146,22 +146,30 @@ func (f *FOFA) ParseContentResult(content []byte) (ipResult portscan.Result, dom
 		if err != nil || index == 0 {
 			continue
 		}
-		domain := utils.HostStrip(strings.TrimSpace(row[0]))
+		domain := utils.ParseHost(strings.TrimSpace(row[0]))
 		ip := strings.TrimSpace(row[2])
 		port, portErr := strconv.Atoi(row[3])
 		title := strings.TrimSpace(row[4])
 		service := strings.TrimSpace(row[6])
 		//域名属性：
-		if len(domain) > 0 && utils.CheckIPV4(domain) == false {
+		if len(domain) > 0 && !utils.CheckIP(domain) {
 			if domainResult.HasDomain(domain) == false {
 				domainResult.SetDomain(domain)
 			}
 			if len(ip) > 0 {
-				domainResult.SetDomainAttr(domain, domainscan.DomainAttrResult{
+				dar := domainscan.DomainAttrResult{
 					Source:  "fofa",
-					Tag:     "A",
 					Content: ip,
-				})
+				}
+				if utils.CheckIPV4(ip) {
+					dar.Tag = "A"
+				} else if utils.CheckIPV6(ip) {
+					dar.Tag = "AAAA"
+					dar.Content = utils.GetIPV6ParsedFormat(ip)
+				}
+				if len(dar.Tag) > 0 {
+					domainResult.SetDomainAttr(domain, dar)
+				}
 			}
 			if len(title) > 0 {
 				domainResult.SetDomainAttr(domain, domainscan.DomainAttrResult{
@@ -172,7 +180,7 @@ func (f *FOFA) ParseContentResult(content []byte) (ipResult portscan.Result, dom
 			}
 		}
 		//IP属性（由于不是主动扫描，忽略导入StatusCode）
-		if len(ip) == 0 || utils.CheckIPV4(ip) == false || portErr != nil {
+		if len(ip) == 0 || !utils.CheckIP(ip) || portErr != nil {
 			continue
 		}
 		if ipResult.HasIP(ip) == false {

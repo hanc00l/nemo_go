@@ -145,7 +145,7 @@ func WhoisQuery(taskId, mainTaskId, configJSON string) (result string, err error
 
 // checkIgnoreResult 检查资产查询API中的IP资产，非中国IP或CDN，则不保存该结果
 func checkIgnoreResult(portScanResult *portscan.Result, domainScanResult *domainscan.Result, config onlineapi.OnlineAPIConfig) {
-	iplocation := custom.NewIPLocation()
+	iplocation := custom.NewIPv4Location()
 	cdnCheck := custom.NewCDNCheck()
 	if len(portScanResult.IPResult) > 0 && (config.IsIgnoreOutofChina || config.IsIgnoreCDN) {
 		for ip := range portScanResult.IPResult {

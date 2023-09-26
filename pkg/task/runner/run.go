@@ -767,38 +767,47 @@ func getDomainFLD(domainTargetList []string) (fldDomain []string) {
 func formatIpTarget(target string, orgId int) (ipTargetList []string) {
 	for _, t := range strings.Split(target, "\n") {
 		if tt := strings.TrimSpace(t); tt != "" {
-			//192.168.1.1  192.168.1.0/24
-			if utils.CheckIPV4(tt) || utils.CheckIPV4Subnet(tt) {
+			//192.168.1.1  192.168.1.0/24及ipv6
+			if utils.CheckIPOrSubnet(tt) {
 				ipTargetList = append(ipTargetList, tt)
 				continue
 			}
-			//192.168.1.1-192.168.1.5
+			//192.168.1.1-192.168.1.5及ipv6
 			address := strings.Split(tt, "-")
-			if len(address) == 2 && utils.CheckIPV4(address[0]) && utils.CheckIPV4(address[1]) {
+			if len(address) == 2 && utils.CheckIP(address[0]) && utils.CheckIP(address[1]) {
 				ipTargetList = append(ipTargetList, tt)
 				continue
 			}
 			//域名，将域名转成ip地址
 			_, hosts := domainscan.ResolveDomain(tt)
-			if len(hosts) > 0 {
-				domainResult := domainscan.Result{DomainResult: make(map[string]*domainscan.DomainResult)}
-				domainResult.SetDomain(tt)
-				for _, h := range hosts {
-					ipTargetList = append(ipTargetList, h)
-					domainResult.SetDomainAttr(tt, domainscan.DomainAttrResult{
-						Source:  "portscan",
-						Tag:     "A",
-						Content: h,
-					})
-				}
-				config := domainscan.Config{OrgId: &orgId}
-				// config.OrgId 为int，默认为0
-				// db.Organization.OrgId为指针，默认nil
-				if *config.OrgId == 0 {
-					config.OrgId = nil
-				}
-				domainResult.SaveResult(config)
+			if len(hosts) == 0 {
+				continue
 			}
+			domainResult := domainscan.Result{DomainResult: make(map[string]*domainscan.DomainResult)}
+			domainResult.SetDomain(tt)
+			for _, h := range hosts {
+				dar := domainscan.DomainAttrResult{
+					Source:  "portscan",
+					Content: h,
+				}
+				if utils.CheckIPV4(h) {
+					dar.Tag = "A"
+				} else if utils.CheckIPV6(h) {
+					dar.Tag = "AAAA"
+					dar.Content = utils.GetIPV6ParsedFormat(h)
+				}
+				if dar.Tag == "A" || dar.Tag == "AAAA" {
+					ipTargetList = append(ipTargetList, h)
+					domainResult.SetDomainAttr(tt, dar)
+				}
+			}
+			config := domainscan.Config{OrgId: &orgId}
+			// config.OrgId 为int，默认为0
+			// db.Organization.OrgId为指针，默认nil
+			if *config.OrgId == 0 {
+				config.OrgId = nil
+			}
+			domainResult.SaveResult(config)
 		}
 	}
 

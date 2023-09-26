@@ -64,7 +64,7 @@ func (s *ScreenShot) Do() {
 				if _, ok := blankPort[portNumber]; ok {
 					continue
 				}
-				protocol := utils.GetProtocol(fmt.Sprintf("%s:%d", ipName, portNumber), 5)
+				protocol := utils.GetProtocol(utils.FormatHostUrl("", ipName, portNumber), 5)
 				swg.Add()
 				go s.doScreenshotAndResize(&swg, ipName, portNumber, protocol)
 
@@ -90,10 +90,9 @@ func (s *ScreenShot) Do() {
 				if _, ok := blankPort[port]; ok {
 					continue
 				}
-				protocol := utils.GetProtocol(fmt.Sprintf("%s:%d", domain, port), 5)
+				protocol := utils.GetProtocol(utils.FormatHostUrl("", domain, port), 5)
 				swg.Add()
 				go s.doScreenshotAndResize(&swg, domain, port, protocol)
-
 			}
 		}
 	}
@@ -131,7 +130,7 @@ func (s *ScreenShot) SaveFile(localSavePath string, result []ScreenshotFileInfo)
 			logging.RuntimeLog.Error("empty upload attribute")
 			continue
 		}
-		if !utils.CheckIPV4(sfi.Domain) && !utils.CheckDomain(sfi.Domain) {
+		if !utils.CheckIP(sfi.Domain) && !utils.CheckDomain(sfi.Domain) {
 			logging.RuntimeLog.Errorf("invalid domain:%s", sfi.Domain)
 			continue
 		}
@@ -164,7 +163,7 @@ func (s *ScreenShot) SaveFile(localSavePath string, result []ScreenshotFileInfo)
 
 // LoadScreenshotFile 获取screenshot文件
 func (s *ScreenShot) LoadScreenshotFile(workspaceGUID, domain string) (r []string) {
-	if !utils.CheckDomain(domain) && !utils.CheckIPV4(domain) {
+	if !utils.CheckDomain(domain) && !utils.CheckIP(domain) {
 		return
 	}
 	files, _ := filepath.Glob(filepath.Join(conf.GlobalServerConfig().Web.WebFiles, workspaceGUID, "screenshot", domain, "*.png"))
@@ -181,7 +180,7 @@ func (s *ScreenShot) LoadScreenshotFile(workspaceGUID, domain string) (r []strin
 func (s *ScreenShot) doScreenshotAndResize(swg *sizedwaitgroup.SizedWaitGroup, domain string, port int, protocol string) {
 	defer swg.Done()
 
-	u := fmt.Sprintf("%s://%s:%d", protocol, domain, port)
+	u := utils.FormatHostUrl(protocol, domain, port)
 	file1 := utils.GetTempPNGPathFileName()
 	defer os.Remove(file1)
 	if DoFullScreenshot(u, file1) {
@@ -199,7 +198,7 @@ func (s *ScreenShot) doScreenshotAndResize(swg *sizedwaitgroup.SizedWaitGroup, d
 
 // Delete 删除指定domain、IP下保存的screenshot文件
 func (s *ScreenShot) Delete(workspaceGUID, domain string) bool {
-	if !utils.CheckDomain(domain) && !utils.CheckIPV4(domain) {
+	if !utils.CheckDomain(domain) && !utils.CheckIP(domain) {
 		logging.RuntimeLog.Errorf("invalid domain:%s", domain)
 		return false
 	}

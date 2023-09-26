@@ -5,6 +5,7 @@ import (
 	"github.com/hanc00l/nemo_go/pkg/conf"
 	"github.com/hanc00l/nemo_go/pkg/logging"
 	"github.com/hanc00l/nemo_go/pkg/utils"
+	"net/netip"
 	"os"
 	"path/filepath"
 	"regexp"
@@ -26,7 +27,8 @@ const (
 )
 
 type IPTarget struct {
-	BlackMapList map[string]struct{}
+	Ipv4BlackMapList map[string]struct{}
+	Ipv6BlackMapList []netip.Prefix
 }
 
 type DomainTarget struct {
@@ -38,6 +40,7 @@ type BlackTargetCheck struct {
 	blackTargetList map[BlackCheckType]BlackTarget
 }
 
+// NewBlackTargetCheck 创建黑名单检查
 func NewBlackTargetCheck(checkType BlackCheckType) *BlackTargetCheck {
 	c := &BlackTargetCheck{checkType: checkType, blackTargetList: make(map[BlackCheckType]BlackTarget)}
 
@@ -55,6 +58,7 @@ func NewBlackTargetCheck(checkType BlackCheckType) *BlackTargetCheck {
 	return c
 }
 
+// CheckBlack 检查黑名单
 func (c *BlackTargetCheck) CheckBlack(target string) bool {
 	domain := strings.TrimSpace(target)
 	if domain == "" {
@@ -69,6 +73,7 @@ func (c *BlackTargetCheck) CheckBlack(target string) bool {
 	return false
 }
 
+// AppendBlackTarget 追加黑名单
 func (c *BlackTargetCheck) AppendBlackTarget(target string) error {
 	f, err := os.OpenFile(filepath.Join(conf.GetRootPath(), "thirdparty/custom", c.GetBlackFileName()), os.O_WRONLY|os.O_APPEND, 0666)
 	if err != nil {
@@ -86,6 +91,7 @@ func (c *BlackTargetCheck) AppendBlackTarget(target string) error {
 	return nil
 }
 
+// GetBlackFileName 获取黑名单文件名
 func (c *BlackTargetCheck) GetBlackFileName() string {
 	if c.checkType == CheckIP || c.checkType == CheckDomain {
 		return c.blackTargetList[c.checkType].GetBlackFileName()
@@ -93,12 +99,14 @@ func (c *BlackTargetCheck) GetBlackFileName() string {
 	return "black_error.txt"
 }
 
+// GetBlackFileName 获取黑名单文件名
 func (t *IPTarget) GetBlackFileName() string {
 	return "black_ip.txt"
 }
 
+// LoadBlackTargetList 加载黑名单列表
 func (t *IPTarget) LoadBlackTargetList() error {
-	t.BlackMapList = make(map[string]struct{})
+	t.Ipv4BlackMapList = make(map[string]struct{})
 
 	inputFile, err := os.Open(filepath.Join(conf.GetRootPath(), "thirdparty/custom/", t.GetBlackFileName()))
 	if err != nil {
@@ -113,11 +121,19 @@ func (t *IPTarget) LoadBlackTargetList() error {
 			continue
 		}
 		ipAndComment := strings.Split(text, " ")
-		ips := utils.ParseIP(ipAndComment[0])
-		for _, ip := range ips {
-			if _, ok := t.BlackMapList[ip]; !ok {
-				t.BlackMapList[ip] = struct{}{}
+		if utils.CheckIPV4(ipAndComment[0]) || utils.CheckIPV4Subnet(ipAndComment[0]) {
+			ips := utils.ParseIP(ipAndComment[0])
+			for _, ip := range ips {
+				if _, ok := t.Ipv4BlackMapList[ip]; !ok {
+					t.Ipv4BlackMapList[ip] = struct{}{}
+				}
 			}
+		} else if utils.CheckIPV6(ipAndComment[0]) || utils.CheckIPV6Subnet(ipAndComment[0]) {
+			ipv6Prefix, err := netip.ParsePrefix(ipAndComment[0])
+			if err != nil {
+				continue
+			}
+			t.Ipv6BlackMapList = append(t.Ipv6BlackMapList, ipv6Prefix)
 		}
 	}
 	inputFile.Close()
@@ -125,19 +141,29 @@ func (t *IPTarget) LoadBlackTargetList() error {
 	return nil
 }
 
+// CheckBlackTarget 检查黑名单
 func (t *IPTarget) CheckBlackTarget(target string) bool {
 	if utils.CheckIPV4(target) {
-		_, existed := t.BlackMapList[target]
+		_, existed := t.Ipv4BlackMapList[target]
 		return existed
+	}
+	if utils.CheckIPV6(target) {
+		for _, ipv6Prefix := range t.Ipv6BlackMapList {
+			ipv6, err := netip.ParseAddr(target)
+			if err == nil && ipv6Prefix.Contains(ipv6) {
+				return true
+			}
+		}
 	}
 	return false
 }
 
+// GetBlackFileName 获取黑名单文件名
 func (t *DomainTarget) GetBlackFileName() string {
 	return "black_domain.txt"
-
 }
 
+// LoadBlackTargetList 加载黑名单列表
 func (t *DomainTarget) LoadBlackTargetList() error {
 	t.BlackMapList = make(map[string]struct{})
 
@@ -163,6 +189,7 @@ func (t *DomainTarget) LoadBlackTargetList() error {
 	return nil
 }
 
+// CheckBlackTarget 检查黑名单
 func (t *DomainTarget) CheckBlackTarget(target string) bool {
 	if !utils.CheckIPV4(target) && utils.CheckDomain(target) {
 		for txt := range t.BlackMapList {

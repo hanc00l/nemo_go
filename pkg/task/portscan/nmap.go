@@ -6,7 +6,6 @@ import (
 	"github.com/hanc00l/nemo_go/pkg/task/custom"
 	"os"
 	"os/exec"
-	"regexp"
 	"runtime"
 	"strconv"
 	"strings"
@@ -32,21 +31,37 @@ func NewNmap(config Config) *Nmap {
 // Do 执行nmap
 func (nmap *Nmap) Do() {
 	nmap.Result.IPResult = make(map[string]*IPResult)
-	inputTargetFile := utils.GetTempPathFileName()
-	resultTempFile := utils.GetTempPathFileName()
-	defer os.Remove(inputTargetFile)
-	defer os.Remove(resultTempFile)
 
+	var targetIpV4, targetIpV6 []string
 	btc := custom.NewBlackTargetCheck(custom.CheckIP)
-	var targets []string
 	for _, target := range strings.Split(nmap.Config.Target, ",") {
 		t := strings.TrimSpace(target)
 		if btc.CheckBlack(t) {
 			logging.RuntimeLog.Warningf("%s is in blacklist,skip...", t)
 			continue
 		}
-		targets = append(targets, t)
+		if utils.CheckIPV4(t) || utils.CheckIPV4Subnet(t) {
+			targetIpV4 = append(targetIpV4, t)
+		} else if utils.CheckIPV6(t) || utils.CheckIPV6Subnet(t) {
+			targetIpV6 = append(targetIpV6, t)
+		}
 	}
+	if len(targetIpV4) > 0 {
+		nmap.RunNmap(targetIpV4, false)
+	}
+	if len(targetIpV6) > 0 {
+		nmap.RunNmap(targetIpV6, true)
+	}
+	FilterIPHasTooMuchPort(&nmap.Result, false)
+}
+
+// RunNmap 调用并执行一次nmap
+func (nmap *Nmap) RunNmap(targets []string, ipv6 bool) {
+	inputTargetFile := utils.GetTempPathFileName()
+	resultTempFile := utils.GetTempPathFileName()
+	defer os.Remove(inputTargetFile)
+	defer os.Remove(resultTempFile)
+
 	err := os.WriteFile(inputTargetFile, []byte(strings.Join(targets, "\n")), 0666)
 	if err != nil {
 		logging.RuntimeLog.Error(err.Error())
@@ -57,8 +72,11 @@ func (nmap *Nmap) Do() {
 	cmdArgs = append(
 		cmdArgs,
 		nmap.Config.Tech, "-T4", "--open", "-n", "--randomize-hosts",
-		"--min-rate", strconv.Itoa(nmap.Config.Rate), "-oG", resultTempFile, "-iL", inputTargetFile,
+		"--min-rate", strconv.Itoa(nmap.Config.Rate), "-oX", resultTempFile, "-iL", inputTargetFile,
 	)
+	if ipv6 {
+		cmdArgs = append(cmdArgs, "-6")
+	}
 	if !nmap.Config.IsPing {
 		cmdArgs = append(cmdArgs, "-Pn")
 	}
@@ -82,7 +100,6 @@ func (nmap *Nmap) Do() {
 		return
 	}
 	nmap.parseResult(resultTempFile)
-	FilterIPHasTooMuchPort(&nmap.Result, false)
 }
 
 // parseResult 解析nmap结果
@@ -92,57 +109,9 @@ func (nmap *Nmap) parseResult(outputTempFile string) {
 		logging.RuntimeLog.Error(err)
 		return
 	}
-
-	hostAndPortsReg := regexp.MustCompile("^Host:(.+)Ports:(.+)")
-	ipReg := regexp.MustCompile("\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}")
-
-	s := custom.Service{}
-	for _, line := range strings.Split(string(content), "\n") {
-		txt := strings.TrimSpace(line)
-		if txt == "" || strings.HasPrefix(txt, "#") {
-			continue
-		}
-		//check exist ip and ports
-		hostAndPorts := hostAndPortsReg.FindAllStringSubmatch(txt, -1)
-		if len(hostAndPorts) < 1 || len(hostAndPorts[0]) != 3 {
-			continue
-		}
-		//ip
-		ip := ipReg.FindString(hostAndPorts[0][1])
-		if ip == "" {
-			continue
-		}
-		if !nmap.Result.HasIP(ip) {
-			nmap.Result.SetIP(ip)
-		}
-		//ports
-		for _, p := range strings.Split(strings.TrimSpace(hostAndPorts[0][2]), ",") {
-			portInfo := strings.Split(strings.TrimSpace(p), "/")
-			portNumber, err := strconv.Atoi(portInfo[0])
-			if err != nil {
-				logging.RuntimeLog.Error(err)
-				continue
-			}
-			if !nmap.Result.HasPort(ip, portNumber) {
-				nmap.Result.SetPort(ip, portNumber)
-			}
-			service := portInfo[4]
-			if service == custom.UnknownService || service == "" {
-				service = s.FindService(portNumber, ip)
-			}
-			nmap.Result.SetPortAttr(ip, portNumber, PortAttrResult{
-				Source:  "portscan",
-				Tag:     "service",
-				Content: service,
-			})
-			if portInfo[6] != "" {
-				nmap.Result.SetPortAttr(ip, portNumber, PortAttrResult{
-					Source:  "portscan",
-					Tag:     "banner",
-					Content: portInfo[6],
-				})
-			}
-		}
+	result := nmap.ParseContentResult(content)
+	for ip, ipr := range result.IPResult {
+		nmap.Result.IPResult[ip] = ipr
 	}
 }
 
@@ -161,10 +130,8 @@ func (nmap *Nmap) ParseContentResult(content []byte) (result Result) {
 		}
 		var ip string
 		for _, addr := range host.Addresses {
-			if addr.AddrType == "ipv4" {
-				ip = addr.Addr
-				break
-			}
+			ip = addr.Addr
+			break
 		}
 		if ip == "" {
 			continue

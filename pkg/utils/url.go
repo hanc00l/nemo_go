@@ -8,18 +8,27 @@ import (
 	"net"
 	"net/url"
 	"regexp"
+	"strconv"
 	"strings"
 	"time"
 )
 
 var Socks5Proxy string
 
-// HostStrip 将http://a.b.c:80/这种url去除不相关的字符，返回主机名
-func HostStrip(u string) string {
+// ParseHost 将http://a.b.c:80/这种url去除不相关的字符，返回主机名
+func ParseHost(u string) string {
+	// url.Parse必须是完整的schema://host:port格式才能解析，比如http://example.org:8080
+	// url.Parse支持对ipv6完整URL的解析
+	// 返回的hostname为example.org（不带端口）
 	p, err := url.Parse(u)
 	if err == nil && p.Host != "" {
 		return p.Hostname()
 	}
+
+	if _, host, _ := ParseHostUrl(u); len(host) > 0 {
+		return host
+	}
+	// 其它格式处理：
 	host := strings.ReplaceAll(u, "https://", "")
 	host = strings.ReplaceAll(host, "http://", "")
 	host = strings.ReplaceAll(host, "/", "")
@@ -64,6 +73,7 @@ func WrapperTcpWithTimeout(network, address string, timeout time.Duration) (net.
 	d := &net.Dialer{Timeout: timeout}
 	return WrapperTCP(network, address, d)
 }
+
 func WrapperTCP(network, address string, forward *net.Dialer) (net.Conn, error) {
 	//get conn
 	var conn net.Conn
@@ -147,4 +157,67 @@ func GetProtocol(host string, Timeout int64) (protocol string) {
 		protocol = "https"
 	}
 	return protocol
+}
+
+// ParseHostUrl ipv4/v6地址格式识别的通用函数，用于识别ipv4,ipv4:port,ipv6,[ipv6],[ipv6]:port的形式
+func ParseHostUrl(u string) (isIpv6 bool, ip string, port int) {
+	// ipv4
+	if CheckIPV4(u) {
+		ip = u
+		return
+	}
+	// ipv6地址 2400:dd01:103a:4041::10
+	if CheckIPV6(u) {
+		isIpv6 = true
+		ip = u
+		return
+	}
+	//ipv6地址：[2400:dd01:103a:4041::101]:443
+	if strings.Index(u, "[") >= 0 && strings.Index(u, "]") >= 0 {
+		ipv6Re := regexp.MustCompile(`\[(.*?)\]`)
+		m := ipv6Re.FindStringSubmatch(u)
+		if len(m) == 2 && CheckIPV6(m[1]) {
+			isIpv6 = true
+			ip = m[1]
+			portRe := regexp.MustCompile(`\[.*?\]:(\d{1,5})`)
+			n := portRe.FindStringSubmatch(u)
+			if len(n) == 2 {
+				port, _ = strconv.Atoi(n[1])
+			}
+			return
+		}
+	}
+	// ipv4:port  192.168.1.1:443
+	if strings.Index(u, ":") > 0 {
+		ipp := strings.Split(u, ":")
+		if len(ipp) == 2 {
+			if CheckIPV4(ipp[0]) {
+				ip = ipp[0]
+				port, _ = strconv.Atoi(ipp[1])
+			}
+			return
+		}
+	}
+	return
+}
+
+// FormatHostUrl 将ipv4/v6生成url格式，ipv6生成url时，必须增加[]
+func FormatHostUrl(protocol, host string, port int) string {
+	var h string
+	if CheckIPV6(host) {
+		h = fmt.Sprintf("[%s]", host)
+	} else {
+		h = host
+	}
+	var hostPort string
+	if port > 0 {
+		hostPort = fmt.Sprintf("%s:%d", h, port)
+	} else {
+		hostPort = h
+	}
+	if len(protocol) > 0 {
+		return fmt.Sprintf("%s://%s", protocol, hostPort)
+	} else {
+		return hostPort
+	}
 }

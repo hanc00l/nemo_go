@@ -100,7 +100,7 @@ func (x *Httpx) Do() {
 				if _, ok := blankPort[portNumber]; ok {
 					continue
 				}
-				url := fmt.Sprintf("%v:%v", ipName, portNumber)
+				url := utils.FormatHostUrl("", ipName, portNumber) //fmt.Sprintf("%v:%v", ipName, portNumber)
 				swg.Add()
 				go func(ip string, port int, u string) {
 					defer swg.Done()
@@ -158,7 +158,7 @@ func (x *Httpx) Do() {
 				if _, ok := blankPort[port]; ok {
 					continue
 				}
-				url := fmt.Sprintf("%s:%d", domain, port)
+				url := utils.FormatHostUrl("", domain, port) //fmt.Sprintf("%s:%d", domain, port)
 				swg.Add()
 				go func(d string, p int, u string) {
 					defer swg.Done()
@@ -318,7 +318,7 @@ func (x *Httpx) ParseContentResult(content []byte) (result portscan.Result) {
 	for scanner.Scan() {
 		data := scanner.Bytes()
 		host, port, fas, _ := x.ParseHttpxJson(data)
-		if host == "" || port == 0 || len(fas) == 0 || utils.CheckIPV4(host) == false {
+		if host == "" || port == 0 || len(fas) == 0 || !utils.CheckIP(host) {
 			continue
 		}
 		if !result.HasIP(host) {

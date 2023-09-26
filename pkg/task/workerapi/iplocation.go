@@ -25,10 +25,16 @@ func IPLocation(taskId, mainTaskId, configJSON string) (result string, err error
 	resultPortScan := portscan.Result{IPResult: make(map[string]*portscan.IPResult)}
 	ips := strings.Split(config.Target, ",")
 	for _, ip := range ips {
-		lists := utils.ParseIP(ip)
-		for _, oneIp := range lists {
-			if !resultPortScan.HasIP(oneIp) {
-				resultPortScan.SetIP(oneIp)
+		if utils.CheckIPV4(ip) || utils.CheckIPV4Subnet(ip) {
+			lists := utils.ParseIP(ip)
+			for _, oneIp := range lists {
+				if !resultPortScan.HasIP(oneIp) {
+					resultPortScan.SetIP(oneIp)
+				}
+			}
+		} else if utils.CheckIPV6(ip) {
+			if !resultPortScan.HasIP(ip) {
+				resultPortScan.SetIP(ip)
 			}
 		}
 	}
@@ -50,11 +56,18 @@ func IPLocation(taskId, mainTaskId, configJSON string) (result string, err error
 
 // doLocation 执行IP位置查询
 func doLocation(portScanResult *portscan.Result) {
-	ipl := custom.NewIPLocation()
+	ipv4 := custom.NewIPv4Location()
+	ipv6, _ := custom.NewIPv6Location()
 	for ip, _ := range portScanResult.IPResult {
-		location := ipl.FindCustomIP(ip)
-		if location == "" {
-			location = ipl.FindPublicIP(ip)
+		var location string
+		if utils.CheckIPV4(ip) {
+			location = ipv4.FindCustomIP(ip)
+			if location == "" {
+				location = ipv4.FindPublicIP(ip)
+			}
+
+		} else if utils.CheckIPV6(ip) {
+			location = ipv6.Find(ip)
 		}
 		if location != "" {
 			portScanResult.IPResult[ip].Location = location

@@ -249,7 +249,7 @@ func (c *DashboardController) OnlineUserListAction() {
 	resp := DataTableResponseData{}
 	OnlineUserMutex.Lock()
 	defer OnlineUserMutex.Unlock()
-	ipLocation := custom.NewIPLocation()
+	ipLocation := custom.NewIPv4Location()
 
 	for _, v := range OnlineUser {
 		if time.Now().Sub(v.UpdateTime).Hours() > 24 {

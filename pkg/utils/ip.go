@@ -3,15 +3,17 @@ package utils
 import (
 	"errors"
 	"fmt"
+	"github.com/hanc00l/nemo_go/pkg/logging"
 	"math"
 	"net"
+	"net/netip"
 	"regexp"
 	"strconv"
 	"strings"
 )
 
-// IPToUInt32 将点分格式的IP地址转换为UINT32
-func IPToUInt32(ip string) uint32 {
+// IPV4ToUInt32 将点分格式的IP地址转换为UINT32
+func IPV4ToUInt32(ip string) uint32 {
 	bits := strings.Split(ip, ".")
 	b0, _ := strconv.Atoi(bits[0])
 	b1, _ := strconv.Atoi(bits[1])
@@ -26,7 +28,7 @@ func IPToUInt32(ip string) uint32 {
 	return sum
 }
 
-func UInt32ToIP(ip uint32) string {
+func UInt32ToIPV4(ip uint32) string {
 	return fmt.Sprintf("%d.%d.%d.%d",
 		byte(ip>>24), byte(ip>>16), byte(ip>>8), byte(ip))
 }
@@ -73,36 +75,77 @@ func GetClientIp() (ip string, err error) {
 	return "", errors.New("Can not find the client ip address!")
 }
 
+// ParseIP 将IP地址、IP地址段、IP地址范围解析为IP地址列表，支持ipv4/ipv6
 func ParseIP(ip string) (ipResults []string) {
 	//192.168.1.1
-	if CheckIPV4(ip) {
+	//2409:8929:42d:bf31:1840:27ba:d669:823f
+	if CheckIPV4(ip) || CheckIPV6(ip) {
 		return []string{ip}
 	}
 	//192.168.1.0/24
+	//2409:8929:42d:bf31:1840:27ba:d669:8200/120
 	if CheckIPV4Subnet(ip) {
 		addr, ipv4sub, err := net.ParseCIDR(ip)
 		if err != nil {
 			return
 		}
 		ones, bits := ipv4sub.Mask.Size()
-		ipStart := IPToUInt32(addr.String())
+		ipStart := IPV4ToUInt32(addr.String())
 		ipSize := int(math.Pow(2, float64(bits-ones)))
 		for i := 0; i < ipSize; i++ {
-			ipResults = append(ipResults, UInt32ToIP(uint32(i)+ipStart))
+			ipResults = append(ipResults, UInt32ToIPV4(uint32(i)+ipStart))
+		}
+		return
+	}
+	if CheckIPV6Subnet(ip) {
+		ipv6Prefix, err := netip.ParsePrefix(ip)
+		if err != nil {
+			return
+		}
+		ipStart := ipv6Prefix.Addr()
+		bits := ipv6Prefix.Bits()
+		if bits < 96 {
+			logging.RuntimeLog.Errorf("ipv6 subnet too large to discard parse:%s", ip)
+			ipResults = append(ipResults, ip)
+			return
+		}
+		for {
+			ipResults = append(ipResults, ipStart.String())
+			ipStart = ipStart.Next()
+			if !ipv6Prefix.Contains(ipStart) {
+				break
+			}
 		}
 		return
 	}
 	//192.168.1.1-192.168.1.5
+	//2409:8929:42d:bf31:1840:27ba:d669:8200-2409:8929:42d:bf31:1840:27ba:d669:82ff
 	address := strings.Split(ip, "-")
-	if len(address) == 2 && CheckIPV4(address[0]) && CheckIPV4(address[1]) {
-		ipStart := address[0]
-		ipEnd := address[1]
-		for i := IPToUInt32(ipStart); i <= IPToUInt32(ipEnd); i++ {
-			ipResults = append(ipResults, UInt32ToIP(i))
+	if len(address) == 2 {
+		if CheckIPV4(address[0]) && CheckIPV4(address[1]) {
+			ipStart := address[0]
+			ipEnd := address[1]
+			for i := IPV4ToUInt32(ipStart); i <= IPV4ToUInt32(ipEnd); i++ {
+				ipResults = append(ipResults, UInt32ToIPV4(i))
+			}
+			return
 		}
-		return
+		if CheckIPV6(address[0]) && CheckIPV6(address[1]) {
+			ipStart, err1 := netip.ParseAddr(address[0])
+			ipEnd, err2 := netip.ParseAddr(address[1])
+			if err1 != nil || err2 != nil {
+				return
+			}
+			for {
+				ipResults = append(ipResults, ipStart.String())
+				if ipStart.Compare(ipEnd) >= 0 {
+					break
+				}
+				ipStart = ipStart.Next()
+			}
+			return
+		}
 	}
-
 	return
 }
 
@@ -138,4 +181,82 @@ func CheckIPLocationInChinaMainLand(ipLocation string) bool {
 		return true
 	}
 	return false
+}
+
+func CheckIPV6(ip string) bool {
+	ipv6Regex := `^(([0-9a-fA-F]{1,4}:){7,7}[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,7}:|([0-9a-fA-F]{1,4}:){1,6}:[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,5}(:[0-9a-fA-F]{1,4}){1,2}|([0-9a-fA-F]{1,4}:){1,4}(:[0-9a-fA-F]{1,4}){1,3}|([0-9a-fA-F]{1,4}:){1,3}(:[0-9a-fA-F]{1,4}){1,4}|([0-9a-fA-F]{1,4}:){1,2}(:[0-9a-fA-F]{1,4}){1,5}|[0-9a-fA-F]{1,4}:((:[0-9a-fA-F]{1,4}){1,6})|:((:[0-9a-fA-F]{1,4}){1,7}|:)|fe80:(:[0-9a-fA-F]{0,4}){0,4}%[0-9a-zA-Z]{1,}|::(ffff(:0{1,4}){0,1}:){0,1}((25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])\.){3,3}(25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])|([0-9a-fA-F]{1,4}:){1,4}:((25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])\.){3,3}(25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9]))$`
+	match, _ := regexp.MatchString(ipv6Regex, ip)
+
+	return match
+}
+func CheckIPV6Subnet(ip string) bool {
+	ipv6Regex := `^(([0-9a-fA-F]{1,4}:){7,7}[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,7}:|([0-9a-fA-F]{1,4}:){1,6}:[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,5}(:[0-9a-fA-F]{1,4}){1,2}|([0-9a-fA-F]{1,4}:){1,4}(:[0-9a-fA-F]{1,4}){1,3}|([0-9a-fA-F]{1,4}:){1,3}(:[0-9a-fA-F]{1,4}){1,4}|([0-9a-fA-F]{1,4}:){1,2}(:[0-9a-fA-F]{1,4}){1,5}|[0-9a-fA-F]{1,4}:((:[0-9a-fA-F]{1,4}){1,6})|:((:[0-9a-fA-F]{1,4}){1,7}|:)|fe80:(:[0-9a-fA-F]{0,4}){0,4}%[0-9a-zA-Z]{1,}|::(ffff(:0{1,4}){0,1}:){0,1}((25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])\.){3,3}(25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])|([0-9a-fA-F]{1,4}:){1,4}:((25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])\.){3,3}(25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9]))/\d{1,3}$`
+	match, _ := regexp.MatchString(ipv6Regex, ip)
+
+	return match
+}
+
+func GetIPV6ParsedFormat(ip string) string {
+	ipv6Addr, err := netip.ParseAddr(ip)
+	if err != nil {
+		return ""
+	} else {
+		return ipv6Addr.String()
+	}
+}
+
+func GetIPV6CIDRParsedFormat(ip string) string {
+	ipv6Prefix, err := netip.ParsePrefix(ip)
+	if err != nil {
+		return ""
+	} else {
+		return ipv6Prefix.String()
+	}
+}
+
+func GetIPV6FullFormat(ip string) string {
+	ipv6Addr, err := netip.ParseAddr(ip)
+	if err != nil {
+		return ""
+	}
+	return ipv6Addr.StringExpanded()
+}
+
+func IPV6Prefix64ToUInt64(ip string) uint64 {
+	var sum uint64
+	dataArray := strings.Split(GetIPV6FullFormat(ip), ":")
+	if len(dataArray) == 8 {
+		b0, _ := strconv.ParseUint(dataArray[0], 16, 16)
+		b1, _ := strconv.ParseUint(dataArray[1], 16, 16)
+		b2, _ := strconv.ParseUint(dataArray[2], 16, 16)
+		b3, _ := strconv.ParseUint(dataArray[3], 16, 16)
+		sum += b0 << 48
+		sum += b1 << 32
+		sum += b2 << 16
+		sum += b3
+	}
+	return sum
+}
+
+// CheckIP 通过正则检查是否是ipv4或ipv6地址
+func CheckIP(ip string) bool {
+	if CheckIPV4(ip) || CheckIPV6(ip) {
+		return true
+	}
+	return false
+}
+
+// CheckIPOrSubnet 通过正则检查是否是ipv4、ipv6地址或CIDR
+func CheckIPOrSubnet(ip string) bool {
+	if CheckIPV4(ip) || CheckIPV6(ip) || CheckIPV4Subnet(ip) || CheckIPV6Subnet(ip) {
+		return true
+	}
+	return false
+}
+
+// GetIPV6SubnetC 生成IPv6的C段掩码地址
+func GetIPV6SubnetC(ip string) string {
+	ipArray := strings.Split(GetIPV6FullFormat(ip), ":")
+	return GetIPV6CIDRParsedFormat(fmt.Sprintf("%s:%s:%s:%s:%s:%s:%s:%s00/120",
+		ipArray[0], ipArray[1], ipArray[2], ipArray[3], ipArray[4], ipArray[5], ipArray[6], ipArray[7][0:2]))
 }

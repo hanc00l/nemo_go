@@ -83,15 +83,14 @@ func (t *TaskSlice) DoDomainSlice() (target []string) {
 	return
 }
 
-// parseAllIP 解析所有的IP，将IP转换为uint32的map结构
-func parseAllIP(targetList []string) (ipIntMap map[int]struct{}) {
-	ipIntMap = make(map[int]struct{})
+// parseAllIP 解析所有的IP
+func parseAllIP(targetList []string) (ipIntMap map[string]struct{}) {
+	ipIntMap = make(map[string]struct{})
 	for _, v := range targetList {
 		ips := ParseIP(v)
 		for _, ip := range ips {
-			ipInt := int(IPToUInt32(ip))
-			if _, ok := ipIntMap[ipInt]; !ok {
-				ipIntMap[ipInt] = struct{}{}
+			if _, ok := ipIntMap[ip]; !ok {
+				ipIntMap[ip] = struct{}{}
 			}
 		}
 	}
@@ -99,27 +98,31 @@ func parseAllIP(targetList []string) (ipIntMap map[int]struct{}) {
 }
 
 // sliceIP 按等量对ip进行切分，同时将IP进行cidr聚合
-func sliceIP(ipIntMap map[int]struct{}, sliceNumber int) (ips []string) {
-	if len(ipIntMap) == 0 {
+func sliceIP(ipStringMap map[string]struct{}, sliceNumber int) (ips []string) {
+	if len(ipStringMap) == 0 {
 		return []string{}
 	}
-	ipIntList := SetToSliceInt(ipIntMap)
-	sort.Ints(ipIntList)
-	segments := splitArray(ipIntList, sliceNumber)
+	ipStringList := SetToSlice(ipStringMap)
+	sort.Strings(ipStringList)
+	segments := splitArrayString(ipStringList, sliceNumber)
 	for _, v := range segments {
 		var ipList []string
-		for _, ipInt := range v {
-			ip := UInt32ToIP(uint32(ipInt))
+		for _, ip := range v {
 			ipList = append(ipList, ip)
 		}
-		ipCidrs := aggregateCIDRs(ipList)
-		ips = append(ips, ipCidrs)
+		ipCidrsV4, ipCidrsV6 := aggregateCIDRs(ipList)
+		if ipCidrsV4 != "" {
+			ips = append(ips, ipCidrsV4)
+		}
+		if ipCidrsV6 != "" {
+			ips = append(ips, ipCidrsV6)
+		}
 	}
 	return
 }
 
-// splitArray 对数组分组
-func splitArray(arr []int, num int) (segments [][]int) {
+// splitArrayInt 对数组分组
+func splitArrayInt(arr []int, num int) (segments [][]int) {
 	segments = make([][]int, 0)
 	max := len(arr)
 	if max <= num {
@@ -141,24 +144,59 @@ func splitArray(arr []int, num int) (segments [][]int) {
 	return
 }
 
+// splitArrayInt 对数组分组
+func splitArrayString(arr []string, num int) (segments [][]string) {
+	segments = make([][]string, 0)
+	max := len(arr)
+	if max <= num {
+		segments = append(segments, arr)
+		return
+	}
+	quantity := max / num
+	for i := 0; i <= quantity; i++ {
+		start := i * num
+		end := (i + 1) * num
+		if i != quantity {
+			segments = append(segments, arr[start:end])
+		} else {
+			if max%num != 0 {
+				segments = append(segments, arr[start:])
+			}
+		}
+	}
+	return
+}
+
 // aggregateCIDRs 对IP进行cidr聚合，调用的是mapcidr
-func aggregateCIDRs(ips []string) string {
+func aggregateCIDRs(ips []string) (ipv4Cidr, ipv6Cidr string) {
 	var allCidrs []*net.IPNet
-	var output []string
 	for _, ip := range ips {
-		cidr := fmt.Sprintf("%s/32", ip)
+		var cidr string
+		if CheckIPV4(ip) {
+			cidr = fmt.Sprintf("%s/32", ip)
+		} else {
+			cidr = fmt.Sprintf("%s/128", ip)
+		}
 		_, pCidr, err := net.ParseCIDR(cidr)
 		if err != nil {
 			continue
 		}
 		allCidrs = append(allCidrs, pCidr)
 	}
-	cCidrsIPV4, _ := mapcidr.CoalesceCIDRs(allCidrs)
+	cCidrsIPV4, cCidrsIPV6 := mapcidr.CoalesceCIDRs(allCidrs)
+	var outputV4, outputV6 []string
 	for _, cidrIPV4 := range cCidrsIPV4 {
 		s := strings.ReplaceAll(cidrIPV4.String(), "/32", "")
-		output = append(output, s)
+		outputV4 = append(outputV4, s)
 	}
-	return strings.Join(output, ",")
+	ipv4Cidr = strings.Join(outputV4, ",")
+	for _, cidrIPV6 := range cCidrsIPV6 {
+		s := strings.ReplaceAll(cidrIPV6.String(), "/128", "")
+		outputV6 = append(outputV6, s)
+	}
+	ipv6Cidr = strings.Join(outputV6, ",")
+
+	return
 }
 
 // slicePort 对Port进行切分
@@ -168,7 +206,7 @@ func slicePort(portIntMap map[int]struct{}, sliceNumber int) (ports []string) {
 	}
 	port := SetToSliceInt(portIntMap)
 	sort.Ints(port)
-	portArray := splitArray(port, sliceNumber)
+	portArray := splitArrayInt(port, sliceNumber)
 	for _, v := range portArray {
 		p := aggregatePort(v)
 		ports = append(ports, p)

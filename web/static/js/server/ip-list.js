@@ -522,15 +522,16 @@ $(function () {
                         let pre_link = "";
                         let j = 0, len = data.length;
                         for (; j < len; j++) {
-                            //提取出端口和状态
+                            // 提取出端口和状态
                             const port = data[j].replace(/\[.+?]/g, "");
                             const status = data[j].replace(/^.+?\[/g, "");
                             strData += pre_link;
                             strData += '<a href="';
-                            if (port === 443 || port === 8443) strData += "https";
+                            // ！！！这里不能用===比较
+                            if (port == 443 || port == 8443) strData += "https";
                             else strData += 'http';
                             // 快速链接地址
-                            strData += '://' + row['ip'] + ':' + port + '" target="_blank">' + port + '</a>';
+                            strData += '://' + row['ipf'] + ':' + port + '" target="_blank">' + port + '</a>';
                             // 端口状态
                             if (status !== port) strData += "[" + status;
 

@@ -73,8 +73,8 @@ type Result struct {
 }
 
 func init() {
-	resolveThreadNumber[conf.HighPerformance] = 100
-	resolveThreadNumber[conf.NormalPerformance] = 50
+	resolveThreadNumber[conf.HighPerformance] = 200
+	resolveThreadNumber[conf.NormalPerformance] = 100
 	//
 	subfinderThreadNumber[conf.HighPerformance] = 4
 	subfinderThreadNumber[conf.NormalPerformance] = 2
@@ -187,7 +187,7 @@ func FilterDomainHasTooMuchIP(result *Result) { //result map[string]*DomainResul
 	// 建立解析ip到domain的反向映射Map
 	for domain, domainResult := range result.DomainResult {
 		for _, attr := range domainResult.DomainAttrs {
-			if attr.Tag == "A" {
+			if attr.Tag == "A" || attr.Tag == "AAAA" {
 				ip := attr.Content
 				if _, ok := ip2DomainMap[ip]; !ok {
 					ip2DomainMap[ip] = make(map[string]struct{})

@@ -1,6 +1,10 @@
 package utils
 
-import "testing"
+import (
+	"fmt"
+	"net/netip"
+	"testing"
+)
 
 func TestCheckIPV4(t *testing.T) {
 	t.Log(CheckIPV4("192.168.1.1"))
@@ -33,6 +37,13 @@ func TestParseIP(t *testing.T) {
 	t.Log(ParseIP("192.168.1.1"))
 	t.Log(ParseIP("192.168.1.1/30"))
 	t.Log(ParseIP("192.168.1.3-192.168.1.10"))
+	for _, v := range ParseIP("2409:8929:42d:bf31:1840:27ba:d669::/124") {
+		t.Log(v)
+	}
+	for _, v := range ParseIP("2409:8929:42d:bf31:1840:27ba:d669:8200-2409:8929:42d:bf31:1840:27ba:d669:82ff") {
+		t.Log(v)
+	}
+
 }
 
 func TestCheckIPLocationInChinaMainLand(t *testing.T) {
@@ -51,4 +62,79 @@ func TestCheckIPLocationInChinaMainLand(t *testing.T) {
 	t.Log(data6, CheckIPLocationInChinaMainLand(data6))
 	t.Log(data7, CheckIPLocationInChinaMainLand(data7))
 
+}
+
+func TestCheckIPV6(t *testing.T) {
+	datas := []string{"::ffff:127:2cde",
+		"::ffff:7f01:0203",
+		"0:0:0:0:0000:ffff:127.1.2.3",
+		"0:0:0:0:000000:ffff:127.1.2.3",
+		"192.168.3.4",
+		"fe80::5c12:27dc:93a4:3426",
+		"fe3f:3fa::0",
+	}
+	for _, d := range datas {
+		fmt.Println(d, CheckIPV6(d))
+	}
+}
+
+func TestCheckIPV6Subnet(t *testing.T) {
+	datas := []string{"::ffff:127:2cde",
+		"::ffff:7f01:0203/126",
+		"0:0:0:0:0000:ffff:127.1.2.3",
+		"0:0:0:0:000000:ffff:127.1.2.3",
+		"192.168.3.4/24",
+		"fe80::5c12:27dc:93a4:3426",
+		"fe3f:3fa::0/48",
+	}
+	for _, d := range datas {
+		fmt.Println(d, CheckIPV6Subnet(d))
+	}
+}
+
+func TestIPV6Prefix64ToUInt64(t *testing.T) {
+	datas := []string{
+		"a3:0:0:123:0000:ffff:127:2cde",
+		"fe80::5c12:27dc:93a4:3426",
+		"fe3f:3fa::0",
+	}
+	for _, d := range datas {
+		fmt.Println(d, "->", fmt.Sprintf("%x", IPV6Prefix64ToUInt64(d)))
+	}
+}
+
+func TestGetIPV6FullFormat(t *testing.T) {
+	datas := []string{"::ffff:127:2cde",
+		"::ffff:7f01:0203",
+		"fe3f:3fa::0:3456",
+		"fe3f:3fa::0",
+		"fe3f:3fa::",
+	}
+	for _, d := range datas {
+		fmt.Println(d, "->", GetIPV6FullFormat(d))
+	}
+}
+
+func TestGetIPV6ParsedFormat(t *testing.T) {
+	datas := []string{"::ffff:127:2cde",
+		"::ffff:7f01:0203",
+		"fe3f:3fa::0:3456",
+		"fe3f:3fa::0",
+		"fe3f:3fa::",
+		"0:0:0:0:0000:ffff:127:abc",
+		"24ae:0:0:0:0000:ffff:127:abc",
+		"192.168.3.4",
+		"fe80::5c12:27dc:93a4:3426",
+	}
+	for _, d := range datas {
+		dd := GetIPV6ParsedFormat(d)
+		ddd := GetIPV6FullFormat(dd)
+		fmt.Println(d, "->", dd, "->", ddd, "->", GetIPV6CIDRParsedFormat(fmt.Sprintf("%s/120", ddd)))
+	}
+}
+
+func TestIPv6Subnet2(t *testing.T) {
+	ipv6 := "24ae:0:0:0:0000:ffff:127:abc"
+	p := netip.PrefixFrom(netip.MustParseAddr(ipv6), 120)
+	t.Log(p)
 }

@@ -27,7 +27,7 @@ func (f *FScan) ParseContentResult(content []byte) (result []Result) {
 			patternHostPort := "(\\d{1,3}.\\d{1,3}.\\d{1,3}.\\d{1,3}):(\\d{1,5})"
 			regHosPort, _ := regexp.Compile(patternHostPort)
 			hostPort := regHosPort.FindStringSubmatch(line)
-			if len(hostPort) != 3 || utils.CheckIPV4(hostPort[1]) == false {
+			if len(hostPort) != 3 || !utils.CheckIP(hostPort[1]) {
 				continue
 			}
 			if ok, ip, _ := f.parseUrlForIPPortResult(fmt.Sprintf("http://%s:%s", hostPort[1], hostPort[2])); ok {
@@ -62,7 +62,7 @@ func (f *FScan) parseUrlForIPPortResult(httpUrl string) (ok bool, ip string, por
 		}
 	}
 	port, err = strconv.Atoi(portValue)
-	if err != nil || utils.CheckIPV4(ip) == false {
+	if err != nil || !utils.CheckIP(ip) {
 		return
 	}
 	ok = true

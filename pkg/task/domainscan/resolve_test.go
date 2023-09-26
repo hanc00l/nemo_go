@@ -12,3 +12,14 @@ func TestResolveDomain(t *testing.T) {
 		t.Log(k, v)
 	}
 }
+
+func TestResolveDomainIPV6(t *testing.T) {
+	datas := []string{"www.sina.com.cn", "www.163.com", "www.sgcc.com.cn"}
+	for _, d := range datas {
+		cname, host := ResolveDomain(d)
+		t.Log(d, "->", cname)
+		for _, h := range host {
+			t.Log(h)
+		}
+	}
+}

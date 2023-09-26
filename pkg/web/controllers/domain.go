@@ -195,18 +195,17 @@ func (c *DomainController) InfoAction() {
 	disableFofa, _ := c.GetBool("disable_fofa", false)
 	if domainName != "" && err == nil && workspaceId > 0 {
 		domain := db.Domain{DomainName: domainName, WorkspaceId: workspaceId}
-		if !domain.GetByDomain() {
-			return
-		}
-		portInfoCacheMap := make(map[int]PortInfo)
-		domainInfo = getDomainInfo(&domain, portInfoCacheMap, disableFofa, false)
-		if len(domainInfo.PortAttr) > 0 {
-			tableBackgroundSet := false
-			for i, _ := range domainInfo.PortAttr {
-				if domainInfo.PortAttr[i].IP != "" && domainInfo.PortAttr[i].Port != "" {
-					tableBackgroundSet = !tableBackgroundSet
+		if domain.GetByDomain() {
+			portInfoCacheMap := make(map[int]PortInfo)
+			domainInfo = getDomainInfo(&domain, portInfoCacheMap, disableFofa, false)
+			if len(domainInfo.PortAttr) > 0 {
+				tableBackgroundSet := false
+				for i, _ := range domainInfo.PortAttr {
+					if domainInfo.PortAttr[i].IP != "" && domainInfo.PortAttr[i].Port != "" {
+						tableBackgroundSet = !tableBackgroundSet
+					}
+					domainInfo.PortAttr[i].TableBackgroundSet = tableBackgroundSet
 				}
-				domainInfo.PortAttr[i].TableBackgroundSet = tableBackgroundSet
 			}
 		}
 	}
@@ -411,14 +410,14 @@ func (c *DomainController) StatisticsAction() {
 	content = append(content, fmt.Sprintf("Subnet(%d):", len(r.IPSubnet)))
 	ipSubnetSorted := utils.SortMapByValue(r.IPSubnet, true)
 	for _, v := range ipSubnetSorted {
-		content = append(content, fmt.Sprintf("%-16s:%d", v.Key, v.Value))
+		content = append(content, fmt.Sprintf("%-40s\t%d", v.Key, v.Value))
 	}
 	//domain ip
 	content = append(content, "")
 	content = append(content, fmt.Sprintf("IP(%d):", len(r.IP)))
 	ipSorted := utils.SortMapByValue(r.IP, true)
 	for _, v := range ipSorted {
-		content = append(content, fmt.Sprintf("%-16s:%d", v.Key, v.Value))
+		content = append(content, fmt.Sprintf("%-40s\t%d", v.Key, v.Value))
 	}
 	rw := c.Ctx.ResponseWriter
 	rw.Header().Set("Content-Disposition", "attachment; filename=domain-statistics.txt")
@@ -776,7 +775,7 @@ func getDomainAttrFullInfo(workspaceGUID string, id int, disableFofa, disableBan
 		if da.Source == "fofa" || da.Source == "quake" || da.Source == "hunter" || da.Source == "0zone" {
 			fofaInfo[da.Tag] = da.Content
 		}
-		if da.Tag == "A" {
+		if da.Tag == "A" || da.Tag == "AAAA" {
 			if _, ok := r.IP[da.Content]; !ok {
 				r.IP[da.Content] = struct{}{}
 			}
@@ -904,7 +903,7 @@ func (c *DomainController) getDomainStatisticsData(req domainRequestParam) Domai
 		domainAttrInfo := domainAttr.GetsByRelatedId()
 		domainIP := make(map[string]struct{})
 		for _, dai := range domainAttrInfo {
-			if dai.Tag == "A" {
+			if dai.Tag == "A" || dai.Tag == "AAAA" {
 				domainIP[dai.Content] = struct{}{}
 				if _, ok := dsi.IP[dai.Content]; !ok {
 					dsi.IP[dai.Content] = 1
@@ -916,9 +915,17 @@ func (c *DomainController) getDomainStatisticsData(req domainRequestParam) Domai
 		dsi.DomainIP[domainRow.DomainName] = utils.SetToString(domainIP)
 	}
 	for k, _ := range dsi.IP {
-		ipArray := strings.Split(k, ".")
-		if len(ipArray) == 4 {
-			subnet := fmt.Sprintf("%s.0/24", strings.Join(ipArray[:3], "."))
+		// C段
+		var subnet string
+		if utils.CheckIPV4(k) {
+			ipArray := strings.Split(k, ".")
+			subnet = fmt.Sprintf("%s.%s.%s.0/24", ipArray[0], ipArray[1], ipArray[2])
+		} else if utils.CheckIPV6(k) {
+			ipArray := strings.Split(utils.GetIPV6FullFormat(k), ":")
+			subnet = utils.GetIPV6CIDRParsedFormat(fmt.Sprintf("%s:%s:%s:%s:%s:%s:%s:%s00/120",
+				ipArray[0], ipArray[1], ipArray[2], ipArray[3], ipArray[4], ipArray[5], ipArray[6], ipArray[7][0:2]))
+		}
+		if len(subnet) > 0 {
 			if _, ok := dsi.IPSubnet[subnet]; !ok {
 				dsi.IPSubnet[subnet] = 1
 			} else {
@@ -1003,7 +1010,7 @@ func (c *DomainController) BlockDomainAction() {
 		domainAttr := db.DomainAttr{RelatedId: d.Id}
 		domainAttrData := domainAttr.GetsByRelatedId()
 		for _, da := range domainAttrData {
-			if da.Tag == "A" {
+			if da.Tag == "A" || da.Tag == "AAAA" {
 				if _, ok := domainRelatedIP[da.Content]; !ok {
 					domainRelatedIP[da.Content] = struct{}{}
 				}

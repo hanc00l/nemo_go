@@ -49,7 +49,7 @@ func (c *Crawler) Do() {
 
 	for _, line := range strings.Split(c.Config.Target, ",") {
 		domain := strings.TrimSpace(line)
-		if domain == "" || utils.CheckIPV4(domain) || utils.CheckIPV4Subnet(domain) {
+		if domain == "" || utils.CheckIPOrSubnet(domain) {
 			continue
 		}
 		if blackDomain.CheckBlack(domain) {

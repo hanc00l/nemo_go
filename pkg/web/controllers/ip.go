@@ -56,6 +56,7 @@ type IPListData struct {
 	Id             int            `json:"id"`
 	Index          int            `json:"index"`
 	IP             string         `json:"ip"`
+	IPFormatted    string         `json:"ipf"`
 	Location       string         `json:"location"`
 	Port           []string       `json:"port"`
 	Title          map[string]int `json:"title"`
@@ -65,6 +66,7 @@ type IPListData struct {
 	Vulnerability  string         `json:"vulnerability"`
 	HoneyPot       string         `json:"honeypot"`
 	ScreenshotFile []string       `json:"screenshot"`
+	CloudName      string         `json:"cloudname"`
 	IsCDN          bool           `json:"cdn"`
 	IconImage      []string       `json:"iconimage"`
 	WorkspaceId    int            `json:"workspace"`
@@ -82,6 +84,7 @@ type IconHashWithFofa struct {
 type IPInfo struct {
 	Id            int
 	IP            string
+	IPFormatted   string
 	Organization  string
 	Status        string
 	Location      string
@@ -111,6 +114,7 @@ type PortAttrInfo struct {
 	Id                 int
 	PortId             int
 	IP                 string
+	IPFormatted        string
 	Port               string
 	Tag                string
 	Content            string
@@ -203,18 +207,17 @@ func (c *IPController) InfoAction() {
 	disableFofa, _ := c.GetBool("disable_fofa", false)
 	if ipName != "" && err == nil && workspaceId > 0 {
 		ip := db.Ip{WorkspaceId: workspaceId, IpName: ipName}
-		if !ip.GetByIp() {
-			return
-		}
-		ipInfo = getIPInfo(&ip, true, disableFofa, false)
-		// 修改背景色为交叉显示
-		if len(ipInfo.PortAttr) > 0 {
-			tableBackgroundSet := false
-			for i := range ipInfo.PortAttr {
-				if ipInfo.PortAttr[i].IP != "" && ipInfo.PortAttr[i].Port != "" {
-					tableBackgroundSet = !tableBackgroundSet
+		if ip.GetByIp() {
+			ipInfo = getIPInfo(&ip, true, disableFofa, false)
+			// 修改背景色为交叉显示
+			if len(ipInfo.PortAttr) > 0 {
+				tableBackgroundSet := false
+				for i := range ipInfo.PortAttr {
+					if ipInfo.PortAttr[i].IP != "" && ipInfo.PortAttr[i].Port != "" {
+						tableBackgroundSet = !tableBackgroundSet
+					}
+					ipInfo.PortAttr[i].TableBackgroundSet = tableBackgroundSet
 				}
-				ipInfo.PortAttr[i].TableBackgroundSet = tableBackgroundSet
 			}
 		}
 	}
@@ -300,7 +303,7 @@ func (c *IPController) StatisticsAction() {
 	content = append(content, "")
 	content = append(content, fmt.Sprintf("Subnet(%d):", len(r.IPSubnet)))
 	for _, pair := range utils.SortMapByValue(r.IPSubnet, true) {
-		content = append(content, fmt.Sprintf("%-16s:%d", pair.Key, pair.Value))
+		content = append(content, fmt.Sprintf("%-40s\t%d", pair.Key, pair.Value))
 	}
 	// IP
 	content = append(content, "")
@@ -611,6 +614,7 @@ func (c *IPController) GetIPListData(req ipRequestParam) (resp DataTableResponse
 		ipData.Index = req.Start + i + 1
 		ipData.Id = ipRow.Id
 		ipData.IP = ipRow.IpName
+		ipData.IPFormatted = utils.FormatHostUrl("", ipRow.IpName, 0)
 		ipData.Location = ipRow.Location
 		ipData.PinIndex = ipRow.PinIndex
 		ipInfo := getIPInfo(&ipRow, false, req.DisableFofa, req.DisableBanner)
@@ -714,6 +718,7 @@ func getPortInfo(workspaceGUID string, ip string, ipId int, disableFofa, disable
 			if FirstRow {
 				FirstRow = false
 				pai.IP = ip
+				pai.IPFormatted = utils.FormatHostUrl("", ip, 0)
 				pai.Port = fmt.Sprintf("%d", pd.PortNum)
 			}
 			if pad.Source == "fofa" {
@@ -778,6 +783,7 @@ func getPortInfo(workspaceGUID string, ip string, ipId int, disableFofa, disable
 			if FirstRow {
 				FirstRow = false
 				httpPortAttr.IP = ip
+				httpPortAttr.IPFormatted = utils.FormatHostUrl("", ip, 0)
 				httpPortAttr.Port = fmt.Sprintf("%d", pd.PortNum)
 			}
 			r.PortAttr = append(r.PortAttr, httpPortAttr)
@@ -789,6 +795,7 @@ func getPortInfo(workspaceGUID string, ip string, ipId int, disableFofa, disable
 // getIPInfo 获取一个IP的信息集合
 func getIPInfo(ip *db.Ip, getReleatedDomain, disableFofa, disableBanner bool) (r IPInfo) {
 	r.IP = ip.IpName
+	r.IPFormatted = utils.FormatHostUrl("", ip.IpName, 0)
 	r.Id = ip.Id
 	r.Location = ip.Location
 	r.Status = ip.Status
@@ -879,15 +886,22 @@ func (c *IPController) getStatisticsData(req ipRequestParam) IPStatisticInfo {
 	for _, ipRow := range ipResult {
 		// ip
 		if _, ok := r.IP[ipRow.IpName]; !ok {
-			r.IP[ipRow.IpName] = ipRow.IpInt
+			r.IP[ipRow.IpName] = int(ipRow.IpInt)
 		}
 		// C段
-		ipArray := strings.Split(ipRow.IpName, ".")
-		subnet := fmt.Sprintf("%s.%s.%s.0/24", ipArray[0], ipArray[1], ipArray[2])
-		if _, ok := r.IPSubnet[subnet]; ok {
-			r.IPSubnet[subnet]++
-		} else {
-			r.IPSubnet[subnet] = 1
+		var subnet string
+		if utils.CheckIPV4(ipRow.IpName) {
+			ipArray := strings.Split(ipRow.IpName, ".")
+			subnet = fmt.Sprintf("%s.%s.%s.0/24", ipArray[0], ipArray[1], ipArray[2])
+		} else if utils.CheckIPV6(ipRow.IpName) {
+			subnet = utils.GetIPV6SubnetC(ipRow.IpName)
+		}
+		if len(subnet) > 0 {
+			if _, ok := r.IPSubnet[subnet]; ok {
+				r.IPSubnet[subnet]++
+			} else {
+				r.IPSubnet[subnet] = 1
+			}
 		}
 		// Location
 		if ipRow.Location != "" {
@@ -1094,7 +1108,7 @@ func (c *IPController) writeToCSVData(exportInfo []IPExportInfo) []byte {
 	for i, v := range exportInfo {
 		csvWriter.Write([]string{
 			strconv.Itoa(i + 1),
-			fmt.Sprintf("%s:%d", v.IP, v.Port),
+			utils.FormatHostUrl("", v.IP, v.Port),
 			v.IP,
 			strconv.Itoa(v.Port),
 			v.Location,

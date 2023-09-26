@@ -28,7 +28,7 @@ func (f *FScan) ParseContentResult(content []byte) (result Result) {
 			patternHost := "Target (.+) +is alive"
 			regHost, _ := regexp.Compile(patternHost)
 			hosts := regHost.FindStringSubmatch(line)
-			if len(hosts) != 2 || utils.CheckIPV4(hosts[1]) == false {
+			if len(hosts) != 2 || !(utils.CheckIPV4(hosts[1]) || utils.CheckIPV6(hosts[1])) {
 				continue
 			}
 			if !result.HasIP(hosts[1]) {
@@ -109,7 +109,7 @@ func (f *FScan) ParseContentResult(content []byte) (result Result) {
 			patternHostPort := "^(.+):(\\d{1,5}) +open"
 			regHosPort, _ := regexp.Compile(patternHostPort)
 			hostPort := regHosPort.FindStringSubmatch(line)
-			if len(hostPort) != 3 || utils.CheckIPV4(hostPort[1]) == false {
+			if len(hostPort) != 3 || !(utils.CheckIPV4(hostPort[1]) || utils.CheckIPV6(hostPort[1])) {
 				continue
 			}
 			if ok, ip, port := f.parseUrlForIPPortResult(fmt.Sprintf("http://%s:%s", hostPort[1], hostPort[2]), &result); ok {
@@ -140,7 +140,7 @@ func (f *FScan) parseUrlForIPPortResult(httpUrl string, result *Result) (ok bool
 		}
 	}
 	port, err = strconv.Atoi(portValue)
-	if err != nil || utils.CheckIPV4(ip) == false {
+	if err != nil || !(utils.CheckIPV4(ip) || utils.CheckIPV6(ip)) {
 		return
 	}
 	if !result.HasIP(ip) {

@@ -209,7 +209,7 @@ func SaveResult(result []Result) string {
 	var resultCount int
 	var newVul int
 	for _, r := range result {
-		target := utils.HostStrip(r.Target)
+		target := utils.ParseHost(r.Target)
 		extra := r.Extra
 		if len(r.Extra) > 2000 {
 			extra = r.Extra[:2000] + "..."

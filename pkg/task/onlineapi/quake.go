@@ -133,7 +133,7 @@ func (q *Quake) GetQueryString(domain string, config OnlineAPIConfig, filterKeyw
 	if config.SearchByKeyWord {
 		query = config.Target
 	} else {
-		if utils.CheckIPV4(domain) || utils.CheckIPV4Subnet(domain) {
+		if utils.CheckIPOrSubnet(domain) {
 			query = fmt.Sprintf("ip:\"%s\"", domain)
 		} else {
 			query = fmt.Sprintf("domain:\"%s\"", domain)

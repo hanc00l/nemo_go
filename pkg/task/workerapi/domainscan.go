@@ -10,6 +10,7 @@ import (
 	"github.com/hanc00l/nemo_go/pkg/task/domainscan"
 	"github.com/hanc00l/nemo_go/pkg/task/portscan"
 	"github.com/hanc00l/nemo_go/pkg/utils"
+	"net/netip"
 	"strings"
 )
 
@@ -132,7 +133,6 @@ func doPortScanByDomainscan(taskId, mainTaskId string, config domainscan.Config,
 			}
 			configPortScanJSON, _ := json.Marshal(configPortScan)
 			// 创建端口扫描任务
-			//x := comm.NewXClient()
 			newTaskArgs := comm.NewTaskArgs{
 				TaskName:      "portscan",
 				LastRunTaskId: taskId,
@@ -140,7 +140,6 @@ func doPortScanByDomainscan(taskId, mainTaskId string, config domainscan.Config,
 				ConfigJSON:    string(configPortScanJSON),
 			}
 			var result string
-			//err := x.Call(context.Background(), "NewTask", &newTaskArgs, &result)
 			err := comm.CallXClient("NewTask", &newTaskArgs, &result)
 			if err != nil {
 				logging.RuntimeLog.Error("Start Portscan task fail:", err)
@@ -177,6 +176,18 @@ func getResultIPList(resultDomainScan *domainscan.Result) (ipResult, ipSubnetRes
 				if _, ok := ipSubnets[s]; !ok {
 					ipSubnets[s] = struct{}{}
 				}
+			} else if dar.Tag == "AAAA" {
+				_, err := netip.ParseAddr(dar.Tag)
+				if err != nil || !utils.CheckIPV6(dar.Content) {
+					continue
+				}
+				if _, ok := ips[dar.Content]; !ok {
+					ips[dar.Content] = struct{}{}
+				}
+				s := utils.GetIPV6SubnetC(dar.Content)
+				if _, ok := ipSubnets[s]; !ok {
+					ipSubnets[s] = struct{}{}
+				}
 			}
 		}
 	}
@@ -207,7 +218,7 @@ func isHaveResolveRecord(domainAttrs *[]domainscan.DomainAttrResult) bool {
 		return false
 	}
 	for _, dar := range *domainAttrs {
-		if dar.Tag == "A" || dar.Tag == "CNAME" {
+		if dar.Tag == "A" || dar.Tag == "AAAA" || dar.Tag == "CNAME" {
 			return true
 		}
 	}

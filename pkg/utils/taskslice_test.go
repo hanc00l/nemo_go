@@ -1,6 +1,8 @@
 package utils
 
-import "testing"
+import (
+	"testing"
+)
 
 func TestNewTaskSlice(t *testing.T) {
 	ts := NewTaskSlice()
@@ -43,4 +45,17 @@ func TestNewTaskSlice3(t *testing.T) {
 			t.Log(p)
 		}
 	}
+}
+
+func TestNewTaskSliceIPV6(t *testing.T) {
+	ts := NewTaskSlice()
+	ts.TaskMode = 2
+	ts.Port = "80,8080,443"
+	ts.IpTarget = []string{"1.1.1.1", "172.16.80.0/30", "2409:8929:42d:bf31:1840:27ba:d669::/124"}
+	ts.IpSliceNumber = 4
+	target, port := ts.DoIpSlice()
+	for _, v := range target {
+		t.Log(v)
+	}
+	t.Log(port)
 }

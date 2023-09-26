@@ -45,13 +45,13 @@ func (z *ZeroZone) ParseContentResult(content []byte) (ipResult portscan.Result,
 		if err != nil || index == 0 {
 			continue
 		}
-		domain := utils.HostStrip(strings.TrimSpace(row[1]))
+		domain := utils.ParseHost(strings.TrimSpace(row[1]))
 		ip := strings.TrimSpace(row[4])
 		port, portErr := strconv.Atoi(row[2])
 		title := strings.TrimSpace(row[5])
 		service := strings.TrimSpace(row[7])
 		//域名属性：
-		if len(domain) > 0 && utils.CheckIPV4(domain) == false {
+		if len(domain) > 0 && utils.CheckIP(domain) == false {
 			if btc.CheckBlack(domain) {
 				logging.RuntimeLog.Warningf("%s is in blacklist,skip...", domain)
 				continue
@@ -75,7 +75,7 @@ func (z *ZeroZone) ParseContentResult(content []byte) (ipResult portscan.Result,
 			}
 		}
 		//IP属性（由于不是主动扫描，忽略导入StatusCode）
-		if len(ip) == 0 || utils.CheckIPV4(ip) == false || portErr != nil {
+		if len(ip) == 0 || !utils.CheckIP(ip) || portErr != nil {
 			continue
 		}
 		if btc.CheckBlack(ip) {

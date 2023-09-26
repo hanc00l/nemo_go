@@ -25,7 +25,7 @@
                     <form>
                         <div class="form-group">
                             <label class="col-form-label" for="text_iplocation">
-                                <b>配置参数</b>
+                                <b>配置参数</b>（只支持ipv4）
                             </label>
                             <textarea class="form-control" id="text_iplocation" rows="6"></textarea>
                         </div>
@@ -97,7 +97,7 @@
         <div class="col-md-6">
             <div class="tile">
                 <h3 class="tile-title">IP/Domain黑名单</h3>
-                <small class="form-text text-muted">任务结果中黑名单中的IP与域名不会保存到数据库中；通过在线资产平台（如FOFA等）收集到的资产如果是黑名单中，会忽略指纹获取、漏洞扫描任务及保存；</small>
+                <small class="form-text text-muted">任务结果中黑名单中的IP与域名不会保存到数据库中；通过在线资产平台（如FOFA等）收集到的资产如果是黑名单中，会忽略指纹获取、漏洞扫描任务及保存；支持ipv4/ipv6</small>
                 <div class="tile-body">
                     <label class="col-form-label" for="select_black_filename">
                         <b>配置文件</b>

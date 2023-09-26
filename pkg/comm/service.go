@@ -382,12 +382,12 @@ func (s *Service) LoadOpenedPort(ctx context.Context, args *LoadIPOpenedPortArgs
 
 	ips := strings.Split(args.Target, ",")
 	for _, ip := range ips {
-		// 如果不是有效的IP（可能是域名）
-		if utils.CheckIPV4(ip) == false && utils.CheckIPV4Subnet(ip) == false {
-			continue
+		var ipAllByParse []string
+		if utils.CheckIPV4(ip) || utils.CheckIPV4Subnet(ip) {
+			ipAllByParse = utils.ParseIP(ip)
+		} else if utils.CheckIPV6(ip) || utils.CheckIPV6Subnet(ip) {
+			ipAllByParse = append(ipAllByParse, ip)
 		}
-		//解析原始输入，可能是ip，也可能是ip/掩码
-		ipAllByParse := utils.ParseIP(ip)
 		for _, ipOneByOne := range ipAllByParse {
 			//Fix Bug：
 			//每次重新初始化数据库对象
@@ -403,7 +403,7 @@ func (s *Service) LoadOpenedPort(ctx context.Context, args *LoadIPOpenedPortArgs
 				continue
 			}
 			for _, port := range ports {
-				resultIPAndPort = append(resultIPAndPort, fmt.Sprintf("%s:%d", ipOneByOne, port.PortNum))
+				resultIPAndPort = append(resultIPAndPort, utils.FormatHostUrl("", ipOneByOne, port.PortNum)) //fmt.Sprintf("%s:%d", ipOneByOne, port.PortNum))
 			}
 		}
 	}
@@ -469,7 +469,7 @@ func (s *Service) LoadDomainOpenedPort(ctx context.Context, args *LoadDomainOpen
 		domainAttr := db.DomainAttr{RelatedId: domain.Id}
 		domainAttrData := domainAttr.GetsByRelatedId()
 		for _, da := range domainAttrData {
-			if da.Tag == "A" {
+			if da.Tag == "A" || da.Tag == "AAAA" {
 				domainIP[domainName][da.Content] = struct{}{}
 			}
 		}

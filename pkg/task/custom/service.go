@@ -78,7 +78,7 @@ func (s *Service) FindService(portNumber int, ip string) string {
 	var serviceName string
 	var ok bool
 	if ip != "" {
-		ipl := &IpLocation{}
+		ipl := &Ipv4Location{}
 		ipLocation := ipl.FindCustomIP(ip)
 		if ipLocation != "" {
 			serviceName, ok = s.customServiceData[fmt.Sprintf("%d/tcp", portNumber)]

@@ -449,7 +449,7 @@ func (x *XScan) doPortscan(swg *sizedwaitgroup.SizedWaitGroup, config portscan.C
 	}
 
 	//增加ip归属地查询,先判断是否合规，再进行查询归属地
-	if utils.CheckIPV4Subnet(config.Target) == false {
+	if !utils.CheckIPV4Subnet(config.Target) && !utils.CheckIPV6Subnet(config.Target) {
 		doLocation(&result)
 	}
 
@@ -799,7 +799,7 @@ func (x *XScan) NucleiScan(taskId string, mainTaskId string) (result string, err
 		for ip, ports := range x.Config.IPPort {
 			for _, port := range ports {
 				runConfig := config
-				runConfig.Target = fmt.Sprintf("%s:%d", ip, port)
+				runConfig.Target = utils.FormatHostUrl("", ip, port) //fmt.Sprintf("%s:%d", ip, port)
 				swg.Add()
 				go x.doNucleiScan(&swg, runConfig)
 			}
@@ -837,7 +837,7 @@ func (x *XScan) GobyScan(taskId string, mainTaskId string) (result string, err e
 		var targets []string
 		for ip, ports := range x.Config.IPPort {
 			for _, port := range ports {
-				targets = append(targets, fmt.Sprintf("%s:%d", ip, port))
+				targets = append(targets, utils.FormatHostUrl("", ip, port)) //fmt.Sprintf("%s:%d", ip, port))
 			}
 		}
 		runConfig := config
@@ -904,7 +904,7 @@ func (x *XScan) XrayScan(taskId string, mainTaskId string) (result string, err e
 		for ip, ports := range x.Config.IPPort {
 			for _, port := range ports {
 				runConfig := config
-				runConfig.Target = fmt.Sprintf("%s:%d", ip, port)
+				runConfig.Target = utils.FormatHostUrl("", ip, port) //fmt.Sprintf("%s:%d", ip, port)
 				swg.Add()
 				go x.doXrayscan(&swg, runConfig)
 			}

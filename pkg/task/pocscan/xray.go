@@ -6,7 +6,6 @@ import (
 	"encoding/json"
 	"github.com/hanc00l/nemo_go/pkg/conf"
 	"github.com/hanc00l/nemo_go/pkg/logging"
-	"github.com/hanc00l/nemo_go/pkg/task/custom"
 	"github.com/hanc00l/nemo_go/pkg/utils"
 	"os"
 	"os/exec"
@@ -31,18 +30,12 @@ func (x *Xray) Do() {
 	defer os.Remove(resultTempFile)
 	defer os.Remove(inputTargetFile)
 
-	btc := custom.NewBlackTargetCheck(custom.CheckAll)
-	urls := strings.Split(x.Config.Target, ",")
-	for idx, url := range urls {
-		if btc.CheckBlack(utils.HostStrip(url)) {
-			logging.RuntimeLog.Warningf("%s is in blacklist,skip...", url)
-			continue
-		}
-		if strings.HasSuffix(url, ":443") {
-			urls[idx] = "https://" + url
-		}
+	var urlsFormatted []string
+	//没有需要检测的端口,直接返回
+	if urlsFormatted = checkAndFormatUrl(x.Config.Target, true); len(urlsFormatted) == 0 {
+		return
 	}
-	err := os.WriteFile(inputTargetFile, []byte(strings.Join(urls, "\n")), 0666)
+	err := os.WriteFile(inputTargetFile, []byte(strings.Join(urlsFormatted, "\n")), 0666)
 	if err != nil {
 		logging.RuntimeLog.Error(err.Error())
 		return
@@ -119,7 +112,7 @@ func (x *Xray) parseXrayResult(outputTempFile string) {
 		for _, s := range r.Detail.Snapshot {
 			extraAll = append(extraAll, strings.Join(s, ""))
 		}
-		host := utils.HostStrip(r.Target.Url)
+		host := utils.ParseHost(r.Target.Url)
 		if host == "" || strings.Contains(r.Plugin, "baseline") || strings.Contains(r.Plugin, "dirscan") {
 			continue
 		}

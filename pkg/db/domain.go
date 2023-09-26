@@ -104,7 +104,7 @@ func (domain *Domain) makeWhere(searchMap map[string]interface{}) *gorm.DB {
 		case "domain":
 			db = makeLike(value, column, db)
 		case "ip":
-			domainAttr := GetDB().Model(&DomainAttr{}).Select("r_id").Distinct("r_id").Where("tag", "A").Where("content", value)
+			domainAttr := GetDB().Model(&DomainAttr{}).Select("r_id").Distinct("r_id").Where("tag='A' or tag='AAAA'").Where("content like ?", fmt.Sprintf("%%%s%%", value))
 			db = db.Where("id in (?)", domainAttr)
 			CloseDB(domainAttr)
 		case "color_tag":
