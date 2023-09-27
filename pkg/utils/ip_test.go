@@ -138,3 +138,10 @@ func TestIPv6Subnet2(t *testing.T) {
 	p := netip.PrefixFrom(netip.MustParseAddr(ipv6), 120)
 	t.Log(p)
 }
+
+func TestCheckIPV6Subnet2(t *testing.T) {
+	data := "24ae:0:0:0:0000:ffff:127:8201"
+	ipv6 := IPV6ToBigInt(data)
+	t.Log(ipv6)
+	t.Log(BigIntToIPV6(ipv6))
+}

@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/hanc00l/nemo_go/pkg/logging"
 	"math"
+	"math/big"
 	"net"
 	"net/netip"
 	"regexp"
@@ -31,6 +32,23 @@ func IPV4ToUInt32(ip string) uint32 {
 func UInt32ToIPV4(ip uint32) string {
 	return fmt.Sprintf("%d.%d.%d.%d",
 		byte(ip>>24), byte(ip>>16), byte(ip>>8), byte(ip))
+}
+
+func IPV6ToBigInt(ipString string) *big.Int {
+	ip := net.ParseIP(ipString)
+	if ip == nil {
+		return nil
+	}
+	i := big.NewInt(0)
+	i.SetBytes(ip)
+	return i
+}
+
+func BigIntToIPV6(i *big.Int) string {
+	var ip net.IP
+	buf := make([]byte, 16)
+	ip = i.FillBytes(buf)
+	return ip.String()
 }
 
 func CheckIPV4(ip string) bool {
@@ -83,7 +101,6 @@ func ParseIP(ip string) (ipResults []string) {
 		return []string{ip}
 	}
 	//192.168.1.0/24
-	//2409:8929:42d:bf31:1840:27ba:d669:8200/120
 	if CheckIPV4Subnet(ip) {
 		addr, ipv4sub, err := net.ParseCIDR(ip)
 		if err != nil {
@@ -97,6 +114,7 @@ func ParseIP(ip string) (ipResults []string) {
 		}
 		return
 	}
+	//2409:8929:42d:bf31:1840:27ba:d669:8200/120
 	if CheckIPV6Subnet(ip) {
 		ipv6Prefix, err := netip.ParsePrefix(ip)
 		if err != nil {
@@ -104,9 +122,10 @@ func ParseIP(ip string) (ipResults []string) {
 		}
 		ipStart := ipv6Prefix.Addr()
 		bits := ipv6Prefix.Bits()
-		if bits < 96 {
-			logging.RuntimeLog.Errorf("ipv6 subnet too large to discard parse:%s", ip)
-			ipResults = append(ipResults, ip)
+		// 为防止IP爆炸，最多支持解析一个A段的地址
+		if bits < 104 {
+			logging.RuntimeLog.Warningf("ipv6 subnet too large to discard parse:%s", ip)
+			//ipResults = append(ipResults, ip)
 			return
 		}
 		for {

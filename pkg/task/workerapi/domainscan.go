@@ -88,8 +88,10 @@ func doDomainScan(config domainscan.Config) (resultDomainScan domainscan.Result)
 		resolve.Result.DomainResult = resultDomainScan.DomainResult
 		resolve.Do()
 	}
-	//去除结果中无域名解析A或CNAME记录的域名
+	// 去除结果中无域名解析A或CNAME记录的域名
 	checkDomainResolveResult(&resultDomainScan)
+	// 对域名结果中同一个IP对应太多进行过滤
+	domainscan.FilterDomainHasTooMuchIP(&resultDomainScan)
 
 	return resultDomainScan
 }

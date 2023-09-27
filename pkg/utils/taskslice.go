@@ -3,6 +3,7 @@ package utils
 import (
 	"fmt"
 	"github.com/projectdiscovery/mapcidr"
+	"math/big"
 	"net"
 	"sort"
 	"strconv"
@@ -52,16 +53,16 @@ func (t *TaskSlice) DoIpSlice() (target []string, port []string) {
 		target = t.IpTarget
 		port = []string{t.Port}
 	case SliceByIP:
-		ipIntMap := parseAllIP(t.IpTarget)
-		target = sliceIP(ipIntMap, t.IpSliceNumber)
+		ipv4IntMap, ipv6BigIntMap := parseAllIP(t.IpTarget)
+		target = sliceIP(ipv4IntMap, ipv6BigIntMap, t.IpSliceNumber)
 		port = []string{t.Port}
 	case SliceByPort:
 		portIntMap := parseAllPort(t.Port)
 		port = slicePort(portIntMap, t.PortSliceNumber)
 		target = t.IpTarget
 	case SliceByIPAndPort:
-		ipIntMap := parseAllIP(t.IpTarget)
-		target = sliceIP(ipIntMap, t.IpSliceNumber)
+		ipv4IntMap, ipv6BigIntMap := parseAllIP(t.IpTarget)
+		target = sliceIP(ipv4IntMap, ipv6BigIntMap, t.IpSliceNumber)
 		portIntMap := parseAllPort(t.Port)
 		port = slicePort(portIntMap, t.PortSliceNumber)
 	default:
@@ -84,13 +85,22 @@ func (t *TaskSlice) DoDomainSlice() (target []string) {
 }
 
 // parseAllIP 解析所有的IP
-func parseAllIP(targetList []string) (ipIntMap map[string]struct{}) {
-	ipIntMap = make(map[string]struct{})
+func parseAllIP(targetList []string) (ipv4IntMap map[int]struct{}, ipv6BigIntMap map[*big.Int]struct{}) {
+	ipv4IntMap = make(map[int]struct{})
+	ipv6BigIntMap = make(map[*big.Int]struct{})
 	for _, v := range targetList {
 		ips := ParseIP(v)
 		for _, ip := range ips {
-			if _, ok := ipIntMap[ip]; !ok {
-				ipIntMap[ip] = struct{}{}
+			if CheckIPV4(ip) {
+				ipv4Int := int(IPV4ToUInt32(ip))
+				if _, ok := ipv4IntMap[ipv4Int]; !ok {
+					ipv4IntMap[ipv4Int] = struct{}{}
+				}
+			} else if CheckIPV6(ip) {
+				ipv6BigInt := IPV6ToBigInt(ip)
+				if _, ok := ipv6BigIntMap[ipv6BigInt]; !ok {
+					ipv6BigIntMap[ipv6BigInt] = struct{}{}
+				}
 			}
 		}
 	}
@@ -98,24 +108,37 @@ func parseAllIP(targetList []string) (ipIntMap map[string]struct{}) {
 }
 
 // sliceIP 按等量对ip进行切分，同时将IP进行cidr聚合
-func sliceIP(ipStringMap map[string]struct{}, sliceNumber int) (ips []string) {
-	if len(ipStringMap) == 0 {
-		return []string{}
+func sliceIP(ipv4Map map[int]struct{}, ipv6Map map[*big.Int]struct{}, sliceNumber int) (ips []string) {
+	//ipv4
+	if len(ipv4Map) > 0 {
+		ipIntList := SetToSliceInt(ipv4Map)
+		sort.Ints(ipIntList)
+		segments := splitArrayInt(ipIntList, sliceNumber)
+		for _, v := range segments {
+			var ipList []string
+			for _, ipInt := range v {
+				ip := UInt32ToIPV4(uint32(ipInt))
+				ipList = append(ipList, ip)
+			}
+			ipCidrs, _ := aggregateCIDRs(ipList)
+			ips = append(ips, ipCidrs)
+		}
 	}
-	ipStringList := SetToSlice(ipStringMap)
-	sort.Strings(ipStringList)
-	segments := splitArrayString(ipStringList, sliceNumber)
-	for _, v := range segments {
-		var ipList []string
-		for _, ip := range v {
-			ipList = append(ipList, ip)
-		}
-		ipCidrsV4, ipCidrsV6 := aggregateCIDRs(ipList)
-		if ipCidrsV4 != "" {
-			ips = append(ips, ipCidrsV4)
-		}
-		if ipCidrsV6 != "" {
-			ips = append(ips, ipCidrsV6)
+	//ipv6:
+	if len(ipv6Map) > 0 {
+		ipBigIntList := SetToSliceBigInt(ipv6Map)
+		sort.Slice(ipBigIntList, func(i, j int) bool {
+			return ipBigIntList[i].Cmp(ipBigIntList[j]) < 0
+		})
+		segmentsBigInt := splitArrayBigInt(ipBigIntList, sliceNumber)
+		for _, v := range segmentsBigInt {
+			var ipList []string
+			for _, ipBigInt := range v {
+				ip := BigIntToIPV6(ipBigInt)
+				ipList = append(ipList, ip)
+			}
+			_, ipCidrs := aggregateCIDRs(ipList)
+			ips = append(ips, ipCidrs)
 		}
 	}
 	return
@@ -147,6 +170,29 @@ func splitArrayInt(arr []int, num int) (segments [][]int) {
 // splitArrayInt 对数组分组
 func splitArrayString(arr []string, num int) (segments [][]string) {
 	segments = make([][]string, 0)
+	max := len(arr)
+	if max <= num {
+		segments = append(segments, arr)
+		return
+	}
+	quantity := max / num
+	for i := 0; i <= quantity; i++ {
+		start := i * num
+		end := (i + 1) * num
+		if i != quantity {
+			segments = append(segments, arr[start:end])
+		} else {
+			if max%num != 0 {
+				segments = append(segments, arr[start:])
+			}
+		}
+	}
+	return
+}
+
+// splitArrayBigInt 对数组分组
+func splitArrayBigInt(arr []*big.Int, num int) (segments [][]*big.Int) {
+	segments = make([][]*big.Int, 0)
 	max := len(arr)
 	if max <= num {
 		segments = append(segments, arr)

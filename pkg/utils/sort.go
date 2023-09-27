@@ -1,6 +1,7 @@
 package utils
 
 import (
+	"math/big"
 	"sort"
 	"strings"
 )
@@ -71,6 +72,28 @@ func SetToString(setMap map[string]struct{}) string {
 // SetToSliceInt 将Set（由map模拟实现）结果转化为列表结果
 func SetToSliceInt(setMap map[int]struct{}) (list []int) {
 	list = make([]int, len(setMap))
+	i := 0
+	for k, _ := range setMap {
+		list[i] = k
+		i++
+	}
+	return
+}
+
+// SetToSliceUInt 将Set（由map模拟实现）结果转化为列表结果
+func SetToSliceUInt(setMap map[uint32]struct{}) (list []uint32) {
+	list = make([]uint32, len(setMap))
+	i := 0
+	for k, _ := range setMap {
+		list[i] = k
+		i++
+	}
+	return
+}
+
+// SetToSliceBigInt 将Set（由map模拟实现）结果转化为列表结果
+func SetToSliceBigInt(setMap map[*big.Int]struct{}) (list []*big.Int) {
+	list = make([]*big.Int, len(setMap))
 	i := 0
 	for k, _ := range setMap {
 		list[i] = k
