@@ -21,6 +21,7 @@
 - 导入[fscan](https://github.com/shadow1ng/fscan)、[gogo](https://github.com/chainreactors/gogo)、[Httpx]( https://github.com/projectdiscovery/httpx)的扫描结果（适用于内网渗透的资产信息收集）
 - 导入FOFA、Hunter及0Zone的查询结果导出的资产文件
 - CDN识别
+- IPV6资产 [使用了解](docs/question.md#10ipv6资产)
 
 ### 2、域名资产
 
