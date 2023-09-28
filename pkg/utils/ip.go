@@ -29,11 +29,13 @@ func IPV4ToUInt32(ip string) uint32 {
 	return sum
 }
 
+// UInt32ToIPV4 将UINT32格式的IP地址转换为点分格式
 func UInt32ToIPV4(ip uint32) string {
 	return fmt.Sprintf("%d.%d.%d.%d",
 		byte(ip>>24), byte(ip>>16), byte(ip>>8), byte(ip))
 }
 
+// IPV4ToBigInt 将点分格式的IP地址转换为大整数
 func IPV6ToBigInt(ipString string) *big.Int {
 	ip := net.ParseIP(ipString)
 	if ip == nil {
@@ -44,6 +46,7 @@ func IPV6ToBigInt(ipString string) *big.Int {
 	return i
 }
 
+// BigIntToIPV4 将大整数格式的IP地址转换为点分格式
 func BigIntToIPV6(i *big.Int) string {
 	var ip net.IP
 	buf := make([]byte, 16)
@@ -59,6 +62,7 @@ func CheckIPV4(ip string) bool {
 
 }
 
+// CheckIPV4Subnet 检查是否是ipv4地址段
 func CheckIPV4Subnet(ip string) bool {
 	ipReg := `^((0|[1-9]\d?|1\d\d|2[0-4]\d|25[0-5])\.){3}(0|[1-9]\d?|1\d\d|2[0-4]\d|25[0-5])/\d{1,2}$`
 	r, _ := regexp.Compile(ipReg)
@@ -66,6 +70,7 @@ func CheckIPV4Subnet(ip string) bool {
 	return r.MatchString(ip)
 }
 
+// GetOutBoundIP 获取本机出口IP
 func GetOutBoundIP() (ip string, err error) {
 	conn, err := net.Dial("udp", "8.8.8.8:53")
 	if err != nil {
@@ -77,6 +82,7 @@ func GetOutBoundIP() (ip string, err error) {
 	return ip, nil
 }
 
+// GetClientIp 获取客户端IP
 func GetClientIp() (ip string, err error) {
 	adders, err := net.InterfaceAddrs()
 	if err != nil {
@@ -202,12 +208,14 @@ func CheckIPLocationInChinaMainLand(ipLocation string) bool {
 	return false
 }
 
+// CheckIPV6 检查是否是ipv6地址
 func CheckIPV6(ip string) bool {
 	ipv6Regex := `^(([0-9a-fA-F]{1,4}:){7,7}[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,7}:|([0-9a-fA-F]{1,4}:){1,6}:[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,5}(:[0-9a-fA-F]{1,4}){1,2}|([0-9a-fA-F]{1,4}:){1,4}(:[0-9a-fA-F]{1,4}){1,3}|([0-9a-fA-F]{1,4}:){1,3}(:[0-9a-fA-F]{1,4}){1,4}|([0-9a-fA-F]{1,4}:){1,2}(:[0-9a-fA-F]{1,4}){1,5}|[0-9a-fA-F]{1,4}:((:[0-9a-fA-F]{1,4}){1,6})|:((:[0-9a-fA-F]{1,4}){1,7}|:)|fe80:(:[0-9a-fA-F]{0,4}){0,4}%[0-9a-zA-Z]{1,}|::(ffff(:0{1,4}){0,1}:){0,1}((25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])\.){3,3}(25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])|([0-9a-fA-F]{1,4}:){1,4}:((25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])\.){3,3}(25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9]))$`
 	match, _ := regexp.MatchString(ipv6Regex, ip)
 
 	return match
 }
+
 func CheckIPV6Subnet(ip string) bool {
 	ipv6Regex := `^(([0-9a-fA-F]{1,4}:){7,7}[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,7}:|([0-9a-fA-F]{1,4}:){1,6}:[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,5}(:[0-9a-fA-F]{1,4}){1,2}|([0-9a-fA-F]{1,4}:){1,4}(:[0-9a-fA-F]{1,4}){1,3}|([0-9a-fA-F]{1,4}:){1,3}(:[0-9a-fA-F]{1,4}){1,4}|([0-9a-fA-F]{1,4}:){1,2}(:[0-9a-fA-F]{1,4}){1,5}|[0-9a-fA-F]{1,4}:((:[0-9a-fA-F]{1,4}){1,6})|:((:[0-9a-fA-F]{1,4}){1,7}|:)|fe80:(:[0-9a-fA-F]{0,4}){0,4}%[0-9a-zA-Z]{1,}|::(ffff(:0{1,4}){0,1}:){0,1}((25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])\.){3,3}(25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])|([0-9a-fA-F]{1,4}:){1,4}:((25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])\.){3,3}(25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9]))/\d{1,3}$`
 	match, _ := regexp.MatchString(ipv6Regex, ip)
@@ -215,6 +223,7 @@ func CheckIPV6Subnet(ip string) bool {
 	return match
 }
 
+// GetIPV4ParsedFormat 将IPv6地址进行格式化（缩写）
 func GetIPV6ParsedFormat(ip string) string {
 	ipv6Addr, err := netip.ParseAddr(ip)
 	if err != nil {
@@ -224,6 +233,7 @@ func GetIPV6ParsedFormat(ip string) string {
 	}
 }
 
+// GetIPV6CIDRParsedFormat 将IPv6地址段进行格式化（缩写）
 func GetIPV6CIDRParsedFormat(ip string) string {
 	ipv6Prefix, err := netip.ParsePrefix(ip)
 	if err != nil {
@@ -233,6 +243,7 @@ func GetIPV6CIDRParsedFormat(ip string) string {
 	}
 }
 
+// GetIPV6FullFormat 将IPv6地址进行格式化（完全展开格式）
 func GetIPV6FullFormat(ip string) string {
 	ipv6Addr, err := netip.ParseAddr(ip)
 	if err != nil {
@@ -241,6 +252,7 @@ func GetIPV6FullFormat(ip string) string {
 	return ipv6Addr.StringExpanded()
 }
 
+// IPV6Prefix64ToUInt64 将IPv6地址段的Prefix段（前64位）转换为uint64
 func IPV6Prefix64ToUInt64(ip string) uint64 {
 	var sum uint64
 	dataArray := strings.Split(GetIPV6FullFormat(ip), ":")

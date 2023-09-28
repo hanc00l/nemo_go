@@ -272,7 +272,7 @@ function change_user_workspace(dataTableId) {
     });
 }
 
-function get_result_output(obj_map, limit_length = true) {
+function get_result_output(obj_map, limit_length = 40) {
     var arrayObj = Array.from(obj_map);
     arrayObj.sort(function (a, b) {
         return b[1] - a[1]
@@ -287,9 +287,9 @@ function get_result_output(obj_map, limit_length = true) {
         if (value < 10) {
             output += "&nbsp;";
         }
-        if (limit_length) {
-            let showed_key = encodeHtml(String(key).substr(0, 40));
-            if (String(key).length > 40) showed_key += '...';
+        if (limit_length > 0) {
+            let showed_key = encodeHtml(String(key).substr(0, limit_length));
+            if (String(key).length > limit_length) showed_key += '...';
             output += showed_key;
         } else {
             output += key;

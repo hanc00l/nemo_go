@@ -398,7 +398,9 @@ $(function () {
                         let disable_fofa = $('#checkbox_disable_fofa').is(":checked");
                         for (let j = 0; j < data.length; j++) {
                             strData += pre_link
-                            strData += '<a href="ip-info?workspace=' + row['workspace'] + '&&ip=' + data[j] + '&&disable_fofa=' + disable_fofa + '" target="_blank">' + data[j] + '</a>';
+                            let ipV46 = data[j];
+                            if (isIpv6(data[j])) ipV46 = "[" + data[j] + "]";
+                            strData += '<a href="ip-info?workspace=' + row['workspace'] + '&&ip=' + data[j] + '&&disable_fofa=' + disable_fofa + '" target="_blank">' + ipV46 + '</a>';
                             pre_link = ",";
                         }
                         if (row["ipcdn"]) {
@@ -573,9 +575,18 @@ function process_statistic_data_ip(setting) {
     let obj_map = new Map()
     for (const data of setting.json.data) {
         for (const ip of data.ip) {
-            let ip_Nums = ip.split(".")
-            if ((ip_Nums.length) === 4) {
-                const ip_C = ip_Nums[0] + "." + ip_Nums[1] + "." + ip_Nums[2] + ".0/24";
+            if (isIpv4(ip)) {
+                let ip_Nums = ip.split(".")
+                if ((ip_Nums.length) === 4) {
+                    const ip_C = ip_Nums[0] + "." + ip_Nums[1] + "." + ip_Nums[2] + ".0/24";
+                    if (obj_map.has(ip_C)) {
+                        obj_map.set(ip_C, obj_map.get(ip_C) + 1)
+                    } else {
+                        obj_map.set(ip_C, 1)
+                    }
+                }
+            } else if (isIpv6(ip)) {
+                const ip_C = getIPv6CSubnet(ip)
                 if (obj_map.has(ip_C)) {
                     obj_map.set(ip_C, obj_map.get(ip_C) + 1)
                 } else {
@@ -584,7 +595,7 @@ function process_statistic_data_ip(setting) {
             }
         }
     }
-    $('#statistic_ip').html(get_result_output(obj_map));
+    $('#statistic_ip').html(get_result_output(obj_map, 42));
 }
 
 function process_statistic_data_port(setting) {
@@ -613,7 +624,7 @@ function process_statistic_data_icon(setting) {
             }
         }
     }
-    $('#statistic_icon').html(get_result_output(obj_map, false));
+    $('#statistic_icon').html(get_result_output(obj_map, 0));
 }
 
 
