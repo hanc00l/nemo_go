@@ -271,6 +271,7 @@ CREATE TABLE `key_word` (
   `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
   `org_id` int(11) NOT NULL,
   `key_word` varchar(511) COLLATE utf8mb4_bin NOT NULL,
+  `engine` varchar(40) COLLATE utf8mb4_bin NOT NULL,
   `search_time` varchar(63) COLLATE utf8mb4_bin DEFAULT NULL,
   `exclude_words` varchar(2047) COLLATE utf8mb4_bin DEFAULT NULL,
   `check_mod` varchar(255) COLLATE utf8mb4_bin DEFAULT NULL,
