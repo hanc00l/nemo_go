@@ -28,7 +28,7 @@ func TestMasscan_Run(t *testing.T) {
 }
 
 func TestMasscan_ParseXMLResult(t *testing.T) {
-	content, err := os.ReadFile("/Users/user/Downloads/masscan.xml")
+	content, err := os.ReadFile("masscan.xml")
 	if err != nil {
 		logging.RuntimeLog.Error(err)
 		return

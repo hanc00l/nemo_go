@@ -31,7 +31,7 @@ func TestNmap_Run(t *testing.T) {
 
 func TestNmap_ParseXMLResult(t *testing.T) {
 	i := NewImportOfflineResult("nmap")
-	content, err := os.ReadFile("/Users/user/Downloads/nmap2.xml")
+	content, err := os.ReadFile("nmap2.xml")
 	if err != nil {
 		logging.RuntimeLog.Error(err)
 		return
