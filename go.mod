@@ -1,6 +1,6 @@
 module github.com/hanc00l/nemo_go
 
-go 1.18
+go 1.21
 
 require (
 	github.com/Qianlitp/crawlergo v0.4.4
@@ -34,7 +34,7 @@ require (
 	github.com/twmb/murmur3 v1.1.6
 	github.com/yl2chen/cidranger v1.0.2
 	github.com/zu1k/nali v0.7.3
-	golang.org/x/net v0.15.0
+	golang.org/x/net v0.17.0
 	golang.org/x/text v0.13.0
 	google.golang.org/genproto/googleapis/api v0.0.0-20230530153820-e85fd2cbaebc
 	gopkg.in/errgo.v2 v2.1.0
@@ -179,13 +179,13 @@ require (
 	github.com/yusufpapurcu/wmi v1.2.3 // indirect
 	go.mongodb.org/mongo-driver v1.9.1 // indirect
 	go.opencensus.io v0.24.0 // indirect
-	golang.org/x/crypto v0.13.0 // indirect
+	golang.org/x/crypto v0.14.0 // indirect
 	golang.org/x/exp v0.0.0-20230817173708-d852ddb80c63 // indirect
-	golang.org/x/image v0.0.0-20210220032944-ac19c3e999fb // indirect
+	golang.org/x/image v0.10.0 // indirect
 	golang.org/x/mod v0.12.0 // indirect
 	golang.org/x/oauth2 v0.11.0 // indirect
 	golang.org/x/sync v0.3.0 // indirect
-	golang.org/x/sys v0.12.0 // indirect
+	golang.org/x/sys v0.13.0 // indirect
 	golang.org/x/tools v0.12.1-0.20230815132531-74c255bcf846 // indirect
 	google.golang.org/api v0.126.0 // indirect
 	google.golang.org/appengine v1.6.7 // indirect
@@ -196,3 +196,5 @@ require (
 	gopkg.in/djherbis/times.v1 v1.3.0 // indirect
 	k8s.io/utils v0.0.0-20230209194617-a36077c30491 // indirect
 )
+
+replace github.com/mat/besticon => github.com/hanc00l/besticon v0.0.0-20231113033355-bdd37074dae7

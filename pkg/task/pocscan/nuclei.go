@@ -60,7 +60,7 @@ func (n *Nuclei) Do() {
 	*/
 	cmdArgs = append(
 		cmdArgs,
-		"--timeout", "5", "-no-color",
+		"--timeout", "5", "-no-color", "-disable-update-check",
 		"-c", fmt.Sprintf("%d", nucleiConcurrencyThreadNumber[conf.WorkerPerformanceMode]),
 		"-bs", fmt.Sprintf("%d", nucleiConcurrencyThreadNumber[conf.WorkerPerformanceMode]),
 		"-rl", fmt.Sprintf("%d", nucleiConcurrencyThreadNumber[conf.WorkerPerformanceMode]*6),
