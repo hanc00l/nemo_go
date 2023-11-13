@@ -15,6 +15,15 @@ func TestIconHash_RunFetchIconHashes(t *testing.T) {
 	}
 }
 
+func TestIconHash_RunFetchIconHashes2(t *testing.T) {
+	url := "172.16.222.1:8000"
+	iconHash := NewIconHash()
+	result := iconHash.RunFetchIconHashes(url)
+	for _, r := range result {
+		t.Log(r)
+	}
+}
+
 func TestIconHash_Do(t *testing.T) {
 	domainConfig := domainscan.Config{Target: "800best.com"}
 	subdomain := domainscan.NewSubFinder(domainConfig)

@@ -160,12 +160,16 @@ func (i *IconHash) RunFetchIconHashes(url string) (hashResult []IconHashResult) 
 	if icon1.Error == nil {
 		icons = append(icons, icon1)
 	}
-	// 获取网页中定义的全部icon
-	u2 := fmt.Sprintf("%s://%s", protocoll, url)
-	finder := besticon.IconFinder{}
-	icons2, err := finder.FetchIcons(u2)
-	if err == nil {
-		icons = append(icons, icons2...)
+	// 缺省的icon不存在再尝试读取其它icon
+	if len(icons) == 0 {
+		// 获取网页中定义的全部icon
+		u2 := fmt.Sprintf("%s://%s", protocoll, url)
+		//finder := besticon.IconFinder{}
+		finder := besticon.New().NewIconFinder()
+		icons2, err := finder.FetchIcons(u2)
+		if err == nil {
+			icons = append(icons, icons2...)
+		}
 	}
 	//计算哈希值
 	for _, icon := range icons {
@@ -207,13 +211,16 @@ func (i *IconHash) SaveFile(localSavePath string, result []IconHashInfo) string 
 func fetchIconDetails(url string) besticon.Icon {
 	i := besticon.Icon{URL: url}
 
-	response, e := besticon.Get(url)
+	bi := besticon.New()
+	response, e := bi.Get(url)
+	//response, e := besticon.Get(url)
 	if e != nil {
 		i.Error = e
 		return i
 	}
 
-	b, e := besticon.GetBodyBytes(response)
+	b, e := bi.GetBodyBytes(response)
+	//b, e := besticon.GetBodyBytes(response)
 	if e != nil {
 		i.Error = e
 		return i
