@@ -1,5 +1,29 @@
 # ChangeLog
 
+## 2.10.3
+
+2023-11-13
+
+### Update
+
+- 增加漏洞的批量删除功能
+- 更新iconhash代码
+- 一些测试用例信息
+- 更新thirdparty第三方组件
+- Go 版本更新到1.21
+
+### Fix
+
+- iplocation in xscan
+
+### Thirdparty版本
+
+- Httpx：1.3.6
+- Subfinder：2.6.3
+- Nuclei：3.0.3
+- Observe_ward：2023.10.13
+- Goby: 2.7.9
+
 ## 2.10.2
 
 2023-09-28
