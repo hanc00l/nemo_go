@@ -449,9 +449,9 @@ func (x *XScan) doPortscan(swg *sizedwaitgroup.SizedWaitGroup, config portscan.C
 	}
 
 	//增加ip归属地查询,先判断是否合规，再进行查询归属地
-	if !utils.CheckIPV4Subnet(config.Target) && !utils.CheckIPV6Subnet(config.Target) {
-		doLocation(&result)
-	}
+	//if !utils.CheckIPV4Subnet(config.Target) && !utils.CheckIPV6Subnet(config.Target) {
+	doLocation(&result)
+	//}
 
 	//合并结果
 	x.ResultIP.Lock()
