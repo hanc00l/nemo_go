@@ -37,6 +37,42 @@ func ParseHost(u string) string {
 	return host
 }
 
+// ParseHostPort 将http://a.b.c:80/这种url去除不相关的字符，返回主机名,端口号
+func ParseHostPort(u string) (string, int) {
+	// url.Parse必须是完整的schema://host:port格式才能解析，比如http://example.org:8080
+	// url.Parse支持对ipv6完整URL的解析
+	// 返回的hostname为example.org（不带端口）
+	p, err := url.Parse(u)
+	if err == nil && p.Host != "" {
+		port, _ := strconv.Atoi(p.Port())
+		return p.Hostname(), port
+	}
+
+	if _, host, port := ParseHostUrl(u); len(host) > 0 && port > 0 {
+		return host, port
+	}
+	// 其它格式处理：
+	url := strings.ReplaceAll(u, "https://", "")
+	url = strings.ReplaceAll(url, "http://", "")
+	url = strings.ReplaceAll(url, "/", "")
+	datas := strings.Split(url, ":")
+	var host string
+	var port int
+	if len(datas) >= 1 {
+		host = datas[0]
+		if len(datas) >= 2 {
+			port, _ = strconv.Atoi(datas[1])
+		} else {
+			if strings.HasPrefix(u, "https://") {
+				port = 443
+			} else {
+				port = 80
+			}
+		}
+	}
+	return host, port
+}
+
 func CheckDomain(domain string) bool {
 	domainPattern := `^(?:[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\.)+[a-z0-9][a-z0-9-]{0,61}[a-z0-9]$`
 	reg := regexp.MustCompile(strings.TrimSpace(domainPattern))
