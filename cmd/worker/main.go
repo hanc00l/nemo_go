@@ -26,6 +26,7 @@ type WorkerOption struct {
 	WorkerPerformance int
 	WorkerTopic       map[string]struct{}
 	TLSEnabled        bool
+	DefaultConfigFile string
 }
 
 func parseWorkerOptions() *WorkerOption {
@@ -40,6 +41,8 @@ func parseWorkerOptions() *WorkerOption {
 	flag.StringVar(&workerRunTaskMode, "m", "0", "worker run task mode; 0: all, 1:active, 2:finger, 3:passive, 4:pocscan, 5:custom; run multiple mode separated by \",\"")
 	flag.StringVar(&taskWorkspaceGUID, "w", "", "workspace guid for custom task; multiple workspace separated by \",\"")
 	flag.BoolVar(&option.TLSEnabled, "tls", false, "use TLS for RPC and filesync")
+	flag.StringVar(&option.DefaultConfigFile, "f", conf.WorkerDefaultConfigFile, "worker default config file")
+
 	flag.Parse()
 
 	if workerRunTaskMode == "0" {
@@ -85,6 +88,9 @@ func parseWorkerOptions() *WorkerOption {
 	if len(option.WorkerTopic) == 0 {
 		logging.CLILog.Error("error worker run task mode...")
 		return nil
+	}
+	if option.DefaultConfigFile != conf.WorkerDefaultConfigFile {
+		conf.WorkerDefaultConfigFile = option.DefaultConfigFile
 	}
 	return option
 }

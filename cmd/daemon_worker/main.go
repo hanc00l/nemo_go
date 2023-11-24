@@ -21,6 +21,7 @@ type WorkerDaemonOption struct {
 	ManualSyncAuth    string
 	TaskWorkspaceGUID string
 	TLSEnabled        bool
+	DefaultConfigFile string
 }
 
 func parseDaemonWorkerOption() *WorkerDaemonOption {
@@ -37,6 +38,7 @@ func parseDaemonWorkerOption() *WorkerDaemonOption {
 	flag.StringVar(&option.ManualSyncAuth, "ma", "", "manual file sync auth key")
 	flag.BoolVar(&option.NoFilesync, "nf", option.NoFilesync, "disable file sync")
 	flag.BoolVar(&option.TLSEnabled, "tls", false, "use TLS for RPC and filesync")
+	flag.StringVar(&option.DefaultConfigFile, "f", conf.WorkerDefaultConfigFile, "worker default config file")
 	flag.Parse()
 
 	return option
@@ -59,6 +61,7 @@ func main() {
 	if option == nil {
 		return
 	}
+	conf.WorkerDefaultConfigFile = option.DefaultConfigFile
 	comm.TLSEnabled = option.TLSEnabled
 	filesync.TLSEnabled = option.TLSEnabled
 

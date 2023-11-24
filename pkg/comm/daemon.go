@@ -94,6 +94,7 @@ func StartWorker(workerRunTaskMode, taskWorkspaceGUID string, concurrency, worke
 		"-p", fmt.Sprintf("%d", workerPerformance),
 		"-m", workerRunTaskMode,
 		"-w", taskWorkspaceGUID,
+		"-f", conf.WorkerDefaultConfigFile,
 	}
 	if TLSEnabled {
 		cmdArgs = append(cmdArgs, "-tls")

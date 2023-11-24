@@ -20,6 +20,9 @@ const (
 // WorkerPerformanceMode worker默认的性能模式为Normal
 var WorkerPerformanceMode = NormalPerformance
 
+var ServerDefaultConfigfile = "conf/server.yml"
+var WorkerDefaultConfigFile = "conf/worker.yml"
+
 // RunMode 运行模式：正式运行请使用Release模式，Debug模式只用于开发调试过程
 var RunMode = Release
 
@@ -185,7 +188,7 @@ func (config *Server) WriteConfig() error {
 		fmt.Println(err)
 		return err
 	}
-	err = os.WriteFile(filepath.Join(GetRootPath(), "conf/server.yml"), content, 0666)
+	err = os.WriteFile(filepath.Join(GetRootPath(), ServerDefaultConfigfile), content, 0666)
 	if err != nil {
 		fmt.Println(err)
 	}
@@ -194,7 +197,7 @@ func (config *Server) WriteConfig() error {
 
 // ReloadConfig 从yaml文件中加载配置
 func (config *Server) ReloadConfig() error {
-	fileContent, err := os.ReadFile(filepath.Join(GetRootPath(), "conf/server.yml"))
+	fileContent, err := os.ReadFile(filepath.Join(GetRootPath(), ServerDefaultConfigfile))
 	if err != nil {
 		fmt.Println(err)
 		return err
@@ -208,7 +211,7 @@ func (config *Server) ReloadConfig() error {
 
 // ReloadConfig 从yaml文件中加载配置
 func (config *Worker) ReloadConfig() error {
-	fileContent, err := os.ReadFile(filepath.Join(GetRootPath(), "conf/worker.yml"))
+	fileContent, err := os.ReadFile(filepath.Join(GetRootPath(), WorkerDefaultConfigFile))
 	if err != nil {
 		fmt.Println(err)
 		return err
@@ -227,7 +230,7 @@ func (config *Worker) WriteConfig() error {
 		fmt.Println(err)
 		return err
 	}
-	err = os.WriteFile(filepath.Join(GetRootPath(), "conf/worker.yml"), content, 0666)
+	err = os.WriteFile(filepath.Join(GetRootPath(), WorkerDefaultConfigFile), content, 0666)
 	if err != nil {
 		fmt.Println(err)
 	}
