@@ -161,6 +161,10 @@ func CheckTaskStatus(taskId string) (ok bool, result string, err error) {
 	if taskStatus.IsRevoked {
 		return false, RevokedTask(""), nil
 	}
+	if taskStatus.IsFinished {
+		logging.RuntimeLog.Warningf("task has finished: %s", taskId)
+		return false, SucceedTask(""), errors.New("task has finished")
+	}
 	return true, "", nil
 }
 

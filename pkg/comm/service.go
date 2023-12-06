@@ -59,12 +59,13 @@ type IconHashResultArgs struct {
 
 // TaskStatusArgs 任务状态请求与返回参数
 type TaskStatusArgs struct {
-	TaskID    string
-	IsExist   bool
-	IsRevoked bool
-	State     string
-	Worker    string
-	Result    string
+	TaskID     string
+	IsExist    bool
+	IsRevoked  bool
+	IsFinished bool
+	State      string
+	Worker     string
+	Result     string
 }
 
 // NewTaskArgs 新建任务请求与返回参数
@@ -276,6 +277,9 @@ func (s *Service) CheckTask(ctx context.Context, args *string, replay *TaskStatu
 	replay.IsExist = true
 	if taskRun.State == ampq.REVOKED || taskMain.State == ampq.REVOKED {
 		replay.IsRevoked = true
+	}
+	if taskRun.SucceededTime != nil {
+		replay.IsFinished = true
 	}
 	replay.TaskID = taskRun.TaskId
 	replay.State = taskRun.State
