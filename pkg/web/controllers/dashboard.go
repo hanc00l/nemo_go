@@ -31,6 +31,7 @@ type WorkerStatusData struct {
 	CreateTime               string `json:"create_time"`
 	UpdateTime               string `json:"update_time"`
 	TaskExecutedNumber       int    `json:"task_number"`
+	TaskStartedNumber        int    `json:"started_number"`
 	EnableManualReloadFlag   bool   `json:"enable_manual_reload_flag"`
 	EnableManualFileSyncFlag bool   `json:"enable_manual_file_sync_flag"`
 	HeartColor               string `json:"heart_color"`
@@ -162,6 +163,7 @@ func (c *DashboardController) WorkerAliveListAction() {
 			CreateTime:         FormatDateTime(v.CreateTime),
 			UpdateTime:         fmt.Sprintf("%s前", time.Now().Sub(v.UpdateTime).Truncate(time.Second).String()),
 			TaskExecutedNumber: v.TaskExecutedNumber,
+			TaskStartedNumber:  v.TaskStartedNumber,
 			HeartColor:         "green",
 		}
 		workerHeartDt := time.Now().Sub(v.UpdateTime).Minutes()

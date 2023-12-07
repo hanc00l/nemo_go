@@ -109,6 +109,11 @@ func StartWorker(topicName string, concurrency int) error {
 
 // postTaskHandler 任务完成时处理工作
 func postTaskHandler(signature *tasks.Signature) {
+	//更新任务执行state和worker
+	WStatus.Lock()
+	WStatus.TaskStartedNumber--
+	WStatus.Unlock()
+
 	//log.INFO.Println("I am an end of task handler for:", signature.Name)
 	server := ampq.GetWorkerAMPQServer(ampq.GetTopicByMQRoutingKey(signature.RoutingKey), 3)
 	r := result.NewAsyncResult(signature, server.GetBackend())
@@ -130,6 +135,7 @@ func preTaskHandler(signature *tasks.Signature) {
 	//更新任务执行state和worker
 	WStatus.Lock()
 	WStatus.TaskExecutedNumber++
+	WStatus.TaskStartedNumber++
 	WStatus.Unlock()
 
 	var taskStatus comm.TaskStatusArgs

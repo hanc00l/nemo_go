@@ -45,6 +45,7 @@ type WorkerStatus struct {
 	CreateTime             time.Time `json:"create_time"`
 	UpdateTime             time.Time `json:"update_time"`
 	TaskExecutedNumber     int       `json:"task_number"`
+	TaskStartedNumber      int       `json:"started_number"`
 	ManualReloadFlag       bool      `json:"manual_reload_flag"`
 	ManualFileSyncFlag     bool      `json:"manual_file_sync_flag"`
 	WorkerDaemonUpdateTime time.Time `json:"worker_daemon_update_time"`

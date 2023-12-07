@@ -85,7 +85,12 @@ $(function () {
                         } else return '<span class="text-danger">' + data + '</span>';
                     }
                 },
-                {data: 'task_number', title: '已执行任务数', width: '10%'},
+                {
+                    title: "<span title='正在执行/已执行'>任务</span>", width: '10%',
+                    render: function (data, type, row, meta) {
+                        return row["started_number"] + "/" + row["task_number"];
+                    }
+                },
                 {
                     title: "操作", width: '10%',
                     render: function (data, type, row, meta) {
