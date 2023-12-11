@@ -1,5 +1,5 @@
 $(function () {
-    //load_domainscan_config();
+    load_domainscan_config();
     //搜索任务
     $("#search").click(function () {
         $("#hidden_org_id").val($("#select_org_id_search").val())

@@ -50,7 +50,7 @@ func NewHttpxFinger() *HttpxFinger {
 	h := &HttpxFinger{}
 	h.StoreResponse = true
 	//加载自定义指纹及回调函数
-	//h.loadFingerprintHub()
+	h.loadFingerprintHub()
 	h.loadCustomFingerprint()
 	//保存HTTP的header与body到数据库：
 	h.FingerPrintFunc = append(h.FingerPrintFunc, h.fingerPrintFuncForSaveHttpHeaderAndBody)

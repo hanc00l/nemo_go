@@ -40,3 +40,22 @@ func TestHttpxFinger_DoHttpxAndFingerPrint2(t *testing.T) {
 		}
 	}
 }
+
+func TestHttpxFinger_DoHttpxAndFingerPrint4(t *testing.T) {
+	v := NewHttpxFinger()
+	v.ResultPortScan = portscan.Result{
+		IPResult: make(map[string]*portscan.IPResult),
+	}
+	v.ResultPortScan.SetIP("113.88.164.63")
+	v.ResultPortScan.SetPort("113.88.164.63", 800)
+
+	v.DoHttpxAndFingerPrint()
+
+	//t.Log(v.ResultPortScan.IPResult)
+	for ip, r := range v.ResultPortScan.IPResult {
+		t.Log(ip, r)
+		for port, p := range r.Ports {
+			t.Log(port, p)
+		}
+	}
+}

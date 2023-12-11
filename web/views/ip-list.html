@@ -288,7 +288,7 @@
                                                                 </div>
                                                                 <input class="form-control" id="input_port" type="text"
                                                                        placeholder="--top-ports 1000（支持Nmap格式的端口列表）"
-                                                                       value="" list="datalist_port">
+                                                                       value="--top-ports 1000" list="datalist_port">
                                                                 <datalist id="datalist_port" style="display:none;">
                                                                     <option value="--top-ports 1000" selected>
                                                                         --top-ports 1000
@@ -325,7 +325,7 @@
                                                                         <select class="form-control" id="select_bin">
                                                                             <option value="nmap">nmap</option>
                                                                             <option value="masscan" selected="selected">
-                                                                                masscan（默认）
+                                                                                masscan
                                                                             </option>
                                                                             <option value="masnmap">masscan+nmap
                                                                             </option>
@@ -337,7 +337,7 @@
                                                                                 aria-hidden="true"
                                                                                 title="使用nmap时的选项，masscan只使用SYN扫描"></i></label>
                                                                         <select class="form-control" id="select_tech">
-                                                                            <option value="-sS" selected>-sS（默认）
+                                                                            <option value="-sS" selected>-sS
                                                                             </option>
                                                                             <option value="-sT">-sT</option>
                                                                             <option value="-sV">-sV</option>
@@ -350,7 +350,7 @@
                                                                                 title="Send packets per second&#10;对应--min-rate(nmap)与--rate(masscan)参数"></i></label>
                                                                         <input class="form-control" id="input_rate"
                                                                                type="text" placeholder="1000（默认）"
-                                                                               value="">
+                                                                               value="1000">
                                                                     </div>
                                                                 </div>
                                                                 <div class="form-group row">
@@ -497,8 +497,6 @@
                                                             </div>
                                                         </div>
                                                     </div>
-
-
                                                     <div class="tab-pane fade" id="vulverify">
                                                         <div class="form-group row bg-light">
                                                             <div class="col-md-12">
@@ -587,7 +585,6 @@
                                                             </div>
                                                         </div>
                                                     </div>
-
                                                     <div class="tab-pane fade" id="batchscan">
                                                         <div class="form-group row bg-light">
                                                             <div class="col-md-12">
@@ -608,7 +605,7 @@
                                                                 <input class="form-control" id="input_batchscan_port2"
                                                                        type="text"
                                                                        placeholder="--top-ports 1000（支持Nmap格式的端口列表）"
-                                                                       value="" list="datalist_port2">
+                                                                       value="--top-ports 1000" list="datalist_port2">
                                                                 <datalist id="datalist_port2" style="display:none;">
                                                                     <option value="--top-ports 1000" selected>
                                                                         --top-ports 1000
@@ -647,7 +644,7 @@
                                                                                 id="select_batchscan_bin">
                                                                             <option value="nmap">nmap</option>
                                                                             <option value="masscan" selected="selected">
-                                                                                masscan（默认）
+                                                                                masscan
                                                                             </option>
                                                                         </select>
                                                                     </div>
@@ -658,7 +655,7 @@
                                                                                 title="使用nmap时的选项，masscan只使用SYN扫描"></i></label>
                                                                         <select class="form-control"
                                                                                 id="select_batchscan_tech">
-                                                                            <option value="-sS" selected>-sS（默认）
+                                                                            <option value="-sS" selected>-sS
                                                                             </option>
                                                                             <option value="-sT">-sT</option>
                                                                             <option value="-sV">-sV</option>
@@ -671,8 +668,8 @@
                                                                                 title="Send packets per second&#10;对应--min-rate(nmap)与--rate(masscan)参数"></i></label>
                                                                         <input class="form-control"
                                                                                id="input_batchscan_rate"
-                                                                               type="text" placeholder="1000（默认）"
-                                                                               value="">
+                                                                               type="text" placeholder="1000"
+                                                                               value="1000">
                                                                     </div>
                                                                 </div>
                                                                 <div class="form-check form-check-inline">

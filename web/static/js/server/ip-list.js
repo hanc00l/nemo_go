@@ -1,5 +1,5 @@
 $(function () {
-    //load_portscan_config();
+    load_portscan_config();
     //搜索
     $("#search").click(function () {
         $("#hidden_org_id").val($("#select_org_id_search").val())
@@ -657,7 +657,7 @@ function process_statistic_data_ip(setting) {
 
         }
     }
-    $('#statistic_ip').html(get_result_output(obj_map,42));
+    $('#statistic_ip').html(get_result_output(obj_map, 42));
 }
 
 function process_statistic_data_port(setting) {
@@ -779,5 +779,9 @@ function load_portscan_config() {
         $('#checkbox_fingerprinthub').prop("checked", data['fingerprinthub']);
         $('#checkbox_screenshot').prop("checked", data['screenshot']);
         $('#checkbox_iconhash').prop("checked", data['iconhash']);
+        $('#checkbox_batchscan_httpx').prop("checked", data['httpx']);
+        $('#checkbox_batchscan_fingerprinthub').prop("checked", data['fingerprinthub']);
+        $('#checkbox_batchscan_screenshot').prop("checked", data['screenshot']);
+        $('#checkbox_batchscan_iconhash').prop("checked", data['iconhash']);
     });
 }
