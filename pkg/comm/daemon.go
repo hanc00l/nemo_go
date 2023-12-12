@@ -6,6 +6,7 @@ import (
 	"github.com/hanc00l/nemo_go/pkg/filesync"
 	"github.com/hanc00l/nemo_go/pkg/logging"
 	"github.com/hanc00l/nemo_go/pkg/utils"
+	"github.com/shirou/gopsutil/v3/process"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -14,6 +15,41 @@ import (
 
 var cmd *exec.Cmd
 var WorkerName string
+
+// WatchWorkerProcess worker进程状态监控
+func WatchWorkerProcess(workerRunTaskMode, taskWorkspaceGUID string, concurrency, workerPerformance int) {
+	if cmd == nil {
+		return
+	}
+	// 检查worker进程是否存在
+	p, err := process.NewProcess(int32(cmd.Process.Pid))
+	if err != nil {
+		logging.RuntimeLog.Warning("detected worker process not exist")
+		logging.CLILog.Warning("detected worker process not exist")
+		if KillWorker() {
+			StartWorker(workerRunTaskMode, taskWorkspaceGUID, concurrency, workerPerformance)
+		}
+		return
+	}
+	// 获取worker进程状态
+	status, err1 := p.Status()
+	if err1 != nil {
+		logging.CLILog.Error(err)
+		logging.RuntimeLog.Error(err)
+		return
+	}
+	//fmt.Println(status)
+	for _, s := range status {
+		// 如果发现进程挂掉了，重启worker
+		if s == process.Zombie {
+			logging.RuntimeLog.Warning("detected worker zombie status")
+			logging.CLILog.Warning("detected worker zombie status")
+			if KillWorker() {
+				StartWorker(workerRunTaskMode, taskWorkspaceGUID, concurrency, workerPerformance)
+			}
+		}
+	}
+}
 
 // StartWorkerDaemon 启动worker的daemon
 func StartWorkerDaemon(workerRunTaskMode, taskWorkspaceGUID string, concurrency, workerPerformance int, noFilesync bool) {
@@ -33,6 +69,7 @@ func StartWorkerDaemon(workerRunTaskMode, taskWorkspaceGUID string, concurrency,
 			logging.CLILog.Error("daemon keep alive fail")
 			continue
 		}
+		WatchWorkerProcess(workerRunTaskMode, taskWorkspaceGUID, concurrency, workerPerformance)
 		// 收到server的手动重启worker命令，执行停止worker、文件同步、重启worker
 		if replay.ManualReloadFlag {
 			if KillWorker() {
