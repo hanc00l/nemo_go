@@ -23,10 +23,11 @@ import (
 )
 
 type IconHash struct {
-	ResultPortScan     portscan.Result
-	ResultDomainScan   domainscan.Result
-	IconHashInfoResult IconHashInfoResult
+	ResultPortScan     *portscan.Result
+	ResultDomainScan   *domainscan.Result
+	IconHashInfoResult *IconHashInfoResult
 	DomainTargetPort   map[string]map[int]struct{}
+	OptimizationMode   bool
 }
 
 type IconHashResult struct {
@@ -60,9 +61,10 @@ func NewIconHash() *IconHash {
 
 func (i *IconHash) Do() {
 	swg := sizedwaitgroup.New(fpIconHashThreadNumber[conf.WorkerPerformanceMode])
+	i.IconHashInfoResult = &IconHashInfoResult{Result: make([]IconHashInfo, 0)}
 
 	btc := custom.NewBlackTargetCheck(custom.CheckAll)
-	if i.ResultPortScan.IPResult != nil {
+	if i.ResultPortScan != nil && i.ResultPortScan.IPResult != nil {
 		for ipName, ipResult := range i.ResultPortScan.IPResult {
 			if btc.CheckBlack(ipName) {
 				logging.RuntimeLog.Warningf("%s is in blacklist,skip...", ipName)
@@ -71,6 +73,11 @@ func (i *IconHash) Do() {
 			for portNumber := range ipResult.Ports {
 				if _, ok := blankPort[portNumber]; ok {
 					continue
+				}
+				if i.OptimizationMode {
+					if !ValidForOptimizationMode(ipName, "", portNumber, i.ResultPortScan, i.ResultDomainScan) {
+						continue
+					}
 				}
 				url := utils.FormatHostUrl("", ipName, portNumber) //fmt.Sprintf("%v:%v", ipName, portNumber)
 				swg.Add()
@@ -100,7 +107,7 @@ func (i *IconHash) Do() {
 			}
 		}
 	}
-	if i.ResultDomainScan.DomainResult != nil {
+	if i.ResultDomainScan != nil && i.ResultDomainScan.DomainResult != nil {
 		if i.DomainTargetPort == nil {
 			i.DomainTargetPort = make(map[string]map[int]struct{})
 		}
@@ -118,6 +125,11 @@ func (i *IconHash) Do() {
 			for port := range i.DomainTargetPort[domain] {
 				if _, ok := blankPort[port]; ok {
 					continue
+				}
+				if i.OptimizationMode {
+					if !ValidForOptimizationMode("", domain, port, i.ResultPortScan, i.ResultDomainScan) {
+						continue
+					}
 				}
 				url := utils.FormatHostUrl("", domain, port)
 				swg.Add()

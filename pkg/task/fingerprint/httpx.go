@@ -19,8 +19,8 @@ import (
 )
 
 type Httpx struct {
-	ResultPortScan   portscan.Result
-	ResultDomainScan domainscan.Result
+	ResultPortScan   *portscan.Result
+	ResultDomainScan *domainscan.Result
 	DomainTargetPort map[string]map[int]struct{}
 	//保存响应的数据，用于自定义指纹匹配
 	StoreResponse          bool
@@ -90,7 +90,7 @@ func NewHttpx() *Httpx {
 func (x *Httpx) Do() {
 	swg := sizedwaitgroup.New(fpHttpxThreadNumber[conf.WorkerPerformanceMode])
 	btc := custom.NewBlackTargetCheck(custom.CheckAll)
-	if x.ResultPortScan.IPResult != nil {
+	if x.ResultPortScan != nil && x.ResultPortScan.IPResult != nil {
 		for ipName, ipResult := range x.ResultPortScan.IPResult {
 			if btc.CheckBlack(ipName) {
 				logging.RuntimeLog.Warningf("%s is in blacklist,skip...", ipName)
@@ -139,7 +139,7 @@ func (x *Httpx) Do() {
 			}
 		}
 	}
-	if x.ResultDomainScan.DomainResult != nil {
+	if x.ResultDomainScan != nil && x.ResultDomainScan.DomainResult != nil {
 		if x.DomainTargetPort == nil {
 			x.DomainTargetPort = make(map[string]map[int]struct{})
 		}

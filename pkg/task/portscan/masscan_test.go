@@ -18,7 +18,7 @@ func TestMasscan_Run(t *testing.T) {
 	}
 	m := NewMasscan(config)
 	m.Do()
-	t.Log(m.Result)
+	t.Log(&m.Result)
 	for ip, ipa := range m.Result.IPResult {
 		t.Log(ip, ipa)
 		for port, pa := range ipa.Ports {

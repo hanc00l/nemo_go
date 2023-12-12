@@ -80,7 +80,7 @@ var (
 )
 
 // parseIpPort 解析搜索结果中的IP记录
-func parseIpPort(ipResult portscan.Result, fsr onlineSearchResult, source string, btc *custom.BlackTargetCheck) {
+func parseIpPort(ipResult *portscan.Result, fsr onlineSearchResult, source string, btc *custom.BlackTargetCheck) {
 	if fsr.IP == "" || !utils.CheckIP(fsr.IP) {
 		return
 	}
@@ -123,7 +123,7 @@ func parseIpPort(ipResult portscan.Result, fsr onlineSearchResult, source string
 }
 
 // parseDomainIP 解析搜索结果中的域名记录
-func parseDomainIP(domainResult domainscan.Result, fsr onlineSearchResult, source string, btc *custom.BlackTargetCheck) {
+func parseDomainIP(domainResult *domainscan.Result, fsr onlineSearchResult, source string, btc *custom.BlackTargetCheck) {
 	host := strings.Replace(fsr.Host, "https://", "", -1)
 	host = strings.Replace(host, "http://", "", -1)
 	host = strings.Replace(host, "/", "", -1)

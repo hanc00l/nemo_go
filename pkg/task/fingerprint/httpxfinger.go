@@ -12,14 +12,18 @@ import (
 	"os"
 	"path"
 	"strings"
+	"sync"
 )
+
+// 全局变量，只加载一次
+var fpMutex sync.Mutex
+var fpWebFingerprintHub []WebFingerPrint
+var fpCustom []CustomFingerPrint
 
 // HttpxFinger 基于httpx实现的web应用的fingerprint功能
 // 通过httpx获取web的指纹，并保存返回的信息实现自定义扩展
 type HttpxFinger struct {
 	Httpx
-	fpWebFingerprintHub []WebFingerPrint
-	fpCustom            []CustomFingerPrint
 }
 
 // WebFingerPrint 匹配web_fingerprint_v3.json的指纹结构
@@ -49,9 +53,13 @@ type CustomFingerPrint struct {
 func NewHttpxFinger() *HttpxFinger {
 	h := &HttpxFinger{}
 	h.StoreResponse = true
+
 	//加载自定义指纹及回调函数
+	fpMutex.Lock()
 	h.loadFingerprintHub()
 	h.loadCustomFingerprint()
+	fpMutex.Unlock()
+
 	//保存HTTP的header与body到数据库：
 	h.FingerPrintFunc = append(h.FingerPrintFunc, h.fingerPrintFuncForSaveHttpHeaderAndBody)
 
@@ -60,6 +68,9 @@ func NewHttpxFinger() *HttpxFinger {
 
 // loadFingerprintHub 加载finerprinthub的指纹及处理函数
 func (h *HttpxFinger) loadFingerprintHub() {
+	if len(fpWebFingerprintHub) > 0 {
+		return
+	}
 	fingerprintJsonPathFile := path.Join(conf.GetRootPath(), "thirdparty/fingerprinthub", "web_fingerprint_v3.json")
 	fingerContent, err := os.ReadFile(fingerprintJsonPathFile)
 	if err != nil {
@@ -67,33 +78,36 @@ func (h *HttpxFinger) loadFingerprintHub() {
 		logging.CLILog.Error(err)
 		return
 	}
-	if err = json.Unmarshal(fingerContent, &h.fpWebFingerprintHub); err != nil {
+	if err = json.Unmarshal(fingerContent, &fpWebFingerprintHub); err != nil {
 		logging.RuntimeLog.Error(err)
 		logging.CLILog.Error(err)
 		return
 	}
-	if len(h.fpWebFingerprintHub) > 0 {
+	if len(fpWebFingerprintHub) > 0 {
 		h.FingerPrintFunc = append(h.FingerPrintFunc, h.fingerPrintFuncForFingerprintHub)
-		logging.CLILog.Infof("Load fingerprinthub total:%d", len(h.fpWebFingerprintHub))
+		logging.CLILog.Infof("Load fingerprinthub total:%d", len(fpWebFingerprintHub))
 	}
 }
 
 // loadCustomFingerprint 加载自定义指纹
 func (h *HttpxFinger) loadCustomFingerprint() {
+	if len(fpCustom) > 0 {
+		return
+	}
 	fingerprintJsonPathFile := path.Join(conf.GetRootPath(), "thirdparty/custom", "web_fingerprint.json")
 	fingerContent, err := os.ReadFile(fingerprintJsonPathFile)
 	if err != nil {
 		logging.CLILog.Warning(err)
 		return
 	}
-	if err = json.Unmarshal(fingerContent, &h.fpCustom); err != nil {
+	if err = json.Unmarshal(fingerContent, &fpCustom); err != nil {
 		logging.RuntimeLog.Error(err)
 		logging.CLILog.Error(err)
 		return
 	}
-	if len(h.fpCustom) > 0 {
+	if len(fpCustom) > 0 {
 		h.FingerPrintFunc = append(h.FingerPrintFunc, h.fingerPrintFuncForCustom)
-		logging.CLILog.Infof("Load custom web finger total:%d", len(h.fpCustom))
+		logging.CLILog.Infof("Load custom web finger total:%d", len(fpCustom))
 	}
 }
 
@@ -111,7 +125,7 @@ func (h *HttpxFinger) fingerPrintFuncForFingerprintHub(domain string, ip string,
 	// 读取httpx保存的response内容，并解析为body和headers
 	body, _, headers := h.parseHttpHeaderAndBody(h.getStoredResponseContent(storedResponsePathFile))
 	// 指纹匹配
-	for _, v := range h.fpWebFingerprintHub {
+	for _, v := range fpWebFingerprintHub {
 		flag := false
 
 		hflag := true
@@ -178,7 +192,7 @@ func (h *HttpxFinger) fingerPrintFuncForCustom(domain string, ip string, port in
 		}
 	}
 	//fmt.Println(content)
-	for _, v := range h.fpCustom {
+	for _, v := range fpCustom {
 		rule := xraypocv1.ParseRules(v.Rule)
 		if xraypocv1.MatchRules(*rule, content) {
 			//fmt.Println(v)

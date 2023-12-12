@@ -100,7 +100,7 @@ func keepAlive() {
 	time.Sleep(10 * time.Second)
 	for {
 		workerapi.WStatus.Lock()
-		if !comm.DoKeepAlive(workerapi.WStatus) {
+		if !comm.DoKeepAlive(&workerapi.WStatus) {
 			logging.RuntimeLog.Errorf("keep alive fail")
 			logging.CLILog.Error("keep alive fail")
 		}

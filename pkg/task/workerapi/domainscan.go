@@ -29,7 +29,7 @@ func DomainScan(taskId, mainTaskId, configJSON string) (result string, err error
 	resultDomainScan := doDomainScan(config)
 	// 如果有端口扫描的选项
 	if config.IsIPPortScan || config.IsIPSubnetPortScan {
-		doPortScanByDomainscan(taskId, mainTaskId, config, &resultDomainScan)
+		doPortScanByDomainscan(taskId, mainTaskId, config, resultDomainScan)
 	}
 	// 保存结果
 	resultArgs := comm.ScanResultArgs{
@@ -43,7 +43,7 @@ func DomainScan(taskId, mainTaskId, configJSON string) (result string, err error
 		logging.RuntimeLog.Error(err)
 		return FailedTask(err.Error()), err
 	}
-	_, err = NewFingerprintTask(taskId, mainTaskId, nil, &resultDomainScan, FingerprintTaskConfig{
+	_, err = NewFingerprintTask(taskId, mainTaskId, nil, resultDomainScan, FingerprintTaskConfig{
 		IsHttpx:          config.IsHttpx,
 		IsFingerprintHub: config.IsFingerprintHub,
 		IsIconHash:       config.IsIconHash,
@@ -58,40 +58,40 @@ func DomainScan(taskId, mainTaskId, configJSON string) (result string, err error
 }
 
 // doDomainScan 域名收集任务
-func doDomainScan(config domainscan.Config) (resultDomainScan domainscan.Result) {
+func doDomainScan(config domainscan.Config) (resultDomainScan *domainscan.Result) {
 	// 子域名枚举
 	if config.IsSubDomainFinder {
 		subdomain := domainscan.NewSubFinder(config)
 		subdomain.Do()
-		resultDomainScan = subdomain.Result
+		resultDomainScan = &subdomain.Result
 	}
 	// 子域名爆破
 	if config.IsSubDomainBrute {
 		massdns := domainscan.NewMassdns(config)
 		massdns.Do()
-		resultDomainScan = massdns.Result
+		resultDomainScan = &massdns.Result
 	}
 	//  Crawler
 	if config.IsCrawler {
 		crawler := domainscan.NewCrawler(config)
 		crawler.Do()
-		resultDomainScan = crawler.Result
+		resultDomainScan = &crawler.Result
 	}
 	// 域名解析
 	resolve := domainscan.NewResolve(config)
 	if !config.IsSubDomainFinder && !config.IsSubDomainBrute && !config.IsCrawler {
 		// 对config中Target进行域名解析
 		resolve.Do()
-		resultDomainScan = resolve.Result
+		resultDomainScan = &resolve.Result
 	} else {
 		// 对域名任务（子域名枚举或爆破）的结果进行域名解析
 		resolve.Result.DomainResult = resultDomainScan.DomainResult
 		resolve.Do()
 	}
 	// 去除结果中无域名解析A或CNAME记录的域名
-	checkDomainResolveResult(&resultDomainScan)
+	checkDomainResolveResult(resultDomainScan)
 	// 对域名结果中同一个IP对应太多进行过滤
-	domainscan.FilterDomainHasTooMuchIP(&resultDomainScan)
+	domainscan.FilterDomainHasTooMuchIP(resultDomainScan)
 
 	return resultDomainScan
 }

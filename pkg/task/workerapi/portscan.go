@@ -30,10 +30,10 @@ func PortScan(taskId, mainTaskId, configJSON string) (result string, err error) 
 		logging.RuntimeLog.Error(err)
 		return FailedTask(err.Error()), err
 	}
-	var resultPortScan portscan.Result
+	var resultPortScan *portscan.Result
 	resultPortScan, result, err = doPortScanAndSave(taskId, mainTaskId, config)
 	//指纹识别任务
-	_, err = NewFingerprintTask(taskId, mainTaskId, &resultPortScan, nil, FingerprintTaskConfig{
+	_, err = NewFingerprintTask(taskId, mainTaskId, resultPortScan, nil, FingerprintTaskConfig{
 		IsHttpx:          config.IsHttpx,
 		IsFingerprintHub: config.IsFingerprintHub,
 		IsIconHash:       config.IsIconHash,
@@ -46,7 +46,7 @@ func PortScan(taskId, mainTaskId, configJSON string) (result string, err error) 
 	return SucceedTask(result), nil
 }
 
-func doPortScanAndSave(taskId string, mainTaskId string, config portscan.Config) (resultPortScan portscan.Result, result string, err error) {
+func doPortScanAndSave(taskId string, mainTaskId string, config portscan.Config) (resultPortScan *portscan.Result, result string, err error) {
 	//端口扫描：
 	if config.IsPortscan {
 		if config.CmdBin == "masnmap" {
@@ -54,18 +54,18 @@ func doPortScanAndSave(taskId string, mainTaskId string, config portscan.Config)
 		} else if config.CmdBin == "nmap" {
 			nmap := portscan.NewNmap(config)
 			nmap.Do()
-			resultPortScan = nmap.Result
+			resultPortScan = &nmap.Result
 		} else {
 			masscan := portscan.NewMasscan(config)
 			masscan.Do()
-			resultPortScan = masscan.Result
+			resultPortScan = &masscan.Result
 		}
 	} else {
 		resultPortScan.IPResult = make(map[string]*portscan.IPResult)
 	}
 	// IP位置
 	if config.IsIpLocation {
-		doLocation(&resultPortScan)
+		doLocation(resultPortScan)
 	}
 	// 保存结果
 	resultArgs := comm.ScanResultArgs{
@@ -114,7 +114,7 @@ func doPortScanAndSave(taskId string, mainTaskId string, config portscan.Config)
 }
 
 // doMasscanPlusNmap masscan进行端口扫描，nmap -sV进行详细扫描
-func doMasscanPlusNmap(config portscan.Config) (resultPortScan portscan.Result) {
+func doMasscanPlusNmap(config portscan.Config) (resultPortScan *portscan.Result) {
 	resultPortScan.IPResult = make(map[string]*portscan.IPResult)
 	//masscan扫描
 	masscan := portscan.NewMasscan(config)

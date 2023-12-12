@@ -3,6 +3,7 @@ package fingerprint
 import (
 	"github.com/hanc00l/nemo_go/pkg/task/domainscan"
 	"github.com/hanc00l/nemo_go/pkg/task/portscan"
+	"os"
 	"testing"
 )
 
@@ -10,10 +11,10 @@ func TestHttpx_Run(t *testing.T) {
 	domainConfig := domainscan.Config{Target: "800best.com"}
 	subdomain := domainscan.NewSubFinder(domainConfig)
 	subdomain.Do()
-	t.Log(subdomain.Result)
+	t.Log(&subdomain.Result)
 
 	httpx := NewHttpx()
-	httpx.ResultDomainScan = subdomain.Result
+	httpx.ResultDomainScan = &subdomain.Result
 	httpx.Do()
 	t.Log(httpx.ResultDomainScan)
 	for d, da := range httpx.ResultDomainScan.DomainResult {
@@ -35,7 +36,7 @@ func TestHttpx_Run2(t *testing.T) {
 	nmap.Do()
 
 	httpx := NewHttpx()
-	httpx.ResultPortScan = nmap.Result
+	httpx.ResultPortScan = &nmap.Result
 	httpx.Do()
 	for ip, r := range httpx.ResultPortScan.IPResult {
 		t.Log(ip, r)
@@ -59,7 +60,7 @@ func TestHttpx_Run3(t *testing.T) {
 	nmap.Do()
 
 	httpx := NewHttpx()
-	httpx.ResultPortScan = nmap.Result
+	httpx.ResultPortScan = &nmap.Result
 	httpx.Do()
 	for ip, r := range httpx.ResultPortScan.IPResult {
 		t.Log(ip, r)
@@ -121,4 +122,8 @@ func TestHttpxFinger_DoHttpxAndFingerPrint3(t *testing.T) {
 	for d, da := range httpx.ResultDomainScan.DomainResult {
 		t.Log(d, da)
 	}
+}
+
+func TestHttpxFinger_Remove(t *testing.T) {
+	os.Remove("/tmp/noexitfilepath")
 }

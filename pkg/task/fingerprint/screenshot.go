@@ -28,10 +28,11 @@ const (
 )
 
 type ScreenShot struct {
-	ResultPortScan   portscan.Result
-	ResultDomainScan domainscan.Result
+	ResultPortScan   *portscan.Result
+	ResultDomainScan *domainscan.Result
 	ResultScreenShot ScreenshotResult
 	DomainTargetPort map[string]map[int]struct{}
+	OptimizationMode bool
 }
 
 type ScreenshotFileInfo struct {
@@ -54,7 +55,7 @@ func (s *ScreenShot) Do() {
 	swg := sizedwaitgroup.New(fpScreenshotThreadNum[conf.WorkerPerformanceMode])
 
 	btc := custom.NewBlackTargetCheck(custom.CheckAll)
-	if s.ResultPortScan.IPResult != nil {
+	if s.ResultPortScan != nil && s.ResultPortScan.IPResult != nil {
 		for ipName, ipResult := range s.ResultPortScan.IPResult {
 			if btc.CheckBlack(ipName) {
 				logging.RuntimeLog.Warningf("%s is in blacklist,skip...", ipName)
@@ -64,6 +65,11 @@ func (s *ScreenShot) Do() {
 				if _, ok := blankPort[portNumber]; ok {
 					continue
 				}
+				if s.OptimizationMode {
+					if !ValidForOptimizationMode(ipName, "", portNumber, s.ResultPortScan, s.ResultDomainScan) {
+						continue
+					}
+				}
 				protocol := utils.GetProtocol(utils.FormatHostUrl("", ipName, portNumber), 5)
 				swg.Add()
 				go s.doScreenshotAndResize(&swg, ipName, portNumber, protocol)
@@ -71,7 +77,7 @@ func (s *ScreenShot) Do() {
 			}
 		}
 	}
-	if s.ResultDomainScan.DomainResult != nil {
+	if s.ResultDomainScan != nil && s.ResultDomainScan.DomainResult != nil {
 		if s.DomainTargetPort == nil {
 			s.DomainTargetPort = make(map[string]map[int]struct{})
 		}
@@ -89,6 +95,11 @@ func (s *ScreenShot) Do() {
 			for port := range s.DomainTargetPort[domain] {
 				if _, ok := blankPort[port]; ok {
 					continue
+				}
+				if s.OptimizationMode {
+					if !ValidForOptimizationMode("", domain, port, s.ResultPortScan, s.ResultDomainScan) {
+						continue
+					}
 				}
 				protocol := utils.GetProtocol(utils.FormatHostUrl("", domain, port), 5)
 				swg.Add()
@@ -183,6 +194,7 @@ func (s *ScreenShot) doScreenshotAndResize(swg *sizedwaitgroup.SizedWaitGroup, d
 	u := utils.FormatHostUrl(protocol, domain, port)
 	file1 := utils.GetTempPNGPathFileName()
 	defer os.Remove(file1)
+	logging.CLILog.Infof("headless-chrome screenshot -> %s", u)
 	if DoFullScreenshot(u, file1) {
 		fileResized := utils.GetTempPNGPathFileName()
 		if utils.ReSizePicture(file1, fileResized, SavedWidth, SavedHeight) {

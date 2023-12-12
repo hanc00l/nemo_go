@@ -27,10 +27,10 @@ func TestFingerprintHub_Do(t *testing.T) {
 	}
 	nmap := portscan.NewNmap(nmapConfig)
 	nmap.Do()
-	t.Log(nmap.Result)
+	t.Log(&nmap.Result)
 
 	fp := NewFingerprintHub()
-	fp.ResultPortScan = nmap.Result
+	fp.ResultPortScan = &nmap.Result
 	fp.Do()
 	for _, r := range fp.ResultPortScan.IPResult {
 		for port, p := range r.Ports {
@@ -50,10 +50,10 @@ func TestFingerprintHub_Do2(t *testing.T) {
 	}
 	nmap := portscan.NewNmap(nmapConfig)
 	nmap.Do()
-	t.Log(nmap.Result)
+	t.Log(&nmap.Result)
 
 	fp := NewFingerprintHub()
-	fp.ResultPortScan = nmap.Result
+	fp.ResultPortScan = &nmap.Result
 	fp.Do()
 	for _, r := range fp.ResultPortScan.IPResult {
 		for port, p := range r.Ports {

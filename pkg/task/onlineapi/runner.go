@@ -201,8 +201,8 @@ func (s *OnlineSearch) processResult() {
 
 	btc := custom.NewBlackTargetCheck(custom.CheckAll)
 	for _, fsr := range s.Result {
-		parseIpPort(s.IpResult, fsr, s.apiName, btc)
-		parseDomainIP(s.DomainResult, fsr, s.apiName, btc)
+		parseIpPort(&s.IpResult, fsr, s.apiName, btc)
+		parseDomainIP(&s.DomainResult, fsr, s.apiName, btc)
 	}
 
 	domainscan.FilterDomainHasTooMuchIP(&s.DomainResult)

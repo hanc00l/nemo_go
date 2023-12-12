@@ -28,35 +28,35 @@ func BatchScan(taskId, mainTaskId, configJSON string) (result string, err error)
 		logging.RuntimeLog.Warning("ports error")
 		return FailedTask("ports error"), errors.New("ports error:" + config.Port)
 	}
-	var resultPortScan portscan.Result
+	var resultPortScan *portscan.Result
 	// 存活探测扫描
 	config.Port = ports[0]
 	if config.CmdBin == "nmap" {
 		nmap := portscan.NewNmap(config)
 		nmap.Do()
-		resultPortScan = nmap.Result
+		resultPortScan = &nmap.Result
 	} else {
 		mascan := portscan.NewMasscan(config)
 		mascan.Do()
-		resultPortScan = mascan.Result
+		resultPortScan = &mascan.Result
 	}
 	// 详细端口扫描
-	ipSubnetList := getResultIPSubnetList(&resultPortScan)
+	ipSubnetList := getResultIPSubnetList(resultPortScan)
 	if ipSubnetList != "" {
 		config.Port = ports[1]
 		config.Target = ipSubnetList
 		if config.CmdBin == "nmap" {
 			nmap := portscan.NewNmap(config)
 			nmap.Do()
-			resultPortScan = nmap.Result
+			resultPortScan = &nmap.Result
 		} else {
 			mascan := portscan.NewMasscan(config)
 			mascan.Do()
-			resultPortScan = mascan.Result
+			resultPortScan = &mascan.Result
 		}
 		// IP位置
 		if config.IsIpLocation {
-			doLocation(&resultPortScan)
+			doLocation(resultPortScan)
 		}
 	}
 	// 保存结果
@@ -72,7 +72,7 @@ func BatchScan(taskId, mainTaskId, configJSON string) (result string, err error)
 		return FailedTask(err.Error()), err
 	}
 	//指纹识别任务
-	_, err = NewFingerprintTask(taskId, mainTaskId, &resultPortScan, nil, FingerprintTaskConfig{
+	_, err = NewFingerprintTask(taskId, mainTaskId, resultPortScan, nil, FingerprintTaskConfig{
 		IsHttpx:          config.IsHttpx,
 		IsFingerprintHub: config.IsFingerprintHub,
 		IsIconHash:       config.IsIconHash,

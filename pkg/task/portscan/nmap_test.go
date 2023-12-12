@@ -20,7 +20,7 @@ func TestNmap_Run(t *testing.T) {
 	nmap.Do()
 	//nmap.Result.SaveResult(nmap.Config)
 
-	t.Log(nmap.Result)
+	t.Log(&nmap.Result)
 	for ip, ipa := range nmap.Result.IPResult {
 		t.Log(ip, ipa)
 		for port, pa := range ipa.Ports {

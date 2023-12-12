@@ -22,11 +22,11 @@ var (
 )
 
 // DoKeepAlive worker请求keepAlive
-func DoKeepAlive(ws ampq.WorkerStatus) bool {
+func DoKeepAlive(ws *ampq.WorkerStatus) bool {
 	kari := newKeepAliveRequestInfo(ws)
 	var replay string
 
-	if err := CallXClient("KeepAlive", &kari, &replay); err != nil {
+	if err := CallXClient("KeepAlive", kari, &replay); err != nil {
 		logging.RuntimeLog.Errorf("keep alive fail:%v", err)
 		logging.CLILog.Errorf("keep alive fail:%v", err)
 		return false
@@ -45,10 +45,10 @@ func DoDaemonKeepAlive() (replay WorkerDaemonManualInfo, err error) {
 }
 
 // newKeepAliveRequestInfo worker请求的keepAlive数据
-func newKeepAliveRequestInfo(ws ampq.WorkerStatus) KeepAliveInfo {
+func newKeepAliveRequestInfo(ws *ampq.WorkerStatus) *KeepAliveInfo {
 	kai := KeepAliveInfo{
-		WorkerStatus: ws,
+		WorkerStatus: *ws,
 	}
 	kai.WorkerStatus.UpdateTime = time.Now()
-	return kai
+	return &kai
 }

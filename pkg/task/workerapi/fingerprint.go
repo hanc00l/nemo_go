@@ -47,13 +47,14 @@ func Fingerprint(taskId, mainTaskId, configJSON string) (result string, err erro
 }
 
 // doFingerPrintAndSave 指纹的综合任务，包括IP与domain
-func doFingerPrintAndSave(taskId string, mainTaskId string, config FingerprintTaskConfig) (resultPortScan portscan.Result, resultDomainScan domainscan.Result, result string, err error) {
+func doFingerPrintAndSave(taskId string, mainTaskId string, config FingerprintTaskConfig) (resultPortScan *portscan.Result, resultDomainScan *domainscan.Result, result string, err error) {
 	var domainPort map[string]map[int]struct{}
 	// 返回的结果
+	resultPortScan = &portscan.Result{}
+	resultDomainScan = &domainscan.Result{}
 	resultPortScan.IPResult = make(map[string]*portscan.IPResult)
 	resultDomainScan.DomainResult = make(map[string]*domainscan.DomainResult)
 	// 通过RPC调用保存结果
-	// 保存结果
 	resultArgs := comm.ScanResultArgs{
 		TaskID:     taskId,
 		MainTaskId: mainTaskId,
@@ -72,7 +73,7 @@ func doFingerPrintAndSave(taskId string, mainTaskId string, config FingerprintTa
 			IsIconHash:       config.IsIconHash,
 			WorkspaceId:      config.WorkspaceId,
 		}
-		doIPFingerPrint(portscanConfig, &resultPortScan)
+		doIPFingerPrint(portscanConfig, resultPortScan)
 		resultArgs.IPConfig = &portscanConfig
 		resultArgs.IPResult = resultPortScan.IPResult
 	}
@@ -96,7 +97,7 @@ func doFingerPrintAndSave(taskId string, mainTaskId string, config FingerprintTa
 			IsIconHash:       config.IsIconHash,
 			WorkspaceId:      config.WorkspaceId,
 		}
-		doDomainFingerPrint(domainscanConfig, &resultDomainScan, domainPort)
+		doDomainFingerPrint(domainscanConfig, resultDomainScan, domainPort)
 		resultArgs.DomainConfig = &domainscanConfig
 		resultArgs.DomainResult = resultDomainScan.DomainResult
 	}
@@ -108,7 +109,7 @@ func doFingerPrintAndSave(taskId string, mainTaskId string, config FingerprintTa
 	}
 	// screenshot任务
 	if config.IsScreenshot {
-		resultScreenshot := doScreenshotAndSave(config.WorkspaceId, mainTaskId, &resultPortScan, &resultDomainScan, domainPort)
+		resultScreenshot := doScreenshotAndSave(config.WorkspaceId, mainTaskId, resultPortScan, resultDomainScan, domainPort, config.IsHttpx)
 		result = strings.Join([]string{result, resultScreenshot}, ",")
 	}
 
@@ -119,16 +120,17 @@ func doFingerPrintAndSave(taskId string, mainTaskId string, config FingerprintTa
 func doIPFingerPrint(config portscan.Config, resultPortScan *portscan.Result) {
 	if config.IsHttpx {
 		httpx := fingerprint.NewHttpxFinger()
-		httpx.ResultPortScan = *resultPortScan
+		httpx.ResultPortScan = resultPortScan
 		httpx.DoHttpxAndFingerPrint()
 	}
 	if config.IsFingerprintHub {
 		fp := fingerprint.NewFingerprintHub()
-		fp.ResultPortScan = *resultPortScan
+		fp.ResultPortScan = resultPortScan
+		fp.OptimizationMode = config.IsHttpx
 		fp.Do()
 	}
 	if config.IsIconHash {
-		doIconHashAndSave(config.WorkspaceId, resultPortScan, nil, nil)
+		doIconHashAndSave(config.WorkspaceId, resultPortScan, nil, nil, config.IsHttpx)
 	}
 }
 
@@ -137,29 +139,31 @@ func doDomainFingerPrint(config domainscan.Config, resultDomainScan *domainscan.
 	// 指纹识别
 	if config.IsHttpx {
 		httpx := fingerprint.NewHttpxFinger()
-		httpx.ResultDomainScan = *resultDomainScan
+		httpx.ResultDomainScan = resultDomainScan
 		httpx.DomainTargetPort = domainPort
 		httpx.DoHttpxAndFingerPrint()
 	}
 	if config.IsFingerprintHub {
 		fp := fingerprint.NewFingerprintHub()
-		fp.ResultDomainScan = *resultDomainScan
+		fp.OptimizationMode = config.IsHttpx
+		fp.ResultDomainScan = resultDomainScan
 		fp.DomainTargetPort = domainPort
 		fp.Do()
 	}
 	if config.IsIconHash {
-		doIconHashAndSave(config.WorkspaceId, nil, resultDomainScan, domainPort)
+		doIconHashAndSave(config.WorkspaceId, nil, resultDomainScan, domainPort, config.IsHttpx)
 	}
 }
 
 // doScreenshotAndSave 执行Screenshot并保存
-func doScreenshotAndSave(workspaceId int, mainTaskId string, resultIPScan *portscan.Result, resultDomainScan *domainscan.Result, domainPort map[string]map[int]struct{}) (result string) {
+func doScreenshotAndSave(workspaceId int, mainTaskId string, resultIPScan *portscan.Result, resultDomainScan *domainscan.Result, domainPort map[string]map[int]struct{}, isHttpx bool) (result string) {
 	ss := fingerprint.NewScreenShot()
+	ss.OptimizationMode = isHttpx
 	if resultIPScan != nil {
-		ss.ResultPortScan = *resultIPScan
+		ss.ResultPortScan = resultIPScan
 	}
 	if resultDomainScan != nil {
-		ss.ResultDomainScan = *resultDomainScan
+		ss.ResultDomainScan = resultDomainScan
 		ss.DomainTargetPort = domainPort
 	}
 	ss.Do()
@@ -177,13 +181,14 @@ func doScreenshotAndSave(workspaceId int, mainTaskId string, resultIPScan *ports
 }
 
 // doIconHashAndSave 获取icon，并将icon image保存到服务端
-func doIconHashAndSave(workspaceId int, resultIPScan *portscan.Result, resultDomainScan *domainscan.Result, domainPort map[string]map[int]struct{}) (result string) {
+func doIconHashAndSave(workspaceId int, resultIPScan *portscan.Result, resultDomainScan *domainscan.Result, domainPort map[string]map[int]struct{}, isHttpx bool) (result string) {
 	hash := fingerprint.NewIconHash()
+	hash.OptimizationMode = isHttpx
 	if resultIPScan != nil {
-		hash.ResultPortScan = *resultIPScan
+		hash.ResultPortScan = resultIPScan
 	}
 	if resultDomainScan != nil {
-		hash.ResultDomainScan = *resultDomainScan
+		hash.ResultDomainScan = resultDomainScan
 		hash.DomainTargetPort = domainPort
 	}
 	hash.Do()

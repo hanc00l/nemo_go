@@ -16,9 +16,10 @@ import (
 )
 
 type FingerprintHub struct {
-	ResultPortScan   portscan.Result
-	ResultDomainScan domainscan.Result
+	ResultPortScan   *portscan.Result
+	ResultDomainScan *domainscan.Result
 	DomainTargetPort map[string]map[int]struct{}
+	OptimizationMode bool
 }
 
 type FingerprintHubReult struct {
@@ -40,7 +41,7 @@ func NewFingerprintHub() *FingerprintHub {
 func (f *FingerprintHub) Do() {
 	swg := sizedwaitgroup.New(fpObserverWardThreadNumber[conf.WorkerPerformanceMode])
 	btc := custom.NewBlackTargetCheck(custom.CheckAll)
-	if f.ResultPortScan.IPResult != nil {
+	if f.ResultPortScan != nil && f.ResultPortScan.IPResult != nil {
 		for ipName, ipResult := range f.ResultPortScan.IPResult {
 			if btc.CheckBlack(ipName) {
 				logging.RuntimeLog.Warningf("%s is in blacklist,skip...", ipName)
@@ -49,6 +50,11 @@ func (f *FingerprintHub) Do() {
 			for portNumber := range ipResult.Ports {
 				if _, ok := blankPort[portNumber]; ok {
 					continue
+				}
+				if f.OptimizationMode {
+					if !ValidForOptimizationMode(ipName, "", portNumber, f.ResultPortScan, f.ResultDomainScan) {
+						continue
+					}
 				}
 				url := utils.FormatHostUrl("", ipName, portNumber)
 				swg.Add()
@@ -71,7 +77,7 @@ func (f *FingerprintHub) Do() {
 			}
 		}
 	}
-	if f.ResultDomainScan.DomainResult != nil {
+	if f.ResultDomainScan != nil && f.ResultDomainScan.DomainResult != nil {
 		if f.DomainTargetPort == nil {
 			f.DomainTargetPort = make(map[string]map[int]struct{})
 		}
@@ -89,6 +95,11 @@ func (f *FingerprintHub) Do() {
 			for port := range f.DomainTargetPort[domain] {
 				if _, ok := blankPort[port]; ok {
 					continue
+				}
+				if f.OptimizationMode {
+					if !ValidForOptimizationMode("", domain, port, f.ResultPortScan, f.ResultDomainScan) {
+						continue
+					}
 				}
 				url := utils.FormatHostUrl("", domain, port)
 				swg.Add()

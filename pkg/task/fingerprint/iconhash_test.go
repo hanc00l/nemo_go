@@ -28,10 +28,10 @@ func TestIconHash_Do(t *testing.T) {
 	domainConfig := domainscan.Config{Target: "800best.com"}
 	subdomain := domainscan.NewSubFinder(domainConfig)
 	subdomain.Do()
-	t.Log(subdomain.Result)
+	t.Log(&subdomain.Result)
 
 	ih := NewIconHash()
-	ih.ResultDomainScan = subdomain.Result
+	ih.ResultDomainScan = &subdomain.Result
 	ih.Do()
 	for d, da := range ih.ResultDomainScan.DomainResult {
 		t.Log(d, da)
@@ -41,8 +41,8 @@ func TestIconHash_Do(t *testing.T) {
 
 func TestIconHash_Do2(t *testing.T) {
 	nmapConfig := portscan.Config{
-		Target: "124.90.39.51",
-		Port:   "80,443",
+		Target: "127.0.0.1",
+		Port:   "80,3306,1080,8000",
 		Rate:   1000,
 		IsPing: false,
 		Tech:   "-sS",
@@ -51,9 +51,15 @@ func TestIconHash_Do2(t *testing.T) {
 	nmap := portscan.NewNmap(nmapConfig)
 	nmap.Do()
 
+	httpx := NewHttpxFinger()
+	httpx.ResultPortScan = &nmap.Result
+	httpx.Do()
+
 	ih := NewIconHash()
-	ih.ResultPortScan = nmap.Result
+	ih.ResultPortScan = httpx.ResultPortScan
+	ih.OptimizationMode = true
 	ih.Do()
+
 	for ip, r := range ih.ResultPortScan.IPResult {
 		t.Log(ip, r)
 		for port, p := range r.Ports {

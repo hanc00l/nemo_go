@@ -8,7 +8,7 @@ import (
 
 func TestHttpxFinger_DoHttpxAndFingerPrint(t *testing.T) {
 	v := NewHttpxFinger()
-	v.ResultDomainScan = domainscan.Result{
+	v.ResultDomainScan = &domainscan.Result{
 		DomainResult: make(map[string]*domainscan.DomainResult),
 	}
 	v.ResultDomainScan.SetDomain("www.baidu.com")
@@ -24,7 +24,7 @@ func TestHttpxFinger_DoHttpxAndFingerPrint(t *testing.T) {
 
 func TestHttpxFinger_DoHttpxAndFingerPrint2(t *testing.T) {
 	v := NewHttpxFinger()
-	v.ResultPortScan = portscan.Result{
+	v.ResultPortScan = &portscan.Result{
 		IPResult: make(map[string]*portscan.IPResult),
 	}
 	v.ResultPortScan.SetIP("172.16.222.1")
@@ -43,7 +43,7 @@ func TestHttpxFinger_DoHttpxAndFingerPrint2(t *testing.T) {
 
 func TestHttpxFinger_DoHttpxAndFingerPrint4(t *testing.T) {
 	v := NewHttpxFinger()
-	v.ResultPortScan = portscan.Result{
+	v.ResultPortScan = &portscan.Result{
 		IPResult: make(map[string]*portscan.IPResult),
 	}
 	v.ResultPortScan.SetIP("113.88.164.63")

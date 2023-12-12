@@ -44,15 +44,15 @@ func doOnlineAPI(taskId string, mainTaskId string, configJSON string, apiName st
 		return FailedTask(err.Error()), err
 	}
 	//执行任务
-	var ipResult portscan.Result
-	var domainResult domainscan.Result
+	var ipResult *portscan.Result
+	var domainResult *domainscan.Result
 	ipResult, domainResult, result, err = doOnlineAPIAndSave(taskId, mainTaskId, apiName, config)
 	//端口过滤
-	portscan.FilterIPHasTooMuchPort(&ipResult, true)
-	domainscan.FilterDomainHasTooMuchIP(&domainResult)
+	portscan.FilterIPHasTooMuchPort(ipResult, true)
+	domainscan.FilterDomainHasTooMuchIP(domainResult)
 	//domainscan.
 	//fingerprint
-	_, err = NewFingerprintTask(taskId, mainTaskId, &ipResult, &domainResult, FingerprintTaskConfig{
+	_, err = NewFingerprintTask(taskId, mainTaskId, ipResult, domainResult, FingerprintTaskConfig{
 		IsHttpx:          config.IsHttpx,
 		IsFingerprintHub: config.IsFingerprintHub,
 		IsIconHash:       config.IsIconHash,
@@ -68,16 +68,16 @@ func doOnlineAPI(taskId string, mainTaskId string, configJSON string, apiName st
 }
 
 // doOnlineAPIAndSave 执行fofa、hunter及quake的资产搜索，并保存结果
-func doOnlineAPIAndSave(taskId string, mainTaskId string, apiName string, config onlineapi.OnlineAPIConfig) (ipResult portscan.Result, domainResult domainscan.Result, result string, err error) {
+func doOnlineAPIAndSave(taskId string, mainTaskId string, apiName string, config onlineapi.OnlineAPIConfig) (ipResult *portscan.Result, domainResult *domainscan.Result, result string, err error) {
 	s := onlineapi.NewOnlineAPISearch(config, apiName)
 	s.Do()
-	ipResult = s.IpResult
-	domainResult = s.DomainResult
-	portscan.FilterIPHasTooMuchPort(&ipResult, true)
-	checkIgnoreResult(&ipResult, &domainResult, config)
+	ipResult = &s.IpResult
+	domainResult = &s.DomainResult
+	portscan.FilterIPHasTooMuchPort(ipResult, true)
+	checkIgnoreResult(ipResult, domainResult, config)
 
 	if config.IsIPLocation {
-		doLocation(&ipResult)
+		doLocation(ipResult)
 	}
 	// 保存结果
 	args := comm.ScanResultArgs{

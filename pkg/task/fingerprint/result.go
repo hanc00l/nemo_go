@@ -1,7 +1,11 @@
 package fingerprint
 
 import (
+	"fmt"
 	"github.com/hanc00l/nemo_go/pkg/conf"
+	"github.com/hanc00l/nemo_go/pkg/task/domainscan"
+	"github.com/hanc00l/nemo_go/pkg/task/portscan"
+	"strings"
 	"sync"
 )
 
@@ -86,4 +90,25 @@ func init() {
 	for _, p := range IgnorePort {
 		blankPort[p] = struct{}{}
 	}
+}
+
+func ValidForOptimizationMode(ip string, domain string, port int, resultPortscan *portscan.Result, resultDomainScan *domainscan.Result) bool {
+	if ip != "" && resultPortscan != nil && resultPortscan.IPResult != nil {
+		for _, par := range resultPortscan.IPResult[ip].Ports[port].PortAttrs {
+			if par.Source == "httpx" {
+				return true
+			}
+		}
+	}
+	if domain != "" && resultDomainScan != nil && resultDomainScan.DomainResult != nil {
+		for _, dar := range resultDomainScan.DomainResult[domain].DomainAttrs {
+			if dar.Source == "httpx" && dar.Tag == "httpx" {
+				url := fmt.Sprintf("%s:%d", domain, port)
+				if strings.Contains(dar.Content, url) {
+					return true
+				}
+			}
+		}
+	}
+	return false
 }

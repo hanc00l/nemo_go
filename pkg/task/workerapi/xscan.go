@@ -54,8 +54,8 @@ type XScanConfig struct {
 
 type XScan struct {
 	Config       XScanConfig
-	ResultIP     portscan.Result
-	ResultDomain domainscan.Result
+	ResultIP     *portscan.Result
+	ResultDomain *domainscan.Result
 	ResultVul    []pocscan.Result
 	vulMutex     sync.Mutex
 }
@@ -101,6 +101,8 @@ func XOrganization(taskId, mainTaskId, configJSON string) (result string, err er
 		return FailedTask("no org id"), errors.New("no org id")
 	}
 	scan := NewXScan(config)
+	scan.ResultIP = &portscan.Result{}
+	scan.ResultDomain = &domainscan.Result{}
 	// 根据ID读取资产
 	if scan.Config.IsOrgIP {
 		err = comm.CallXClient("LoadIpByOrgId", *config.OrgId, &scan.ResultIP.IPResult)
@@ -120,7 +122,7 @@ func XOrganization(taskId, mainTaskId, configJSON string) (result string, err er
 		result = fmt.Sprintf("domain:%d", len(scan.ResultDomain.DomainResult))
 	}
 	// 执行portscan与domainscan
-	ipPortMap, domainMap := MakeSubTaskTarget(&scan.ResultIP, &scan.ResultDomain)
+	ipPortMap, domainMap := MakeSubTaskTarget(scan.ResultIP, scan.ResultDomain)
 	if len(ipPortMap) > 0 {
 		// 指定了扫描的端口
 		if len(config.OrgIPPort) > 0 {
@@ -172,7 +174,7 @@ func XOnlineAPI(taskId, mainTaskId, configJSON string) (result string, err error
 		return FailedTask(err.Error()), err
 	}
 	// 执行portscan与domainscan
-	ipPortMap, domainMap := MakeSubTaskTarget(&scan.ResultIP, &scan.ResultDomain)
+	ipPortMap, domainMap := MakeSubTaskTarget(scan.ResultIP, scan.ResultDomain)
 	_, err = scan.NewPortScan(taskId, mainTaskId, ipPortMap, nil)
 	if err != nil {
 		logging.RuntimeLog.Error(err)
@@ -371,8 +373,8 @@ func XGoby(taskId, mainTaskId, configJSON string) (result string, err error) {
 
 // Portscan 执行端口扫描，通过协程并发执行
 func (x *XScan) Portscan(taskId string, mainTaskId string) (result string, err error) {
+	x.ResultIP = &portscan.Result{}
 	x.ResultIP.IPResult = make(map[string]*portscan.IPResult)
-
 	swg := sizedwaitgroup.New(portscanMaxThreadNum[conf.WorkerPerformanceMode])
 	// 生成扫描参数
 	conf.GlobalWorkerConfig().ReloadConfig()
@@ -465,7 +467,7 @@ func (x *XScan) doPortscan(swg *sizedwaitgroup.SizedWaitGroup, config portscan.C
 func (x *XScan) doDomainscan(swg *sizedwaitgroup.SizedWaitGroup, config domainscan.Config) {
 	defer swg.Done()
 
-	var result domainscan.Result
+	var result *domainscan.Result
 	//扫描
 	result = doDomainScan(config)
 	//合并结果
@@ -555,6 +557,7 @@ func (x *XScan) OnlineAPISearch(taskId string, mainTaskId string) (result string
 
 // Domainscan 执行域名任务
 func (x *XScan) Domainscan(taskId string, mainTaskId string) (result string, err error) {
+	x.ResultDomain = &domainscan.Result{}
 	x.ResultDomain.DomainResult = make(map[string]*domainscan.DomainResult)
 	swg := sizedwaitgroup.New(domainscanMaxThreadNum[conf.WorkerPerformanceMode])
 
@@ -581,7 +584,7 @@ func (x *XScan) Domainscan(taskId string, mainTaskId string) (result string, err
 	swg.Wait()
 	// 如果有端口扫描的选项
 	if config.IsIPPortScan || config.IsIPSubnetPortScan {
-		doPortScanByDomainscan(taskId, mainTaskId, config, &x.ResultDomain)
+		doPortScanByDomainscan(taskId, mainTaskId, config, x.ResultDomain)
 	}
 	// 保存结果
 	resultArgs := comm.ScanResultArgs{
@@ -718,7 +721,7 @@ func (x *XScan) NewFingerprintScan(taskId, mainTaskId string) (result string, er
 		WorkspaceId:   x.Config.WorkspaceId,
 	}
 	//拆分子任务
-	ipTarget, domainTarget := MakeSubTaskTarget(&x.ResultIP, &x.ResultDomain)
+	ipTarget, domainTarget := MakeSubTaskTarget(x.ResultIP, x.ResultDomain)
 	//生成任务
 	for _, t := range ipTarget {
 		newConfig := config
@@ -744,7 +747,7 @@ func (x *XScan) NewFingerprintScan(taskId, mainTaskId string) (result string, er
 // NewNucleiScan 生成Nuclei任务
 func (x *XScan) NewNucleiScan(taskId, mainTaskId string) (result string, err error) {
 	//拆分子任务
-	ipTarget, domainTarget := MakeSubTaskTarget(&x.ResultIP, &x.ResultDomain)
+	ipTarget, domainTarget := MakeSubTaskTarget(x.ResultIP, x.ResultDomain)
 	for _, t := range ipTarget {
 		newConfig := XScanConfig{IPPort: t, IsNucleiPoc: true, NucleiPocFile: x.Config.NucleiPocFile, WorkspaceId: x.Config.WorkspaceId}
 		result, err = sendTask(taskId, mainTaskId, newConfig, "xnuclei")
@@ -767,7 +770,7 @@ func (x *XScan) NewNucleiScan(taskId, mainTaskId string) (result string, err err
 // NewGobyScan 生成Goby任务
 func (x *XScan) NewGobyScan(taskId, mainTaskId string) (result string, err error) {
 	//拆分子任务
-	ipTarget, domainTarget := MakeSubTaskTarget(&x.ResultIP, &x.ResultDomain)
+	ipTarget, domainTarget := MakeSubTaskTarget(x.ResultIP, x.ResultDomain)
 	for _, t := range ipTarget {
 		newConfig := XScanConfig{IPPort: t, IsGobyPoc: true, WorkspaceId: x.Config.WorkspaceId}
 		result, err = sendTask(taskId, mainTaskId, newConfig, "xgoby")
@@ -872,7 +875,7 @@ func (x *XScan) GobyScan(taskId string, mainTaskId string) (result string, err e
 // NewXrayScan 生成xraypoc任务
 func (x *XScan) NewXrayScan(taskId, mainTaskId string) (result string, err error) {
 	//拆分子任务
-	ipTarget, domainTarget := MakeSubTaskTarget(&x.ResultIP, &x.ResultDomain)
+	ipTarget, domainTarget := MakeSubTaskTarget(x.ResultIP, x.ResultDomain)
 	for _, t := range ipTarget {
 		newConfig := XScanConfig{IPPort: t, IsXrayPoc: true, XrayPocFile: x.Config.XrayPocFile, WorkspaceId: x.Config.WorkspaceId}
 		result, err = sendTask(taskId, mainTaskId, newConfig, "xxray")
