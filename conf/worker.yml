@@ -33,6 +33,7 @@ fingerprint:
   screenshot: true
   fingerprinthub: true
   iconhash: true
+  fingerprintx: true
 domainscan:
   resolver: resolver.txt
   wordlist: subnames.txt

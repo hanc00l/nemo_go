@@ -52,6 +52,7 @@ func (c *ConfigController) LoadDefaultConfig() {
 		IsScreenshot:     fingerprint.IsScreenshot,
 		IsFingerprintHub: fingerprint.IsFingerprintHub,
 		IsIconHash:       fingerprint.IsIconHash,
+		IsFingerprintx:   fingerprint.IsFingerprintx,
 		// domainscan
 		Wordlist:           domainscan.Wordlist,
 		IsSubDomainFinder:  domainscan.IsSubDomainFinder,
@@ -162,6 +163,7 @@ func (c *ConfigController) SaveDefaultConfig() {
 	conf.GlobalWorkerConfig().Fingerprint.IsFingerprintHub = data.IsFingerprintHub
 	conf.GlobalWorkerConfig().Fingerprint.IsScreenshot = data.IsScreenshot
 	conf.GlobalWorkerConfig().Fingerprint.IsIconHash = data.IsIconHash
+	conf.GlobalWorkerConfig().Fingerprint.IsFingerprintx = data.IsFingerprintx
 	//onlineapi
 	conf.GlobalWorkerConfig().OnlineAPI.IsFofa = data.IsFofa
 	conf.GlobalWorkerConfig().OnlineAPI.IsQuake = data.IsQuake

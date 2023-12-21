@@ -7,6 +7,7 @@ import (
 	"github.com/hanc00l/nemo_go/pkg/conf"
 	"github.com/hanc00l/nemo_go/pkg/logging"
 	"github.com/hanc00l/nemo_go/pkg/task/ampq"
+	"github.com/hanc00l/nemo_go/pkg/task/fingerprint"
 	"github.com/hanc00l/nemo_go/pkg/task/workerapi"
 	"github.com/hanc00l/nemo_go/pkg/utils"
 	"github.com/shirou/gopsutil/v3/cpu"
@@ -172,6 +173,10 @@ func main() {
 	go comm.StartSaveRuntimeLog(comm.GetWorkerNameBySelf())
 	checkWorkerPerformance(option.WorkerPerformance)
 	initWorkerStatus(option)
+
+	fingerprint.HttpxOutputDirectory = utils.GetTempPathDirName()
+	defer os.RemoveAll(fingerprint.HttpxOutputDirectory)
+
 	startWorker(option)
 	setupCloseHandler()
 }

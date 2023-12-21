@@ -531,6 +531,7 @@ func (x *XScan) OnlineAPISearch(taskId string, mainTaskId string) (result string
 		config.IsScreenshot = conf.GlobalWorkerConfig().Fingerprint.IsScreenshot
 		config.IsFingerprintHub = conf.GlobalWorkerConfig().Fingerprint.IsFingerprintHub
 		config.IsIconHash = conf.GlobalWorkerConfig().Fingerprint.IsIconHash
+		config.IsFingerprintx = conf.GlobalWorkerConfig().Fingerprint.IsFingerprintx
 	}
 	//fofa任务支持两种模式：
 	//一种是关键词，需设置SearchByKeyWord为true，只支持fofa
@@ -697,6 +698,7 @@ func (x *XScan) FingerPrint(taskId string, mainTaskId string) (result string, er
 		IsScreenshot:     conf.GlobalWorkerConfig().Fingerprint.IsScreenshot,
 		IsFingerprintHub: conf.GlobalWorkerConfig().Fingerprint.IsFingerprintHub,
 		IsIconHash:       conf.GlobalWorkerConfig().Fingerprint.IsIconHash,
+		IsFingerprintx:   conf.GlobalWorkerConfig().Fingerprint.IsFingerprintx,
 		IPTargetMap:      x.Config.IPPort,
 		DomainTargetMap:  x.Config.Domain,
 		WorkspaceId:      x.Config.WorkspaceId,

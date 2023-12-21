@@ -38,6 +38,7 @@ func PortScan(taskId, mainTaskId, configJSON string) (result string, err error) 
 		IsFingerprintHub: config.IsFingerprintHub,
 		IsIconHash:       config.IsIconHash,
 		IsScreenshot:     config.IsScreenshot,
+		IsFingerprintx:   config.IsFingerprintx,
 		WorkspaceId:      config.WorkspaceId,
 	})
 	if err != nil {

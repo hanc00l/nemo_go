@@ -20,10 +20,10 @@ import (
 )
 
 const (
-	MaxWidth       = 1980
-	MinHeight      = 1080
-	SavedWidth     = 1024
-	SavedHeight    = 0 //根据比例自动缩放
+	MaxWidth       = 1280 //1980
+	MinHeight      = 800  //1080
+	SavedWidth     = 1280 //1024
+	SavedHeight    = 800  //768
 	thumbnailWidth = 120
 )
 
@@ -66,7 +66,7 @@ func (s *ScreenShot) Do() {
 					continue
 				}
 				if s.OptimizationMode {
-					if !ValidForOptimizationMode(ipName, "", portNumber, s.ResultPortScan, s.ResultDomainScan) {
+					if !CheckForHttpxFingerResult(ipName, "", portNumber, s.ResultPortScan, s.ResultDomainScan) {
 						continue
 					}
 				}
@@ -97,7 +97,7 @@ func (s *ScreenShot) Do() {
 					continue
 				}
 				if s.OptimizationMode {
-					if !ValidForOptimizationMode("", domain, port, s.ResultPortScan, s.ResultDomainScan) {
+					if !CheckForHttpxFingerResult("", domain, port, s.ResultPortScan, s.ResultDomainScan) {
 						continue
 					}
 				}

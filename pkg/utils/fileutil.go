@@ -6,17 +6,17 @@ import (
 	"github.com/disintegration/imaging"
 	"github.com/hanc00l/nemo_go/pkg/logging"
 	"github.com/pkg/errors"
+	"image"
 	"io"
 	"math/rand"
 	"net/http"
 	"os"
 	"path/filepath"
 	"runtime"
-	"time"
 )
 
 func init() {
-	rand.Seed(time.Now().UnixNano())
+	//rand.Seed(time.Now().UnixNano())
 }
 
 // GetRandomString2 生成指定长度的随机字符串
@@ -141,6 +141,26 @@ func ReSizePicture(srcFile, dstFile string, width, height int) bool {
 		return false
 	}
 	dst := imaging.Resize(src, width, height, imaging.CatmullRom)
+
+	err = imaging.Save(dst, dstFile)
+	if err != nil {
+		logging.RuntimeLog.Errorf("failed to save image: %v", err)
+		return false
+	}
+	return true
+}
+
+// ReSizeAndCropPicture 对图片文件尺寸缩放、剪裁
+func ReSizeAndCropPicture(srcFile, dstFile string, width, height int) bool {
+	src, err := imaging.Open(srcFile)
+	if err != nil {
+		logging.RuntimeLog.Errorf("failed to open image: %v", err)
+		return false
+	}
+	dstResize := imaging.Resize(src, width, 0, imaging.CatmullRom)
+	//  按指定的边界进行裁剪
+	dst := imaging.Crop(dstResize, image.Rect(0, 0, width, height))
+
 	err = imaging.Save(dst, dstFile)
 	if err != nil {
 		logging.RuntimeLog.Errorf("failed to save image: %v", err)
@@ -159,6 +179,7 @@ const (
 	Worker       BinShortName = "worker"
 	Httpx        BinShortName = "httpx"
 	Subfinder    BinShortName = "subfinder"
+	Fingerprintx BinShortName = "fingerprintx"
 )
 
 // GetThirdpartyBinNameByPlatform 根据当前运行平台及架构，生成指定的文件名称

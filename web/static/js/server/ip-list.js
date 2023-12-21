@@ -135,6 +135,7 @@ $(function () {
                     'screenshot': $('#checkbox_screenshot').is(":checked"),
                     'fingerprinthub': $('#checkbox_fingerprinthub').is(":checked"),
                     'iconhash': $('#checkbox_iconhash').is(":checked"),
+                    'fingerprintx': $('#checkbox_fingerprintx').is(":checked"),
                     'taskcron': $('#checkbox_cron_task').is(":checked"),
                     'cronrule': cron_rule,
                     'croncomment': $('#input_cron_comment').val(),
@@ -236,6 +237,7 @@ $(function () {
                     'screenshot': $('#checkbox_batchscan_screenshot').is(":checked"),
                     'fingerprinthub': $('#checkbox_batchscan_fingerprinthub').is(":checked"),
                     'iconhash': $('#checkbox_batchscan_iconhash').is(":checked"),
+                    'fingerprintx': $('#checkbox_batchscan_fingerprintx').is(":checked"),
                     'taskcron': $('#checkbox_cron_task').is(":checked"),
                     'cronrule': cron_rule,
                     'croncomment': $('#input_cron_comment').val(),
@@ -783,5 +785,6 @@ function load_portscan_config() {
         $('#checkbox_batchscan_fingerprinthub').prop("checked", data['fingerprinthub']);
         $('#checkbox_batchscan_screenshot').prop("checked", data['screenshot']);
         $('#checkbox_batchscan_iconhash').prop("checked", data['iconhash']);
+        $('#checkbox_batchscan_fingerprintx').prop("checked", data['fingerprintx']);
     });
 }

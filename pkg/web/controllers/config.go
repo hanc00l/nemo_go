@@ -56,6 +56,7 @@ type DefaultConfig struct {
 	IsScreenshot     bool `json:"screenshot" form:"screenshot"`
 	IsFingerprintHub bool `json:"fingerprinthub" form:"fingerprinthub"`
 	IsIconHash       bool `json:"iconhash" form:"iconhash"`
+	IsFingerprintx   bool `json:"fingerprintx" form:"fingerprintx"`
 	// onlineapi
 	IsFofa           bool   `json:"fofa" form:"fofa"`
 	IsQuake          bool   `json:"quake" form:"quake"`
@@ -123,6 +124,7 @@ func (c *ConfigController) LoadDefaultConfigAction() {
 		IsScreenshot:     fingerprint.IsScreenshot,
 		IsFingerprintHub: fingerprint.IsFingerprintHub,
 		IsIconHash:       fingerprint.IsIconHash,
+		IsFingerprintx:   fingerprint.IsFingerprintx,
 		//
 		ServerChanToken: notifyToken["serverchan"].Token,
 		DingTalkToken:   notifyToken["dingtalk"].Token,
@@ -446,6 +448,7 @@ func (c *ConfigController) SaveFingerprintAction() {
 	conf.GlobalWorkerConfig().Fingerprint.IsFingerprintHub = data.IsFingerprintHub
 	conf.GlobalWorkerConfig().Fingerprint.IsScreenshot = data.IsScreenshot
 	conf.GlobalWorkerConfig().Fingerprint.IsIconHash = data.IsIconHash
+	conf.GlobalWorkerConfig().Fingerprint.IsFingerprintx = data.IsFingerprintx
 	err = conf.GlobalWorkerConfig().WriteConfig()
 	if err != nil {
 		logging.RuntimeLog.Error("save config file error:", err)

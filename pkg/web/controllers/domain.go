@@ -789,7 +789,7 @@ func getDomainAttrFullInfo(workspaceGUID string, id int, disableFofa, disableBan
 			} else {
 				r.TitleSet[da.Content]++
 			}
-		} else if da.Tag == "server" || da.Tag == "fingerprint" {
+		} else if da.Tag == "server" || da.Tag == "fingerprint" || da.Tag == "service" {
 			// banner信息：server、fingerpinter
 			if !isUnusefulBanner(da.Content) {
 				if _, ok := r.BannerSet[da.Content]; !ok {

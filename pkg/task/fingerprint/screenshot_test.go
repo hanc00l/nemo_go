@@ -16,7 +16,7 @@ func TestScreenShot_Do(t *testing.T) {
 	nmap := portscan.NewNmap(config)
 	nmap.Do()
 
-	httpx := NewHttpxFinger()
+	httpx := NewHttpxAll()
 	httpx.ResultPortScan = &nmap.Result
 	httpx.Do()
 

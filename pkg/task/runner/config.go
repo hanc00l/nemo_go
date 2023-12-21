@@ -17,6 +17,7 @@ type PortscanRequestParam struct {
 	ExcludeIP          string `form:"exclude"`
 	IsScreenshot       bool   `form:"screenshot"`
 	IsFingerprintHub   bool   `form:"fingerprinthub"`
+	IsFingerprintx     bool   `form:"fingerprintx"`
 	IsIconHash         bool   `form:"iconhash"`
 	TaskMode           int    `form:"taskmode"`
 	IsTaskCron         bool   `form:"taskcron" json:"-"`
@@ -45,6 +46,7 @@ type DomainscanRequestParam struct {
 	IsWhoisQuery       bool   `form:"whoisquery"`
 	IsFingerprintHub   bool   `form:"fingerprinthub"`
 	IsIconHash         bool   `form:"iconhash"`
+	IsFingerprintx     bool   `form:"fingerprintx"`
 	TaskMode           int    `form:"taskmode"`
 	PortTaskMode       int    `form:"porttaskmode"`
 	IsTaskCron         bool   `form:"taskcron" json:"-"`

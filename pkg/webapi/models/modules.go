@@ -387,6 +387,7 @@ type DefaultConfigData struct {
 	IsScreenshot     bool `json:"screenshot"`
 	IsFingerprintHub bool `json:"fingerprinthub"`
 	IsIconHash       bool `json:"iconhash"`
+	IsFingerprintx   bool `json:"fingerprintx"`
 	// onlineapi
 	IsFofa   bool `json:"fofa"`
 	IsQuake  bool `json:"quake"`

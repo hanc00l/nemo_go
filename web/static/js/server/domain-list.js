@@ -92,6 +92,7 @@ $(function () {
                     'whoisquery': $('#checkbox_whoisquery').is(":checked"),
                     'fingerprinthub': $('#checkbox_fingerprinthub').is(":checked"),
                     'iconhash': $('#checkbox_iconhash').is(":checked"),
+                    'fingerprintx': $('#checkbox_fingerprintx').is(":checked"),
                     'taskcron': $('#checkbox_cron_task').is(":checked"),
                     'cronrule': cron_rule,
                     'croncomment': $('#input_cron_comment').val(),

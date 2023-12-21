@@ -2,7 +2,6 @@ package fingerprint
 
 import (
 	"github.com/hanc00l/nemo_go/pkg/task/domainscan"
-	"github.com/hanc00l/nemo_go/pkg/task/portscan"
 	"testing"
 )
 
@@ -37,33 +36,4 @@ func TestIconHash_Do(t *testing.T) {
 		t.Log(d, da)
 	}
 	subdomain.Result.SaveResult(subdomain.Config)
-}
-
-func TestIconHash_Do2(t *testing.T) {
-	nmapConfig := portscan.Config{
-		Target: "127.0.0.1",
-		Port:   "80,3306,1080,8000",
-		Rate:   1000,
-		IsPing: false,
-		Tech:   "-sS",
-		CmdBin: "nmap",
-	}
-	nmap := portscan.NewNmap(nmapConfig)
-	nmap.Do()
-
-	httpx := NewHttpxFinger()
-	httpx.ResultPortScan = &nmap.Result
-	httpx.Do()
-
-	ih := NewIconHash()
-	ih.ResultPortScan = httpx.ResultPortScan
-	ih.OptimizationMode = true
-	ih.Do()
-
-	for ip, r := range ih.ResultPortScan.IPResult {
-		t.Log(ip, r)
-		for port, p := range r.Ports {
-			t.Log(port, p)
-		}
-	}
 }

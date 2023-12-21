@@ -23,6 +23,7 @@ var (
 	fpScreenshotThreadNum      = make(map[string]int)
 	fpObserverWardThreadNumber = make(map[string]int)
 	fpIconHashThreadNumber     = make(map[string]int)
+	fpFingerprintxThreadNumber = make(map[string]int)
 )
 
 func init() {
@@ -37,6 +38,9 @@ func init() {
 	//
 	fpIconHashThreadNumber[conf.HighPerformance] = 8
 	fpIconHashThreadNumber[conf.NormalPerformance] = 4
+	//
+	fpFingerprintxThreadNumber[conf.HighPerformance] = 6
+	fpFingerprintxThreadNumber[conf.NormalPerformance] = 3
 }
 
 type Config struct {
@@ -92,7 +96,7 @@ func init() {
 	}
 }
 
-func ValidForOptimizationMode(ip string, domain string, port int, resultPortscan *portscan.Result, resultDomainScan *domainscan.Result) bool {
+func CheckForHttpxFingerResult(ip string, domain string, port int, resultPortscan *portscan.Result, resultDomainScan *domainscan.Result) bool {
 	if ip != "" && resultPortscan != nil && resultPortscan.IPResult != nil {
 		for _, par := range resultPortscan.IPResult[ip].Ports[port].PortAttrs {
 			if par.Source == "httpx" {

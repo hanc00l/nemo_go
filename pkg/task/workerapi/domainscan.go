@@ -48,6 +48,7 @@ func DomainScan(taskId, mainTaskId, configJSON string) (result string, err error
 		IsFingerprintHub: config.IsFingerprintHub,
 		IsIconHash:       config.IsIconHash,
 		IsScreenshot:     config.IsIconHash,
+		IsFingerprintx:   config.IsFingerprintx,
 		WorkspaceId:      config.WorkspaceId,
 	})
 	if err != nil {
@@ -129,6 +130,7 @@ func doPortScanByDomainscan(taskId, mainTaskId string, config domainscan.Config,
 				IsScreenshot:     config.IsScreenshot,
 				IsFingerprintHub: config.IsFingerprintHub,
 				IsIconHash:       config.IsIconHash,
+				IsFingerprintx:   config.IsFingerprintx,
 				IsLoadOpenedPort: false, //只扫描当前结果
 				IsPortscan:       true,
 				WorkspaceId:      config.WorkspaceId,

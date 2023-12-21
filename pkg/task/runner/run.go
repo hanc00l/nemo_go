@@ -46,21 +46,21 @@ func StartPortScanTask(req PortscanRequestParam, mainTaskId string, workspaceId 
 			}
 			// FOFA
 			if req.IsFofa {
-				if taskId, err = doOnlineAPISearch(workspaceId, mainTaskId, "fofa", t, &req.OrgId, req.IsIPLocation, req.IsHttpx, req.IsFingerprintHub, req.IsScreenshot, req.IsIconHash, req.IsIgnoreCDN, req.IsIgnoreOutofChina); err != nil {
+				if taskId, err = doOnlineAPISearch(workspaceId, mainTaskId, "fofa", t, &req.OrgId, req.IsIPLocation, req.IsHttpx, req.IsFingerprintHub, req.IsScreenshot, req.IsIconHash, req.IsFingerprintx, req.IsIgnoreCDN, req.IsIgnoreOutofChina); err != nil {
 					logging.RuntimeLog.Error(err)
 					return
 				}
 			}
 			// Quake
 			if req.IsQuake {
-				if taskId, err = doOnlineAPISearch(workspaceId, mainTaskId, "quake", t, &req.OrgId, req.IsIPLocation, req.IsHttpx, req.IsFingerprintHub, req.IsScreenshot, req.IsIconHash, req.IsIgnoreCDN, req.IsIgnoreOutofChina); err != nil {
+				if taskId, err = doOnlineAPISearch(workspaceId, mainTaskId, "quake", t, &req.OrgId, req.IsIPLocation, req.IsHttpx, req.IsFingerprintHub, req.IsScreenshot, req.IsIconHash, req.IsFingerprintx, req.IsIgnoreCDN, req.IsIgnoreOutofChina); err != nil {
 					logging.RuntimeLog.Error(err)
 					return
 				}
 			}
 			// Hunter
 			if req.IsHunter {
-				if taskId, err = doOnlineAPISearch(workspaceId, mainTaskId, "hunter", t, &req.OrgId, req.IsIPLocation, req.IsHttpx, req.IsFingerprintHub, req.IsScreenshot, req.IsIconHash, req.IsIgnoreCDN, req.IsIgnoreOutofChina); err != nil {
+				if taskId, err = doOnlineAPISearch(workspaceId, mainTaskId, "hunter", t, &req.OrgId, req.IsIPLocation, req.IsHttpx, req.IsFingerprintHub, req.IsScreenshot, req.IsIconHash, req.IsFingerprintx, req.IsIgnoreCDN, req.IsIgnoreOutofChina); err != nil {
 					logging.RuntimeLog.Error(err)
 					return
 				}
@@ -145,19 +145,19 @@ func StartDomainScanTask(req DomainscanRequestParam, mainTaskId string, workspac
 			}
 		}
 		if req.IsFofa {
-			if taskId, err = doOnlineAPISearch(workspaceId, mainTaskId, "fofa", t, &req.OrgId, true, req.IsHttpx, req.IsFingerprintHub, req.IsScreenshot, req.IsIconHash, req.IsIgnoreCDN, req.IsIgnoreOutofChina); err != nil {
+			if taskId, err = doOnlineAPISearch(workspaceId, mainTaskId, "fofa", t, &req.OrgId, true, req.IsHttpx, req.IsFingerprintHub, req.IsScreenshot, req.IsIconHash, req.IsFingerprintx, req.IsIgnoreCDN, req.IsIgnoreOutofChina); err != nil {
 				logging.RuntimeLog.Error(err)
 				return
 			}
 		}
 		if req.IsQuake {
-			if taskId, err = doOnlineAPISearch(workspaceId, mainTaskId, "quake", t, &req.OrgId, true, req.IsHttpx, req.IsFingerprintHub, req.IsScreenshot, req.IsIconHash, req.IsIgnoreCDN, req.IsIgnoreOutofChina); err != nil {
+			if taskId, err = doOnlineAPISearch(workspaceId, mainTaskId, "quake", t, &req.OrgId, true, req.IsHttpx, req.IsFingerprintHub, req.IsScreenshot, req.IsIconHash, req.IsFingerprintx, req.IsIgnoreCDN, req.IsIgnoreOutofChina); err != nil {
 				logging.RuntimeLog.Error(err)
 				return
 			}
 		}
 		if req.IsHunter {
-			if taskId, err = doOnlineAPISearch(workspaceId, mainTaskId, "hunter", t, &req.OrgId, true, req.IsHttpx, req.IsFingerprintHub, req.IsScreenshot, req.IsIconHash, req.IsIgnoreCDN, req.IsIgnoreOutofChina); err != nil {
+			if taskId, err = doOnlineAPISearch(workspaceId, mainTaskId, "hunter", t, &req.OrgId, true, req.IsHttpx, req.IsFingerprintHub, req.IsScreenshot, req.IsIconHash, req.IsFingerprintx, req.IsIgnoreCDN, req.IsIgnoreOutofChina); err != nil {
 				logging.RuntimeLog.Error(err)
 				return
 			}
@@ -543,6 +543,7 @@ func doPortscan(workspaceId int, mainTaskId string, target string, port string, 
 		IsScreenshot:     req.IsScreenshot,
 		IsFingerprintHub: req.IsFingerprintHub,
 		IsIconHash:       req.IsIconHash,
+		IsFingerprintx:   req.IsFingerprintx,
 		CmdBin:           req.CmdBin,
 		IsPortscan:       req.IsPortScan,
 		IsLoadOpenedPort: req.IsLoadOpenedPort,
@@ -593,6 +594,7 @@ func doBatchScan(workspaceId int, mainTaskId string, target string, port string,
 		IsScreenshot:     req.IsScreenshot,
 		IsFingerprintHub: req.IsFingerprintHub,
 		IsIconHash:       req.IsIconHash,
+		IsFingerprintx:   req.IsFingerprintx,
 		CmdBin:           "masscan",
 		WorkspaceId:      workspaceId,
 	}
@@ -640,6 +642,7 @@ func doDomainscan(workspaceId int, mainTaskId string, target string, req Domains
 		IsScreenshot:       req.IsScreenshot,
 		IsFingerprintHub:   req.IsFingerprintHub,
 		IsIconHash:         req.IsIconHash,
+		IsFingerprintx:     req.IsFingerprintx,
 		PortTaskMode:       req.PortTaskMode,
 		WorkspaceId:        workspaceId,
 	}
@@ -662,7 +665,7 @@ func doDomainscan(workspaceId int, mainTaskId string, target string, req Domains
 }
 
 // doOnlineAPISearch Fofa,hunter,quaker的查询
-func doOnlineAPISearch(workspaceId int, mainTaskId string, apiName string, target string, orgId *int, isIplocation, isHttp, isFingerprintHub, isScreenshot, isIconHash, isIgnoreCDN, isIgnorOutofChina bool) (taskId string, err error) {
+func doOnlineAPISearch(workspaceId int, mainTaskId string, apiName string, target string, orgId *int, isIplocation, isHttp, isFingerprintHub, isScreenshot, isIconHash, isFingerprintx, isIgnoreCDN, isIgnorOutofChina bool) (taskId string, err error) {
 	config := onlineapi.OnlineAPIConfig{
 		Target:             target,
 		OrgId:              orgId,
@@ -670,6 +673,7 @@ func doOnlineAPISearch(workspaceId int, mainTaskId string, apiName string, targe
 		IsHttpx:            isHttp,
 		IsFingerprintHub:   isFingerprintHub,
 		IsScreenshot:       isScreenshot,
+		IsFingerprintx:     isFingerprintx,
 		IsIconHash:         isIconHash,
 		IsIgnoreCDN:        isIgnoreCDN,
 		IsIgnoreOutofChina: isIgnorOutofChina,

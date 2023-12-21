@@ -75,7 +75,7 @@ func (i *IconHash) Do() {
 					continue
 				}
 				if i.OptimizationMode {
-					if !ValidForOptimizationMode(ipName, "", portNumber, i.ResultPortScan, i.ResultDomainScan) {
+					if !CheckForHttpxFingerResult(ipName, "", portNumber, i.ResultPortScan, i.ResultDomainScan) {
 						continue
 					}
 				}
@@ -127,7 +127,7 @@ func (i *IconHash) Do() {
 					continue
 				}
 				if i.OptimizationMode {
-					if !ValidForOptimizationMode("", domain, port, i.ResultPortScan, i.ResultDomainScan) {
+					if !CheckForHttpxFingerResult("", domain, port, i.ResultPortScan, i.ResultDomainScan) {
 						continue
 					}
 				}

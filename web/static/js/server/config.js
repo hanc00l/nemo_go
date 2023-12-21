@@ -33,7 +33,7 @@ $(function () {
                 "fingerprinthub": $('#checkbox_fingerprinthub').is(":checked"),
                 "screenshot": $('#checkbox_screenshot').is(":checked"),
                 "iconhash": $('#checkbox_iconhash').is(":checked"),
-
+                "fingerprintx": $('#checkbox_fingerprintx').is(":checked"),
             }, function (data, e) {
                 if (e === "success" && data['status'] == 'success') {
                     swal({
@@ -238,6 +238,7 @@ function load_config() {
         $('#checkbox_fingerprinthub').prop("checked", data['fingerprinthub']);
         $('#checkbox_screenshot').prop("checked", data['screenshot']);
         $('#checkbox_iconhash').prop("checked", data['iconhash']);
+        $('#checkbox_fingerprintx').prop("checked", data['fingerprintx']);
 
         $('#input_ipslicenumber').val(data['ipslicenumber']);
         $('#input_portslicenumber').val(data['portslicenumber']);

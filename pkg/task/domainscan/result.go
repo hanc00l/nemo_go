@@ -36,6 +36,7 @@ type Config struct {
 	IsScreenshot       bool   `json:"screenshot"`
 	IsFingerprintHub   bool   `json:"fingerprinthub"`
 	IsIconHash         bool   `json:"iconhash"`
+	IsFingerprintx     bool   `json:"fingerprintx"`
 	PortTaskMode       int    `json:"portTaskMode"`
 	IsIgnoreCDN        bool   `json:"ignorecdn"`
 	IsIgnoreOutofChina bool   `json:"ignoreoutofchina"`

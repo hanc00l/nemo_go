@@ -57,6 +57,7 @@ func doOnlineAPI(taskId string, mainTaskId string, configJSON string, apiName st
 		IsFingerprintHub: config.IsFingerprintHub,
 		IsIconHash:       config.IsIconHash,
 		IsScreenshot:     config.IsScreenshot,
+		IsFingerprintx:   config.IsFingerprintx,
 		WorkspaceId:      config.WorkspaceId,
 	})
 	if err != nil {

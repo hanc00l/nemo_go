@@ -17,6 +17,7 @@ type OnlineAPIConfig struct {
 	IsHttpx            bool   `json:"httpx"`
 	IsScreenshot       bool   `json:"screenshot"`
 	IsFingerprintHub   bool   `json:"fingerprinthub"`
+	IsFingerprintx     bool   `json:"fingerprintx"`
 	IsIconHash         bool   `json:"iconhash"`
 	IsIgnoreCDN        bool   `json:"ignorecdn"`
 	IsIgnoreOutofChina bool   `json:"ignoreoutofchina"`

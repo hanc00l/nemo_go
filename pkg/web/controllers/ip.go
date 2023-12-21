@@ -514,7 +514,7 @@ func (c *IPController) ImportPortscanResultAction() {
 			result = fmt.Sprintf("%s,%s", resultIpPort, resultVul)
 		}
 	} else if bin == "httpx" {
-		i := portscan.NewImportOfflineResultWithInterface("httpx", new(fingerprint.Httpx))
+		i := portscan.NewImportOfflineResultWithInterface("httpx", new(fingerprint.HttpxAll))
 		i.Parse(fileContent)
 		portscan.FilterIPHasTooMuchPort(&i.IpResult, false)
 		resultIpPort := i.IpResult.SaveResult(config)
@@ -732,7 +732,7 @@ func getPortInfo(workspaceGUID string, ip string, ipId int, disableFofa, disable
 				} else {
 					r.TitleSet[pad.Content]++
 				}
-			} else if pad.Tag == "banner" || pad.Tag == "server" || pad.Tag == "tag" || pad.Tag == "fingerprint" {
+			} else if pad.Tag == "banner" || pad.Tag == "server" || pad.Tag == "tag" || pad.Tag == "fingerprint" || pad.Tag == "service" {
 				if pad.Tag == "banner" && disableBanner {
 					continue
 				}
@@ -1029,7 +1029,7 @@ func (c *IPController) ExportIPResultAction() {
 }
 
 func isUnusefulBanner(bannerInfo string) bool {
-	unusefulBannerList := []string{"", "java", "php", "jsp", "unknown", "digicert-cert", "jquery", "jquery-ui", "core", "cdnjs"}
+	unusefulBannerList := []string{"", "java", "php", "jsp", "unknown", "digicert-cert", "jquery", "jquery-ui", "core", "cdnjs", "tcp"}
 	for _, b := range unusefulBannerList {
 		if b == strings.ToLower(bannerInfo) {
 			return true

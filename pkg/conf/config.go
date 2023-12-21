@@ -141,6 +141,7 @@ type Fingerprint struct {
 	IsScreenshot     bool `yaml:"screenshot"`
 	IsFingerprintHub bool `yaml:"fingerprinthub"`
 	IsIconHash       bool `yaml:"iconhash"`
+	IsFingerprintx   bool `yaml:"fingerprintx"`
 }
 
 type Pocscan struct {

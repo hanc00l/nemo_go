@@ -52,7 +52,7 @@ func (f *FingerprintHub) Do() {
 					continue
 				}
 				if f.OptimizationMode {
-					if !ValidForOptimizationMode(ipName, "", portNumber, f.ResultPortScan, f.ResultDomainScan) {
+					if !CheckForHttpxFingerResult(ipName, "", portNumber, f.ResultPortScan, f.ResultDomainScan) {
 						continue
 					}
 				}
@@ -97,7 +97,7 @@ func (f *FingerprintHub) Do() {
 					continue
 				}
 				if f.OptimizationMode {
-					if !ValidForOptimizationMode("", domain, port, f.ResultPortScan, f.ResultDomainScan) {
+					if !CheckForHttpxFingerResult("", domain, port, f.ResultPortScan, f.ResultDomainScan) {
 						continue
 					}
 				}
