@@ -79,6 +79,11 @@ func (x *Xray) Do() {
 			)
 		}
 	}
+	/*
+		xray的proxy，目前不支持从命令行中进行配置，需要在xray的配置文件config.yaml中进行配置：
+		http:
+		  proxy: ""
+	*/
 	cmd := exec.Command(cmdBin, cmdArgs...)
 	//Fix:必须指定绝对路径，才能正确读取到配置文件
 	cmd.Dir = filepath.Join(conf.GetAbsRootPath(), "thirdparty/xray")

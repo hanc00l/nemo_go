@@ -59,6 +59,7 @@ func doOnlineAPI(taskId string, mainTaskId string, configJSON string, apiName st
 		IsScreenshot:     config.IsScreenshot,
 		IsFingerprintx:   config.IsFingerprintx,
 		WorkspaceId:      config.WorkspaceId,
+		IsProxy:          config.IsProxy,
 	})
 	if err != nil {
 		logging.RuntimeLog.Error(err)

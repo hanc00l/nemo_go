@@ -38,9 +38,7 @@ func (n *Nuclei) Do() {
 	defer os.Remove(inputTargetFile)
 
 	var urlsFormatted []string
-	//由于nuclei要求url要http或https开始，非http/https协议不进行漏洞检测，节约扫描时间
-	//没有需要检测的端口,直接返回
-	if urlsFormatted = checkAndFormatUrl(n.Config.Target, true); len(urlsFormatted) == 0 {
+	if urlsFormatted = checkAndFormatUrl(n.Config.Target, false); len(urlsFormatted) == 0 {
 		return
 	}
 	err := os.WriteFile(inputTargetFile, []byte(strings.Join(urlsFormatted, "\n")), 0666)
@@ -67,6 +65,14 @@ func (n *Nuclei) Do() {
 		"-t", filepath.Join(conf.GetAbsRootPath(), conf.GlobalWorkerConfig().Pocscan.Nuclei.PocPath, n.Config.PocFile),
 		"-j", "-o", resultTempFile, "-l", inputTargetFile,
 	)
+	if n.Config.IsProxy {
+		if proxy := conf.GetProxyConfig(); proxy != "" {
+			cmdArgs = append(cmdArgs, "-p", proxy)
+		} else {
+			logging.RuntimeLog.Warning("get proxy config fail or disabled by worker,skip proxy!")
+			logging.CLILog.Warning("get proxy config fail or disabled by worker,skip proxy!")
+		}
+	}
 	cmd := exec.Command(cmdBin, cmdArgs...)
 	var stderr bytes.Buffer
 	cmd.Stdout = os.Stdout

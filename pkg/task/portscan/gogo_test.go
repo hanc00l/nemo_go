@@ -4,6 +4,25 @@ import (
 	"testing"
 )
 
+func TestGogo_Run(t *testing.T) {
+	config := Config{
+		Target:        "127.0.0.1,172.16.222.1",
+		ExcludeTarget: "",
+		Port:          "3306,1080,4369,4572",
+		Rate:          1000,
+		IsPing:        false,
+	}
+	g := NewGogo(config)
+	g.Do()
+	t.Log(&g.Result)
+	for ip, ipa := range g.Result.IPResult {
+		t.Log(ip, ipa)
+		for port, pa := range ipa.Ports {
+			t.Log(port, pa)
+		}
+	}
+}
+
 var gogoResult = `{
     "config": {
         "ip": "192.168.3.1/24",

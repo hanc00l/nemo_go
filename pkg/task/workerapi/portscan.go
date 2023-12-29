@@ -40,6 +40,7 @@ func PortScan(taskId, mainTaskId, configJSON string) (result string, err error) 
 		IsScreenshot:     config.IsScreenshot,
 		IsFingerprintx:   config.IsFingerprintx,
 		WorkspaceId:      config.WorkspaceId,
+		IsProxy:          config.IsProxy,
 	})
 	if err != nil {
 		return FailedTask(err.Error()), err
@@ -56,6 +57,10 @@ func doPortScanAndSave(taskId string, mainTaskId string, config portscan.Config)
 			nmap := portscan.NewNmap(config)
 			nmap.Do()
 			resultPortScan = &nmap.Result
+		} else if config.CmdBin == "gogo" {
+			gogo := portscan.NewGogo(config)
+			gogo.Do()
+			resultPortScan = &gogo.Result
 		} else {
 			masscan := portscan.NewMasscan(config)
 			masscan.Do()

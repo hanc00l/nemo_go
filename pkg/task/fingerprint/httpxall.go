@@ -50,11 +50,14 @@ type HttpxAll struct {
 	FingerPrintFunc    []func(domain string, ip string, port int, url string, result []FingerAttrResult, storedResponsePathFile string) []string
 	//保存响应的数据，用于自定义指纹匹配
 	httpxOutputDir string
+
+	IsProxy bool
 }
 
 type HttpxResult struct {
 	A                  []string `json:"a,omitempty"`
 	CNames             []string `json:"cnames,omitempty"`
+	Scheme             string   `json:"scheme,omitempty"`
 	Url                string   `json:"url,omitempty"`
 	Host               string   `json:"host,omitempty"`
 	Port               string   `json:"port,omitempty"`
@@ -63,6 +66,7 @@ type HttpxResult struct {
 	ContentType        string   `json:"content_type,omitempty"`
 	StatusCode         int      `json:"status_code,omitempty"`
 	TLSData            *TLS     `json:"tls,omitempty"`
+	Jarm               string   `json:"jarm,omitempty"`
 	StoredResponsePath string   `json:"stored_response_path,omitempty"`
 	IconHash           string   `json:"favicon,omitempty"`
 	FaviconPath        string   `json:"favicon_path,omitempty"`
@@ -267,10 +271,23 @@ func (x *HttpxAll) RunHttpx(domain string) (result []FingerAttrResult, urlRespon
 	cmdArgs = append(cmdArgs,
 		"-random-agent", "-l", inputTempFile, "-o", resultTempFile,
 		"-retries", "0", "-threads", "50", "-timeout", "5", "-disable-update-check",
-		"-title", "-server", "-status-code", "-content-type", "-follow-redirects", "-json", "-silent", "-no-color", "-tls-grab",
-		"-favicon", "-screenshot", "--system-chrome",
+		"-title", "-server", "-status-code", "-content-type", "-follow-redirects", "-json", "-silent", "-no-color", "-tls-grab", "-jarm",
+		"-favicon", "-screenshot", "--system-chrome", "-esb", "-ehb",
+		// -esb, -exclude-screenshot-bytes  enable excluding screenshot bytes from json output
+		// -ehb, -exclude-headless-body     enable excluding headless header from json output
 		"-store-response", "-store-response-dir", x.httpxOutputDir,
 	)
+	// 由于chrome不支持带认证的socks5代理，因此httpx及chrome使用本地的socks5转发
+	if x.IsProxy {
+		if proxy := conf.GetProxyConfig(); proxy != "" {
+			if conf.Socks5ForwardAddr != "" {
+				cmdArgs = append(cmdArgs, "-http-proxy", fmt.Sprintf("socks5://%s", conf.Socks5ForwardAddr))
+			}
+		} else {
+			logging.RuntimeLog.Warning("get proxy config fail or disabled by worker,skip proxy!")
+			logging.CLILog.Warning("get proxy config fail or disabled by worker,skip proxy!")
+		}
+	}
 	binPath := filepath.Join(conf.GetRootPath(), "thirdparty/httpx", utils.GetThirdpartyBinNameByPlatform(utils.Httpx))
 	cmd := exec.Command(binPath, cmdArgs...)
 	var stderr bytes.Buffer
@@ -305,11 +322,14 @@ func (x *HttpxAll) ParseHttpxJson(content []byte) (host string, port int, result
 	}
 	urlResponse = resultJSON.Url
 	// 保存stored_response_path等供fingerprint功能及其它使用，但返回的JSON字符串不需要
-	storedResponsePathFile = resultJSON.StoredResponsePath
-	storedFaviconPathFile = resultJSON.FaviconPath
 	storedScreenshotPathFile = resultJSON.ScreenShotPath
+	storedResponsePathFile = resultJSON.StoredResponsePath
+	// 只有httpx的JSON结果有favicon的hash，才表示有favicon图像存在
+	if resultJSON.IconHash != "" {
+		storedFaviconPathFile = resultJSON.FaviconPath
+		resultJSON.FaviconPath = ""
+	}
 	resultJSON.StoredResponsePath = ""
-	resultJSON.FaviconPath = ""
 	resultJSON.ScreenShotPath = ""
 	// 获取全部的Httpx信息
 	httpxResultMarshaled, err := json.Marshal(resultJSON)
@@ -336,6 +356,12 @@ func (x *HttpxAll) ParseHttpxJson(content []byte) (host string, port int, result
 		result = append(result, FingerAttrResult{
 			Tag:     "status",
 			Content: fmt.Sprintf("%v", resultJSON.StatusCode),
+		})
+	}
+	if resultJSON.Scheme != "" {
+		result = append(result, FingerAttrResult{
+			Tag:     "service",
+			Content: resultJSON.Scheme,
 		})
 	}
 	if resultJSON.TLSData != nil {
@@ -503,15 +529,15 @@ func (x *HttpxAll) doScreenshot(domain string, port int, u string, storedScreens
 	}
 }
 
-func (x *HttpxAll) doFavicon(url string, storedFaviconPathFile string) (result *IconHashInfo) {
-	urlFavicon := fmt.Sprintf("%s%s", url, storedFaviconPathFile)
+func (x *HttpxAll) doFavicon(u string, storedFaviconPathFile string) (result *IconHashInfo) {
+	urlFavicon := fmt.Sprintf("%s%s", u, storedFaviconPathFile)
 	logging.CLILog.Info(urlFavicon)
 	//获取icon
 	request, err := http.NewRequest(http.MethodGet, urlFavicon, nil)
 	if err != nil {
 		return
 	}
-	resp, err := http.DefaultClient.Do(request)
+	resp, err := utils.GetProxyHttpClient(x.IsProxy).Do(request)
 	if err != nil {
 		return
 	}

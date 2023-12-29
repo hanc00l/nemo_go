@@ -25,6 +25,7 @@ func init() {
 	web.CtrlPost("/config-save-api", (*controllers.ConfigController).SaveAPITokenAction)
 	web.CtrlPost("/config-test-api", (*controllers.ConfigController).TestOnlineAPIKeyAction)
 	web.CtrlPost("/config-test-notify", (*controllers.ConfigController).TestTaskNotifyAction)
+	web.CtrlPost("/config-save-workerproxy", (*controllers.ConfigController).SaveWorkerProxyAction)
 	web.CtrlPost("/config-save-domainscan", (*controllers.ConfigController).SaveDomainscanAction)
 	web.CtrlPost("/custom-save-taskworkspace", (*controllers.ConfigController).SaveCustomTaskWorkspaceConfigAction)
 
@@ -34,8 +35,6 @@ func init() {
 	web.CtrlPost("/worker-list", (*controllers.DashboardController).WorkerAliveListAction)
 	web.CtrlPost("/onlineuser-list", (*controllers.DashboardController).OnlineUserListAction)
 	web.CtrlPost("/dashboard-task-started-info", (*controllers.DashboardController).GetStartedTaskInfoAction)
-	web.CtrlPost("/worker-reload", (*controllers.DashboardController).ManualReloadWorkerAction)
-	web.CtrlPost("/worker-filesync", (*controllers.DashboardController).ManualWorkerFileSyncAction)
 
 	web.CtrlGet("/ip-list", (*controllers.IPController).IndexAction)
 	web.CtrlPost("/ip-list", (*controllers.IPController).ListAction)
@@ -141,4 +140,9 @@ func init() {
 	web.CtrlPost("/runtimelog-delete", (*controllers.RuntimeLogController).DeleteAction)
 	web.CtrlPost("/runtimelog-batch-delete", (*controllers.RuntimeLogController).BatchDeleteAction)
 
+	web.CtrlGet("/worker-list", (*controllers.WorkerController).IndexAction)
+	web.CtrlPost("/worker-list", (*controllers.WorkerController).ListAction)
+	web.CtrlPost("/worker-reload", (*controllers.WorkerController).ManualReloadWorkerAction)
+	web.CtrlPost("/worker-edit", (*controllers.WorkerController).EditWorkerAction)
+	web.CtrlPost("/worker-update", (*controllers.WorkerController).UpdateWorkerAction)
 }

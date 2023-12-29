@@ -39,15 +39,25 @@ type TaskResult struct {
 }
 
 type WorkerStatus struct {
-	sync.Mutex             `json:"-"`
-	WorkerName             string    `json:"worker_name"`
-	WorkerTopics           string    `json:"worker_topic"`
-	CreateTime             time.Time `json:"create_time"`
-	UpdateTime             time.Time `json:"update_time"`
-	TaskExecutedNumber     int       `json:"task_number"`
-	TaskStartedNumber      int       `json:"started_number"`
-	ManualReloadFlag       bool      `json:"manual_reload_flag"`
-	ManualFileSyncFlag     bool      `json:"manual_file_sync_flag"`
+	sync.Mutex `json:"-"`
+	// worker's task status
+	WorkerName         string    `json:"worker_name"`
+	WorkerTopics       string    `json:"worker_topic"`
+	CreateTime         time.Time `json:"create_time"`
+	UpdateTime         time.Time `json:"update_time"`
+	TaskExecutedNumber int       `json:"task_number"`
+	TaskStartedNumber  int       `json:"started_number"`
+	// worker's run status
+	ManualReloadFlag       bool   `json:"manual_reload_flag"`
+	ManualFileSyncFlag     bool   `json:"manual_file_sync_flag"`
+	ManualUpdateOptionFlag bool   `json:"manual_update_daemon_option"`
+	CPULoad                string `json:"cpu_load"`
+	MemUsed                string `json:"mem_used"`
+	// worker's option
+	WorkerRunOption    []byte `json:"worker_run_option"`    //worker当前运行的启动参数
+	WorkerUpdateOption []byte `json:"worker_update_option"` //worker需要更新的启动参数
+	// daemon option
+	IsDaemonProcess        bool      `json:"is_daemon_process"`
 	WorkerDaemonUpdateTime time.Time `json:"worker_daemon_update_time"`
 }
 
@@ -75,7 +85,6 @@ var taskTopicDefineMap = map[string]string{
 	"quake":             TopicPassive,
 	"hunter":            TopicPassive,
 	"xray":              TopicPocscan,
-	"dirsearch":         TopicPocscan,
 	"nuclei":            TopicPocscan,
 	"goby":              TopicPocscan,
 	"icpquery":          TopicPassive,

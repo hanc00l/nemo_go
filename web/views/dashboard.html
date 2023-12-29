@@ -16,7 +16,7 @@
                 </a>
                 <div class="info">
                     <h4>IP资产</h4>
-                    <p><b><span id="ip_count"></span></b></p>
+                    <p><b><span id="ip_count">0</span></b></p>
                 </div>
             </div>
         </div>
@@ -27,44 +27,40 @@
                 </a>
                 <div class="info">
                     <h4>Domain资产</h4>
-                    <p><b><span id="domain_count"></span></b></p>
+                    <p><b><span id="domain_count">0</span></b></p>
                 </div>
             </div>
         </div>
-        <div class="col-md-6 col-lg-3">
+        <div class="col-md-6 col-lg-2">
             <div class="widget-small danger coloured-icon">
                 <a href="vulnerability-list" style="text-decoration:none;">
                     <i class="icon fa fa-bolt fa-3x"></i>
                 </a>
                 <div class="info">
-                    <h4>验证漏洞</h4>
-                    <p><b><span id="vulnerability_count"></span></b></p>
+                    <h4>漏洞</h4>
+                    <p><b><span id="vulnerability_count">0</span></b></p>
                 </div>
             </div>
         </div>
-        <div class="col-md-6 col-lg-3">
+        <div class="col-md-6 col-lg-2">
+            <div class="widget-small warning coloured-icon">
+                <a href="worker-list" style="text-decoration:none;">
+                    <i class="icon fa fa-futbol-o fa-3x"></i>
+                </a>
+                <div class="info">
+                    <h4><b>Worker</b></h4>
+                    <p><b><span id="worker_count">0</span></b></p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6 col-lg-2">
             <div class="widget-small warning coloured-icon">
                 <a href="task-list" style="text-decoration:none;">
                     <i class="icon fa fa-hourglass-1 fa-3x"></i>
                 </a>
                 <div class="info">
-                    <h4><b>Active</b>任务</h4>
-                    <p><b><span id="task_active"></span></b></p>
-                </div>
-            </div>
-        </div>
-    </div>
-    <div class="row">
-        <div class="col-md-12">
-            <div class="tile">
-                <div class="form-group col-md-4 align-self-end">
-                    <h3 class="tile-title">Worker</h3>
-                </div>
-                <div class="col-sm-12">
-                    <table class="table table-hover table-bordered dataTable no-footer" id="worker-table"
-                           role="grid"
-                           width="100%">
-                    </table>
+                    <h4><b>Task</b></h4>
+                    <p><b><span id="task_active">0</span></b></p>
                 </div>
             </div>
         </div>

@@ -14,7 +14,7 @@
 
 ### 1、IP资产
 
-- Masscan、Nmap端口扫描
+- Masscan、Nmap、[gogo](https://github.com/chainreactors/gogo)（支持代理的端口扫描器）端口扫描
 - IP归属地（纯真离线数据）
 - 自定义IP归属地、Service、蜜罐
 - 导入本地的Masscan、Nmap端口扫描结果
@@ -32,11 +32,12 @@
 
 ### 3、指纹信息
 
-- [HTTPX](https://github.com/projectdiscovery/httpx) 
+- [HTTPX](https://github.com/projectdiscovery/httpx) 获取HTTP指纹
 - [ScreenShot](https://github.com/chromedp/chromedp) （调用chrome headless）
-- [ObserverWard](https://github.com/0x727/ObserverWard_0x727)  (指纹信息来源于https://github.com/0x727/FingerprintHub)
-- IconHash（基于[mat/besticon](github.com/mat/besticon)和[Becivells/iconhash](github.com/Becivells/iconhash)项目）
-
+- ~~[ObserverWard](https://github.com/0x727/ObserverWard_0x727)~~  被动指纹库(指纹信息来源于https://github.com/0x727/FingerprintHub)
+- IconHash ~~（基于[mat/besticon](github.com/mat/besticon)和[Becivells/iconhash](github.com/Becivells/iconhash)项目）~~
+- [Fingerprintx](https://github.com/praetorian-inc/fingerprintx)获取非HTTP协议指纹
+- 自定义指纹
 
 ### 4、API接口 （需提供相应的Key)
 
@@ -50,7 +51,6 @@
 - [XRay](https://github.com/chaitin/xray)
 - [Nuclei](https://github.com/projectdiscovery/nuclei) && [Nuclei-Templates](https://github.com/projectdiscovery/nuclei-templates)
 - [Goby](https://gobysec.net/)（服务端部署模式）
-- [Dirsearch](https://github.com/evilsocket/dirsearch)
 
 ### 6、分布式任务
 
@@ -78,6 +78,7 @@
 - 资产流程化扫描（XSCAN）![xscan](docs/image/9-1.xscan2.png)
 - 导出IP与Domain资产
 - 当前页面资产信息统计
+- Worker使用代理扫描（仅支持socks5），支持代理服务器地址池化。
 
 ## 演示页面
 

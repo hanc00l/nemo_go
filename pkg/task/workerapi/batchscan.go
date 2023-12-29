@@ -35,6 +35,10 @@ func BatchScan(taskId, mainTaskId, configJSON string) (result string, err error)
 		nmap := portscan.NewNmap(config)
 		nmap.Do()
 		resultPortScan = &nmap.Result
+	} else if config.CmdBin == "gogo" {
+		gogo := portscan.NewGogo(config)
+		gogo.Do()
+		resultPortScan = &gogo.Result
 	} else {
 		mascan := portscan.NewMasscan(config)
 		mascan.Do()
@@ -49,10 +53,14 @@ func BatchScan(taskId, mainTaskId, configJSON string) (result string, err error)
 			nmap := portscan.NewNmap(config)
 			nmap.Do()
 			resultPortScan = &nmap.Result
+		} else if config.CmdBin == "gogo" {
+			gogo := portscan.NewGogo(config)
+			gogo.Do()
+			resultPortScan = &gogo.Result
 		} else {
-			mascan := portscan.NewMasscan(config)
-			mascan.Do()
-			resultPortScan = &mascan.Result
+			masscan := portscan.NewMasscan(config)
+			masscan.Do()
+			resultPortScan = &masscan.Result
 		}
 		// IP位置
 		if config.IsIpLocation {

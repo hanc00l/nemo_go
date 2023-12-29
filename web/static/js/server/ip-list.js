@@ -142,6 +142,7 @@ $(function () {
                     'load_opened_port': $('#checkbox_ip_load_opened_port').is(":checked"),
                     'ignoreoutofchina': $('#checkbox_ignorecdn_outofchina').is(":checked"),
                     'ignorecdn': $('#checkbox_ignorecdn_outofchina').is(":checked"),
+                    'proxy': $('#checkbox_proxy').is(":checked"),
                 }, function (data, e) {
                     if (e === "success" && data['status'] == 'success') {
                         swal({
@@ -161,19 +162,13 @@ $(function () {
                 });
         }
         if (getCurrentTabIndex('#nav_tabs') == 1) {
-            if ($('#checkbox_xray').is(":checked") == false && $('#checkbox_dirsearch').is(":checked") == false && $('#checkbox_nuclei').is(":checked") == false && $('#checkbox_goby').is(":checked") == false) {
+            if ($('#checkbox_xray').is(":checked") == false && $('#checkbox_nuclei').is(":checked") == false && $('#checkbox_goby').is(":checked") == false) {
                 swal('Warning', '请选择要使用的验证工具！', 'error');
                 return;
             }
             if ($('#checkbox_nuclei').is(":checked")) {
                 if ($('#input_nuclei_poc_file').val() == '') {
                     swal('Warning', '请选择poc file', 'error');
-                    return;
-                }
-            }
-            if ($('#checkbox_dirsearch').is(":checked")) {
-                if ($('#input_dirsearch_ext').val() == '') {
-                    swal('Warning', '请选择EXTENSIONS', 'error');
                     return;
                 }
             }
@@ -185,12 +180,11 @@ $(function () {
                     'nucleiverify': $('#checkbox_nuclei').is(":checked"),
                     'nuclei_poc_file': $('#input_nuclei_poc_file').val(),
                     'gobyverify': $('#checkbox_goby').is(":checked"),
-                    'dirsearch': $('#checkbox_dirsearch').is(":checked"),
-                    'ext': $('#input_dirsearch_ext').val(),
                     'load_opened_port': $('#checkbox_load_opened_port').is(":checked"),
                     'taskcron': $('#checkbox_cron_task').is(":checked"),
                     'cronrule': cron_rule,
                     'croncomment': $('#input_cron_comment').val(),
+                    'proxy': $('#checkbox_proxy').is(":checked"),
                 }, function (data, e) {
                     if (e === "success" && data['status'] == 'success') {
                         swal({
@@ -241,6 +235,7 @@ $(function () {
                     'taskcron': $('#checkbox_cron_task').is(":checked"),
                     'cronrule': cron_rule,
                     'croncomment': $('#input_cron_comment').val(),
+                    'proxy': $('#checkbox_proxy').is(":checked"),
                 }, function (data, e) {
                     if (e === "success" && data['status'] == 'success') {
                         swal({
@@ -320,6 +315,7 @@ $(function () {
         formData.append("taskcron", $('#checkbox_cron_task_xscan').is(":checked"));
         formData.append("cronrule", cron_rule);
         formData.append("croncomment", $('#input_cron_comment_xscan').val());
+        formData.append("proxy", $('#checkbox_proxy_xscan').is(":checked"));
 
         if ((formData.get("nucleipoc") === "true" || formData.get("gobypoc") === "true" || formData.get("xraypoc") === "true") && formData.get("fingerprint") === "false") {
             swal('Warning', '漏洞扫描需要开启指纹扫描步骤选项', 'error');

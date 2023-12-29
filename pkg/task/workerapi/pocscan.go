@@ -36,10 +36,6 @@ func PocScan(taskId, mainTaskId, configJSON string) (result string, err error) {
 		x := pocscan.NewXray(config)
 		x.Do()
 		scanResult = x.Result
-	} else if config.CmdBin == "dirsearch" {
-		d := pocscan.NewDirsearch(config)
-		d.Do()
-		scanResult = d.Result
 	} else if config.CmdBin == "nuclei" {
 		n := pocscan.NewNuclei(config)
 		n.Do()

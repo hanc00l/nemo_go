@@ -17,6 +17,7 @@ import (
 type Fingerprintx struct {
 	ResultPortScan   *portscan.Result
 	OptimizationMode bool
+	IsProxy          bool
 }
 
 type FingerprintxService struct {
@@ -83,6 +84,14 @@ func (f *Fingerprintx) RunFingerprintx(domain string) (result []FingerAttrResult
 	cmdArgs = append(cmdArgs,
 		"--json", "-t", domain, "-o", resultTempFile,
 	)
+	if f.IsProxy {
+		if proxy := conf.GetProxyConfig(); proxy != "" {
+			cmdArgs = append(cmdArgs, "-p", proxy)
+		} else {
+			logging.RuntimeLog.Warning("get proxy config fail or disabled by worker,skip proxy!")
+			logging.CLILog.Warning("get proxy config fail or disabled by worker,skip proxy!")
+		}
+	}
 	binPath := filepath.Join(conf.GetRootPath(), "thirdparty/fingerprintx", utils.GetThirdpartyBinNameByPlatform(utils.Fingerprintx))
 	cmd := exec.Command(binPath, cmdArgs...)
 	var stderr bytes.Buffer

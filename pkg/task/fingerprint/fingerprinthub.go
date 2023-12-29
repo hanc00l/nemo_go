@@ -15,6 +15,9 @@ import (
 	"path/filepath"
 )
 
+// ObserveWard目前已废弃
+// 采用被动式指纹识别方式，通过解析response header和body中的指纹信息来识别目标的指纹
+
 type FingerprintHub struct {
 	ResultPortScan   *portscan.Result
 	ResultDomainScan *domainscan.Result

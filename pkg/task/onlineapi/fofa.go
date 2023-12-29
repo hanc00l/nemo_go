@@ -91,7 +91,7 @@ func (f *FOFA) Run(query string, apiKey string, pageIndex int, pageSize int, con
 	params.Add("page", strconv.Itoa(pageIndex))
 	params.Add("size", strconv.Itoa(pageSize))
 	request.URL.RawQuery = params.Encode()
-	resp, err := http.DefaultClient.Do(request)
+	resp, err := utils.GetProxyHttpClient(config.IsProxy).Do(request)
 	if err != nil {
 		return
 	}

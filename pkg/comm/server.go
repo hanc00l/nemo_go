@@ -78,8 +78,14 @@ func StartFileSyncServer() {
 
 // StartFileSyncMonitor server文件变化检测并同步worker
 func StartFileSyncMonitor() {
+	srcPath, err := filepath.Abs(conf.GetRootPath())
+	if err != nil {
+		logging.RuntimeLog.Error(err)
+		logging.CLILog.Error(err)
+		return
+	}
 	w := filesync.NewNotifyFile()
-	w.WatchDir()
+	w.WatchDir(srcPath)
 	for {
 		select {
 		case fileName := <-w.ChNeedWorkerSync:

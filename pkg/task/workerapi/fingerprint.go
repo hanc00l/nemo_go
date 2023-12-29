@@ -24,6 +24,7 @@ type FingerprintTaskConfig struct {
 	IPTargetMap      map[string][]int
 	DomainTargetMap  map[string]struct{}
 	WorkspaceId      int
+	IsProxy          bool
 }
 
 // Fingerprint 指纹识别任务，将所有指纹识别任务整合后，可由worker将端口扫描与域名收集后的结果进行二次拆分为多个任务，提高指纹识别效率
@@ -76,6 +77,7 @@ func doFingerPrintAndSave(taskId string, mainTaskId string, config FingerprintTa
 			IsIconHash:       config.IsIconHash,
 			IsFingerprintx:   config.IsFingerprintx,
 			WorkspaceId:      config.WorkspaceId,
+			IsProxy:          config.IsProxy,
 		}
 		resultScreenshot := doIPFingerPrint(portscanConfig, resultPortScan, mainTaskId)
 		if resultScreenshot != "" {
@@ -105,6 +107,7 @@ func doFingerPrintAndSave(taskId string, mainTaskId string, config FingerprintTa
 			IsIconHash:       config.IsIconHash,
 			IsFingerprintx:   config.IsFingerprintx,
 			WorkspaceId:      config.WorkspaceId,
+			IsProxy:          config.IsProxy,
 		}
 		resultScreenshot := doDomainFingerPrint(domainscanConfig, resultDomainScan, domainPort, mainTaskId)
 		if resultScreenshot != "" {
@@ -132,8 +135,10 @@ func doIPFingerPrint(config portscan.Config, resultPortScan *portscan.Result, ma
 	httpx.IsIconHash = config.IsIconHash
 	httpx.IsScreenshot = config.IsScreenshot
 	httpx.IsFingerprintHub = config.IsFingerprintHub
+	httpx.IsProxy = config.IsProxy
 	httpx.ResultPortScan = resultPortScan
 	httpx.Do()
+
 	if config.IsScreenshot && len(httpx.ResultScreenShot.Result) > 0 {
 		resultScreenshot = doSaveScreenshot(config.WorkspaceId, mainTaskId, httpx.ResultScreenShot)
 	}
@@ -144,6 +149,7 @@ func doIPFingerPrint(config portscan.Config, resultPortScan *portscan.Result, ma
 		fingerprintx := fingerprint.NewFingerprintx()
 		fingerprintx.ResultPortScan = resultPortScan
 		fingerprintx.OptimizationMode = config.IsHttpx
+		fingerprintx.IsProxy = config.IsProxy
 		fingerprintx.Do()
 	}
 	return
@@ -157,6 +163,7 @@ func doDomainFingerPrint(config domainscan.Config, resultDomainScan *domainscan.
 	httpx.IsFingerprintHub = config.IsFingerprintHub
 	httpx.ResultDomainScan = resultDomainScan
 	httpx.DomainTargetPort = domainPort
+	httpx.IsProxy = config.IsProxy
 	httpx.Do()
 
 	if config.IsScreenshot && len(httpx.ResultScreenShot.Result) > 0 {

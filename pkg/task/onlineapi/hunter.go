@@ -117,7 +117,7 @@ func (h *Hunter) Run(query string, apiKey string, pageIndex int, pageSize int, c
 	params.Add("start_time", startTime)
 	params.Add("end_time", endTime)
 	request.URL.RawQuery = params.Encode()
-	resp, err := http.DefaultClient.Do(request)
+	resp, err := utils.GetProxyHttpClient(config.IsProxy).Do(request)
 	if err != nil {
 		return
 	}

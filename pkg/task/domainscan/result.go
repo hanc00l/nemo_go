@@ -41,6 +41,7 @@ type Config struct {
 	IsIgnoreCDN        bool   `json:"ignorecdn"`
 	IsIgnoreOutofChina bool   `json:"ignoreoutofchina"`
 	WorkspaceId        int    `json:"workspaceId"`
+	IsProxy            bool   `json:"proxy"`
 }
 
 // DomainAttrResult 域名属性结果

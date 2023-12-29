@@ -116,6 +116,8 @@ func main() {
 	if option == nil {
 		return
 	}
+	comm.TLSEnabled = option.TLSEnabled
+	filesync.TLSEnabled = option.TLSEnabled
 
 	if option.TLSEnabled {
 		if !utils.CheckFileExist(filepath.Join(conf.GetRootPath(), option.TLSCertFile)) || !utils.CheckFileExist(filepath.Join(conf.GetRootPath(), option.TLSKeyFile)) {
@@ -127,7 +129,6 @@ func main() {
 		}
 	}
 	if !option.NoFilesync {
-		filesync.TLSEnabled = option.TLSEnabled
 		filesync.TLSCertFile = option.TLSCertFile
 		filesync.TLSKeyFile = option.TLSKeyFile
 		go comm.StartFileSyncServer()
@@ -135,7 +136,6 @@ func main() {
 		time.Sleep(time.Second * 1)
 	}
 	if !option.NoRPC {
-		comm.TLSEnabled = option.TLSEnabled
 		comm.TLSCertFile = option.TLSCertFile
 		comm.TLSKeyFile = option.TLSKeyFile
 		go comm.StartRPCServer()

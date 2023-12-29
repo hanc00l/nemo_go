@@ -198,6 +198,7 @@ $("#start_xscan_task").click(function () {
     formData.append("taskcron", $('#checkbox_cron_task_xscan').is(":checked"));
     formData.append("cronrule", cron_rule);
     formData.append("croncomment", $('#input_cron_comment_xscan').val());
+    formData.append("proxy", $('#checkbox_proxy_xscan').is(":checked"));
 
     if ((formData.get("nucleipoc") === "true" || formData.get("gobypoc") === "true" || formData.get("xraypoc") === "true") && formData.get("fingerprint") === "false") {
         swal('Warning', '漏洞扫描需要开启指纹扫描步骤选项', 'error');

@@ -68,7 +68,7 @@ func (c *Crawler) Do() {
 
 // RunCrawler 爬取一个网站
 func (c *Crawler) RunCrawler(domainUrl string) {
-	taskConfig := initTaskConfig()
+	taskConfig := c.initTaskConfig()
 	option := getOption(&taskConfig)
 	if taskConfig.ChromiumPath == "" {
 		logging.RuntimeLog.Error("no chrome or chromium-browser found in default path")
@@ -139,7 +139,7 @@ func getOption(taskConfig *pkg.TaskConfig) model2.Options {
 }
 
 // initTaskConfig 初始化爬虫参数
-func initTaskConfig() pkg.TaskConfig {
+func (c *Crawler) initTaskConfig() pkg.TaskConfig {
 	/*	type TaskConfig struct {
 		MaxCrawlCount           int    // 最大爬取的数量
 		FilterMode              string // simple、smart、strict
@@ -180,7 +180,15 @@ func initTaskConfig() pkg.TaskConfig {
 	taskConfig.EncodeURLWithCharset = false
 	taskConfig.PathFromRobots = false
 	taskConfig.IgnoreKeywords = config.DefaultIgnoreKeywords
-
+	//添加proxy配置
+	if c.Config.IsProxy {
+		if proxy := conf.GetProxyConfig(); proxy != "" {
+			taskConfig.Proxy = proxy
+		} else {
+			logging.RuntimeLog.Warning("get proxy config fail or disabled by worker,skip proxy!")
+			logging.CLILog.Warning("get proxy config fail or disabled by worker,skip proxy!")
+		}
+	}
 	return taskConfig
 }
 

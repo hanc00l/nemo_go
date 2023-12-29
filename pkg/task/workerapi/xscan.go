@@ -50,6 +50,8 @@ type XScanConfig struct {
 	NucleiPocFile string `json:"nucleipocfile,omitempty"`
 	// gobypoc
 	IsGobyPoc bool `json:"gobypoc,omitempty"`
+	//
+	IsProxy bool `json:"proxy,omitempty"`
 }
 
 type XScan struct {
@@ -377,7 +379,6 @@ func (x *XScan) Portscan(taskId string, mainTaskId string) (result string, err e
 	x.ResultIP.IPResult = make(map[string]*portscan.IPResult)
 	swg := sizedwaitgroup.New(portscanMaxThreadNum[conf.WorkerPerformanceMode])
 	// 生成扫描参数
-	conf.GlobalWorkerConfig().ReloadConfig()
 	config := portscan.Config{
 		OrgId:        x.Config.OrgId,
 		Rate:         conf.GlobalWorkerConfig().Portscan.Rate,
@@ -386,6 +387,7 @@ func (x *XScan) Portscan(taskId string, mainTaskId string) (result string, err e
 		CmdBin:       conf.GlobalWorkerConfig().Portscan.Cmdbin,
 		IsIpLocation: true,
 		WorkspaceId:  x.Config.WorkspaceId,
+		IsProxy:      x.Config.IsProxy,
 	}
 	if len(x.Config.IPPortString) > 0 {
 		for ip, ports := range x.Config.IPPortString {
@@ -444,6 +446,10 @@ func (x *XScan) doPortscan(swg *sizedwaitgroup.SizedWaitGroup, config portscan.C
 		m := portscan.NewMasscan(config)
 		m.Do()
 		result.IPResult = m.Result.IPResult
+	} else if config.CmdBin == "gogo" {
+		gogo := portscan.NewGogo(config)
+		gogo.Do()
+		result.IPResult = gogo.Result.IPResult
 	} else {
 		m := portscan.NewNmap(config)
 		m.Do()
@@ -516,7 +522,6 @@ func (x *XScan) doGobyScan(swg *sizedwaitgroup.SizedWaitGroup, config pocscan.Co
 
 // OnlineAPISearch 执行fofa搜索任务
 func (x *XScan) OnlineAPISearch(taskId string, mainTaskId string) (result string, err error) {
-	conf.GlobalWorkerConfig().ReloadConfig()
 	config := onlineapi.OnlineAPIConfig{
 		OrgId:           x.Config.OrgId,
 		IsIPLocation:    true,
@@ -525,6 +530,7 @@ func (x *XScan) OnlineAPISearch(taskId string, mainTaskId string) (result string
 		IsIgnoreCDN:        conf.GlobalWorkerConfig().Domainscan.IsIgnoreCDN,
 		IsIgnoreOutofChina: conf.GlobalWorkerConfig().Domainscan.IsIgnoreOutofChina,
 		WorkspaceId:        x.Config.WorkspaceId,
+		IsProxy:            x.Config.IsProxy,
 	}
 	if x.Config.IsFingerprint {
 		config.IsHttpx = conf.GlobalWorkerConfig().Fingerprint.IsHttpx
@@ -562,7 +568,6 @@ func (x *XScan) Domainscan(taskId string, mainTaskId string) (result string, err
 	x.ResultDomain.DomainResult = make(map[string]*domainscan.DomainResult)
 	swg := sizedwaitgroup.New(domainscanMaxThreadNum[conf.WorkerPerformanceMode])
 
-	conf.GlobalWorkerConfig().ReloadConfig()
 	config := domainscan.Config{
 		OrgId: x.Config.OrgId,
 		// domain方法：
@@ -575,6 +580,7 @@ func (x *XScan) Domainscan(taskId string, mainTaskId string) (result string, err
 		IsIPPortScan:       conf.GlobalWorkerConfig().Domainscan.IsPortScan,
 
 		WorkspaceId: x.Config.WorkspaceId,
+		IsProxy:     x.Config.IsProxy,
 	}
 	for domain := range x.Config.Domain {
 		runConfig := config
@@ -611,6 +617,7 @@ func (x *XScan) NewPortScan(taskId, mainTaskId string, ipPortMap []map[string][]
 		NucleiPocFile: x.Config.NucleiPocFile,
 		IsGobyPoc:     x.Config.IsGobyPoc,
 		WorkspaceId:   x.Config.WorkspaceId,
+		IsProxy:       x.Config.IsProxy,
 	}
 	for _, t := range ipPortMap {
 		configRun := config
@@ -676,6 +683,7 @@ func (x *XScan) NewDomainScan(taskId, mainTaskId string, domainMap []map[string]
 		NucleiPocFile:     x.Config.NucleiPocFile,
 		IsGobyPoc:         x.Config.IsGobyPoc,
 		WorkspaceId:       x.Config.WorkspaceId,
+		IsProxy:           x.Config.IsProxy,
 	}
 	for _, t := range domainMap {
 		configRun := config
@@ -691,7 +699,6 @@ func (x *XScan) NewDomainScan(taskId, mainTaskId string, domainMap []map[string]
 
 // FingerPrint 执行指纹识别任务
 func (x *XScan) FingerPrint(taskId string, mainTaskId string) (result string, err error) {
-	conf.GlobalWorkerConfig().ReloadConfig()
 	config := FingerprintTaskConfig{
 		// 从配置文件默认参数获取：
 		IsHttpx:          conf.GlobalWorkerConfig().Fingerprint.IsHttpx,
@@ -702,6 +709,7 @@ func (x *XScan) FingerPrint(taskId string, mainTaskId string) (result string, er
 		IPTargetMap:      x.Config.IPPort,
 		DomainTargetMap:  x.Config.Domain,
 		WorkspaceId:      x.Config.WorkspaceId,
+		IsProxy:          x.Config.IsProxy,
 	}
 	x.ResultIP, x.ResultDomain, result, err = doFingerPrintAndSave(taskId, mainTaskId, config)
 
@@ -721,6 +729,7 @@ func (x *XScan) NewFingerprintScan(taskId, mainTaskId string) (result string, er
 		NucleiPocFile: x.Config.NucleiPocFile,
 		IsGobyPoc:     x.Config.IsGobyPoc,
 		WorkspaceId:   x.Config.WorkspaceId,
+		IsProxy:       x.Config.IsProxy,
 	}
 	//拆分子任务
 	ipTarget, domainTarget := MakeSubTaskTarget(x.ResultIP, x.ResultDomain)
@@ -751,7 +760,7 @@ func (x *XScan) NewNucleiScan(taskId, mainTaskId string) (result string, err err
 	//拆分子任务
 	ipTarget, domainTarget := MakeSubTaskTarget(x.ResultIP, x.ResultDomain)
 	for _, t := range ipTarget {
-		newConfig := XScanConfig{IPPort: t, IsNucleiPoc: true, NucleiPocFile: x.Config.NucleiPocFile, WorkspaceId: x.Config.WorkspaceId}
+		newConfig := XScanConfig{IPPort: t, IsNucleiPoc: true, NucleiPocFile: x.Config.NucleiPocFile, WorkspaceId: x.Config.WorkspaceId, IsProxy: x.Config.IsProxy}
 		result, err = sendTask(taskId, mainTaskId, newConfig, "xnuclei")
 		if err != nil {
 			logging.RuntimeLog.Error(err)
@@ -759,7 +768,7 @@ func (x *XScan) NewNucleiScan(taskId, mainTaskId string) (result string, err err
 		}
 	}
 	for _, t := range domainTarget {
-		newConfig := XScanConfig{Domain: t, IsNucleiPoc: true, NucleiPocFile: x.Config.NucleiPocFile, WorkspaceId: x.Config.WorkspaceId}
+		newConfig := XScanConfig{Domain: t, IsNucleiPoc: true, NucleiPocFile: x.Config.NucleiPocFile, WorkspaceId: x.Config.WorkspaceId, IsProxy: x.Config.IsProxy}
 		result, err = sendTask(taskId, mainTaskId, newConfig, "xnuclei")
 		if err != nil {
 			logging.RuntimeLog.Error(err)
@@ -774,7 +783,7 @@ func (x *XScan) NewGobyScan(taskId, mainTaskId string) (result string, err error
 	//拆分子任务
 	ipTarget, domainTarget := MakeSubTaskTarget(x.ResultIP, x.ResultDomain)
 	for _, t := range ipTarget {
-		newConfig := XScanConfig{IPPort: t, IsGobyPoc: true, WorkspaceId: x.Config.WorkspaceId}
+		newConfig := XScanConfig{IPPort: t, IsGobyPoc: true, WorkspaceId: x.Config.WorkspaceId, IsProxy: x.Config.IsProxy}
 		result, err = sendTask(taskId, mainTaskId, newConfig, "xgoby")
 		if err != nil {
 			logging.RuntimeLog.Error(err)
@@ -782,7 +791,7 @@ func (x *XScan) NewGobyScan(taskId, mainTaskId string) (result string, err error
 		}
 	}
 	for _, t := range domainTarget {
-		newConfig := XScanConfig{Domain: t, IsGobyPoc: true, WorkspaceId: x.Config.WorkspaceId}
+		newConfig := XScanConfig{Domain: t, IsGobyPoc: true, WorkspaceId: x.Config.WorkspaceId, IsProxy: x.Config.IsProxy}
 		result, err = sendTask(taskId, mainTaskId, newConfig, "xgoby")
 		if err != nil {
 			logging.RuntimeLog.Error(err)
@@ -795,7 +804,7 @@ func (x *XScan) NewGobyScan(taskId, mainTaskId string) (result string, err error
 // NucleiScan 调用执行Nuclei扫描任务
 func (x *XScan) NucleiScan(taskId string, mainTaskId string) (result string, err error) {
 	// 生成扫描参数
-	config := pocscan.Config{PocFile: x.Config.NucleiPocFile, WorkspaceId: x.Config.WorkspaceId}
+	config := pocscan.Config{PocFile: x.Config.NucleiPocFile, WorkspaceId: x.Config.WorkspaceId, IsProxy: x.Config.IsProxy}
 	if x.Config.NucleiPocFile == "" {
 		config.PocFile = "*"
 	}
@@ -835,7 +844,7 @@ func (x *XScan) NucleiScan(taskId string, mainTaskId string) (result string, err
 // GobyScan 调用执行goby扫描任务
 func (x *XScan) GobyScan(taskId string, mainTaskId string) (result string, err error) {
 	// 生成扫描参数
-	config := pocscan.Config{WorkspaceId: x.Config.WorkspaceId}
+	config := pocscan.Config{WorkspaceId: x.Config.WorkspaceId, IsProxy: x.Config.IsProxy}
 	// goby支持通过,分隔的多个目标
 	swg := sizedwaitgroup.New(xrayscanMaxThreadNum[conf.WorkerPerformanceMode])
 	if len(x.Config.IPPort) > 0 {
@@ -879,7 +888,7 @@ func (x *XScan) NewXrayScan(taskId, mainTaskId string) (result string, err error
 	//拆分子任务
 	ipTarget, domainTarget := MakeSubTaskTarget(x.ResultIP, x.ResultDomain)
 	for _, t := range ipTarget {
-		newConfig := XScanConfig{IPPort: t, IsXrayPoc: true, XrayPocFile: x.Config.XrayPocFile, WorkspaceId: x.Config.WorkspaceId}
+		newConfig := XScanConfig{IPPort: t, IsXrayPoc: true, XrayPocFile: x.Config.XrayPocFile, WorkspaceId: x.Config.WorkspaceId, IsProxy: x.Config.IsProxy}
 		result, err = sendTask(taskId, mainTaskId, newConfig, "xxray")
 		if err != nil {
 			logging.RuntimeLog.Error(err)
@@ -887,7 +896,7 @@ func (x *XScan) NewXrayScan(taskId, mainTaskId string) (result string, err error
 		}
 	}
 	for _, t := range domainTarget {
-		newConfig := XScanConfig{Domain: t, IsXrayPoc: true, XrayPocFile: x.Config.XrayPocFile, WorkspaceId: x.Config.WorkspaceId}
+		newConfig := XScanConfig{Domain: t, IsXrayPoc: true, XrayPocFile: x.Config.XrayPocFile, WorkspaceId: x.Config.WorkspaceId, IsProxy: x.Config.IsProxy}
 		result, err = sendTask(taskId, mainTaskId, newConfig, "xxray")
 		if err != nil {
 			logging.RuntimeLog.Error(err)
@@ -900,7 +909,7 @@ func (x *XScan) NewXrayScan(taskId, mainTaskId string) (result string, err error
 // XrayScan 调用执行xray扫描任务
 func (x *XScan) XrayScan(taskId string, mainTaskId string) (result string, err error) {
 	// 生成扫描参数
-	config := pocscan.Config{PocFile: x.Config.XrayPocFile, WorkspaceId: x.Config.WorkspaceId}
+	config := pocscan.Config{PocFile: x.Config.XrayPocFile, WorkspaceId: x.Config.WorkspaceId, IsProxy: x.Config.IsProxy}
 	if x.Config.XrayPocFile == "" {
 		config.PocFile = "*"
 	}

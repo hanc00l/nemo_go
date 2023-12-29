@@ -185,6 +185,26 @@ $(function () {
                 }
             });
     });
+    $("#buttonSaveWorkerProxy").click(function () {
+        $.post("/config-save-workerproxy",
+            {
+                "proxyList": $('#text_proxy_list').val(),
+            }, function (data, e) {
+                if (e === "success" && data['status'] == 'success') {
+                    swal({
+                        title: "保存成功！",
+                        text: "",
+                        type: "success",
+                        confirmButtonText: "确定",
+                        confirmButtonColor: "#41b883",
+                        closeOnConfirm: true,
+                        timer: 3000
+                    });
+                } else {
+                    swal('Warning', data['msg'], 'error');
+                }
+            });
+    });
     $("#buttonChangPassword").click(function () {
         if ($('#input_oldpass').val() === '' || $('#input_password1').val() === '' || $('#input_password2').val() === '') {
             swal('Warning', "请输入密码！", 'error');
@@ -267,6 +287,8 @@ function load_config() {
         $('#checkbox_quake').prop("checked", data['quake']);
         $('#input_pagesize').val(data['pagesize']);
         $('#input_limitcount').val(data['limitcount']);
+
+        $("#text_proxy_list").val(data['proxyList']);
     });
 }
 

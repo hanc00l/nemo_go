@@ -3,8 +3,11 @@ package conf
 import (
 	"fmt"
 	"gopkg.in/yaml.v2"
+	"math/rand"
 	"os"
 	"path/filepath"
+	"sync"
+	"time"
 )
 
 const (
@@ -20,8 +23,14 @@ const (
 // WorkerPerformanceMode worker默认的性能模式为Normal
 var WorkerPerformanceMode = NormalPerformance
 
+// NoProxyByCmd 不使用proxy，由worker启动时命令行指定
+var NoProxyByCmd bool
+
+// Socks5ForwardAddr chrome浏览器的socks5代理地址转发地址，支持用户名和密码认证（默认chrome不支持带认证的socks5代理）
+var Socks5ForwardAddr string
 var ServerDefaultConfigfile = "conf/server.yml"
 var WorkerDefaultConfigFile = "conf/worker.yml"
+var WorkerReloadMutex sync.Mutex // worker读配置文件同步锁
 
 // RunMode 运行模式：正式运行请使用Release模式，Debug模式只用于开发调试过程
 var RunMode = Release
@@ -47,7 +56,11 @@ func GlobalServerConfig() *Server {
 func GlobalWorkerConfig() *Worker {
 	if workerConfig == nil {
 		workerConfig = new(Worker)
+
+		WorkerReloadMutex.Lock()
 		err := workerConfig.ReloadConfig()
+		WorkerReloadMutex.Unlock()
+
 		if err != nil {
 			fmt.Println("Load Worker config fail!")
 			os.Exit(0)
@@ -77,6 +90,7 @@ type Worker struct {
 	Domainscan  Domainscan  `yaml:"domainscan"`
 	OnlineAPI   OnlineAPI   `yaml:"onlineapi"`
 	Pocscan     Pocscan     `yaml:"pocscan"`
+	Proxy       Proxy       `yaml:"proxy"`
 }
 
 type Web struct {
@@ -182,6 +196,10 @@ type Notify struct {
 	Token string `yaml:"token"`
 }
 
+type Proxy struct {
+	Host []string `yaml:"host"`
+}
+
 // WriteConfig 写配置到yaml文件中
 func (config *Server) WriteConfig() error {
 	content, err := yaml.Marshal(config)
@@ -236,6 +254,26 @@ func (config *Worker) WriteConfig() error {
 		fmt.Println(err)
 	}
 	return err
+}
+
+// GetProxyConfig 从配置文件中获取一个代理配置参数，多个代理则随机选取一个
+func GetProxyConfig() string {
+	if NoProxyByCmd {
+		return ""
+	}
+	config := GlobalWorkerConfig()
+	if len(config.Proxy.Host) == 0 {
+		return ""
+	}
+	if len(config.Proxy.Host) == 1 {
+		return config.Proxy.Host[0]
+	}
+	if len(config.Proxy.Host) > 1 {
+		r := rand.New(rand.NewSource(time.Now().UnixNano()))
+		n := r.Intn(len(config.Proxy.Host))
+		return config.Proxy.Host[n]
+	}
+	return ""
 }
 
 // GetRootPath 获取运行时系统的root位置，解决调试时无法使用相对位置的困扰

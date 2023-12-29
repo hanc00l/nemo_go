@@ -329,13 +329,14 @@
                                                                             </option>
                                                                             <option value="masnmap">masscan+nmap
                                                                             </option>
+                                                                            <option value="gogo">gogo（支持socks5代理）</option>
                                                                         </select>
                                                                     </div>
                                                                     <div class="form-group col-md-4">
                                                                         <label for="select_tech">探测技术<i
                                                                                 class="fa fa-question-circle"
                                                                                 aria-hidden="true"
-                                                                                title="使用nmap时的选项，masscan只使用SYN扫描"></i></label>
+                                                                                title="使用nmap时的选项，masscan只使用SYN扫描，gogo只使用TCP扫描"></i></label>
                                                                         <select class="form-control" id="select_tech">
                                                                             <option value="-sS" selected>-sS
                                                                             </option>
@@ -347,7 +348,7 @@
                                                                         <label for="input_rate">扫描速度<i
                                                                                 class="fa fa-question-circle"
                                                                                 aria-hidden="true"
-                                                                                title="Send packets per second&#10;对应--min-rate(nmap)与--rate(masscan)参数"></i></label>
+                                                                                title="Send packets per second&#10;对应--min-rate(nmap)、--rate(masscan)、--thread(gogo)参数"></i></label>
                                                                         <input class="form-control" id="input_rate"
                                                                                type="text" placeholder="1000（默认）"
                                                                                value="1000">
@@ -570,29 +571,6 @@
                                                                                id="checkbox_goby" type="checkbox"><b>Goby</b>
                                                                     </label>
                                                                 </div>
-                                                                <p></p>
-                                                                <div class="form-check form-check-inline">
-                                                                    <label class="form-check-label"
-                                                                           for="checkbox_dirsearch">
-                                                                        <input class="form-check-input"
-                                                                               id="checkbox_dirsearch"
-                                                                               type="checkbox"><b>Dirsearch</b>
-                                                                    </label>
-                                                                </div>
-                                                                <input class="form-control" id="input_dirsearch_ext"
-                                                                       type="text"
-                                                                       placeholder="--选择EXTENSIONS--" value=""
-                                                                       list="datalist_dirsearch_ext">
-                                                                <datalist id="datalist_dirsearch_ext"
-                                                                          style="display:none;">
-                                                                    <option value="php" selected>php</option>
-                                                                    <option value="asp">asp</option>
-                                                                    <option value="aspx">aspx</option>
-                                                                    <option value="jsp">jsp</option>
-                                                                    <option value="jspx">jspx</option>
-                                                                    <option value="do">do</option>
-                                                                    <option value="action">action</option>
-                                                                </datalist>
                                                             </div>
                                                         </div>
                                                     </div>
@@ -657,13 +635,14 @@
                                                                             <option value="masscan" selected="selected">
                                                                                 masscan
                                                                             </option>
+                                                                            <option value="gogo">gogo（支持socks5代理）</option>
                                                                         </select>
                                                                     </div>
                                                                     <div class="form-group col-md-4">
                                                                         <label for="select_batchscan_tech">探测技术<i
                                                                                 class="fa fa-question-circle"
                                                                                 aria-hidden="true"
-                                                                                title="使用nmap时的选项，masscan只使用SYN扫描"></i></label>
+                                                                                title="使用nmap时的选项，masscan只使用SYN扫描，gogo只使用TCP扫描"></i></label>
                                                                         <select class="form-control"
                                                                                 id="select_batchscan_tech">
                                                                             <option value="-sS" selected>-sS
@@ -676,7 +655,7 @@
                                                                         <label for="input_batchscan_rate">扫描速度<i
                                                                                 class="fa fa-question-circle"
                                                                                 aria-hidden="true"
-                                                                                title="Send packets per second&#10;对应--min-rate(nmap)与--rate(masscan)参数"></i></label>
+                                                                                title="Send packets per second&#10;对应--min-rate(nmap)、--rate(masscan)参数、--thread(gogo)参数"></i></label>
                                                                         <input class="form-control"
                                                                                id="input_batchscan_rate"
                                                                                type="text" placeholder="1000"
@@ -802,6 +781,20 @@
                                                     </div>
                                                 </div>
                                             </div>
+                                            <div class="form-group row ">
+                                                <div class="col-md-12">
+                                                    <div class="form-check form-check-inline">
+                                                        <label class="form-check-label"
+                                                               for="checkbox_proxy">
+                                                            <input class="form-check-input"
+                                                                   id="checkbox_proxy" type="checkbox"
+                                                            ><b>使用代理</b><i
+                                                                class="fa fa-info-circle" aria-hidden="true"
+                                                                title="worker使用配置的代理进行执行任务，代理的配置、支持代理的技术和工具见Config-配置管理-Worker代理配置"></i>
+                                                        </label>
+                                                    </div>
+                                                </div>
+                                            </div>
                                         </div>
                                     </form>
                                 </div>
@@ -830,7 +823,7 @@
                                 <div class="modal-body ">
                                     <form class="form-horizontal" role="form">
                                         <div class="form-group">
-                                            <label for="select_bin">资产结果类型<i class="fa fa-question-circle"
+                                            <label for="select_portscan_bin">资产结果类型<i class="fa fa-question-circle"
                                                                                    aria-hidden="true"
                                                                                    title="支持导入namp、masscan扫描输出的-oX格式的XML结果；&#10;fscan的results.txt结果；&#10;gogo的未加密的json结果文件（后缀为.dat）;&#10;naabu的普通text结果；&#10;httpx的-json结果；&#10;TXPortMap的rst.txt结果&#10;FOFA、Hunter及0Zone为导出的csv格式文件"></i></label>
                                             <select class="form-control" id="select_portscan_bin">
@@ -1197,6 +1190,20 @@
                                                             <input class="form-control" id="input_cron_rule_xscan"
                                                                    type="text"
                                                                    placeholder="0 8 * * *" disabled value="0 8 * * *">
+                                                        </div>
+                                                    </div>
+                                                    <div class="form-group row ">
+                                                        <div class="col-md-12">
+                                                            <div class="form-check form-check-inline">
+                                                                <label class="form-check-label"
+                                                                       for="checkbox_proxy_xscan">
+                                                                    <input class="form-check-input"
+                                                                           id="checkbox_proxy_xscan" type="checkbox"
+                                                                    ><b>使用代理</b><i
+                                                                        class="fa fa-info-circle" aria-hidden="true"
+                                                                        title="worker使用配置的代理进行执行任务，代理的配置、支持代理的技术和工具见Config-配置管理-Worker代理配置"></i>
+                                                                </label>
+                                                            </div>
                                                         </div>
                                                     </div>
                                                 </div>

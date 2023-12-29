@@ -2,7 +2,6 @@ package onlineapi
 
 import (
 	"bytes"
-	"crypto/tls"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -158,11 +157,6 @@ func (q *Quake) getFilterTitleKeyword(filterKeyword map[string]struct{}) string 
 }
 
 func (q *Quake) Run(query string, apiKey string, pageIndex int, pageSize int, config OnlineAPIConfig) (pageResult []onlineSearchResult, sizeTotal int, err error) {
-	client := &http.Client{
-		Timeout: time.Duration(30) * time.Second,
-		Transport: &http.Transport{
-			TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
-		}}
 	data := quakePostData{
 		Query:       query,
 		Latest:      true,
@@ -182,15 +176,14 @@ func (q *Quake) Run(query string, apiKey string, pageIndex int, pageSize int, co
 	request.Header.Set("Content-Type", "application/json")
 	request.Header.Set("X-QuakeToken", apiKey)
 	request.Header.Add("User-Agent", userAgent)
-	var response *http.Response
-	response, err = client.Do(request)
+	resp, err := utils.GetProxyHttpClient(config.IsProxy).Do(request)
 	if err != nil {
 		return
 	}
-	if response.Body != nil {
-		defer response.Body.Close()
+	if resp.Body != nil {
+		defer resp.Body.Close()
 		var body []byte
-		body, err = io.ReadAll(response.Body)
+		body, err = io.ReadAll(resp.Body)
 		if err != nil {
 			return
 		}

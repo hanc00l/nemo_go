@@ -26,6 +26,7 @@ type OnlineAPIConfig struct {
 	SearchLimitCount   int    `json:"searchlimitcount"`
 	SearchPageSize     int    `json:"searchpagesize"`
 	WorkspaceId        int    `json:"workspaceId"`
+	IsProxy            bool   `json:"proxy"`
 }
 
 type ICPQueryConfig struct {

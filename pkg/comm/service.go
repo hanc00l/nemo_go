@@ -325,13 +325,20 @@ func (s *Service) UpdateTask(ctx context.Context, args *TaskStatusArgs, replay *
 }
 
 // KeepAlive worker通过RPC，保持与server的心跳与同步
-func (s *Service) KeepAlive(ctx context.Context, args *KeepAliveInfo, replay *string) error {
-	if args.WorkerStatus.WorkerName == "" {
+func (s *Service) KeepAlive(ctx context.Context, args *KeepAliveWorkerInfo, replay *string) error {
+	if args == nil || args.WorkerStatus.WorkerName == "" {
 		logging.RuntimeLog.Error("no worker name")
 		return nil
 	}
 	WorkerStatusMutex.Lock()
-	WorkerStatus[args.WorkerStatus.WorkerName] = &args.WorkerStatus
+	if _, ok := WorkerStatus[args.WorkerStatus.WorkerName]; !ok {
+		WorkerStatus[args.WorkerStatus.WorkerName] = &args.WorkerStatus
+	} else {
+		WorkerStatus[args.WorkerStatus.WorkerName].MemUsed = args.WorkerStatus.MemUsed
+		WorkerStatus[args.WorkerStatus.WorkerName].CPULoad = args.WorkerStatus.CPULoad
+		WorkerStatus[args.WorkerStatus.WorkerName].TaskExecutedNumber = args.WorkerStatus.TaskExecutedNumber
+		WorkerStatus[args.WorkerStatus.WorkerName].TaskStartedNumber = args.WorkerStatus.TaskStartedNumber
+	}
 	WorkerStatus[args.WorkerStatus.WorkerName].UpdateTime = time.Now()
 	WorkerStatusMutex.Unlock()
 	msg := "ok"
@@ -341,25 +348,35 @@ func (s *Service) KeepAlive(ctx context.Context, args *KeepAliveInfo, replay *st
 }
 
 // KeepDaemonAlive worker的daemon通过RPC，保持与server的心跳与同步
-func (s *Service) KeepDaemonAlive(ctx context.Context, args *string, replay *WorkerDaemonManualInfo) error {
+func (s *Service) KeepDaemonAlive(ctx context.Context, args *string, replay *KeepAliveDaemonInfo) error {
 	// args -> WorkName
-	wdm := WorkerDaemonManualInfo{}
-	if *args == "" {
+	daemonInfo := KeepAliveDaemonInfo{}
+	if args == nil || *args == "" {
 		logging.RuntimeLog.Error("no worker name")
-		*replay = wdm
+		*replay = daemonInfo
 		return nil
 	}
 	WorkerStatusMutex.Lock()
-	if _, ok := WorkerStatus[*args]; ok {
-		wdm.ManualReloadFlag = WorkerStatus[*args].ManualReloadFlag
-		wdm.ManualFileSyncFlag = WorkerStatus[*args].ManualFileSyncFlag
-		//
-		WorkerStatus[*args].WorkerDaemonUpdateTime = time.Now()
-		WorkerStatus[*args].ManualFileSyncFlag = false //重置文件同步请求标志
-	}
-	WorkerStatusMutex.Unlock()
+	defer WorkerStatusMutex.Unlock()
 
-	*replay = wdm
+	if _, ok := WorkerStatus[*args]; ok {
+		daemonInfo.ManualReloadFlag = WorkerStatus[*args].ManualReloadFlag
+		daemonInfo.ManualFileSyncFlag = WorkerStatus[*args].ManualFileSyncFlag
+		daemonInfo.ManualUpdateOptionFlag = WorkerStatus[*args].ManualUpdateOptionFlag
+		if WorkerStatus[*args].ManualUpdateOptionFlag {
+			w := &WorkerOption{}
+			if err := json.Unmarshal(WorkerStatus[*args].WorkerUpdateOption, w); err == nil {
+				daemonInfo.WorkerRunOption = w
+			}
+		}
+		WorkerStatus[*args].ManualFileSyncFlag = false
+		WorkerStatus[*args].ManualReloadFlag = false
+		WorkerStatus[*args].IsDaemonProcess = true
+		WorkerStatus[*args].WorkerDaemonUpdateTime = time.Now()
+	} else {
+		logging.RuntimeLog.Error("no worker name")
+	}
+	*replay = daemonInfo
 	return nil
 }
 

@@ -60,6 +60,14 @@ func (s *SubFinder) RunSubFinder(domain string) {
 		"-no-color", "-v",
 		"-active", //RemoveWildcard
 	)
+	if s.Config.IsProxy {
+		if proxy := conf.GetProxyConfig(); proxy != "" {
+			cmdArgs = append(cmdArgs, "-proxy", proxy)
+		} else {
+			logging.RuntimeLog.Warning("get proxy config fail or disabled by worker,skip proxy!")
+			logging.CLILog.Warning("get proxy config fail or disabled by worker,skip proxy!")
+		}
+	}
 	binPath := filepath.Join(conf.GetRootPath(), "thirdparty/subfinder", utils.GetThirdpartyBinNameByPlatform(utils.Subfinder))
 	cmd := exec.Command(binPath, cmdArgs...)
 	var stderr bytes.Buffer

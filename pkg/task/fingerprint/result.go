@@ -43,11 +43,6 @@ func init() {
 	fpFingerprintxThreadNumber[conf.NormalPerformance] = 3
 }
 
-type Config struct {
-	Target string
-	//OrgId  *int
-}
-
 type FingerAttrResult struct {
 	Tag     string
 	Content string

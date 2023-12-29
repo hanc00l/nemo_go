@@ -13,11 +13,38 @@ import (
 	"time"
 )
 
+type WorkerOption struct {
+	Concurrency       int                 `json:"concurrency" form:"concurrency"`
+	WorkerPerformance int                 `json:"worker_performance" form:"worker_performance"`
+	WorkerRunTaskMode string              `json:"worker_run_task_mode" form:"worker_run_task_mode"`
+	TaskWorkspaceGUID string              `json:"task_workspace_guid" form:"task_workspace_guid"`
+	WorkerTopic       map[string]struct{} `json:"-"`
+	TLSEnabled        bool                `json:"-"`
+	DefaultConfigFile string              `json:"default_config_file" form:"default_config_file"`
+	NoProxy           bool                `json:"no_proxy" form:"no_proxy"`
+}
+
+type WorkerDaemonOption struct {
+	Concurrency       int
+	WorkerPerformance int
+	NoFilesync        bool
+	NoProxy           bool
+	WorkerRunTaskMode string
+	TaskWorkspaceGUID string
+	ManualSyncHost    string
+	ManualSyncPort    string
+	ManualSyncAuth    string
+	TLSEnabled        bool
+	DefaultConfigFile string
+}
+
 var cmd *exec.Cmd
 var WorkerName string
+var DaemonRunOption *WorkerDaemonOption
+var WorkerRunOption *WorkerOption
 
 // WatchWorkerProcess worker进程状态监控
-func WatchWorkerProcess(workerRunTaskMode, taskWorkspaceGUID string, concurrency, workerPerformance int) {
+func WatchWorkerProcess() {
 	if cmd == nil {
 		return
 	}
@@ -27,7 +54,7 @@ func WatchWorkerProcess(workerRunTaskMode, taskWorkspaceGUID string, concurrency
 		logging.RuntimeLog.Warning("detected worker process not exist")
 		logging.CLILog.Warning("detected worker process not exist")
 		if KillWorker() {
-			StartWorker(workerRunTaskMode, taskWorkspaceGUID, concurrency, workerPerformance)
+			StartWorker()
 		}
 		return
 	}
@@ -45,20 +72,20 @@ func WatchWorkerProcess(workerRunTaskMode, taskWorkspaceGUID string, concurrency
 			logging.RuntimeLog.Warning("detected worker zombie status")
 			logging.CLILog.Warning("detected worker zombie status")
 			if KillWorker() {
-				StartWorker(workerRunTaskMode, taskWorkspaceGUID, concurrency, workerPerformance)
+				StartWorker()
 			}
 		}
 	}
 }
 
 // StartWorkerDaemon 启动worker的daemon
-func StartWorkerDaemon(workerRunTaskMode, taskWorkspaceGUID string, concurrency, workerPerformance int, noFilesync bool) {
+func StartWorkerDaemon() {
 	fileSyncServer := conf.GlobalWorkerConfig().FileSync
-	if !noFilesync {
+	if !DaemonRunOption.NoFilesync {
 		logging.CLILog.Info("start file sync...")
 		filesync.WorkerStartupSync(fileSyncServer.Host, fmt.Sprintf("%d", fileSyncServer.Port), fileSyncServer.AuthKey)
 	}
-	if success := StartWorker(workerRunTaskMode, taskWorkspaceGUID, concurrency, workerPerformance); success == false {
+	if success := StartWorker(); success == false {
 		return
 	}
 	for {
@@ -69,21 +96,32 @@ func StartWorkerDaemon(workerRunTaskMode, taskWorkspaceGUID string, concurrency,
 			logging.CLILog.Error("daemon keep alive fail")
 			continue
 		}
-		WatchWorkerProcess(workerRunTaskMode, taskWorkspaceGUID, concurrency, workerPerformance)
+		WatchWorkerProcess()
+		// 收到server更新运行参数的命令
+		if replay.ManualUpdateOptionFlag && replay.WorkerRunOption != nil {
+			DaemonRunOption.NoProxy = replay.WorkerRunOption.NoProxy
+			DaemonRunOption.Concurrency = replay.WorkerRunOption.Concurrency
+			DaemonRunOption.WorkerPerformance = replay.WorkerRunOption.WorkerPerformance
+			DaemonRunOption.DefaultConfigFile = replay.WorkerRunOption.DefaultConfigFile
+			DaemonRunOption.WorkerRunTaskMode = replay.WorkerRunOption.WorkerRunTaskMode
+			DaemonRunOption.TaskWorkspaceGUID = replay.WorkerRunOption.TaskWorkspaceGUID
+			//更新运行参数后，强制重启worker
+			replay.ManualReloadFlag = true
+		}
 		// 收到server的手动重启worker命令，执行停止worker、文件同步、重启worker
 		if replay.ManualReloadFlag {
 			if KillWorker() {
-				if !noFilesync {
+				if !DaemonRunOption.NoFilesync {
 					logging.CLILog.Info("manual reload to start file sync...")
 					logging.RuntimeLog.Info("manual reload to start file sync...")
 					filesync.WorkerStartupSync(fileSyncServer.Host, fmt.Sprintf("%d", fileSyncServer.Port), fileSyncServer.AuthKey)
 				}
-				StartWorker(workerRunTaskMode, taskWorkspaceGUID, concurrency, workerPerformance)
+				StartWorker()
 			}
 			// 忽略文件同步（如果有）
 			continue
 		}
-		if !noFilesync && replay.ManualFileSyncFlag {
+		if !DaemonRunOption.NoFilesync && replay.ManualFileSyncFlag {
 			logging.CLILog.Info("manual start file sync...")
 			logging.RuntimeLog.Info("manual start file sync...")
 			filesync.WorkerStartupSync(fileSyncServer.Host, fmt.Sprintf("%d", fileSyncServer.Port), fileSyncServer.AuthKey)
@@ -117,7 +155,7 @@ func KillWorker() bool {
 }
 
 // StartWorker 启动worker进程
-func StartWorker(workerRunTaskMode, taskWorkspaceGUID string, concurrency, workerPerformance int) bool {
+func StartWorker() bool {
 	workerBin := utils.GetThirdpartyBinNameByPlatform(utils.Worker)
 	//绝对路径
 	workerPathName, err := filepath.Abs(filepath.Join(conf.GetRootPath(), workerBin))
@@ -127,14 +165,19 @@ func StartWorker(workerRunTaskMode, taskWorkspaceGUID string, concurrency, worke
 		return false
 	}
 	var cmdArgs = []string{
-		"-c", fmt.Sprintf("%d", concurrency),
-		"-p", fmt.Sprintf("%d", workerPerformance),
-		"-m", workerRunTaskMode,
-		"-w", taskWorkspaceGUID,
-		"-f", conf.WorkerDefaultConfigFile,
+		"-c", fmt.Sprintf("%d", DaemonRunOption.Concurrency),
+		"-p", fmt.Sprintf("%d", DaemonRunOption.WorkerPerformance),
+		"-m", DaemonRunOption.WorkerRunTaskMode,
+		"-f", DaemonRunOption.DefaultConfigFile,
 	}
-	if TLSEnabled {
+	if DaemonRunOption.TaskWorkspaceGUID != "" {
+		cmdArgs = append(cmdArgs, "-w", DaemonRunOption.TaskWorkspaceGUID)
+	}
+	if DaemonRunOption.TLSEnabled {
 		cmdArgs = append(cmdArgs, "-tls")
+	}
+	if DaemonRunOption.NoProxy {
+		cmdArgs = append(cmdArgs, "-np")
 	}
 	cmd = exec.Command(workerPathName, cmdArgs...)
 	cmd.Stdout = os.Stdout

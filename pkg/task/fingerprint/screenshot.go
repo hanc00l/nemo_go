@@ -27,6 +27,9 @@ const (
 	thumbnailWidth = 120
 )
 
+// 不直接调用ScreenShot
+// 目前采用httpx调用chrome-headless的方式获取screenshot，并做相应的缩放与裁剪后获得screenshot
+
 type ScreenShot struct {
 	ResultPortScan   *portscan.Result
 	ResultDomainScan *domainscan.Result

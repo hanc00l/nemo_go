@@ -3,7 +3,6 @@ package filesync
 import (
 	"fmt"
 	"github.com/fsnotify/fsnotify"
-	"github.com/hanc00l/nemo_go/pkg/conf"
 	"github.com/hanc00l/nemo_go/pkg/logging"
 	"os"
 	"path/filepath"
@@ -16,26 +15,23 @@ type NotifyFile struct {
 
 func NewNotifyFile() *NotifyFile {
 	w := new(NotifyFile)
-	w.watch, _ = fsnotify.NewWatcher()
+	var err error
+	w.watch, err = fsnotify.NewWatcher()
+	if err != nil {
+		logging.RuntimeLog.Error(err)
+		logging.CLILog.Error(err)
+	}
 	w.ChNeedWorkerSync = make(chan string)
 
 	return w
 }
 
 // WatchDir 监控目录中文件的变化
-func (n *NotifyFile) WatchDir() {
-	var srcPath string
-	var err error
-	srcPath, err = filepath.Abs(conf.GetRootPath())
-	if err != nil {
-		logging.RuntimeLog.Error(err)
-		logging.CLILog.Error(err)
-		return
-	}
+func (n *NotifyFile) WatchDir(srcPath string) {
 	f, fErr := os.Lstat(srcPath)
 	if fErr != nil {
-		logging.RuntimeLog.Error(err)
-		logging.CLILog.Error(err)
+		logging.RuntimeLog.Error(fErr)
+		logging.CLILog.Error(fErr)
 		return
 	}
 	var dir string
@@ -47,7 +43,6 @@ func (n *NotifyFile) WatchDir() {
 		dir = filepath.Dir(srcPath)
 		base = filepath.Base(srcPath)
 	}
-
 	fErr = os.Chdir(dir)
 	if fErr != nil {
 		msg := fmt.Sprintf("traverse monitor dir failure:%s", fErr.Error())
@@ -56,9 +51,10 @@ func (n *NotifyFile) WatchDir() {
 		return
 	}
 	defer os.Chdir(cwd)
+	var err error
 	//通过Walk来遍历目录下的所有子目录
 	err = filepath.Walk(base, func(path string, info os.FileInfo, err error) error {
-		if checkFileIsMonitorWhileList(path) == false {
+		if !checkFileIsMonitorWhileList(path) {
 			return nil
 		}
 		//判断是否为目录，监控目录,目录下文件也在监控范围内，不需要加
@@ -82,6 +78,25 @@ func (n *NotifyFile) WatchDir() {
 		return
 	}
 
+	go n.WatchEvent()
+}
+
+// WatchFile 监控指定文件的变化
+func (n *NotifyFile) WatchFile(srcPathFile []string) {
+	for _, f := range srcPathFile {
+		_, fErr := os.Lstat(f)
+		if fErr != nil {
+			logging.RuntimeLog.Error(fErr)
+			logging.CLILog.Error(fErr)
+			continue
+		}
+		err := n.watch.Add(f)
+		if err != nil {
+			logging.RuntimeLog.Error(fErr)
+			logging.CLILog.Error(fErr)
+			continue
+		}
+	}
 	go n.WatchEvent()
 }
 

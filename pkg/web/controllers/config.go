@@ -80,6 +80,9 @@ type DefaultConfig struct {
 	IsPortscan         bool   `json:"portscan" form:"portscan"`
 	IsWhois            bool   `json:"whois" form:"whois"`
 	IsICP              bool   `json:"icp" form:"icp"`
+	// proxy
+	IsProxyEnable bool   `json:"proxyEnable" form:"proxyEnable"`
+	ProxyList     string `json:"proxyList" form:"proxyList"`
 }
 
 func (c *ConfigController) IndexAction() {
@@ -110,6 +113,7 @@ func (c *ConfigController) LoadDefaultConfigAction() {
 	apiConfig := conf.GlobalWorkerConfig().API
 	onlineapi := conf.GlobalWorkerConfig().OnlineAPI
 	domainscan := conf.GlobalWorkerConfig().Domainscan
+	proxy := conf.GlobalWorkerConfig().Proxy
 	data := DefaultConfig{
 		CmdBin: portscan.Cmdbin,
 		Port:   portscan.Port,
@@ -150,6 +154,8 @@ func (c *ConfigController) LoadDefaultConfigAction() {
 		IsQuake:          onlineapi.IsQuake,
 		SearchPageSize:   apiConfig.SearchPageSize,
 		SearchLimitCount: apiConfig.SearchLimitCount,
+		//
+		ProxyList: strings.Join(proxy.Host, "\n"),
 	}
 	if fileContent, err1 := os.ReadFile(filepath.Join(conf.GetRootPath(), "version.txt")); err1 == nil {
 		data.Version = strings.TrimSpace(string(fileContent))
@@ -457,6 +463,42 @@ func (c *ConfigController) SaveFingerprintAction() {
 	c.SucceededStatus("保存配置成功")
 }
 
+// SaveWorkerProxyAction 保存worker代理设置
+func (c *ConfigController) SaveWorkerProxyAction() {
+	defer c.ServeJSON()
+	if c.CheckMultiAccessRequest([]RequestRole{SuperAdmin, Admin}, false) == false {
+		c.FailedStatus("当前用户权限不允许！")
+		return
+	}
+
+	data := DefaultConfig{}
+	err := c.ParseForm(&data)
+	if err != nil {
+		c.FailedStatus(err.Error())
+		return
+	}
+	err = conf.GlobalWorkerConfig().ReloadConfig()
+	if err != nil {
+		logging.RuntimeLog.Error("read config file error:", err)
+		c.FailedStatus(err.Error())
+		return
+	}
+	var hostList []string
+	for _, line := range strings.Split(data.ProxyList, "\n") {
+		host := strings.TrimSpace(line)
+		if host != "" {
+			hostList = append(hostList, host)
+		}
+	}
+	conf.GlobalWorkerConfig().Proxy.Host = hostList
+	err = conf.GlobalWorkerConfig().WriteConfig()
+	if err != nil {
+		logging.RuntimeLog.Error("save config file error:", err)
+		c.FailedStatus(err.Error())
+	}
+	c.SucceededStatus("保存配置成功")
+}
+
 // SaveDomainscanAction 保存默认域名任务的设置
 func (c *ConfigController) SaveDomainscanAction() {
 	defer c.ServeJSON()
@@ -521,6 +563,8 @@ func (c *ConfigController) SavePortscanAction() {
 	conf.GlobalWorkerConfig().Portscan.Cmdbin = "masscan"
 	if cmdbin == "nmap" {
 		conf.GlobalWorkerConfig().Portscan.Cmdbin = "nmap"
+	} else if cmdbin == "gogo" {
+		conf.GlobalWorkerConfig().Portscan.Cmdbin = "gogo"
 	}
 	conf.GlobalWorkerConfig().Portscan.Port = port
 	conf.GlobalWorkerConfig().Portscan.Rate = rate

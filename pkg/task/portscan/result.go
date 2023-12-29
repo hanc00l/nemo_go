@@ -32,6 +32,7 @@ type Config struct {
 	IsLoadOpenedPort bool   `json:"loadOpenedPort"`
 	IsPortscan       bool   `json:"isPortscan"`
 	WorkspaceId      int    `json:"workspaceId"`
+	IsProxy          bool   `json:"proxy"`
 }
 
 // PortAttrResult 端口属性结果

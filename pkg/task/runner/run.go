@@ -46,21 +46,21 @@ func StartPortScanTask(req PortscanRequestParam, mainTaskId string, workspaceId 
 			}
 			// FOFA
 			if req.IsFofa {
-				if taskId, err = doOnlineAPISearch(workspaceId, mainTaskId, "fofa", t, &req.OrgId, req.IsIPLocation, req.IsHttpx, req.IsFingerprintHub, req.IsScreenshot, req.IsIconHash, req.IsFingerprintx, req.IsIgnoreCDN, req.IsIgnoreOutofChina); err != nil {
+				if taskId, err = doOnlineAPISearch(workspaceId, mainTaskId, "fofa", t, &req.OrgId, req.IsIPLocation, req.IsHttpx, req.IsFingerprintHub, req.IsScreenshot, req.IsIconHash, req.IsFingerprintx, req.IsIgnoreCDN, req.IsIgnoreOutofChina, req.IsProxy); err != nil {
 					logging.RuntimeLog.Error(err)
 					return
 				}
 			}
 			// Quake
 			if req.IsQuake {
-				if taskId, err = doOnlineAPISearch(workspaceId, mainTaskId, "quake", t, &req.OrgId, req.IsIPLocation, req.IsHttpx, req.IsFingerprintHub, req.IsScreenshot, req.IsIconHash, req.IsFingerprintx, req.IsIgnoreCDN, req.IsIgnoreOutofChina); err != nil {
+				if taskId, err = doOnlineAPISearch(workspaceId, mainTaskId, "quake", t, &req.OrgId, req.IsIPLocation, req.IsHttpx, req.IsFingerprintHub, req.IsScreenshot, req.IsIconHash, req.IsFingerprintx, req.IsIgnoreCDN, req.IsIgnoreOutofChina, req.IsProxy); err != nil {
 					logging.RuntimeLog.Error(err)
 					return
 				}
 			}
 			// Hunter
 			if req.IsHunter {
-				if taskId, err = doOnlineAPISearch(workspaceId, mainTaskId, "hunter", t, &req.OrgId, req.IsIPLocation, req.IsHttpx, req.IsFingerprintHub, req.IsScreenshot, req.IsIconHash, req.IsFingerprintx, req.IsIgnoreCDN, req.IsIgnoreOutofChina); err != nil {
+				if taskId, err = doOnlineAPISearch(workspaceId, mainTaskId, "hunter", t, &req.OrgId, req.IsIPLocation, req.IsHttpx, req.IsFingerprintHub, req.IsScreenshot, req.IsIconHash, req.IsFingerprintx, req.IsIgnoreCDN, req.IsIgnoreOutofChina, req.IsProxy); err != nil {
 					logging.RuntimeLog.Error(err)
 					return
 				}
@@ -145,19 +145,19 @@ func StartDomainScanTask(req DomainscanRequestParam, mainTaskId string, workspac
 			}
 		}
 		if req.IsFofa {
-			if taskId, err = doOnlineAPISearch(workspaceId, mainTaskId, "fofa", t, &req.OrgId, true, req.IsHttpx, req.IsFingerprintHub, req.IsScreenshot, req.IsIconHash, req.IsFingerprintx, req.IsIgnoreCDN, req.IsIgnoreOutofChina); err != nil {
+			if taskId, err = doOnlineAPISearch(workspaceId, mainTaskId, "fofa", t, &req.OrgId, true, req.IsHttpx, req.IsFingerprintHub, req.IsScreenshot, req.IsIconHash, req.IsFingerprintx, req.IsIgnoreCDN, req.IsIgnoreOutofChina, req.IsProxy); err != nil {
 				logging.RuntimeLog.Error(err)
 				return
 			}
 		}
 		if req.IsQuake {
-			if taskId, err = doOnlineAPISearch(workspaceId, mainTaskId, "quake", t, &req.OrgId, true, req.IsHttpx, req.IsFingerprintHub, req.IsScreenshot, req.IsIconHash, req.IsFingerprintx, req.IsIgnoreCDN, req.IsIgnoreOutofChina); err != nil {
+			if taskId, err = doOnlineAPISearch(workspaceId, mainTaskId, "quake", t, &req.OrgId, true, req.IsHttpx, req.IsFingerprintHub, req.IsScreenshot, req.IsIconHash, req.IsFingerprintx, req.IsIgnoreCDN, req.IsIgnoreOutofChina, req.IsProxy); err != nil {
 				logging.RuntimeLog.Error(err)
 				return
 			}
 		}
 		if req.IsHunter {
-			if taskId, err = doOnlineAPISearch(workspaceId, mainTaskId, "hunter", t, &req.OrgId, true, req.IsHttpx, req.IsFingerprintHub, req.IsScreenshot, req.IsIconHash, req.IsFingerprintx, req.IsIgnoreCDN, req.IsIgnoreOutofChina); err != nil {
+			if taskId, err = doOnlineAPISearch(workspaceId, mainTaskId, "hunter", t, &req.OrgId, true, req.IsHttpx, req.IsFingerprintHub, req.IsScreenshot, req.IsIconHash, req.IsFingerprintx, req.IsIgnoreCDN, req.IsIgnoreOutofChina, req.IsProxy); err != nil {
 				logging.RuntimeLog.Error(err)
 				return
 			}
@@ -187,7 +187,7 @@ func StartPocScanTask(req PocscanRequestParam, mainTaskId string, workspaceId in
 		}
 	}
 	if req.IsXrayVerify && req.XrayPocFile != "" {
-		config := pocscan.Config{Target: strings.Join(targetList, ","), PocFile: req.XrayPocFile, CmdBin: "xray", IsLoadOpenedPort: req.IsLoadOpenedPort, WorkspaceId: workspaceId}
+		config := pocscan.Config{Target: strings.Join(targetList, ","), PocFile: req.XrayPocFile, CmdBin: "xray", IsLoadOpenedPort: req.IsLoadOpenedPort, WorkspaceId: workspaceId, IsProxy: req.IsProxy}
 		configJSON, _ := json.Marshal(config)
 		taskId, err = serverapi.NewRunTask("xray", string(configJSON), mainTaskId, "")
 		if err != nil {
@@ -196,7 +196,7 @@ func StartPocScanTask(req PocscanRequestParam, mainTaskId string, workspaceId in
 		}
 	}
 	if req.IsNucleiVerify && req.NucleiPocFile != "" {
-		config := pocscan.Config{Target: strings.Join(targetList, ","), PocFile: req.NucleiPocFile, CmdBin: "nuclei", IsLoadOpenedPort: req.IsLoadOpenedPort, WorkspaceId: workspaceId}
+		config := pocscan.Config{Target: strings.Join(targetList, ","), PocFile: req.NucleiPocFile, CmdBin: "nuclei", IsLoadOpenedPort: req.IsLoadOpenedPort, WorkspaceId: workspaceId, IsProxy: req.IsProxy}
 		configJSON, _ := json.Marshal(config)
 		taskId, err = serverapi.NewRunTask("nuclei", string(configJSON), mainTaskId, "")
 		if err != nil {
@@ -204,17 +204,8 @@ func StartPocScanTask(req PocscanRequestParam, mainTaskId string, workspaceId in
 			return
 		}
 	}
-	if req.IsDirsearch && req.DirsearchExtName != "" {
-		config := pocscan.Config{Target: strings.Join(targetList, ","), PocFile: req.DirsearchExtName, CmdBin: "dirsearch", IsLoadOpenedPort: req.IsLoadOpenedPort, WorkspaceId: workspaceId}
-		configJSON, _ := json.Marshal(config)
-		taskId, err = serverapi.NewRunTask("dirsearch", string(configJSON), mainTaskId, "")
-		if err != nil {
-			logging.RuntimeLog.Error(err)
-			return
-		}
-	}
 	if req.IsGobyVerify {
-		config := pocscan.Config{Target: strings.Join(targetList, ","), CmdBin: "goby", IsLoadOpenedPort: req.IsLoadOpenedPort, WorkspaceId: workspaceId}
+		config := pocscan.Config{Target: strings.Join(targetList, ","), CmdBin: "goby", IsLoadOpenedPort: req.IsLoadOpenedPort, WorkspaceId: workspaceId, IsProxy: req.IsProxy}
 		configJSON, _ := json.Marshal(config)
 		taskId, err = serverapi.NewRunTask("goby", string(configJSON), mainTaskId, "")
 		if err != nil {
@@ -236,6 +227,7 @@ func StartXOnlineAPIKeywordTask(req XScanRequestParam, mainTaskId string, worksp
 		NucleiPocFile: req.NucleiPocFile,
 		IsGobyPoc:     req.IsGobyPocscan,
 		WorkspaceId:   workspaceId,
+		IsProxy:       req.IsProxy,
 	}
 	// config.OrgId 为int，默认为0
 	// db.Organization.OrgId为指针，默认nil
@@ -275,6 +267,7 @@ func StartXOnlineAPIKeywordCustomTask(req XScanRequestParam, mainTaskId string, 
 		NucleiPocFile: req.NucleiPocFile,
 		IsGobyPoc:     req.IsGobyPocscan,
 		WorkspaceId:   workspaceId,
+		IsProxy:       req.IsProxy,
 	}
 	// config.OrgId 为int，默认为0
 	// db.Organization.OrgId为指针，默认nil
@@ -322,6 +315,7 @@ func StartXDomainScanTask(req XScanRequestParam, mainTaskId string, workspaceId 
 		IsGobyPoc:     req.IsGobyPocscan,
 		//
 		WorkspaceId: workspaceId,
+		IsProxy:     req.IsProxy,
 	}
 	// config.OrgId 为int，默认为0
 	// db.Organization.OrgId为指针，默认nil
@@ -438,6 +432,8 @@ func StartXPortScanTask(req XScanRequestParam, mainTaskId string, workspaceId in
 		IsGobyPoc:     req.IsGobyPocscan,
 		NucleiPocFile: req.NucleiPocFile,
 		WorkspaceId:   workspaceId,
+		//
+		IsProxy: req.IsProxy,
 	}
 	// config.OrgId 为int，默认为0
 	// db.Organization.OrgId为指针，默认nil
@@ -518,6 +514,7 @@ func StartXOrgScanTask(req XScanRequestParam, mainTaskId string, workspaceId int
 		IsGobyPoc:     req.IsGobyPocscan,
 		//
 		WorkspaceId: workspaceId,
+		IsProxy:     req.IsProxy,
 	}
 	configJSON, _ := json.Marshal(config)
 	taskId, err = serverapi.NewRunTask("xorgscan", string(configJSON), mainTaskId, "")
@@ -548,6 +545,7 @@ func doPortscan(workspaceId int, mainTaskId string, target string, port string, 
 		IsPortscan:       req.IsPortScan,
 		IsLoadOpenedPort: req.IsLoadOpenedPort,
 		WorkspaceId:      workspaceId,
+		IsProxy:          req.IsProxy,
 	}
 	if req.CmdBin == "" {
 		config.CmdBin = conf.GlobalWorkerConfig().Portscan.Cmdbin
@@ -597,9 +595,12 @@ func doBatchScan(workspaceId int, mainTaskId string, target string, port string,
 		IsFingerprintx:   req.IsFingerprintx,
 		CmdBin:           "masscan",
 		WorkspaceId:      workspaceId,
+		IsProxy:          req.IsProxy,
 	}
 	if req.CmdBin == "nmap" {
 		config.CmdBin = "nmap"
+	} else if req.CmdBin == "gogo" {
+		config.CmdBin = "gogo"
 	}
 	if config.Port == "" {
 		config.Port = "80,443,8080|" + conf.GlobalWorkerConfig().Portscan.Port
@@ -645,6 +646,7 @@ func doDomainscan(workspaceId int, mainTaskId string, target string, req Domains
 		IsFingerprintx:     req.IsFingerprintx,
 		PortTaskMode:       req.PortTaskMode,
 		WorkspaceId:        workspaceId,
+		IsProxy:            req.IsProxy,
 	}
 	// config.OrgId 为int，默认为0
 	// db.Organization.OrgId为指针，默认nil
@@ -665,7 +667,7 @@ func doDomainscan(workspaceId int, mainTaskId string, target string, req Domains
 }
 
 // doOnlineAPISearch Fofa,hunter,quaker的查询
-func doOnlineAPISearch(workspaceId int, mainTaskId string, apiName string, target string, orgId *int, isIplocation, isHttp, isFingerprintHub, isScreenshot, isIconHash, isFingerprintx, isIgnoreCDN, isIgnorOutofChina bool) (taskId string, err error) {
+func doOnlineAPISearch(workspaceId int, mainTaskId string, apiName string, target string, orgId *int, isIplocation, isHttp, isFingerprintHub, isScreenshot, isIconHash, isFingerprintx, isIgnoreCDN, isIgnorOutofChina, isProxy bool) (taskId string, err error) {
 	config := onlineapi.OnlineAPIConfig{
 		Target:             target,
 		OrgId:              orgId,
@@ -678,6 +680,7 @@ func doOnlineAPISearch(workspaceId int, mainTaskId string, apiName string, targe
 		IsIgnoreCDN:        isIgnoreCDN,
 		IsIgnoreOutofChina: isIgnorOutofChina,
 		WorkspaceId:        workspaceId,
+		IsProxy:            isProxy,
 	}
 	// config.OrgId 为int，默认为0
 	// db.Organization.OrgId为指针，默认nil

@@ -2,10 +2,12 @@ package utils
 
 import (
 	"crypto/tls"
-	"errors"
 	"fmt"
+	"github.com/hanc00l/nemo_go/pkg/conf"
+	"github.com/hanc00l/nemo_go/pkg/logging"
 	"golang.org/x/net/proxy"
 	"net"
+	"net/http"
 	"net/url"
 	"regexp"
 	"strconv"
@@ -105,78 +107,41 @@ func in(target string, strArray []string) bool {
 	return false
 }
 
-func WrapperTcpWithTimeout(network, address string, timeout time.Duration) (net.Conn, error) {
+func WrapperTCP(network, address string, timeout time.Duration) (net.Conn, error) {
 	d := &net.Dialer{Timeout: timeout}
-	return WrapperTCP(network, address, d)
+	return WrapperTCPWithSocks5(network, address, d)
 }
 
-func WrapperTCP(network, address string, forward *net.Dialer) (net.Conn, error) {
-	//get conn
-	var conn net.Conn
-	if Socks5Proxy == "" {
-		var err error
-		conn, err = forward.Dial(network, address)
-		if err != nil {
-			return nil, err
-		}
-	} else {
-		dailer, err := Socks5Dailer(forward)
-		if err != nil {
-			return nil, err
-		}
-		conn, err = dailer.Dial(network, address)
-		if err != nil {
-			return nil, err
+func WrapperTCPWithSocks5(network, address string, forward *net.Dialer) (net.Conn, error) {
+	if proxyServer := conf.GetProxyConfig(); proxyServer != "" {
+		uri, err := url.Parse(proxyServer)
+		if err == nil {
+			dial, err := proxy.FromURL(uri, forward)
+			if err != nil {
+				return nil, err
+			}
+			conn, err := dial.Dial(network, address)
+			if err != nil {
+				return nil, err
+			}
+			return conn, nil
 		}
 	}
-	return conn, nil
-
-}
-
-func Socks5Dailer(forward *net.Dialer) (proxy.Dialer, error) {
-	u, err := url.Parse(Socks5Proxy)
-	if err != nil {
-		return nil, err
-	}
-	if strings.ToLower(u.Scheme) != "socks5" {
-		return nil, errors.New("Only support socks5")
-	}
-	address := u.Host
-	var auth proxy.Auth
-	var dailer proxy.Dialer
-	if u.User.String() != "" {
-		auth = proxy.Auth{}
-		auth.User = u.User.Username()
-		password, _ := u.User.Password()
-		auth.Password = password
-		dailer, err = proxy.SOCKS5("tcp", address, &auth, forward)
-	} else {
-		dailer, err = proxy.SOCKS5("tcp", address, nil, forward)
-	}
-
-	if err != nil {
-		return nil, err
-	}
-	return dailer, nil
+	return forward.Dial(network, address)
 }
 
 // GetProtocol 检测URL协议
 func GetProtocol(host string, Timeout int64) (protocol string) {
 	protocol = "http"
-	//如果端口是80或443,跳过Protocol判断
-	//if strings.HasSuffix(host, ":80") || !strings.Contains(host, ":") {
-	//	return
-	//} else
 	if strings.HasSuffix(host, ":443") {
 		protocol = "https"
 		return
 	}
-
-	socksconn, err := WrapperTcpWithTimeout("tcp", host, time.Duration(Timeout)*time.Second)
+	tcpConn, err := WrapperTCP("tcp", host, time.Duration(Timeout)*time.Second)
 	if err != nil {
 		return
 	}
-	conn := tls.Client(socksconn, &tls.Config{InsecureSkipVerify: true})
+	conn := tls.Client(tcpConn, &tls.Config{InsecureSkipVerify: true})
 	defer func() {
 		if conn != nil {
 			defer func() {
@@ -256,4 +221,34 @@ func FormatHostUrl(protocol, host string, port int) string {
 	} else {
 		return hostPort
 	}
+}
+
+// GetProxyHttpClient 获取代理的http client
+func GetProxyHttpClient(isProxy bool) *http.Client {
+	var transport *http.Transport
+	transport = &http.Transport{
+		TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
+	}
+	if isProxy {
+		if proxy := conf.GetProxyConfig(); proxy != "" {
+			proxyURL, parseErr := url.Parse(proxy)
+			if parseErr != nil {
+				logging.RuntimeLog.Warningf("proxy config fail:%v,skip proxy!", parseErr)
+				logging.CLILog.Warningf("proxy config fail:%v,skip proxy!", parseErr)
+			} else {
+				transport = &http.Transport{
+					Proxy:           http.ProxyURL(proxyURL),
+					TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
+				}
+			}
+		} else {
+			logging.RuntimeLog.Warning("get proxy config fail or disabled by worker,skip proxy!")
+			logging.CLILog.Warning("get proxy config fail or disabled by worker,skip proxy!")
+		}
+	}
+	httpClient := &http.Client{
+		Transport: transport,
+		Timeout:   3 * time.Second,
+	}
+	return httpClient
 }

@@ -23,20 +23,21 @@
                             <select class="form-control" id="select_cmdbin">
                                 <option value="masscan">masscan</option>
                                 <option value="nmap">nmap</option>
+                                <option value="gogo">gogo（支持socks5代理）</option>
                             </select>
                             <label class="col-form-label" for="input_port">
                                 <b>默认扫描端口:</b>（支持Nmap格式的端口列表）
                             </label>
                             <input class="form-control" id="input_port" type="text"
                                    placeholder="--top-ports 1000（支持Nmap格式的端口列表）" value="">
-                            <label for="select_tech"><b>NMAP探测技术</b></label>
+                            <label for="select_tech"><b>探测技术</b></label>
                             <select class="form-control" id="select_tech">
                                 <option value="-sS">-sS</option>
                                 <option value="-sT">-sT</option>
                                 <option value="-sV">-sV</option>
                             </select>
                             <label for="input_rate"><b>扫描速度</b></label>
-                            <input class="form-control" id="input_rate" type="text" placeholder="3000（默认）"
+                            <input class="form-control" id="input_rate" type="text" placeholder="1000（默认）"
                                    value="">
                         </div>
                         <div class="form-check form-check-inline">
@@ -161,23 +162,20 @@
                 </div>
             </div>
             <div class="tile">
-                <h3 class="tile-title">任务切分设置</h3>
+                <h3 class="tile-title">Worker代理设置</h3>
                 <div class="tile-body">
                     <form>
+                        <small class="form-text text-muted">Worker支持代理的技术与工具有：gogo、域名被动收集、域名爬虫、指纹识别、在线资产API接口、Nuclei；多个代理分行设置、随机选取；目前只支持socks5代理。</small>
+                        <small class="form-text text-muted">由于chrome不支持带验证的socks5代理，因此在127.0.0.1:5010进行代理转发到设置的代理服务器中。</small>
+                        <small class="form-text text-muted">Worker的启动参数-np可关闭代理的使用和本地转发。</small>
+                        <br/>
                         <div class="form-group">
-                            <label class="col-form-label" for="input_ipslicenumber">
-                                <b>IP切分数量</b>
-                            </label>
-                            <input class="form-control" id="input_ipslicenumber" type="text" value="">
-                            <label class="col-form-label" for="input_portslicenumber">
-                                <b>端口切分数量</b>
-                            </label>
-                            <input class="form-control" id="input_portslicenumber" type="text" value="">
+                            <textarea class="form-control" id="text_proxy_list" rows="4"></textarea>
                         </div>
                     </form>
                 </div>
                 <div class="tile-footer">
-                    <button class="btn btn-primary" type="button" id="buttonSaveTaskSlice"><i
+                    <button class="btn btn-primary" type="button" id="buttonSaveWorkerProxy"><i
                             class="fa fa-fw fa-lg fa-check-circle"></i>保存设置
                     </button>&nbsp;&nbsp;&nbsp;
                 </div>
@@ -321,6 +319,29 @@
                     </button>&nbsp;&nbsp;&nbsp;
                 </div>
             </div>
+            <div class="tile">
+                <h3 class="tile-title">任务切分设置</h3>
+                <div class="tile-body">
+                    <form>
+                        <div class="form-group">
+                            <label class="col-form-label" for="input_ipslicenumber">
+                                <b>IP切分数量</b>
+                            </label>
+                            <input class="form-control" id="input_ipslicenumber" type="text" value="">
+                            <label class="col-form-label" for="input_portslicenumber">
+                                <b>端口切分数量</b>
+                            </label>
+                            <input class="form-control" id="input_portslicenumber" type="text" value="">
+                        </div>
+                    </form>
+                </div>
+                <div class="tile-footer">
+                    <button class="btn btn-primary" type="button" id="buttonSaveTaskSlice"><i
+                            class="fa fa-fw fa-lg fa-check-circle"></i>保存设置
+                    </button>&nbsp;&nbsp;&nbsp;
+                </div>
+            </div>
+
             {{ end }}
             <div class="tile">
                 <h3 class="tile-title">修改登录密码</h3>

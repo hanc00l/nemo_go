@@ -28,6 +28,7 @@ func TestHttpxInvode_DoHttpxAndFingerPrint2(t *testing.T) {
 	v.ResultDomainScan = &domainscan.Result{
 		DomainResult: make(map[string]*domainscan.DomainResult),
 	}
+	v.IsProxy = true
 	v.ResultDomainScan.SetDomain("www.163.com")
 
 	v.Do()

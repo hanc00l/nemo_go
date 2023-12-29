@@ -24,6 +24,7 @@ type Goby struct {
 
 // goby服务端部署：
 // goby-cmd -mode api -bind 127.0.0.1:8361 -apiauth goby:goby
+// goby如果使用代理，需在命令行中指定参数-proxy，如：-proxy socks5://127.0.0.1:1080
 
 // GobyStartScanRequest 扫描任务请求参数
 type GobyStartScanRequest struct {

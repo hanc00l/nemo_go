@@ -27,6 +27,7 @@ type Config struct {
 	CmdBin           string `json:"cmdBin"`
 	IsLoadOpenedPort bool   `json:"loadOpenedPort"`
 	WorkspaceId      int    `json:"workspaceId"`
+	IsProxy          bool   `json:"proxy"`
 }
 
 type Result struct {

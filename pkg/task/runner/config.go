@@ -26,6 +26,7 @@ type PortscanRequestParam struct {
 	IsLoadOpenedPort   bool   `form:"load_opened_port"`
 	IsIgnoreOutofChina bool   `form:"ignoreoutofchina"`
 	IsIgnoreCDN        bool   `form:"ignorecdn"`
+	IsProxy            bool   `form:"proxy"`
 }
 
 type DomainscanRequestParam struct {
@@ -54,6 +55,7 @@ type DomainscanRequestParam struct {
 	TaskCronComment    string `form:"croncomment" json:"-"`
 	IsIgnoreOutofChina bool   `form:"ignoreoutofchina"`
 	IsIgnoreCDN        bool   `form:"ignorecdn"`
+	IsProxy            bool   `form:"proxy"`
 }
 
 type PocscanRequestParam struct {
@@ -63,12 +65,11 @@ type PocscanRequestParam struct {
 	IsNucleiVerify   bool   `form:"nucleiverify"`
 	NucleiPocFile    string `form:"nuclei_poc_file"`
 	IsGobyVerify     bool   `form:"gobyverify"`
-	IsDirsearch      bool   `form:"dirsearch"`
-	DirsearchExtName string `form:"ext"`
 	IsLoadOpenedPort bool   `form:"load_opened_port"`
 	IsTaskCron       bool   `form:"taskcron" json:"-"`
 	TaskCronRule     string `form:"cronrule" json:"-"`
 	TaskCronComment  string `form:"croncomment" json:"-"`
+	IsProxy          bool   `form:"proxy"`
 }
 
 type XScanRequestParam struct {
@@ -89,6 +90,7 @@ type XScanRequestParam struct {
 	IsTaskCron      bool   `form:"taskcron" json:"-"`
 	TaskCronRule    string `form:"cronrule" json:"-"`
 	TaskCronComment string `form:"croncomment" json:"-"`
+	IsProxy         bool   `form:"proxy"`
 }
 
 type taskKeySearchParam struct {

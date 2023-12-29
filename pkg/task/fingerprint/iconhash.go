@@ -22,6 +22,9 @@ import (
 	"sync"
 )
 
+// besticon方式已废弃
+// 目前采用httpx方式获取icon路径，通过golang以HTTP方式获取icon，然后计算icon的hash值
+
 type IconHash struct {
 	ResultPortScan     *portscan.Result
 	ResultDomainScan   *domainscan.Result

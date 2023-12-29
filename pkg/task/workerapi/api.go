@@ -30,7 +30,6 @@ var taskMaps = map[string]interface{}{
 	"quake":             Quake,
 	"hunter":            Hunter,
 	"xray":              PocScan,
-	"dirsearch":         PocScan,
 	"nuclei":            PocScan,
 	"goby":              PocScan,
 	"icpquery":          ICPQuery,

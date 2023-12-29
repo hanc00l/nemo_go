@@ -1,11 +1,14 @@
 package main
 
 import (
+	"encoding/json"
 	"flag"
 	"fmt"
 	"github.com/hanc00l/nemo_go/pkg/comm"
 	"github.com/hanc00l/nemo_go/pkg/conf"
+	"github.com/hanc00l/nemo_go/pkg/filesync"
 	"github.com/hanc00l/nemo_go/pkg/logging"
+	"github.com/hanc00l/nemo_go/pkg/socks5forward"
 	"github.com/hanc00l/nemo_go/pkg/task/ampq"
 	"github.com/hanc00l/nemo_go/pkg/task/fingerprint"
 	"github.com/hanc00l/nemo_go/pkg/task/workerapi"
@@ -14,6 +17,7 @@ import (
 	"github.com/shirou/gopsutil/v3/mem"
 	"os"
 	"os/signal"
+	"path/filepath"
 	"strconv"
 	"strings"
 	"syscall"
@@ -22,38 +26,26 @@ import (
 	"time"
 )
 
-type WorkerOption struct {
-	Concurrency       int
-	WorkerPerformance int
-	WorkerTopic       map[string]struct{}
-	TLSEnabled        bool
-	DefaultConfigFile string
-}
-
-func parseWorkerOptions() *WorkerOption {
-	option := &WorkerOption{
-		WorkerTopic: make(map[string]struct{}),
-	}
-
-	var workerRunTaskMode string
-	var taskWorkspaceGUID string
+func parseWorkerOptions() *comm.WorkerOption {
+	option := &comm.WorkerOption{WorkerTopic: make(map[string]struct{})}
+	
 	flag.IntVar(&option.Concurrency, "c", 3, "concurrent number of tasks")
 	flag.IntVar(&option.WorkerPerformance, "p", 0, "worker performance,default is autodetect (0:autodetect, 1:high, 2:normal)")
-	flag.StringVar(&workerRunTaskMode, "m", "0", "worker run task mode; 0: all, 1:active, 2:finger, 3:passive, 4:pocscan, 5:custom; run multiple mode separated by \",\"")
-	flag.StringVar(&taskWorkspaceGUID, "w", "", "workspace guid for custom task; multiple workspace separated by \",\"")
+	flag.StringVar(&option.WorkerRunTaskMode, "m", "0", "worker run task mode; 0: all, 1:active, 2:finger, 3:passive, 4:pocscan, 5:custom; run multiple mode separated by \",\"")
+	flag.StringVar(&option.TaskWorkspaceGUID, "w", "", "workspace guid for custom task; multiple workspace separated by \",\"")
 	flag.BoolVar(&option.TLSEnabled, "tls", false, "use TLS for RPC and filesync")
+	flag.BoolVar(&option.NoProxy, "np", false, "disable proxy configuration,include socks5 proxy and socks5forward")
 	flag.StringVar(&option.DefaultConfigFile, "f", conf.WorkerDefaultConfigFile, "worker default config file")
 
 	flag.Parse()
 
-	if workerRunTaskMode == "0" {
+	if option.WorkerRunTaskMode == "0" {
 		option.WorkerTopic[ampq.TopicActive] = struct{}{}
 		option.WorkerTopic[ampq.TopicFinger] = struct{}{}
 		option.WorkerTopic[ampq.TopicPassive] = struct{}{}
 		option.WorkerTopic[ampq.TopicPocscan] = struct{}{}
-		option.Concurrency = 2
-	} else if workerRunTaskMode == "5" {
-		for _, workspaceGUID := range strings.Split(taskWorkspaceGUID, ",") {
+	} else if option.WorkerRunTaskMode == "5" {
+		for _, workspaceGUID := range strings.Split(option.TaskWorkspaceGUID, ",") {
 			guid := strings.TrimSpace(workspaceGUID)
 			// GUID的长度为36个字符
 			if len(guid) != 36 {
@@ -64,7 +56,7 @@ func parseWorkerOptions() *WorkerOption {
 			option.WorkerTopic[topicName] = struct{}{}
 		}
 	} else {
-		for _, mode := range strings.Split(workerRunTaskMode, ",") {
+		for _, mode := range strings.Split(option.WorkerRunTaskMode, ",") {
 			m, err := strconv.Atoi(mode)
 			if err != nil {
 				logging.CLILog.Error("error worker run task mode...")
@@ -98,6 +90,9 @@ func parseWorkerOptions() *WorkerOption {
 
 // keepAlive worker与server的心跳与同步
 func keepAlive() {
+	workerapi.WStatus.Lock()
+	workerapi.WStatus.WorkerRunOption, _ = json.Marshal(comm.WorkerRunOption)
+	workerapi.WStatus.Unlock()
 	time.Sleep(10 * time.Second)
 	for {
 		workerapi.WStatus.Lock()
@@ -106,7 +101,7 @@ func keepAlive() {
 			logging.CLILog.Error("keep alive fail")
 		}
 		workerapi.WStatus.Unlock()
-		time.Sleep(60 * time.Second)
+		time.Sleep(30 * time.Second)
 	}
 }
 
@@ -136,26 +131,65 @@ func setupCloseHandler() {
 	os.Exit(0)
 }
 
-func initWorkerStatus(option *WorkerOption) {
+func initWorkerStatus() {
 	workerapi.WStatus.WorkerName = comm.GetWorkerNameBySelf()
 	workerapi.WStatus.CreateTime = time.Now()
 	workerapi.WStatus.UpdateTime = time.Now()
-	workerapi.WStatus.WorkerTopics = utils.SetToString(option.WorkerTopic)
+	workerapi.WStatus.WorkerTopics = utils.SetToString(comm.WorkerRunOption.WorkerTopic)
 }
 
-func startWorker(option *WorkerOption) {
-	for mode := range option.WorkerTopic {
+func startWorker() {
+	for mode := range comm.WorkerRunOption.WorkerTopic {
 		go func(topicName string, concurrency int) {
 			err := workerapi.StartWorker(topicName, concurrency)
 			if err != nil {
 				logging.CLILog.Error(err.Error())
 				logging.RuntimeLog.Fatal(err.Error())
 			}
-		}(mode, option.Concurrency)
+		}(mode, comm.WorkerRunOption.Concurrency)
 		time.Sleep(1 * time.Second)
 	}
 }
 
+// startWorkerConfMonitor worker的conf文件有更新，reload配置文件到内存
+func startWorkerConfMonitor() {
+	rootPath, err := filepath.Abs(conf.GetRootPath())
+	if err != nil {
+		logging.RuntimeLog.Error(err)
+		logging.CLILog.Error(err)
+		return
+	}
+	w := filesync.NewNotifyFile()
+	w.WatchFile([]string{filepath.Join(rootPath, conf.WorkerDefaultConfigFile)})
+	for {
+		select {
+		case fileName := <-w.ChNeedWorkerSync:
+			logging.CLILog.Infof("reload config file:%s", fileName)
+			conf.WorkerReloadMutex.Lock()
+			conf.GlobalWorkerConfig().ReloadConfig()
+			conf.WorkerReloadMutex.Unlock()
+
+		}
+	}
+}
+
+// startSocks5Forward 启动socks5代理转发
+func startSocks5Forward() {
+	if !comm.WorkerRunOption.NoProxy {
+		localPort := 5010
+		chListenFail := make(chan struct{})
+		go func() {
+			for {
+				conf.Socks5ForwardAddr = fmt.Sprintf("127.0.0.1:%d", localPort)
+				go socks5forward.StartSocks5Forward(conf.Socks5ForwardAddr, chListenFail)
+				select {
+				case <-chListenFail:
+					localPort++
+				}
+			}
+		}()
+	}
+}
 func main() {
 	//pprof
 	//if conf.RunMode == conf.Debug {
@@ -163,20 +197,22 @@ func main() {
 	//		log.Println(http.ListenAndServe("localhost:6060", nil))
 	//	}()
 	//}
-	option := parseWorkerOptions()
-	if option == nil {
+	comm.WorkerRunOption = parseWorkerOptions()
+	if comm.WorkerRunOption == nil {
 		return
 	}
 
-	comm.TLSEnabled = option.TLSEnabled
-	go keepAlive()
-	go comm.StartSaveRuntimeLog(comm.GetWorkerNameBySelf())
-	checkWorkerPerformance(option.WorkerPerformance)
-	initWorkerStatus(option)
-
+	comm.TLSEnabled = comm.WorkerRunOption.TLSEnabled
+	conf.NoProxyByCmd = comm.WorkerRunOption.NoProxy
 	fingerprint.HttpxOutputDirectory = utils.GetTempPathDirName()
 	defer os.RemoveAll(fingerprint.HttpxOutputDirectory)
 
-	startWorker(option)
+	go keepAlive()
+	go comm.StartSaveRuntimeLog(comm.GetWorkerNameBySelf())
+	checkWorkerPerformance(comm.WorkerRunOption.WorkerPerformance)
+	initWorkerStatus()
+	go startWorkerConfMonitor()
+	startSocks5Forward()
+	startWorker()
 	setupCloseHandler()
 }

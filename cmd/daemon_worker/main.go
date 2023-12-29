@@ -11,21 +11,8 @@ import (
 	"syscall"
 )
 
-type WorkerDaemonOption struct {
-	Concurrency       int
-	WorkerPerformance int
-	NoFilesync        bool
-	WorkerRunTaskMode string
-	ManualSyncHost    string
-	ManualSyncPort    string
-	ManualSyncAuth    string
-	TaskWorkspaceGUID string
-	TLSEnabled        bool
-	DefaultConfigFile string
-}
-
-func parseDaemonWorkerOption() *WorkerDaemonOption {
-	option := &WorkerDaemonOption{}
+func parseDaemonWorkerOption() *comm.WorkerDaemonOption {
+	option := &comm.WorkerDaemonOption{}
 	if conf.RunMode == conf.Debug {
 		option.NoFilesync = true
 	}
@@ -37,6 +24,7 @@ func parseDaemonWorkerOption() *WorkerDaemonOption {
 	flag.StringVar(&option.ManualSyncPort, "mp", "", "manual file sync port,default is 5002")
 	flag.StringVar(&option.ManualSyncAuth, "ma", "", "manual file sync auth key")
 	flag.BoolVar(&option.NoFilesync, "nf", option.NoFilesync, "disable file sync")
+	flag.BoolVar(&option.NoProxy, "np", false, "disable proxy configuration,include socks5 proxy and socks5forward")
 	flag.BoolVar(&option.TLSEnabled, "tls", false, "use TLS for RPC and filesync")
 	flag.StringVar(&option.DefaultConfigFile, "f", conf.WorkerDefaultConfigFile, "worker default config file")
 	flag.Parse()
@@ -57,21 +45,21 @@ func setupCloseHandler() {
 }
 
 func main() {
-	option := parseDaemonWorkerOption()
-	if option == nil {
+	comm.DaemonRunOption = parseDaemonWorkerOption()
+	if comm.DaemonRunOption == nil {
 		return
 	}
-	conf.WorkerDefaultConfigFile = option.DefaultConfigFile
-	comm.TLSEnabled = option.TLSEnabled
-	filesync.TLSEnabled = option.TLSEnabled
 
-	if option.ManualSyncHost != "" && option.ManualSyncPort != "" && option.ManualSyncAuth != "" {
+	comm.TLSEnabled = comm.DaemonRunOption.TLSEnabled
+	filesync.TLSEnabled = comm.DaemonRunOption.TLSEnabled
+
+	if comm.DaemonRunOption.ManualSyncHost != "" && comm.DaemonRunOption.ManualSyncPort != "" && comm.DaemonRunOption.ManualSyncAuth != "" {
 		logging.RuntimeLog.Info("start onetime file sync...")
 		logging.CLILog.Info("start onetime file sync...")
-		filesync.WorkerStartupSync(option.ManualSyncHost, option.ManualSyncPort, option.ManualSyncAuth)
+		filesync.WorkerStartupSync(comm.DaemonRunOption.ManualSyncHost, comm.DaemonRunOption.ManualSyncPort, comm.DaemonRunOption.ManualSyncAuth)
 		return
 	}
 	go comm.StartSaveRuntimeLog(comm.GetWorkerNameBySelf())
 	go setupCloseHandler()
-	comm.StartWorkerDaemon(option.WorkerRunTaskMode, option.TaskWorkspaceGUID, option.Concurrency, option.WorkerPerformance, option.NoFilesync)
+	comm.StartWorkerDaemon()
 }
