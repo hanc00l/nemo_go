@@ -1,5 +1,18 @@
 # ChangeLog
 
+## v2.11.0
+
+2024-1-3
+
+### Update
+
+- worker支持socks5代理扫描；
+- 在web中可查看和管理worker的启动参数及运行负载情况；
+- 优化指纹获取方式；指纹获取不再调用observ_ward，开启通过httpx保存的reseponse信息被动匹配fingerprinthub的指纹；
+- 增加fingerprintx作为httpx的补充，用于获取非HTTP端口的指纹信息；
+- 增加对子任务的状态检查的判断，防止已完成任务重复执行；
+- 可通过启动参数指定worker配置文件；
+
 ## 2.10.3
 
 2023-11-13
