@@ -32,7 +32,6 @@ func init() {
 	web.CtrlGet("/dashboard", (*controllers.DashboardController).IndexAction)
 	web.CtrlPost("/dashboard", (*controllers.DashboardController).GetStatisticDataAction)
 	web.CtrlPost("/dashboard-task-info", (*controllers.DashboardController).GetTaskInfoAction)
-	web.CtrlPost("/worker-list", (*controllers.DashboardController).WorkerAliveListAction)
 	web.CtrlPost("/onlineuser-list", (*controllers.DashboardController).OnlineUserListAction)
 	web.CtrlPost("/dashboard-task-started-info", (*controllers.DashboardController).GetStartedTaskInfoAction)
 

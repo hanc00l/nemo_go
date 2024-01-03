@@ -1,8 +1,8 @@
 # Nemo安装手册
 
-## v1.2
+## v1.3
 
-2023-9-18
+2024-1-3
 
 
 Nemo分为**Server**端和**Worker**端两部份。Server提供Http访问、API接口、RPC接口、消息中间件服务以及文件同步接口。Worker是通过消息中间件从Worker接收任务并执行，通过RPC接口上传任务的结果，并通过文件同步接口接收Server的文件。
@@ -31,6 +31,7 @@ Nemo目前可运行在**x86-AMD**平台的MacOS、Linux及Windows平台，其它
 - 5000：Http，web界面
 - 5001：RPC接口，用于worker将任务结果保存到server
 - 5002：文件同步，在server与worker之间同步文件
+- 5010：本地socks5转发，用于chrome-headless支持带验证的socks5代理；如果该端口被占用，会自动递增1个可使用的端口
 - 5672：rabbitmq消息中间件监听端口，用于Nemo的异步和分布式任务执行
 
 如果启用API接口（需单独运行），会开启以下端口：
@@ -339,15 +340,20 @@ Server的Web（5000）、RPC（5001）及文件同步（5002）默认不使用TL
     	use TLS for RPC and filesync
   -w string
     	workspace guid for custom task; multiple workspace separated by ","
-  
+  -f string
+    	worker default config file (default "conf/worker.yml")  
+  -np
+    	disable proxy configuration,include socks5 proxy and socks5forward
 ```
-- -c参数：worker并发的任务数量，默认为3。
-- -mh、mp及ma参数：Server文件同步的host、port及authKey，如果同时指定这三个参数，将执行文件同步功能，从server同步文件到worker。
-- nf参数：指定参数则禁用文件同步功能。
-- -p参数：worker的的性能模式，默认为0；根据worker的性能模式（1：高性能，2：普通）不同，在任务的并发线程数会有所区别；参数为0则自动判断，判断规则为CPU>=4核、内存>=4G为高性能模式。
+- -c worker并发的任务数量，默认为3。
+- -mh、mp及ma Server文件同步的host、port及authKey，如果同时指定这三个参数，将执行文件同步功能，从server同步文件到worker。
+- -nf 禁用文件同步功能。
+- -p worker的的性能模式，默认为0；根据worker的性能模式（1：高性能，2：普通）不同，在任务的并发线程数会有所区别；参数为0则自动判断，判断规则为CPU>=4核、内存>=4G为高性能模式。
 - -m worker执行的任务类型
 - -w worker执行自定义任务（-m 5）时，自定义任务所在的工作空间GUID
 - -tls 启用TLS加密（server也必须使用-tls）
+- -f worker配置文件，默认为conf/worker.yml
+- -np 禁用socks5代理
 
 #### 2、Goby的服务端部署模式
 需在thirdparty/goby目录下运行：（Docker已自动运行）
@@ -430,7 +436,23 @@ Worker默认启动时参数为-m 0，将会执行所有类型（除custom）的�
 ![nemo_vps](./image/nemo_vps.png)
 
 
-## Worker使用Socks5代理
+## Worker使用自定义的socks5代理
+
+为提高Worker部署和扫描的灵活性，在v2.11版本后，Worker的部份任务功能支持sock5代理，包括：
+- gogo的端口扫描
+- 指纹获取
+- 在线API接口
+- 子域名任务被动收集（subfinder）和爬虫
+- Nuclei漏洞验证
+
+代理设置：Config-配置管理，支持同时配置多个socks5代理地址（地址格式为socks5://user:pass@host:port），多个地址将由worker每次任务时随机选择。
+
+由于获取网站截图时调用的chrome-headless不支持验证功能的socks5代理，因此worker在启动时默认在127.0.0.1:5010地址进行代理转发到设置的socks5地址。
+
+worker可通过命令行参数-np关闭代理功能。如果前端任务指定了代理扫描选项，但未配置socks5地址或worker关闭了代理功能，任务将会由不使用代理直接执行。
+
+
+## Worker使用全局Socks5代理
 
 在实战的高强度对抗中，使用代理可以降低IP被安设备BAN导致的信息收集不全。由于Nemo的特点是大量使用第三方组件，每个组件对代理的支持的方式和能力都不尽相同，因此建议通过第三方工具和技术，通过全局代理的方式来达到代理Worker的网络流量的目的。
 

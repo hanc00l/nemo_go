@@ -133,20 +133,6 @@ func (c *DashboardController) GetStartedTaskInfoAction() {
 	c.Data["json"] = tis
 }
 
-// WorkerAliveListAction 获取worker数据，用于dashboard列表显示
-func (c *DashboardController) WorkerAliveListAction() {
-	defer c.ServeJSON()
-
-	req := DatableRequestParam{}
-	err := c.ParseForm(&req)
-	if err != nil {
-		logging.RuntimeLog.Error(err)
-		logging.CLILog.Error(err)
-	}
-	resp := getWorkerAliveList(&req)
-	c.Data["json"] = resp
-}
-
 // OnlineUserListAction 获取在线用户数据，用于Dashboard表表显示
 func (c *DashboardController) OnlineUserListAction() {
 	defer c.ServeJSON()

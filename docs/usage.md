@@ -1,8 +1,8 @@
 # Nemo使用手册 
 
-## v1.1
+## v1.2
 
-2023-8-3
+2024-1-3
 
 ## 工作空间
 
@@ -32,6 +32,8 @@
 - 任务切分
 - 在线API
 - 任务消息通知Token
+- 自定义任务的工作空间GUID
+- 代理配置
 
 在Nemo的任务中，这些默认参数有些是Server生成任务时使用（任务切分、任务消息通知Token），有些是用于Worker任务执行时读取（具体可查看conf目录下server.yml和worker.yml）。
 
@@ -59,9 +61,10 @@
 
 ### 3、指纹获取
 - Httpx：调用httpx，获取web指纹
-- FingerprintHub：调用Observer_Ward，根据web_fingerprint_v3.json获取web指纹
+- FingerprintHub：根据web_fingerprint_v3.json获取web指纹(不再调用Observer_Ward)
 - Screenshot：调用chrome进行网页屏幕截图
 - IconHash：获取web的favicon
+- fingerprintx：调用fingerprintx获取非HTTP的端口指纹信息
 
 ### 4、任务切分
 在新建任务，如果选择任务的执行方式为根据IP切分、根据端口拆分或根据IP和端口拆分时，会根据设置的切分数量，将一个任务分成多个任务执行。
@@ -88,11 +91,23 @@ Nemo支持调用相关平台的API发送任务执行结果消息，目前支持�
 ### 7、自定义任务的工作空间GUID
 
 Nemo将任务分为5种类型，worker启动时通过参数-m指定worker执行的任务类型；对自定义的任务：-m 5，需要用-w参数指定任务关联的工作空间GUID（比如-w 1a0ca919-7960-4067-9981-9abcb4eaa735）。
-在Nemo的IP或Domain列表视图中，切换到第一步配置的工作空间，在新建任务或XScan任务后，只有启动命令为：-m 5 -w 1a0ca919-7960-4067-9981-9abcb4eaa735的worker才会收到任务并执行。
+在Nemo的IP或Domain列表视图中，切换到第一步配置的工作空间，配置自定义任务的工作空间，这些工作空间的任务将会被设置为自定义任务；在新建任务或XScan任务后，只有启动命令为：-m 5 -w 1a0ca919-7960-4067-9981-9abcb4eaa735的worker才会收到任务并执行。
 
 配置格式为：GUID 备注，可以每行配置一个配置多个如：
 1a0ca919-7960-4067-9981-9abcb4eaa735 172网段；
 
+### 8、代理配置
+
+为提高Worker部署和扫描的灵活性，在v2.11版本后，Worker的部份任务功能支持sock5代理，包括：
+- gogo的端口扫描
+- 指纹获取
+- 在线API接口
+- 子域名任务被动收集（subfinder）和爬虫
+- Nuclei漏洞验证
+
+支持同时配置多个socks5代理地址（地址格式为socks5://user:pass@host:port），多个地址将由worker每次任务时随机选择。
+由于获取网站截图时调用的chrome-headless不支持验证功能的socks5代理，因此worker在启动时默认在127.0.0.1:5010地址进行代理转发到设置的socks5地址。
+worker可通过命令行参数-np关闭代理功能。如果前端任务指定了代理扫描选项，但未配置socks5地址或worker关闭了代理功能，任务将会不使用代理直接执行。
 
 ## 自定义管理
 
@@ -428,9 +443,8 @@ Nemo内置了RED、YELLOW、BLUE、GREEN、GRAY及BLANK六种颜色，供团队�
 - XRay
 - Nuclei
 - Goby
-- Dirsearch
 
-Dirsearch是通过go代码集成；XRay和Nuclei是通过命令行的方式传递参数调用并解析结果文件；Goby需通过服务端部署的模式，通过API调用和解析结果。
+XRay和Nuclei是通过命令行的方式传递参数调用并解析结果文件；Goby需通过服务端部署的模式，通过API调用和解析结果。
 
 **POC使用与管理**
 
@@ -510,3 +524,14 @@ Nemo比较推荐采用分布式worker的使用方式。为了方便对worker的�
 从v2.10后，worker的RuntimeLog通过RPC的方式上传到Server并保存到数据库中，从v2.9版本升级需导入runtimelog.sql以创建数据库表。
 
 Nemo日志按从高到低分为Fatal、Error、Warning、Info、Debug及Trace六个级别，每条日常包含了来源Worker、产生日志的文件、函数及信息，重点需关注Error和Warning类。
+
+
+## Worker管理
+
+从v2.11后，支持对worker的任务执行情况、所在VPS的CPU/MEM资源使用率进行监控，同时可通过Server端动态修改Worker的启动参数；修改的启动参数由Daemon进程重启并传递到Worker执行。可修改的启动参数包括：
+- 任务并发数（-c）
+- 任务执行模式（-m）
+- Worker性能模式（-p）
+- 默认启动参数文件（-f）
+- 自定义任务的工作空间GUID（-w)
+- 关闭socks5代理功能（-np）

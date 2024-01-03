@@ -30,7 +30,7 @@ var NoProxyByCmd bool
 var Socks5ForwardAddr string
 var ServerDefaultConfigfile = "conf/server.yml"
 var WorkerDefaultConfigFile = "conf/worker.yml"
-var WorkerReloadMutex sync.Mutex // worker读配置文件同步锁
+var WorkerConfigReloadMutex sync.Mutex // worker读配置文件同步锁
 
 // RunMode 运行模式：正式运行请使用Release模式，Debug模式只用于开发调试过程
 var RunMode = Release
@@ -57,9 +57,9 @@ func GlobalWorkerConfig() *Worker {
 	if workerConfig == nil {
 		workerConfig = new(Worker)
 
-		WorkerReloadMutex.Lock()
+		WorkerConfigReloadMutex.Lock()
 		err := workerConfig.ReloadConfig()
-		WorkerReloadMutex.Unlock()
+		WorkerConfigReloadMutex.Unlock()
 
 		if err != nil {
 			fmt.Println("Load Worker config fail!")

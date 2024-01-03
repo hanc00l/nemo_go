@@ -28,7 +28,7 @@ import (
 
 func parseWorkerOptions() *comm.WorkerOption {
 	option := &comm.WorkerOption{WorkerTopic: make(map[string]struct{})}
-	
+
 	flag.IntVar(&option.Concurrency, "c", 3, "concurrent number of tasks")
 	flag.IntVar(&option.WorkerPerformance, "p", 0, "worker performance,default is autodetect (0:autodetect, 1:high, 2:normal)")
 	flag.StringVar(&option.WorkerRunTaskMode, "m", "0", "worker run task mode; 0: all, 1:active, 2:finger, 3:passive, 4:pocscan, 5:custom; run multiple mode separated by \",\"")
@@ -165,9 +165,9 @@ func startWorkerConfMonitor() {
 		select {
 		case fileName := <-w.ChNeedWorkerSync:
 			logging.CLILog.Infof("reload config file:%s", fileName)
-			conf.WorkerReloadMutex.Lock()
+			conf.WorkerConfigReloadMutex.Lock()
 			conf.GlobalWorkerConfig().ReloadConfig()
-			conf.WorkerReloadMutex.Unlock()
+			conf.WorkerConfigReloadMutex.Unlock()
 
 		}
 	}
