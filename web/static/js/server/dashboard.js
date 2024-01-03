@@ -97,11 +97,11 @@ $(function () {
 function get_count_data() {
     //异步获取任务统计信息
     $.post("/dashboard", function (data) {
-        $("#task_active").html(data['task_active']);
         $("#vulnerability_count").html(data['vulnerability_count']);
         $("#domain_count").html(data['domain_count']);
         $("#ip_count").html(data['ip_count']);
-        $('#worker_count').html(data['worker_count']);
+        $("#task_active").html("TASK:&nbsp;" + data['task_active']);
+        $('#worker_count').html("WORKER:&nbsp;" + data['worker_count']);
     });
 }
 

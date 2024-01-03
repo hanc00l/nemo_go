@@ -41,7 +41,7 @@
                                 <div class="modal-body ">
                                     <form class="form-horizontal" role="form">
                                         <div class="form-group">
-                                            <label for="select_concurrency">任务并发数</label>
+                                            <label for="select_concurrency"><strong>任务并发数</strong></label>
                                             <select class="form-control" id="select_concurrency">
                                                 <option value="1">1</option>
                                                 <option value="2">2</option>
@@ -49,26 +49,69 @@
                                                 <option value="4">4</option>
                                                 <option value="5">5</option>
                                             </select>
-                                            <label for="select_worker_run_task_mode">任务模式</label>
-                                            <select class="form-control" id="select_worker_run_task_mode">
-                                                <option value="0" selected>全部任务</option>
-                                                <option value="1">主动扫描</option>
-                                                <option value="2">指纹识别</option>
-                                                <option value="3">被动信息</option>
-                                                <option value="4">漏洞验证</option>
-                                                <option value="5">自定义任务</option>
-                                            </select>
-                                            <label for="select_worker_performance">工作性能</label>
+                                            <label><strong>任务模式</strong></label>
+                                            <br/>
+                                            <div class="form-check form-check-inline">
+                                                <label class="form-check-label"
+                                                       for="checkbox_task_mode_0">
+                                                    <input class="form-check-input"
+                                                           id="checkbox_task_mode_0" type="checkbox"
+                                                    >全部任务
+                                                </label>
+                                            </div>
+                                            <br/>
+                                            <div class="form-check form-check-inline">
+                                                <label class="form-check-label"
+                                                       for="checkbox_task_mode_1">
+                                                    <input class="form-check-input"
+                                                           id="checkbox_task_mode_1" type="checkbox"
+                                                    >主动扫描
+                                                </label>
+                                            </div>
+                                            <div class="form-check form-check-inline">
+                                                <label class="form-check-label"
+                                                       for="checkbox_task_mode_2">
+                                                    <input class="form-check-input"
+                                                           id="checkbox_task_mode_2" type="checkbox"
+                                                    >指纹识别
+                                                </label>
+                                            </div>
+                                            <div class="form-check form-check-inline">
+                                                <label class="form-check-label"
+                                                       for="checkbox_task_mode_3">
+                                                    <input class="form-check-input"
+                                                           id="checkbox_task_mode_3" type="checkbox"
+                                                    >被动搜集
+                                                </label>
+                                            </div>
+                                            <div class="form-check form-check-inline">
+                                                <label class="form-check-label"
+                                                       for="checkbox_task_mode_4">
+                                                    <input class="form-check-input"
+                                                           id="checkbox_task_mode_4" type="checkbox"
+                                                    >漏洞验证
+                                                </label>
+                                            </div>
+                                            <div class="form-check form-check-inline">
+                                                <label class="form-check-label"
+                                                       for="checkbox_task_mode_5">
+                                                    <input class="form-check-input"
+                                                           id="checkbox_task_mode_5" type="checkbox"
+                                                    >自定义任务
+                                                </label>
+                                            </div>
+                                            <br/>
+                                            <label for="select_worker_performance"><strong>工作性能</strong></label>
                                             <select class="form-control" id="select_worker_performance">
                                                 <option value="0" selected>自动选择</option>
                                                 <option value="1">高性能</option>
                                                 <option value="2">普通性能</option>
                                             </select>
-                                            <label for="input_default_config_file">配置文件
+                                            <label for="input_default_config_file"><strong>配置文件</strong>
                                             </label>
                                             <input class="form-control" id="input_default_config_file" type="text"
                                                    placeholder="conf/worker.yml" value="">
-                                            <label for="input_task_workspace_guid">自定义任务的工作空间GUID
+                                            <label for="input_task_workspace_guid"><strong>自定义任务的工作空间GUID</strong>
                                             </label>
                                             <input class="form-control" id="input_task_workspace_guid" type="text"
                                                    placeholder="工作空间GUID，多个以,分割" value="">

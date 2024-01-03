@@ -108,12 +108,29 @@ $(function () {
         $("#worker_table").DataTable().draw(true);
     });
     $("#buttonUpdate").click(function () {
+        let worker_run_task_mode = "";
+        if ($('#checkbox_task_mode_0').is(":checked")) {
+            worker_run_task_mode = "0"
+        } else {
+            let sep = "";
+            for (let i = 1; i <= 5; i++) {
+                if ($('#checkbox_task_mode_' + i).is(":checked")) {
+                    worker_run_task_mode += sep;
+                    worker_run_task_mode += i;
+                    sep = ","
+                }
+            }
+        }
+        if (worker_run_task_mode === "") {
+            alert("必须指定Worker的任务模式！")
+            return
+        }
         $.post("/worker-update",
             {
                 "worker_name": $('#input_worker_name').val(),
                 "concurrency": $('#select_concurrency').val(),
                 "worker_performance": $('#select_worker_performance').val(),
-                "worker_run_task_mode": $('#select_worker_run_task_mode').val(),
+                "worker_run_task_mode": worker_run_task_mode,
                 "task_workspace_guid": $('#input_task_workspace_guid').val(),
                 "default_config_file": $('#input_default_config_file').val(),
                 "no_proxy": $('#checkbox_no_proxy').is(":checked"),
@@ -226,7 +243,17 @@ function edit_option(worker_name, daemon_process) {
             if (e === "success") {
                 $('#select_concurrency').val(data['concurrency']);
                 $('#select_worker_performance').val(data['worker_performance']);
-                $('#select_worker_run_task_mode').val(data['worker_run_task_mode']);
+                for (let i = 0; i <= 5; i++) {
+                    $('#checkbox_task_mode_' + i).prop("checked", false);
+                }
+                data['worker_run_task_mode'].split(",").forEach(function (item) {
+                    if (item === "0") {
+                        $('#checkbox_task_mode_0').prop("checked", true);
+                        return
+                    } else {
+                        $('#checkbox_task_mode_' + item).prop("checked", true);
+                    }
+                });
                 $('#input_task_workspace_guid').val(data['task_workspace_guid']);
                 $('#input_default_config_file').val(data['default_config_file']);
                 $('#checkbox_no_proxy').prop("checked", data['no_proxy']);
