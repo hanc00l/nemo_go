@@ -21,8 +21,6 @@ tar -cvzf release/nemo_darwin_amd64.tar \
   --exclude=thirdparty/xray/xray_windows_amd64.exe \
   --exclude=thirdparty/nuclei/nuclei_linux_amd64 \
   --exclude=thirdparty/nuclei/nuclei_windows_amd64.exe \
-  --exclude=thirdparty/fingerprinthub/observer_ward_linux_amd64 \
-  --exclude=thirdparty/fingerprinthub/observer_ward_windows_amd64.exe \
   --exclude=thirdparty/subfinder/subfinder_windows_amd64.exe \
   --exclude=thirdparty/subfinder/subfinder_linux_amd64 \
   --exclude=thirdparty/httpx/httpx_windows_amd64.exe \
@@ -44,8 +42,6 @@ tar -cvzf release/nemo_linux_amd64.tar \
   --exclude=thirdparty/xray/xray_windows_amd64.exe \
   --exclude=thirdparty/nuclei/nuclei_darwin_amd64 \
   --exclude=thirdparty/nuclei/nuclei_windows_amd64.exe \
-  --exclude=thirdparty/fingerprinthub/observer_ward_darwin_amd64 \
-  --exclude=thirdparty/fingerprinthub/observer_ward_windows_amd64.exe \
   --exclude=thirdparty/subfinder/subfinder_windows_amd64.exe \
   --exclude=thirdparty/subfinder/subfinder_darwin_amd64 \
   --exclude=thirdparty/httpx/httpx_windows_amd64.exe \
@@ -67,8 +63,6 @@ tar -cvzf release/nemo_windows_amd64.tar \
   --exclude=thirdparty/xray/xray_linux_amd64 \
   --exclude=thirdparty/nuclei/nuclei_darwin_amd64 \
   --exclude=thirdparty/nuclei/nuclei_linux_amd64 \
-  --exclude=thirdparty/fingerprinthub/observer_ward_darwin_amd64 \
-  --exclude=thirdparty/fingerprinthub/observer_ward_linux_amd64 \
   --exclude=thirdparty/subfinder/subfinder_darwin_amd64 \
   --exclude=thirdparty/subfinder/subfinder_linux_amd64 \
   --exclude=thirdparty/httpx/httpx_darwin_amd64 \
@@ -89,8 +83,6 @@ tar -cvzf release/worker_linux_amd64.tar \
   --exclude=thirdparty/xray/xray_windows_amd64.exe \
   --exclude=thirdparty/nuclei/nuclei_darwin_amd64 \
   --exclude=thirdparty/nuclei/nuclei_windows_amd64.exe \
-  --exclude=thirdparty/fingerprinthub/observer_ward_darwin_amd64 \
-  --exclude=thirdparty/fingerprinthub/observer_ward_windows_amd64.exe \
   --exclude=thirdparty/subfinder/subfinder_windows_amd64.exe \
   --exclude=thirdparty/subfinder/subfinder_darwin_amd64 \
   --exclude=thirdparty/httpx/httpx_windows_amd64.exe \
@@ -112,8 +104,6 @@ tar -cvzf release/worker_darwin_amd64.tar \
   --exclude=thirdparty/xray/xray_windows_amd64.exe \
   --exclude=thirdparty/nuclei/nuclei_linux_amd64 \
   --exclude=thirdparty/nuclei/nuclei_windows_amd64.exe \
-  --exclude=thirdparty/fingerprinthub/observer_ward_linux_amd64 \
-  --exclude=thirdparty/fingerprinthub/observer_ward_windows_amd64.exe \
   --exclude=thirdparty/subfinder/subfinder_windows_amd64.exe \
   --exclude=thirdparty/subfinder/subfinder_linux_amd64 \
   --exclude=thirdparty/httpx/httpx_windows_amd64.exe \
@@ -135,8 +125,6 @@ tar -cvzf release/worker_windows_amd64.tar \
   --exclude=thirdparty/xray/xray_linux_amd64 \
   --exclude=thirdparty/nuclei/nuclei_darwin_amd64 \
   --exclude=thirdparty/nuclei/nuclei_linux_amd64 \
-  --exclude=thirdparty/fingerprinthub/observer_ward_darwin_amd64 \
-  --exclude=thirdparty/fingerprinthub/observer_ward_linux_amd64 \
   --exclude=thirdparty/subfinder/subfinder_darwin_amd64 \
   --exclude=thirdparty/subfinder/subfinder_linux_amd64 \
   --exclude=thirdparty/httpx/httpx_darwin_amd64 \
