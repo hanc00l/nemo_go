@@ -114,53 +114,102 @@ func (c *ConfigController) LoadDefaultConfigAction() {
 	onlineapi := conf.GlobalWorkerConfig().OnlineAPI
 	domainscan := conf.GlobalWorkerConfig().Domainscan
 	proxy := conf.GlobalWorkerConfig().Proxy
-	data := DefaultConfig{
-		CmdBin: portscan.Cmdbin,
-		Port:   portscan.Port,
-		Rate:   portscan.Rate,
-		Tech:   portscan.Tech,
-		IsPing: portscan.IsPing,
-		//
-		IpSliceNumber:   task.IpSliceNumber,
-		PortSliceNumber: task.PortSliceNumber,
-		//
-		IsHttpx:          fingerprint.IsHttpx,
-		IsScreenshot:     fingerprint.IsScreenshot,
-		IsFingerprintHub: fingerprint.IsFingerprintHub,
-		IsIconHash:       fingerprint.IsIconHash,
-		IsFingerprintx:   fingerprint.IsFingerprintx,
-		//
-		ServerChanToken: notifyToken["serverchan"].Token,
-		DingTalkToken:   notifyToken["dingtalk"].Token,
-		FeishuToken:     notifyToken["feishu"].Token,
-		//
-		FofaToken:   apiConfig.Fofa.Key,
-		HunterToken: apiConfig.Hunter.Key,
-		QuakeToken:  apiConfig.Quake.Key,
-		ChinazToken: apiConfig.ICP.Key,
-		//
-		Wordlist:           domainscan.Wordlist,
-		IsSubDomainFinder:  domainscan.IsSubDomainFinder,
-		IsSubDomainBrute:   domainscan.IsSubDomainBrute,
-		IsSubDomainCrawler: domainscan.IsSubdomainCrawler,
-		IsIgnoreCDN:        domainscan.IsIgnoreCDN,
-		IsIgnoreOutofChina: domainscan.IsIgnoreOutofChina,
-		IsPortscan:         domainscan.IsPortScan,
-		IsWhois:            domainscan.IsWhois,
-		IsICP:              domainscan.IsICP,
-		//onlineAPI:
-		IsFofa:           onlineapi.IsFofa,
-		IsHunter:         onlineapi.IsHunter,
-		IsQuake:          onlineapi.IsQuake,
-		SearchPageSize:   apiConfig.SearchPageSize,
-		SearchLimitCount: apiConfig.SearchLimitCount,
-		//
-		ProxyList: strings.Join(proxy.Host, "\n"),
+
+	var data *DefaultConfig
+	if c.CheckMultiAccessRequest([]RequestRole{SuperAdmin, Admin}, false) {
+		data = &DefaultConfig{
+			CmdBin: portscan.Cmdbin,
+			Port:   portscan.Port,
+			Rate:   portscan.Rate,
+			Tech:   portscan.Tech,
+			IsPing: portscan.IsPing,
+			//
+			IpSliceNumber:   task.IpSliceNumber,
+			PortSliceNumber: task.PortSliceNumber,
+			//
+			IsHttpx:          fingerprint.IsHttpx,
+			IsScreenshot:     fingerprint.IsScreenshot,
+			IsFingerprintHub: fingerprint.IsFingerprintHub,
+			IsIconHash:       fingerprint.IsIconHash,
+			IsFingerprintx:   fingerprint.IsFingerprintx,
+			//
+			ServerChanToken: notifyToken["serverchan"].Token,
+			DingTalkToken:   notifyToken["dingtalk"].Token,
+			FeishuToken:     notifyToken["feishu"].Token,
+			//
+			FofaToken:   apiConfig.Fofa.Key,
+			HunterToken: apiConfig.Hunter.Key,
+			QuakeToken:  apiConfig.Quake.Key,
+			ChinazToken: apiConfig.ICP.Key,
+			//
+			Wordlist:           domainscan.Wordlist,
+			IsSubDomainFinder:  domainscan.IsSubDomainFinder,
+			IsSubDomainBrute:   domainscan.IsSubDomainBrute,
+			IsSubDomainCrawler: domainscan.IsSubdomainCrawler,
+			IsIgnoreCDN:        domainscan.IsIgnoreCDN,
+			IsIgnoreOutofChina: domainscan.IsIgnoreOutofChina,
+			IsPortscan:         domainscan.IsPortScan,
+			IsWhois:            domainscan.IsWhois,
+			IsICP:              domainscan.IsICP,
+			//onlineAPI:
+			IsFofa:           onlineapi.IsFofa,
+			IsHunter:         onlineapi.IsHunter,
+			IsQuake:          onlineapi.IsQuake,
+			SearchPageSize:   apiConfig.SearchPageSize,
+			SearchLimitCount: apiConfig.SearchLimitCount,
+			//
+			ProxyList: strings.Join(proxy.Host, "\n"),
+		}
+	} else {
+		data = &DefaultConfig{
+			CmdBin: portscan.Cmdbin,
+			Port:   portscan.Port,
+			Rate:   portscan.Rate,
+			Tech:   portscan.Tech,
+			IsPing: portscan.IsPing,
+			//
+			IpSliceNumber:   task.IpSliceNumber,
+			PortSliceNumber: task.PortSliceNumber,
+			//
+			IsHttpx:          fingerprint.IsHttpx,
+			IsScreenshot:     fingerprint.IsScreenshot,
+			IsFingerprintHub: fingerprint.IsFingerprintHub,
+			IsIconHash:       fingerprint.IsIconHash,
+			IsFingerprintx:   fingerprint.IsFingerprintx,
+			////
+			//ServerChanToken: notifyToken["serverchan"].Token,
+			//DingTalkToken:   notifyToken["dingtalk"].Token,
+			//FeishuToken:     notifyToken["feishu"].Token,
+			////
+			//FofaToken:   apiConfig.Fofa.Key,
+			//HunterToken: apiConfig.Hunter.Key,
+			//QuakeToken:  apiConfig.Quake.Key,
+			//ChinazToken: apiConfig.ICP.Key,
+			//
+			Wordlist:           domainscan.Wordlist,
+			IsSubDomainFinder:  domainscan.IsSubDomainFinder,
+			IsSubDomainBrute:   domainscan.IsSubDomainBrute,
+			IsSubDomainCrawler: domainscan.IsSubdomainCrawler,
+			IsIgnoreCDN:        domainscan.IsIgnoreCDN,
+			IsIgnoreOutofChina: domainscan.IsIgnoreOutofChina,
+			IsPortscan:         domainscan.IsPortScan,
+			IsWhois:            domainscan.IsWhois,
+			IsICP:              domainscan.IsICP,
+			//onlineAPI:
+			IsFofa:           onlineapi.IsFofa,
+			IsHunter:         onlineapi.IsHunter,
+			IsQuake:          onlineapi.IsQuake,
+			SearchPageSize:   apiConfig.SearchPageSize,
+			SearchLimitCount: apiConfig.SearchLimitCount,
+			//
+			//ProxyList: strings.Join(proxy.Host, "\n"),
+		}
 	}
+
 	if fileContent, err1 := os.ReadFile(filepath.Join(conf.GetRootPath(), "version.txt")); err1 == nil {
 		data.Version = strings.TrimSpace(string(fileContent))
 	}
-	c.Data["json"] = data
+	c.Data["json"] = *data
 }
 
 // ChangePasswordAction 修改密码
