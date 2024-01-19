@@ -145,3 +145,19 @@ func TestCheckIPV6Subnet2(t *testing.T) {
 	t.Log(ipv6)
 	t.Log(BigIntToIPV6(ipv6))
 }
+
+func TestFindIPV4(t *testing.T) {
+	data := `部门：输入部门名称
+        汇报人：输入“@+人名”提及相关人
+        时间：11月1日-11月7日
+        本周工作总结
+        
+        1.2.3.4 172.16.222.1
+a3.4.5.6
+		1a.35.test.10086.cn
+		this is a test.
+        做的好的
+        `
+
+	t.Log(FindIPV4(data))
+}

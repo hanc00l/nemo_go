@@ -106,21 +106,6 @@
                         <span class="btn border-success">{{ .domain_info.CreateTime }}</span>
                         <span class="btn btn-info">更新时间</span></b>
                         <span class="btn border-success">{{ .domain_info.UpdateTime }}</span>
-                        {{ if .domain_info.Memo }}
-                        <p></p>
-                        <p>
-                            <button class="btn btn-info" type="button" data-toggle="collapse"
-                                    data-target="#collapseExample" aria-expanded="false"
-                                    aria-controls="collapseExample">
-                                备忘录信息
-                            </button>
-                        </p>
-                        <div class="collapse.show" id="collapseExample">
-                            <div id="memo_content" class="card card-body">
-                                <pre>{{ .domain_info.Memo }}</pre>
-                            </div>
-                        </div>
-                        {{ end }}
                         {{ if .domain_info.Screenshot }}
                         <p></p>
                         <p>
@@ -142,42 +127,88 @@
                             </div>
                         </div>
                         {{ end }}
-                        {{ if .domain_info.Vulnerability }}
+
+                        {{ if or .domain_info.Memo .domain_info.Vulnerability .domain_info.WikiDocs }}
                         <p></p>
-                        <p>
-                            <button class="btn btn-danger" type="button" data-toggle="collapse"
-                                    data-target="#collapseExample2" aria-expanded="false"
-                                    aria-controls="collapseExample2">
-                                漏洞信息
-                            </button>
-                        </p>
-                        <div class="collapse.show" id="collapseExample2">
-                            <table class="table table-bordered">
-                                <thead>
-                                <tr class="alert-dark">
-                                    <th width="10%">Target</th>
-                                    <th width="25%">URL</th>
-                                    <th width="35%">Poc File</th>
-                                    <th width="10%">Source</th>
-                                    <th width="15%">更新时间</th>
-                                </tr>
-                                </thead>
-                                <tbody>
-                                {{ range .domain_info.Vulnerability }}
-                                <tr>
-                                    <td>{{ .Target }}</td>
-                                    <td>{{ .Url }}</td>
-                                    <td>
-                                        <a href="vulnerability-info?id={{ .Id }}"
-                                           target="_blank">{{ .PocFile }}</a>
-                                    </td>
-                                    <td>{{ .Source }}</td>
-                                    <td>{{ .UpdateTime }}</td>
+                        <ul class="nav nav-tabs" id="myTab">
+                            {{ if .domain_info.Memo }}
+                            <li class="nav-item active"><a class="nav-link active" data-toggle="tab"
+                                                           href="#menu1">Memo</a></li>
+                            {{ end }}
+                            {{ if .domain_info.WikiDocs }}
+                            <li class="nav-item"><a class="nav-link" data-toggle="tab" href="#menu2">Wiki</a></li>
+                            {{ end }}
+                            {{ if .domain_info.Vulnerability }}
+                            <li class="nav-item"><a class="nav-link" data-toggle="tab" href="#menu3">Vulnerability</a>
+                            </li>
+                            {{ end }}
+                        </ul>
+                        <div class="tab-content" id="myTabContent">
+                            {{ if .domain_info.Memo }}
+                            <div id="menu1" class="tab-pane fade show active">
+                                <div class="card card-body">
+                                    <pre>{{.domain_info.Memo }}</pre>
+                                </div>
+                            </div>
+                            {{ end }}
+                            {{ if .domain_info.WikiDocs }}
+                            <div id="menu2" class="tab-pane fade ">
+                                <table class="table table-bordered">
+                                    <thead>
+                                    <tr class="alert-dark">
+                                        <th width="35%">标题</th>
+                                        <th width="25%">备注</th>
+                                        <th width="15%">更新时间</th>
+                                        <th width="15%">创建时间</th>
+                                    </tr>
+                                    </thead>
+                                    <tbody>
+                                    {{ range .domain_info.WikiDocs}}
+                                    <tr>
+                                        <td>
+                                            <a href="https://nqmgg3xrjzi.feishu.cn/wiki/{{ .NodeToken }}"
+                                               target="{{ .NodeToken }}">{{ .Title }}</a>
+                                        </td>
+                                        <td>{{ .Comment }}</td>
+                                        <td>{{ .UpdateTime }}</td>
+                                        <td>{{ .CreateTime }}</td>
+                                    </tr>
                                     {{ end }}
-                                </tbody>
-                            </table>
+                                    </tbody>
+                                </table>
+                            </div>
+                            {{ end }}
+                            {{ if .domain_info.Vulnerability }}
+                            <div id="menu3" class="tab-pane fade  ">
+                                <table class="table table-bordered">
+                                    <thead>
+                                    <tr class="alert-dark">
+                                        <th width="10%">Target</th>
+                                        <th width="25%">URL</th>
+                                        <th width="35%">Poc File</th>
+                                        <th width="10%">Source</th>
+                                        <th width="15%">更新时间</th>
+                                    </tr>
+                                    </thead>
+                                    <tbody>
+                                    {{ range .domain_info.Vulnerability}}
+                                    <tr>
+                                        <td>{{ .Target }}</td>
+                                        <td>{{ .Url }}</td>
+                                        <td>
+                                            <a href="vulnerability-info?id={{ .Id }}" target="_blank">{{ .PocFile }}</a>
+                                        </td>
+                                        <td>{{ .Source }}</td>
+                                        <td>{{ .UpdateTime }}</td>
+                                    </tr>
+                                    {{ end }}
+                                    </tbody>
+                                </table>
+                            </div>
+                            {{ end }}
                         </div>
                         {{ end }}
+
                     </div>
                     <div class="card-footer text-muted">
                         <button class="btn btn-secondary" type="button" data-toggle="collapse"
@@ -411,4 +442,5 @@
 <script src="static/js/server/asset-info.js"></script>
 <script>
     $("title").html(" {{ .domain_info.Domain }}-domaininfo");
+    $('#myTab a:first').tab('show');
 </script>

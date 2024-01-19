@@ -127,6 +127,12 @@ func (domain *Domain) makeWhere(searchMap map[string]interface{}) *gorm.DB {
 			http := GetDB().Model(&DomainHttp{}).Select("r_id").Where("content like ?", fmt.Sprintf("%%%s%%", value))
 			db = db.Where("id in (?)", http)
 			CloseDB(http)
+		case "wiki_docs":
+			dbDocs := GetDB().Model(&WikiDocs{}).Select("id").Where("title like ? ", fmt.Sprintf("%%%s%%", value)).Or("comment like ?", fmt.Sprintf("%%%s%%", value))
+			dbDocsDomain := GetDB().Model(&WikiDocsDomain{}).Select("domain_id").Where("doc_id in (?)", dbDocs)
+			db = db.Where("id in (?)", dbDocsDomain)
+			CloseDB(dbDocs)
+			CloseDB(dbDocsDomain)
 		default:
 			db = db.Where(column, value)
 		}

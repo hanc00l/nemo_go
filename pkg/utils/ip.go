@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/hanc00l/nemo_go/pkg/logging"
+	cregex "github.com/mingrammer/commonregex"
 	"math"
 	"math/big"
 	"net"
@@ -96,7 +97,7 @@ func GetClientIp() (ip string, err error) {
 		}
 	}
 
-	return "", errors.New("Can not find the client ip address!")
+	return "", errors.New("can not find the client ip address")
 }
 
 // ParseIP 将IP地址、IP地址段、IP地址范围解析为IP地址列表，支持ipv4/ipv6
@@ -290,4 +291,18 @@ func GetIPV6SubnetC(ip string) string {
 	ipArray := strings.Split(GetIPV6FullFormat(ip), ":")
 	return GetIPV6CIDRParsedFormat(fmt.Sprintf("%s:%s:%s:%s:%s:%s:%s:%s00/120",
 		ipArray[0], ipArray[1], ipArray[2], ipArray[3], ipArray[4], ipArray[5], ipArray[6], ipArray[7][0:2]))
+}
+
+// FindIPV4 从字符串中提取出所有的ipv4地址
+func FindIPV4(content string) []string {
+	allResult := cregex.IPv4s(content)
+	//去重：
+	ips := make(map[string]struct{})
+	for _, ip := range allResult {
+		if _, existed := ips[ip]; !existed {
+			ips[ip] = struct{}{}
+		}
+	}
+
+	return SetToSlice(ips)
 }

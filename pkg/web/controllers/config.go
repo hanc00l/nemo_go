@@ -81,8 +81,11 @@ type DefaultConfig struct {
 	IsWhois            bool   `json:"whois" form:"whois"`
 	IsICP              bool   `json:"icp" form:"icp"`
 	// proxy
-	IsProxyEnable bool   `json:"proxyEnable" form:"proxyEnable"`
-	ProxyList     string `json:"proxyList" form:"proxyList"`
+	ProxyList string `json:"proxyList" form:"proxyList"`
+	// wiki:feishu
+	FeishuAppId        string `json:"feishuappid" form:"feishuappid"`
+	FeishuAppSecret    string `json:"feishusecret" form:"feishuappsecret"`
+	FeishuRefreshToken string `json:"feishurefreshtoken" form:"feishurefreshtoken"`
 }
 
 func (c *ConfigController) IndexAction() {
@@ -97,10 +100,61 @@ func (c *ConfigController) CustomAction() {
 	c.TplName = "custom.html"
 }
 
-// LoadDefaultConfigAction 获取默认的端口扫描配置参数
+// LoadDefaultConfigAction 获取默认的worker扫描使用的配置参数
 func (c *ConfigController) LoadDefaultConfigAction() {
 	defer c.ServeJSON()
 
+	err := conf.GlobalWorkerConfig().ReloadConfig()
+	if err != nil {
+		c.FailedStatus(err.Error())
+		return
+	}
+	portscan := conf.GlobalWorkerConfig().Portscan
+	fingerprint := conf.GlobalWorkerConfig().Fingerprint
+	onlineapi := conf.GlobalWorkerConfig().OnlineAPI
+	domainscan := conf.GlobalWorkerConfig().Domainscan
+
+	data := DefaultConfig{
+		CmdBin: portscan.Cmdbin,
+		Port:   portscan.Port,
+		Rate:   portscan.Rate,
+		Tech:   portscan.Tech,
+		IsPing: portscan.IsPing,
+		//
+		IsHttpx:          fingerprint.IsHttpx,
+		IsScreenshot:     fingerprint.IsScreenshot,
+		IsFingerprintHub: fingerprint.IsFingerprintHub,
+		IsIconHash:       fingerprint.IsIconHash,
+		IsFingerprintx:   fingerprint.IsFingerprintx,
+		//
+		IsSubDomainFinder:  domainscan.IsSubDomainFinder,
+		IsSubDomainBrute:   domainscan.IsSubDomainBrute,
+		IsSubDomainCrawler: domainscan.IsSubdomainCrawler,
+		IsIgnoreCDN:        domainscan.IsIgnoreCDN,
+		IsIgnoreOutofChina: domainscan.IsIgnoreOutofChina,
+		IsPortscan:         domainscan.IsPortScan,
+		IsWhois:            domainscan.IsWhois,
+		IsICP:              domainscan.IsICP,
+		//
+		IsFofa:   onlineapi.IsFofa,
+		IsHunter: onlineapi.IsHunter,
+		IsQuake:  onlineapi.IsQuake,
+	}
+
+	if fileContent, err1 := os.ReadFile(filepath.Join(conf.GetRootPath(), "version.txt")); err1 == nil {
+		data.Version = strings.TrimSpace(string(fileContent))
+	}
+	c.Data["json"] = data
+}
+
+// LoadAdminConfigAction 获取配置管理的参数
+func (c *ConfigController) LoadAdminConfigAction() {
+	if !c.CheckMultiAccessRequest([]RequestRole{SuperAdmin, Admin}, false) {
+		c.LoadDefaultConfigAction()
+		return
+	}
+
+	defer c.ServeJSON()
 	err := conf.GlobalWorkerConfig().ReloadConfig()
 	if err != nil {
 		c.FailedStatus(err.Error())
@@ -114,102 +168,59 @@ func (c *ConfigController) LoadDefaultConfigAction() {
 	onlineapi := conf.GlobalWorkerConfig().OnlineAPI
 	domainscan := conf.GlobalWorkerConfig().Domainscan
 	proxy := conf.GlobalWorkerConfig().Proxy
+	feishu := conf.GlobalServerConfig().Wiki.Feishu
 
-	var data *DefaultConfig
-	if c.CheckMultiAccessRequest([]RequestRole{SuperAdmin, Admin}, false) {
-		data = &DefaultConfig{
-			CmdBin: portscan.Cmdbin,
-			Port:   portscan.Port,
-			Rate:   portscan.Rate,
-			Tech:   portscan.Tech,
-			IsPing: portscan.IsPing,
-			//
-			IpSliceNumber:   task.IpSliceNumber,
-			PortSliceNumber: task.PortSliceNumber,
-			//
-			IsHttpx:          fingerprint.IsHttpx,
-			IsScreenshot:     fingerprint.IsScreenshot,
-			IsFingerprintHub: fingerprint.IsFingerprintHub,
-			IsIconHash:       fingerprint.IsIconHash,
-			IsFingerprintx:   fingerprint.IsFingerprintx,
-			//
-			ServerChanToken: notifyToken["serverchan"].Token,
-			DingTalkToken:   notifyToken["dingtalk"].Token,
-			FeishuToken:     notifyToken["feishu"].Token,
-			//
-			FofaToken:   apiConfig.Fofa.Key,
-			HunterToken: apiConfig.Hunter.Key,
-			QuakeToken:  apiConfig.Quake.Key,
-			ChinazToken: apiConfig.ICP.Key,
-			//
-			Wordlist:           domainscan.Wordlist,
-			IsSubDomainFinder:  domainscan.IsSubDomainFinder,
-			IsSubDomainBrute:   domainscan.IsSubDomainBrute,
-			IsSubDomainCrawler: domainscan.IsSubdomainCrawler,
-			IsIgnoreCDN:        domainscan.IsIgnoreCDN,
-			IsIgnoreOutofChina: domainscan.IsIgnoreOutofChina,
-			IsPortscan:         domainscan.IsPortScan,
-			IsWhois:            domainscan.IsWhois,
-			IsICP:              domainscan.IsICP,
-			//onlineAPI:
-			IsFofa:           onlineapi.IsFofa,
-			IsHunter:         onlineapi.IsHunter,
-			IsQuake:          onlineapi.IsQuake,
-			SearchPageSize:   apiConfig.SearchPageSize,
-			SearchLimitCount: apiConfig.SearchLimitCount,
-			//
-			ProxyList: strings.Join(proxy.Host, "\n"),
-		}
-	} else {
-		data = &DefaultConfig{
-			CmdBin: portscan.Cmdbin,
-			Port:   portscan.Port,
-			Rate:   portscan.Rate,
-			Tech:   portscan.Tech,
-			IsPing: portscan.IsPing,
-			//
-			IpSliceNumber:   task.IpSliceNumber,
-			PortSliceNumber: task.PortSliceNumber,
-			//
-			IsHttpx:          fingerprint.IsHttpx,
-			IsScreenshot:     fingerprint.IsScreenshot,
-			IsFingerprintHub: fingerprint.IsFingerprintHub,
-			IsIconHash:       fingerprint.IsIconHash,
-			IsFingerprintx:   fingerprint.IsFingerprintx,
-			////
-			//ServerChanToken: notifyToken["serverchan"].Token,
-			//DingTalkToken:   notifyToken["dingtalk"].Token,
-			//FeishuToken:     notifyToken["feishu"].Token,
-			////
-			//FofaToken:   apiConfig.Fofa.Key,
-			//HunterToken: apiConfig.Hunter.Key,
-			//QuakeToken:  apiConfig.Quake.Key,
-			//ChinazToken: apiConfig.ICP.Key,
-			//
-			Wordlist:           domainscan.Wordlist,
-			IsSubDomainFinder:  domainscan.IsSubDomainFinder,
-			IsSubDomainBrute:   domainscan.IsSubDomainBrute,
-			IsSubDomainCrawler: domainscan.IsSubdomainCrawler,
-			IsIgnoreCDN:        domainscan.IsIgnoreCDN,
-			IsIgnoreOutofChina: domainscan.IsIgnoreOutofChina,
-			IsPortscan:         domainscan.IsPortScan,
-			IsWhois:            domainscan.IsWhois,
-			IsICP:              domainscan.IsICP,
-			//onlineAPI:
-			IsFofa:           onlineapi.IsFofa,
-			IsHunter:         onlineapi.IsHunter,
-			IsQuake:          onlineapi.IsQuake,
-			SearchPageSize:   apiConfig.SearchPageSize,
-			SearchLimitCount: apiConfig.SearchLimitCount,
-			//
-			//ProxyList: strings.Join(proxy.Host, "\n"),
-		}
+	data := DefaultConfig{
+		CmdBin: portscan.Cmdbin,
+		Port:   portscan.Port,
+		Rate:   portscan.Rate,
+		Tech:   portscan.Tech,
+		IsPing: portscan.IsPing,
+		//
+		IpSliceNumber:   task.IpSliceNumber,
+		PortSliceNumber: task.PortSliceNumber,
+		//
+		IsHttpx:          fingerprint.IsHttpx,
+		IsScreenshot:     fingerprint.IsScreenshot,
+		IsFingerprintHub: fingerprint.IsFingerprintHub,
+		IsIconHash:       fingerprint.IsIconHash,
+		IsFingerprintx:   fingerprint.IsFingerprintx,
+		//
+		ServerChanToken: notifyToken["serverchan"].Token,
+		DingTalkToken:   notifyToken["dingtalk"].Token,
+		FeishuToken:     notifyToken["feishu"].Token,
+		//
+		FofaToken:   apiConfig.Fofa.Key,
+		HunterToken: apiConfig.Hunter.Key,
+		QuakeToken:  apiConfig.Quake.Key,
+		ChinazToken: apiConfig.ICP.Key,
+		//
+		Wordlist:           domainscan.Wordlist,
+		IsSubDomainFinder:  domainscan.IsSubDomainFinder,
+		IsSubDomainBrute:   domainscan.IsSubDomainBrute,
+		IsSubDomainCrawler: domainscan.IsSubdomainCrawler,
+		IsIgnoreCDN:        domainscan.IsIgnoreCDN,
+		IsIgnoreOutofChina: domainscan.IsIgnoreOutofChina,
+		IsPortscan:         domainscan.IsPortScan,
+		IsWhois:            domainscan.IsWhois,
+		IsICP:              domainscan.IsICP,
+		//onlineAPI:
+		IsFofa:           onlineapi.IsFofa,
+		IsHunter:         onlineapi.IsHunter,
+		IsQuake:          onlineapi.IsQuake,
+		SearchPageSize:   apiConfig.SearchPageSize,
+		SearchLimitCount: apiConfig.SearchLimitCount,
+		//
+		ProxyList:          strings.Join(proxy.Host, "\n"),
+		FeishuAppId:        feishu.AppId,
+		FeishuAppSecret:    feishu.AppSecret,
+		FeishuRefreshToken: feishu.UserAccessRefreshToken,
 	}
 
 	if fileContent, err1 := os.ReadFile(filepath.Join(conf.GetRootPath(), "version.txt")); err1 == nil {
 		data.Version = strings.TrimSpace(string(fileContent))
 	}
-	c.Data["json"] = *data
+	c.Data["json"] = data
 }
 
 // ChangePasswordAction 修改密码
@@ -331,6 +342,34 @@ func (c *ConfigController) SaveTaskSliceNumberAction() {
 	}
 	conf.GlobalServerConfig().Task.IpSliceNumber = ipSliceNumber
 	conf.GlobalServerConfig().Task.PortSliceNumber = portSliceNumber
+	err = conf.GlobalServerConfig().WriteConfig()
+	if err != nil {
+		c.FailedStatus(err.Error())
+	}
+	c.SucceededStatus("保存配置成功")
+}
+
+// SaveWikiFeishuAction 保存知识库的设置
+func (c *ConfigController) SaveWikiFeishuAction() {
+	defer c.ServeJSON()
+	if c.CheckMultiAccessRequest([]RequestRole{SuperAdmin, Admin}, false) == false {
+		c.FailedStatus("当前用户权限不允许！")
+		return
+	}
+
+	appId := c.GetString("feishuappid", "")
+	appSecret := c.GetString("feishusecret", "")
+	refreshToken := c.GetString("feishurefreshtoken", "")
+
+	err := conf.GlobalServerConfig().ReloadConfig()
+	if err != nil {
+		c.FailedStatus(err.Error())
+		return
+	}
+	conf.GlobalServerConfig().Wiki.Feishu.AppId = appId
+	conf.GlobalServerConfig().Wiki.Feishu.AppSecret = appSecret
+	conf.GlobalServerConfig().Wiki.Feishu.UserAccessRefreshToken = refreshToken
+
 	err = conf.GlobalServerConfig().WriteConfig()
 	if err != nil {
 		c.FailedStatus(err.Error())

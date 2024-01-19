@@ -23,8 +23,9 @@ $(function () {
                     }
                 },
                 {data: "index", title: "序号", width: "5%"},
-                {data: "workspace_name", title: "工作空间名称", width: "15%"},
+                {data: "workspace_name", title: "工作空间名称", width: "10%"},
                 {data: "workspace_guid", title: "GUID", width: "25%"},
+                {data: "wiki_space_id", title: "知识库SpaceId", width: "15%"},
                 {
                     data: "state", title: "状态", width: "5%",
                     "render": function (data, type, row, meta) {
@@ -36,9 +37,8 @@ $(function () {
 
                     }
                 },
-                {data: "sort_order", title: "排序", width: "8%"},
-                {data: "create_time", title: "创建时间", width: "15%"},
-                {data: "update_time", title: "更新时间", width: "15%"},
+                {data: "create_time", title: "创建时间", width: "12%"},
+                {data: "update_time", title: "更新时间", width: "12%"},
                 {
                     title: "操作",
                     "render": function (data, type, row, meta) {
@@ -78,6 +78,7 @@ $(function () {
                 "sort_order": sort_order,
                 'state': state,
                 'workspace_description': workspace_description,
+                'wiki_space_id': $('#wiki_space_id').val(),
             }, function (data, e) {
                 if (e === "success") {
                     swal({
@@ -137,6 +138,7 @@ function edit_workspace(id) {
             $('#state').val(data.state);
             $('#workspace_id').val(id);
             $('#workspace_description').val(data.workspace_description);
+            $('#wiki_space_id').val(data.wiki_space_id);
         },
         error: function (xhr, type) {
         }

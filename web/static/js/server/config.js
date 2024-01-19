@@ -11,7 +11,7 @@ $(function () {
                 "tech": $('#select_tech').val(),
                 "ping": $('#checkbox_ping').is(":checked"),
             }, function (data, e) {
-                if (e === "success" && data['status'] == 'success') {
+                if (e === "success" && data['status'] === 'success') {
                     swal({
                         title: "保存成功！",
                         text: "",
@@ -35,7 +35,7 @@ $(function () {
                 "iconhash": $('#checkbox_iconhash').is(":checked"),
                 "fingerprintx": $('#checkbox_fingerprintx').is(":checked"),
             }, function (data, e) {
-                if (e === "success" && data['status'] == 'success') {
+                if (e === "success" && data['status'] === 'success') {
                     swal({
                         title: "保存成功！",
                         text: "",
@@ -60,7 +60,7 @@ $(function () {
                 "portslicenumber": $('#input_portslicenumber').val(),
                 "ipslicenumber": $('#input_ipslicenumber').val(),
             }, function (data, e) {
-                if (e === "success" && data['status'] == 'success') {
+                if (e === "success" && data['status'] === 'success') {
                     swal({
                         title: "保存成功！",
                         text: "",
@@ -82,7 +82,7 @@ $(function () {
                 "token_dingtalk": $('#input_dingtalk').val(),
                 "token_feishu": $('#input_feishu').val(),
             }, function (data, e) {
-                if (e === "success" && data['status'] == 'success') {
+                if (e === "success" && data['status'] === 'success') {
                     swal({
                         title: "保存成功！",
                         text: "",
@@ -99,7 +99,7 @@ $(function () {
     });
     $("#buttonTestNotify").click(function () {
         $.post("/config-test-notify", {}, function (data, e) {
-            if (e === "success" && data['status'] == 'success') {
+            if (e === "success" && data['status'] === 'success') {
                 swal({
                     title: "测试完成",
                     text: data['msg'],
@@ -126,7 +126,7 @@ $(function () {
                 "pagesize": $('#input_pagesize').val(),
                 "limitcount": $('#input_limitcount').val(),
             }, function (data, e) {
-                if (e === "success" && data['status'] == 'success') {
+                if (e === "success" && data['status'] === 'success') {
                     swal({
                         title: "保存成功！",
                         text: "",
@@ -143,7 +143,7 @@ $(function () {
     });
     $("#buttonTestAPIToken").click(function () {
         $.post("/config-test-api", {}, function (data, e) {
-            if (e === "success" && data['status'] == 'success') {
+            if (e === "success" && data['status'] === 'success') {
                 swal({
                     title: "测试完成",
                     text: data['msg'],
@@ -170,7 +170,7 @@ $(function () {
                 "ignoreoutofchina": $('#checkbox_ignoreoutofchina').is(":checked"),
                 "wordlist": $('#select_wordlist').val(),
             }, function (data, e) {
-                if (e === "success" && data['status'] == 'success') {
+                if (e === "success" && data['status'] === 'success') {
                     swal({
                         title: "保存成功！",
                         text: "",
@@ -190,7 +190,29 @@ $(function () {
             {
                 "proxyList": $('#text_proxy_list').val(),
             }, function (data, e) {
-                if (e === "success" && data['status'] == 'success') {
+                if (e === "success" && data['status'] === 'success') {
+                    swal({
+                        title: "保存成功！",
+                        text: "",
+                        type: "success",
+                        confirmButtonText: "确定",
+                        confirmButtonColor: "#41b883",
+                        closeOnConfirm: true,
+                        timer: 3000
+                    });
+                } else {
+                    swal('Warning', data['msg'], 'error');
+                }
+            });
+    });
+    $("#buttonSaveWikiFeishu").click(function () {
+        $.post("/config-save-wikifeishu",
+            {
+                "feishuappid": $('#input_feishu_appid').val(),
+                "feishusecret": $('#input_feishu_secret').val(),
+                "feishurefreshtoken": $('#input_feishu_refreshtoken').val(),
+            }, function (data, e) {
+                if (e === "success" && data['status'] === 'success') {
                     swal({
                         title: "保存成功！",
                         text: "",
@@ -223,7 +245,7 @@ $(function () {
                 "oldpass": oldpass,
                 "newpass": newpass,
             }, function (data, e) {
-                if (e === "success" && data['status'] == 'success') {
+                if (e === "success" && data['status'] === 'success') {
                     $('#input_oldpass').val('');
                     $('#input_password1').val('');
                     $('#input_password2').val('');
@@ -241,13 +263,57 @@ $(function () {
                 }
             });
     });
+    $("#buttonRefreshToken").click(function () {
+        $.post("wiki-refresh-token",
+            {}, function (data, e) {
+                if (e === "success" && data['status'] === 'success') {
+                    swal({
+                        title: "刷新Token成功",
+                        text: data['msg'],
+                        type: "success",
+                        confirmButtonText: "确定",
+                        confirmButtonColor: "#41b883",
+                        closeOnConfirm: true,
+                        timer: 3000
+                    });
+                } else {
+                    swal('Warning', data['msg'], 'error');
+                }
+            });
+    });
     $("#buttonSaveTaskWorkspace").click(function () {
         save_custom("task_workspace", $('#text_task_workspace').val(), "/custom-save-taskworkspace")
+    });
+    $("#button_feishu_auth").click(function () {
+        let appid = $('#input_feishu_appid').val();
+        if (appid === '') {
+            swal('Warning', "请输入应用ID！", 'error');
+            return;
+        }
+        let appScret = $('#input_feishu_secret').val();
+        if (appScret === '') {
+            swal('Warning', "请输入应用Secret！", 'error');
+            return;
+        }
+        let server_ip = $('#input_server_ip').val();
+        if (server_ip === '') {
+            swal('Warning', "请输入服务器IP！", 'error');
+            return;
+        }
+        let server_port = $('#input_server_port').val();
+        if (server_port === '') {
+            swal('Warning', "请输入服务器端口！", 'error');
+            return;
+        }
+        let callback_url = encodeURIComponent($('#select_server_protocol').val() + "://" + server_ip + ":" + server_port + "/wiki-feishu-code");
+        let url = "https://open.feishu.cn/open-apis/authen/v1/index?redirect_uri=" + callback_url + "&app_id=" + appid + "&state=RANDOMSTATE";
+        window.open(url, "_blank");
+        $('#openfeishu').modal('hide');
     });
 });
 
 function load_config() {
-    $.post("/config-list", function (data) {
+    $.post("/config-list-admin", function (data) {
         $('#select_cmdbin').val(data['cmdbin']);
         $('#input_port').val(data['port']);
         $('#select_tech').val(data['tech']);
@@ -289,6 +355,10 @@ function load_config() {
         $('#input_limitcount').val(data['limitcount']);
 
         $("#text_proxy_list").val(data['proxyList']);
+
+        $('#input_feishu_appid').val(data['feishuappid']);
+        $('#input_feishu_secret').val(data['feishusecret']);
+        $('#input_feishu_refreshtoken').val(data['feishurefreshtoken']);
     });
 }
 
@@ -315,7 +385,7 @@ function save_custom(type, content, url = "/custom-save") {
             "type": type,
             "content": content
         }, function (data, e) {
-            if (e === "success" && data['status'] == 'success') {
+            if (e === "success" && data['status'] === 'success') {
                 swal({
                     title: "保存成功！",
                     text: "",

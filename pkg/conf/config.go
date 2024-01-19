@@ -78,6 +78,7 @@ type Server struct {
 	Rabbitmq Rabbitmq          `yaml:"rabbitmq"`
 	Task     Task              `yaml:"task"`
 	Notify   map[string]Notify `yaml:"notify"`
+	Wiki     Wiki              `yaml:"wiki"`
 }
 
 type Worker struct {
@@ -198,6 +199,14 @@ type Notify struct {
 
 type Proxy struct {
 	Host []string `yaml:"host"`
+}
+
+type Wiki struct {
+	Feishu struct {
+		AppId                  string `yaml:"appId"`
+		AppSecret              string `yaml:"appSecret"`
+		UserAccessRefreshToken string `yaml:"refreshToken"`
+	} `yaml:"feishu"`
 }
 
 // WriteConfig 写配置到yaml文件中

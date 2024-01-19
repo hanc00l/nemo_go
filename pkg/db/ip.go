@@ -222,6 +222,12 @@ func (ip *Ip) makeWhere(searchMap map[string]interface{}) *gorm.DB {
 			db = db.Where("id in (?)", port)
 			CloseDB(http)
 			CloseDB(port)
+		case "wiki_docs":
+			dbDocs := GetDB().Model(&WikiDocs{}).Select("id").Where("title like ? ", fmt.Sprintf("%%%s%%", value)).Or("comment like ?", fmt.Sprintf("%%%s%%", value))
+			dbDocsIp := GetDB().Model(&WikiDocsIP{}).Select("ip_id").Where("doc_id in (?)", dbDocs)
+			db = db.Where("id in (?)", dbDocsIp)
+			CloseDB(dbDocs)
+			CloseDB(dbDocsIp)
 		default:
 			db = db.Where(column, value)
 		}

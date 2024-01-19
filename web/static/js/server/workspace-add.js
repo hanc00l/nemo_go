@@ -22,6 +22,7 @@ $(function () {
                 "sort_order": sort_order,
                 'state': state,
                 'workspace_description': workspace_description,
+                'wiki_space_id': $('#wiki_space_id').val(),
             }, function (data, e) {
                 if (e === "success") {
                     swal({

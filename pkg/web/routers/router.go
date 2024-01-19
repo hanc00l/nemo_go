@@ -13,6 +13,7 @@ func init() {
 
 	web.CtrlGet("/config-list", (*controllers.ConfigController).IndexAction)
 	web.CtrlPost("/config-list", (*controllers.ConfigController).LoadDefaultConfigAction)
+	web.CtrlPost("/config-list-admin", (*controllers.ConfigController).LoadAdminConfigAction)
 	web.CtrlPost("/config-change-password", (*controllers.ConfigController).ChangePasswordAction)
 	web.CtrlGet("/custom-list", (*controllers.ConfigController).CustomAction)
 	web.CtrlPost("/custom-load", (*controllers.ConfigController).LoadCustomConfigAction)
@@ -28,6 +29,7 @@ func init() {
 	web.CtrlPost("/config-save-workerproxy", (*controllers.ConfigController).SaveWorkerProxyAction)
 	web.CtrlPost("/config-save-domainscan", (*controllers.ConfigController).SaveDomainscanAction)
 	web.CtrlPost("/custom-save-taskworkspace", (*controllers.ConfigController).SaveCustomTaskWorkspaceConfigAction)
+	web.CtrlPost("/config-save-wikifeishu", (*controllers.ConfigController).SaveWikiFeishuAction)
 
 	web.CtrlGet("/dashboard", (*controllers.DashboardController).IndexAction)
 	web.CtrlPost("/dashboard", (*controllers.DashboardController).GetStatisticDataAction)
@@ -144,4 +146,15 @@ func init() {
 	web.CtrlPost("/worker-reload", (*controllers.WorkerController).ManualReloadWorkerAction)
 	web.CtrlPost("/worker-edit", (*controllers.WorkerController).EditWorkerAction)
 	web.CtrlPost("/worker-update", (*controllers.WorkerController).UpdateWorkerAction)
+
+	web.CtrlGet("/wiki-feishu-code", (*controllers.WikiController).FeishuAuthorizationCodeCallbackAction)
+	web.CtrlPost("/wiki-refresh-token", (*controllers.WikiController).RefreshTokenAction)
+	web.CtrlGet("/wiki-list", (*controllers.WikiController).IndexAction)
+	web.CtrlPost("/wiki-list", (*controllers.WikiController).ListAction)
+	web.CtrlPost("/wiki-sync", (*controllers.WikiController).SyncFeishuSpacesAction)
+	web.CtrlGet("/wiki-add", (*controllers.WikiController).AddIndexAction)
+	web.CtrlPost("/wiki-add", (*controllers.WikiController).AddSaveAction)
+	web.CtrlPost("/wiki-get", (*controllers.WikiController).GetAction)
+	web.CtrlPost("/wiki-update", (*controllers.WikiController).UpdateAction)
+	web.CtrlPost("/wiki-export", (*controllers.WikiController).ExportDocument)
 }

@@ -100,8 +100,8 @@ function get_count_data() {
         $("#vulnerability_count").html(data['vulnerability_count']);
         $("#domain_count").html(data['domain_count']);
         $("#ip_count").html(data['ip_count']);
-        $("#task_active").html("TASK:&nbsp;" + data['task_active']);
-        $('#worker_count').html("WORKER:&nbsp;" + data['worker_count']);
+        $("#task_active").html("Task:&nbsp;" + data['task_active']);
+        $('#worker_count').html("Worker:&nbsp;" + data['worker_count']);
     });
 }
 

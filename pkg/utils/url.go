@@ -252,3 +252,20 @@ func GetProxyHttpClient(isProxy bool) *http.Client {
 	}
 	return httpClient
 }
+
+// FindDomain 从字符串中提取域名
+func FindDomain(content string) []string {
+	domainPattern := `(?:[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\.)+[a-z0-9][a-z0-9-]{0,61}[a-z0-9]`
+	r := regexp.MustCompile(strings.TrimSpace(domainPattern))
+
+	allResult := r.FindAllString(content, -1)
+	//去重：
+	ips := make(map[string]struct{})
+	for _, ip := range allResult {
+		if _, existed := ips[ip]; !existed {
+			ips[ip] = struct{}{}
+		}
+	}
+
+	return SetToSlice(ips)
+}

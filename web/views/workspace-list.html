@@ -23,7 +23,8 @@
                            aria-describedby="workspace_table" width="100%">
                     </table>
                     <!-- 模态对话框：修改-->
-                    <div class="modal fade" id="editworkspace" tabindex="-1" role="dialog" aria-labelledby="myModalLabel"
+                    <div class="modal fade" id="editworkspace" tabindex="-1" role="dialog"
+                         aria-labelledby="myModalLabel"
                          aria-hidden="true">
                         <div class="modal-dialog">
                             <div class="modal-content">
@@ -35,24 +36,35 @@
                                 <div class="modal-body">
                                     <form class="form-horizontal" role="form">
                                         <div class="form-group">
-                                            <label class="control-label no-padding-right" for="workspace_name">工作空间名称</label>
+                                            <label class="control-label no-padding-right"
+                                                   for="workspace_name">工作空间名称</label>
                                             <div>
-                                                <input class="form-control col-md-7" title="工作空间名称" id="workspace_name">
+                                                <input class="form-control col-md-7" title="工作空间名称"
+                                                       id="workspace_name">
                                             </div>
                                         </div>
                                         <div class="form-group">
                                             <label class="control-label no-padding-right" for="workspace_description">工作空间描述</label>
                                             <div>
-                                                <input class="form-control col-md-7" title="工作空间描述" id="workspace_description">
+                                                <input class="form-control col-md-7" title="工作空间描述"
+                                                       id="workspace_description">
                                             </div>
                                         </div>
                                         <div class="form-group">
-                                            <label class="control-label no-padding-right" for="sort_order">排序号</label>
+                                            <label class="control-label no-padding-right"
+                                                   for="sort_order">排序号</label>
                                             <div>
                                                 <input class="form-control col-md-7" title="排序号" id="sort_order">
                                             </div>
                                         </div>
-
+                                        <div class="form-group">
+                                            <label class="control-label no-padding-right"
+                                                   for="wiki_space_id">知识库的SpaceId</label>
+                                            <div>
+                                                <input class="form-control col-md-7" title="知识库的SpaceId"
+                                                       id="wiki_space_id">
+                                            </div>
+                                        </div>
                                         <div class="form-group">
                                             <label class="control-label no-padding-right" for="state">状态</label>
                                             <div>
@@ -62,12 +74,14 @@
                                                 </select>
                                             </div>
                                         </div>
+
                                         <div class="hr hr-16 hr-dotted"></div>
                                         <div class="modal-footer">
                                             <button type="button" class="btn btn-secondary" data-dismiss="modal"
                                                     aria-hidden="true">Cancel
                                             </button>
-                                            <button class="btn btn-primary workspace-update" type="button" id="workspace_update">
+                                            <button class="btn btn-primary workspace-update" type="button"
+                                                    id="workspace_update">
                                                 <span>更新</span> <i class="fa fa-send m-l-10"></i>
                                             </button>
                                         </div>

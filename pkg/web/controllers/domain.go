@@ -43,6 +43,7 @@ type domainRequestParam struct {
 	SelectNoResolvedIP bool   `form:"select_no_ip"`
 	OrderByDate        bool   `form:"select_order_by_date"`
 	DomainHttp         string `form:"domain_http"`
+	WikiDocs           string `form:"wiki_docs"`
 }
 
 // DomainListData datable显示的每一行数据
@@ -68,6 +69,7 @@ type DomainListData struct {
 	WorkspaceId    int            `json:"workspace"`
 	WorkspaceGUID  string         `json:"workspace_guid"`
 	PinIndex       int            `json:"pinindex"`
+	WikiDocs       string         `json:"wiki_docs"`
 }
 
 // DomainInfo domain详细数据聚合
@@ -100,6 +102,7 @@ type DomainInfo struct {
 	WorkspaceGUID string
 	PinIndex      string
 	Source        []string
+	WikiDocs      []DocumentInfo
 }
 
 // DomainAttrInfo domain属性
@@ -518,6 +521,9 @@ func (c *DomainController) getSearchMap(req domainRequestParam) (searchMap map[s
 	if req.DomainHttp != "" {
 		searchMap["domain_http"] = req.DomainHttp
 	}
+	if req.WikiDocs != "" {
+		searchMap["wiki_docs"] = req.WikiDocs
+	}
 	return
 }
 
@@ -598,6 +604,11 @@ func (c *DomainController) getDomainListData(req domainRequestParam) (resp DataT
 		for _, ihm := range domainInfo.IconHashes {
 			domainData.IconImage = append(domainData.IconImage, ihm.IconImage)
 		}
+		var docs []string
+		for _, doc := range domainInfo.WikiDocs {
+			docs = append(docs, doc.Title)
+		}
+		domainData.WikiDocs = strings.Join(docs, "\r\n")
 		resp.Data = append(resp.Data, domainData)
 	}
 	resp.Draw = req.Draw
@@ -749,6 +760,19 @@ func getDomainInfo(domain *db.Domain, portInfoCacheMap map[int]PortInfo, disable
 			UpdateTime: FormatDateTime(info.UpdateDatetime),
 		}
 		r.DomainAttr = append(r.DomainAttr, dai)
+	}
+	//wiki document
+	wiki := db.WikiDocs{}
+	for _, doc := range wiki.GetsByIpOrDomain(0, domain.Id) {
+		r.WikiDocs = append(r.WikiDocs, DocumentInfo{
+			Id:         doc.Id,
+			Title:      doc.Title,
+			NodeToken:  doc.NodeToken,
+			Comment:    doc.Comment,
+			PinIndex:   doc.PinIndex,
+			CreateTime: FormatDateTime(doc.CreateDatetime),
+			UpdateTime: FormatSubDateTime(doc.UpdateDatetime),
+		})
 	}
 	return
 }

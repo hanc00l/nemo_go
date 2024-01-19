@@ -331,6 +331,7 @@ $(function () {
                         'content': $('#content').val(),
                         'select_order_by_date': $('#checkbox_select_order_by_date').is(":checked"),
                         "domain_http": $('#http_content').val(),
+                        "wiki_docs": $('#wiki_docs_content').val(),
                     });
                 }
             },
@@ -342,9 +343,6 @@ $(function () {
                     title: '<input  type="checkbox" class="checkall" />',
                     "render": function (data, type, row) {
                         let strData = '<input type="checkbox" class="checkchild" value="' + row['id'] + "|" + row['domain'] + '"/>';
-                        if (row['memo_content']) {
-                            strData += '&nbsp;<span class="badge  badge-primary" data-toggle="tooltip" data-html="true" title="' + html2Escape(row['memo_content']) + '"><i class="fa fa-flag"></i></span>';
-                        }
                         return strData;
                     }
                 },
@@ -370,6 +368,12 @@ $(function () {
                             strData = '<h5><a href="/domain-info?workspace=' + row['workspace'] + '&&domain=' + data + '&&disable_fofa=' + disable_fofa + '" target="_blank" class="badge ' + row['color_tag'] + '">' + data + '</a></h5>';
                         } else {
                             strData = '<a href="/domain-info?workspace=' + row['workspace'] + '&&domain=' + data + '&&disable_fofa=' + disable_fofa + '" target="_blank">' + data + '</a>';
+                        }
+                        if (row['wiki_docs']) {
+                            strData += '&nbsp;<i class="fa fa-archive" style="color: darkorange" title="' + html2Escape(row['wiki_docs']) + '"></i>';
+                        }
+                        if (row['vulnerability']) {
+                            strData += '&nbsp;<span class="badge badge-danger" data-toggle="tooltip" data-html="true" title="' + html2Escape(row['vulnerability']) + '"><i class="fa fa-bolt"></span>';
                         }
                         if (row['vulnerability']) {
                             strData += '&nbsp;<span class="badge badge-danger" data-toggle="tooltip" data-html="true" title="' + html2Escape(row['vulnerability']) + '"><i class="fa fa-bolt"></span>';

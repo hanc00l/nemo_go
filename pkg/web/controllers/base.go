@@ -249,6 +249,19 @@ func (c *BaseController) GetCurrentWorkspace() (workspaceId int) {
 	return
 }
 
+// GetCurrentWorkspaceGUID 根据获取保存在session或jwt中的workspaceId，获取GUID
+func (c *BaseController) GetCurrentWorkspaceGUID() (workspaceGUID string) {
+	workspaceId := c.GetCurrentWorkspace()
+	if workspaceId > 0 {
+		workspace := db.Workspace{Id: workspaceId}
+		if workspace.Get() {
+			workspaceGUID = workspace.WorkspaceGUID
+		}
+	}
+
+	return
+}
+
 // GetCurrentUser 获取保存在session或jwt中的username
 func (c *BaseController) GetCurrentUser() (userName string) {
 	if c.IsServerAPI {

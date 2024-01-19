@@ -1,0 +1,115 @@
+<main class="app-content">
+    <div class="app-title">
+        <div>
+            <h1><i class="fa fa-th-list"></i>&nbsp;文档列表</h1>
+            <p></p>
+        </div>
+        <ul class="app-breadcrumb breadcrumb side">
+            <li class="breadcrumb-item"><i class="fa fa-home fa-lg"></i></li>
+            <li class="breadcrumb-item"><a href="/index">首页</a></li>
+            <li class="breadcrumb-item active"><a href="#">文档列表</a></li>
+        </ul>
+    </div>
+
+    <div class="row">
+        <div class="col-md-12">
+            <div class="tile">
+                <div class="tile-body">
+                    <a class="btn btn-primary" href="wiki-add" role="button" title="新建文档">
+                        <i class="fa fa-plus fa-lg"></i>新建文档</a>
+                    <button class="btn btn-primary" type="button" id="button_sync" title="从飞书知识库中同步文档到Nemo">
+                        <i class="fa fa-fw fa-lg fa-archive"></i>同步知识库
+                    </button>
+                    <br>
+                    <br>
+                    <table class="table table-hover table-bordered dataTable no-footer" id="document_table" role="grid"
+                           aria-describedby="document_table" width="100%">
+                    </table>
+                    <!-- 模态对话框：修改-->
+                    <div class="modal fade" id="editdocument" tabindex="-1" role="dialog"
+                         aria-labelledby="myModalLabel"
+                         aria-hidden="true">
+                        <div class="modal-dialog">
+                            <div class="modal-content">
+                                <div class="modal-header card-header bg-primary">
+                                    <h4 class="modal-title" id="myModalLabel">
+                                        修改文档
+                                    </h4>
+                                </div>
+                                <div class="modal-body">
+                                    <form class="form-horizontal" role="form">
+                                        <div class="form-group">
+                                            <label class="control-label no-padding-right"
+                                                   for="document_title">文档名称</label>
+                                            <div>
+                                                <input class="form-control col-md-7" title="文档名称" disabled
+                                                       id="document_title">
+                                            </div>
+                                        </div>
+                                        <div class="form-group">
+                                            <label class="control-label no-padding-right"
+                                                   for="document_comment">文档备注</label>
+                                            <div>
+                                                <input class="form-control col-md-7" title="文档备注"
+                                                       id="document_comment">
+                                            </div>
+                                        </div>
+                                        <div class="form-group row">
+                                            <div class="col-md-12">
+                                                <div class="form-check form-check-inline">
+                                                    <label class="form-check-label"
+                                                           for="checkbox_pin_to_top">
+                                                        <input class="form-check-input"
+                                                               id="checkbox_pin_to_top"
+                                                               type="checkbox">置顶
+                                                    </label>
+                                                    &nbsp;&nbsp;&nbsp;
+                                                    <label class="form-check-label"
+                                                           for="checkbox_remove_exported_file">
+                                                        <input class="form-check-input"
+                                                               id="checkbox_remove_exported_file"
+                                                               type="checkbox">清除导出文档
+                                                    </label>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="hr hr-16 hr-dotted"></div>
+                                        <div class="modal-footer">
+                                            <button type="button" class="btn btn-secondary" data-dismiss="modal"
+                                                    aria-hidden="true">Cancel
+                                            </button>
+                                            <button class="btn btn-primary document-update" type="button"
+                                                    id="document_update">
+                                                <span>更新</span> <i class="fa fa-send m-l-10"></i>
+                                            </button>
+                                        </div>
+                                        <input type="hidden" id="document_id">
+                                    </form>
+                                </div>
+                            </div><!-- /.modal-content -->
+                        </div><!-- /.modal-dialog -->
+                    </div>
+                </div>
+                <!----tile body-->
+            </div> <!-- tile -->
+        </div> <!-- col md-12 -->
+    </div>
+    <!--row-->
+</main>
+<script src="static/js/jquery/jquery-3.3.1.min.js"></script>
+<script src="static/js/bootstrap/popper.min.js"></script>
+<script src="static/js/bootstrap/bootstrap.min.js"></script>
+<script src="static/js/main.js"></script>
+<script src="static/js/plugins/pace.min.js"></script>
+<!-- Data table plugin-->
+<script type="text/javascript" src="static/js/plugins/jquery.dataTables.min.js"></script>
+<script type="text/javascript" src="static/js/plugins/dataTables.bootstrap.min.js"></script>
+<script src="static/js/sweetalert/sweetalert.min.js"></script>
+<script src="static/js/jquery/jquery.bootstrap-duallistbox.js"></script>
+<script type="text/javascript" src="static/js/server/wiki-list.js"></script>
+<script src="static/js/server/assert-list.js"></script>
+<script>
+    $(function () {
+        $("title").html("Wiki-Nemo");
+    });
+</script>

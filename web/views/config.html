@@ -9,6 +9,61 @@
             <li class="breadcrumb-item active"><a href="#">配置管理</a></li>
         </ul>
     </div>
+
+    <!-- 模态对话框：修改-->
+    <div class="modal fade" id="openfeishu" tabindex="-1" role="dialog"
+         aria-labelledby="myModalLabel"
+         aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header card-header bg-primary">
+                    <h4 class="modal-title" id="myModalLabel">
+                        获取飞书用户访问RefreshToken
+                    </h4>
+                </div>
+                <div class="modal-body">
+                    <form class="form-horizontal" role="form">
+                        <div class="form-group">
+                            <label class="control-label no-padding-right"
+                                   for="input_server_ip">NemoIP地址</label>
+                            <div>
+                                <input class="form-control col-md-7" title="Server的互联网访问IP地址"
+                                       id="input_server_ip">
+                            </div>
+                            <label class="control-label no-padding-right"
+                                   for="input_server_ip">Nemo端口</label>
+                            <div>
+                                <input class="form-control col-md-7" title="Server的互联网访问端口"
+                                       id="input_server_port" value="5000">
+                            </div>
+                            <label class="control-label no-padding-right"
+                                   for="select_server_protocol">协议类型</label>
+                            <div>
+                                <select class="form-control  col-md-7" id="select_server_protocol">
+                                    <option value="https" selected>https</option>
+                                    <option value="http">http</option>
+                                </select>
+                            </div>
+                            <br/>
+                            <label class="control-label no-padding-right">输入Nemo的IP地址后并点击“验证”按钮，将前往飞书开放平台，获取用户访问Token和RefreshToken。如果Nemo提示“获取用户AccessToken成功”，则Nemo已成功获取并保存了Token，请在配置页面刷新即可！</label>
+                            <br/>
+                        </div>
+                        <div class="hr hr-16 hr-dotted"></div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-dismiss="modal"
+                                    aria-hidden="true">Cancel
+                            </button>
+                            <button class="btn btn-primary document-update" type="button"
+                                    id="button_feishu_auth">
+                                <span>前往飞书验证</span> <i class="fa fa-send m-l-10"></i>
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div><!-- /.modal-content -->
+        </div><!-- /.modal-dialog -->
+    </div>
+
     <div class="row">
         <div class="col-md-6">
             {{ if eq .UserRole "superadmin" "admin" }}
@@ -320,6 +375,40 @@
                 </div>
             </div>
             <div class="tile">
+                <h3 class="tile-title">知识库：飞书自建应用设置</h3>
+                <div class="tile-body">
+                    <form>
+                        <div class="form-group">
+                            <label class="col-form-label" for="input_feishu_appid">
+                                <b>AppId</b>
+                            </label>
+                            <input class="form-control" id="input_feishu_appid" type="text" value="">
+                            <label class="col-form-label" for="input_feishu_secret">
+                                <b>AppSecret</b>
+                            </label>
+                            <input class="form-control" id="input_feishu_secret" type="text" value="">
+                            <label class="col-form-label" for="input_feishu_refreshtoken">
+                                <b>用户访问RefreshToken</b>
+                            </label>
+                            <input class="form-control" id="input_feishu_refreshtoken" type="text" value="">
+                        </div>
+                    </form>
+                </div>
+                <div class="tile-footer">
+                    <button class="btn btn-primary" type="button" id="buttonSaveWikiFeishu"><i
+                            class="fa fa-fw fa-lg fa-check-circle"></i>保存设置
+                    </button>&nbsp;&nbsp;&nbsp;
+                    <button class="btn btn-primary" type="button" id="buttonRefreshToken" ><i
+                            class="fa fa-fw fa-lg fa-refresh"></i>刷新用户访问Token
+                    </button>
+                    <button class="btn btn-primary" type="button" id="buttonOpenWikiFeishu" data-toggle="modal"
+                            data-target="#openfeishu"><i
+                            class="fa fa-fw fa-lg fa-send"></i>从飞书授权用户访问Token
+                    </button>
+                    (请先保存设置后再进行获取/刷新用户访问Token)
+                </div>
+            </div>
+            <div class="tile">
                 <h3 class="tile-title">任务切分设置</h3>
                 <div class="tile-body">
                     <form>
@@ -341,7 +430,6 @@
                     </button>&nbsp;&nbsp;&nbsp;
                 </div>
             </div>
-
             {{ end }}
             <div class="tile">
                 <h3 class="tile-title">修改登录密码</h3>

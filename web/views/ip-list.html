@@ -19,7 +19,8 @@
                         </div>
                         <div class="form-group col-md-2">
                             <label class="control-label" for="ip_address">IP</label>
-                            <input class="form-control" type="text" id="ip_address" placeholder="IPv4（单个或掩码）、IPv6模糊匹配"
+                            <input class="form-control" type="text" id="ip_address"
+                                   placeholder="IPv4（单个或掩码）、IPv6模糊匹配"
                                    value="{{ .data.IpAddressIp }}">
                         </div>
                         <div class="form-group col-md-2">
@@ -204,6 +205,14 @@
                                 </select>
                             </div>
                         </form>
+                        <form class="row">
+                            <div class="form-group col-md-2">
+                                <label class="control-label" for="wiki_docs_content">知识库文档</label>
+                                <input class="form-control" type="text" id="wiki_docs_content"
+                                       placeholder="文档信息(模糊搜索）"
+                                       value="">
+                            </div>
+                        </form>
                     </div>
                     <div id="div_show_statistic">
                         <form class="row">
@@ -329,7 +338,8 @@
                                                                             </option>
                                                                             <option value="masnmap">masscan+nmap
                                                                             </option>
-                                                                            <option value="gogo">gogo（支持socks5代理）</option>
+                                                                            <option value="gogo">gogo（支持socks5代理）
+                                                                            </option>
                                                                         </select>
                                                                     </div>
                                                                     <div class="form-group col-md-4">
@@ -429,7 +439,8 @@
                                                                     <label class="form-check-label"
                                                                            for="checkbox_fingerprintx">
                                                                         <input class="form-check-input"
-                                                                               id="checkbox_fingerprintx" type="checkbox"
+                                                                               id="checkbox_fingerprintx"
+                                                                               type="checkbox"
                                                                                checked
                                                                         >Fingerprintx<i class="fa fa-question-circle"
                                                                                         aria-hidden="true"
@@ -635,7 +646,8 @@
                                                                             <option value="masscan" selected="selected">
                                                                                 masscan
                                                                             </option>
-                                                                            <option value="gogo">gogo（支持socks5代理）</option>
+                                                                            <option value="gogo">gogo（支持socks5代理）
+                                                                            </option>
                                                                         </select>
                                                                     </div>
                                                                     <div class="form-group col-md-4">
@@ -714,7 +726,8 @@
                                                                     <label class="form-check-label"
                                                                            for="checkbox_batchscan_fingerprintx">
                                                                         <input class="form-check-input"
-                                                                               id="checkbox_batchscan_fingerprintx" type="checkbox"
+                                                                               id="checkbox_batchscan_fingerprintx"
+                                                                               type="checkbox"
                                                                                checked
                                                                         >Fingerprintx<i class="fa fa-question-circle"
                                                                                         aria-hidden="true"
@@ -823,9 +836,10 @@
                                 <div class="modal-body ">
                                     <form class="form-horizontal" role="form">
                                         <div class="form-group">
-                                            <label for="select_portscan_bin">资产结果类型<i class="fa fa-question-circle"
-                                                                                   aria-hidden="true"
-                                                                                   title="支持导入namp、masscan扫描输出的-oX格式的XML结果；&#10;fscan的results.txt结果；&#10;gogo的未加密的json结果文件（后缀为.dat）;&#10;naabu的普通text结果；&#10;httpx的-json结果；&#10;TXPortMap的rst.txt结果&#10;FOFA、Hunter及0Zone为导出的csv格式文件"></i></label>
+                                            <label for="select_portscan_bin">资产结果类型<i
+                                                    class="fa fa-question-circle"
+                                                    aria-hidden="true"
+                                                    title="支持导入namp、masscan扫描输出的-oX格式的XML结果；&#10;fscan的results.txt结果；&#10;gogo的未加密的json结果文件（后缀为.dat）;&#10;naabu的普通text结果；&#10;httpx的-json结果；&#10;TXPortMap的rst.txt结果&#10;FOFA、Hunter及0Zone为导出的csv格式文件"></i></label>
                                             <select class="form-control" id="select_portscan_bin">
                                                 <option value="nmap" selected>nmap</option>
                                                 <option value="masscan">masscan</option>

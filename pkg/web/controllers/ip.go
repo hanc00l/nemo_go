@@ -49,6 +49,7 @@ type ipRequestParam struct {
 	SelectNoOpenedPort    bool   `form:"select_no_openedport"`
 	OrderByDate           bool   `form:"select_order_by_date"`
 	IpHttp                string `form:"ip_http"`
+	WikiDocs              string `form:"wiki_docs"`
 }
 
 // IPListData 列表中每一行显示的IP数据
@@ -72,6 +73,7 @@ type IPListData struct {
 	WorkspaceId    int            `json:"workspace"`
 	WorkspaceGUID  string         `json:"workspace_guid"`
 	PinIndex       int            `json:"pinindex"`
+	WikiDocs       string         `json:"wiki_docs"`
 }
 
 type IconHashWithFofa struct {
@@ -107,6 +109,7 @@ type IPInfo struct {
 	Workspace     string
 	WorkspaceGUID string
 	PinIndex      string
+	WikiDocs      []DocumentInfo
 }
 
 // PortAttrInfo 每一个端口的详细数据
@@ -588,6 +591,9 @@ func (c *IPController) getSearchMap(req ipRequestParam) (searchMap map[string]in
 	if req.IpHttp != "" {
 		searchMap["ip_http"] = req.IpHttp
 	}
+	if req.WikiDocs != "" {
+		searchMap["wiki_docs"] = req.WikiDocs
+	}
 	return searchMap
 }
 
@@ -670,6 +676,12 @@ func (c *IPController) GetIPListData(req ipRequestParam) (resp DataTableResponse
 		if cdn.CheckIP(ipRow.IpName) || cdn.CheckASN(ipRow.IpName) {
 			ipData.IsCDN = true
 		}
+		var docs []string
+		for _, doc := range ipInfo.WikiDocs {
+			docs = append(docs, doc.Title)
+		}
+		ipData.WikiDocs = strings.Join(docs, "\r\n")
+
 		resp.Data = append(resp.Data, ipData)
 	}
 	resp.Draw = req.Draw
@@ -722,7 +734,7 @@ func getPortInfo(workspaceGUID string, ip string, ipId int, disableFofa, disable
 				pai.Port = fmt.Sprintf("%d", pd.PortNum)
 			}
 			if pad.Source == "fofa" {
-				fofaSearch := fmt.Sprintf(`ip="%s" && port="%d"`, ip, pd.PortNum)
+				fofaSearch := fmt.Sprintf(`ip = "%s" && port = "%d"`, ip, pd.PortNum)
 				pai.FofaLink = fmt.Sprintf("https://fofa.info/result?qbase64=%s", base64.URLEncoding.EncodeToString([]byte(fofaSearch)))
 			}
 			r.PortAttr = append(r.PortAttr, pai)
@@ -868,6 +880,19 @@ func getIPInfo(ip *db.Ip, getReleatedDomain, disableFofa, disableBanner bool) (r
 	r.TlsData = utils.SetToSlice(portInfo.TlsDataSet)
 	if getReleatedDomain {
 		r.Domain = getIpRelatedDomain(ip.WorkspaceId, ip.IpName)
+	}
+	//wiki document
+	wiki := db.WikiDocs{}
+	for _, doc := range wiki.GetsByIpOrDomain(ip.Id, 0) {
+		r.WikiDocs = append(r.WikiDocs, DocumentInfo{
+			Id:         doc.Id,
+			Title:      doc.Title,
+			NodeToken:  doc.NodeToken,
+			Comment:    doc.Comment,
+			PinIndex:   doc.PinIndex,
+			CreateTime: FormatDateTime(doc.CreateDatetime),
+			UpdateTime: FormatSubDateTime(doc.UpdateDatetime),
+		})
 	}
 	return
 }

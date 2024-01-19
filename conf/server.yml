@@ -34,3 +34,8 @@ notify:
     token: ""
   serverchan:
     token: ""
+wiki:
+  feishu:
+    appId:
+    appSecret:
+    refreshToken:

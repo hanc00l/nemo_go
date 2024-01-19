@@ -16,9 +16,11 @@ require (
 	github.com/google/uuid v1.3.0
 	github.com/joeguo/tldextract v0.0.0-20210326083850-1ec7be2de68a
 	github.com/lair-framework/go-nmap v0.0.0-20191202052157-3507e0b03523
+	github.com/larksuite/oapi-sdk-go/v3 v3.1.0
 	github.com/likexian/whois v1.14.2
 	github.com/likexian/whois-parser v1.24.1
 	github.com/mat/besticon v0.0.0-20210801190920-bdff7778a634
+	github.com/mingrammer/commonregex v1.0.1
 	github.com/oschwald/geoip2-golang v1.9.0
 	github.com/pkg/errors v0.9.1
 	github.com/projectdiscovery/mapcidr v1.1.9
@@ -28,6 +30,7 @@ require (
 	github.com/shirou/gopsutil/v3 v3.23.7
 	github.com/sirupsen/logrus v1.9.3
 	github.com/smallnest/rpcx v1.8.11
+	github.com/things-go/go-socks5 v0.0.4
 	github.com/tidwall/pretty v1.2.1
 	github.com/twmb/murmur3 v1.1.6
 	github.com/yl2chen/cidranger v1.0.2
@@ -160,7 +163,6 @@ require (
 	github.com/streadway/amqp v1.0.0 // indirect
 	github.com/templexxx/cpufeat v0.0.0-20180724012125-cef66df7f161 // indirect
 	github.com/templexxx/xor v0.0.0-20191217153810-f85b25db303b // indirect
-	github.com/things-go/go-socks5 v0.0.4 // indirect
 	github.com/tinylib/msgp v1.1.8 // indirect
 	github.com/tjfoc/gmsm v1.4.1 // indirect
 	github.com/tklauser/go-sysconf v0.3.11 // indirect

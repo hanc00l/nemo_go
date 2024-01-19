@@ -25,6 +25,7 @@ type WorkspaceData struct {
 	WorkspaceDescription string `json:"workspace_description" form:"workspace_description"`
 	State                string `json:"state" form:"state"`
 	SortOrder            int    `json:"sort_order" form:"sort_order"`
+	WikiSpaceId          string `json:"wiki_space_id" form:"wiki_space_id"`
 	CreateDatetime       string `json:"create_time" form:"-"`
 	UpdateDatetime       string `json:"update_time" form:"-"`
 }
@@ -32,6 +33,7 @@ type WorkspaceData struct {
 type WorkspaceInfoData struct {
 	WorkspaceId   string `json:"workspaceId"`
 	WorkspaceName string `json:"workspaceName"`
+	WikiSpaceId   string `json:"wikiSpaceId"`
 	Enable        bool   `json:"enable"`
 }
 
@@ -195,6 +197,12 @@ func (c *WorkspaceController) getWorkspaceListData(req workspaceRequestParam) (r
 		wData.SortOrder = workspaceRow.SortOrder
 		wData.UpdateDatetime = FormatDateTime(workspaceRow.UpdateDatetime)
 		wData.CreateDatetime = FormatDateTime(workspaceRow.CreateDatetime)
+
+		wikiSpace := db.WikiSpace{WorkspaceId: workspaceRow.Id}
+		if wikiSpace.GetByWorkspaceId() {
+			wData.WikiSpaceId = wikiSpace.WikiSpaceId
+		}
+
 		resp.Data = append(resp.Data, wData)
 	}
 	resp.Draw = req.Draw
@@ -234,9 +242,18 @@ func (c *WorkspaceController) AddSaveAction() {
 	workspace.State = wData.State
 	workspace.SortOrder = wData.SortOrder
 	workspace.WorkspaceDescription = wData.WorkspaceDescription
-	c.MakeStatusResponse(workspace.Add())
-	logging.RuntimeLog.Infof("add workspace:%s,GUID:%s", workspace.WorkspaceName, workspace.WorkspaceGUID)
-
+	status := workspace.Add()
+	c.MakeStatusResponse(status)
+	logging.RuntimeLog.Infof("add workspace:%s,GUID:%s,status:%v", workspace.WorkspaceName, workspace.WorkspaceGUID, status)
+	//添加wiki的spaceId
+	if status && len(wData.WikiSpaceId) > 0 {
+		wikiSpace := db.WikiSpace{WorkspaceId: workspace.Id, WikiSpaceId: wData.WikiSpaceId}
+		if wikiSpace.Add() {
+			logging.RuntimeLog.Infof("add wiki spaceId:%s", wData.WikiSpaceId)
+		} else {
+			logging.RuntimeLog.Errorf("add workspace:%s,wiki spaceId:%s fail", workspace.WorkspaceName, wData.WikiSpaceId)
+		}
+	}
 }
 
 // GetAction 根据ID获取一个记录
@@ -262,6 +279,10 @@ func (c *WorkspaceController) GetAction() {
 		wData.WorkspaceGUID = workspace.WorkspaceGUID
 		wData.UpdateDatetime = FormatDateTime(workspace.UpdateDatetime)
 		wData.CreateDatetime = FormatDateTime(workspace.CreateDatetime)
+		wikiSpace := db.WikiSpace{WorkspaceId: workspace.Id}
+		if wikiSpace.GetByWorkspaceId() {
+			wData.WikiSpaceId = wikiSpace.WikiSpaceId
+		}
 	}
 	c.Data["json"] = wData
 }
@@ -292,9 +313,30 @@ func (c *WorkspaceController) UpdateAction() {
 	updateMap["sort_order"] = wData.SortOrder
 	updateMap["state"] = wData.State
 	updateMap["workspace_description"] = wData.WorkspaceDescription
-	c.MakeStatusResponse(workspace.Update(updateMap))
-	logging.RuntimeLog.Infof("update workspace:%s", wData.WorkspaceName)
-
+	status := workspace.Update(updateMap)
+	c.MakeStatusResponse(status)
+	logging.RuntimeLog.Infof("update workspace:%s,state:%v", wData.WorkspaceName, status)
+	// update wiki spaceId
+	if len(wData.WikiSpaceId) > 0 {
+		wikiSpace := db.WikiSpace{WorkspaceId: workspace.Id, WikiSpaceId: wData.WikiSpaceId}
+		if wikiSpace.GetByWorkspaceId() {
+			// 如果spaceId发生了变化才更新
+			if wikiSpace.WikiSpaceId != wData.WikiSpaceId {
+				wikiSpace.Update(map[string]interface{}{"wiki_space_id": wData.WikiSpaceId})
+				logging.RuntimeLog.Infof("update workspace:%s,wiki spaceId:%s", workspace.WorkspaceName, wData.WikiSpaceId)
+			}
+		} else {
+			wikiSpace.Add()
+			logging.RuntimeLog.Infof("add workspace:%s,wiki spaceId:%s", workspace.WorkspaceName, wData.WikiSpaceId)
+		}
+	} else {
+		// delete space id
+		wikiSpace := db.WikiSpace{WorkspaceId: workspace.Id}
+		if wikiSpace.GetByWorkspaceId() {
+			wikiSpace.Delete()
+			logging.RuntimeLog.Infof("delete workspace:%s,wiki spaceId:%s", workspace.WorkspaceName, wikiSpace.WikiSpaceId)
+		}
+	}
 }
 
 // DeleteAction 删除一条记录
