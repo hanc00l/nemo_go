@@ -140,6 +140,9 @@ func init() {
 	web.CtrlGet("/runtimelog-info", (*controllers.RuntimeLogController).InfoAction)
 	web.CtrlPost("/runtimelog-delete", (*controllers.RuntimeLogController).DeleteAction)
 	web.CtrlPost("/runtimelog-batch-delete", (*controllers.RuntimeLogController).BatchDeleteAction)
+	web.CtrlGet("/accesslog-list", (*controllers.AccessLogController).IndexAction)
+	web.CtrlPost("/accesslog-list", (*controllers.AccessLogController).ListAction)
+	web.CtrlPost("/accesslog-file", (*controllers.AccessLogController).AccessLogFilesAction)
 
 	web.CtrlGet("/worker-list", (*controllers.WorkerController).IndexAction)
 	web.CtrlPost("/worker-list", (*controllers.WorkerController).ListAction)
