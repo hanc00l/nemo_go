@@ -11,9 +11,11 @@ func init() {
 	web.CtrlPost("/", (*controllers.LoginController).LoginAction)
 	web.CtrlGet("/logout", (*controllers.LoginController).LogoutAction)
 
-	web.CtrlGet("/config-list", (*controllers.ConfigController).IndexAction)
+	web.CtrlGet("/config-list-server", (*controllers.ConfigController).IndexServerAction)
+	web.CtrlGet("/config-list-worker", (*controllers.ConfigController).IndexWorkerAction)
 	web.CtrlPost("/config-list", (*controllers.ConfigController).LoadDefaultConfigAction)
-	web.CtrlPost("/config-list-admin", (*controllers.ConfigController).LoadAdminConfigAction)
+	web.CtrlPost("/config-list-server", (*controllers.ConfigController).LoadServerConfigAction)
+	web.CtrlPost("/config-list-worker", (*controllers.ConfigController).LoadWorkerConfigAction)
 	web.CtrlPost("/config-change-password", (*controllers.ConfigController).ChangePasswordAction)
 	web.CtrlGet("/custom-list", (*controllers.ConfigController).CustomAction)
 	web.CtrlPost("/custom-load", (*controllers.ConfigController).LoadCustomConfigAction)

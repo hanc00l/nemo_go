@@ -88,9 +88,14 @@ type DefaultConfig struct {
 	FeishuRefreshToken string `json:"feishurefreshtoken" form:"feishurefreshtoken"`
 }
 
-func (c *ConfigController) IndexAction() {
+func (c *ConfigController) IndexServerAction() {
 	c.Layout = "base.html"
-	c.TplName = "config.html"
+	c.TplName = "config-server.html"
+}
+
+func (c *ConfigController) IndexWorkerAction() {
+	c.Layout = "base.html"
+	c.TplName = "config-worker.html"
 }
 
 func (c *ConfigController) CustomAction() {
@@ -111,7 +116,7 @@ func (c *ConfigController) LoadDefaultConfigAction() {
 	}
 	portscan := conf.GlobalWorkerConfig().Portscan
 	fingerprint := conf.GlobalWorkerConfig().Fingerprint
-	onlineapi := conf.GlobalWorkerConfig().OnlineAPI
+	onlineAPI := conf.GlobalWorkerConfig().OnlineAPI
 	domainscan := conf.GlobalWorkerConfig().Domainscan
 
 	data := DefaultConfig{
@@ -136,9 +141,9 @@ func (c *ConfigController) LoadDefaultConfigAction() {
 		IsWhois:            domainscan.IsWhois,
 		IsICP:              domainscan.IsICP,
 		//
-		IsFofa:   onlineapi.IsFofa,
-		IsHunter: onlineapi.IsHunter,
-		IsQuake:  onlineapi.IsQuake,
+		IsFofa:   onlineAPI.IsFofa,
+		IsHunter: onlineAPI.IsHunter,
+		IsQuake:  onlineAPI.IsQuake,
 	}
 
 	if fileContent, err1 := os.ReadFile(filepath.Join(conf.GetRootPath(), "version.txt")); err1 == nil {
@@ -147,28 +152,25 @@ func (c *ConfigController) LoadDefaultConfigAction() {
 	c.Data["json"] = data
 }
 
-// LoadAdminConfigAction 获取配置管理的参数
-func (c *ConfigController) LoadAdminConfigAction() {
+// LoadWorkerConfigAction 获取worker的参数
+func (c *ConfigController) LoadWorkerConfigAction() {
 	if !c.CheckMultiAccessRequest([]RequestRole{SuperAdmin, Admin}, false) {
 		c.LoadDefaultConfigAction()
 		return
 	}
-
 	defer c.ServeJSON()
+
 	err := conf.GlobalWorkerConfig().ReloadConfig()
 	if err != nil {
 		c.FailedStatus(err.Error())
 		return
 	}
 	portscan := conf.GlobalWorkerConfig().Portscan
-	task := conf.GlobalServerConfig().Task
 	fingerprint := conf.GlobalWorkerConfig().Fingerprint
-	notifyToken := conf.GlobalServerConfig().Notify
 	apiConfig := conf.GlobalWorkerConfig().API
-	onlineapi := conf.GlobalWorkerConfig().OnlineAPI
+	onlineAPI := conf.GlobalWorkerConfig().OnlineAPI
 	domainscan := conf.GlobalWorkerConfig().Domainscan
 	proxy := conf.GlobalWorkerConfig().Proxy
-	feishu := conf.GlobalServerConfig().Wiki.Feishu
 
 	data := DefaultConfig{
 		CmdBin: portscan.Cmdbin,
@@ -177,18 +179,11 @@ func (c *ConfigController) LoadAdminConfigAction() {
 		Tech:   portscan.Tech,
 		IsPing: portscan.IsPing,
 		//
-		IpSliceNumber:   task.IpSliceNumber,
-		PortSliceNumber: task.PortSliceNumber,
-		//
 		IsHttpx:          fingerprint.IsHttpx,
 		IsScreenshot:     fingerprint.IsScreenshot,
 		IsFingerprintHub: fingerprint.IsFingerprintHub,
 		IsIconHash:       fingerprint.IsIconHash,
 		IsFingerprintx:   fingerprint.IsFingerprintx,
-		//
-		ServerChanToken: notifyToken["serverchan"].Token,
-		DingTalkToken:   notifyToken["dingtalk"].Token,
-		FeishuToken:     notifyToken["feishu"].Token,
 		//
 		FofaToken:   apiConfig.Fofa.Key,
 		HunterToken: apiConfig.Hunter.Key,
@@ -205,18 +200,44 @@ func (c *ConfigController) LoadAdminConfigAction() {
 		IsWhois:            domainscan.IsWhois,
 		IsICP:              domainscan.IsICP,
 		//onlineAPI:
-		IsFofa:           onlineapi.IsFofa,
-		IsHunter:         onlineapi.IsHunter,
-		IsQuake:          onlineapi.IsQuake,
+		IsFofa:           onlineAPI.IsFofa,
+		IsHunter:         onlineAPI.IsHunter,
+		IsQuake:          onlineAPI.IsQuake,
 		SearchPageSize:   apiConfig.SearchPageSize,
 		SearchLimitCount: apiConfig.SearchLimitCount,
 		//
-		ProxyList:          strings.Join(proxy.Host, "\n"),
+		ProxyList: strings.Join(proxy.Host, "\n"),
+	}
+
+	if fileContent, err1 := os.ReadFile(filepath.Join(conf.GetRootPath(), "version.txt")); err1 == nil {
+		data.Version = strings.TrimSpace(string(fileContent))
+	}
+	c.Data["json"] = data
+}
+
+// LoadServerConfigAction 获取Server的管理的参数
+func (c *ConfigController) LoadServerConfigAction() {
+	if !c.CheckMultiAccessRequest([]RequestRole{SuperAdmin, Admin}, false) {
+		return
+	}
+	defer c.ServeJSON()
+
+	task := conf.GlobalServerConfig().Task
+	notifyToken := conf.GlobalServerConfig().Notify
+	feishu := conf.GlobalServerConfig().Wiki.Feishu
+
+	data := DefaultConfig{
+		IpSliceNumber:   task.IpSliceNumber,
+		PortSliceNumber: task.PortSliceNumber,
+		//
+		ServerChanToken: notifyToken["serverchan"].Token,
+		DingTalkToken:   notifyToken["dingtalk"].Token,
+		FeishuToken:     notifyToken["feishu"].Token,
+		//
 		FeishuAppId:        feishu.AppId,
 		FeishuAppSecret:    feishu.AppSecret,
 		FeishuRefreshToken: feishu.UserAccessRefreshToken,
 	}
-
 	if fileContent, err1 := os.ReadFile(filepath.Join(conf.GetRootPath(), "version.txt")); err1 == nil {
 		data.Version = strings.TrimSpace(string(fileContent))
 	}

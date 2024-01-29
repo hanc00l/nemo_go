@@ -36,6 +36,6 @@ notify:
     token: ""
 wiki:
   feishu:
-    appId:
-    appSecret:
-    refreshToken:
+    appId: ""
+    appSecret: ""
+    refreshToken: ""

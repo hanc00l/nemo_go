@@ -1,67 +1,13 @@
 <main class="app-content">
     <div class="app-title">
         <div>
-            <h1><i class="fa fa-gear"></i> 配置管理</h1>
+            <h1><i class="fa fa-gear"></i>配置管理-Worker</h1>
         </div>
         <ul class="app-breadcrumb breadcrumb">
             <li class="breadcrumb-item"><i class="fa fa-home fa-lg"></i></li>
             <li class="breadcrumb-item"><a href="/">首页</a></li>
-            <li class="breadcrumb-item active"><a href="#">配置管理</a></li>
+            <li class="breadcrumb-item active"><a href="#">配置管理-Worker</a></li>
         </ul>
-    </div>
-
-    <!-- 模态对话框：修改-->
-    <div class="modal fade" id="openfeishu" tabindex="-1" role="dialog"
-         aria-labelledby="myModalLabel"
-         aria-hidden="true">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header card-header bg-primary">
-                    <h4 class="modal-title" id="myModalLabel">
-                        获取飞书用户访问RefreshToken
-                    </h4>
-                </div>
-                <div class="modal-body">
-                    <form class="form-horizontal" role="form">
-                        <div class="form-group">
-                            <label class="control-label no-padding-right"
-                                   for="input_server_ip">NemoIP地址</label>
-                            <div>
-                                <input class="form-control col-md-7" title="Server的互联网访问IP地址"
-                                       id="input_server_ip">
-                            </div>
-                            <label class="control-label no-padding-right"
-                                   for="input_server_ip">Nemo端口</label>
-                            <div>
-                                <input class="form-control col-md-7" title="Server的互联网访问端口"
-                                       id="input_server_port" value="5000">
-                            </div>
-                            <label class="control-label no-padding-right"
-                                   for="select_server_protocol">协议类型</label>
-                            <div>
-                                <select class="form-control  col-md-7" id="select_server_protocol">
-                                    <option value="https" selected>https</option>
-                                    <option value="http">http</option>
-                                </select>
-                            </div>
-                            <br/>
-                            <label class="control-label no-padding-right">输入Nemo的IP地址后并点击“验证”按钮，将前往飞书开放平台，获取用户访问Token和RefreshToken。如果Nemo提示“获取用户AccessToken成功”，则Nemo已成功获取并保存了Token，请在配置页面刷新即可！</label>
-                            <br/>
-                        </div>
-                        <div class="hr hr-16 hr-dotted"></div>
-                        <div class="modal-footer">
-                            <button type="button" class="btn btn-secondary" data-dismiss="modal"
-                                    aria-hidden="true">Cancel
-                            </button>
-                            <button class="btn btn-primary document-update" type="button"
-                                    id="button_feishu_auth">
-                                <span>前往飞书验证</span> <i class="fa fa-send m-l-10"></i>
-                            </button>
-                        </div>
-                    </form>
-                </div>
-            </div><!-- /.modal-content -->
-        </div><!-- /.modal-dialog -->
     </div>
 
     <div class="row">
@@ -216,52 +162,7 @@
                     </button>&nbsp;&nbsp;&nbsp;
                 </div>
             </div>
-            <div class="tile">
-                <h3 class="tile-title">Worker代理设置</h3>
-                <div class="tile-body">
-                    <form>
-                        <small class="form-text text-muted">Worker支持代理的技术与工具有：gogo、域名被动收集、域名爬虫、指纹识别、在线资产API接口、Nuclei；多个代理分行设置、随机选取；目前只支持socks5代理。</small>
-                        <small class="form-text text-muted">由于chrome不支持带验证的socks5代理，因此在127.0.0.1:5010进行代理转发到设置的代理服务器中。</small>
-                        <small class="form-text text-muted">Worker的启动参数-np可关闭代理的使用和本地转发。</small>
-                        <br/>
-                        <div class="form-group">
-                            <textarea class="form-control" id="text_proxy_list" rows="4"></textarea>
-                        </div>
-                    </form>
-                </div>
-                <div class="tile-footer">
-                    <button class="btn btn-primary" type="button" id="buttonSaveWorkerProxy"><i
-                            class="fa fa-fw fa-lg fa-check-circle"></i>保存设置
-                    </button>&nbsp;&nbsp;&nbsp;
-                </div>
-            </div>
-            <div class="tile">
-                <h3 class="tile-title">自定义任务的工作空间</h3>
-                <div class="tile-body">
-                    <form>
-                        <div class="form-group">
-                            <textarea class="form-control" id="text_task_workspace" rows="4"></textarea>
-                        </div>
-                    </form>
-                </div>
-                <div class="tile-footer">
-                    <button class="btn btn-primary" type="button" id="buttonSaveTaskWorkspace"><i
-                            class="fa fa-fw fa-lg fa-check-circle"></i>保存设置
-                    </button>&nbsp;&nbsp;&nbsp;
-                </div>
-            </div>
             {{ end }}
-            <div class="tile">
-                <h3 class="tile-title">Version&nbsp;<span id="nemo_version"></span></h3>
-                <div class="tile-body">
-                </div>
-                <div class="tile-footer">
-                    <div class="row">
-                        <div class="col-md-8 col-md-offset-3">
-                        </div>
-                    </div>
-                </div>
-            </div>
         </div>
         <div class="col-md-6">
             {{ if eq .UserRole "superadmin" "admin" }}
@@ -270,7 +171,7 @@
                 <div class="tile-body">
                     <form>
                         <div class="form-group">
-                            <label class="col-form-label" for="div_subdomain">
+                            <label class="col-form-label">
                                 <b>在线API接口：</b>
                             </label>
                             </br>
@@ -338,130 +239,25 @@
                 </div>
             </div>
             <div class="tile">
-                <h3 class="tile-title">任务消息通知Token</h3>
+                <h3 class="tile-title">Worker代理设置</h3>
                 <div class="tile-body">
                     <form>
+                        <small class="form-text text-muted">Worker支持代理的技术与工具有：gogo、域名被动收集、域名爬虫、指纹识别、在线资产API接口、Nuclei；多个代理分行设置、随机选取；目前只支持socks5代理。</small>
+                        <small class="form-text text-muted">由于chrome不支持带验证的socks5代理，因此在127.0.0.1:5010进行代理转发到设置的代理服务器中。</small>
+                        <small class="form-text text-muted">Worker的启动参数-np可关闭代理的使用和本地转发。</small>
+                        <br/>
                         <div class="form-group">
-                            <label class="col-form-label" for="input_serverchan">
-                                <b>Server酱<a href="https://sct.ftqq.com/" target="_blank"><i
-                                        class="fa fa-fw fa-external-link" aria-hidden="true"></i></a></b>
-                            </label>
-                            <input class="form-control" id="input_serverchan" type="text" placeholder="serverchan token"
-                                   value="">
-                            <label class="col-form-label" for="input_dingtalk">
-                                <b>钉钉群机器人<a href="https://open.dingtalk.com/document/group/custom-robot-access"
-                                                  target="_blank"><i class="fa fa-fw fa-external-link"
-                                                                     aria-hidden="true"></i></a></b>
-                            </label>
-                            <input class="form-control" id="input_dingtalk" type="text"
-                                   placeholder="dingtalk robot token" value="">
-                            <label class="col-form-label" for="input_feishu">
-                                <b>飞书群机器人<a
-                                        href="https://open.feishu.cn/document/ukTMukTMukTM/ucTM5YjL3ETO24yNxkjN"
-                                        target="_blank"><i class="fa fa-fw fa-external-link" aria-hidden="true"></i></a></b>
-                            </label>
-                            <input class="form-control" id="input_feishu" type="text" placeholder="feishu robot token"
-                                   value="">
+                            <textarea class="form-control" id="text_proxy_list" rows="4"></textarea>
                         </div>
                     </form>
                 </div>
                 <div class="tile-footer">
-                    <button class="btn btn-primary" type="button" id="buttonSaveNotify"><i
-                            class="fa fa-fw fa-lg fa-check-circle"></i>保存设置
-                    </button>
-                    <button class="btn btn-primary" type="button" id="buttonTestNotify"><i
-                            class="fa fa-fw fa-lg fa-podcast"></i>测试消息通知
-                    </button>&nbsp;&nbsp;&nbsp;
-                </div>
-            </div>
-            <div class="tile">
-                <h3 class="tile-title">知识库：飞书自建应用设置</h3>
-                <div class="tile-body">
-                    <form>
-                        <div class="form-group">
-                            <label class="col-form-label" for="input_feishu_appid">
-                                <b>AppId</b>
-                            </label>
-                            <input class="form-control" id="input_feishu_appid" type="text" value="">
-                            <label class="col-form-label" for="input_feishu_secret">
-                                <b>AppSecret</b>
-                            </label>
-                            <input class="form-control" id="input_feishu_secret" type="text" value="">
-                            <label class="col-form-label" for="input_feishu_refreshtoken">
-                                <b>用户访问RefreshToken</b>
-                            </label>
-                            <input class="form-control" id="input_feishu_refreshtoken" type="text" value="">
-                        </div>
-                    </form>
-                </div>
-                <div class="tile-footer">
-                    <button class="btn btn-primary" type="button" id="buttonSaveWikiFeishu"><i
-                            class="fa fa-fw fa-lg fa-check-circle"></i>保存设置
-                    </button>&nbsp;&nbsp;&nbsp;
-                    <button class="btn btn-primary" type="button" id="buttonRefreshToken" ><i
-                            class="fa fa-fw fa-lg fa-refresh"></i>刷新用户访问Token
-                    </button>
-                    <button class="btn btn-primary" type="button" id="buttonOpenWikiFeishu" data-toggle="modal"
-                            data-target="#openfeishu"><i
-                            class="fa fa-fw fa-lg fa-send"></i>从飞书授权用户访问Token
-                    </button>
-                    (请先保存设置后再进行获取/刷新用户访问Token)
-                </div>
-            </div>
-            <div class="tile">
-                <h3 class="tile-title">任务切分设置</h3>
-                <div class="tile-body">
-                    <form>
-                        <div class="form-group">
-                            <label class="col-form-label" for="input_ipslicenumber">
-                                <b>IP切分数量</b>
-                            </label>
-                            <input class="form-control" id="input_ipslicenumber" type="text" value="">
-                            <label class="col-form-label" for="input_portslicenumber">
-                                <b>端口切分数量</b>
-                            </label>
-                            <input class="form-control" id="input_portslicenumber" type="text" value="">
-                        </div>
-                    </form>
-                </div>
-                <div class="tile-footer">
-                    <button class="btn btn-primary" type="button" id="buttonSaveTaskSlice"><i
+                    <button class="btn btn-primary" type="button" id="buttonSaveWorkerProxy"><i
                             class="fa fa-fw fa-lg fa-check-circle"></i>保存设置
                     </button>&nbsp;&nbsp;&nbsp;
                 </div>
             </div>
             {{ end }}
-            <div class="tile">
-                <h3 class="tile-title">修改登录密码</h3>
-                <div class="tile-body">
-                    <div class="form-group row">
-                        <label class="control-label col-md-3"> 原始密码</label>
-                        <div class="col-md-8">
-                            <input class="form-control" id="input_oldpass" type="password" placeholder="old password"
-                                   value="">
-                        </div>
-                    </div>
-                    <div class="form-group row">
-                        <label class="control-label col-md-3">修改后的新密码</label>
-                        <div class="col-md-8">
-                            <input class="form-control" id="input_password1" type="password" placeholder="new password"
-                                   value="">
-                        </div>
-                    </div>
-                    <div class="form-group row">
-                        <label class="control-label col-md-3">确认修改新密码</label>
-                        <div class="col-md-8">
-                            <input class="form-control" id="input_password2" type="password"
-                                   placeholder="confirm password" value="">
-                        </div>
-                    </div>
-                </div>
-                <div class="tile-footer">
-                    <button class="btn btn-primary" type="button" id="buttonChangPassword"><i
-                            class="fa fa-fw fa-lg fa-check-circle"></i>保存设置
-                    </button>&nbsp;&nbsp;&nbsp;
-                </div>
-            </div>
         </div>
         <div class="clearix"></div>
     </div>
@@ -475,9 +271,7 @@
 <script src="static/js/plugins/dataTables.bootstrap.min.js"></script>
 <script src="static/js/sweetalert/sweetalert.min.js"></script>
 <script src="static/js/jquery/jquery.bootstrap-duallistbox.js"></script>
-<script src="static/js/server/config.js"></script>
-<script src="static/js/rsa/jsencrypt.min.js"></script>
-<script src="static/js/server/login.js"></script><!-- load RSA pub-key -->
+<script src="static/js/server/config-worker.js"></script>
 <script>
     $(function () {
         $("title").html("Config-Nemo");

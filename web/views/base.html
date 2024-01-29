@@ -6,7 +6,7 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link rel="stylesheet" type="text/css" href="static/css/bootstrap.min.css">
-    <link rel="icon" type="image/x-icon" class="js-site-favicon" href="static/css/images/favicon.ico">
+    <link rel="icon" type="image/x-icon" class="js-site-favicon" href="static/images/favicon.ico">
     <link rel="stylesheet" type="text/css" href="static/css/main.css">
     <link rel="stylesheet" type="text/css" href="static/css/font-awesome/4.7.0/css/font-awesome.min.css">
     <!-- Main CSS-->
@@ -167,7 +167,10 @@
                 <i class="treeview-indicator fa fa-angle-right"></i>
             </a>
             <ul class="treeview-menu">
-                <li><a class="treeview-item" href="config-list"><i class="icon fa fa-gear fa-fw"></i>配置管理</a></li>
+                <li><a class="treeview-item" href="config-list-server"><i class="icon fa fa-gear fa-fw"></i>配置管理-Server</a>
+                </li>
+                <li><a class="treeview-item" href="config-list-worker"><i class="icon fa fa-gear fa-fw"></i>配置管理-Worker</a>
+                </li>
                 {{ if eq .UserRole "superadmin" "admin" }}
                 <li><a class="treeview-item" href="custom-list"><i class="icon fa fa-futbol-o fa-fw"></i>自定义配置</a>
                 </li>
