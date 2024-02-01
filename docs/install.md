@@ -17,13 +17,14 @@ Nemo分为**Server**端和**Worker**端两部份。Server提供Http访问、API�
 - Chrome
 
 **Worker其它使用工具已集成到thirdparty目录中：**
-- Observer_Ward
 - httpx
 - subfinder
 - massdns
 - nuclei
 - xray
 - goby
+- fingerprintx
+- gogo
 
 Nemo目前可运行在**x86-AMD**平台的MacOS、Linux及Windows平台，其它平台目前未做测试。本文档均以Ubuntu Linux版本进行介绍安装步骤，在Mac、Windows平台及其它请参考相应的安装步骤。
 
@@ -136,7 +137,7 @@ Worker不会开启任务监听端口（启用goby服务端模式除外），work
 
 ## Linux安装
 
-推荐使用Ubuntu18.04/20.04 LTS版本安装（以下的安装方法均是在Ubuntu上进行）。根据大家的测试和反馈，也支持其它的Linux发行版本的安装（比如centos），只是各组件的步骤和细节稍有不同，可以参照进行相应的调整。
+推荐使用Ubuntu22.04 LTS版本安装（以下的安装方法均是在Ubuntu上进行）。根据大家的测试和反馈，也支持其它的Linux发行版本的安装（比如centos），只是各组件的步骤和细节稍有不同，可以参照进行相应的调整。
 
 ### 一、Server 
 
@@ -285,6 +286,7 @@ Worker不会开启任务监听端口（启用goby服务端模式除外），work
     username: nemo
     password: nemo2020
   ```
+- **注意：由于chrome-headless因安全的原因，不推荐在root权限下运行，建议worker使用普通用户运行。**
 
 ## 运行
 

@@ -33,10 +33,10 @@
 ### 3、指纹信息
 
 - [HTTPX](https://github.com/projectdiscovery/httpx) 获取HTTP指纹
-- [ScreenShot](https://github.com/chromedp/chromedp) （调用chrome headless）
-- ~~[ObserverWard](https://github.com/0x727/ObserverWard_0x727)~~  被动指纹库(指纹信息来源于https://github.com/0x727/FingerprintHub)
-- IconHash ~~（基于[mat/besticon](github.com/mat/besticon)和[Becivells/iconhash](github.com/Becivells/iconhash)项目）~~
-- [Fingerprintx](https://github.com/praetorian-inc/fingerprintx)获取非HTTP协议指纹
+- [ScreenShot](https://github.com/chromedp/chromedp) （httpx调用chrome headless）
+- 被动指纹库(指纹信息来源于https://github.com/0x727/FingerprintHub)
+- IconHash指纹
+- [fingerprintx](https://github.com/praetorian-inc/fingerprintx)获取非HTTP协议指纹
 - 自定义指纹
 
 ### 4、API接口 （需提供相应的Key)
@@ -71,7 +71,7 @@
 - 多用户/角色、多工作空间（项目）支持及资产隔离
 - 资产颜色标记、置顶、备忘录协作
 - IP/Domain黑名单、一键拉黑
-- 基于飞书的自建企业应用，集成[飞书知识库](docs/wiki_feishu.md)，并与Nemo的IP和域名资产进行关联
+- 知识库：基于飞书平台和自建企业应用，集成[飞书知识库](docs/wiki_feishu.md)，并与Nemo的IP和域名资产进行关联
 
 ### 8、其它
 

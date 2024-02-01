@@ -38,6 +38,8 @@
 
 ![feishu-313.png](image%2Ffeishu-313.png)
 
+![feishu-314.png](image%2Ffeishu-314.png)
+
 + 根据自建应用调用的API，为自建应用开通知识库API使用的权限。调用的API清单如下：
 
   *认证及授权*
@@ -55,7 +57,7 @@
     - 获取知识空间节点信息：GET /open-apis/wiki/v2/spaces/get_node。获取知识空间节点信息。
     - 创建知识空间节点：POST /open-apis/wiki/v2/spaces/:space_id/nodes。此接口用于在知识节点里创建节点到指定位置。
     - 获取文档纯文本内容：GET /open-apis/docx/v1/documents/:document_id/raw_content。获取文档的纯文本内容。
-  
+
   *导出*
 
     - 创建导出任务：POST

@@ -222,6 +222,11 @@ func (c *ConfigController) LoadServerConfigAction() {
 	}
 	defer c.ServeJSON()
 
+	err := conf.GlobalServerConfig().ReloadConfig()
+	if err != nil {
+		c.FailedStatus(err.Error())
+		return
+	}
 	task := conf.GlobalServerConfig().Task
 	notifyToken := conf.GlobalServerConfig().Notify
 	feishu := conf.GlobalServerConfig().Wiki.Feishu

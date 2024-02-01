@@ -20,7 +20,6 @@ require (
 	github.com/likexian/whois v1.14.2
 	github.com/likexian/whois-parser v1.24.1
 	github.com/mat/besticon v0.0.0-20210801190920-bdff7778a634
-	github.com/mingrammer/commonregex v1.0.1
 	github.com/oschwald/geoip2-golang v1.9.0
 	github.com/pkg/errors v0.9.1
 	github.com/projectdiscovery/mapcidr v1.1.9

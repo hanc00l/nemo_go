@@ -1,5 +1,27 @@
 # ChangeLog
 
+## v2.12.0
+
+2024-2-1
+
+### Update
+
+- 集成飞书知识库，详细使用方法请参考[飞书知识库](docs/wiki_feishu.md)；数据库新增了wiki表，从v2.11升级需导入wiki.sql；
+- 在web后台查看acceelog日志；
+- web的配置管理拆分为Server端和Worker端；
+- 更新nuclei的poc；
+
+### Thirdparty版本
+
+- Httpx：1.3.9
+- Subfinder：2.6.4
+- Nuclei：3.1.7
+- Gogo: 2.11.12
+- Goby：2.8.8
+- Xray：1.9.11
+- fingerprintx：1.1.13（fork and fixed by [hanc00l](https://github.com/hanc00l/fingerprintx))
+
+
 ## v2.11.0
 
 2024-1-3
