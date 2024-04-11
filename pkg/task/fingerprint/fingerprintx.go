@@ -3,6 +3,7 @@ package fingerprint
 import (
 	"bytes"
 	"encoding/json"
+	"fmt"
 	"github.com/hanc00l/nemo_go/pkg/conf"
 	"github.com/hanc00l/nemo_go/pkg/logging"
 	"github.com/hanc00l/nemo_go/pkg/task/custom"
@@ -123,11 +124,23 @@ func (f *Fingerprintx) parseResult(outputTempFile string) (result []FingerAttrRe
 		logging.CLILog.Error(err)
 		return
 	}
-	farBanner := FingerAttrResult{
-		Tag:     "fingerprintx",
-		Content: string(content),
+	// 去除ssh协议中无意义的algo字段部份
+	if service.Protocol == "ssh" {
+		var data map[string]json.RawMessage
+		if err = json.Unmarshal(service.Raw, &data); err == nil {
+			delete(data, "algo")
+			service.Raw, _ = json.Marshal(data)
+		}
 	}
-	result = append(result, farBanner)
+	banner, err := json.Marshal(service)
+	if err == nil {
+		farBanner := FingerAttrResult{
+			Tag:     "fingerprintx",
+			Content: string(banner),
+		}
+		fmt.Println(farBanner)
+		result = append(result, farBanner)
+	}
 	if service.Protocol != "" {
 		farProtocol := FingerAttrResult{
 			Tag:     "service",

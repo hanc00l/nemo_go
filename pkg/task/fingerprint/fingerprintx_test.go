@@ -13,6 +13,14 @@ func TestFingerprintx_RunFingerprintx(t *testing.T) {
 	}
 }
 
+func TestFingerprintx_RunFingerprintx_SSH(t *testing.T) {
+	f := NewFingerprintx()
+	result := f.RunFingerprintx("172.16.222.144:22")
+	for _, r := range result {
+		t.Log(r)
+	}
+}
+
 func TestFingerprintx_Do(t *testing.T) {
 	v := NewHttpxAll()
 	v.ResultPortScan = &portscan.Result{
