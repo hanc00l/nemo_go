@@ -3,7 +3,6 @@ package fingerprint
 import (
 	"bytes"
 	"encoding/json"
-	"fmt"
 	"github.com/hanc00l/nemo_go/pkg/conf"
 	"github.com/hanc00l/nemo_go/pkg/logging"
 	"github.com/hanc00l/nemo_go/pkg/task/custom"
@@ -138,7 +137,6 @@ func (f *Fingerprintx) parseResult(outputTempFile string) (result []FingerAttrRe
 			Tag:     "fingerprintx",
 			Content: string(banner),
 		}
-		fmt.Println(farBanner)
 		result = append(result, farBanner)
 	}
 	if service.Protocol != "" {
