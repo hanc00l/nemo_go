@@ -162,4 +162,9 @@ func init() {
 	web.CtrlPost("/wiki-get", (*controllers.WikiController).GetAction)
 	web.CtrlPost("/wiki-update", (*controllers.WikiController).UpdateAction)
 	web.CtrlPost("/wiki-export", (*controllers.WikiController).ExportDocument)
+
+	web.CtrlGet("/minichat", (*controllers.MiniChatController).IndexAction)
+	web.CtrlPost("/message/precheck", (*controllers.MiniChatController).PreCheckAction)
+	web.CtrlGet("/message/ws", (*controllers.MiniChatController).WebSocketAction)
+	web.CtrlPost("/api/upload", (*controllers.MiniChatController).UploadAction)
 }

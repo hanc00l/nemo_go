@@ -1,0 +1,871 @@
+﻿<!DOCTYPE html>
+<html>
+
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0,viewport-fit=cover">
+    <link rel="icon" type="image/svg+xml"
+          href="data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%20100%20100'%3E%3Ctext%20y='.9em'%20font-size='90'%3E😂%3C/text%3E%3C/svg%3E">
+    <link rel="shortcut icon" type="image/svg+xml"
+          href="data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%20100%20100'%3E%3Ctext%20y='.9em'%20font-size='90'%3E😂%3C/text%3E%3C/svg%3E">
+    <link rel="apple-touch-icon"
+          href="data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%20100%20100'%3E%3Ctext%20y='.9em'%20font-size='90'%3E😂%3C/text%3E%3C/svg%3E"
+          sizes="180x180">
+    <meta name="theme-color" content="#212129">
+    <title>MiniChat</title>
+    <meta name="description" content="MiniSecChat">
+    <link rel="stylesheet" href="static/minichat/index.6369ed8c.css">
+    <link rel="stylesheet" href="static/minichat/index.a243aca3.css">
+    <script rel="stylesheet" src="static/minichat/jquery.min.js"></script>
+    <script rel="stylesheet" src="static/minichat/jsencrypt.js"></script>
+    <script rel="stylesheet" src="static/minichat/crypto-js.js"></script>
+
+    <style type="text/css">
+
+        #popup {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: white;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+            z-index: 1000;
+            overflow: hidden;
+            max-width: 400px;
+            width: 96%;
+        }
+
+        .popup-content input {
+            width: calc(100%);
+            padding: 10px;
+            margin-bottom: 10px;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+        }
+
+        .popup-content button {
+            padding: 10px 20px;
+            background-color: #a0bfa6;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        .container {
+            height: calc(100% - 64px - 106px - 16px - 26px);
+            overflow: auto;
+            scrollbar-width: none;
+            /* Firefox */
+            -ms-overflow-style: none;
+            /* IE and Edge */
+
+            ::-webkit-scrollbar {
+                /* Chrome, Safari, and Opera */
+                display: none;
+            }
+        }
+
+        html, body, main {
+            height: 98%;
+        }
+
+        img {
+            max-width: 100%;
+            border-radius: 1px;
+        }
+
+        .label-file {
+            box-sizing: border-box;
+            border-width: 0;
+            border-style: solid;
+            border-color: #e5e7eb;
+            height: 3rem;
+            border-radius: .125rem;
+            --un-bg-opacity: 1;
+            background-color: rgba(148, 163, 184, var(--un-bg-opacity));
+            --un-bg-opacity: .15;
+            padding: .6rem 1rem;
+            cursor: pointer;
+        }
+
+    </style>
+    <script src="static/minichat/vue.global.js"></script>
+</head>
+
+<body>
+
+<main id="app">
+    <div id="popup" class="hidden">
+        <div class="popup-content">
+            <div id="roomTips" style="overflow-wrap: anywhere;"
+                 class="my-4 px-4 py-3 border border-red/50 bg-red/10 text-red op-70 text-sm"></div>
+            <br>
+            <input type="text" id="username" placeholder="Enter Name...">
+            <input type="text" id="password" placeholder="Password or Empty">
+            <button id="join">Enter</button>
+        </div>
+    </div>
+    <header>
+        <div class="fb items-center">
+            <input type="file" id="headupimg" style=" opacity: 0;display:none;">
+            <svg onclick="uploadHead()" style="cursor: pointer;" xmlns="http://www.w3.org/2000/svg" width="48"
+                 height="48" viewBox="0 0 32 32">
+                <g fill="none">
+                    <path fill="#F8312F"
+                          d="M5 3.5a1.5 1.5 0 0 1-1 1.415V12l2.16 5.487L4 23c-1.1 0-2-.9-2-1.998v-7.004a2 2 0 0 1 1-1.728V4.915A1.5 1.5 0 1 1 5 3.5Zm25.05.05c0 .681-.44 1.26-1.05 1.468V12.2c.597.347 1 .994 1 1.73v7.01c0 1.1-.9 2-2 2l-2.94-5.68L28 11.93V5.018a1.55 1.55 0 1 1 2.05-1.468Z"></path>
+                    <path fill="#FFB02E"
+                          d="M11 4.5A1.5 1.5 0 0 1 12.5 3h7a1.5 1.5 0 0 1 .43 2.938c-.277.082-.57.104-.847.186l-3.053.904l-3.12-.908c-.272-.08-.56-.1-.832-.18A1.5 1.5 0 0 1 11 4.5Z"></path>
+                    <path fill="#CDC4D6"
+                          d="M22.05 30H9.95C6.66 30 4 27.34 4 24.05V12.03C4 8.7 6.7 6 10.03 6h11.95C25.3 6 28 8.7 28 12.03v12.03c0 3.28-2.66 5.94-5.95 5.94Z"></path>
+                    <path fill="#212121"
+                          d="M9.247 18.5h13.506c2.33 0 4.247-1.919 4.247-4.25A4.257 4.257 0 0 0 22.753 10H9.247A4.257 4.257 0 0 0 5 14.25a4.257 4.257 0 0 0 4.247 4.25Zm4.225 7.5h5.056C19.34 26 20 25.326 20 24.5s-.66-1.5-1.472-1.5h-5.056C12.66 23 12 23.674 12 24.5s.66 1.5 1.472 1.5Z"></path>
+                    <path fill="#00A6ED"
+                          d="M10.25 12C9.56 12 9 12.56 9 13.25v2.5a1.25 1.25 0 1 0 2.5 0v-2.5c0-.69-.56-1.25-1.25-1.25Zm11.5 0c-.69 0-1.25.56-1.25 1.25v2.5a1.25 1.25 0 1 0 2.5 0v-2.5c0-.69-.56-1.25-1.25-1.25Z"></path>
+                </g>
+            </svg>
+            <div id="themeToggle"
+                 class="flex items-center justify-center w-10 h-10 rounded-md transition-colors hover:bg-slate/10 astro-KXYEDVG6">
+                <svg class="theme_toggle_svg astro-KXYEDVG6" width="1.2em" height="1.2em" viewBox="0 0 24 24"
+                     color="#858585" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                     stroke="currentColor">
+                    <mask id="myMask" class="astro-KXYEDVG6">
+                        <rect x="0" y="0" width="100%" height="100%" fill="white" class="astro-KXYEDVG6"></rect>
+                        <circle class="theme_toggle_circle1 astro-KXYEDVG6" fill="black" cx="100%" cy="0%"
+                                r="5"></circle>
+                    </mask>
+                    <circle class="theme_toggle_circle2 astro-KXYEDVG6" cx="12" cy="12" fill="#858585"
+                            mask="url(#myMask)" r="5"></circle>
+                    <g class="theme_toggle_g astro-KXYEDVG6" stroke="currentColor" opacity="1">
+                        <line x1="12" y1="1" x2="12" y2="3" class="astro-KXYEDVG6"></line>
+                        <line x1="12" y1="21" x2="12" y2="23" class="astro-KXYEDVG6"></line>
+                        <line x1="4.22" y1="4.22" x2="5.64" y2="5.64" class="astro-KXYEDVG6"></line>
+                        <line x1="18.36" y1="18.36" x2="19.78" y2="19.78" class="astro-KXYEDVG6"></line>
+                        <line x1="1" y1="12" x2="3" y2="12" class="astro-KXYEDVG6"></line>
+                        <line x1="21" y1="12" x2="23" y2="12" class="astro-KXYEDVG6"></line>
+                        <line x1="4.22" y1="19.78" x2="5.64" y2="18.36" class="astro-KXYEDVG6"></line>
+                        <line x1="18.36" y1="5.64" x2="19.78" y2="4.22" class="astro-KXYEDVG6"></line>
+                    </g>
+                </svg>
+            </div>
+        </div>
+        <div class="fi mt-2">
+            <span class="gpt-title">Mini</span>
+            <span class="gpt-subtitle">Chat</span>
+        </div>
+        <!--        <p mt-1="" op-60=""  ></p>-->
+        <div class="my-4 px-4 py-3 border border-red/50 bg-red/10" v-show="roomTips != ''">
+            <div class="text-red op-70 text-sm" v-html="roomTips"></div>
+        </div>
+    </header>
+
+    <div data-hk="s00-0" my-6="" id="messages" class="container"
+         style="overflow-x: hidden; font-size: 14px; scrollbar-width: auto;">
+        <div data-hk="s00-1-0" class="my-4">
+        </div>
+        <div class="py-2 -mx-4 px-4 transition-colors md:hover:bg-slate/3" v-for="msg in items">
+            <div class="flex gap-3 rounded-lg op-75">
+                <template v-if="msg.head_ulr != ''">
+                    <img v-bind:src="msg.head_ulr" style="max-height: 60px;max-width: 60px;" onclick="cccccc(this)"/>
+                </template>
+                <template v-else>
+                    <div class="shrink-0 w-7 h-7 rounded-full op-80 bg-gradient-to-r from-purple-400 to-yellow-400 mt-1 "></div>
+                </template>
+                <!--                <img src="/static/images/headimgurl.jpg" style="max-height: 20px;">-->
+                <div class="message prose break-words overflow-hidden">
+                    <div class="text-red op-90 text-base">
+                        <template v-if="msg.cmd === 'join' || msg.cmd === 'exit'">
+                            <strong>( 系统 )</strong>
+                        </template>
+                        <template v-else-if="msg.username === username">
+                            <strong class="myft" style="color: rgb(36 170 197);">{[ msg.username === username ? '[我的对话] ':'(其他人)' ]} {[ msg.username ]}</strong>
+                        </template>
+                        <template v-else>
+                            <strong class="otft">{[ msg.username === username ? '[我的对话] ':'(其他人)' ]} {[ msg.username ]}</strong>
+                        </template>
+                    </div>
+                    <div class="text-red op-90 text-xs">
+                        {[ formatDate(new Date()) ]}
+                    </div>
+                    <div>
+                        <template v-if="msg.cmd === 'join'">
+                            <p class="text-red op-90 text-sm" style="margin:0.5rem 0">{[ msg.payload ]}</p>
+                        </template>
+                        <template v-else-if="msg.cmd === 'img'">
+                            <img v-bind:src="msg.payload" style="max-height: 250px;" onclick="cccccc(this)"/>
+                        </template>
+                        <template v-else-if="msg.cmd === 'file'">
+                            <a v-bind:href="msg.payload" target="_blank" style="max-height:80px;font-size: 22px;">[上传文件]---{[
+                                msg.file_name ]}</a>
+                        </template>
+                        <template v-else-if="msg.cmd === 'exit'">
+                            <p class="text-red op-90 text-sm" style="margin:0.5rem 0">{[ msg.payload ]}</p>
+                        </template>
+                        <template v-else>
+                            <p style="margin:0" v-html="msg.payload"></p>
+                        </template>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="gen-text-wrapper">
+        <textarea id="message" placeholder="Enter something..." autocomplete="off" autofocus="" rows="1"
+                  class="gen-textarea"></textarea>
+        <button gen-slate-btn="" id="send" @click="send">Send</button>
+        <label for="fileInput" class="label-file">
+            <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADIAAAAyCAYAAAAeP4ixAAAACXBIWXMAAAsTAAALEwEAmpwYAAACLUlEQVR4nO2ZwU4UQRCGv+CCiciLKPHkRbgZ5YBRQ7K+hQHBB+AE6skTTwCcwUfRiLsh6g25KmKie6BNJf+Qdpyd7WGHnV7tL6lkd7s7Xf9WVU/3NCQSiVCmgFfAF8AFmPVbIkJeBgrwrQfcJjKO5NxcYP/X6t8FrhERThbKVeCdxmwxxkKMW8DPC6TksHYEvFBd1yLEeOil5ahts04hTTDvRWashZT6+88JOW4o36vYcYiQcbO/yBruED9z/1WNjAsuCYkMlyISGS5FJDJcikhkuBSRyHApIpHhYo7IJNAGdoAOcAr8AD4Bu8AToBW7kMfAYcBB6jPwIEYhE3pHlc3/HngG3ASmZfZ5FTiockIcNZmIX8BT4EpJX2tb1jvnqIRYOp1JxL2C9jfAfsHv9z0xlmaNCpn0asIiUUSZTytezbRCB10Gba8m+qWTK/HJnP+g9nbooMtgV/PZP9sPN8CnNbVvVxlUN13Nd6Okjxvg06zaP1YZVDcnmm/GK2wXaNkCMKPvp00K+ZYTYs6FCtnLCTlpUkhH89nDbtjU6lYZVDc7ms+e2P1wA3x6XlTs2a2TXaKMgiXNdzDE8tspWn79/c6obfkCQlbVdqiH6zlTEtPEfWBP2448+15h+yxojG1vHhEJ656Ylfx2I0dLkeiVXYY2yYb+XaeaWdOKdF02q8LOtiRnEmFHgOi4q5PgoDS0mogmnfphq9eilua3wFfguyJhS6ytTn8UdsZvcIb6yptP4cwAAAAASUVORK5CYII=">
+        </label>
+        <input v-show="false" type="file" id="fileInput" style=" opacity: 0;">
+
+        <button @click="clearScreen" title="Clear" gen-slate-btn="">
+            <svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 24 24">
+                <path fill="currentColor"
+                      d="M8 20v-5h2v5h9v-7H5v7h3zm-4-9h16V8h-6V4h-4v4H4v3zM3 21v-8H2V7a1 1 0 0 1 1-1h5V3a1 1 0 0 1 1-1h6a1 1 0 0 1 1 1v3h5a1 1 0 0 1 1 1v6h-1v8a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1z"></path>
+            </svg>
+        </button>
+    </div>
+    <footer>
+        <p mt-8="" text-xs="" op-30="">
+            <span pr-1="">  MiniChat by https://github.com/okhanyu/minichat（更换头像请点击最上图标并上传JPG/PNG图片） </span>
+            <!--            <a b-slate-link="" href="https://ddiu.io/" target="_blank">-->
+            <!--                Diu-->
+            <!--            </a>-->
+            <!--            <span px-1="">|</span>-->
+            <!--            <span pr-1=""> Server by</span>-->
+            <!--            <a b-slate-link="" href="https://lion.im/" target="_blank">-->
+            <!--                Han-->
+            <!--            </a> -->
+        </p>
+    </footer>
+    <div id="outerdiv"
+         style="position:fixed;top:0;left:0;background:rgba(0,0,0,0.7);z-index:2;width:100%;height:100%;display:none;">
+        <div id="innerdiv" style="position:absolute;">
+            <img id="bigimg" style="border:5px solid #fff;" src=""/>
+        </div>
+    </div>
+
+</main>
+
+<script>
+
+    let host = window.location.host;
+    let ws;
+    let username;
+    let roomNumber;
+    let password;
+    let publicKey;
+    var secKey;
+
+    //AES 加密函数
+    function AESJiaMi1(word, keyStr) {
+        keyStr = keyStr ? keyStr : "1234567890123456";
+        var ivStr = "1234567890123456";
+        return CryptoJS.AES.encrypt(word, CryptoJS.enc.Utf8.parse(keyStr), {
+            iv: CryptoJS.enc.Utf8.parse(ivStr),
+            mode: CryptoJS.mode.CBC,
+            padding: CryptoJS.pad.Pkcs7
+        }).toString()
+    };
+
+    //AES 解密函数
+    function AESJieMi1(word, keyStr) {
+        keyStr = keyStr ? keyStr : "1234567890123456";
+        var ivStr = "1234567890123456";
+        let decrypted = CryptoJS.AES.decrypt(word, CryptoJS.enc.Utf8.parse(keyStr), {
+            iv: CryptoJS.enc.Utf8.parse(ivStr),
+            mode: CryptoJS.mode.CBC,
+            padding: CryptoJS.pad.Pkcs7
+        });
+        return decrypted.toString(CryptoJS.enc.Utf8)
+    };
+
+    // 滚动到div底部的函数
+    function scrollToBottom() {
+        var myDiv = document.getElementById('messages');
+        myDiv.scrollTop = myDiv.scrollHeight;
+    }
+
+    // 获取地址栏参数
+    function getQueryParams() {
+        let queryParams = {};
+        let queryString = window.location.search;
+
+        // 移除查询字符串前面的'?'
+        if (queryString.charAt(0) === '?') {
+            queryString = queryString.substr(1);
+        }
+
+        let params = new URLSearchParams(queryString);
+        params.forEach((value, key) => {
+            queryParams[key] = value;
+        });
+
+        return queryParams;
+    }
+
+    function format(date) {
+        const day = date.getDate().toString().padStart(2, '0');
+        const month = (date.getMonth() + 1).toString().padStart(2, '0');
+        const year = date.getFullYear();
+        const hours = date.getHours().toString().padStart(2, '0');
+        const minutes = date.getMinutes().toString().padStart(2, '0');
+        const seconds = date.getSeconds().toString().padStart(2, '0');
+
+        return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
+    }
+
+    function generateRandomString(length) {
+        let result = '';
+        let characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+        let charactersLength = characters.length;
+        for (let i = 0; i < length; i++) {
+            result += characters.charAt(Math.floor(Math.random() * charactersLength));
+        }
+        return result;
+    }
+
+    function init(that) {
+        roomNumber = getQueryParams().room;
+        if (roomNumber === undefined || roomNumber === "" || roomNumber == null) {
+            let currentUrl = window.location.href;
+            let urlWithoutParams = currentUrl.split('?')[0];
+            // 从服务端获取默认的roomNumber；如果为空则客户端生成：
+            let roomNumberInit = "{{ .roomNumber }}";
+            if (roomNumberInit === "") {
+                alert("获取roomNumber失败，请先登录Nemo并选择一个工作空间！");
+                return;
+            }
+            window.location.href = urlWithoutParams + '?room=' + roomNumberInit;
+        }
+        document.getElementById('roomTips').innerHTML = "🏠︎ " + window.location.href;
+
+        const exit = "exit";
+        const join = "join";
+        const chat = "chat";
+
+        document.getElementById('join').onclick = function () {
+            roomNumber = getQueryParams().room;
+            username = document.getElementById('username').value;
+            password = document.getElementById('password').value;
+
+            var serverApi = window.location.protocol + '//' + host;
+            if (host === "" || host === undefined || host === null) {
+                serverApi = window.location.protocol + '//' + window.location.host
+            }
+
+            const data = {'room_number': roomNumber, 'username': username, 'password': password};
+
+            var url = serverApi + '/message/precheck';
+
+            fetch(url, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(data),
+            })
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Network response was not ok');
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    console.log('Success:', data);
+
+                    if (data.code !== 10000) {
+                        alert(data.info);
+                        return;
+                    }
+                    publicKey = data["public_key"]
+                    //进行随机产生加密密钥
+                    const jsencrypt = new JSEncrypt()
+                    jsencrypt.setPublicKey(publicKey)
+                    if (secKey == null || secKey == undefined || secKey == "") {
+                        secKey = generateRandomString(32);
+                    }
+                    const encryptMsg = jsencrypt.encrypt(secKey)
+                    const protocol = window.location.protocol === 'https:' ? 'wss://' : 'ws://';
+                    if (host === "" || host === undefined || host === null) {
+                        serverApi = protocol + window.location.host;
+                    } else {
+                        serverApi = protocol + host;
+                    }
+                    const path = '/message/ws?';
+
+                    const param = 'username=' + username + '&room_number=' + roomNumber + '&password=' + password + '&head_img=' + localStorage.getItem("head_img") + '&cmd=join' + '&once_token=' + data.data + '&sec_key=' + encodeURIComponent(encryptMsg);
+
+                    if (serverApi.charAt(serverApi.length - 1) === '/') {
+                        serverApi = serverApi.slice(0, -1);
+                    }
+                    ws = new WebSocket(serverApi + path + param);
+                    // ws = new WebSocket('ws://localhost:8080/ws/' + channel + '/' + username+ '/' + pwd + '/' + cmd);
+
+                    that.roomTips = "🏠︎  " + window.location.href;
+
+                    let first = true;
+                    ws.onmessage = function (event) {
+                        data = event.data
+                        if (secKey != null && secKey != undefined && secKey != "" && secKey.length == 32) {
+                            data = AESJieMi1(data, secKey);
+                        }
+                        let messageData = JSON.parse(data);
+
+                        if (first) {
+                            that.username = username;
+                            first = false;
+                        }
+
+                        if (messageData.cmd === "join-pwd-fail") {
+                            document.getElementById('popup').classList.remove('hidden');
+                        }
+
+                        that.items.push(messageData);
+
+                        that.$nextTick(function () {
+                            scrollToBottom();
+                        }.bind(that));
+
+                    };
+
+                    ws.onopen = function () {
+                        console.log("Socket opened");
+                    };
+
+                    ws.onclose = function () {
+                        console.log("Socket closed");
+                        ws = null
+                    };
+                    ws.onerror = function () {
+                        console.log("Socket error");
+                        ws = null
+                    }
+
+                    document.getElementById('popup').classList.add('hidden');
+
+                    let inputElement = document.getElementById('message');
+
+                    inputElement.addEventListener('keydown', function (event) {
+                        if (event.keyCode === 13) {
+                            event.preventDefault();
+                            let message = document.getElementById('message').value;
+                            if (ws === null || ws === undefined || ws === "") {
+                                alert("The connection is closed, please refresh the page to reconnect！");
+                                return;
+                            }
+                            if (message === null || message === undefined || message === "") {
+                                return;
+                            }
+                            if (secKey != null && secKey != undefined && secKey != "" && secKey.length == 32) {
+                                messageData = AESJiaMi1(message, secKey);
+                                ws.send(messageData);
+                            } else {
+                                ws.send(message);
+                            }
+
+                            document.getElementById('message').value = "";
+                        }
+                    });
+
+
+                })
+                .catch(error => {
+                    console.error('There has been a problem with your fetch operation:', error);
+                });
+        };
+
+        // document.getElementById('send').onclick = function() {
+        //     var message = document.getElementById('message').value;
+        //     ws.send(message);
+        //     document.getElementById('message').value ="";
+        // };
+
+        document.getElementById('popup').classList.remove('hidden');
+    }
+
+</script>
+
+<script type="text/javascript">
+    const {
+        createApp
+    } = Vue;
+
+    const app = createApp({
+        delimiters: ['{[', ']}'],
+        data() {
+            return {
+                items: [],
+                roomTips: "",
+                username: "",
+            }
+        },
+        computed: {},
+        methods: {
+            send() {
+                var message = document.getElementById('message').value;
+                if (ws === null || ws === undefined || ws === "") {
+                    alert("房间的链接未建立或者已经断开！");
+                    return;
+                }
+                if (message == "") {
+                    return;
+                }
+                if (secKey != null && secKey != undefined && secKey != "" && secKey.length == 32) {
+                    messageDataEnc = AESJiaMi1(message, secKey);
+                    ws.send(messageDataEnc);
+                } else {
+                    ws.send(message);
+                }
+
+                document.getElementById('message').value = "";
+            },
+            clearScreen() {
+                this.items = [];
+            },
+            formatDate(value) {
+                return format(value, "yyyy-MM-dd HH:mm:ss");
+            }
+        },
+        mounted: function () {
+
+            const that = this;
+            init(that);
+        }
+    });
+
+    const vm = app.mount('#app');
+</script>
+
+
+<script type="text/javascript">
+    // 假设你要切换class的元素是<body>
+    // const body = document.getElementsByTagName("html");
+    const themeToggle = document.getElementById('themeToggle');
+
+    // 读取localStorage中的主题状态
+    const savedTheme = localStorage.getItem('theme');
+    if (savedTheme) {
+        // 如果localStorage中有主题状态，则应用它
+        document.documentElement.classList.toggle('dark', savedTheme === 'dark');
+    }
+
+    // 为themeToggle元素添加点击事件监听器
+    themeToggle.addEventListener('click', function () {
+        // 切换body的dark类
+        document.documentElement.classList.toggle("dark");
+
+        // if(document.documentElement.classList.contains('dark')){
+        //     document.getElementsByClassName("")
+        // }
+        // 更新localStorage中的主题状态
+        localStorage.setItem('theme', document.documentElement.classList.contains('dark') ? 'dark' : 'light');
+
+    });
+</script>
+<script>
+
+    function uploadImage($id) {
+
+        document.getElementById($id).addEventListener('paste', function (e) {
+            if (ws === null || ws === undefined || ws === "") {
+                return;
+            }
+            if (e.clipboardData && e.clipboardData.items) {
+                var clipboard = e.clipboardData;
+                for (var i = 0, len = clipboard.items.length; i < len; i++) {
+                    if (clipboard.items[i].kind === 'file' || clipboard.items[i].type.indexOf('image') > -1) {
+
+                        var imageFile = clipboard.items[i].getAsFile();
+
+                        var fileName = String((new Date()).valueOf());
+                        typex = "img";
+                        switch (imageFile.type) {
+                            case "image/png" :
+                                fileName += ".png";
+                                break;
+                            case "image/jpg" :
+                                fileName += ".jpg";
+                                break;
+                            case "image/jpeg" :
+                                fileName += ".jpeg";
+                                break;
+                            case "image/gif" :
+                                fileName += ".gif";
+                                break;
+                            default :
+                                nname = imageFile.name.split(".");
+                                if (nname.length > 1) {
+                                    fileName += "." + nname[nname.length - 1];
+                                }
+                                typex = "file"
+                        }
+                        var form = new FormData();
+
+                        form.append('editormd-image-file', imageFile, fileName);
+
+                        const protocol = window.location.protocol;
+                        serverApi = "";
+                        if (host === "" || host === undefined || host === null) {
+                            serverApi = protocol + "//" + window.location.host;
+                        } else {
+                            serverApi = protocol + "//" + host;
+                        }
+
+                        $.ajax({
+                            url: serverApi + "/api/upload?identify=message&roomNumber=" + roomNumber,
+                            type: "POST",
+                            dataType: "json",
+                            data: form,
+                            processData: false,
+                            contentType: false,
+                            error: function () {
+
+                            },
+                            success: function (data) {
+                                if (data.url != undefined && data.url != "") {
+                                    if (typex == "file") {
+                                        if (secKey != null && secKey != undefined && secKey != "" && secKey.length == 32) {
+                                            messageDataEnc = AESJiaMi1("file:" + imageFile.name + "||||" + data.url, secKey);
+                                            ws.send(messageDataEnc);
+                                        } else {
+                                            ws.send("file:" + imageFile.name + "||||" + data.url);
+                                        }
+
+                                    } else {
+                                        if (secKey != null && secKey != undefined && secKey != "" && secKey.length == 32) {
+                                            messageDataEnc = AESJiaMi1("img:" + data.url, secKey);
+                                            ws.send(messageDataEnc);
+                                        } else {
+                                            ws.send("img:" + data.url);
+                                        }
+
+                                    }
+                                }
+                            }
+                        });
+                        e.preventDefault();
+                    }
+                }
+            }
+        });
+    }
+
+    uploadImage("app");
+
+    function uploadFile($id) {
+        document.getElementById($id).addEventListener('change', function (e) {
+            if (ws === null || ws === undefined || ws === "") {
+                alert("房间的链接未建立或者已经断开！");
+                return;
+            }
+            if (e.target && e.target.files) {
+                var target = e.target;
+                for (var i = 0, len = target.files.length; i < len; i++) {
+                    var imageFile = target.files[i];
+
+                    var fileName = String((new Date()).valueOf());
+                    typex = "img";
+                    switch (imageFile.type) {
+                        case "image/png" :
+                            fileName += ".png";
+                            break;
+                        case "image/jpg" :
+                            fileName += ".jpg";
+                            break;
+                        case "image/jpeg" :
+                            fileName += ".jpeg";
+                            break;
+                        case "image/gif" :
+                            fileName += ".gif";
+                            break;
+                        default :
+                            nname = imageFile.name.split(".");
+                            if (nname.length > 1) {
+                                fileName += "." + nname[nname.length - 1];
+                            }
+                            typex = "file"
+                    }
+                    var form = new FormData();
+
+                    form.append('editormd-image-file', imageFile, fileName);
+
+                    const protocol = window.location.protocol;
+                    serverApi = "";
+                    if (host === "" || host === undefined || host === null) {
+                        serverApi = protocol + "//" + window.location.host;
+                    } else {
+                        serverApi = protocol + "//" + host;
+                    }
+
+                    $.ajax({
+                        url: serverApi + "/api/upload?identify=message&roomNumber=" + roomNumber,
+                        type: "POST",
+                        dataType: "json",
+                        data: form,
+                        processData: false,
+                        contentType: false,
+                        error: function () {
+
+                        },
+                        success: function (data) {
+                            if (data.url != undefined && data.url != "") {
+                                if (typex == "file") {
+                                    if (secKey != null && secKey != undefined && secKey != "" && secKey.length == 32) {
+                                        messageDataEnc = AESJiaMi1("file:" + imageFile.name + "||||" + data.url, secKey);
+                                        ws.send(messageDataEnc);
+                                    } else {
+                                        ws.send("file:" + imageFile.name + "||||" + data.url);
+                                    }
+                                } else {
+                                    if (secKey != null && secKey != undefined && secKey != "" && secKey.length == 32) {
+                                        messageDataEnc = AESJiaMi1("img:" + data.url, secKey);
+                                        ws.send(messageDataEnc);
+                                    } else {
+                                        ws.send("img:" + data.url);
+                                    }
+                                }
+                            }
+                        }
+                    });
+                    e.preventDefault();
+                }
+            }
+        });
+    }
+
+    uploadFile("fileInput");
+</script>
+
+<script>
+    function cccccc(ll) {
+        var _this = $(ll);// 将当前的pimg元素作为_this传入函数
+        imgShow("#outerdiv", "#innerdiv", "#bigimg", _this);
+    }
+
+    function imgShow(outerdiv, innerdiv, bigimg, _this) {
+        var src = _this.attr("src");// 获取当前点击的pimg元素中的src属性
+
+
+        $(bigimg).attr("src", src);// 设置#bigimg元素的src属性
+
+        var realWidth = 1024;// 获取图片真实宽度
+        var realHeight = 1024;
+        if (_this[0] != undefined && _this[0] != null) {
+            realWidth = _this[0].naturalWidth;// 获取图片真实宽度
+            realHeight = _this[0].naturalHeight;
+        }
+        /* 获取当前点击图片的真实大小，并显示弹出层及大图 */
+        $("<img/>").attr("src", src).load(function () {
+            var windowW = $(window).width();// 获取当前窗口宽度
+            var windowH = $(window).height();// 获取当前窗口高度
+            // 获取图片真实高度
+            var imgWidth, imgHeight;
+            var scale = 1;// 缩放尺寸，当图片真实宽度和高度大于窗口宽度和高度时进行缩放
+
+            if (realHeight > windowH * scale) {// 判断图片高度
+                imgHeight = windowH * scale;// 如大于窗口高度，图片高度进行缩放
+                imgWidth = imgHeight / realHeight * realWidth;// 等比例缩放宽度
+                if (imgWidth > windowW * scale) {// 如宽度扔大于窗口宽度
+                    imgWidth = windowW * scale;// 再对宽度进行缩放
+                }
+            } else if (realWidth > windowW * scale) {// 如图片高度合适，判断图片宽度
+                imgWidth = windowW * scale;// 如大于窗口宽度，图片宽度进行缩放
+                imgHeight = imgWidth / realWidth * realHeight;// 等比例缩放高度
+            } else {// 如果图片真实高度和宽度都符合要求，高宽不变
+                imgWidth = realWidth;
+                imgHeight = realHeight;
+            }
+            $(bigimg).css("width", imgWidth);// 以最终的宽度对图片缩放
+
+            var w = (windowW - imgWidth) / 2;// 计算图片与窗口左边距
+            var h = (windowH - imgHeight) / 2;// 计算图片与窗口上边距
+            $(innerdiv).css({
+                "top": h,
+                "left": w
+            });// 设置#innerdiv的top和left属性
+            $(outerdiv).fadeIn("fast");// 淡入显示#outerdiv及.pimg
+        });
+
+        $(outerdiv).click(function () {// 再次点击淡出消失弹出层
+            $(this).fadeOut("fast");
+        });
+    }
+
+    function uploadHead() {
+        h_file.click()
+    }
+
+    let h_file = document.getElementById("headupimg")
+    h_file.addEventListener('change', function (e) {
+
+        if (e.target && e.target.files) {
+            var target = e.target;
+            for (var i = 0, len = target.files.length; i < len; i++) {
+                var imageFile = target.files[i];
+
+                var fileName = String((new Date()).valueOf());
+                typex = "img";
+                switch (imageFile.type) {
+                    case "image/png" :
+                        fileName += ".png";
+                        break;
+                    case "image/jpg" :
+                        fileName += ".jpg";
+                        break;
+                    case "image/jpeg" :
+                        fileName += ".jpeg";
+                        break;
+                    case "image/gif" :
+                        fileName += ".gif";
+                        break;
+                    default :
+                        return
+                }
+                var form = new FormData();
+
+                form.append('editormd-image-file', imageFile, fileName);
+
+                const protocol = window.location.protocol;
+                serverApi = "";
+                if (host === "" || host === undefined || host === null) {
+                    serverApi = protocol + "//" + window.location.host;
+                } else {
+                    serverApi = protocol + "//" + host;
+                }
+
+                $.ajax({
+                    url: serverApi + "/api/upload?identify=headimg&roomNumber=" + roomNumber,
+                    type: "POST",
+                    dataType: "json",
+                    data: form,
+                    processData: false,
+                    contentType: false,
+                    error: function () {
+
+                    },
+                    success: function (data) {
+                        if (data.url != undefined && data.url != "") {
+                            localStorage.setItem("head_img", data.url);
+                            alert("头像上传成功");
+                        }
+                    }
+                });
+                e.preventDefault();
+            }
+        }
+    });
+
+</script>
+</body>
+
+
+</html>

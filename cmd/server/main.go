@@ -10,6 +10,8 @@ import (
 	"github.com/hanc00l/nemo_go/pkg/conf"
 	"github.com/hanc00l/nemo_go/pkg/filesync"
 	"github.com/hanc00l/nemo_go/pkg/logging"
+	minichatConfig "github.com/hanc00l/nemo_go/pkg/minichat/config"
+	"github.com/hanc00l/nemo_go/pkg/minichat/conversation"
 	"github.com/hanc00l/nemo_go/pkg/task/ampq"
 	"github.com/hanc00l/nemo_go/pkg/task/custom"
 	"github.com/hanc00l/nemo_go/pkg/task/runner"
@@ -153,5 +155,8 @@ func main() {
 		logging.RuntimeLog.Error(err)
 		return
 	}
+	minichatConfig.FlagParse()
+	go conversation.Manager.Start()
+
 	StartWebServer(option)
 }

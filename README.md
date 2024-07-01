@@ -72,6 +72,7 @@
 - 资产颜色标记、置顶、备忘录协作
 - IP/Domain黑名单、一键拉黑
 - 知识库：基于飞书平台和自建企业应用，集成[飞书知识库](docs/wiki_feishu.md)，并与Nemo的IP和域名资产进行关联
+- 团队交流：集成基于[MiniChat](https://github.com/okhanyu/minichat)的轻量级团队在线沟通工具（支持消息、文件上传分享，关闭后自动销毁历史记录）
 
 ### 8、其它
 

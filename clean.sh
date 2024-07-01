@@ -8,6 +8,7 @@ rm -f server_darwin_amd64 worker_darwin_amd64 daemon_worker_darwin_amd64 \
 rm -rf serverapi_darwin_amd64
 rm -rf thirdparty/goby/screenshots/*
 rm -rf thirdparty/massdns/temp/*
+rm -rf web/static/minichat/uploads/*
 
 echo > log/access.log
 echo > log/runtime.log

@@ -3,6 +3,7 @@
 echo "package nemo for macos,linux and windows..."
 echo "MAKS SURE \"RunMode = Release\" in pkg/conf/config.go"
 rm -rf release/*
+rm -rf web/static/minichat/uploads/*
 echo > log/runtime.log
 echo > log/access.log
 
