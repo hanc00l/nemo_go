@@ -263,7 +263,8 @@ func FilterIPResult(result *Result, isOnline bool) {
 			continue
 		}
 		// 根据标题进行过滤
-		if len(titleFilter) > 0 {
+		// strings.split始终返回len()>=1，即使是空字符串
+		if titleFilter[0] != "" {
 			ipHadFiltered := false
 			for _, portResult := range ipResult.Ports {
 				if ipHadFiltered {

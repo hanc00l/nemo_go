@@ -219,7 +219,8 @@ func FilterDomainResult(result *Result) { //result map[string]*DomainResult) {
 	}
 	//根据标题进行过滤
 	titleFilter := strings.Split(conf.GlobalWorkerConfig().Filter.Title, "|")
-	if len(titleFilter) > 0 {
+	// strings.split始终返回len()>=1，即使是空字符串
+	if titleFilter[0] != "" {
 		for domain, domainResult := range result.DomainResult {
 			domainHadFiltered := false
 			for _, attr := range domainResult.DomainAttrs {
