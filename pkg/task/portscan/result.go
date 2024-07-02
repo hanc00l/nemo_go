@@ -275,11 +275,13 @@ func FilterIPResult(result *Result, isOnline bool) {
 					}
 					if portAttrResult.Tag == "title" {
 						for _, title := range titleFilter {
-							if strings.Contains(portAttrResult.Content, title) {
-								logging.RuntimeLog.Warningf("ip:%s has filter title:%s,discard to save!", ipName, title)
-								delete(result.IPResult, ipName)
-								ipHadFiltered = true
-								break
+							if titleTrim := strings.TrimSpace(title); titleTrim != "" {
+								if strings.Contains(portAttrResult.Content, titleTrim) {
+									logging.RuntimeLog.Warningf("ip:%s has filter title:%s,discard to save!", ipName, title)
+									delete(result.IPResult, ipName)
+									ipHadFiltered = true
+									break
+								}
 							}
 						}
 					}

@@ -228,11 +228,13 @@ func FilterDomainResult(result *Result) { //result map[string]*DomainResult) {
 				}
 				if attr.Tag == "title" {
 					for _, title := range titleFilter {
-						if strings.Contains(attr.Content, title) {
-							logging.RuntimeLog.Warningf("domain:%s has filter title:%s,discard to save!", domain, title)
-							delete(result.DomainResult, domain)
-							domainHadFiltered = true
-							break
+						if titleTrim := strings.TrimSpace(title); titleTrim != "" {
+							if strings.Contains(attr.Content, titleTrim) {
+								logging.RuntimeLog.Warningf("domain:%s has filter title:%s,discard to save!", domain, title)
+								delete(result.DomainResult, domain)
+								domainHadFiltered = true
+								break
+							}
 						}
 					}
 				}
