@@ -5,18 +5,6 @@ import (
 	"testing"
 )
 
-var rPortscan = map[string]map[int]bool{
-	"127.0.0.1": {
-		21:   false,
-		22:   false,
-		23:   false,
-		80:   false,
-		443:  false,
-		5900: false,
-		9200: false,
-	},
-}
-
 func init() {
 	/*
 		 nemo_test用于测试的server端口
@@ -35,11 +23,26 @@ func TestNmap_test(t *testing.T) {
 	doPortscan("nmap", t)
 }
 
-func TestMasscan_test(t *testing.T) {
-	doPortscan("masscan", t)
+//func TestMasscan_test(t *testing.T) {
+//	doPortscan("masscan", t)
+//}
+
+func TestGogo_test(t *testing.T) {
+	doPortscan("gogo", t)
 }
 
 func doPortscan(cmdBin string, t *testing.T) {
+	var rPortscan = map[string]map[int]bool{
+		"127.0.0.1": {
+			21:   false,
+			22:   false,
+			23:   false,
+			80:   false,
+			443:  false,
+			5900: false,
+			9200: false,
+		},
+	}
 	config := portscan.Config{
 		Target:        "127.0.0.1,172.16.222.1",
 		ExcludeTarget: "",
@@ -58,6 +61,10 @@ func doPortscan(cmdBin string, t *testing.T) {
 		masscan := portscan.NewMasscan(config)
 		masscan.Do()
 		result = masscan.Result.IPResult
+	} else if cmdBin == "gogo" {
+		gogo := portscan.NewGogo(config)
+		gogo.Do()
+		result = gogo.Result.IPResult
 	} else {
 		t.Errorf("invalid cmdbin:%s", cmdBin)
 		return
@@ -66,7 +73,7 @@ func doPortscan(cmdBin string, t *testing.T) {
 	for ip, ipa := range result {
 		//t.Log(ip, ipa)
 		for port, _ := range ipa.Ports {
-			//t.Log(port, pa)
+			//t.Log(port, result[ip].Ports[port])
 			if ip == "127.0.0.1" {
 				if _, exist := rPortscan[ip][port]; exist {
 					rPortscan[ip][port] = true

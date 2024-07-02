@@ -65,7 +65,7 @@ func TestXray_test(t *testing.T) {
 	}
 	xray := pocscan.NewXray(config)
 	xray.Do()
-	t.Log(xray.Result)
+	//t.Log(xray.Result)
 
 	for _, r := range xray.Result {
 		if _, ok := rXrayPocResult[r.Url]; ok {

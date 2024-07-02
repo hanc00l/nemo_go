@@ -1,4 +1,21 @@
 # ChangeLog
+## v2.13.0
+
+2024-7-2
+
+### Update
+
+- 增加对部份任务的自动化测试（配合发布的nemo_test使用）
+- 集成基于[MiniChat](https://github.com/okhanyu/minichat)的轻量级团队在线沟通工具（支持消息、文件上传分享，关闭后自动销毁历史记录）
+- 增加对任务结果过滤的调整参数
+- 更新部份thirdparty和qqwry.dat
+
+### Thirdparty版本（更新）
+- 
+- Httpx：1.6.2 （当前最新的1.6.5的无法正常屏幕截图）
+- Subfinder：2.6.6
+- Nuclei：3.2.9
+- Gogo: 2.13.1
 
 ## v2.12.0
 

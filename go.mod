@@ -6,6 +6,7 @@ require (
 	github.com/Qianlitp/crawlergo v0.4.4
 	github.com/RichardKnop/machinery/v2 v2.0.11
 	github.com/beego/beego/v2 v2.1.1
+	github.com/chainreactors/utils v0.0.0-20240528085651-ba1b255482c1
 	github.com/chromedp/cdproto v0.0.0-20221126224343-3a0787b8dd28
 	github.com/chromedp/chromedp v0.8.6
 	github.com/disintegration/imaging v1.6.2
@@ -32,7 +33,7 @@ require (
 	github.com/smallnest/rpcx v1.8.11
 	github.com/things-go/go-socks5 v0.0.4
 	github.com/tidwall/pretty v1.2.1
-	github.com/twmb/murmur3 v1.1.6
+	github.com/twmb/murmur3 v1.1.8
 	github.com/yl2chen/cidranger v1.0.2
 	github.com/zu1k/nali v0.7.3
 	golang.org/x/net v0.17.0

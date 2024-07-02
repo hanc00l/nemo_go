@@ -5,6 +5,7 @@ import (
 	"compress/flate"
 	"encoding/json"
 	"fmt"
+	"github.com/chainreactors/utils/iutils"
 	"github.com/hanc00l/nemo_go/pkg/conf"
 	"github.com/hanc00l/nemo_go/pkg/logging"
 	"github.com/hanc00l/nemo_go/pkg/task/custom"
@@ -111,41 +112,47 @@ func (fs Frameworks) String() string {
 
 type Vuln struct {
 	Name          string                 `json:"name"`
+	Tags          []string               `json:"tags,omitempty"`
 	Payload       map[string]interface{} `json:"payload,omitempty"`
-	Detail        map[string]interface{} `json:"detail,omitempty"`
+	Detail        map[string][]string    `json:"detail,omitempty"`
 	SeverityLevel int                    `json:"severity"`
+	Framework     *Framework             `json:"-"`
+}
+
+func (v *Vuln) HasTag(tag string) bool {
+	for _, t := range v.Tags {
+		if t == tag {
+			return true
+		}
+	}
+	return false
+}
+
+func (v *Vuln) GetPayload() string {
+	return iutils.MapToString(v.Payload)
+}
+
+func (v *Vuln) GetDetail() string {
+	var s strings.Builder
+	for k, v := range v.Detail {
+		s.WriteString(fmt.Sprintf(" %s:%s ", k, strings.Join(v, ",")))
+	}
+	return s.String()
 }
 
 func (v *Vuln) String() string {
 	s := v.Name
 	if payload := v.GetPayload(); payload != "" {
-		s += fmt.Sprintf(" payloads:%s", payload)
+		s += fmt.Sprintf(" payloads:%s", iutils.AsciiEncode(payload))
 	}
 	if detail := v.GetDetail(); detail != "" {
-		s += fmt.Sprintf(" payloads:%s", detail)
+		s += fmt.Sprintf(" payloads:%s", iutils.AsciiEncode(detail))
 	}
 	return s
 }
-func MapToString(m map[string]interface{}) string {
-	if m == nil || len(m) == 0 {
-		return ""
-	}
-	var s string
-	for k, v := range m {
-		s += fmt.Sprintf(" %s:%s ", k, v.(string))
-	}
-	return s
-}
-func (v *Vuln) GetPayload() string {
-	return MapToString(v.Payload)
-}
 
-func (v *Vuln) GetDetail() string {
-	return MapToString(v.Detail)
-}
-
+type Vulns map[string]*Vuln
 type GOGOResults []*GOGOResult
-type Vulns []*Vuln
 type Frameworks map[string]*Framework
 
 type GOGOResult struct {
@@ -265,7 +272,8 @@ func (g *Gogo) Do() {
 func (g *Gogo) loadGOGOResultData(input []byte) (gogoData *GOGOData) {
 	gogoData = &GOGOData{}
 	// 先直接解析为json，如果没有报错则直接返回结果
-	if err := json.Unmarshal(input, gogoData); err == nil {
+	err := json.Unmarshal(input, gogoData)
+	if err == nil {
 		return
 	}
 	// 如果不是json文件，则先解压后再解析

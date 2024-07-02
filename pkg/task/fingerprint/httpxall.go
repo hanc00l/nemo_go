@@ -71,6 +71,7 @@ type HttpxResult struct {
 	IconHash           string   `json:"favicon,omitempty"`
 	FaviconPath        string   `json:"favicon_path,omitempty"`
 	ScreenShotPath     string   `json:"screenshot_path,omitempty"`
+	Tech               []string `json:"tech,omitempty"`
 }
 
 type TLS struct {
