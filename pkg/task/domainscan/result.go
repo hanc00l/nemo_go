@@ -183,8 +183,8 @@ func (r *Result) SaveResult(config Config) string {
 	return sb.String()
 }
 
-// FilterDomainHasTooMuchIP 对域名结果中同一个IP对应太多进行过滤
-func FilterDomainHasTooMuchIP(result *Result) { //result map[string]*DomainResult) {
+// FilterDomainResult 对域名结果进行过滤
+func FilterDomainResult(result *Result) { //result map[string]*DomainResult) {
 	ip2DomainMap := make(map[string]map[string]struct{})
 	// 建立解析ip到domain的反向映射Map
 	for domain, domainResult := range result.DomainResult {
@@ -203,13 +203,39 @@ func FilterDomainHasTooMuchIP(result *Result) { //result map[string]*DomainResul
 		}
 	}
 	// 如果多个域名解析到同一个IP超过阈值，则过滤掉该结果
+	MaxDomainPerIp := conf.GlobalWorkerConfig().Filter.MaxDomainPerIp
+	if MaxDomainPerIp <= 0 {
+		MaxDomainPerIp = SameIpToDomainFilterMax
+	}
 	for ip, domains := range ip2DomainMap {
 		domainNumbers := len(domains)
-		if domainNumbers > SameIpToDomainFilterMax {
+		if domainNumbers > MaxDomainPerIp {
 			logging.RuntimeLog.Infof("the multiple domain for one same ip:%s,total:%d,ignored!", ip, domainNumbers)
 			logging.CLILog.Infof("the multiple domain for one same ip:%s -- %s,ignored!", ip, utils.SetToString(domains))
 			for domain := range domains {
 				delete(result.DomainResult, domain)
+			}
+		}
+	}
+	//根据标题进行过滤
+	titleFilter := strings.Split(conf.GlobalWorkerConfig().Filter.Title, "|")
+	if len(titleFilter) > 0 {
+		for domain, domainResult := range result.DomainResult {
+			domainHadFiltered := false
+			for _, attr := range domainResult.DomainAttrs {
+				if domainHadFiltered {
+					break
+				}
+				if attr.Tag == "title" {
+					for _, title := range titleFilter {
+						if strings.Contains(attr.Content, title) {
+							logging.RuntimeLog.Warningf("domain:%s has filter title:%s,discard to save!", domain, title)
+							delete(result.DomainResult, domain)
+							domainHadFiltered = true
+							break
+						}
+					}
+				}
 			}
 		}
 	}

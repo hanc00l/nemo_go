@@ -258,7 +258,7 @@ func (g *Gogo) Do() {
 		return
 	}
 	g.parsResult(resultTempFile)
-	FilterIPHasTooMuchPort(&g.Result, false)
+	FilterIPResult(&g.Result, false)
 }
 
 // loadGOGOResultData 读取并解析gogo的json类型的结果文件，支持压缩格式

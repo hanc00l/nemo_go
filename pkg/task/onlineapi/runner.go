@@ -80,6 +80,9 @@ func (s *OnlineSearch) Do() {
 		s.Query(domain, filterKeyword)
 	}
 	s.processResult()
+
+	portscan.FilterIPResult(&s.IpResult, true)
+	domainscan.FilterDomainResult(&s.DomainResult)
 }
 
 // Query 查询一个domain
@@ -204,8 +207,6 @@ func (s *OnlineSearch) processResult() {
 		parseIpPort(&s.IpResult, fsr, s.apiName, btc)
 		parseDomainIP(&s.DomainResult, fsr, s.apiName, btc)
 	}
-
-	domainscan.FilterDomainHasTooMuchIP(&s.DomainResult)
 }
 
 // loadFilterKeyword 从文件中加载需要过滤的标题关键词

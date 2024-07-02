@@ -52,7 +52,7 @@ func (nmap *Nmap) Do() {
 	if len(targetIpV6) > 0 {
 		nmap.RunNmap(targetIpV6, true)
 	}
-	FilterIPHasTooMuchPort(&nmap.Result, false)
+	FilterIPResult(&nmap.Result, false)
 }
 
 // RunNmap 调用并执行一次nmap

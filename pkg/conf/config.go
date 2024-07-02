@@ -92,6 +92,7 @@ type Worker struct {
 	OnlineAPI   OnlineAPI   `yaml:"onlineapi"`
 	Pocscan     Pocscan     `yaml:"pocscan"`
 	Proxy       Proxy       `yaml:"proxy"`
+	Filter      Filter      `yaml:"filter"`
 }
 
 type Web struct {
@@ -207,6 +208,12 @@ type Wiki struct {
 		AppSecret              string `yaml:"appSecret"`
 		UserAccessRefreshToken string `yaml:"refreshToken"`
 	} `yaml:"feishu"`
+}
+
+type Filter struct {
+	MaxPortPerIp   int    `yaml:"maxPortPerIp"`
+	MaxDomainPerIp int    `yaml:"maxDomainPerIp"`
+	Title          string `yaml:"title"`
 }
 
 // WriteConfig 写配置到yaml文件中

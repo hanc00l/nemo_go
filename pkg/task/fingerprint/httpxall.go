@@ -253,6 +253,13 @@ func (x *HttpxAll) Do() {
 		}
 	}
 	swg.Wait()
+	// 过滤任务的结果，主要是对标题字段过滤
+	if x.ResultPortScan != nil && x.ResultPortScan.IPResult != nil {
+		portscan.FilterIPResult(x.ResultPortScan, false)
+	}
+	if x.ResultDomainScan != nil && x.ResultDomainScan.DomainResult != nil {
+		domainscan.FilterDomainResult(x.ResultDomainScan)
+	}
 }
 
 // RunHttpx 调用httpx，获取一个domain的标题指纹

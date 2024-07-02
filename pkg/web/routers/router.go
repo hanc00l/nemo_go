@@ -32,6 +32,7 @@ func init() {
 	web.CtrlPost("/config-save-domainscan", (*controllers.ConfigController).SaveDomainscanAction)
 	web.CtrlPost("/custom-save-taskworkspace", (*controllers.ConfigController).SaveCustomTaskWorkspaceConfigAction)
 	web.CtrlPost("/config-save-wikifeishu", (*controllers.ConfigController).SaveWikiFeishuAction)
+	web.CtrlPost("/config-save-workerfilter", (*controllers.ConfigController).SaveWorkerFilterAction)
 
 	web.CtrlGet("/dashboard", (*controllers.DashboardController).IndexAction)
 	web.CtrlPost("/dashboard", (*controllers.DashboardController).GetStatisticDataAction)

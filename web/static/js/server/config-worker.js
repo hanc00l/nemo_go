@@ -141,6 +141,28 @@ $(function () {
                 }
             });
     });
+    $("#buttonSaveTaskFilter").click(function () {
+        $.post("/config-save-workerfilter",
+            {
+                "maxportperip": $('#input_maxportperip').val(),
+                "maxdomainperip": $('#input_maxdomainperip').val(),
+                "title": $('#input_title').val(),
+            }, function (data, e) {
+                if (e === "success" && data['status'] === 'success') {
+                    swal({
+                        title: "保存成功！",
+                        text: "",
+                        type: "success",
+                        confirmButtonText: "确定",
+                        confirmButtonColor: "#41b883",
+                        closeOnConfirm: true,
+                        timer: 3000
+                    });
+                } else {
+                    swal('Warning', data['msg'], 'error');
+                }
+            });
+    });
 });
 
 function load_config_worker() {
@@ -177,6 +199,10 @@ function load_config_worker() {
         $('#checkbox_quake').prop("checked", data['quake']);
         $('#input_pagesize').val(data['pagesize']);
         $('#input_limitcount').val(data['limitcount']);
+
+        $('#input_maxportperip').val(data['maxportperip']);
+        $('#input_maxdomainperip').val(data['maxdomainperip']);
+        $('#input_title').val(data['title']);
 
         $("#text_proxy_list").val(data['proxyList']);
     });

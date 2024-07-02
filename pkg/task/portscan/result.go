@@ -2,6 +2,7 @@ package portscan
 
 import (
 	"fmt"
+	"github.com/hanc00l/nemo_go/pkg/conf"
 	"github.com/hanc00l/nemo_go/pkg/db"
 	"github.com/hanc00l/nemo_go/pkg/logging"
 	"github.com/hanc00l/nemo_go/pkg/task/custom"
@@ -244,16 +245,46 @@ func (r *Result) SaveResult(config Config) string {
 	return sb.String()
 }
 
-// FilterIPHasTooMuchPort 过滤有安全防护、显示太多端口开放的IP
-func FilterIPHasTooMuchPort(result *Result, isOnline bool) {
-	MaxNumber := IpOpenedPortFilterNumber
+// FilterIPResult 过滤IP结果
+func FilterIPResult(result *Result, isOnline bool) {
+	MaxNumber := conf.GlobalWorkerConfig().Filter.MaxPortPerIp
+	if MaxNumber <= 0 {
+		MaxNumber = IpOpenedPortFilterNumber
+	}
 	if isOnline {
 		MaxNumber *= 2
 	}
+	titleFilter := strings.Split(conf.GlobalWorkerConfig().Filter.Title, "|")
 	for ipName, ipResult := range result.IPResult {
+		// 过滤开放端口数量
 		if len(ipResult.Ports) > MaxNumber {
 			logging.RuntimeLog.Warningf("ip:%s has too much open port:%d,discard to save!", ipName, len(ipResult.Ports))
 			delete(result.IPResult, ipName)
+			continue
+		}
+		// 根据标题进行过滤
+		if len(titleFilter) > 0 {
+			ipHadFiltered := false
+			for _, portResult := range ipResult.Ports {
+				if ipHadFiltered {
+					break
+				}
+				for _, portAttrResult := range portResult.PortAttrs {
+					if ipHadFiltered {
+						break
+					}
+					if portAttrResult.Tag == "title" {
+						for _, title := range titleFilter {
+							if strings.Contains(portAttrResult.Content, title) {
+								logging.RuntimeLog.Warningf("ip:%s has filter title:%s,discard to save!", ipName, title)
+								delete(result.IPResult, ipName)
+								ipHadFiltered = true
+								break
+							}
+						}
+					}
+				}
+			}
 		}
 	}
 }

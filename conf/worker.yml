@@ -62,3 +62,7 @@ pocscan:
     - http://127.0.0.1:8361
 proxy:
   host: []
+filter:
+  maxPortPerIp: 50
+  maxDomainPerIp: 100
+  title: ""

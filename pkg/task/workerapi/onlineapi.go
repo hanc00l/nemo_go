@@ -47,10 +47,6 @@ func doOnlineAPI(taskId string, mainTaskId string, configJSON string, apiName st
 	var ipResult *portscan.Result
 	var domainResult *domainscan.Result
 	ipResult, domainResult, result, err = doOnlineAPIAndSave(taskId, mainTaskId, apiName, config)
-	//端口过滤
-	portscan.FilterIPHasTooMuchPort(ipResult, true)
-	domainscan.FilterDomainHasTooMuchIP(domainResult)
-	//domainscan.
 	//fingerprint
 	_, err = NewFingerprintTask(taskId, mainTaskId, ipResult, domainResult, FingerprintTaskConfig{
 		IsHttpx:          config.IsHttpx,
@@ -75,7 +71,6 @@ func doOnlineAPIAndSave(taskId string, mainTaskId string, apiName string, config
 	s.Do()
 	ipResult = &s.IpResult
 	domainResult = &s.DomainResult
-	portscan.FilterIPHasTooMuchPort(ipResult, true)
 	checkIgnoreResult(ipResult, domainResult, config)
 
 	if config.IsIPLocation {

@@ -162,6 +162,39 @@
                     </button>&nbsp;&nbsp;&nbsp;
                 </div>
             </div>
+            <div class="tile">
+                <h3 class="tile-title">任务结果过滤设置</h3>
+                <div class="tile-body">
+                    <form>
+                        <div class="form-group">
+                            <label class="col-form-label" for="input_maxportperip">
+                                <b>IP开放端口阈值</b>&nbsp;<i
+                                    class="fa fa-question-circle"
+                                    aria-hidden="true"
+                                    title="如果一个IP开放的端口超过设置数量，该IP会从本次任务的结果中丢弃"></i>
+                            </label>
+                            <input class="form-control" id="input_maxportperip" type="text" value="">
+                            <label class="col-form-label" for="input_maxdomainperip">
+                                <b>域名解析的IP阈值</b>&nbsp;<i
+                                    class="fa fa-question-circle"
+                                    aria-hidden="true"
+                                    title="如果一个IP同时被多个域名解析或者关联的数量超过设置值，这些域名会从本次任务的结果中丢弃"></i>
+                            </label>
+                            <input class="form-control" id="input_maxdomainperip" type="text" value="">
+                            <label class="col-form-label" for="input_title">
+                                <b>标题的关键词</b>
+                                <small class="form-text text-muted">对结果中的标题(title)属性的内容进行关键词过滤，多个关键词用“|”分隔开；包含任意一个过滤条件的IP或者域名，将会从本次任务的结果中丢弃。</small>
+                            </label>
+                            <input class="form-control" id="input_title" type="text" value="">
+                        </div>
+                    </form>
+                </div>
+                <div class="tile-footer">
+                    <button class="btn btn-primary" type="button" id="buttonSaveTaskFilter"><i
+                            class="fa fa-fw fa-lg fa-check-circle"></i>保存设置
+                    </button>&nbsp;&nbsp;&nbsp;
+                </div>
+            </div>
             {{ end }}
         </div>
         <div class="col-md-6">

@@ -506,7 +506,7 @@ func (c *IPController) ImportPortscanResultAction() {
 		// 导入IP资产
 		i := portscan.NewImportOfflineResult(bin)
 		i.Parse(fileContent)
-		portscan.FilterIPHasTooMuchPort(&i.IpResult, false)
+		portscan.FilterIPResult(&i.IpResult, false)
 		resultIpPort := i.IpResult.SaveResult(config)
 		result = fmt.Sprintf("%s", resultIpPort)
 		// 导入漏洞资产
@@ -519,14 +519,14 @@ func (c *IPController) ImportPortscanResultAction() {
 	} else if bin == "httpx" {
 		i := portscan.NewImportOfflineResultWithInterface("httpx", new(fingerprint.HttpxAll))
 		i.Parse(fileContent)
-		portscan.FilterIPHasTooMuchPort(&i.IpResult, false)
+		portscan.FilterIPResult(&i.IpResult, false)
 		resultIpPort := i.IpResult.SaveResult(config)
 		result = fmt.Sprintf("%s", resultIpPort)
 	} else if bin == "0zone" || bin == "fofa" || bin == "hunter" {
 		s := onlineapi.NewOnlineAPISearch(onlineapi.OnlineAPIConfig{}, bin)
 		s.ParseContentResult(fileContent)
-		portscan.FilterIPHasTooMuchPort(&s.IpResult, true)
-		domainscan.FilterDomainHasTooMuchIP(&s.DomainResult)
+		portscan.FilterIPResult(&s.IpResult, true)
+		domainscan.FilterDomainResult(&s.DomainResult)
 		resultIpPort := s.IpResult.SaveResult(config)
 		resultDomain := s.DomainResult.SaveResult(domainscan.Config{OrgId: config.OrgId, WorkspaceId: workspaceId})
 		result = fmt.Sprintf("%s,%s", resultDomain, resultIpPort)

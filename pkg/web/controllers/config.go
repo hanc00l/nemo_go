@@ -9,7 +9,9 @@ import (
 	"github.com/hanc00l/nemo_go/pkg/notify"
 	"github.com/hanc00l/nemo_go/pkg/task/ampq"
 	"github.com/hanc00l/nemo_go/pkg/task/custom"
+	"github.com/hanc00l/nemo_go/pkg/task/domainscan"
 	"github.com/hanc00l/nemo_go/pkg/task/onlineapi"
+	"github.com/hanc00l/nemo_go/pkg/task/portscan"
 	"github.com/hanc00l/nemo_go/pkg/utils"
 	"github.com/remeh/sizedwaitgroup"
 	"os"
@@ -86,6 +88,10 @@ type DefaultConfig struct {
 	FeishuAppId        string `json:"feishuappid" form:"feishuappid"`
 	FeishuAppSecret    string `json:"feishusecret" form:"feishuappsecret"`
 	FeishuRefreshToken string `json:"feishurefreshtoken" form:"feishurefreshtoken"`
+	// filter
+	MaxPortPerIP   int    `json:"maxportperip" form:"maxportperip"`
+	MaxDomainPerIP int    `json:"maxdomainperip" form:"maxdomainperip"`
+	TitleFilter    string `json:"title" form:"title"`
 }
 
 func (c *ConfigController) IndexServerAction() {
@@ -171,6 +177,7 @@ func (c *ConfigController) LoadWorkerConfigAction() {
 	onlineAPI := conf.GlobalWorkerConfig().OnlineAPI
 	domainscan := conf.GlobalWorkerConfig().Domainscan
 	proxy := conf.GlobalWorkerConfig().Proxy
+	filter := conf.GlobalWorkerConfig().Filter
 
 	data := DefaultConfig{
 		CmdBin: portscan.Cmdbin,
@@ -205,6 +212,10 @@ func (c *ConfigController) LoadWorkerConfigAction() {
 		IsQuake:          onlineAPI.IsQuake,
 		SearchPageSize:   apiConfig.SearchPageSize,
 		SearchLimitCount: apiConfig.SearchLimitCount,
+		//
+		MaxPortPerIP:   filter.MaxPortPerIp,
+		MaxDomainPerIP: filter.MaxDomainPerIp,
+		TitleFilter:    filter.Title,
 		//
 		ProxyList: strings.Join(proxy.Host, "\n"),
 	}
@@ -739,6 +750,36 @@ func (c *ConfigController) UploadPocAction() {
 		return
 	}
 	c.SucceededStatus("上传成功")
+}
+
+// SaveWorkerFilterAction 保存任务过滤的设置
+func (c *ConfigController) SaveWorkerFilterAction() {
+	defer c.ServeJSON()
+	if c.CheckMultiAccessRequest([]RequestRole{SuperAdmin, Admin}, false) == false {
+		c.FailedStatus("当前用户权限不允许！")
+		return
+	}
+
+	maxPortPerIp, err1 := c.GetInt("maxportperip", portscan.IpOpenedPortFilterNumber)
+	maxDomainPerIp, err2 := c.GetInt("maxdomainperip", domainscan.SameIpToDomainFilterMax)
+	titleFilter := c.GetString("title", "")
+	if err1 != nil || err2 != nil {
+		c.FailedStatus("数量错误")
+		return
+	}
+	err := conf.GlobalWorkerConfig().ReloadConfig()
+	if err != nil {
+		c.FailedStatus(err.Error())
+		return
+	}
+	conf.GlobalWorkerConfig().Filter.MaxPortPerIp = maxPortPerIp
+	conf.GlobalWorkerConfig().Filter.MaxDomainPerIp = maxDomainPerIp
+	conf.GlobalWorkerConfig().Filter.Title = titleFilter
+	err = conf.GlobalWorkerConfig().WriteConfig()
+	if err != nil {
+		c.FailedStatus(err.Error())
+	}
+	c.SucceededStatus("保存配置成功")
 }
 
 // getCustomFilename  根据类型返回自定义文件名
