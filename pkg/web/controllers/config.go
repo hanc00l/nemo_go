@@ -6,6 +6,7 @@ import (
 	"github.com/hanc00l/nemo_go/pkg/comm"
 	"github.com/hanc00l/nemo_go/pkg/conf"
 	"github.com/hanc00l/nemo_go/pkg/logging"
+	minichatConfig "github.com/hanc00l/nemo_go/pkg/minichat/config"
 	"github.com/hanc00l/nemo_go/pkg/notify"
 	"github.com/hanc00l/nemo_go/pkg/task/ampq"
 	"github.com/hanc00l/nemo_go/pkg/task/custom"
@@ -92,6 +93,10 @@ type DefaultConfig struct {
 	MaxPortPerIP   int    `json:"maxportperip" form:"maxportperip"`
 	MaxDomainPerIP int    `json:"maxdomainperip" form:"maxdomainperip"`
 	TitleFilter    string `json:"title" form:"title"`
+	// minichat
+	IsNotDelFileDir   bool `json:"notdelfiledir" form:"notdelfiledir"`
+	LoadHistory       bool `json:"loadhistory" form:"loadhistory"`
+	MaxHistoryMessage int  `json:"maxhistorymessage" form:"maxhistorymessage"`
 }
 
 func (c *ConfigController) IndexServerAction() {
@@ -253,6 +258,10 @@ func (c *ConfigController) LoadServerConfigAction() {
 		FeishuAppId:        feishu.AppId,
 		FeishuAppSecret:    feishu.AppSecret,
 		FeishuRefreshToken: feishu.UserAccessRefreshToken,
+		//
+		IsNotDelFileDir:   minichatConfig.IsNotDelFileDir,
+		LoadHistory:       minichatConfig.LoadHistory,
+		MaxHistoryMessage: minichatConfig.MaxHistoryMessage,
 	}
 	if fileContent, err1 := os.ReadFile(filepath.Join(conf.GetRootPath(), "version.txt")); err1 == nil {
 		data.Version = strings.TrimSpace(string(fileContent))
@@ -780,6 +789,27 @@ func (c *ConfigController) SaveWorkerFilterAction() {
 		c.FailedStatus(err.Error())
 	}
 	c.SucceededStatus("保存配置成功")
+}
+
+// UpdateMinichatConfigAction 更新minichat的设置
+func (c *ConfigController) UpdateMinichatConfigAction() {
+	defer c.ServeJSON()
+	if c.CheckMultiAccessRequest([]RequestRole{SuperAdmin, Admin}, false) == false {
+		c.FailedStatus("当前用户权限不允许！")
+		return
+	}
+	notDeleteDir, err1 := c.GetBool("notdelfiledir", false)
+	loadHistory, err2 := c.GetBool("loadhistory", true)
+	maxHistoryMessage, err3 := c.GetInt("maxhistorymessage", 1000)
+	if err1 != nil || err2 != nil || err3 != nil {
+		c.FailedStatus("参数错误")
+		return
+	}
+	minichatConfig.IsNotDelFileDir = notDeleteDir
+	minichatConfig.LoadHistory = loadHistory
+	minichatConfig.MaxHistoryMessage = maxHistoryMessage
+
+	c.SucceededStatus("更新配置成功")
 }
 
 // getCustomFilename  根据类型返回自定义文件名

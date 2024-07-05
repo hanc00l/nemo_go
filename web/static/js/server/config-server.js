@@ -170,6 +170,28 @@ $(function () {
         window.open(url, "_blank");
         $('#openfeishu').modal('hide');
     });
+    $("#buttonUpdateMinichatConfig").click(function () {
+        $.post("/config-update-minichat",
+            {
+                "notdelfiledir": $('#checkbox_notdelfiledir').is(":checked"),
+                "loadhistory": $('#checkbox_loadhistory').is(":checked"),
+                "maxhistorymessage": $('#input_maxhistorymessage').val(),
+            }, function (data, e) {
+                if (e === "success" && data['status'] === 'success') {
+                    swal({
+                        title: "更新成功！",
+                        text: "",
+                        type: "success",
+                        confirmButtonText: "确定",
+                        confirmButtonColor: "#41b883",
+                        closeOnConfirm: true,
+                        timer: 3000
+                    });
+                } else {
+                    swal('Warning', data['msg'], 'error');
+                }
+            });
+    });
 });
 
 function load_config_server() {
@@ -185,6 +207,10 @@ function load_config_server() {
         $('#input_feishu_appid').val(data['feishuappid']);
         $('#input_feishu_secret').val(data['feishusecret']);
         $('#input_feishu_refreshtoken').val(data['feishurefreshtoken']);
+
+        $('#checkbox_notdelfiledir').prop("checked", data['notdelfiledir']);
+        $('#checkbox_loadhistory').prop("checked", data['loadhistory']);
+        $('#input_maxhistorymessage').val(data['maxhistorymessage']);
     });
 }
 

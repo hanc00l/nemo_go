@@ -210,6 +210,37 @@
                     (请先保存设置后再进行获取/刷新用户访问Token)
                 </div>
             </div>
+            <div class="tile">
+                <h3 class="tile-title">Minichat设置</h3>
+                <div class="tile-body">
+                    <form>
+                        <div class="form-group">
+                            <div class="form-check form-check-inline">
+                                <div class="form-check form-check-inline">
+                                    <label class="form-check-label" for="checkbox_notdelfiledir">
+                                        <input class="form-check-input" id="checkbox_notdelfiledir" type="checkbox">聊天房间关闭后保留文件和图片
+                                    </label>
+                                </div>
+                                <div class="form-check form-check-inline">
+                                    <label class="form-check-label" for="checkbox_loadhistory">
+                                        <input class="form-check-input" id="checkbox_loadhistory" type="checkbox">自动加载历史聊天记录信息
+                                    </label>
+                                </div>
+                            </div>
+                            </br>
+                            <label class="col-form-label" for="input_maxhistorymessage">
+                                <b>历史聊天记录最大数量：</b>
+                            </label>
+                            <input class="form-control" id="input_maxhistorymessage" type="text" value="">
+                        </div>
+                    </form>
+                </div>
+                <div class="tile-footer">
+                    <button class="btn btn-primary" type="button" id="buttonUpdateMinichatConfig"><i
+                            class="fa fa-fw fa-lg fa-check-circle"></i>更新设置
+                    </button>&nbsp;&nbsp;&nbsp;
+                </div>
+            </div>
             {{ end }}
             <div class="tile">
                 <h3 class="tile-title">Version&nbsp;<span id="nemo_version"></span></h3>
