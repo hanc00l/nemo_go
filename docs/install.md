@@ -1,8 +1,8 @@
 # Nemo安装手册
 
-## v1.3
+## v1.4
 
-2024-1-3
+2024-7-9
 
 
 Nemo分为**Server**端和**Worker**端两部份。Server提供Http访问、API接口、RPC接口、消息中间件服务以及文件同步接口。Worker是通过消息中间件从Worker接收任务并执行，通过RPC接口上传任务的结果，并通过文件同步接口接收Server的文件。
@@ -39,6 +39,21 @@ Nemo目前可运行在**x86-AMD**平台的MacOS、Linux及Windows平台，其它
 - 5003
 
 Worker不会开启任务监听端口（启用goby服务端模式除外），worker会根据conf/worker.yml配置的参数与server进行连接。
+
+## 在VPS使用安装脚本辅助进行安装
+
+(在ubuntu 22.04LTS上测试，其它linux版本请自行测试)
+
+**一、server端**
+
+- 1、将nemo_linux_amd64.tar解压到nemo目录
+- 2、运行./server_install.sh
+- 3、server安装完成后，必须手动修改conf/worker.yml，设置rpc、filesync和rabbitmq的host ip（由worker能访问），在worker同步后会覆盖worker的conf/worker.yml；server端没有修改worker.yml文件会导致同步后worker无法正常工作
+
+**二、worker端安装**
+
+- 1、创建nemo目录，将daemon_worker_linux_amd64和worker_install.sh放入nemo目录
+- 2、运行./worker_install.sh，输入server的ip、filesync端口及authKey（server的conf/server.yml中的authKey），worker会自动同步server的文件
 
 ## Docker安装
 

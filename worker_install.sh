@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# check daemon_worker_linux_amd64 exist
+# 检查daemon文件是否存在
 if [ -f "daemon_worker_linux_amd64" ];then
   echo "check daemon_worker_linux_amd64 exist..."
   chmod +x daemon_worker_linux_amd64
@@ -8,7 +8,7 @@ if [ -f "daemon_worker_linux_amd64" ];then
   echo "check daemon_worker_linux_amd64 not exist,exit..."
   exit
 fi
-# update and install dependence
+# 更新相关的依赖
 read -r -p "start check update and install dependence? [Y/n]: " sure
 if [ -z "$sure" ];then
     sure="y"
@@ -26,8 +26,9 @@ case "$sure" in
         echo "skip..."
         ;;
 esac
-
+# 创建一些必要的目录
 mkdir conf && mkdir log && mkdir -p thirdparty/massdns/temp
+# 从server同步文件
 echo "start to sync from server...."
 # sync from server
 read -r -p "input server ip: " server_ip
@@ -40,11 +41,16 @@ if  [ -z "$server_port" ] ;then
     echo "you have not input server sync port!"
     exit
 fi
-read -r -p "input server  sync key: " sync_key
+read -r -p "input server sync key: " sync_key
 if  [ -z "$sync_key" ] ;then
     echo "you have not input server sync key!"
     exit
 fi
-
-./daemon_worker_linux_amd64 -tls -mh "$server_ip" -mp "$server_port" -ma "$sync_key"
+read -r -p "use tls? [y/n]: " tls
+if  [ "$tls" = "y" ] ;then
+    tls="-tls"
+    else
+    tls=""
+fi
+./daemon_worker_linux_amd64 $tls -mh "$server_ip" -mp "$server_port" -ma "$sync_key"
 echo "install success!"

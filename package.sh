@@ -56,7 +56,7 @@ tar -cvzf release/nemo_linux_amd64.tar \
   --exclude=thirdparty/gogo/gogo_windows_amd64.exe \
   --exclude=thirdparty/fingerprintx/fingerprintx_darwin_amd64 \
   --exclude=thirdparty/fingerprintx/fingerprintx_windows_amd64.exe \
-  server_linux_amd64 worker_linux_amd64 daemon_worker_linux_amd64 version.txt \
+  server_linux_amd64 worker_linux_amd64 daemon_worker_linux_amd64 version.txt server_install.sh worker_install.sh\
   conf log thirdparty web docker* Dockerfile*
 
 tar -cvzf release/nemo_windows_amd64.tar \
@@ -97,7 +97,7 @@ tar -cvzf release/worker_linux_amd64.tar \
   --exclude=thirdparty/gogo/gogo_darwin_amd64 \
   --exclude=thirdparty/gogo/gogo_windows_amd64.exe \
   --exclude=thirdparty/fingerprintx/fingerprintx_darwin_amd64 \
-  --exclude=thirdparty/fingerprintx/fingerprintx_windows_amd64.exe \
+  --exclude=thirdparty/fingerprintx/fingerprintx_windows_amd64.exe worker_install.sh \
   worker_linux_amd64 daemon_worker_linux_amd64 conf log thirdparty version.txt
 
 tar -cvzf release/worker_darwin_amd64.tar \
