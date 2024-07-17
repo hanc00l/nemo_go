@@ -1,6 +1,7 @@
 package portscan
 
 import (
+	"encoding/json"
 	"fmt"
 	"github.com/hanc00l/nemo_go/pkg/conf"
 	"github.com/hanc00l/nemo_go/pkg/db"
@@ -163,6 +164,8 @@ func (r *Result) SaveResult(config Config) string {
 	var resultIPCount, resultPortCount int
 	var newIP, newPort int
 	blackIP := custom.NewBlackTargetCheck(custom.CheckIP)
+	// 用于同步到es的IP
+	var ElasticAssets []db.Ip
 	for ipName, ipResult := range r.IPResult {
 		if blackIP.CheckBlack(ipName) {
 			logging.RuntimeLog.Warningf("%s is in blacklist,skip...", ipName)
@@ -188,6 +191,10 @@ func (r *Result) SaveResult(config Config) string {
 			}
 		}
 		resultIPCount++
+		// elastic assets
+		if conf.ElasticSyncAssetsChan != nil {
+			ElasticAssets = append(ElasticAssets, *ip)
+		}
 		for portNumber, portResult := range ipResult.Ports {
 			//save port
 			port := &db.Port{
@@ -232,6 +239,16 @@ func (r *Result) SaveResult(config Config) string {
 				httpInfo.SaveOrUpdate()
 			}
 		}
+	}
+	// 将IP资产同步到Elastic
+	if conf.ElasticSyncAssetsChan != nil && len(ElasticAssets) > 0 {
+		ElasticAssetsIPByte, _ := json.Marshal(ElasticAssets)
+		syncArgs := conf.ElasticSyncAssetsArgs{
+			Contents:       ElasticAssetsIPByte,
+			SyncOp:         conf.SyncOpNew,
+			SyncAssetsType: conf.SyncAssetsTypeIP,
+		}
+		conf.ElasticSyncAssetsChan <- syncArgs
 	}
 	var sb strings.Builder
 	sb.WriteString(fmt.Sprintf("ip:%d", resultIPCount))

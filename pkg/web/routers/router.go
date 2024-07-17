@@ -169,4 +169,9 @@ func init() {
 	web.CtrlPost("/message/precheck", (*controllers.MiniChatController).PreCheckAction)
 	web.CtrlGet("/message/ws", (*controllers.MiniChatController).WebSocketAction)
 	web.CtrlPost("/api/upload", (*controllers.MiniChatController).UploadAction)
+
+	web.CtrlGet("/es-list", (*controllers.EsSearchController).IndexAction)
+	web.CtrlPost("/es-list", (*controllers.EsSearchController).ListAction)
+	web.CtrlPost("/es-delete", (*controllers.EsSearchController).DeleteAction)
+	web.CtrlPost("/es-get-body", (*controllers.EsSearchController).GetAssetsBody)
 }

@@ -16,8 +16,12 @@ const (
 )
 
 const (
-	HighPerformance   = "High"
-	NormalPerformance = "Normal"
+	HighPerformance      = "High"
+	NormalPerformance    = "Normal"
+	SyncAssetsTypeIP     = "IP"
+	SyncAssetsTypeDomain = "Domain"
+	SyncOpNew            = "New"
+	syncOpDel            = "Del"
 )
 
 // WorkerPerformanceMode worker默认的性能模式为Normal
@@ -40,6 +44,17 @@ var RunMode = Release
 // Nemo 系统运行全局配置参数
 var serverConfig *Server
 var workerConfig *Worker
+
+// ElasticSyncAssetsArgs 用于同步资产数据到ElasticSearch的参数
+type ElasticSyncAssetsArgs struct {
+	Contents       []byte
+	SyncOp         string
+	SyncAssetsType string
+}
+
+// ElasticSyncAssetsChan 用于同步资产数据到ElasticSearch的channel
+var ElasticSyncAssetsChan chan ElasticSyncAssetsArgs
+var ElasticSyncAssetsChanMax = 100
 
 func GlobalServerConfig() *Server {
 	if serverConfig == nil {
@@ -76,6 +91,7 @@ type Server struct {
 	WebAPI   WebAPI            `yaml:"api"`
 	Database Database          `yaml:"database"`
 	Rabbitmq Rabbitmq          `yaml:"rabbitmq"`
+	Elastic  ElasticSearch     `yaml:"elastic"`
 	Task     Task              `yaml:"task"`
 	Notify   map[string]Notify `yaml:"notify"`
 	Wiki     Wiki              `yaml:"wiki"`
@@ -122,6 +138,12 @@ type Database struct {
 type Rabbitmq struct {
 	Host     string `yaml:"host"`
 	Port     int    `yaml:"port"`
+	Username string `yaml:"username"`
+	Password string `yaml:"password"`
+}
+
+type ElasticSearch struct {
+	Url      string `yaml:"url"`
 	Username string `yaml:"username"`
 	Password string `yaml:"password"`
 }

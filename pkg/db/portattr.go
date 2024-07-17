@@ -59,6 +59,16 @@ func (portAttr *PortAttr) GetsByRelatedId() (results []PortAttr) {
 	return
 }
 
+// GetsByRelatedIdByDateAsc 根据查询条件执行数据库查询操作，返回查询结果数组；返回结果为按时间升序（最新的在最后），用于从mysql导出至es的索引中
+func (portAttr *PortAttr) GetsByRelatedIdByDateAsc() (results []PortAttr) {
+	orderBy := "tag,update_datetime asc"
+
+	db := GetDB()
+	defer CloseDB(db)
+	db.Where("r_id", portAttr.RelatedId).Order(orderBy).Find(&results)
+	return
+}
+
 // Update 更新指定ID的一条记录，列名和内容位于map中
 func (portAttr *PortAttr) Update(updateMap map[string]interface{}) (success bool) {
 	updateMap["update_datetime"] = time.Now()

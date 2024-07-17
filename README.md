@@ -81,7 +81,10 @@
 - 导出IP与Domain资产
 - 当前页面资产信息统计
 - Worker使用代理扫描（仅支持socks5），支持代理服务器地址池化。
-
+- ElasticSearch同步与查询（测试中）
+  <img src="docs/image/es-1.png" />
+  <img src="docs/image/es-2.png" />
+- 
 ## 演示页面
 
 <img src="docs/demo.gif" />

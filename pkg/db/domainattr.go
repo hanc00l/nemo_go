@@ -60,6 +60,15 @@ func (domainAttr *DomainAttr) GetsByRelatedId() (results []DomainAttr) {
 	return
 }
 
+// GetsByRelatedIdByDateAsc 根据查询条件执行数据库查询操作，返回查询结果数组；按日期升序排列
+func (domainAttr *DomainAttr) GetsByRelatedIdByDateAsc() (results []DomainAttr) {
+	db := GetDB()
+	defer CloseDB(db)
+
+	db.Where("r_id", domainAttr.RelatedId).Order("tag,update_datetime asc").Find(&results)
+	return
+}
+
 // Update 更新指定ID的一条记录，列名和内容位于map中
 func (domainAttr *DomainAttr) Update(updatedMap map[string]interface{}) (success bool) {
 	updatedMap["update_datetime"] = time.Now()

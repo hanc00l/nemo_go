@@ -1,6 +1,7 @@
 package domainscan
 
 import (
+	"encoding/json"
 	"fmt"
 	"github.com/hanc00l/nemo_go/pkg/conf"
 	"github.com/hanc00l/nemo_go/pkg/db"
@@ -126,6 +127,8 @@ func (r *Result) SaveResult(config Config) string {
 	var resultDomainCount int
 	var newDomain int
 	blackDomain := custom.NewBlackTargetCheck(custom.CheckDomain)
+	// 用于同步到es的域名
+	var ElasticAssets []db.Domain
 	for domainName, domainResult := range r.DomainResult {
 		if blackDomain.CheckBlack(domainName) {
 			logging.RuntimeLog.Warningf("%s is in blacklist,skip...", domainName)
@@ -144,6 +147,10 @@ func (r *Result) SaveResult(config Config) string {
 			}
 		}
 		resultDomainCount++
+		// elastic assets
+		if conf.ElasticSyncAssetsChan != nil {
+			ElasticAssets = append(ElasticAssets, *domain)
+		}
 		// save domain attr
 		for _, domainAttrResult := range domainResult.DomainAttrs {
 			domainAttr := &db.DomainAttr{
@@ -174,6 +181,16 @@ func (r *Result) SaveResult(config Config) string {
 			}
 			httpInfo.SaveOrUpdate()
 		}
+	}
+	// 将资产同步到Elastic
+	if conf.ElasticSyncAssetsChan != nil && len(ElasticAssets) > 0 {
+		ElasticAssetsByte, _ := json.Marshal(ElasticAssets)
+		syncArgs := conf.ElasticSyncAssetsArgs{
+			Contents:       ElasticAssetsByte,
+			SyncOp:         conf.SyncOpNew,
+			SyncAssetsType: conf.SyncAssetsTypeDomain,
+		}
+		conf.ElasticSyncAssetsChan <- syncArgs
 	}
 	var sb strings.Builder
 	sb.WriteString(fmt.Sprintf("domain:%d", resultDomainCount))

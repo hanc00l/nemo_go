@@ -24,6 +24,10 @@ rabbitmq:
   port: 5672
   username: guest
   password: guest
+elastic:
+  url:
+  username:
+  password:
 task:
   ipSliceNumber: 64
   portSliceNumber: 1000

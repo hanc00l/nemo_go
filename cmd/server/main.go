@@ -144,6 +144,8 @@ func main() {
 		time.Sleep(time.Second * 1)
 	}
 	go comm.StartSaveRuntimeLog("server@nemo")
+	go comm.StartSyncElasticAssets()
+
 	loadCustomTaskWorkspace()
 	StartCronTask()
 	StartMainTaskDemon()

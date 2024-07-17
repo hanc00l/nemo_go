@@ -4,9 +4,12 @@ import (
 	"bytes"
 	"context"
 	"crypto/tls"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"github.com/hanc00l/nemo_go/pkg/conf"
+	"github.com/hanc00l/nemo_go/pkg/db"
+	"github.com/hanc00l/nemo_go/pkg/es"
 	"github.com/hanc00l/nemo_go/pkg/filesync"
 	"github.com/hanc00l/nemo_go/pkg/logging"
 	"github.com/hanc00l/nemo_go/pkg/utils"
@@ -15,6 +18,7 @@ import (
 	"os"
 	"path/filepath"
 	"regexp"
+	"time"
 )
 
 var (
@@ -139,6 +143,54 @@ func StartSaveRuntimeLog(source string) {
 			err := CallXClient("SaveRuntimeLog", &resultArgs, &result)
 			if err != nil {
 				logging.CLILog.Error(err)
+			}
+		}
+	}
+}
+
+func StartSyncElasticAssets() {
+	// 同步elastic assets
+	if !es.CheckElasticConn() {
+		logging.RuntimeLog.Warningf("start sync elastic assets failed, elastic client is nil")
+		logging.CLILog.Warningf("start sync elastic assets failed:elastic client is nil")
+		return
+	}
+	logging.RuntimeLog.Info("start sync elastic assets...")
+	logging.CLILog.Info("start sync elastic assets...")
+	conf.ElasticSyncAssetsChan = make(chan conf.ElasticSyncAssetsArgs, conf.ElasticSyncAssetsChanMax)
+	for {
+		select {
+		case assets := <-conf.ElasticSyncAssetsChan:
+			if assets.SyncAssetsType == conf.SyncAssetsTypeIP {
+				var ips []db.Ip
+				err := json.Unmarshal(assets.Contents, &ips)
+				if err != nil {
+					logging.RuntimeLog.Errorf("unmarshal ip assets failed:%s", err)
+					continue
+				}
+				if len(ips) == 0 {
+					logging.RuntimeLog.Errorf("sync elastic ip assets is empty")
+					continue
+				}
+				time.Sleep(3 * time.Second)
+				if !es.SyncIpAssets(ips[0].WorkspaceId, ips) {
+					logging.RuntimeLog.Errorf("sync elastic ip assets failed,ip count:%d", len(ips))
+				}
+			} else if assets.SyncAssetsType == conf.SyncAssetsTypeDomain {
+				var domains []db.Domain
+				err := json.Unmarshal(assets.Contents, &domains)
+				if err != nil {
+					logging.RuntimeLog.Errorf("unmarshal domain assets failed:%s", err)
+					continue
+				}
+				if len(domains) == 0 {
+					logging.RuntimeLog.Errorf("sync elastic domain assets is empty")
+					continue
+				}
+				time.Sleep(3 * time.Second)
+				if !es.SyncDomainAssets(domains[0].WorkspaceId, domains) {
+					logging.RuntimeLog.Errorf("sync elastic domain assets failed,domain count:%d", len(domains))
+				}
 			}
 		}
 	}

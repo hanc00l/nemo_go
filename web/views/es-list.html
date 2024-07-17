@@ -1,0 +1,464 @@
+<main class="app-content">
+    <div class="row">
+        <div class="imgPreview"><img src="#" alt="" id="imgPreview">
+        </div>
+        <div class="col-md-12">
+            <div class="tile">
+                <div class="tile-body">
+                    <form class="row">
+                        <div class="form-group col-md-9">
+                            <label class="control-label" for="query"> <i class="fa fa-question-circle-o"
+                                                                         aria-hidden="true"></i><a
+                                    href="javascript:show_query_expr()">查询语法</a>
+                            </label>
+                            <input class="form-control" type="text" id="query" placeholder="Search...">
+                        </div>
+                        <div class="form-group col-md-2 align-self-end">
+                            <button class="btn btn-primary" type="button" id="search"><i
+                                    class="fa fa-fw fa-lg fa-search"></i>搜索
+                            </button>
+                            <div class="btn-group" role="group">
+                                <button id="btnGroupDrop1" type="button" class="btn btn-secondary dropdown-toggle"
+                                        data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                    <i class="fa fa-angle-double-down"></i>其它
+                                </button>
+                                <div class="dropdown-menu" aria-labelledby="btnGroupDrop1">
+                                    <a class="dropdown-item" href="#" id="batch_delete"><i
+                                            class="fa fa-fw fa-lg fa-remove"></i>删除选择的资产</a>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+            <div class="tile">
+                <div class="tile-body">
+                    <table class="table table-hover table-bordered" id="es_table" width="100%">
+                    </table>
+                </div>
+                <!----tile body-->
+            </div> <!-- tile -->
+        </div> <!-- col md-12 -->
+    </div>
+    <!-- 模态对话框：显示网站正文-->
+    <div class="modal fade" id="showHttpInfo" tabindex="-1" role="dialog" aria-labelledby="myModalLabel2"
+         aria-hidden="true">
+        <div class="modal-dialog" style="max-width: 1024px;">
+            <div class="modal-content">
+                <div class="modal-header card-header bg-primary">
+                    <h4 class="modal-title" id="myModalLabel2">
+                        网站正文
+                    </h4>
+                </div>
+                <div class="modal-body">
+                    <form class="form-horizontal" role="form">
+                        <div class="form-group">
+                        <textarea class="form-control" id="text_content_http" rows="20"
+                                  placeholder="网站正文"></textarea>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal" aria-hidden="true">关闭
+                    </button>
+                </div>
+            </div><!-- /.modal-content -->
+        </div><!-- /.modal-dialog -->
+    </div> <!-- table responsive-->
+    <!-- 模态对话框：显示搜索语法-->
+    <div class="modal fade" id="showSearchExpr" tabindex="-1" role="dialog" aria-labelledby="myModalLabel3"
+         aria-hidden="true">
+        <div class="modal-dialog" style="max-width: 1024px;">
+            <div class="modal-content">
+                <div class="modal-header card-header bg-primary">
+                    <h4 class="modal-title" id="myModalLabel3">
+                        查询语法
+                    </h4>
+                </div>
+                <div class="modal-body">
+                    <div class="el-dialog__body">
+                        <div data-v-008f13b2="" class="queryDialog">
+                            <div data-v-008f13b2="" class="page-scroll el-scrollbar">
+                                <div class="el-scrollbar__wrap" style="margin-bottom: -6px; margin-right: -6px;">
+                                    <div class="el-scrollbar__view">
+                                        <div data-v-008f13b2="" class="paddingRight25">
+                                            <div data-v-008f13b2="">
+                                                <div data-v-008f13b2="" role="tablist" aria-multiselectable="true"
+                                                     class="el-collapse">
+                                                    支持的逻辑连接符：&&（与）、||（或）；如果查询表达式有多个与或关系，尽量在外面用（）包含起来；
+                                                </div>
+                                            </div>
+                                            <div data-v-008f13b2="">
+                                                <div data-v-008f13b2="" class="table-grammar">
+                                                    <table data-v-008f13b2="">
+                                                        <thead data-v-008f13b2="">
+                                                        <tr data-v-008f13b2="">
+                                                            <th data-v-008f13b2="" width="130">语法</th>
+                                                            <th data-v-008f13b2="" width="200">例句</th>
+                                                            <th data-v-008f13b2="">用途说明</th>
+                                                            <th data-v-008f13b2="" width="80">==</th>
+                                                            <th data-v-008f13b2="" width="80">!=</th>
+                                                            <th data-v-008f13b2="" width="80">&gt;=和 &lt;=</th>
+                                                        </tr>
+                                                        </thead>
+                                                        <tbody data-v-008f13b2="">
+                                                        <tr data-v-008f13b2="">
+                                                            <td data-v-008f13b2="" rowspan="2" class="">ip</td>
+                                                            <td data-v-008f13b2="">
+                                                                ip=="1.1.1.1"
+                                                            </td>
+                                                            <td data-v-008f13b2="">
+                                                                通过单一IPv4地址进行查询
+                                                            </td>
+                                                            <td data-v-008f13b2="" class="text-center">
+                                                                ✓
+                                                            </td>
+                                                            <td data-v-008f13b2="" class="text-center">
+                                                                ✓
+                                                            </td>
+                                                            <td data-v-008f13b2="" class="text-center">
+                                                                -
+                                                            </td>
+                                                        </tr>
+                                                        <tr data-v-008f13b2=""><!---->
+                                                            <td data-v-008f13b2="">
+                                                                ip=="220.181.111.1/24"
+                                                            </td>
+                                                            <td data-v-008f13b2="">
+                                                                通过IPv4掩码进行查询
+                                                            </td>
+                                                            <td data-v-008f13b2="" class="text-center">
+                                                                ✓
+                                                            </td>
+                                                            <td data-v-008f13b2="" class="text-center">
+                                                                ✓
+                                                            </td>
+                                                            <td data-v-008f13b2="" class="text-center">
+                                                                -
+                                                            </td>
+                                                        </tr>
+                                                        <tr data-v-008f13b2="">
+                                                            <td data-v-008f13b2="" rowspan="1" class="">port</td>
+                                                            <td data-v-008f13b2="">
+                                                                port=="6379"
+                                                            </td>
+                                                            <td data-v-008f13b2="">
+                                                                通过端口号进行查询
+                                                            </td>
+                                                            <td data-v-008f13b2="" class="text-center">
+                                                                ✓
+                                                            </td>
+                                                            <td data-v-008f13b2="" class="text-center">
+                                                                ✓
+                                                            </td>
+                                                            <td data-v-008f13b2="" class="text-center">
+                                                                -
+                                                            </td>
+                                                        </tr>
+                                                        <tr data-v-008f13b2="">
+                                                            <td data-v-008f13b2="" rowspan="1" class="">domain</td>
+                                                            <td data-v-008f13b2="">
+                                                                domain=="qq.com"
+                                                            </td>
+                                                            <td data-v-008f13b2="">
+                                                                通过根域名进行查询
+                                                            </td>
+                                                            <td data-v-008f13b2="" class="text-center">
+                                                                ✓
+                                                            </td>
+                                                            <td data-v-008f13b2="" class="text-center">
+                                                                ✓
+                                                            </td>
+                                                            <td data-v-008f13b2="" class="text-center">
+                                                                -
+                                                            </td>
+                                                        </tr>
+                                                        <tr data-v-008f13b2="">
+                                                            <td data-v-008f13b2="" rowspan="1" class="">host</td>
+                                                            <td data-v-008f13b2="">
+                                                                host=="api.fofa.info"
+                                                            </td>
+                                                            <td data-v-008f13b2="">
+                                                                通过主机名进行查询
+                                                            </td>
+                                                            <td data-v-008f13b2="" class="text-center">
+                                                                ✓
+                                                            </td>
+                                                            <td data-v-008f13b2="" class="text-center">
+                                                                ✓
+                                                            </td>
+                                                            <td data-v-008f13b2="" class="text-center">
+                                                                -
+                                                            </td>
+                                                        </tr>
+                                                        <tr data-v-008f13b2="">
+                                                            <td data-v-008f13b2="" rowspan="1" class="">location</td>
+                                                            <td data-v-008f13b2="">
+                                                                location=="北京"
+                                                            </td>
+                                                            <td data-v-008f13b2="">
+                                                                通过IP归属地进行查询
+                                                            </td>
+                                                            <td data-v-008f13b2="" class="text-center">
+                                                                ✓
+                                                            </td>
+                                                            <td data-v-008f13b2="" class="text-center">
+                                                                ✓
+                                                            </td>
+                                                            <td data-v-008f13b2="" class="text-center">
+                                                                -
+                                                            </td>
+                                                        </tr>
+                                                        <tr data-v-008f13b2="">
+                                                            <td data-v-008f13b2="" rowspan="1" class="">status</td>
+                                                            <td data-v-008f13b2="">
+                                                                status=="200"
+                                                            </td>
+                                                            <td data-v-008f13b2="">
+                                                                通过HTTP状态码进行查询
+                                                            </td>
+                                                            <td data-v-008f13b2="" class="text-center">
+                                                                ✓
+                                                            </td>
+                                                            <td data-v-008f13b2="" class="text-center">
+                                                                ✓
+                                                            </td>
+                                                            <td data-v-008f13b2="" class="text-center">
+                                                                -
+                                                            </td>
+                                                        </tr>
+                                                        <tr data-v-008f13b2="">
+                                                            <td data-v-008f13b2="" rowspan="1" class="">service</td>
+                                                            <td data-v-008f13b2="">
+                                                                service=="http"
+                                                            </td>
+                                                            <td data-v-008f13b2="">
+                                                                通过服务进行查询
+                                                            </td>
+                                                            <td data-v-008f13b2="" class="text-center">
+                                                                ✓
+                                                            </td>
+                                                            <td data-v-008f13b2="" class="text-center">
+                                                                ✓
+                                                            </td>
+                                                            <td data-v-008f13b2="" class="text-center">
+                                                                -
+                                                            </td>
+                                                        </tr>
+                                                        <tr data-v-008f13b2="">
+                                                            <td data-v-008f13b2="" rowspan="1" class="">banner</td>
+                                                            <td data-v-008f13b2="">
+                                                                banner=="ssh"
+                                                            </td>
+                                                            <td data-v-008f13b2="">
+                                                                通过协议返回信息进行查询
+                                                            </td>
+                                                            <td data-v-008f13b2="" class="text-center">
+                                                                ✓
+                                                            </td>
+                                                            <td data-v-008f13b2="" class="text-center">
+                                                                ✓
+                                                            </td>
+                                                            <td data-v-008f13b2="" class="text-center">
+                                                                -
+                                                            </td>
+                                                        </tr>
+                                                        <tr data-v-008f13b2="">
+                                                            <td data-v-008f13b2="" rowspan="1" class="">server</td>
+                                                            <td data-v-008f13b2="">
+                                                                server=="Microsoft-IIS/10"
+                                                            </td>
+                                                            <td data-v-008f13b2="">
+                                                                通过服务器进行查询
+                                                            </td>
+                                                            <td data-v-008f13b2="" class="text-center">
+                                                                ✓
+                                                            </td>
+                                                            <td data-v-008f13b2="" class="text-center">
+                                                                ✓
+                                                            </td>
+                                                            <td data-v-008f13b2="" class="text-center">
+                                                                -
+                                                            </td>
+                                                        </tr>
+                                                        <tr data-v-008f13b2="">
+                                                            <td data-v-008f13b2="" rowspan="1" class="">cert</td>
+                                                            <td data-v-008f13b2="">
+                                                                cert=="fofa.info"
+                                                            </td>
+                                                            <td data-v-008f13b2="">
+                                                                通过TLS证书进行查询
+                                                            </td>
+                                                            <td data-v-008f13b2="" class="text-center">
+                                                                ✓
+                                                            </td>
+                                                            <td data-v-008f13b2="" class="text-center">
+                                                                ✓
+                                                            </td>
+                                                            <td data-v-008f13b2="" class="text-center">
+                                                                -
+                                                            </td>
+                                                        </tr>
+                                                        <tr data-v-008f13b2="">
+                                                            <td data-v-008f13b2="" rowspan="1" class="">icon_hash</td>
+                                                            <td data-v-008f13b2="">
+                                                                icon_hash=="-247388890"
+                                                            </td>
+                                                            <td data-v-008f13b2="">
+                                                                通过网站图标的hash值进行查询
+                                                            </td>
+                                                            <td data-v-008f13b2="" class="text-center">
+                                                                ✓
+                                                            </td>
+                                                            <td data-v-008f13b2="" class="text-center">
+                                                                ✓
+                                                            </td>
+                                                            <td data-v-008f13b2="" class="text-center">
+                                                                -
+                                                            </td>
+                                                        </tr>
+                                                        <tr data-v-008f13b2="">
+                                                            <td data-v-008f13b2="" rowspan="1" class="">title</td>
+                                                            <td data-v-008f13b2="">
+                                                                title=="beijing"
+                                                            </td>
+                                                            <td data-v-008f13b2="">
+                                                                通过网站标题进行查询
+                                                            </td>
+                                                            <td data-v-008f13b2="" class="text-center">
+                                                                ✓
+                                                            </td>
+                                                            <td data-v-008f13b2="" class="text-center">
+                                                                ✓
+                                                            </td>
+                                                            <td data-v-008f13b2="" class="text-center">
+                                                                -
+                                                            </td>
+                                                        </tr>
+                                                        <tr data-v-008f13b2="">
+                                                            <td data-v-008f13b2="" rowspan="1" class="">header</td>
+                                                            <td data-v-008f13b2="">
+                                                                header=="elastic"
+                                                            </td>
+                                                            <td data-v-008f13b2="">
+                                                                通过响应标头进行查询
+                                                            </td>
+                                                            <td data-v-008f13b2="" class="text-center">
+                                                                ✓
+                                                            </td>
+                                                            <td data-v-008f13b2="" class="text-center">
+                                                                ✓
+                                                            </td>
+                                                            <td data-v-008f13b2="" class="text-center">
+                                                                -
+                                                            </td>
+                                                        </tr>
+                                                        <tr data-v-008f13b2="">
+                                                            <td data-v-008f13b2="" rowspan="1" class="">body</td>
+                                                            <td data-v-008f13b2="">
+                                                                body=="网络空间测绘"
+                                                            </td>
+                                                            <td data-v-008f13b2="">
+                                                                通过HTML正文进行查询
+                                                            </td>
+                                                            <td data-v-008f13b2="" class="text-center">
+                                                                ✓
+                                                            </td>
+                                                            <td data-v-008f13b2="" class="text-center">
+                                                                ✓
+                                                            </td>
+                                                            <td data-v-008f13b2="" class="text-center">
+                                                                -
+                                                            </td>
+                                                        </tr>
+                                                        <tr data-v-008f13b2="">
+                                                            <td data-v-008f13b2="" rowspan="1" class="">org</td>
+                                                            <td data-v-008f13b2="">
+                                                                org=="测试单位"
+                                                            </td>
+                                                            <td data-v-008f13b2="">
+                                                                通过所属的Nemo自定义的组织机构查询
+                                                            </td>
+                                                            <td data-v-008f13b2="" class="text-center">
+                                                                ✓
+                                                            </td>
+                                                            <td data-v-008f13b2="" class="text-center">
+                                                                ✓
+                                                            </td>
+                                                            <td data-v-008f13b2="" class="text-center">
+                                                                -
+                                                            </td>
+                                                        </tr>
+                                                        <tr data-v-008f13b2="">
+                                                            <td data-v-008f13b2="" rowspan="1" class="">create_time</td>
+                                                            <td data-v-008f13b2="">
+                                                                create_time=="2024-07-01"
+                                                            </td>
+                                                            <td data-v-008f13b2="">
+                                                                通过资产的创建时间查询（日期格式为yyyy-MM-dd）
+                                                            </td>
+                                                            <td data-v-008f13b2="" class="text-center">
+                                                                ✓
+                                                            </td>
+                                                            <td data-v-008f13b2="" class="text-center">
+                                                                ✓
+                                                            </td>
+                                                            <td data-v-008f13b2="" class="text-center">
+                                                                ✓
+                                                            </td>
+                                                        </tr>
+                                                        <tr data-v-008f13b2="">
+                                                            <td data-v-008f13b2="" rowspan="1" class="">update_time</td>
+                                                            <td data-v-008f13b2="">
+                                                                update_time=="2024-07-01"
+                                                            </td>
+                                                            <td data-v-008f13b2="">
+                                                                通过资产的最后更新时间查询（日期格式为yyyy-MM-dd）
+                                                            </td>
+                                                            <td data-v-008f13b2="" class="text-center">
+                                                                ✓
+                                                            </td>
+                                                            <td data-v-008f13b2="" class="text-center">
+                                                                ✓
+                                                            </td>
+                                                            <td data-v-008f13b2="" class="text-center">
+                                                                ✓
+                                                            </td>
+                                                        </tr>
+                                                        </tbody>
+                                                    </table>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal" aria-hidden="true">关闭
+                    </button>
+                </div>
+            </div><!-- /.modal-content -->
+        </div><!-- /.modal-dialog -->
+    </div> <!-- table responsive-->
+    <!--row-->
+</main>
+<script src="static/js/jquery/jquery-3.3.1.min.js"></script>
+<script src="static/js/bootstrap/popper.min.js"></script>
+<script src="static/js/bootstrap/bootstrap.min.js"></script>
+<script src="static/js/main.js"></script>
+<script src="static/js/plugins/pace.min.js"></script>
+<!-- Data table plugin-->
+<script src="static/js/plugins/jquery.dataTables.min.js"></script>
+<script src="static/js/plugins/dataTables.bootstrap.min.js"></script>
+<script src="static/js/sweetalert/sweetalert.min.js"></script>
+<script src="static/js/jquery/jquery.bootstrap-duallistbox.js"></script>
+<script src="static/js/server/list-common.js"></script>
+<script src="static/js/server/es-list.js"></script>
+<script>
+    $(function () {
+        $("title").html("EsSearch-Nemo");
+    });
+</script>

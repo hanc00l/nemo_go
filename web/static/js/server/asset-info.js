@@ -73,11 +73,8 @@ function html2Escape(sHtml) {
     var temp = document.createElement("div");
     (temp.textContent != null) ? (temp.textContent = sHtml) : (temp.innerText = sHtml);
     var output = temp.innerHTML.replace(/\"/g, "&quot;").replace(/\'/g, "&acute;");
-    ;
-    ;
     temp = null;
     //output = output
-
     return output;
 }
 
