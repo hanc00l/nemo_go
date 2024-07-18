@@ -75,15 +75,15 @@ func mapIpToAssets(workspaceId int, ips []db.Ip) (docList []Document) {
 					}
 				}
 				source[portAttrData.Source] = struct{}{}
-				// http header and body
-				htp := db.IpHttp{RelatedId: portData.Id}
-				htps := htp.GetsByRelatedId()
-				for _, htpData := range htps {
-					if htpData.Tag == "header" {
-						doc.Header = htpData.Content
-					} else if htpData.Tag == "body" {
-						doc.Body = htpData.Content
-					}
+			}
+			// http header and body
+			htp := db.IpHttp{RelatedId: portData.Id}
+			htps := htp.GetsByRelatedId()
+			for _, htpData := range htps {
+				if htpData.Tag == "header" {
+					doc.Header = htpData.Content
+				} else if htpData.Tag == "body" {
+					doc.Body = htpData.Content
 				}
 			}
 			doc.Source = utils.SetToSlice(source)
