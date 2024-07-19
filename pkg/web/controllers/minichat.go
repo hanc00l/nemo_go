@@ -2,6 +2,7 @@ package controllers
 
 import (
 	"github.com/google/uuid"
+	minichatConfig "github.com/hanc00l/nemo_go/pkg/minichat/config"
 	"github.com/hanc00l/nemo_go/pkg/minichat/server"
 )
 
@@ -13,23 +14,36 @@ var GlobalRoomNumber = make(map[string]string)
 
 // IndexAction 显示列表页面
 func (c *MiniChatController) IndexAction() {
-	// 根据当前工作区映射到房间号
 	roomNumber := c.GetString("room", "")
-	// 强制检查房间号是否是由服务端生成并对应
-	if roomNumber != "" {
-		if !checkRoomNumber(roomNumber) {
-			c.Abort("404")
+	if minichatConfig.EnableAnonymous {
+		//允许匿名访问，但房间号只能uuid生成提高安全性
+		if roomNumber == "" {
+			roomNumber = uuid.New().String()
+			GlobalRoomNumber[roomNumber] = roomNumber
+		} else {
+			if !checkRoomNumber(roomNumber) {
+				c.Abort("404")
+			}
 		}
 		c.Data["roomNumber"] = roomNumber
 	} else {
-		workspaceGUID := c.GetCurrentWorkspaceGUID()
-		if workspaceGUID != "" {
-			if _, ok := GlobalRoomNumber[workspaceGUID]; !ok {
-				GlobalRoomNumber[workspaceGUID] = uuid.New().String()
+		// 根据当前工作区映射到房间号
+		// 强制检查房间号是否是由服务端生成并对应
+		if roomNumber != "" {
+			if !checkRoomNumber(roomNumber) {
+				c.Abort("404")
 			}
-			c.Data["roomNumber"] = GlobalRoomNumber[workspaceGUID]
+			c.Data["roomNumber"] = roomNumber
 		} else {
-			c.Data["roomNumber"] = ""
+			workspaceGUID := c.GetCurrentWorkspaceGUID()
+			if workspaceGUID != "" {
+				if _, ok := GlobalRoomNumber[workspaceGUID]; !ok {
+					GlobalRoomNumber[workspaceGUID] = uuid.New().String()
+				}
+				c.Data["roomNumber"] = GlobalRoomNumber[workspaceGUID]
+			} else {
+				c.Data["roomNumber"] = ""
+			}
 		}
 	}
 	c.TplName = "minichat-index.html"

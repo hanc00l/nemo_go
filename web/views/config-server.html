@@ -184,15 +184,18 @@
                             <label class="col-form-label" for="input_feishu_appid">
                                 <b>AppId</b>
                             </label>
-                            <input class="form-control" id="input_feishu_appid" type="text" value="" placeholder="飞书自建应用的appId">
+                            <input class="form-control" id="input_feishu_appid" type="text" value=""
+                                   placeholder="飞书自建应用的appId">
                             <label class="col-form-label" for="input_feishu_secret">
                                 <b>AppSecret</b>
                             </label>
-                            <input class="form-control" id="input_feishu_secret" type="text" value="" placeholder="飞书自建应用的appSecret">
+                            <input class="form-control" id="input_feishu_secret" type="text" value=""
+                                   placeholder="飞书自建应用的appSecret">
                             <label class="col-form-label" for="input_feishu_refreshtoken">
                                 <b>用户访问RefreshToken</b>
                             </label>
-                            <input class="form-control" id="input_feishu_refreshtoken" type="text" value="" placeholder="飞书自建应用的用户访问权限刷新Token（通过该Token获取有效的用户访问权限Token）">
+                            <input class="form-control" id="input_feishu_refreshtoken" type="text" value=""
+                                   placeholder="飞书自建应用的用户访问权限刷新Token（通过该Token获取有效的用户访问权限Token）">
                         </div>
                     </form>
                 </div>
@@ -200,7 +203,7 @@
                     <button class="btn btn-primary" type="button" id="buttonSaveWikiFeishu"><i
                             class="fa fa-fw fa-lg fa-check-circle"></i>保存设置
                     </button>&nbsp;&nbsp;&nbsp;
-                    <button class="btn btn-primary" type="button" id="buttonRefreshToken" ><i
+                    <button class="btn btn-primary" type="button" id="buttonRefreshToken"><i
                             class="fa fa-fw fa-lg fa-refresh"></i>刷新用户访问Token
                     </button>
                     <button class="btn btn-primary" type="button" id="buttonOpenWikiFeishu" data-toggle="modal"
@@ -217,6 +220,11 @@
                         <div class="form-group">
                             <div class="form-check form-check-inline">
                                 <div class="form-check form-check-inline">
+                                    <div class="form-check form-check-inline">
+                                        <label class="form-check-label" for="checkbox_anonymous">
+                                            <input class="form-check-input" id="checkbox_anonymous" type="checkbox">允许未登录进入聊天房间
+                                        </label>
+                                    </div>
                                     <label class="form-check-label" for="checkbox_notdelfiledir">
                                         <input class="form-check-input" id="checkbox_notdelfiledir" type="checkbox">聊天房间关闭后保留文件和图片
                                     </label>

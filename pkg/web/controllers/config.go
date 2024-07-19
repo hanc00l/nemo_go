@@ -94,6 +94,7 @@ type DefaultConfig struct {
 	MaxDomainPerIP int    `json:"maxdomainperip" form:"maxdomainperip"`
 	TitleFilter    string `json:"title" form:"title"`
 	// minichat
+	Anonymous         bool `json:"anonymous" form:"anonymous"`
 	IsNotDelFileDir   bool `json:"notdelfiledir" form:"notdelfiledir"`
 	LoadHistory       bool `json:"loadhistory" form:"loadhistory"`
 	MaxHistoryMessage int  `json:"maxhistorymessage" form:"maxhistorymessage"`
@@ -259,6 +260,7 @@ func (c *ConfigController) LoadServerConfigAction() {
 		FeishuAppSecret:    feishu.AppSecret,
 		FeishuRefreshToken: feishu.UserAccessRefreshToken,
 		//
+		Anonymous:         minichatConfig.EnableAnonymous,
 		IsNotDelFileDir:   minichatConfig.IsNotDelFileDir,
 		LoadHistory:       minichatConfig.LoadHistory,
 		MaxHistoryMessage: minichatConfig.MaxHistoryMessage,
@@ -798,13 +800,15 @@ func (c *ConfigController) UpdateMinichatConfigAction() {
 		c.FailedStatus("当前用户权限不允许！")
 		return
 	}
+	anonymous, err0 := c.GetBool("anonymous", false)
 	notDeleteDir, err1 := c.GetBool("notdelfiledir", false)
 	loadHistory, err2 := c.GetBool("loadhistory", true)
 	maxHistoryMessage, err3 := c.GetInt("maxhistorymessage", 1000)
-	if err1 != nil || err2 != nil || err3 != nil {
+	if err0 != nil || err1 != nil || err2 != nil || err3 != nil {
 		c.FailedStatus("参数错误")
 		return
 	}
+	minichatConfig.EnableAnonymous = anonymous
 	minichatConfig.IsNotDelFileDir = notDeleteDir
 	minichatConfig.LoadHistory = loadHistory
 	minichatConfig.MaxHistoryMessage = maxHistoryMessage

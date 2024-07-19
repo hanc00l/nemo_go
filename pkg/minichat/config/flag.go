@@ -8,6 +8,7 @@ var IsNotDelFileDir = false
 var ChatPath = ""
 var LoadHistory = true
 var MaxHistoryMessage = 1000
+var EnableAnonymous = false
 
 var RsaPrivateKey = ""
 var RsaPublicKey = ""

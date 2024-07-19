@@ -113,3 +113,37 @@ screen -r
 - 由于IPv6地址的长度，导致在扫描时，扫描速度会比IPv4慢很多，因此建议在扫描时，将IPv6地址单独扫描，或者将扫描的端口范围缩小， 同时Nemo默认会丢弃掩码低于/104的IPv6地址，因此建议在扫描时，将掩码设置为/104以上。
 - Nemo对域名任务，会自动识别域名对应的IPv6地址。对于IP任务，如果需要扫描IPv6地址，需要在IP任务中添加IPv6地址，或者在IP任务中添加域名，Nemo会自动识别域名对应的IPv6地址。
 - 最最最重要的一点：Worker必须支持IPv6地址，否则无法正常工作。请用ifconfig/ipconfig查看ip时，确认启用了ipv6并且地址并且不是fe80开头（fe80::/10为本地链路地址，用于单一链路，适用于自动配置、邻机发现等，路由器不转发，类似ipv4的169.254/地址）。
+
+### 11、ElasticSearch功能（测试中）
+
+从v2.13.1开始，增加了数据同步到ElasticSearch的功能。
+
+- ElasticSearch服务需单独安装；将URL及用户密码，在server.yml中进行配置(以下为配置样例，请根据实际修改)
+
+```yaml
+elastic:
+  url: https://127.0.0.1:9200
+  username: elastic
+  password: xxxxxxx
+```
+- 编译cmd/estools/main.go，生成estools可执行文件，放到server目录下。
+- 启动server后，将server中的数据同步到ElasticSearch中。命令参数-i -w为要同步的workspace的GUID
+
+```shell
+  -c	create index
+  -d	delete index
+  -f string
+    	import by json file path
+  -i	import data to es
+  -w string
+    	import index name by workspace guid
+Usage:
+	estools -i -w workspace_guid		import data from nemo database to elasticsearch
+	estools -c -w workspace_guid		create index
+	estools -d -w workspace_guid		delete index
+	estools -i -w workspace_guid -f json_file_path		import data from json file to elasticsearch
+```
+
+- Nemo的任务执行结果会自动同步到ElasticSearch中。
+- 在EsSearch页面，可通过语法查询ElasticSearch中的数据，支持的语法请参考：
+  <img src="image/es-2.png" />

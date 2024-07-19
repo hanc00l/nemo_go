@@ -173,6 +173,7 @@ $(function () {
     $("#buttonUpdateMinichatConfig").click(function () {
         $.post("/config-update-minichat",
             {
+                "anonymous": $('#checkbox_anonymous').is(":checked"),
                 "notdelfiledir": $('#checkbox_notdelfiledir').is(":checked"),
                 "loadhistory": $('#checkbox_loadhistory').is(":checked"),
                 "maxhistorymessage": $('#input_maxhistorymessage').val(),
@@ -208,6 +209,7 @@ function load_config_server() {
         $('#input_feishu_secret').val(data['feishusecret']);
         $('#input_feishu_refreshtoken').val(data['feishurefreshtoken']);
 
+        $('#checkbox_anonymous').prop("checked", data['anonymous']);
         $('#checkbox_notdelfiledir').prop("checked", data['notdelfiledir']);
         $('#checkbox_loadhistory').prop("checked", data['loadhistory']);
         $('#input_maxhistorymessage').val(data['maxhistorymessage']);

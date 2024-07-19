@@ -19,6 +19,7 @@ import (
 	_ "github.com/hanc00l/nemo_go/pkg/web/routers"
 	"net/http"
 	"path/filepath"
+	"strings"
 	"time"
 )
 
@@ -30,7 +31,11 @@ type ServerOption struct {
 	TLSKeyFile  string
 }
 
-var UrlFilterWhiteList = []string{"/"}
+var UrlFilterWhiteList = []string{}
+
+var MinichatUrlFilterWhiteList = []string{
+	"/minichat", "/message/precheck", "/message/ws", "/api/upload",
+}
 
 func parseServerOption() *ServerOption {
 	option := &ServerOption{}
@@ -91,9 +96,19 @@ func StartWebServer(option *ServerOption) {
 
 // filterLoginCheck 全局的登录验证
 func filterLoginCheck(ctx *beegoContext.Context) {
+	if ctx.Request.RequestURI == "/" {
+		return
+	}
 	for _, url := range UrlFilterWhiteList {
-		if ctx.Request.RequestURI == url {
+		if strings.HasPrefix(ctx.Request.RequestURI, url) {
 			return
+		}
+	}
+	if minichatConfig.EnableAnonymous {
+		for _, url := range MinichatUrlFilterWhiteList {
+			if strings.HasPrefix(ctx.Request.RequestURI, url) {
+				return
+			}
 		}
 	}
 	// 检查用户是否登录（检查登录成功后的session:User、UserRole、Workspace
