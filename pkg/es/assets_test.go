@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"github.com/elastic/go-elasticsearch/v8/typedapi/core/search"
 	"github.com/elastic/go-elasticsearch/v8/typedapi/types"
+	"github.com/hanc00l/nemo_go/pkg/utils"
 	"testing"
 	"time"
 )
@@ -155,4 +156,25 @@ func TestAssets_Search(t *testing.T) {
 		return
 	}
 	outputDoc(res, t)
+}
+
+func TestAssets_Aggregation2(t *testing.T) {
+	workspaceResult := map[int]string{
+		1: "b0c79065-7ff7-32ae-cc18-864ccd8f7717",
+	}
+	query := types.Query{
+		MatchAll: types.NewMatchAllQuery(),
+	}
+	a := NewAssets(workspaceResult[1])
+	result, err := a.Aggregation(query)
+	if err != nil {
+		t.Error(err)
+		return
+	}
+	t.Log(utils.SortMapByValue(result["port"], true))
+	t.Log(utils.SortMapByValue(result["icon_hash"], true))
+	t.Log(utils.SortMapByValue(result["service"], true))
+	t.Log(utils.SortMapByValue(result["server"], true))
+	t.Log(utils.SortMapByValue(result["location"], true))
+	t.Log(utils.SortMapByValue(result["title"], true))
 }

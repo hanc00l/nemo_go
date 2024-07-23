@@ -11,6 +11,7 @@ import (
 var (
 	JsonPathFile  string
 	WorkspaceGUID string
+	IsList        bool
 	IsImport      bool
 	IsCreate      bool
 	IsDelete      bool
@@ -19,6 +20,7 @@ var (
 func parseOption() {
 	flag.StringVar(&JsonPathFile, "f", "", "import by json file path")
 	flag.StringVar(&WorkspaceGUID, "w", "", "import index name by workspace guid")
+	flag.BoolVar(&IsList, "l", false, "list all es index")
 	flag.BoolVar(&IsImport, "i", false, "import data to es")
 	flag.BoolVar(&IsCreate, "c", false, "create index")
 	flag.BoolVar(&IsDelete, "d", false, "delete index")
@@ -30,13 +32,23 @@ func parseOption() {
 func main() {
 	parseOption()
 
-	if !IsImport && !IsCreate && !IsDelete {
+	if !IsList && !IsImport && !IsCreate && !IsDelete {
 		flag.Usage()
 		fmt.Println("Usage: " +
+			"\n\testools -l\t\t\t\tlist all es index" +
 			"\n\testools -i -w workspace_guid\t\timport data from nemo database to elasticsearch" +
 			"\n\testools -c -w workspace_guid\t\tcreate index" +
 			"\n\testools -d -w workspace_guid\t\tdelete index" +
 			"\n\testools -i -w workspace_guid -f json_file_path\t\timport data from json file to elasticsearch")
+		return
+	}
+	if IsList {
+		a := es.NewAssets("")
+		result := a.ListAllIndices()
+		fmt.Printf("%s\t%s\n", "docCount", "indexName")
+		for indexName, count := range result {
+			fmt.Printf("%s\t\t%s\n", count, indexName)
+		}
 		return
 	}
 	if WorkspaceGUID == "" {

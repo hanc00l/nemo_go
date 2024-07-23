@@ -6,6 +6,7 @@ import (
 	"crypto/sha1"
 	"encoding/hex"
 	"encoding/json"
+	"fmt"
 	"github.com/cenkalti/backoff/v4"
 	"github.com/dustin/go-humanize"
 	"github.com/elastic/go-elasticsearch/v8"
@@ -67,6 +68,23 @@ func (a *Assets) GetIndexMapping() *types.TypeMapping {
 	hostProperty.Analyzer = &analyzer
 	hostProperty.SearchAnalyzer = &analyzer
 
+	locationProperty := types.NewTextProperty()
+	locationProperty.Fields = map[string]types.Property{
+		"keyword": types.NewKeywordProperty(),
+	}
+	serverProperty := types.NewTextProperty()
+	serverProperty.Fields = map[string]types.Property{
+		"keyword": types.NewKeywordProperty(),
+	}
+	titleProperty := types.NewTextProperty()
+	titleProperty.Fields = map[string]types.Property{
+		"keyword": types.NewKeywordProperty(),
+	}
+	serviceProperty := types.NewTextProperty()
+	serviceProperty.Fields = map[string]types.Property{
+		"keyword": types.NewKeywordProperty(),
+	}
+
 	return &types.TypeMapping{
 		Properties: map[string]types.Property{
 			"id":     types.NewKeywordProperty(),       // sha1(host)
@@ -75,12 +93,12 @@ func (a *Assets) GetIndexMapping() *types.TypeMapping {
 			"port":   types.NewIntegerNumberProperty(), // port 端口号
 			"domain": types.NewKeywordProperty(),       // domain keyword类型，只保存主域名，用于查询结果的分类的排序用
 			// 属性
-			"location":  types.NewTextProperty(),
+			"location":  locationProperty,
 			"status":    types.NewIntegerNumberProperty(),
-			"service":   types.NewTextProperty(),
+			"service":   serviceProperty,
 			"banner":    types.NewTextProperty(),
-			"server":    types.NewTextProperty(),
-			"title":     types.NewTextProperty(),
+			"server":    serverProperty,
+			"title":     titleProperty,
 			"header":    types.NewTextProperty(),
 			"body":      types.NewTextProperty(),
 			"cert":      types.NewTextProperty(),
@@ -97,67 +115,92 @@ func (a *Assets) GetIndexMapping() *types.TypeMapping {
 
 func (a *Assets) GetIndexMappingWithJson() string {
 	mappingJSON := `{
-        "mappings": {
-            "properties": {
-                "banner": {
-                    "type": "text"
-                },
-                "body": {
-                    "type": "text"
-                },
-                "cert": {
-                    "type": "text"
-                },
-                "comment": {
-                    "type": "text"
-                },
-               
-                "header": {
-                    "type": "text"
-                },
-                "host": {
-                    "type": "text",
-                    "analyzer": "stop"
-                },
-                "icon_hash": {
-                    "type": "long"
-                },
-                "id": {
-                    "type": "keyword"
-                },
-                "ip": {
-                    "type": "ip"
-                },
-                "location": {
-                    "type": "text"
-                },
-                "org": {
-                    "type": "text"
-                },
-                "port": {
-                    "type": "integer"
-                },
-                "server": {
-                    "type": "text"
-                },
-                "service": {
-                    "type": "text"
-                },
-                "source": {
-                    "type": "keyword"
-                },
-                "status": {
-                    "type": "integer"
-                },
-                "title": {
-                    "type": "text"
-                },
-                "update_time": {
-                    "type": "date"
-                }
-            }
+  "mappings": {
+    "properties": {
+      "banner": {
+        "type": "text"
+      },
+      "body": {
+        "type": "text"
+      },
+      "cert": {
+        "type": "text"
+      },
+      "comment": {
+        "type": "text"
+      },
+      "create_time": {
+        "type": "date"
+      },
+      "domain": {
+        "type": "keyword"
+      },
+      "header": {
+        "type": "text"
+      },
+      "host": {
+        "type": "text",
+        "analyzer": "stop"
+      },
+      "icon_hash": {
+        "type": "long"
+      },
+      "id": {
+        "type": "keyword"
+      },
+      "ip": {
+        "type": "ip"
+      },
+      "location": {
+        "type": "text",
+        "fields": {
+          "keyword": {
+            "type": "keyword"
+          }
         }
-	}`
+      },
+      "org": {
+        "type": "text"
+      },
+      "port": {
+        "type": "integer"
+      },
+      "server": {
+        "type": "text",
+        "fields": {
+          "keyword": {
+            "type": "keyword"
+          }
+        }
+      },
+      "service": {
+        "type": "text",
+        "fields": {
+          "keyword": {
+            "type": "keyword"
+          }
+        }
+      },
+      "source": {
+        "type": "keyword"
+      },
+      "status": {
+        "type": "integer"
+      },
+      "title": {
+        "type": "text",
+        "fields": {
+          "keyword": {
+            "type": "keyword"
+          }
+        }
+      },
+      "update_time": {
+        "type": "date"
+      }
+    }
+  }
+}`
 	return mappingJSON
 }
 
@@ -314,6 +357,47 @@ func (a *Assets) Search(query types.Query, page, rowsPerPage int) (res *search.R
 	return
 }
 
+// Aggregation 根据指定条件获取聚合数据
+func (a *Assets) Aggregation(query types.Query) (result map[string]map[string]int, err error) {
+	size := 0
+	aggrPort := "port"
+	aggrService := "service.keyword"
+	aggrServer := "server.keyword"
+	aggrLocation := "location.keyword"
+	aggrTitle := "title.keyword"
+	aggrIconHash := "icon_hash"
+	result = make(map[string]map[string]int)
+
+	var req = &search.Request{
+		Query: &query,
+		Size:  &size,
+		Aggregations: map[string]types.Aggregations{
+			"port":      {Terms: &types.TermsAggregation{Field: &aggrPort}},
+			"icon_hash": {Terms: &types.TermsAggregation{Field: &aggrIconHash}},
+			"service":   {Terms: &types.TermsAggregation{Field: &aggrService}},
+			"server":    {Terms: &types.TermsAggregation{Field: &aggrServer}},
+			"location":  {Terms: &types.TermsAggregation{Field: &aggrLocation}},
+			"title":     {Terms: &types.TermsAggregation{Field: &aggrTitle}},
+		},
+	}
+	resp, err := GetTypedClient().Search().
+		Index(a.IndexName).
+		Request(req).Pretty(true).
+		Do(a.Ctx)
+	if err != nil {
+		logging.RuntimeLog.Errorf("aggregation failed:%v", err)
+		return
+	}
+	result["port"] = GetAggregateLongResult(resp.Aggregations["port"])
+	result["icon_hash"] = GetAggregateLongResult(resp.Aggregations["icon_hash"])
+	result["service"] = GetAggregateStringResult(resp.Aggregations["service"])
+	result["server"] = GetAggregateStringResult(resp.Aggregations["server"])
+	result["location"] = GetAggregateStringResult(resp.Aggregations["location"])
+	result["title"] = GetAggregateStringResult(resp.Aggregations["title"])
+
+	return
+}
+
 // BulkIndexDoc 批量索文档
 func (a *Assets) BulkIndexDoc(docs []Document) bool {
 	var countSuccessful uint64
@@ -410,9 +494,64 @@ func (a *Assets) BulkIndexDoc(docs []Document) bool {
 	return true
 }
 
+// ListAllIndices 获取所有的可用索引
+func (a *Assets) ListAllIndices() (indexInfo map[string]string) {
+	indexInfo = make(map[string]string)
+
+	resp, err := GetTypedClient().
+		Cat.Indices().
+		Format("json").
+		Do(context.Background())
+	if err != nil {
+		logging.RuntimeLog.Errorf("get index failed:%v", err)
+		return
+	}
+	for _, v := range resp {
+		indexName := *v.Index
+		if indexName != "" && !strings.HasPrefix(indexName, ".") {
+			indexInfo[indexName] = v.DocsCount
+		}
+	}
+	return
+}
+
 // SID 生成唯一标识
 func SID(plainText string) string {
-	sha1 := sha1.New()
-	sha1.Write([]byte(plainText))
-	return hex.EncodeToString(sha1.Sum(nil))
+	hash := sha1.New()
+	hash.Write([]byte(plainText))
+	return hex.EncodeToString(hash.Sum(nil))
+}
+
+// GetAggregateLongResult 获取key为long（比如端口号）的聚合结果
+func GetAggregateLongResult(aggr types.Aggregate) (result map[string]int) {
+	var ags types.LongTermsAggregate
+	var bs []types.LongTermsBucket
+	result = make(map[string]int)
+
+	agsBytes, _ := json.Marshal(aggr)
+	json.Unmarshal(agsBytes, &ags)
+	bsBytes, _ := json.Marshal(ags.Buckets)
+	json.Unmarshal(bsBytes, &bs)
+	for _, bsv := range bs {
+		result[fmt.Sprint(bsv.Key)] = int(bsv.DocCount)
+	}
+
+	return
+}
+
+// GetAggregateStringResult 获取key为string的聚合结果
+func GetAggregateStringResult(aggr types.Aggregate) (result map[string]int) {
+	var ags types.StringTermsAggregate
+	var bs []types.StringTermsBucket
+	result = make(map[string]int)
+
+	agsBytes, _ := json.Marshal(aggr)
+	json.Unmarshal(agsBytes, &ags)
+	bsBytes, _ := json.Marshal(ags.Buckets)
+	json.Unmarshal(bsBytes, &bs)
+	for _, bsv := range bs {
+		result[bsv.Key.(string)] = int(bsv.DocCount)
+	}
+
+	return
 }
