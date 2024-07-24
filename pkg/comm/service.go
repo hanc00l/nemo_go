@@ -331,6 +331,8 @@ func (s *Service) KeepAlive(ctx context.Context, args *KeepAliveWorkerInfo, repl
 		return nil
 	}
 	WorkerStatusMutex.Lock()
+	defer WorkerStatusMutex.Unlock()
+
 	if _, ok := WorkerStatus[args.WorkerStatus.WorkerName]; !ok {
 		WorkerStatus[args.WorkerStatus.WorkerName] = &args.WorkerStatus
 	} else {
@@ -340,9 +342,11 @@ func (s *Service) KeepAlive(ctx context.Context, args *KeepAliveWorkerInfo, repl
 		WorkerStatus[args.WorkerStatus.WorkerName].TaskStartedNumber = args.WorkerStatus.TaskStartedNumber
 	}
 	WorkerStatus[args.WorkerStatus.WorkerName].UpdateTime = time.Now()
-	WorkerStatusMutex.Unlock()
+
 	msg := "ok"
 	*replay = msg
+
+	checkWorkerStatus()
 
 	return nil
 }
@@ -352,7 +356,7 @@ func (s *Service) KeepDaemonAlive(ctx context.Context, args *string, replay *Kee
 	// args -> WorkName
 	daemonInfo := KeepAliveDaemonInfo{}
 	if args == nil || *args == "" {
-		logging.RuntimeLog.Error("no worker name")
+		logging.RuntimeLog.Error("no worker info or name")
 		*replay = daemonInfo
 		return nil
 	}
@@ -374,7 +378,7 @@ func (s *Service) KeepDaemonAlive(ctx context.Context, args *string, replay *Kee
 		WorkerStatus[*args].IsDaemonProcess = true
 		WorkerStatus[*args].WorkerDaemonUpdateTime = time.Now()
 	} else {
-		logging.RuntimeLog.Error("no worker name")
+		logging.RuntimeLog.Error("worker not exist")
 	}
 	*replay = daemonInfo
 	return nil
@@ -678,4 +682,15 @@ func saveMainTaskNewResult(mainTaskId, msg string) {
 
 	MainTaskResult[mainTaskId] = taskObj
 	return
+}
+
+// checkWorkerStatus 对超过指定时间未同步的的worker，移除相关信息
+func checkWorkerStatus() {
+	for _, v := range WorkerStatus {
+		// 如果worker资源（cpu、内存）比较低，会在大并发任务的时候导致很长一段时间阻塞同步
+		// 因此将worker不存活的时间调整为超过12个小时
+		if time.Now().Sub(v.UpdateTime).Hours() > 12 {
+			delete(WorkerStatus, v.WorkerName)
+		}
+	}
 }

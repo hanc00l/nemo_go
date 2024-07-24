@@ -171,11 +171,11 @@ func getWorkerTopicDescription(taskMode string) string {
 func getWorkerAliveList(req *DatableRequestParam) (resp DataTableResponseData) {
 	comm.WorkerStatusMutex.Lock()
 	defer comm.WorkerStatusMutex.Unlock()
-	// 检查超过更新时间的worker；对worker按更新时间排序
+	// 对worker按更新时间排序
 	taskAliveUpdateList := make(map[string]int)
 	for _, v := range comm.WorkerStatus {
+		// 只显示最近5分钟有心跳的worker（worker失去同步并清除信息的操作由同步的时候进行检查）
 		if time.Now().Sub(v.UpdateTime).Minutes() > 5 {
-			delete(comm.WorkerStatus, v.WorkerName)
 			continue
 		}
 		seconds := time.Now().Sub(v.CreateTime).Seconds()
