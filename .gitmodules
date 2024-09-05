@@ -1,3 +1,0 @@
-[submodule "thirdparty/nuclei/nuclei-templates"]
-	path = thirdparty/nuclei/nuclei-templates
-	url = https://github.com/projectdiscovery/nuclei-templates

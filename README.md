@@ -1,10 +1,12 @@
 # Nemo
 
-**[快速上手](docs/quickstart.md)** • **[安装手册](docs/install.md)** • **[使用手册](docs/usage.md)** • **[常见问题](docs/question.md)** • **[飞书知识库](docs/wiki_feishu.md)** • **[CHANGELOG](CHANGELOG.md)**
+**[快速上手](v2/docs/quickstart.md)** • **[安装手册](v2/docs/install.md)** • **[使用手册](v2/docs/usage.md)** • **[常见问题](v2/docs/question.md)** • **[飞书知识库](v2/docs/wiki_feishu.md)** • **[CHANGELOG](v2/CHANGELOG.md)**
 
 **Nemo**是用来进行自动化信息收集的一个简单平台，通过集成常用的信息收集工具和技术，实现对内网及互联网资产信息的自动收集，提高隐患排查和渗透测试的工作效率。
 
-<img src="docs/image/index.png" alt="login" />
+当前版本为v2.13，v3正在计划中。
+
+<img src="v2/docs/image/index.png" alt="login" />
 
 
 
@@ -62,7 +64,7 @@
 - 任务执行完成消息通知（钉钉、飞书群机器人及Server酱）
 
 **典型VPS部署架构：**
-![nemo_vps](docs/image/nemo_vps.png)
+![nemo_vps](v2/docs/image/nemo_vps.png)
 
 
 
@@ -71,23 +73,23 @@
 - 多用户/角色、多工作空间（项目）支持及资产隔离
 - 资产颜色标记、置顶、备忘录协作
 - IP/Domain黑名单、一键拉黑
-- 知识库：基于飞书平台和自建企业应用，集成[飞书知识库](docs/wiki_feishu.md)，并与Nemo的IP和域名资产进行关联
+- 知识库：基于飞书平台和自建企业应用，集成[飞书知识库](v2/docs/wiki_feishu.md)，并与Nemo的IP和域名资产进行关联
 - 团队交流：集成基于[MiniChat](https://github.com/okhanyu/minichat)的轻量级团队在线沟通工具（支持消息、文件上传分享，关闭后自动销毁历史记录）
 
 ### 8、其它
 
 - Docker支持
-- 资产流程化扫描（XSCAN）![xscan](docs/image/9-1.xscan2.png)
+- 资产流程化扫描（XSCAN）![xscan](v2/docs/image/9-1.xscan2.png)
 - 导出IP与Domain资产
 - 当前页面资产信息统计
 - Worker使用代理扫描（仅支持socks5），支持代理服务器地址池化。
 - ElasticSearch同步与查询（测试中）
-  <img src="docs/image/es-1.png" />
-  <img src="docs/image/es-2.png" />
+  <img src="v2/docs/image/es-1.png" />
+  <img src="v2/docs/image/es-2.png" />
 
 ## 演示页面
 
-<img src="docs/demo.gif" />
+<img src="v2/docs/demo.gif" />
 
 
 
