@@ -5,13 +5,13 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"github.com/chainreactors/fingers"
 	"github.com/hanc00l/nemo_go/pkg/conf"
 	"github.com/hanc00l/nemo_go/pkg/logging"
 	"github.com/hanc00l/nemo_go/pkg/task/custom"
 	"github.com/hanc00l/nemo_go/pkg/task/domainscan"
 	"github.com/hanc00l/nemo_go/pkg/task/portscan"
 	"github.com/hanc00l/nemo_go/pkg/utils"
-	"github.com/hanc00l/nemo_go/pkg/xraypocv1"
 	"github.com/remeh/sizedwaitgroup"
 	"image"
 	"io"
@@ -19,7 +19,6 @@ import (
 	"net/url"
 	"os"
 	"os/exec"
-	"path"
 	"path/filepath"
 	"strconv"
 	"strings"
@@ -30,17 +29,16 @@ var HttpxOutputDirectory string //全局的httpx保存响应的数据，用于�
 
 // 全局变量，只加载一次
 var fpMutex sync.Mutex
-var fpWebFingerprintHub []WebFingerPrint
-var fpCustom []CustomFingerPrint
+
+// 被动指纹引擎
+var chainreactorsEngine *fingers.Engine
 
 // 是否保存http协议的header与body
 var isSaveHTTPHeaderAndBody = true
 
 type HttpxAll struct {
-	IsFingerprintHub    bool
-	IsScreenshot        bool
-	IsIconHash          bool
-	IsCustomFingerprint bool
+	IsScreenshot bool
+	IsIconHash   bool
 
 	ResultPortScan     *portscan.Result
 	ResultDomainScan   *domainscan.Result
@@ -83,44 +81,17 @@ type TLS struct {
 	IssuerOrganization       []string `json:"issuer_org,omitempty"`
 }
 
-// WebFingerPrint 匹配web_fingerprint_v3.json的指纹结构
-// 通过借鉴afrog代码获取fingerprinthub定义的指纹信息
-type WebFingerPrint struct {
-	Name           string            `json:"name"`
-	Path           string            `json:"path"`
-	RequestMethod  string            `json:"request_method"`
-	RequestHeaders map[string]string `json:"request_headers"`
-	RequestData    string            `json:"request_data"`
-	StatusCode     int               `json:"status_code"`
-	Headers        map[string]string `json:"headers"`
-	Keyword        []string          `json:"keyword"`
-	FaviconHash    []string          `json:"favicon_hash"`
-	Priority       int               `json:"priority"`
-}
-
-// CustomFingerPrint 自定义指纹结构
-type CustomFingerPrint struct {
-	Id      int     `json:"id"`
-	App     string  `json:"app"`
-	Rule    string  `json:"rule"`
-	Company *string `json:"company,omitempty"`
-	RuleId  *int    `json:"rule_id,omitempty"`
-}
-
 // NewHttpxAll 创建对象
 func NewHttpxAll() *HttpxAll {
 	h := &HttpxAll{
-		IsFingerprintHub:    true,
-		IsScreenshot:        true,
-		IsIconHash:          true,
-		IsCustomFingerprint: true,
-		httpxOutputDir:      HttpxOutputDirectory,
+		IsScreenshot:   true,
+		IsIconHash:     true,
+		httpxOutputDir: HttpxOutputDirectory,
 	}
 	//加载自定义指纹及回调函数
 	fpMutex.Lock()
-	h.loadFingerprintHub()
-	h.loadCustomFingerprint()
-	fpMutex.Unlock()
+	defer fpMutex.Unlock()
+	h.loadChainReactorsFingers()
 
 	return h
 }
@@ -439,49 +410,19 @@ func (x *HttpxAll) ParseContentResult(content []byte) (result portscan.Result) {
 	return
 }
 
-// loadFingerprintHub 加载finerprinthub的指纹及处理函数
-func (x *HttpxAll) loadFingerprintHub() {
-	if !x.IsFingerprintHub || len(fpWebFingerprintHub) > 0 {
+// loadChainReactorsFingers 加载ChainReactorsFingers指纹
+func (x *HttpxAll) loadChainReactorsFingers() {
+	if chainreactorsEngine != nil {
 		return
 	}
-	fingerprintJsonPathFile := path.Join(conf.GetRootPath(), "thirdparty/fingerprinthub", "web_fingerprint_v3.json")
-	fingerContent, err := os.ReadFile(fingerprintJsonPathFile)
+	var err error
+	chainreactorsEngine, err = fingers.NewEngine(fingers.FingersEngine)
 	if err != nil {
-		logging.RuntimeLog.Error(err)
-		logging.CLILog.Error(err)
+		logging.RuntimeLog.Errorf("load chainreactors fingers err:%v", err)
 		return
 	}
-	if err = json.Unmarshal(fingerContent, &fpWebFingerprintHub); err != nil {
-		logging.RuntimeLog.Error(err)
-		logging.CLILog.Error(err)
-		return
-	}
-	if len(fpWebFingerprintHub) > 0 {
-		x.FingerPrintFunc = append(x.FingerPrintFunc, x.fingerPrintFuncForFingerprintHub)
-		logging.CLILog.Infof("Load fingerprinthub total:%d", len(fpWebFingerprintHub))
-	}
-}
-
-// loadCustomFingerprint 加载自定义指纹
-func (x *HttpxAll) loadCustomFingerprint() {
-	if !x.IsCustomFingerprint || len(fpCustom) > 0 {
-		return
-	}
-	fingerprintJsonPathFile := path.Join(conf.GetRootPath(), "thirdparty/custom", "web_fingerprint.json")
-	fingerContent, err := os.ReadFile(fingerprintJsonPathFile)
-	if err != nil {
-		logging.CLILog.Warning(err)
-		return
-	}
-	if err = json.Unmarshal(fingerContent, &fpCustom); err != nil {
-		logging.RuntimeLog.Error(err)
-		logging.CLILog.Error(err)
-		return
-	}
-	if len(fpCustom) > 0 {
-		x.FingerPrintFunc = append(x.FingerPrintFunc, x.fingerPrintFuncForCustom)
-		logging.CLILog.Infof("Load custom web finger total:%d", len(fpCustom))
-	}
+	x.FingerPrintFunc = append(x.FingerPrintFunc, x.fingerPrintFuncForChainReactorsFingers)
+	logging.CLILog.Info("Load chainreactors fingers engine ok")
 }
 
 // doFinger 执行指纹识别
@@ -590,91 +531,27 @@ func (x *HttpxAll) doFavicon(u string, storedFaviconPathFile string) (result *Ic
 	return
 }
 
-// fingerPrintFuncForFingerprintHub 回调函数，用于处理自己的指纹识别
-func (x *HttpxAll) fingerPrintFuncForFingerprintHub(domain string, ip string, port int, url string, result []FingerAttrResult, storedResponsePathFile string) (fingers []string) {
-	// 读取httpx保存的response内容，并解析为body和headers
-	body, _, headers := x.parseHttpHeaderAndBody(x.getStoredResponseContent(storedResponsePathFile))
-	// 指纹匹配
-	for _, v := range fpWebFingerprintHub {
-		flag := false
-
-		hflag := true
-		if len(v.Headers) > 0 {
-			hflag = false
-			for k, hh := range v.Headers {
-				if len(headers[strings.ToLower(k)]) == 0 {
-					hflag = false
-					break
-				}
-				if len(headers[strings.ToLower(k)]) > 0 {
-					if !strings.Contains(headers[strings.ToLower(k)][0], hh) {
-						hflag = false
-						break
-					}
-					hflag = true
-				}
-			}
-		}
-		if len(v.Headers) > 0 && hflag {
-			flag = true
-		}
-
-		kflag := true
-		if len(v.Keyword) > 0 {
-			kflag = false
-			for _, k := range v.Keyword {
-				if !strings.Contains(body, k) {
-					kflag = false
-					break
-				}
-				kflag = true
-			}
-		}
-		if len(v.Keyword) > 0 && kflag {
-			flag = true
-		}
-		//是否需要匹配多个指纹？
-		if flag {
-			fingers = append(fingers, v.Name)
-			//break
-		}
+// fingerPrintFuncForChainReactorsFingers 回调函数，用于处理ChainReactorsFingers指纹识别
+func (x *HttpxAll) fingerPrintFuncForChainReactorsFingers(domain string, ip string, port int, url string, result []FingerAttrResult, storedResponsePathFile string) (fingers []string) {
+	if chainreactorsEngine == nil {
+		return
 	}
-	//fmt.Println(fingers)
-	return
-}
-
-// fingerPrintFuncForIceMoon 回调函数，用于处理自己的指纹识别
-func (x *HttpxAll) fingerPrintFuncForCustom(domain string, ip string, port int, url string, result []FingerAttrResult, storedResponsePathFile string) (fingers []string) {
-	body, header, _ := x.parseHttpHeaderAndBody(x.getStoredResponseContent(storedResponsePathFile))
-
-	content := xraypocv1.Content{
-		Port:   fmt.Sprintf("%d", port),
-		Body:   body,
-		Header: header,
+	body, header := x.parseHttpHeaderAndBody(x.getStoredResponseContent(storedResponsePathFile))
+	c := strings.Join([]string{header, body}, "\r\n\r\n")
+	frames, err := chainreactorsEngine.DetectContent([]byte(c))
+	if err != nil {
+		logging.RuntimeLog.Errorf("run chainreactors fingers err:%v", err)
+		return
 	}
-	for _, fa := range result {
-		if fa.Tag == "title" {
-			content.Title = fa.Content
-		} else if fa.Tag == "server" {
-			content.Server = fa.Content
-		} else if fa.Tag == "tlsdata" {
-			content.Cert = fa.Content
-		}
-	}
-	//fmt.Println(content)
-	for _, v := range fpCustom {
-		rule := xraypocv1.ParseRules(v.Rule)
-		if xraypocv1.MatchRules(*rule, content) {
-			//fmt.Println(v)
-			fingers = append(fingers, v.App)
-		}
+	for _, f := range frames.List() {
+		fingers = append(fingers, f.String())
 	}
 	return
 }
 
 // saveHttpHeaderAndBody 保存http协议的raw信息
 func (x *HttpxAll) saveHttpHeaderAndBody(domain string, ip string, port int, storedResponsePathFile string) {
-	body, header, _ := x.parseHttpHeaderAndBody(x.getStoredResponseContent(storedResponsePathFile))
+	body, header := x.parseHttpHeaderAndBody(x.getStoredResponseContent(storedResponsePathFile))
 	if len(ip) > 0 && port > 0 {
 		if len(header) > 0 {
 			x.ResultPortScan.SetPortHttpInfo(ip, port, portscan.HttpResult{
@@ -726,13 +603,13 @@ func (x *HttpxAll) getStoredResponseContent(storedResponsePathFile string) strin
 }
 
 // parseHttpHeaderAndBody 分离、解析http的header与body
-func (x *HttpxAll) parseHttpHeaderAndBody(content string) (body string, header string, headerMap map[string][]string) {
-	headerMap = make(map[string][]string)
+func (x *HttpxAll) parseHttpHeaderAndBody(content string) (body string, header string) {
 	if len(content) <= 0 {
 		return
 	}
 	/* httpx保存的文件格式为(v1.2.9）：
 	GET / HTTP/1.1
+	Request ->header
 
 	Response->header
 
@@ -745,20 +622,6 @@ func (x *HttpxAll) parseHttpHeaderAndBody(content string) (body string, header s
 	headerAndBodyArrays := strings.Split(content, "\r\n\r\n")
 	if len(headerAndBodyArrays) >= 2 {
 		header = headerAndBodyArrays[1]
-		respHeaderSlice := strings.Split(header, "\r\n")
-		for _, hh := range respHeaderSlice {
-			hslice := strings.SplitN(hh, ":", 2)
-			if len(hslice) != 2 {
-				continue
-			}
-			k := strings.ToLower(hslice[0])
-			v := strings.TrimLeft(hslice[1], " ")
-			if len(headerMap[k]) > 0 {
-				headerMap[k] = append(headerMap[k], v)
-			} else {
-				headerMap[k] = []string{v}
-			}
-		}
 	}
 	if len(headerAndBodyArrays) >= 3 {
 		body = strings.Join(headerAndBodyArrays[2:], "\r\n\r\n")

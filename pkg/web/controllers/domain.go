@@ -57,6 +57,7 @@ type DomainListData struct {
 	StatusCode     []string       `json:"statuscode"`
 	Title          map[string]int `json:"title"`
 	Banner         map[string]int `json:"banner"`
+	Finger         map[string]int `json:"finger"`
 	ColorTag       string         `json:"color_tag"`
 	MemoContent    string         `json:"memo_content"`
 	Vulnerability  string         `json:"vulnerability"`
@@ -80,12 +81,13 @@ type DomainInfo struct {
 	IP            []string
 	Port          []int
 	PortAttr      []PortAttrInfo
-	Finger        []string
+	Finger        map[string]int
 	StatusCode    []string
 	Title         map[string]int
 	Banner        map[string]int
 	TitleString   string
 	BannerString  string
+	FingerString  string
 	ColorTag      string
 	Memo          string
 	Vulnerability []VulnerabilityInfo
@@ -121,7 +123,7 @@ type DomainAttrFullInfo struct {
 	IP            map[string]struct{}
 	TitleSet      map[string]int
 	BannerSet     map[string]int
-	FingerSet     map[string]struct{}
+	FingerSet     map[string]int
 	StatusCodeSet map[string]struct{}
 	DomainAttr    []DomainAttrInfo
 	IconImageSet  map[string]string
@@ -582,6 +584,7 @@ func (c *DomainController) getDomainListData(req domainRequestParam) (resp DataT
 		domainData.ColorTag = domainInfo.ColorTag
 		domainData.Title = domainInfo.Title
 		domainData.Banner = domainInfo.Banner
+		domainData.Finger = domainInfo.Finger
 		domainData.StatusCode = domainInfo.StatusCode
 		domainData.Port = domainInfo.Port
 		domainData.ScreenshotFile = ss.LoadScreenshotFile(domainData.WorkspaceGUID, domainRow.DomainName)
@@ -692,12 +695,13 @@ func getDomainInfo(domain *db.Domain, portInfoCacheMap map[int]PortInfo, disable
 	r.IP = utils.SetToSlice(domainAttrInfo.IP)
 	r.Title = domainAttrInfo.TitleSet
 	r.Banner = domainAttrInfo.BannerSet
+	r.Finger = domainAttrInfo.FingerSet
 	r.TitleString = strings.Join(utils.SetToSliceStringInt(domainAttrInfo.TitleSet), ", ")
 	r.BannerString = strings.Join(utils.SetToSliceStringInt(domainAttrInfo.BannerSet), ", ")
+	r.FingerString = strings.Join(utils.SetToSliceStringInt(domainAttrInfo.FingerSet), ", ")
 	r.DomainAttr = domainAttrInfo.DomainAttr
 	r.Source = utils.SetToSlice(domainAttrInfo.SourceSet)
 	r.StatusCode = utils.SetToSlice(domainAttrInfo.StatusCodeSet)
-	r.Finger = utils.SetToSlice(domainAttrInfo.FingerSet)
 	icp := onlineapi.NewICPQuery(onlineapi.ICPQueryConfig{})
 	if icpInfo := icp.LookupICP(domain.DomainName); icpInfo != nil {
 		icpContent, _ := json.Marshal(*icpInfo)
@@ -786,7 +790,7 @@ func getDomainAttrFullInfo(workspaceGUID string, id int, disableFofa, disableBan
 		TlsData:       make(map[string]struct{}),
 		IconImageSet:  make(map[string]string),
 		SourceSet:     make(map[string]struct{}),
-		FingerSet:     make(map[string]struct{}),
+		FingerSet:     make(map[string]int),
 		StatusCodeSet: make(map[string]struct{}),
 	}
 	fofaInfo := make(map[string]string)
@@ -816,14 +820,18 @@ func getDomainAttrFullInfo(workspaceGUID string, id int, disableFofa, disableBan
 		} else if da.Tag == "server" || da.Tag == "fingerprint" || da.Tag == "service" {
 			// banner信息：server、fingerpinter
 			if !isUnusefulBanner(da.Content) {
-				if _, ok := r.BannerSet[da.Content]; !ok {
-					r.BannerSet[da.Content] = 1
-				} else {
-					r.BannerSet[da.Content]++
+				if !disableBanner {
+					if _, ok := r.BannerSet[da.Content]; !ok {
+						r.BannerSet[da.Content] = 1
+					} else {
+						r.BannerSet[da.Content]++
+					}
 				}
 				if da.Tag == "fingerprint" {
 					if _, ok := r.FingerSet[da.Content]; !ok {
-						r.FingerSet[da.Content] = struct{}{}
+						r.FingerSet[da.Content] = 1
+					} else {
+						r.FingerSet[da.Content] += 1
 					}
 					r.DomainAttr = append(r.DomainAttr, DomainAttrInfo{
 						Id:         da.Id,
@@ -1097,7 +1105,7 @@ func (c *DomainController) getDomainExportData(req domainRequestParam) (result [
 		eInfo.TlsData = domainInfo.TlsData
 		eInfo.Source = domainInfo.Source
 		eInfo.StatusCode = domainInfo.StatusCode
-		eInfo.Finger = domainInfo.Finger
+		eInfo.Finger = utils.SetToSliceStringInt(domainInfo.Finger)
 		eInfo.DomainCDN = domainInfo.DomainCDN
 		eInfo.DomainCNAME = domainInfo.DomainCNAME
 		for _, ip := range eInfo.IP {

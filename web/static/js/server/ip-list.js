@@ -544,7 +544,7 @@ $(function () {
                     }
                 },
                 {
-                    data: "banner", title: "Icon && Title && Banner", width: "25%",
+                    data: "banner", title: "Icon | Title | Finger | Banner", width: "25%",
                     "render": function (data, type, row, meta) {
                         let icons = '';
                         for (let i in row['iconimage']) {
@@ -560,6 +560,15 @@ $(function () {
                         if (titles_all.length > 200) title += '......';
                         if (title !== "") title += "<br>";
 
+                        let finger_array = [];
+                        for (let key of Object.keys(row['finger'])) {
+                            finger_array.push(key)
+                        }
+                        let fingers_all = finger_array.toString();
+                        let finger = encodeHtml(fingers_all.substr(0, 200));
+                        if (fingers_all.length > 200) finger += '......';
+                        if (finger !== "") finger += "<br>";
+
                         let banner_array = [];
                         for (let key of Object.keys(row['banner'])) {
                             banner_array.push(key)
@@ -567,7 +576,7 @@ $(function () {
                         let banner_all = banner_array.toString();
                         let banner = encodeHtml(banner_all.substr(0, 200));
                         if (banner_all.length > 200) banner += '......';
-                        return '<div style="width:100%;white-space:normal;word-wrap:break-word;word-break:break-all;">' + icons + title + banner + '</div>';
+                        return '<div style="width:100%;white-space:normal;word-wrap:break-word;word-break:break-all;">' + icons + title + finger + banner + '</div>';
                     }
                 },
                 {

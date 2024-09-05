@@ -134,7 +134,6 @@ func doIPFingerPrint(config portscan.Config, resultPortScan *portscan.Result, ma
 	httpx := fingerprint.NewHttpxAll()
 	httpx.IsIconHash = config.IsIconHash
 	httpx.IsScreenshot = config.IsScreenshot
-	httpx.IsFingerprintHub = config.IsFingerprintHub
 	httpx.IsProxy = config.IsProxy
 	httpx.ResultPortScan = resultPortScan
 	httpx.Do()
@@ -160,7 +159,6 @@ func doDomainFingerPrint(config domainscan.Config, resultDomainScan *domainscan.
 	httpx := fingerprint.NewHttpxAll()
 	httpx.IsIconHash = config.IsIconHash
 	httpx.IsScreenshot = config.IsScreenshot
-	httpx.IsFingerprintHub = config.IsFingerprintHub
 	httpx.ResultDomainScan = resultDomainScan
 	httpx.DomainTargetPort = domainPort
 	httpx.IsProxy = config.IsProxy

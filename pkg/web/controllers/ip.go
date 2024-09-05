@@ -62,6 +62,7 @@ type IPListData struct {
 	Port           []string       `json:"port"`
 	Title          map[string]int `json:"title"`
 	Banner         map[string]int `json:"banner"`
+	Finger         map[string]int `json:"finger"`
 	ColorTag       string         `json:"color_tag"`
 	MemoContent    string         `json:"memo_content"`
 	Vulnerability  string         `json:"vulnerability"`
@@ -93,8 +94,10 @@ type IPInfo struct {
 	Port          []int
 	Title         map[string]int
 	Banner        map[string]int
+	Finger        map[string]int
 	TitleString   string
 	BannerString  string
+	FingerString  string
 	PortAttr      []PortAttrInfo
 	Domain        []string
 	ColorTag      string
@@ -141,6 +144,7 @@ type PortInfo struct {
 	PortStatus       map[int]string
 	TitleSet         map[string]int
 	BannerSet        map[string]int
+	FingerSet        map[string]int
 	PortAttr         []PortAttrInfo
 	IconHashImageSet map[string]string
 	TlsDataSet       map[string]struct{}
@@ -633,6 +637,7 @@ func (c *IPController) GetIPListData(req ipRequestParam) (resp DataTableResponse
 		ipData.MemoContent = ipInfo.Memo
 		ipData.Title = ipInfo.Title
 		ipData.Banner = ipInfo.Banner
+		ipData.Finger = ipInfo.Finger
 		ipData.WorkspaceId = ipRow.WorkspaceId
 		if _, ok := workspaceCacheMap[ipRow.WorkspaceId]; !ok {
 			workspace := db.Workspace{Id: ipRow.WorkspaceId}
@@ -698,6 +703,7 @@ func getPortInfo(workspaceGUID string, ip string, ipId int, disableFofa, disable
 	r.PortStatus = make(map[int]string)
 	r.BannerSet = make(map[string]int)
 	r.TitleSet = make(map[string]int)
+	r.FingerSet = make(map[string]int)
 	r.TlsDataSet = make(map[string]struct{})
 	r.IconHashImageSet = make(map[string]string)
 
@@ -745,7 +751,15 @@ func getPortInfo(workspaceGUID string, ip string, ipId int, disableFofa, disable
 					r.TitleSet[pad.Content]++
 				}
 			} else if pad.Tag == "banner" || pad.Tag == "server" || pad.Tag == "tag" || pad.Tag == "fingerprint" || pad.Tag == "service" {
-				if pad.Tag == "banner" && disableBanner {
+				if pad.Tag == "fingerprint" {
+					if _, ok := r.FingerSet[pad.Content]; !ok {
+						r.FingerSet[pad.Content] = 1
+					} else {
+						r.FingerSet[pad.Content]++
+					}
+					//continue
+				}
+				if disableBanner { //if pad.Tag == "banner" && disableBanner {
 					continue
 				}
 				if isUnusefulBanner(pad.Content) { //pad.Content == "unknown" || pad.Content == "" {
@@ -844,8 +858,10 @@ func getIPInfo(ip *db.Ip, getReleatedDomain, disableFofa, disableBanner bool) (r
 	r.PortAttr = portInfo.PortAttr
 	r.Title = portInfo.TitleSet
 	r.Banner = portInfo.BannerSet
+	r.Finger = portInfo.FingerSet
 	r.TitleString = strings.Join(utils.SetToSliceStringInt(portInfo.TitleSet), ", ")
 	r.BannerString = strings.Join(utils.SetToSliceStringInt(portInfo.BannerSet), ", ")
+	r.FingerString = strings.Join(utils.SetToSliceStringInt(portInfo.FingerSet), ", ")
 	r.Port = portInfo.PortNumbers
 	colorTag := db.IpColorTag{RelatedId: ip.Id}
 	if colorTag.GetByRelatedId() {
