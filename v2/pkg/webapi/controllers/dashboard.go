@@ -33,7 +33,7 @@ func (c *DashboardController) GetTaskInfo() {
 // @router /worker/list [post]
 func (c *DashboardController) WorkerAliveList() {
 	c.IsServerAPI = true
-	c.WorkerAliveListAction()
+	//c.WorkerAliveListAction()
 }
 
 // @Title ManualReloadWorker
@@ -44,7 +44,7 @@ func (c *DashboardController) WorkerAliveList() {
 // @router /worker/reload [post]
 func (c *DashboardController) ManualReloadWorker() {
 	c.IsServerAPI = true
-	c.ManualReloadWorkerAction()
+	//c.ManualReloadWorkerAction()
 }
 
 // @Title ManualWorkerFileSync
@@ -55,7 +55,7 @@ func (c *DashboardController) ManualReloadWorker() {
 // @router /worker/filesync [post]
 func (c *DashboardController) ManualWorkerFileSync() {
 	c.IsServerAPI = true
-	c.ManualWorkerFileSyncAction()
+	//c.ManualWorkerFileSyncAction()
 }
 
 // @Title OnlineUserList
