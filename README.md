@@ -16,8 +16,8 @@
 - 企业备案信息：新增通过ChinaZ接口获取企业备案信息（高可靠性），实现给定企业名称实现自动化的信息收集；
 - 新增Standalone模式：支持单文件worker部署，无需依赖其他组件，适合实战中内网渗透的快速信息收集与Nemo的集成（后续在优化后开源）；
 
-<img src="v3/docs/image/index.png" alt="login" />
-<img src="v3/docs/image/dashboard.png" alt="dashboard">
+![login](v3/docs/image/index.png)
+![dashboard](v3/docs/image/dashboard.png)
 
 
 ## 特性
@@ -64,7 +64,7 @@
 - Worker按不同类型的任务分离和组合部署
 - 任务执行完成消息通知（钉钉、飞书群机器人及Server酱）
 
-**典型VPS部署架构：**
+    **典型VPS部署架构：**
 ![nemo_vps](v3/docs/image/nemo_vps.iodraw.png)
 
 
