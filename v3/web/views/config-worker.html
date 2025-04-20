@@ -1,0 +1,171 @@
+<main class="app-content">
+    <div class="app-title">
+        <div>
+            <h1><i class="fa fa-gear"></i>配置-Worker</h1><small>更改worker的配置后，需要重启worker才能生效</small>
+        </div>
+        <ul class="app-breadcrumb breadcrumb">
+            <li class="breadcrumb-item"><i class="fa fa-home fa-lg"></i></li>
+            <li class="breadcrumb-item"><a href="/">首页</a></li>
+            <li class="breadcrumb-item active"><a href="#">配置-Worker</a></li>
+        </ul>
+    </div>
+
+    <div class="row">
+        <div class="col-md-6">
+            {{ if eq .UserRole "superadmin" "admin" }}
+            <div class="tile">
+                <h3 class="tile-title">LLM设置</h3>
+                <div class="tile-body">
+                    <form>
+                        <div class="form-group">
+                            <label class="col-form-label" for="input_kimi_api">
+                                <b>Kimi</b>
+                            </label>
+                            <small>API地址:</small>
+                            <input class="form-control" id="input_kimi_api" type="text"
+                                   value="">
+                            <small>Model:</small>
+                            <input class="form-control" id="input_kimi_model" type="text"
+                                   value="">
+                            <small>Token:</small>
+                            <input class="form-control" id="input_kimi_token" type="text"
+                                   value="">
+                            <label class="col-form-label" for="input_deepseek_api">
+                                <b>DeepSeek</b>
+                            </label>
+                            <small>API地址:</small>
+                            <input class="form-control" id="input_deepseek_api" type="text"
+                                   value="">
+                            <small>Model:</small>
+                            <input class="form-control" id="input_deepseek_model" type="text"
+                                   value="">
+                            <small>Token:</small>
+                            <input class="form-control" id="input_deepseek_token" type="text"
+                                   value="">
+                            <label class="col-form-label" for="input_qwen_api">
+                                <b>QWen</b>
+                            </label>
+                            <small>API地址:</small>
+                            <input class="form-control" id="input_qwen_api" type="text"
+                                   value="">
+                            <small>Model:</small>
+                            <input class="form-control" id="input_qwen_model" type="text"
+                                   value="">
+                            <small>Token:</small>
+                            <input class="form-control" id="input_qwen_token" type="text"
+                                   value="">
+                        </div>
+                    </form>
+                </div>
+                <div class="tile-footer">
+                    <button class="btn btn-primary" type="button" id="buttonSaveLLM"><i
+                            class="fa fa-fw fa-lg fa-check-circle"></i>保存设置
+                    </button>&nbsp;&nbsp;&nbsp;
+                    <button class="btn btn-primary" type="button" id="buttonTestLLM"><i
+                            class="fa fa-fw fa-lg fa-podcast"></i>测试API
+                    </button>
+                    （点击测试后需要一定时间，请等待...）&nbsp;&nbsp;&nbsp;
+                </div>
+            </div>
+            <div class="tile">
+                <h3 class="tile-title">Worker代理设置</h3>
+                <div class="tile-body">
+                    <form>
+                        <small class="form-text text-muted">Worker支持代理的技术与工具有：gogo、域名被动收集、域名爬虫、指纹识别、在线资产API接口、Nuclei；多个代理分行设置、随机选取；目前只支持socks5代理。</small>
+                        <small class="form-text text-muted">由于chrome不支持带验证的socks5代理，因此在127.0.0.1:5010进行代理转发到设置的代理服务器中。</small>
+                        <small class="form-text text-muted">Worker的启动参数--no-proxy可关闭代理的使用和本地转发。</small>
+                        <br/>
+                        <div class="form-group">
+                            <textarea class="form-control" id="text_proxy_list" rows="4"></textarea>
+                        </div>
+                    </form>
+                </div>
+                <div class="tile-footer">
+                    <button class="btn btn-primary" type="button" id="buttonSaveProxy"><i
+                            class="fa fa-fw fa-lg fa-check-circle"></i>保存设置
+                    </button>&nbsp;&nbsp;&nbsp;
+                </div>
+            </div>
+            {{ end }}
+        </div>
+        <div class="col-md-6">
+            {{ if eq .UserRole "superadmin" "admin" }}
+            <div class="tile">
+                <h3 class="tile-title">在线API设置</h3>
+                <div class="tile-body">
+                    <form>
+                        <div class="form-group">
+                            <label class="col-form-label" for="input_pagesize">
+                                <b>API请求的每页数量：</b>
+                            </label>
+                            <input class="form-control" id="input_pagesize" type="text" value="">
+                            <label class="col-form-label" for="input_limitcount">
+                                <b>搜索结果省数量限制（0表示不限制）：</b>
+                            </label>
+                            <input class="form-control" id="input_limitcount" type="text" value="">
+                            <label class="col-form-label" for="input_fofa_key">
+                                <b>FOFA</b>
+                            </label>
+                            <small>Token:</small>
+                            <input class="form-control" id="input_fofa_key" type="text"
+                                   placeholder="fofa token，格式为email:token，多个token以,分隔"
+                                   value="">
+                            <label class="col-form-label" for="input_hunter_key">
+                                <b>Hunter</b>
+                            </label>
+                            <small>Token:</small>
+                            <input class="form-control" id="input_hunter_key" type="text"
+                                   placeholder="hunter token，多个token以,分隔"
+                                   value="">
+                            <label class="col-form-label" for="input_quake_key">
+                                <b>Quake</b>
+                            </label>
+                            <small>Token:</small>
+                            <input class="form-control" id="input_quake_key" type="text"
+                                   placeholder="quake token，多个token以,分隔"
+                                   value="">
+                            <label class="col-form-label" for="input_icp_key">
+                                <b>Chinaz ICP</b>
+                            </label>
+                            <small>Token:</small>
+                            <input class="form-control" id="input_icp_key" type="text"
+                                   placeholder="chinaz icp token，多个token以,分隔"
+                                   value="">
+                            <label class="col-form-label" for="input_icpPlus_key">
+                                <b>Chinaz组织备案域名查询</b>
+                            </label>
+                            <small>Token:</small>
+                            <input class="form-control" id="input_icpPlus_key" type="text"
+                                   placeholder="chinaz icp plus token，多个token以,分隔"
+                                   value="">
+                        </div>
+                    </form>
+                </div>
+                <div class="tile-footer">
+                    <button class="btn btn-primary" type="button" id="buttonSaveAPI"><i
+                            class="fa fa-fw fa-lg fa-check-circle"></i>保存设置
+                    </button>&nbsp;&nbsp;&nbsp;
+                    <button class="btn btn-primary" type="button" id="buttonTestAPI"><i
+                            class="fa fa-fw fa-lg fa-podcast"></i>测试API
+                    </button>
+                    （点击测试后需要一定时间，请等待...）&nbsp;&nbsp;&nbsp;
+                </div>
+            </div>
+            {{ end }}
+        </div>
+        <div class="clearix"></div>
+    </div>
+</main>
+<script src="static/js/jquery/jquery-3.3.1.min.js"></script>
+<script src="static/js/bootstrap/popper.min.js"></script>
+<script src="static/js/bootstrap/bootstrap.min.js"></script>
+<script src="static/js/main.js"></script>
+<script src="static/js/plugins/pace.min.js"></script>
+<script src="static/js/sweetalert/sweetalert.min.js"></script>
+<script src="static/js/jquery/jquery.bootstrap-duallistbox.js"></script>
+<script src="static/js/server/config-worker.js"></script>
+<script>
+    $(function () {
+        $("title").html("节点端配置-Nemo");
+    });
+</script>

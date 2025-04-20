@@ -1,0 +1,67 @@
+<main class="app-content">
+    <div class="app-title">
+        <div>
+            <h1><i class="fa fa-futbol-o"></i> 自定义配置 </h1>
+        </div>
+        <ul class="app-breadcrumb breadcrumb">
+            <li class="breadcrumb-item"><i class="fa fa-home fa-lg"></i></li>
+            <li class="breadcrumb-item"><a href="/">首页</a></li>
+            <li class="breadcrumb-item active"><a href="#">自定义管理</a></li>
+        </ul>
+    </div>
+    <div class="row">
+        <div class="col-md-12">
+            <div class="tile">
+                <h3 class="tile-title">基本配置</h3>
+                <div class="tile-body">
+                    <label class="col-form-label" for="select_category">
+                        <b>类别</b>
+                    </label>
+                    <select class="form-control" id="select_category">
+                        <option value="customIPLocation" selected>IP归属地</option>
+                        <option value="blacklist">黑名单</option>
+                        <option value="honeypot">蜜罐</option>
+                    </select>
+                    <form>
+                        <div class="form-group">
+                            <label class="col-form-label" for="text_description">
+                                <b>描述</b>
+                            </label>
+                            <input class="form-control" type="text" id="text_description" placeholder="描述">
+                            <label class="col-form-label" for="text_data">
+                                <b>配置参数</b>
+                            </label>
+                            <textarea class="form-control" id="text_data" rows="12"></textarea>
+                        </div>
+                    </form>
+                    <div class="tile-footer">
+                        <input type="hidden" id="hidden_id" value="">
+                        <button class="btn btn-primary" type="button" id="button_refresh"><i
+                                class="fa fa-fw fa-lg fa-refresh"></i>刷新
+                        </button>
+                        <button class="btn btn-primary" type="button" id="button_save"><i
+                                class="fa fa-fw fa-lg fa-check-circle"></i>保存
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+        <div class="clearix"></div>
+    </div>
+</main>
+<script src="static/js/jquery/jquery-3.3.1.min.js"></script>
+<script src="static/js/bootstrap/popper.min.js"></script>
+<script src="static/js/bootstrap/bootstrap.min.js"></script>
+<script src="static/js/main.js"></script>
+<script src="static/js/plugins/pace.min.js"></script>
+<script src="static/js/plugins/jquery.dataTables.min.js"></script>
+<script src="static/js/plugins/dataTables.bootstrap.min.js"></script>
+<script src="static/js/sweetalert/sweetalert.min.js"></script>
+<script src="static/js/jquery/jquery.bootstrap-duallistbox.js"></script>
+<script src="static/js/server/custom.js"></script>
+<script>
+    $(function () {
+        $("title").html("自定义配置-Nemo");
+    });
+</script>

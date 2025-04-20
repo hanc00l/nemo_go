@@ -1,0 +1,126 @@
+<main class="app-content">
+    <div class="app-title">
+        <div class="form-group row d-flex align-items-center">
+                <h1><i class="fa fa-dashboard mr-2"></i></h1>
+                <span class="mr-2">切换工作空间</span>
+                <select class="form-control" title="工作空间" id="switch_workspace" style="width: auto;">
+                    <option value="0">默认工作空间</option>
+                </select>
+            <input type="hidden" id="current_workspace" value="{{ .Workspace }}">
+
+        </div>
+        <ul class="app-breadcrumb breadcrumb">
+            <li class="breadcrumb-item"><i class="fa fa-home fa-lg"></i></li>
+            <li class="breadcrumb-item"><a href="#">仪表盘</a></li>
+        </ul>
+    </div>
+    <div class="row">
+        <div class="col-md-6 col-lg-3">
+            <div class="widget-small primary coloured-icon">
+                <a href="asset-list" style="text-decoration:none;">
+                    <i class="icon fa fa-gg fa-3x"></i>
+                </a>
+                <div class="info">
+                    <h4>资产总数</h4>
+                    <p><b><span id="asset-count">0</span></b></p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6 col-lg-3">
+            <div class="widget-small info coloured-icon">
+                <a href="asset-list" style="text-decoration:none;">
+                    <i class="icon fa fa-gitlab fa-3x"></i>
+                </a>
+                <div class="info">
+                    <h4>IP资产</h4>
+                    <p><b><span id="ip-count">0</span></b></p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6 col-lg-3">
+            <div class="widget-small info coloured-icon">
+                <a href="asset-list" style="text-decoration:none;">
+                    <i class="icon fa fa-gitlab fa-3x"></i>
+                </a>
+                <div class="info">
+                    <h4>域名资产</h4>
+                    <p><b><span id="domain-count">0</span></b></p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6 col-lg-3">
+            <div class="widget-small danger coloured-icon">
+                <a href="vul-list" style="text-decoration:none;">
+                    <i class="icon fa fa-bolt fa-3x"></i>
+                </a>
+                <div class="info">
+                    <h4>漏洞</h4>
+                    <p><b><span id="vul-count">0</span></b></p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-6">
+            <div class="tile">
+                <div class="form-group col-md-8 align-self-end">
+                    <h3 class="tile-title">资产趋势</h3>
+                </div>
+                <div class="col-sm-12">
+                    <div id="asset_chart"></div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="tile">
+                <div class="form-group col-md-8 align-self-end">
+                    <h3 class="tile-title">漏洞趋势</h3>
+                </div>
+                <div class="col-sm-12">
+                    <div id="vul_chart"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-6">
+            <div class="tile">
+                <div class="form-group col-md-8 align-self-end">
+                    <h3 class="tile-title">运行任务</h3>
+                </div>
+                <div class="col-sm-12">
+                    <div id="task_chart"></div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="tile">
+                <div class="form-group col-md-8 align-self-end">
+                    <h3 class="tile-title">用户登录</h3>
+                </div>
+                <div class="col-sm-12">
+                    <div id="user_chart"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</main>
+<script src="static/js/jquery/jquery-3.3.1.min.js"></script>
+<script src="static/js/bootstrap/popper.min.js"></script>
+<script src="static/js/bootstrap/bootstrap.min.js"></script>
+<script src="static/js/main.js"></script>
+<script src="static/js/plugins/pace.min.js"></script>
+<!-- Data table plugin-->
+<script type="text/javascript" src="static/js/plugins/jquery.dataTables.min.js"></script>
+<script type="text/javascript" src="static/js/plugins/dataTables.bootstrap.min.js"></script>
+<script src="static/js/sweetalert/sweetalert.min.js"></script>
+<script src="static/js/jquery/jquery.bootstrap-duallistbox.js"></script>
+<script type="text/javascript" src="static/js/server/dashboard.js"></script>
+<script type="text/javascript" src="static/js/apexcharts/dist/apexcharts.min.js"></script>
+<script>
+    $(function () {
+        $("title").html("仪表盘-Nemo");
+    });
+</script>

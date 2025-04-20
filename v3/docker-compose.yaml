@@ -1,0 +1,41 @@
+services:
+  redis:
+    image: redis:alpine
+    container_name: nemo3_redis
+    volumes:
+      - redis_data:/data
+    restart: unless-stopped
+    networks:
+      - nemo3_network
+
+  mongodb:
+    image: mongo:latest
+    container_name: nemo3_mongodb
+    volumes:
+      - mongodb_data:/data/db
+      - ./docker/mongo-init.js:/docker-entrypoint-initdb.d/mongo-init.js:ro
+    restart: unless-stopped
+    networks:
+      - nemo3_network
+
+  nemo3:
+    build: .
+    container_name: nemo3_app
+    working_dir: /opt/nemo  # 指定工作目录
+    entrypoint: ["/bin/sh", "-c", "/opt/nemo/docker_start.sh"]  # 启动后台应用
+    depends_on:
+      - redis
+      - mongodb
+    ports:
+      - "5000:5000"  # 对外暴露5000端口
+    restart: unless-stopped
+    networks:
+      - nemo3_network
+
+volumes:
+  redis_data:
+  mongodb_data:
+
+networks:
+  nemo3_network:
+    driver: bridge

@@ -1,0 +1,109 @@
+<main class="app-content">
+    <div class="app-title">
+        <div>
+            <h1><i class="fa fa-edit"></i>添加通知</h1>
+        </div>
+        <ul class="app-breadcrumb breadcrumb">
+            <li class="breadcrumb-item"><i class="fa fa-home fa-lg"></i></li>
+            <li class="breadcrumb-item"><a href="/index">首页</a></li>
+            <li class="breadcrumb-item"><a href="/notify-list">通知列表</a></li>
+            <li class="breadcrumb-item active"><a href="#">添加通知</a></li>
+        </ul>
+    </div>
+    <div class="row">
+        <div class="col-md-12">
+            <div class="tile">
+                <div class="row">
+                    <div class="col-lg-2">
+                    </div>
+                    <div class="col-lg-8">
+                        <form class="form-horizontal" id="notify_form">
+                            <div class="form-group row">
+                                <label class="control-label col-md-3" for="notify_name">名称<span
+                                        class="text-danger">*</span></label>
+                                <div class="col-md-8">
+                                    <input class="form-control col-md-7" title="通知名称" id="notify_name"
+                                           placeholder="" required>
+                                </div>
+                            </div>
+                            <div class="form-group row">
+                                <label class="control-label col-md-3" for="notify_description">描述</label>
+                                <div class="col-md-8">
+                                    <input class="form-control col-md-7" title="通知详细描述"
+                                           id="notify_description"
+                                           placeholder="">
+                                </div>
+                            </div>
+                            <div class="form-group row">
+                                <label class="control-label col-md-3" for="notify_category">类型</label>
+                                <div class="col-md-8">
+                                    <select class="form-control col-md-7" title="通知类型" id="notify_category">
+                                        <option value="feishu" selected>飞书</option>
+                                        <option value="dingtalk">钉钉</option>
+                                        <option value="serverchan">ServerChan</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="form-group row">
+                                <label class="control-label col-md-3" for="notify_token">Token<span
+                                        class="text-danger">*</span></label>
+                                <div class="col-md-8">
+                                    <input class="form-control col-md-7" title="Token" id="notify_token"
+                                           placeholder="" required>
+                                </div>
+                            </div>
+                            <div class="form-group row">
+                                <label class="control-label col-md-3" for="notify_template">内容模板<span
+                                        class="text-danger">*</span></label>
+                                <div class="col-md-8">
+                                    <textarea class="form-control" id="notify_template" rows="5"
+                                              placeholder="" required>Nemo任务通知：
+任务：$taskName$
+用时：$runtime$
+目标：$target$
+结果：$result$</textarea>
+                                </div>
+                            </div>
+                            <div class="form-group row">
+                                <label class="control-label col-md-3" for="sort_number">排序号</label>
+                                <div class="col-md-8">
+                                    <input class="form-control col-md-7" type="number" title="排序号" id="sort_number"
+                                           value="100" required>
+                                </div>
+                            </div>
+                            <div class="form-group row">
+                                <label class="control-label col-md-3" for="status">通知状态</label>
+                                <div class="col-md-8">
+                                    <select class="form-control col-md-7" title="通知状态" id="status">
+                                        <option value="enable">Enable</option>
+                                        <option value="disable">Disable</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="tile-footer">
+                                <button class="btn btn-secondary" id="btn_cancel">返回</button>
+                                <button class="btn btn-primary" type="submit">保存</button>
+                            </div>
+                        </form>
+                    </div>
+                    <div class="col-lg-2">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</main>
+<script src="static/js/jquery/jquery-3.3.1.min.js"></script>
+<script src="static/js/bootstrap/popper.min.js"></script>
+<script src="static/js/bootstrap/bootstrap.min.js"></script>
+<script src="static/js/main.js"></script>
+<script src="static/js/plugins/pace.min.js"></script>
+<script src="static/js/sweetalert/sweetalert.min.js"></script>
+<script src="static/js/plugins/select2.min.js"></script>
+<script src="static/js/jquery/jquery.md5.js"></script>
+<script src="static/js/server/notify-edit.js"></script>
+<script>
+    $(function () {
+        $("title").html("通知编辑-Nemo");
+    });
+</script>

@@ -1,0 +1,40 @@
+service:
+    host: 127.0.0.1
+    port: 5001
+    authKey: da8Ae0e295eba72a7rgb1d34b13d86b
+redis:
+    host: 127.0.0.1
+    port: 16379
+    password:
+redisTunnel:
+    port: 5002
+    authKey: da8Ae0e295eba72a7rgb1d34b13d86b
+api:
+    searchPageSize: 100
+    searchLimitCount: 2000
+    fofa:
+        key:
+    quake:
+        key:
+    hunter:
+        key:
+    icp:
+        key:
+    icpPlus:
+        key:
+llmapi:
+    kimi:
+        api: https://api.moonshot.cn/v1/chat/completions
+        model: moonshot-v1-auto
+        token:
+    deepseek:
+        api: https://api.deepseek.com/v1
+        model: deepseek-chat
+        token:
+    qwen:
+        api: https://dashscope.aliyuncs.com/compatible-mode/v1
+        model: qwen-plus
+        token:
+proxy:
+    host:
+        - ""

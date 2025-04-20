@@ -1,0 +1,82 @@
+<main class="app-content">
+    <div class="app-title">
+        <div>
+            <h1><i class="fa fa-edit"></i>导入资产</h1>
+        </div>
+        <ul class="app-breadcrumb breadcrumb">
+            <li class="breadcrumb-item"><i class="fa fa-home fa-lg"></i></li>
+            <li class="breadcrumb-item"><a href="/index">首页</a></li>
+            <li class="breadcrumb-item"><a href="/asset-list">资产管理</a></li>
+            <li class="breadcrumb-item active"><a href="#">导入资产</a></li>
+        </ul>
+    </div>
+
+    <div class="row">
+        <div class="col-md-12">
+            <div class="tile">
+                <div class="row">
+                    <div class="col-lg-2">
+
+                    </div>
+                    <div class="col-lg-8">
+                        <form class="form-horizontal">
+                            <div class="form-group row">
+                                <label class="control-label col-md-3" for="bin">资产来源<span
+                                        class="text-danger">*</span></label>
+                                <div class="col-md-8">
+                                    <select class="form-control" id="bin" style="width: 200px;">
+                                        <option value="nemo">Nemo</option>
+                                        <option value="fofa">Fofa</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="form-group row">
+                                <label class="control-label col-md-3" for="org_id">所属组织</label>
+                                <div class="col-md-8">
+                                    <select class="form-control" id="org_id"
+                                            style="width: 400px;">
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div class="checkbox">
+                                <label><input type="checkbox" id="insert_and_update">
+                                    检查已存在的资产进行更新</label><small>（如果导入的资产已存在，则更新其信息，否则创建新的资产；导入数量较多时将会耗费较长时间，请耐心等待）</small>
+                            </div>
+
+                            <div class="form-group row">
+                                <div class="col-lg-3">
+                                </div>
+                                <div class="col-lg-8">
+                                    <input id="file" type="file"/>
+                                </div>
+                            </div>
+                        </form>
+                        <div class="tile-footer">
+                            <button class="btn btn-primary " id="btn-import" type="button">导入</button>
+                        </div>
+                    </div>
+
+                    <div class="col-lg-2">
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</main>
+<script src="static/js/jquery/jquery-3.3.1.min.js"></script>
+<script src="static/js/bootstrap/popper.min.js"></script>
+<script src="static/js/bootstrap/bootstrap.min.js"></script>
+<script src="static/js/main.js"></script>
+<script src="static/js/plugins/pace.min.js"></script>
+<script src="static/js/sweetalert/sweetalert.min.js"></script>
+<script src="static/js/plugins/select2.min.js"></script>
+<script src="static/js/jquery/jquery.md5.js"></script>
+<script src="static/js/server/asset-import.js"></script>
+<script>
+    $(function () {
+        $("title").html("编辑组织-Nemo");
+    });
+</script>
+

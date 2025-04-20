@@ -1,0 +1,93 @@
+<main class="app-content">
+    <div class="app-title">
+        <div>
+            <h1><i class="fa fa-edit"></i>编辑工作空间</h1>
+        </div>
+        <ul class="app-breadcrumb breadcrumb">
+            <li class="breadcrumb-item"><i class="fa fa-home fa-lg"></i></li>
+            <li class="breadcrumb-item"><a href="/index">首页</a></li>
+            <li class="breadcrumb-item"><a href="/workspace-list">工作空间列表</a></li>
+            <li class="breadcrumb-item active"><a href="#">编辑工作空间</a></li>
+        </ul>
+    </div>
+    <div class="row">
+        <div class="col-md-12">
+            <div class="tile">
+                <div class="row">
+                    <div class="col-lg-2">
+                    </div>
+                    <div class="col-lg-10">
+                        <form class="form-horizontal" id="workspaceForm">
+                            <div class="form-group row">
+                                <label class="control-label col-md-3" for="workspace_name">工作空间名称<span
+                                        class="text-danger">*</span></label>
+                                <div class="col-md-8">
+                                    <input class="form-control col-md-7" title="工作空间名称" id="workspace_name"
+                                           placeholder="workspace name">
+                                </div>
+                            </div>
+                            <div class="form-group row">
+                                <label class="control-label col-md-3"
+                                       for="workspace_description">工作空间详细描述</label>
+                                <div class="col-md-8">
+                                    <input class="form-control col-md-7" title="工作空间详细描述"
+                                           id="workspace_description"
+                                           placeholder="workspace description">
+                                </div>
+                            </div>
+                            <div class="form-group row">
+                                <label class="control-label col-md-3" for="sort_number">排序号<span
+                                        class="text-danger">*</span></label>
+                                <div class="col-md-8">
+                                    <input class="form-control col-md-7" title="排序号" id="sort_number" value="100">
+                                </div>
+                            </div>
+                            <div class="form-group row">
+                                <label class="control-label col-md-3" for="status">工作空间状态<span
+                                        class="text-danger">*</span></label>
+                                <div class="col-md-8">
+                                    <select class="form-control col-md-7" title="工作空间状态" id="status">
+                                        <option value="enable">Enable</option>
+                                        <option value="disable">Disable</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div class="form-group row">
+                                <label class="control-label col-md-3" for="select_notify">任务通知对象<span
+                                        class="text-danger">*</span></label>
+                                <div class="col-md-8">
+                                    <label for="select_notify">通知对象选择：</label>
+                                    <select class="form-control" id="select_notify" multiple="multiple">
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div class="tile-footer">
+                                <button class="btn btn-secondary" onclick="history.back()">返回</button>
+                                <button class="btn btn-primary" type="submit">保存</button>
+                                <input type="hidden" id="hidden_id" value="{{ .workspaceId }}">
+                            </div>
+                        </form>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+</main>
+<script src="static/js/jquery/jquery-3.3.1.min.js"></script>
+<script src="static/js/bootstrap/popper.min.js"></script>
+<script src="static/js/bootstrap/bootstrap.min.js"></script>
+<script src="static/js/bootstrap/bootstrap-multiselect.min.js"></script>
+<script src="static/js/main.js"></script>
+<script src="static/js/plugins/pace.min.js"></script>
+<script src="static/js/sweetalert/sweetalert.min.js"></script>
+<script src="static/js/plugins/select2.min.js"></script>
+<script src="static/js/jquery/jquery.md5.js"></script>
+<script src="static/js/server/workspace-edit.js"></script>
+<script>
+    $(function () {
+        $("title").html("编辑工作空间-Nemo");
+    });
+</script>

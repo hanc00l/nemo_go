@@ -1,0 +1,107 @@
+<main class="app-content">
+    <div class="app-title">
+        <div>
+            <h1><i class="fa fa-edit"></i>添加用户</h1>
+        </div>
+        <ul class="app-breadcrumb breadcrumb">
+            <li class="breadcrumb-item"><i class="fa fa-home fa-lg"></i></li>
+            <li class="breadcrumb-item"><a href="/index">首页</a></li>
+            <li class="breadcrumb-item"><a href="/user-list">用户列表</a></li>
+            <li class="breadcrumb-item active"><a href="#">添加用户</a></li>
+        </ul>
+    </div>
+    <div class="row">
+        <div class="col-md-12">
+            <div class="tile">
+                <div class="row">
+                    <div class="col-lg-2">
+                    </div>
+                    <div class="col-lg-8">
+                        <form class="form-horizontal">
+                            <div class="form-group row">
+                                <label class="control-label col-md-3" for="user_name">用户名称<span
+                                        class="text-danger">*</span></label>
+                                <div class="col-md-8">
+                                    <input class="form-control col-md-7" title="用户名称" id="user_name"
+                                           placeholder="user name">
+                                </div>
+                            </div>
+                            <div class="form-group row">
+                                <label class="control-label col-md-3" for="user_password">登录密码<span
+                                        class="text-danger">*</span></label>
+                                <div class="col-md-8">
+                                    <input class="form-control col-md-7" title="用户名称" id="user_password"
+                                           type="password"
+                                           placeholder="password">
+                                </div>
+                            </div>
+                            <div class="form-group row">
+                                <label class="control-label col-md-3" for="user_password_confirm">确认密码<span
+                                        class="text-danger">*</span></label>
+                                <div class="col-md-8">
+                                    <input class="form-control col-md-7" title="用户名称" id="user_password_confirm"
+                                           type="password"
+                                           placeholder="confirm password">
+                                </div>
+                            </div>
+                            <div class="form-group row">
+                                <label class="control-label col-md-3" for="user_role">用户类型<span class="text-danger">*</span></label>
+                                <div class="col-md-8">
+                                    <select class="form-control col-md-7" title="用户状态" id="user_role">
+                                        <option value="superadmin">超级管理员</option>
+                                        <option value="admin" selected>管理员</option>
+                                        <option value="guest">普通用户</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="form-group row">
+                                <label class="control-label col-md-3" for="user_description">用户详细描述</label>
+                                <div class="col-md-8">
+                                    <input class="form-control col-md-7" title="用户详细描述"
+                                           id="user_description"
+                                           placeholder="user description">
+                                </div>
+                            </div>
+                            <div class="form-group row">
+                                <label class="control-label col-md-3" for="sort_number">排序号<span
+                                        class="text-danger">*</span></label>
+                                <div class="col-md-8">
+                                    <input class="form-control col-md-7" title="排序号" id="sort_number" value="100">
+                                </div>
+                            </div>
+                            <div class="form-group row">
+                                <label class="control-label col-md-3" for="status">用户状态<span
+                                        class="text-danger">*</span></label>
+                                <div class="col-md-8">
+                                    <select class="form-control col-md-7" title="用户状态" id="status">
+                                        <option value="enable">Enable</option>
+                                        <option value="disable">Disable</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </form>
+                        <div class="tile-footer">
+                            <button class="btn btn-primary " id="user_add" type="button">添加</button>
+                        </div>
+                    </div>
+                    <div class="col-lg-2">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</main>
+<script src="static/js/jquery/jquery-3.3.1.min.js"></script>
+<script src="static/js/bootstrap/popper.min.js"></script>
+<script src="static/js/bootstrap/bootstrap.min.js"></script>
+<script src="static/js/main.js"></script>
+<script src="static/js/plugins/pace.min.js"></script>
+<script src="static/js/sweetalert/sweetalert.min.js"></script>
+<script src="static/js/plugins/select2.min.js"></script>
+<script src="static/js/jquery/jquery.md5.js"></script>
+<script src="static/js/server/user-add.js"></script>
+<script>
+    $(function () {
+        $("title").html("编辑用户-Nemo");
+    });
+</script>

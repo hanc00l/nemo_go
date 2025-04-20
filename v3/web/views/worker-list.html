@@ -1,0 +1,184 @@
+<main class="app-content">
+    <div class="app-title">
+        <div>
+            <h1><i class="fa fa-th-list"></i>&nbsp;节点列表</h1>
+            <p></p>
+        </div>
+        <ul class="app-breadcrumb breadcrumb side">
+            <li class="breadcrumb-item"><i class="fa fa-home fa-lg"></i></li>
+            <li class="breadcrumb-item"><a href="/index">首页</a></li>
+            <li class="breadcrumb-item active"><a href="#">节点列表</a></li>
+        </ul>
+    </div>
+    <div class="row">
+        <div class="col-md-12">
+            <div class="tile">
+                <div class="tile-body">
+                    <form class="row">
+                        <div class="form-group col-md-3 align-self-end">
+                            <button class="btn btn-primary" type="button" id="batch_reload">
+                                <i class="fa fa-fw fa-lg fa-refresh"></i>批量重启
+                            </button>
+                            <button class="btn btn-primary" type="button" id="refresh">
+                                <i class="fa fa-fw fa-lg fa-refresh"></i>刷新
+                            </button>
+                            <div class="form-check form-check-inline">
+                                <label class="form-check-label" for="checkbox_auto-refresh">
+                                    <input class="form-check-input" id="checkbox_auto-refresh" type="checkbox" checked>自动刷新
+                                </label>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+            <div class="tile">
+                <div class="tile-body">
+                    <table class="table table-hover table-bordered" id="worker_table" width="100%"></table>
+                    <!-- 模态对话框：启动参数修改 -->
+                    <div class="modal fade" id="editWorkerOption" tabindex="-1" role="dialog"
+                         aria-labelledby="editWorkerOptionLabel" aria-hidden="true">
+                        <div class="modal-dialog" role="document">
+                            <div class="modal-content">
+                                <div class="modal-header card-header bg-primary">
+                                    <h4 class="modal-title" id="editWorkerOptionLabel">Worker运行参数</h4>
+                                </div>
+                                <div class="modal-body">
+                                    <form class="form-horizontal" role="form">
+                                        <div class="form-group">
+                                            <label for="input_service_host"><strong>Service地址</strong></label>
+                                            <input class="form-control" id="input_service_host" type="text" value="">
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="input_service_port"><strong>端口</strong></label>
+                                            <input class="form-control" id="input_service_port" type="text" value="">
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="input_service_auth"><strong>验证口令</strong></label>
+                                            <input class="form-control" id="input_service_auth" type="password" value="">
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="select_concurrency"><strong>任务并发数</strong></label>
+                                            <select class="form-control" id="select_concurrency">
+                                                <option value="1">1</option>
+                                                <option value="2">2</option>
+                                                <option value="3" selected>3</option>
+                                                <option value="4">4</option>
+                                                <option value="5">5</option>
+                                            </select>
+                                        </div>
+                                        <div class="form-group">
+                                            <label><strong>任务模式</strong></label>
+                                            <div class="form-check form-check-inline">
+                                                <label class="form-check-label" for="checkbox_task_mode_0">
+                                                    <input class="form-check-input" id="checkbox_task_mode_0"
+                                                           type="checkbox">全部任务
+                                                </label>
+                                            </div>
+                                            <div class="form-check form-check-inline">
+                                                <!-- 其他任务模式复选框 -->
+                                                <div class="form-check form-check-inline">
+                                                    <label class="form-check-label"
+                                                           for="checkbox_task_mode_1">
+                                                        <input class="form-check-input"
+                                                               id="checkbox_task_mode_1" type="checkbox"
+                                                        >主动扫描
+                                                    </label>
+                                                </div>
+                                                <div class="form-check form-check-inline">
+                                                    <label class="form-check-label"
+                                                           for="checkbox_task_mode_2">
+                                                        <input class="form-check-input"
+                                                               id="checkbox_task_mode_2" type="checkbox"
+                                                        >指纹识别
+                                                    </label>
+                                                </div>
+                                                <div class="form-check form-check-inline">
+                                                    <label class="form-check-label"
+                                                           for="checkbox_task_mode_3">
+                                                        <input class="form-check-input"
+                                                               id="checkbox_task_mode_3" type="checkbox"
+                                                        >被动搜集
+                                                    </label>
+                                                </div>
+                                                <div class="form-check form-check-inline">
+                                                    <label class="form-check-label"
+                                                           for="checkbox_task_mode_4">
+                                                        <input class="form-check-input"
+                                                               id="checkbox_task_mode_4" type="checkbox"
+                                                        >漏洞验证
+                                                    </label>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="select_worker_performance"><strong>工作性能</strong></label>
+                                            <select class="form-control" id="select_worker_performance">
+                                                <option value="0" selected>自动选择</option>
+                                                <option value="1">高性能</option>
+                                                <option value="2">普通性能</option>
+                                            </select>
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="input_default_config_file"><strong>配置文件</strong></label>
+                                            <input class="form-control" id="input_default_config_file" type="text" value="">
+                                        </div>
+                                        <div class="form-group">
+                                            <div class="form-check form-check-inline">
+                                                <label class="form-check-label" for="checkbox_no_proxy">
+                                                    <input class="form-check-input" id="checkbox_no_proxy"
+                                                           type="checkbox">禁止本地socks5代理转发
+                                                </label>
+                                            </div>
+                                        </div>
+                                        <div class="form-group">
+                                            <div class="form-check form-check-inline">
+                                                <label class="form-check-label" for="checkbox_no_redis_proxy">
+                                                    <input class="form-check-input" id="checkbox_no_redis_proxy"
+                                                           type="checkbox">禁止本地Redis安全代理转发
+                                                </label>
+                                            </div>
+                                        </div>
+                                        <div class="form-group">
+                                            <div class="form-check form-check-inline">
+                                                <label class="form-check-label" for="checkbox_ip_v6">
+                                                    <input class="form-check-input" id="checkbox_ip_v6"
+                                                           type="checkbox">支持IPv6扫描
+                                                </label>
+                                            </div>
+                                        </div>
+                                        <input type="hidden" id="input_worker_name" value="">
+                                    </form>
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-secondary" data-dismiss="modal"
+                                            aria-hidden="true">取消
+                                    </button>
+                                    <button class="btn btn-primary org-update" type="button" id="buttonUpdate"
+                                            title="重置worker，并更新worker参数、同步文件并重启">
+                                        重置并更新重启
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</main>
+
+<script src="static/js/jquery/jquery-3.3.1.min.js"></script>
+<script src="static/js/bootstrap/popper.min.js"></script>
+<script src="static/js/bootstrap/bootstrap.min.js"></script>
+<script src="static/js/main.js"></script>
+<script src="static/js/plugins/pace.min.js"></script>
+<script src="static/js/plugins/jquery.dataTables.min.js" defer></script>
+<script src="static/js/plugins/dataTables.bootstrap.min.js" defer></script>
+<script src="static/js/sweetalert/sweetalert.min.js"></script>
+<script src="static/js/jquery/jquery.bootstrap-duallistbox.js"></script>
+<script src="static/js/server/worker-list.js"></script>
+<script>
+    $(function () {
+        $("title").html("节点管理-Nemo");
+    });
+</script>

@@ -1,0 +1,44 @@
+<main class="app-content">
+    <div class="row">
+        <div class="col-md-12">
+            <div class="tile">
+                <div class="tile-body">
+                    <!-- 子任务列表卡片 -->
+                    <div class="row" id="task_executor_card">
+                        <div class="col-md-12">
+                            <div class="card shadow-sm">
+                                <div class="card-header bg-primary text-white">
+                                    <h2 class="card-title mb-0"><i class="fa fa-random" aria-hidden="true"></i>子任务流程图</h2>
+                                </div>
+                                <div class="card-body">
+                                    <div id="toolbar" style=" width: 800px;margin: 20px auto;text-align: right;">
+                                        <button id="layoutTop">&uarr;</button>
+                                        <button id="layoutBottom">&darr;</button>
+                                        <button id="layoutLeft">&larr;</button>
+                                        <button id="layoutRight">&rarr;</button>
+                                        <button id="fitScreen">Fit to Screen</button>
+                                    </div>
+                                    <div id="svg-tree"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</main>
+
+<script src="static/js/jquery/jquery-3.3.1.min.js"></script>
+<script src="static/js/bootstrap/popper.min.js"></script>
+<script src="static/js/bootstrap/bootstrap.min.js"></script>
+<script src="static/js/apextree/apextree.min.js"></script>
+<script src="static/js/main.js"></script>
+<script src="static/js/plugins/pace.min.js"></script>
+<script src="static/js/server/maintask-tree.js"></script>
+<script src="static/js/sweetalert/sweetalert.min.js"></script>
+<script>
+    $(function () {
+        $("title").html("任务流程图-Nemo");
+    });
+</script>

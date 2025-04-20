@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <link rel="icon" type="image/x-icon" class="js-site-favicon" href="static/images/favicon.ico">
+    <!-- Main CSS-->
+    <link rel="stylesheet" type="text/css" href="static/css/main.css">
+    <!-- Font-icon css-->
+    <link rel="stylesheet" type="text/css" href="static/css/font-awesome/4.7.0/css/font-awesome.min.css">
+
+    <title>Nemo - Login</title>
+</head>
+<body>
+<section class="material-half-bg">
+    <img src="static/images/bj.jpg" style="height: 100vh;width: 100%;"/>
+    <div class="cover"></div>
+</section>
+<section class="lockscreen-content">
+    <div class="logo">
+        <h1>Nemo</h1>
+    </div>
+    <div class="lock-box"><img class="rounded-circle user-image" src="static/images/favicon.jpg">
+        <!-- <p class="text-center text-muted">账号已锁</p> -->
+        <form class="unlock-form" action="" method="post">
+            <div class="form-group">
+                <label class="control-label" for="username"><i class="fa fa-user fa-lg" title="用户名"></i></label>
+                <input class="form-control" type="text" id="username" name="username" placeholder="Username" autofocus>
+            </div>
+            <div class="form-group">
+                <label class="control-label" for="password"><i class="fa fa-id-card fa-lg"
+                                                               title="登录密码"></i></label>
+                <input class="form-control" type="password" id="password" name="password" placeholder="Password"
+                       autofocus>
+            </div>
+            <div class="form-group">
+                <label class="control-label" for="captcha"><i class="fa fa-universal-access fa-lg"
+                                                              title="验证码"></i></label>
+                <input class="form-control" type="text" id="captcha" name="captcha" placeholder="Captcha Code">
+                {{create_captcha}}
+            </div>
+            <div class="form-group btn-container">
+                <button class="btn btn-primary btn-block" type="submit" id="button_login"><i
+                        class="fa fa-unlock fa-lg"></i>解 锁
+                </button>
+            </div>
+        </form>
+    </div>
+</section>
+<!-- Essential javascripts for application to work-->
+<script src="static/js/jquery/jquery-3.3.1.min.js"></script>
+<script src="static/js/bootstrap/popper.min.js"></script>
+<script src="static/js/bootstrap/bootstrap.min.js"></script>
+<!--<script src="static/js/rsa/jsencrypt.min.js"></script>-->
+<!--<script src="static/js/server/login.js"></script>-->
+<!--<script src="static/js/main.js"></script>-->
+</body>
+</html>

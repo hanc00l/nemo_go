@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Nemo</title>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" type="text/css" href="static/css/bootstrap.min.css">
+    <link rel="icon" type="image/x-icon" class="js-site-favicon" href="static/images/favicon.ico">
+    <link rel="stylesheet" type="text/css" href="static/css/main.css">
+    <link rel="stylesheet" type="text/css" href="static/css/font-awesome/4.7.0/css/font-awesome.min.css">
+    <!-- Main CSS-->
+    <link rel="stylesheet" type="text/css" href="static/css/jquery.dataTables.min.css">
+    <link rel="stylesheet" href="/static/css/bootstrap-duallistbox/bootstrap-duallistbox.css">
+    <link rel="stylesheet" href="/static/css/bootstrap-multiselect.min.css">
+    <style type="text/css">
+        .imgPreview {
+            display: none;
+            top: 0;
+            left: 0;
+            width: 100%;
+            /*容器占满整个屏幕*/
+            height: 100%;
+            position: fixed;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 2000;
+        }
+
+        .imgPreview img {
+            z-index: 2000;
+            width: 60%;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+        }
+
+        pre {
+            white-space: pre-wrap; /* css-3 */
+            word-wrap: break-word; /* InternetExplorer5.5+ */
+            white-space: -moz-pre-wrap; /* Mozilla,since1999 */
+        }
+    </style>
+    <style>
+        .custom-shape {
+            display: inline-block;
+            padding: 0.35em 0.65em;
+            color: white;
+            font-size: 10px;
+            border-radius: 8px; border-left: 0; border-right: 0;
+            word-break: break-all;
+        }
+        .custom-shape-org {
+            background-color: #96ae7b;
+        }
+        .custom-shape-app {
+            background-color: #4CAF50;
+        }
+    </style>
+</head>
+
+<body class="app sidebar-mini rtl">
+<!-- Navbar-->
+<header class="app-header "><a class="app-header__logo" href="/">Nemo</a>
+    <!-- Sidebar toggle button--><a class="app-sidebar__toggle" href="#" data-toggle="sidebar" id="btnsiderbar"
+                                    aria-label="Hide Sidebar"></a>
+    <!-- Navbar Right Menu-->
+    <ul class="app-nav">
+        <!--Notification Menu-->
+        <li class="dropdown"><a class="app-nav__item" href="task-list"
+                                aria-label="Show notifications"><i class="fa fa-bell-o fa-lg" title="任务状态信息"></i>
+            <span class="badge badge-light" id="span_show_task" data-toggle="popover"></span></a>
+            <div id="notification_update">
+            </div>
+        </li>
+        <!-- User Menu-->
+        <li class="dropdown"><a class="app-nav__item" href="#" data-toggle="dropdown"
+                                aria-label="Open Profile Menu"><i class="fa fa-user fa-lg"
+                                                                  title="{{ .User }}/{{ .UserRole }}"></i></a>
+            <ul class="dropdown-menu settings-menu dropdown-menu-right">
+                <li><a class="dropdown-item" href="https://www.github.com/hanc00l/nemo_go" target="_blank"><i
+                        class="fa fa-user fa-lg"></i> 关于</a></li>
+                <li>
+                    <div class="dropdown-divideDataTabler"></div>
+                    <a class="dropdown-item" href="logout"><i
+                            class="fa fa-sign-out fa-lg"></i> 退出</a>
+                </li>
+            </ul>
+        </li>
+    </ul>
+</header>
+<!-- Sidebar menu-->
+<aside class="app-sidebar ">
+    <ul class="app-menu">
+        <li>
+            <a class="app-menu__item" href="dashboard">
+                <i class="app-menu__icon fa fa-dashboard"></i>
+                <span class="app-menu__label">仪表盘</span>
+            </a>
+        </li>
+        <li>
+            <a class="app-menu__item" href="asset-list">
+                <i class="app-menu__icon fa fa-gitlab"></i>
+                <span class="app-menu__label">资产管理</span>
+            </a>
+        </li>
+        <li>
+            <a class="app-menu__item" href="vul-list">
+                <i class="app-menu__icon fa fa-bolt"></i>
+                <span class="app-menu__label">漏洞管理</span>
+            </a>
+        </li>
+        <li>
+            <a class="app-menu__item" href="maintask-list">
+                <i class="app-menu__icon fa fa-hourglass-1"></i>
+                <span class="app-menu__label">任务管理</span>
+            </a>
+        </li>
+        <li>
+            <a class="app-menu__item" href="org-list">
+                <i class="app-menu__icon fa fa-users"></i>
+                <span class="app-menu__label">组织管理</span>
+            </a>
+        </li>
+        {{ if eq .UserRole "superadmin" }}
+        <li>
+            <a class="app-menu__item" href="runtimelog-list">
+                <i class="app-menu__icon fa fa-sliders"></i>
+                <span class="app-menu__label">运行日志</span>
+            </a>
+        </li>
+        <li>
+            <a class="app-menu__item" href="accesslog-list">
+                <i class="app-menu__icon fa fa-sliders"></i>
+                <span class="app-menu__label">访问日志</span>
+            </a>
+        </li>
+        <li>
+            <a class="app-menu__item" href="worker-list">
+                <i class="app-menu__icon fa fa-futbol-o"></i>
+                <span class="app-menu__label">节点管理</span>
+            </a>
+        </li>
+        <li class="treeview">
+            <a class="app-menu__item" href="#" data-toggle="treeview">
+                <i class="app-menu__icon fa fa-user-secret"></i>
+                <span class="app-menu__label">系统管理</span>
+                <i class="treeview-indicator fa fa-angle-right"></i>
+            </a>
+            <ul class="treeview-menu">
+                <li><a class="treeview-item" href="user-list"><i class="icon fa fa-user fa-fw"></i>用户</a></li>
+                <li><a class="treeview-item" href="workspace-list"><i class="icon fa fa-cubes fa-fw"></i>工作空间</a>
+                <li><a class="treeview-item" href="notify-list"><i class="icon fa fa-comment fa-fw"></i>通知管理</a>
+
+                </li>
+            </ul>
+        </li>
+        {{ end }}
+        <li class="treeview">
+            <a class="app-menu__item" href="#" data-toggle="treeview">
+                <i class="app-menu__icon fa fa-cogs"></i>
+                <span class="app-menu__label">配置管理</span>
+                <i class="treeview-indicator fa fa-angle-right"></i>
+            </a>
+            <ul class="treeview-menu">
+                <li><a class="treeview-item" href="config-server"><i class="icon fa fa-gear fa-fw"></i>配置-Server</a>
+                </li>
+                <li><a class="treeview-item" href="config-worker"><i class="icon fa fa-gear fa-fw"></i>配置-Worker</a>
+                </li>
+                {{ if eq .UserRole "superadmin" "admin" }}
+                <li><a class="treeview-item" href="custom-index"><i class="icon fa fa-futbol-o fa-fw"></i>自定义配置</a>
+                </li>
+                {{ end }}
+            </ul>
+        </li>
+    </ul>
+</aside>
+
+{{.LayoutContent}}
+
+</body>
+</html>
