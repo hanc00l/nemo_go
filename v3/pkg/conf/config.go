@@ -234,7 +234,7 @@ func GetProxyConfig() string {
 // GetRootPath 获取运行时系统的root位置，解决调试时无法使用相对位置的困扰
 func GetRootPath() string {
 	if RunMode == Debug {
-		return "/Users/user/21GolandProjects/nemo_go_v3"
+		return "/Users/user/nemo_go/v3"
 	}
 	return "."
 }
