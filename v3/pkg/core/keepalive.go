@@ -9,10 +9,11 @@ import (
 )
 
 type KeepAliveDaemonInfo struct {
-	ManualReloadFlag       bool
-	ManualFileSyncFlag     bool
-	ManualUpdateOptionFlag bool
-	WorkerRunOption        *WorkerOption
+	ManualReloadFlag           bool // 重启
+	ManualConfigAndPocSyncFlag bool // 同步已存在的配置、Poc
+	ManualInitEnvFlag          bool // 重置
+	ManualUpdateOptionFlag     bool // 更新启动参数
+	WorkerRunOption            *WorkerOption
 }
 
 // DoKeepAlive worker请求keepAlive

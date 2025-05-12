@@ -61,11 +61,12 @@ type WorkerStatus struct {
 	TaskExecutedNumber int       `json:"task_number"`
 	TaskStartedNumber  int       `json:"started_number"`
 	// worker's run status
-	ManualReloadFlag       bool   `json:"manual_reload_flag"`
-	ManualFileSyncFlag     bool   `json:"manual_file_sync_flag"`
-	ManualUpdateOptionFlag bool   `json:"manual_update_daemon_option"`
-	CPULoad                string `json:"cpu_load"`
-	MemUsed                string `json:"mem_used"`
+	ManualReloadFlag           bool   `json:"manual_reload_flag"`
+	ManualInitEnvFlag          bool   `json:"manual_init_env_flag"`
+	ManualConfigAndPocSyncFlag bool   `json:"manual_config_and_poc_sync_flag"`
+	ManualUpdateOptionFlag     bool   `json:"manual_update_daemon_option"`
+	CPULoad                    string `json:"cpu_load"`
+	MemUsed                    string `json:"mem_used"`
 	// worker's option
 	WorkerRunOption    []byte `json:"worker_run_option"`    //worker当前运行的启动参数
 	WorkerUpdateOption []byte `json:"worker_update_option"` //worker需要更新的启动参数

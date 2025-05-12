@@ -51,7 +51,7 @@ Worker不会开启对外的任务监听端口，但默认开启本地socks5转�
 
 - 1、将nemo_linux_amd64.tar解压到nemo目录
 - 2、运行./server_install.sh
-- 3、修改server.yaml中的mongodb、redis的地址和端口，与实际情况保持一致
+- 3、修改server.yml中的mongodb、redis的地址和端口，与实际情况保持一致
 - 4、server参数：
 ```bash
  Usage:
@@ -106,7 +106,7 @@ Help Options:
 ```
 **三、修改默认配置密码**
 
-- 1、进入nemo/conf目录，分别修改server.yaml和worker.yaml中Service、redisTunnel的authKey，建议16位以上随机字符串。
+- 1、进入nemo/conf目录，分别修改server.yml和worker.yml中Service、redisTunnel的authKey，建议16位以上随机字符串。
 - 2、建议redis增加密码验证（可选，具体请参考相应文档）。
 
 

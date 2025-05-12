@@ -110,7 +110,7 @@ func getResultTarget(result []db.AssetDocument, chunkSize int) [][]string {
 	return chunks
 }
 
-func doNextExecutorTask(config execute.ExecutorTaskInfo, result []db.AssetDocument, doFingerprint bool) {
+func doNextFingerAndPocscanExecutorTask(config execute.ExecutorTaskInfo, result []db.AssetDocument, doFingerprint bool) {
 	// 如果任务获取到结果，则新建下一步任务
 	var TaskSliceSize = 50
 	targetSlice := getResultTarget(result, TaskSliceSize)
@@ -149,7 +149,7 @@ func PortScan(configJSON string) (result string, err error) {
 		return FailedTask(err.Error()), err
 	}
 	// 如果任务获取到结果，则新建下一步任务
-	doNextExecutorTask(config, resultArgs.Result, true)
+	doNextFingerAndPocscanExecutorTask(config, resultArgs.Result, true)
 
 	return SucceedTask(result), nil
 }
@@ -174,7 +174,7 @@ func DomainScan(configJSON string) (result string, err error) {
 		return FailedTask(err.Error()), err
 	}
 	// 如果任务获取到结果，则新建下一步任务
-	doNextExecutorTask(config, resultArgs.Result, true)
+	doNextFingerAndPocscanExecutorTask(config, resultArgs.Result, true)
 	// 如果有端口扫描，则新建portscan的任务
 	var domainscanConfig execute.DomainscanConfig
 	for _, v := range config.DomainScan {
@@ -208,7 +208,7 @@ func OnlineAPI(configJSON string) (result string, err error) {
 		return FailedTask(err.Error()), err
 	}
 	// 如果任务获取到结果，则新建下一步任务
-	doNextExecutorTask(config, resultArgs.Result, true)
+	doNextFingerAndPocscanExecutorTask(config, resultArgs.Result, true)
 
 	return SucceedTask(result), nil
 }
@@ -268,23 +268,41 @@ func Fingerprint(configJSON string) (result string, err error) {
 	}
 	// 如果任务获取到结果，则新建下一步任务
 	if len(config.PocScan) > 0 {
+		// 获取pocscan配置，目前只支持nuclei模式
+		var executor string
 		var pocscanConfig execute.PocscanConfig
-		for _, v := range config.PocScan {
+		for k, v := range config.PocScan {
+			executor = k
 			pocscanConfig = v
 			break
 		}
-		if pocscanConfig.IsScanBaseWebStatus {
-			var newResult []db.AssetDocument
-			for _, doc := range resultArgs.Result {
-				if len(doc.HttpStatus) > 0 {
-					newResult = append(newResult, doc)
+		// 匹配指纹识别结果，只有在指纹识别模块才能启用
+		if pocscanConfig.PocType == "matchFinger" {
+			targetPocMapResult := core.MatchAssetPoc(resultArgs.Result, pocscanConfig)
+			if len(targetPocMapResult) > 0 {
+				for target, newPocConfig := range targetPocMapResult {
+					newConfig := config
+					newConfig.Target = target
+					newConfig.PocScan[executor] = newPocConfig
+					_ = newNextExecutorTask(newConfig, target, executor)
 				}
 			}
-			if len(newResult) > 0 {
-				doNextExecutorTask(config, newResult, false)
-			}
 		} else {
-			doNextExecutorTask(config, resultArgs.Result, false)
+			// 指定poc文件方式
+			// 基于http状态码扫描
+			if pocscanConfig.IsScanBaseWebStatus {
+				var newResult []db.AssetDocument
+				for _, doc := range resultArgs.Result {
+					if len(doc.HttpStatus) > 0 {
+						newResult = append(newResult, doc)
+					}
+				}
+				if len(newResult) > 0 {
+					doNextFingerAndPocscanExecutorTask(config, newResult, false)
+				}
+			} else {
+				doNextFingerAndPocscanExecutorTask(config, resultArgs.Result, false)
+			}
 		}
 	}
 

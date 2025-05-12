@@ -20,6 +20,7 @@ const (
 	Zxipv6wryCategory    = "zxipv6wry"
 	Geolite2Category     = "geolite2"
 	NmapCategory         = "nmap"
+	PocFileCategory      = "pocfile"
 )
 
 type Resource struct {
@@ -51,6 +52,8 @@ func init() {
 	dict["resolver.txt"] = Resource{Name: "resolver.txt", Type: ConfigFile, Path: "thirdparty/dict"}
 	dict["subnames_medium.txt"] = Resource{Name: "subnames_medium.txt", Type: ConfigFile, Path: "thirdparty/dict"}
 	dict["subnames.txt"] = Resource{Name: "subnames.txt", Type: ConfigFile, Path: "thirdparty/dict"}
+	dict["web_fingerprint_v4.json"] = Resource{Name: "web_fingerprint_v4.json", Type: ConfigFile, Path: "thirdparty/dict"}
+	dict["web_poc_map_v2.json"] = Resource{Name: "web_poc_map_v2.json", Type: ConfigFile, Path: "thirdparty/dict"}
 	Resources[DictCategory] = dict
 
 	massdns := make(map[string]Resource)
@@ -98,6 +101,11 @@ func init() {
 	nuclei["nuclei_darwin_amd64"] = Resource{Name: "nuclei_darwin_amd64", Type: ExecuteFile, Path: "thirdparty/nuclei"}
 	nuclei["nuclei_linux_amd64"] = Resource{Name: "nuclei_linux_amd64", Type: ExecuteFile, Path: "thirdparty/nuclei"}
 	nuclei["nuclei_win_amd64.exe"] = Resource{Name: "nuclei_win_amd64.exe", Type: ExecuteFile, Path: "thirdparty/nuclei"}
-	nuclei["nuclei-templates"] = Resource{Name: "nuclei-templates", Type: DirAndFile, Path: "thirdparty/nuclei"}
 	Resources[NucleiCategory] = nuclei
+
+	//poc文件
+	pocfile := make(map[string]Resource)
+	pocfile["nuclei-templates"] = Resource{Name: "nuclei-templates", Type: DirAndFile, Path: "thirdparty/nuclei"}
+	pocfile["some_nuclei_templates"] = Resource{Name: "some_nuclei_templates", Type: DirAndFile, Path: "thirdparty/nuclei"}
+	Resources[PocFileCategory] = pocfile
 }

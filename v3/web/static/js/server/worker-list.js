@@ -114,8 +114,8 @@ $(function () {
         }
         $('#editWorkerOption').modal('hide');
         swal({
-                title: "确定要重置、更新worker吗?",
-                text: "将重置、更新worker命令发送至守护进程，由守护进程结束当前正在运行的worker进程，同时会清除原有的worker文件和thirdparty目录、重新请求下载最新版本的worker文件，并使用新的配置参数启动worker进程！",
+                title: "确定要更新并重启worker吗?",
+                text: "将更新worker命令发送至守护进程，由守护进程结束当前正在运行的worker进程，并使用新的配置参数启动worker进程！",
                 type: "warning",
                 showCancelButton: true,
                 confirmButtonColor: "#DD6B55",
@@ -157,34 +157,22 @@ $(function () {
             })
     });
     $("#batch_reload").click(function () {
-        let dataTableId = "#worker_table"
         let url = "worker-reload"
-        swal({
-                title: "确定要批量重启选定的Worker?",
-                text: "该操作会下发重启命令到所有选定Worker，由Daemon进程重启Worker；如果Worker不是由Daemon进程启动的将无法重启！",
-                type: "warning",
-                showCancelButton: true,
-                confirmButtonColor: "#DD6B55",
-                confirmButtonText: "确认重启",
-                cancelButtonText: "取消",
-                closeOnConfirm: true
-            },
-            function () {
-                $(dataTableId).DataTable().$('input[type=checkbox]:checked').each(function (i) {
-                    let id = $(this).val().split("|")[0];
-                    $.ajax({
-                        type: 'post',
-                        async: false,
-                        url: url,
-                        data: {"worker_name": id},
-                        success: function (data) {
-                        },
-                        error: function (xhr, type) {
-                        }
-                    });
-                });
-                $(dataTableId).DataTable().draw(false);
-            });
+        let title = "确定要批量重启选定的Worker?"
+        let text = "该操作会下发重启命令到所有选定Worker，由Daemon进程重启Worker；如果Worker不是由Daemon进程启动的将无法重启！"
+        batch_op_worker(url, title, text)
+    });
+    $("#batch_sync").click(function () {
+        let url = "worker-sync"
+        let title = "确定要批量同步选定的Worker的配置、Poc文件?"
+        let text = "该操作会下发重启命令到所有选定Worker，由Daemon进程同步选定Worker的配置、Poc文件；如果Worker不是由Daemon进程启动的将无法重启！"
+        batch_op_worker(url, title, text)
+    });
+    $("#batch_init").click(function () {
+        let url = "worker-init"
+        let title = "确定要批量重置选定的Worker?"
+        let text = "将重置命令发送至守护进程，由守护进程结束当前正在运行的worker进程，同时会清除原有的worker文件和thirdparty目录、请求下载最新版本的worker文件,重新启动worker进程！"
+        batch_op_worker(url, title, text)
     });
     //定时刷新页面
     setInterval(function () {
@@ -194,6 +182,35 @@ $(function () {
     }, 10 * 1000);
 });
 
+function batch_op_worker(url, title, text) {
+    let dataTableId = "#worker_table"
+    swal({
+            title: title,
+            text: text,
+            type: "warning",
+            showCancelButton: true,
+            confirmButtonColor: "#DD6B55",
+            confirmButtonText: "确认",
+            cancelButtonText: "取消",
+            closeOnConfirm: true
+        },
+        function () {
+            $(dataTableId).DataTable().$('input[type=checkbox]:checked').each(function (i) {
+                let id = $(this).val().split("|")[0];
+                $.ajax({
+                    type: 'post',
+                    async: false,
+                    url: url,
+                    data: {"worker_name": id},
+                    success: function (data) {
+                    },
+                    error: function (xhr, type) {
+                    }
+                });
+            });
+            $(dataTableId).DataTable().draw(false);
+        });
+}
 
 /**
  * 重启worker
@@ -228,7 +245,6 @@ function reload_worker(worker_name) {
             });
         });
 }
-
 
 function edit_option(worker_name, daemon_process) {
     $('#editWorkerOption').modal('toggle');

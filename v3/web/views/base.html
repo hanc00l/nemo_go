@@ -67,8 +67,8 @@
     <!-- Navbar Right Menu-->
     <ul class="app-nav">
         <!--Notification Menu-->
-        <li class="dropdown"><a class="app-nav__item" href="task-list"
-                                aria-label="Show notifications"><i class="fa fa-bell-o fa-lg" title="任务状态信息"></i>
+        <li class="dropdown"><a class="app-nav__item" href="/dashboard"
+                                aria-label="Show notifications"><i class="fa fa-bell-o fa-lg" title="任务提醒"></i>
             <span class="badge badge-light" id="span_show_task" data-toggle="popover"></span></a>
             <div id="notification_update">
             </div>
@@ -169,6 +169,7 @@
                 </li>
                 {{ if eq .UserRole "superadmin" "admin" }}
                 <li><a class="treeview-item" href="custom-index"><i class="icon fa fa-futbol-o fa-fw"></i>自定义配置</a>
+                <li><a class="treeview-item" href="pocfile-index"><i class="icon fa fa-file-text-o fa-fw"></i>Poc文件</a>
                 </li>
                 {{ end }}
             </ul>

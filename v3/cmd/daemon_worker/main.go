@@ -35,7 +35,7 @@ func prepareWorkerRunEnv() bool {
 		Category: resource.WorkerCategory,
 		Name:     workerBin,
 	})
-	err = core.CheckRequiredResource(re)
+	err = core.CheckRequiredResource(re, false)
 	if err != nil {
 		logging.RuntimeLog.Errorf("获取资源失败:%s", err.Error())
 		return false

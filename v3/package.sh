@@ -50,7 +50,7 @@ tar -cvzf release/nemo_linux_amd64.tar \
   --exclude=thirdparty/fingerprintx/fingerprintx_windows_amd64.exe \
   server_linux_amd64 worker_linux_amd64 daemon_worker_linux_amd64 \
   conf log thirdparty web version.txt \
-  Dockerfile docker docker-compose.yaml docker_start.sh
+  Dockerfile docker docker-compose.yaml docker_start.sh server_install.sh worker_install.sh
 
 tar -cvzf release/nemo_windows_amd64.tar \
   --exclude=thirdparty/nuclei/nuclei_darwin_amd64 \

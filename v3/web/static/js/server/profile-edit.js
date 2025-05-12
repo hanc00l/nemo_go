@@ -1,16 +1,17 @@
 $(function () {
     init_pocfile_multiselect();
     const id = $('#hidden_id').val();
-    load_pocfile_data(null);
     if (id !== "") {
         load_profile_data(id);
     } else {
+        load_pocfile_data(null);
         $('#llmapi_config input, #llmapi_config select').prop('disabled', true);
         $('#portscan_config input, #portscan_config select').prop('disabled', true);
         $('#domainscan_config input, #domainscan_config select').prop('disabled', true);
         $('#onlineapi_config input, #onlineapi_config select').prop('disabled', true);
         $('#fingerprint_config input, #fingerprint_config select').prop('disabled', true);
         $('#pocscan_config input, #pocscan_config select').prop('disabled', true);
+        $('#pocscan_poc_file').multiselect('disable');
     }
 
     $.urlParam = function (param) {
@@ -85,7 +86,7 @@ $(function () {
     $('#enable_pocscan').change(function () {
         const isEnabled = $(this).prop('checked');
         $('#pocscan_config input, #pocscan_config select').prop('disabled', !isEnabled);
-        if (isEnabled) {
+        if (isEnabled && $('#pocscan_poc_type').val() === 'selectedPocFile') {
             $('#pocscan_poc_file').multiselect('enable')
         } else {
             $('#pocscan_poc_file').multiselect('disable')
@@ -95,6 +96,14 @@ $(function () {
     $('#generateProfileName').on('click', function () {
         const name = generate_profile_name();
         $('#name').val(name);
+    });
+    $('#pocscan_poc_type').change(function () {
+        const pocType = $(this).val();
+        if (pocType === 'matchFinger') {
+            $('#pocscan_poc_file').multiselect('disable');
+        } else {
+            $('#pocscan_poc_file').multiselect('enable');
+        }
     });
 });
 
@@ -287,11 +296,18 @@ function process_form_data() {
     // 获取POC扫描部分的字段值
     const pocscan_enabled = $('#enable_pocscan').is(':checked');
     const pocscan_bin = $('#pocscan_bin').val();
+    const pocscan_poc_type = $('#pocscan_poc_type').val();
     const pocscan_base_web_status = $('#pocscan_base_web_status').is(':checked');
     const pocscanPocFile = $('#pocscan_poc_file').val().join(',');
     if (pocscan_enabled && pocscan_base_web_status) {
         if (!fingerprint_enabled || !fingerprintHttpx) {
             alert('请先开启指纹识别，并选择Httpx工具，web状态识别需要Httpx工具');
+            return false;
+        }
+    }
+    if (pocscan_enabled && pocscan_poc_type === "selectedPocFile") {
+        if (pocscanPocFile.length === 0) {
+            alert('请选择POC文件');
             return false;
         }
     }
@@ -384,6 +400,7 @@ function process_form_data() {
             enabled: pocscan_enabled,
             pocbin: pocscan_bin,
             config: {
+                pocType: pocscan_poc_type,
                 baseWebStatus: pocscan_base_web_status,
                 pocFile: pocscanPocFile
             }
@@ -472,10 +489,16 @@ function fill_form_with_data(data) {
         if (data.pocscan.enabled) {
             $('#pocscan_bin').val(data.pocscan.pocbin);
             $('#pocscan_base_web_status').prop('checked', data.pocscan.config.baseWebStatus);
-            if (!isEmpty(data.pocscan.config.pocFile)) {
-                arr = data.pocscan.config.pocFile.split(',');
-                $('#pocscan_poc_file').val(arr);
-                sortSelectedOptionsToTop();
+            $('#pocscan_poc_type').val(data.pocscan.config.pocType);
+            if (data.pocscan.config.pocType === "selectedPocFile") {
+                $('#pocscan_poc_file').multiselect('enable');
+                if (isNotEmpty(data.pocscan.config.pocFile)) {
+                    let arr = data.pocscan.config.pocFile.split(',');
+                    load_pocfile_data(arr);
+                }
+            } else {
+                $('#pocscan_poc_file').multiselect('disable');
+                load_pocfile_data(null);
             }
         }
     } else if (data.config_type === "standalone") {
@@ -549,7 +572,14 @@ function generate_profile_name() {
         }
         if ($('#enable_pocscan').is(':checked')) {
             stringBuilder.push("Poc扫描");
-            stringBuilder.push($('#pocscan_bin').val());
+            //stringBuilder.push($('#pocscan_bin').val());
+            if ($('#pocscan_poc_type').val() === "matchFinger") {
+                stringBuilder.push("指纹匹配");
+            } else {
+                if ($('#pocscan_base_web_status').is(':checked')) {
+                    stringBuilder.push("HTTP状态码");
+                }
+            }
         }
     } else {
         stringBuilder.push("(SA)");

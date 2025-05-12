@@ -15,9 +15,15 @@
             <div class="tile">
                 <div class="tile-body">
                     <form class="row">
-                        <div class="form-group col-md-3 align-self-end">
+                        <div class="form-group col-md-12 align-self-end">
                             <button class="btn btn-primary" type="button" id="batch_reload">
-                                <i class="fa fa-fw fa-lg fa-refresh"></i>批量重启
+                                重启
+                            </button>
+                            <button class="btn btn-primary" type="button" id="batch_sync">
+                                同步配置与Poc
+                            </button>
+                            <button class="btn btn-primary" type="button" id="batch_init">
+                                重置
                             </button>
                             <button class="btn btn-primary" type="button" id="refresh">
                                 <i class="fa fa-fw fa-lg fa-refresh"></i>刷新
@@ -154,8 +160,8 @@
                                             aria-hidden="true">取消
                                     </button>
                                     <button class="btn btn-primary org-update" type="button" id="buttonUpdate"
-                                            title="重置worker，并更新worker参数、同步文件并重启">
-                                        重置并更新重启
+                                            title="更新worker参数并重启">
+                                        更新参数并重启
                                     </button>
                                 </div>
                             </div>

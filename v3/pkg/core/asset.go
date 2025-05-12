@@ -17,7 +17,7 @@ func SyncTaskAsset(workspaceId string, taskId string) (result string) {
 
 	globalAsset := db.NewAsset(workspaceId, db.GlobalAsset, "", mongoClient)
 	taskAsset := db.NewAsset(workspaceId, db.TaskAsset, taskId, mongoClient)
-	logging.RuntimeLog.Infof("同步任务历史资产, workspaceId:%s, taskId:%s", workspaceId, taskId)
+	//logging.RuntimeLog.Infof("同步任务历史资产, workspaceId:%s, taskId:%s", workspaceId, taskId)
 	taskAssetDocs, err := taskAsset.Find(bson.M{db.TaskId: taskId}, 0, 0, false, false)
 	if err != nil {
 		logging.RuntimeLog.Errorf("获取任务资产失败,taskId:%s,err:%v", taskId, err.Error())
@@ -54,7 +54,7 @@ func SyncTaskHistoryVul(workspaceId string, taskId string, mongoClient *mongo.Cl
 	// 同步漏洞：
 	globalVul := db.NewVul(workspaceId, db.GlobalVul, mongoClient)
 	taskVul := db.NewVul(workspaceId, db.TaskVul, mongoClient)
-	logging.RuntimeLog.Infof("同步任务漏洞,workspaceId:%s, taskId:%s", workspaceId, taskId)
+	//logging.RuntimeLog.Infof("同步任务漏洞,workspaceId:%s, taskId:%s", workspaceId, taskId)
 
 	taskVulDocs, err := taskVul.Find(bson.M{db.TaskId: taskId}, 0, 0)
 	if err != nil {
@@ -63,6 +63,7 @@ func SyncTaskHistoryVul(workspaceId string, taskId string, mongoClient *mongo.Cl
 	}
 	for _, newDoc := range taskVulDocs {
 		oldDocs, _ := globalVul.Find(bson.M{"authority": newDoc.Authority, "url": newDoc.Url, "source": newDoc.Source, "pocfile": newDoc.PocFile}, 0, 0)
+		newDoc.TaskId = "" // 保存到全局中必须要去掉task字段
 		var isSuccess bool
 		if len(oldDocs) == 0 {
 			isSuccess, err = globalVul.Insert(newDoc)

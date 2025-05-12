@@ -64,7 +64,7 @@ $(function () {
                         if (data === "100%") str_data += '<span class="badge badge-success">100%</span>';
                         else str_data += '<span class="badge badge-info">' + data + '</span>';
                         if (isNotEmpty(row['progress'])) {
-                            str_data += '</br><span title="执行中/待执行/已完成">[' + row['progress'] + ']</span>';
+                            str_data += '</br><span title="执行中/待执行/总任务数">[' + row['progress'] + ']</span>';
                         }
                         return str_data;
                     },

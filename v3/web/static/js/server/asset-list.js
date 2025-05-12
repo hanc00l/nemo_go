@@ -71,6 +71,10 @@ $(function () {
                             strData += br + '<i class="fa  fa-spinner"  style="color:#FFA500" aria-hidden="true" title="新增或有更新"></i>&nbsp;';
                             br = "";
                         }
+                        if (row["vul"]) {
+                            strData += br + '<i class="fa fa-bolt" style="color:red" aria-hidden="true" title="有漏洞信息"></i>&nbsp;';
+                            br = "";
+                        }
                         if (row["cdn"]) {
                             strData += br + '<i class="fa fa-cloud" style="color:#FFA500" aria-hidden="true" title="CDN"></i>&nbsp;';
                             br = "";

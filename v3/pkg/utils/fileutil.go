@@ -174,6 +174,7 @@ const (
 	MassDns      BinShortName = "massdns"
 	Nuclei       BinShortName = "nuclei"
 	Worker       BinShortName = "worker"
+	Server       BinShortName = "server"
 	Httpx        BinShortName = "httpx"
 	Subfinder    BinShortName = "subfinder"
 	Fingerprintx BinShortName = "fingerprintx"

@@ -670,7 +670,7 @@ func (c *AssetController) getListData(workspaceId, taskId string, req assetReque
 			IconHash:    result.IconHash,
 			IsHoneypot:  honeypot.IsHoneypot(result.Host),
 			WorkspaceId: workspaceId,
-			UpdateTime:  result.UpdateTime.In(conf.LocalTimeLocation).Format("2006-01-02 15:04:05"),
+			UpdateTime:  FormatDateTime(result.UpdateTime),
 		}
 		if len(result.OrgId) > 0 {
 			if _, ok := orgNameMap[result.OrgId]; !ok {

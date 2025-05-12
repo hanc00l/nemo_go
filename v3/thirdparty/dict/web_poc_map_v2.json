@@ -1,0 +1,4000 @@
+[
+  {
+    "Name": "360-tianqing",
+    "Category": "device",
+    "Description": "TianQing,360天擎",
+    "Updated": "2025-05-06",
+    "Fingerprint": [
+      "tianqing"
+    ],
+    "Poc": [
+      {
+        "Source": "nuclei-template",
+        "Path": [
+          "http/vulnerabilities/other/tianqing-info-leak.yaml",
+          "http/cnvd/2021/CNVD-2021-32799.yaml"
+        ]
+      }
+    ]
+  },
+  {
+    "Name": "74cms",
+    "Category": "cms",
+    "Description": "74cms sql inject",
+    "Updated": "2025-05-06",
+    "Fingerprint": [
+      "74cms"
+    ],
+    "Poc": [
+      {
+        "Source": "nuclei-template",
+        "Path": [
+          "http/vulnerabilities/74cms/74cms-weixin-sqli.yaml",
+          "http/vulnerabilities/other/74cms-sqli.yaml"
+        ]
+      }
+    ]
+  },
+  {
+    "Name": "activemq",
+    "Category": "component",
+    "Description": "activemq",
+    "Updated": "2025-05-06",
+    "Fingerprint": [
+      "activemq"
+    ],
+    "Poc": [
+      {
+        "Source": "nuclei-template",
+        "Path": [
+          "http/default-logins/activemq/activemq-default-login.yaml",
+          "http/cves/2016/CVE-2016-3088.yaml"
+        ]
+      }
+    ]
+  },
+  {
+    "Name": "activemq-apollo",
+    "Category": "component",
+    "Description": "apache apollo",
+    "Updated": "2025-05-06",
+    "Fingerprint": [
+      "apollo"
+    ],
+    "Poc": [
+      {
+        "Source": "nuclei-template",
+        "Path": [
+          "http/cves/2022/CVE-2022-22897.yaml",
+          "http/cves/2023/CVE-2023-47643.yaml",
+          "http/default-logins/apache/apache-apollo-default-login.yaml",
+          "http/default-logins/apollo/apollo-default-login.yaml"
+        ]
+      }
+    ]
+  },
+  {
+    "Name": "adobe-coldfusion",
+    "Category": "component",
+    "Description": "Adobe Coldfusion",
+    "Updated": "2025-05-06",
+    "Fingerprint": [
+      "coldfusion"
+    ],
+    "Poc": [
+      {
+        "Source": "nuclei-template",
+        "Path": [
+          "http/cves/2010/CVE-2010-2861.yaml",
+          "http/cves/2018/CVE-2018-15961.yaml",
+          "http/cves/2023/CVE-2023-29300.yaml",
+          "http/cves/2023/CVE-2023-38203.yaml"
+        ]
+      }
+    ]
+  },
+  {
+    "Name": "alibaba-canal",
+    "Category": "cloud",
+    "Description": "Alibaba Canal",
+    "Updated": "2025-05-06",
+    "Fingerprint": [
+      "canal"
+    ],
+    "Poc": [
+      {
+        "Source": "nuclei-template",
+        "Path": [
+          "http/default-logins/alibaba/canal-default-login.yaml"
+        ]
+      }
+    ]
+  },
+  {
+    "Name": "alibaba-nacos",
+    "Category": "cloud",
+    "Description": "Alibaba nacos",
+    "Updated": "2025-05-06",
+    "Fingerprint": [
+      "nacos"
+    ],
+    "Poc": [
+      {
+        "Source": "nuclei-template",
+        "Path": [
+          "http/cves/2021/CVE-2021-29441.yaml",
+          "http/cves/2021/CVE-2021-29442.yaml",
+          "http/default-logins/nacos/nacos-default-login.yaml",
+          "http/vulnerabilities/other/nacos-auth-bypass.yaml",
+          "http/vulnerabilities/other/nacos-info-leak.yaml"
+        ]
+      }
+    ]
+  },
+  {
+    "Name": "amtt-hiboss",
+    "Category": "component",
+    "Description": "AMTT Hiboss",
+    "Updated": "2025-05-06",
+    "Fingerprint": [
+      "amtt",
+      "hiboss"
+    ],
+    "Poc": [
+      {
+        "Source": "nuclei-template",
+        "Path": [
+          "http/vulnerabilities/other/hiboss-rce.yaml"
+        ]
+      }
+    ]
+  },
+  {
+    "Name": "an-heng",
+    "Category": "device",
+    "Description": "安恒，安恒信息安全设备",
+    "Updated": "2025-05-06",
+    "Fingerprint": [
+      "安恒"
+    ],
+    "Poc": [
+      {
+        "Source": "some_nuclei_templates",
+        "Path": [
+          "anheng-DAS-Gateway-rce-suffix.yaml",
+          "anheng-DAS-USM-SSRF-xmlrpc.yaml"
+        ]
+      }
+    ]
+  },
+  {
+    "Name": "apache-airflow",
+    "Category": "component",
+    "Description": "Apache Airflow",
+    "Updated": "2025-05-06",
+    "Fingerprint": [
+      "airflow"
+    ],
+    "Poc": [
+      {
+        "Source": "nuclei-template",
+        "Path": [
+          "http/cves/2020/CVE-2020-11978.yaml",
+          "http/cves/2020/CVE-2020-13927.yaml",
+          "http/cves/2020/CVE-2020-17526.yaml",
+          "http/cves/2021/CVE-2021-38540.yaml",
+          "http/cves/2022/CVE-2022-24288.yaml",
+          "http/cves/2022/CVE-2022-40127.yaml",
+          "http/default-logins/apache/airflow-default-login.yaml"
+        ]
+      }
+    ]
+  },
+  {
+    "Name": "apache-ambari",
+    "Category": "component",
+    "Description": "Apache Ambari",
+    "Updated": "2025-05-06",
+    "Fingerprint": [
+      "ambari"
+    ],
+    "Poc": [
+      {
+        "Source": "nuclei-template",
+        "Path": [
+          "http/default-logins/ambari/ambari-default-login.yaml"
+        ]
+      }
+    ]
+  },
+  {
+    "Name": "apache-axis2",
+    "Category": "component",
+    "Description": "Apache Axis2",
+    "Updated": "2025-05-06",
+    "Fingerprint": [
+      "axis2"
+    ],
+    "Poc": [
+      {
+        "Source": "nuclei-template",
+        "Path": [
+          "http/technologies/apache/apache-axis-detect.yaml",
+          "http/cves/2010/CVE-2010-0219.yaml"
+        ]
+      }
+    ]
+  },
+  {
+    "Name": "apache-couchdb",
+    "Category": "component",
+    "Description": "ApacheCouchDB",
+    "Updated": "2025-05-06",
+    "Fingerprint": [
+      "couchdb"
+    ],
+    "Poc": [
+      {
+        "Source": "nuclei-template",
+        "Path": [
+          "http/cves/2017/CVE-2017-12635.yaml",
+          "http/default-logins/couchdb/couchdb-default-login.yaml",
+          "http/vulnerabilities/other/couchdb-adminparty.yaml"
+        ]
+      }
+    ]
+  },
+  {
+    "Name": "apache-druid",
+    "Category": "component",
+    "Description": "Apache Druid",
+    "Updated": "2025-05-06",
+    "Fingerprint": [
+      "druid"
+    ],
+    "Poc": [
+      {
+        "Source": "nuclei-template",
+        "Path": [
+          "http/cves/2021/CVE-2021-25646.yaml",
+          "http/cves/2021/CVE-2021-36749.yaml",
+          "http/cves/2023/CVE-2023-25194.yaml",
+          "http/default-logins/druid/druid-default-login.yaml",
+          "http/vulnerabilities/other/apache-druid-log4j.yaml"
+        ]
+      }
+    ]
+  },
+  {
+    "Name": "apache-dubbo",
+    "Category": "component",
+    "Description": "Apache Dubbo",
+    "Updated": "2025-05-06",
+    "Fingerprint": [
+      "dubbo"
+    ],
+    "Poc": [
+      {
+        "Source": "nuclei-template",
+        "Path": [
+          "http/default-logins/apache/dubbo-admin-default-login.yaml"
+        ]
+      }
+    ]
+  },
+  {
+    "Name": "apache-flink",
+    "Category": "cloud",
+    "Description": "Apache Flink",
+    "Updated": "2025-05-06",
+    "Fingerprint": [
+      "flink"
+    ],
+    "Poc": [
+      {
+        "Source": "nuclei-template",
+        "Path": [
+          "http/cves/2020/CVE-2020-17518.yaml",
+          "http/cves/2020/CVE-2020-17519.yaml",
+          "http/vulnerabilities/apache/apache-flink-unauth-rce.yaml"
+        ]
+      }
+    ]
+  },
+  {
+    "Name": "apache-hadoop",
+    "Category": "component",
+    "Description": "Apache Hadoop",
+    "Updated": "2025-05-06",
+    "Fingerprint": [
+      "hadoop"
+    ],
+    "Poc": [
+      {
+        "Source": "nuclei-template",
+        "Path": [
+          "http/vulnerabilities/other/yarn-resourcemanager-rce.yaml"
+        ]
+      }
+    ]
+  },
+  {
+    "Name": "apache-httpd",
+    "Category": "component",
+    "Description": "Apache HTTPD",
+    "Updated": "2025-05-06",
+    "Fingerprint": [
+      "http_server"
+    ],
+    "Poc": [
+      {
+        "Source": "nuclei-template",
+        "Path": [
+          "http/cves/2021/CVE-2021-40438.yaml",
+          "http/cves/2021/CVE-2021-41773.yaml",
+          "http/cves/2021/CVE-2021-42013.yaml",
+          "http/cves/2024/CVE-2024-38473.yaml"
+        ]
+      }
+    ]
+  },
+  {
+    "Name": "apache-kylin",
+    "Category": "component",
+    "Description": "Apache Kylin",
+    "Updated": "2025-05-06",
+    "Fingerprint": [
+      "kylin"
+    ],
+    "Poc": [
+      {
+        "Source": "nuclei-template",
+        "Path": [
+          "http/cves/2020/CVE-2020-1956.yaml",
+          "http/cves/2020/CVE-2020-13937.yaml",
+          "http/default-logins/apache/kylin-default-login.yaml"
+        ]
+      }
+    ]
+  },
+  {
+    "Name": "apache-nifi",
+    "Category": "component",
+    "Description": "Apache NiFi",
+    "Updated": "2025-05-06",
+    "Fingerprint": [
+      "apache-nifi",
+      "nifi"
+    ],
+    "Poc": [
+      {
+        "Source": "nuclei-template",
+        "Path": [
+          "http/vulnerabilities/apache/apache-nifi-rce.yaml"
+        ]
+      }
+    ]
+  },
+  {
+    "Name": "apache-ofbiz",
+    "Category": "component",
+    "Description": "Apache OFBiz",
+    "Updated": "2025-05-06",
+    "Fingerprint": [
+      "ofbiz"
+    ],
+    "Poc": [
+      {
+        "Source": "nuclei-template",
+        "Path": [
+          "http/cves/2018/CVE-2018-8033.yaml",
+          "http/cves/2020/CVE-2020-9496.yaml",
+          "http/cves/2021/CVE-2021-29200.yaml",
+          "http/cves/2021/CVE-2021-30128.yaml",
+          "http/cves/2022/CVE-2022-47501.yaml",
+          "http/cves/2023/CVE-2023-51467.yaml",
+          "http/cves/2024/CVE-2024-32113.yaml",
+          "http/cves/2024/CVE-2024-38856.yaml",
+          "http/cves/2024/CVE-2024-45195.yaml",
+          "http/cves/2024/CVE-2024-45507.yaml",
+          "http/default-logins/ofbiz/ofbiz-default-login.yaml",
+          "http/technologies/apache/apache-ofbiz-detect.yaml",
+          "http/vulnerabilities/apache/apache-ofbiz-log4j-rce.yaml"
+        ]
+      }
+    ]
+  },
+  {
+    "Name": "apache-skywalking",
+    "Category": "component",
+    "Description": "Apache SkyWalking",
+    "Updated": "2025-05-06",
+    "Fingerprint": [
+      "skywalking"
+    ],
+    "Poc": [
+      {
+        "Source": "nuclei-template",
+        "Path": [
+          "http/cves/2020/CVE-2020-9483.yaml"
+        ]
+      }
+    ]
+  },
+  {
+    "Name": "apache-solr",
+    "Category": "component",
+    "Description": "Apache Solr",
+    "Updated": "2025-05-06",
+    "Fingerprint": [
+      "solr"
+    ],
+    "Poc": [
+      {
+        "Source": "nuclei-template",
+        "Path": [
+          "http/cves/2017/CVE-2017-12629.yaml",
+          "http/cves/2019/CVE-2019-0193.yaml",
+          "http/cves/2023/CVE-2023-50290.yaml",
+          "http/cves/2024/CVE-2024-45216.yaml",
+          "http/vulnerabilities/apache/apache-solr-file-read.yaml",
+          "http/vulnerabilities/apache/apache-solr-log4j-rce.yaml",
+          "http/cves/2019/CVE-2019-17558.yaml"
+        ]
+      }
+    ]
+  },
+  {
+    "Name": "apache-struts",
+    "Category": "component",
+    "Description": "Apache Struts",
+    "Updated": "2025-05-06",
+    "Fingerprint": [
+      "struts"
+    ],
+    "Poc": [
+      {
+        "Source": "nuclei-template",
+        "Path": [
+          "http/cves/2017/CVE-2017-5638.yaml",
+          "http/cves/2017/CVE-2017-9791.yaml",
+          "http/cves/2017/CVE-2017-9805.yaml",
+          "http/cves/2017/CVE-2017-12611.yaml",
+          "http/cves/2018/CVE-2018-11776.yaml",
+          "http/cves/2019/CVE-2019-0230.yaml",
+          "http/cves/2020/CVE-2020-17530.yaml",
+          "http/cves/2021/CVE-2021-31805.yaml"
+        ]
+      }
+    ]
+  },
+  {
+    "Name": "apache-tomcat",
+    "Category": "component",
+    "Description": "Apache Tomcat",
+    "Updated": "2025-05-06",
+    "Fingerprint": [
+      "tomcat"
+    ],
+    "Poc": [
+      {
+        "Source": "nuclei-template",
+        "Path": [
+          "http/cves/2017/CVE-2017-12615.yaml",
+          "http/cves/2018/CVE-2018-11759.yaml",
+          "http/default-logins/apache/tomcat-default-login.yaml"
+        ]
+      }
+    ]
+  },
+  {
+    "Name": "aspcms",
+    "Category": "cms",
+    "Description": "ASPCMS",
+    "Updated": "2025-05-06",
+    "Fingerprint": [
+      "aspcms"
+    ],
+    "Poc": [
+      {
+        "Source": "nuclei-template",
+        "Path": [
+          "http/vulnerabilities/other/aspcms-commentlist-sqli.yaml"
+        ]
+      }
+    ]
+  },
+  {
+    "Name": "cacti",
+    "Category": "component",
+    "Description": "Cacti",
+    "Updated": "2025-05-06",
+    "Fingerprint": [
+      "cacti"
+    ],
+    "Poc": [
+      {
+        "Source": "nuclei-template",
+        "Path": [
+          "http/cves/2020/CVE-2020-8813.yaml",
+          "http/cves/2022/CVE-2022-46169.yaml",
+          "http/cves/2023/CVE-2023-39361.yaml",
+          "http/cves/2024/CVE-2024-29895.yaml",
+          "http/vulnerabilities/other/cacti-weathermap-file-write.yaml"
+        ]
+      }
+    ]
+  },
+  {
+    "Name": "chanjet",
+    "Category": "component",
+    "Description": "chanjet,畅捷通",
+    "Updated": "2025-05-06",
+    "Fingerprint": [
+      "chanjet"
+    ],
+    "Poc": [
+      {
+        "Source": "some_nuclei_templates",
+        "Path": [
+          "chanjet-Tplus-rce-oob-GetStoreWarehouseByStore.yaml",
+          "chanjet-Tplus-upload-Upload.yaml"
+        ]
+      },
+      {
+        "Source": "nuclei-template",
+        "Path": [
+          "http/vulnerabilities/chanjet-tplus/chanjet-tplus-rce.yaml",
+          "http/vulnerabilities/chanjet-tplus/chanjet-tplus-unauth-passreset.yaml",
+          "http/vulnerabilities/yonyou/chanjet-gnremote-sqli.yaml",
+          "http/vulnerabilities/yonyou/chanjet-tplus-checkmutex-sqli.yaml",
+          "http/vulnerabilities/yonyou/chanjet-tplus-file-read.yaml",
+          "http/vulnerabilities/yonyou/chanjet-tplus-fileupload.yaml",
+          "http/vulnerabilities/yonyou/chanjet-tplus-ufida-sqli.yaml"
+        ]
+      }
+    ]
+  },
+  {
+    "Name": "cisco-asa",
+    "Category": "device",
+    "Description": "cve-2020-3452:Cisco Adaptive Security Appliance (ASA)/Firepower Threat Defense (FTD) - Local File Inclusion",
+    "Updated": "2025-05-06",
+    "Fingerprint": [
+      "cisco"
+    ],
+    "Poc": [
+      {
+        "Source": "nuclei-template",
+        "Path": [
+          "http/cves/2020/CVE-2020-3452.yaml",
+          "http/technologies/cisco-asa-detect.yaml",
+          "http/vulnerabilities/backdoor/cisco-implant-detect.yaml"
+        ]
+      }
+    ]
+  },
+  {
+    "Name": "citrix",
+    "Category": "component",
+    "Description": "Citrix devices",
+    "Updated": "2025-05-06",
+    "Fingerprint": [
+      "citrix"
+    ],
+    "Poc": [
+      {
+        "Source": "nuclei-template",
+        "Path": [
+          "http/cves/2019/CVE-2019-19781.yaml",
+          "http/cves/2020/CVE-2020-8194.yaml",
+          "http/cves/2020/CVE-2020-8193.yaml",
+          "http/cves/2020/CVE-2020-8209.yaml",
+          "http/cves/2023/CVE-2023-4966.yaml",
+          "http/cves/2024/CVE-2024-6235.yaml",
+          "http/vulnerabilities/other/citrix-xenapp-log4j-rce.yaml"
+        ]
+      }
+    ]
+  },
+  {
+    "Name": "cnpower-oa",
+    "Category": "oa",
+    "Description": "华天动力 oa",
+    "Updated": "2025-05-06",
+    "Fingerprint": [
+      "华天动力",
+      "cnpower-oa"
+    ],
+    "Poc": [
+      {
+        "Source": "some_nuclei_templates",
+        "Path": [
+          "cnpower-oa-sql-workFlowService.yaml"
+        ]
+      }
+    ]
+  },
+  {
+    "Name": "confluence",
+    "Category": "oa",
+    "Description": "Confluence",
+    "Updated": "2025-05-06",
+    "Fingerprint": [
+      "confluence"
+    ],
+    "Poc": [
+      {
+        "Source": "nuclei-template",
+        "Path": [
+          "http/cves/2015/CVE-2015-8399.yaml",
+          "http/cves/2019/CVE-2019-3396.yaml",
+          "http/cves/2019/CVE-2019-3398.yaml",
+          "http/cves/2021/CVE-2021-26084.yaml",
+          "http/cves/2021/CVE-2021-26085.yaml",
+          "http/cves/2022/CVE-2022-26134.yaml",
+          "http/cves/2022/CVE-2022-26138.yaml",
+          "http/cves/2023/CVE-2023-22515.yaml"
+        ]
+      }
+    ]
+  },
+  {
+    "Name": "consul",
+    "Category": "cloud",
+    "Description": "Consul CVE-2022-21953 is ssrf vulnerability",
+    "Updated": "2025-05-06",
+    "Fingerprint": [
+      "consul"
+    ],
+    "Poc": [
+      {
+        "Source": "nuclei-template",
+        "Path": [
+          "http/cves/2022/CVE-2022-29153.yaml",
+          "http/vulnerabilities/other/hashicorp-consul-rce.yaml"
+        ]
+      }
+    ]
+  },
+  {
+    "Name": "couchcms",
+    "Category": "cms",
+    "Description": "CouchCMS",
+    "Updated": "2025-05-06",
+    "Fingerprint": [
+      "couchcms"
+    ],
+    "Poc": [
+      {
+        "Source": "nuclei-template",
+        "Path": [
+          "http/cves/2018/CVE-2018-7662.yaml"
+        ]
+      }
+    ]
+  },
+  {
+    "Name": "craft-cms",
+    "Category": "cms",
+    "Description": "Craft CMS",
+    "Updated": "2025-05-06",
+    "Fingerprint": [
+      "craft"
+    ],
+    "Poc": [
+      {
+        "Source": "nuclei-template",
+        "Path": [
+          "http/cves/2020/CVE-2020-9757.yaml",
+          "http/cves/2021/CVE-2021-41749.yaml",
+          "http/cves/2023/CVE-2023-41892.yaml",
+          "http/cves/2024/CVE-2024-56145.yaml"
+        ]
+      }
+    ]
+  },
+  {
+    "Name": "d-link",
+    "Category": "device",
+    "Description": "D-Link",
+    "Updated": "2025-05-06",
+    "Fingerprint": [
+      "d-link",
+      "dlink"
+    ],
+    "Poc": [
+      {
+        "Source": "nuclei-template",
+        "Path": [
+          "http/vulnerabilities/other/dlink-850L-info-leak.yaml",
+          "http/cves/2019/CVE-2019-16920.yaml",
+          "http/cves/2019/CVE-2019-17506.yaml",
+          "http/cves/2020/CVE-2020-25078.yaml",
+          "http/cves/2020/CVE-2020-9376.yaml",
+          "http/cves/2020/CVE-2020-24579.yaml",
+          "http/cves/2024/CVE-2024-57045.yaml",
+          "http/vulnerabilities/dlink/dlink-nas-rce.yaml",
+          "http/default-logins/d-link/dlink-centralized-default-login.yaml"
+        ]
+      }
+    ]
+  },
+  {
+    "Name": "dahua",
+    "Category": "device",
+    "Description": "dahua,大华",
+    "Updated": "2025-05-06",
+    "Fingerprint": [
+      "dahua"
+    ],
+    "Poc": [
+      {
+        "Source": "some_nuclei_templates",
+        "Path": [
+          "dahua-loginpass-leak.yaml"
+        ]
+      },
+      {
+        "Source": "nuclei-template",
+        "Path": [
+          "http/cnvd/2017/CNVD-2017-06001.yaml",
+          "http/cnvd/2024/CNVD-2024-38747.yaml",
+          "http/cves/2017/CVE-2017-7925.yaml",
+          "http/cves/2021/CVE-2021-33044.yaml",
+          "http/cves/2023/CVE-2023-3836.yaml",
+          "http/vulnerabilities/dahua/dahua-bitmap-fileupload.yaml",
+          "http/vulnerabilities/dahua/dahua-eims-rce.yaml",
+          "http/vulnerabilities/dahua/dahua-wpms-lfi.yaml",
+          "http/vulnerabilities/dahua/dahua-wpms-rce.yaml"
+        ]
+      }
+    ]
+  },
+  {
+    "Name": "dedecms",
+    "Category": "cms",
+    "Description": "DedeCMS",
+    "Updated": "2025-05-06",
+    "Fingerprint": [
+      "dedecms"
+    ],
+    "Poc": [
+      {
+        "Source": "nuclei-template",
+        "Path": [
+          "http/vulnerabilities/dedecms/dedecms-carbuyaction-fileinclude.yaml",
+          "http/cves/2018/CVE-2018-6910.yaml",
+          "http/cves/2018/CVE-2018-7700.yaml",
+          "http/vulnerabilities/dedecms/dedecms-membergroup-sqli.yaml",
+          "http/vulnerabilities/dedecms/dedecms-openredirect.yaml",
+          "http/cves/2017/CVE-2017-17731.yaml",
+          "http/cves/2023/CVE-2023-2059.yaml"
+        ]
+      }
+    ]
+  },
+  {
+    "Name": "discuz",
+    "Category": "cms",
+    "Description": "Discuz",
+    "Updated": "2025-05-06",
+    "Fingerprint": [
+      "discuz"
+    ],
+    "Poc": [
+      {
+        "Source": "nuclei-template",
+        "Path": [
+          "http/vulnerabilities/discuz/discuz-api-pathinfo.yaml"
+        ]
+      }
+    ]
+  },
+  {
+    "Name": "django",
+    "Category": "component",
+    "Description": "Django",
+    "Updated": "2025-05-06",
+    "Fingerprint": [
+      "django"
+    ],
+    "Poc": [
+      {
+        "Source": "nuclei-template",
+        "Path": [
+          "http/cves/2018/CVE-2018-14574.yaml",
+          "http/technologies/default-django-page.yaml"
+        ]
+      }
+    ]
+  },
+  {
+    "Name": "dotnetcms",
+    "Category": "cms",
+    "Description": "DotNetCMS",
+    "Updated": "2025-05-06",
+    "Fingerprint": [
+      "dotnetcms",
+      "foosun"
+    ],
+    "Poc": [
+      {
+        "Source": "nuclei-template",
+        "Path": [
+          "http/vulnerabilities/other/dotnetcms-sqli.yaml"
+        ]
+      }
+    ]
+  },
+  {
+    "Name": "draytek",
+    "Category": "device",
+    "Description": "DrayTek",
+    "Updated": "2025-05-06",
+    "Fingerprint": [
+      "draytek",
+      "vigorconnect"
+    ],
+    "Poc": [
+      {
+        "Source": "nuclei-template",
+        "Path": [
+          "http/cves/2020/CVE-2020-8515.yaml",
+          "http/cves/2021/CVE-2021-20124.yaml"
+        ]
+      }
+    ]
+  },
+  {
+    "Name": "drupal",
+    "Category": "cms",
+    "Description": "Drupal",
+    "Updated": "2025-05-06",
+    "Fingerprint": [
+      "drupal"
+    ],
+    "Poc": [
+      {
+        "Source": "nuclei-template",
+        "Path": [
+          "http/cves/2014/CVE-2014-3704.yaml",
+          "http/cves/2018/CVE-2018-7600.yaml",
+          "http/cves/2019/CVE-2019-6340.yaml"
+        ]
+      }
+    ]
+  },
+  {
+    "Name": "duomicms",
+    "Category": "cms",
+    "Description": "DuomiCms",
+    "Updated": "2025-05-06",
+    "Fingerprint": [
+      "duomicms"
+    ],
+    "Poc": [
+      {
+        "Source": "nuclei-template",
+        "Path": [
+          "http/vulnerabilities/other/duomicms-sql-injection.yaml"
+        ]
+      }
+    ]
+  },
+  {
+    "Name": "ecshop",
+    "Category": "cms",
+    "Description": "ECShop",
+    "Updated": "2025-05-06",
+    "Fingerprint": [
+      "ecshop"
+    ],
+    "Poc": [
+      {
+        "Source": "nuclei-template",
+        "Path": [
+          "http/cves/2021/CVE-2021-41460.yaml",
+          "http/vulnerabilities/other/ecshop-sqli.yaml"
+        ]
+      }
+    ]
+  },
+  {
+    "Name": "ectouch",
+    "Category": "oa",
+    "Description": "Ectouch",
+    "Updated": "2025-05-06",
+    "Fingerprint": [
+      "ectouch"
+    ],
+    "Poc": [
+      {
+        "Source": "nuclei-template",
+        "Path": [
+          "http/vulnerabilities/other/etouch-v2-sqli.yaml",
+          "http/cves/2023/CVE-2023-39560.yaml"
+        ]
+      }
+    ]
+  },
+  {
+    "Name": "elasticsearch",
+    "Category": "component",
+    "Description": "Elasticsearch",
+    "Updated": "2025-05-06",
+    "Fingerprint": [
+      "elasticsearch"
+    ],
+    "Poc": [
+      {
+        "Source": "nuclei-template",
+        "Path": [
+          "http/cves/2014/CVE-2014-3120.yaml",
+          "http/cves/2015/CVE-2015-1427.yaml",
+          "http/cves/2015/CVE-2015-3337.yaml",
+          "http/cves/2015/CVE-2015-5531.yaml",
+          "http/default-logins/elasticsearch/elasticsearch-default-login.yaml",
+          "http/vulnerabilities/other/elasticsearch5-log4j-rce.yaml"
+        ]
+      }
+    ]
+  },
+  {
+    "Name": "esafenet",
+    "Category": "component",
+    "Description": "esafenet,易赛通",
+    "Updated": "2025-05-06",
+    "Fingerprint": [
+      "esafenet"
+    ],
+    "Poc": [
+      {
+        "Source": "some_nuclei_templates",
+        "Path": [
+          "Esafenet-CDG-upload-UploadFileFromClientServiceForClient.yaml"
+        ]
+      },
+      {
+        "Source": "nuclei-template",
+        "Path": [
+          "http/cves/2019/CVE-2019-9632.yaml",
+          "http/default-logins/esafenet-cdg-default-login.yaml",
+          "http/vulnerabilities/esafenet/esafenet-mysql-fileread.yaml",
+          "http/vulnerabilities/esafenet/esafenet-netsecconfigajax-sqli.yaml",
+          "http/vulnerabilities/esafenet/esafenet-noticeajax-sqli.yaml"
+        ]
+      }
+    ]
+  },
+  {
+    "Name": "etcd",
+    "Category": "component",
+    "Description": "etcd",
+    "Updated": "2025-05-06",
+    "Fingerprint": [
+      "etcd"
+    ],
+    "Poc": [
+      {
+        "Source": "nuclei-template",
+        "Path": [
+          "http/technologies/kubernetes/etcd/etcd-version.yaml"
+        ]
+      }
+    ]
+  },
+  {
+    "Name": "exchange",
+    "Category": "component",
+    "Description": "Exchange",
+    "Updated": "2025-05-06",
+    "Fingerprint": [
+      "exchange"
+    ],
+    "Poc": [
+      {
+        "Source": "nuclei-template",
+        "Path": [
+          "http/cves/2021/CVE-2021-26855.yaml",
+          "http/cves/2021/CVE-2021-34473.yaml",
+          "http/cves/2021/CVE-2021-41349.yaml"
+        ]
+      }
+    ]
+  },
+  {
+    "Name": "eyou",
+    "Category": "oa",
+    "Description": "Eyou",
+    "Updated": "2025-05-06",
+    "Fingerprint": [
+      "eyou",
+      "亿邮"
+    ],
+    "Poc": [
+      {
+        "Source": "nuclei-template",
+        "Path": [
+          "http/cnvd/2021/CNVD-2021-26422.yaml"
+        ]
+      }
+    ]
+  },
+  {
+    "Name": "f5",
+    "Category": "device",
+    "Description": "F5",
+    "Updated": "2025-05-06",
+    "Fingerprint": [
+      "f5"
+    ],
+    "Poc": [
+      {
+        "Source": "nuclei-template",
+        "Path": [
+          "http/cves/2021/CVE-2021-22986.yaml",
+          "http/cves/2022/CVE-2022-1388.yaml",
+          "http/cves/2020/CVE-2020-5902.yaml",
+          "http/cves/2023/CVE-2023-46747.yaml"
+        ]
+      }
+    ]
+  },
+  {
+    "Name": "feifeicms",
+    "Category": "cms",
+    "Description": "FeiFeiCms",
+    "Updated": "2025-05-06",
+    "Fingerprint": [
+      "feifeicms"
+    ],
+    "Poc": [
+      {
+        "Source": "nuclei-template",
+        "Path": [
+          "http/vulnerabilities/other/feifeicms-lfr.yaml"
+        ]
+      }
+    ]
+  },
+  {
+    "Name": "finecms",
+    "Category": "cms",
+    "Description": "FineCMS",
+    "Updated": "2025-05-06",
+    "Fingerprint": [
+      "finecms"
+    ],
+    "Poc": [
+      {
+        "Source": "nuclei-template",
+        "Path": [
+          "http/vulnerabilities/other/finecms-sqli.yaml"
+        ]
+      }
+    ]
+  },
+  {
+    "Name": "finereport",
+    "Category": "oa",
+    "Description": "Finereport",
+    "Updated": "2025-05-06",
+    "Fingerprint": [
+      "finereport"
+    ],
+    "Poc": [
+      {
+        "Source": "nuclei-template",
+        "Path": [
+          "http/vulnerabilities/finereport/fine-report-v9-file-upload.yaml",
+          "http/vulnerabilities/finereport/finereport-path-traversal.yaml",
+          "http/vulnerabilities/finereport/finereport-sqli-rce.yaml",
+          "http/vulnerabilities/other/fanruanoa2012-disclosure.yaml"
+        ]
+      }
+    ]
+  },
+  {
+    "Name": "finereport",
+    "Category": "component",
+    "Description": "finereport,帆软报表系统",
+    "Updated": "2025-05-06",
+    "Fingerprint": [
+      "finereport"
+    ],
+    "Poc": [
+      {
+        "Source": "some_nuclei_templates",
+        "Path": [
+          "finereport_data_decision_system_unserialize.yaml"
+        ]
+      },
+      {
+        "Source": "nuclei-template",
+        "Path": [
+          "http/vulnerabilities/finereport/fine-report-v9-file-upload.yaml",
+          "http/vulnerabilities/finereport/finereport-path-traversal.yaml",
+          "http/vulnerabilities/finereport/finereport-sqli-rce.yaml"
+        ]
+      }
+    ]
+  },
+  {
+    "Name": "fortinet",
+    "Category": "device",
+    "Description": "Fortinet device",
+    "Updated": "2025-05-06",
+    "Fingerprint": [
+      "fortinet",
+      "fortigate"
+    ],
+    "Poc": [
+      {
+        "Source": "nuclei-template",
+        "Path": [
+          "http/cves/2018/CVE-2018-13379.yaml",
+          "http/cves/2024/CVE-2024-55591.yaml",
+          "http/cves/2023/CVE-2023-34993.yaml",
+          "http/cves/2022/CVE-2022-40684.yaml",
+          "http/cves/2022/CVE-2022-39952.yaml",
+          "http/vulnerabilities/other/fortiportal-log4j-rce.yaml"
+        ]
+      }
+    ]
+  },
+  {
+    "Name": "frp",
+    "Category": "component",
+    "Description": "Frp",
+    "Updated": "2025-05-06",
+    "Fingerprint": [
+      "frp"
+    ],
+    "Poc": [
+      {
+        "Source": "nuclei-template",
+        "Path": [
+          "http/default-logins/frps/frp-default-login.yaml"
+        ]
+      }
+    ]
+  },
+  {
+    "Name": "gateone",
+    "Category": "component",
+    "Description": "Gateone",
+    "Updated": "2025-05-06",
+    "Fingerprint": [
+      "gateone",
+      "gate-one"
+    ],
+    "Poc": [
+      {
+        "Source": "nuclei-template",
+        "Path": [
+          "http/cves/2020/CVE-2020-35736.yaml"
+        ]
+      }
+    ]
+  },
+  {
+    "Name": "geoserver",
+    "Category": "component",
+    "Description": "geoserver,地理信息服务器",
+    "Updated": "2025-05-06",
+    "Fingerprint": [
+      "geoserver"
+    ],
+    "Poc": [
+      {
+        "Source": "some_nuclei_templates",
+        "Path": [
+          "geoserver-rce-cve-2024-36401.yaml"
+        ]
+      },
+      {
+        "Source": "nuclei-template",
+        "Path": [
+          "http/cves/2022/CVE-2022-24816.yaml",
+          "http/cves/2023/CVE-2023-25157.yaml",
+          "http/cves/2024/CVE-2024-36401.yaml",
+          "http/cves/2024/CVE-2024-36404.yaml",
+          "http/default-logins/geoserver/geoserver-default-login.yaml"
+        ]
+      }
+    ]
+  },
+  {
+    "Name": "gitlab",
+    "Category": "component",
+    "Description": "Gitlab",
+    "Updated": "2025-05-06",
+    "Fingerprint": [
+      "gitlab"
+    ],
+    "Poc": [
+      {
+        "Source": "nuclei-template",
+        "Path": [
+          "http/cves/2020/CVE-2020-26413.yaml",
+          "http/cves/2021/CVE-2021-4191.yaml",
+          "http/cves/2021/CVE-2021-22205.yaml",
+          "http/cves/2021/CVE-2021-22214.yaml",
+          "http/cves/2022/CVE-2022-0735.yaml",
+          "http/cves/2022/CVE-2022-1162.yaml",
+          "http/cves/2022/CVE-2022-2185.yaml",
+          "http/default-logins/gitlab/gitlab-weak-login.yaml"
+        ]
+      }
+    ]
+  },
+  {
+    "Name": "gitlist",
+    "Category": "component",
+    "Description": "Gitlist",
+    "Updated": "2025-05-06",
+    "Fingerprint": [
+      "gitlist"
+    ],
+    "Poc": [
+      {
+        "Source": "nuclei-template",
+        "Path": [
+          "http/cves/2018/CVE-2018-1000533.yaml"
+        ]
+      }
+    ]
+  },
+  {
+    "Name": "glassfish",
+    "Category": "component",
+    "Description": "Glassfish",
+    "Updated": "2025-05-06",
+    "Fingerprint": [
+      "glassfish"
+    ],
+    "Poc": [
+      {
+        "Source": "nuclei-template",
+        "Path": [
+          "http/cves/2017/CVE-2017-1000028.yaml",
+          "http/cves/2017/CVE-2017-1000029.yaml"
+        ]
+      }
+    ]
+  },
+  {
+    "Name": "glodon",
+    "Category": "component",
+    "Description": "glodon,广联达",
+    "Updated": "2025-05-06",
+    "Fingerprint": [
+      "glodon"
+    ],
+    "Poc": [
+      {
+        "Source": "some_nuclei_templates",
+        "Path": [
+          "glodon-linkworks-sql-GetIMDictionary.yaml"
+        ]
+      },
+      {
+        "Source": "nuclei-template",
+        "Path": [
+          "http/vulnerabilities/other/glodon-linkworks-sqli.yaml"
+        ]
+      }
+    ]
+  },
+  {
+    "Name": "gocd",
+    "Category": "component",
+    "Description": "GoCD",
+    "Updated": "2025-05-06",
+    "Fingerprint": [
+      "gocd"
+    ],
+    "Poc": [
+      {
+        "Source": "nuclei-template",
+        "Path": [
+          "http/cves/2021/CVE-2021-43287.yaml"
+        ]
+      }
+    ]
+  },
+  {
+    "Name": "h3c-imc",
+    "Category": "device",
+    "Description": "H3C-IMC",
+    "Updated": "2025-05-06",
+    "Fingerprint": [
+      "h3c-imc"
+    ],
+    "Poc": [
+      {
+        "Source": "nuclei-template",
+        "Path": [
+          "http/vulnerabilities/other/h3c-imc-rce.yaml",
+          "http/vulnerabilities/other/qizhi-fortressaircraft-unauth.yaml"
+        ]
+      },
+      {
+        "Source": "some_nuclei_templates",
+        "Path": [
+          "h3c-iMC-JSF-rce.yaml"
+        ]
+      }
+    ]
+  },
+  {
+    "Name": "h5s-video-platform",
+    "Category": "component",
+    "Description": "H5S Video Platform",
+    "Updated": "2025-05-06",
+    "Fingerprint": [
+      "h5s"
+    ],
+    "Poc": [
+      {
+        "Source": "nuclei-template",
+        "Path": [
+          "http/cnvd/2020/CNVD-2020-67113.yaml"
+        ]
+      }
+    ]
+  },
+  {
+    "Name": "hanming-video-conferencing",
+    "Category": "component",
+    "Description": "Hanming Video Conferencing",
+    "Updated": "2025-05-06",
+    "Fingerprint": [
+      "hanming"
+    ],
+    "Poc": [
+      {
+        "Source": "nuclei-template",
+        "Path": [
+          "http/vulnerabilities/other/hanming-lfr.yaml"
+        ]
+      }
+    ]
+  },
+  {
+    "Name": "harbor",
+    "Category": "cloud",
+    "Description": "Harbor",
+    "Updated": "2025-05-06",
+    "Fingerprint": [
+      "harbor"
+    ],
+    "Poc": [
+      {
+        "Source": "nuclei-template",
+        "Path": [
+          "http/cves/2019/CVE-2019-16097.yaml",
+          "http/cves/2022/CVE-2022-46463.yaml"
+        ]
+      }
+    ]
+  },
+  {
+    "Name": "hikvision",
+    "Category": "device",
+    "Description": "Hikvision",
+    "Updated": "2025-05-06",
+    "Fingerprint": [
+      "hikvision"
+    ],
+    "Poc": [
+      {
+        "Source": "nuclei-template",
+        "Path": [
+          "http/cves/2017/CVE-2017-7921.yaml",
+          "http/cves/2021/CVE-2021-36260.yaml",
+          "http/cves/2023/CVE-2023-6895.yaml",
+          "http/vulnerabilities/hikvision/hikvision-isecure-info-leak.yaml",
+          "http/vulnerabilities/hikvision/hikvision-ivms-file-upload-bypass.yaml",
+          "http/vulnerabilities/hikvision/hikvision-ivms-file-upload-rce.yaml",
+          "http/vulnerabilities/hikvision/hikvision-js-files-upload.yaml",
+          "http/vulnerabilities/other/hikvision-isecure-center-rce.yaml"
+        ]
+      },
+      {
+        "Source": "some_nuclei_templates",
+        "Path": [
+          "hikvision_isecure_center_unauth_upload_files.yaml"
+        ]
+      }
+    ]
+  },
+  {
+    "Name": "hjsoft",
+    "Category": "component",
+    "Description": "hjsoft,宏景HCM人力资源管理系统",
+    "Updated": "2025-05-06",
+    "Fingerprint": [
+      "hjsoft"
+    ],
+    "Poc": [
+      {
+        "Source": "some_nuclei_templates",
+        "Path": [
+          "HJSOFT-HCM-sql-codesettree.yaml",
+          "HJSOFT-HCM-upload-OfficeServer.yaml"
+        ]
+      },
+      {
+        "Source": "nuclei-template",
+        "Path": [
+          "http/vulnerabilities/hjsoft/hjsoft-hcm-lfi.yaml",
+          "http/vulnerabilities/hjsoft/hjsoft-hcm-sqli.yaml",
+          "http/vulnerabilities/hjsoft/hjsoft-hcm-tb-sqli.yaml"
+        ]
+      }
+    ]
+  },
+  {
+    "Name": "hjtcloud",
+    "Category": "cloud",
+    "Description": "HJTCloud",
+    "Updated": "2025-05-06",
+    "Fingerprint": [
+      "hjtcloud"
+    ],
+    "Poc": [
+      {
+        "Source": "nuclei-template",
+        "Path": [
+          "http/vulnerabilities/other/hjtcloud-arbitrary-file-read.yaml",
+          "http/vulnerabilities/other/hjtcloud-rest-arbitrary-file-read.yaml"
+        ]
+      }
+    ]
+  },
+  {
+    "Name": "huawei-router",
+    "Category": "device",
+    "Description": "Huawei Router",
+    "Updated": "2025-05-06",
+    "Fingerprint": [
+      "huawei"
+    ],
+    "Poc": [
+      {
+        "Source": "nuclei-template",
+        "Path": [
+          "http/cves/2019/CVE-2019-19411.yaml",
+          "http/default-logins/huawei/huawei-HG532e-default-router-login.yaml",
+          "http/vulnerabilities/huawei/huawei-authhttp-lfi.yaml",
+          "http/vulnerabilities/huawei/huawei-hg255s-lfi.yaml",
+          "http/vulnerabilities/other/huawei-hg659-lfi.yaml",
+          "http/vulnerabilities/other/huawei-router-auth-bypass.yaml"
+        ]
+      }
+    ]
+  },
+  {
+    "Name": "ifw8",
+    "Category": "device",
+    "Description": "IFW8",
+    "Updated": "2025-05-06",
+    "Fingerprint": [
+      "ifw8",
+      "蜂网"
+    ],
+    "Poc": [
+      {
+        "Source": "nuclei-template",
+        "Path": [
+          "http/cves/2019/CVE-2019-16313.yaml"
+        ]
+      }
+    ]
+  },
+  {
+    "Name": "iis",
+    "Category": "component",
+    "Description": "IIS",
+    "Updated": "2025-05-06",
+    "Fingerprint": [
+      "iis"
+    ],
+    "Poc": [
+      {
+        "Source": "nuclei-template",
+        "Path": [
+          "http/cves/2017/CVE-2017-7269.yaml",
+          "http/cves/2015/CVE-2015-1635.yaml"
+        ]
+      }
+    ]
+  },
+  {
+    "Name": "influxdb",
+    "Category": "component",
+    "Description": "InfluxDB",
+    "Updated": "2025-05-06",
+    "Fingerprint": [
+      "influxdb"
+    ],
+    "Poc": [
+      {
+        "Source": "nuclei-template",
+        "Path": [
+          "http/cves/2019/CVE-2019-20933.yaml"
+        ]
+      }
+    ]
+  },
+  {
+    "Name": "inspur",
+    "Category": "component",
+    "Description": "Inspur ClusterEngine",
+    "Updated": "2025-05-06",
+    "Fingerprint": [
+      "inspur"
+    ],
+    "Poc": [
+      {
+        "Source": "nuclei-template",
+        "Path": [
+          "http/cves/2020/CVE-2020-21224.yaml",
+          "http/vulnerabilities/other/inspur-clusterengine-rce.yaml"
+        ]
+      }
+    ]
+  },
+  {
+    "Name": "jboss",
+    "Category": "component",
+    "Description": "JBoss",
+    "Updated": "2025-05-06",
+    "Fingerprint": [
+      "jboss"
+    ],
+    "Poc": [
+      {
+        "Source": "nuclei-template",
+        "Path": [
+          "http/cves/2017/CVE-2017-12149.yaml",
+          "http/default-logins/jboss/jboss-jbpm-default-login.yaml",
+          "http/default-logins/jboss/jmx-default-login.yaml"
+        ]
+      }
+    ]
+  },
+  {
+    "Name": "jeewms",
+    "Category": "component",
+    "Description": "Jeewms",
+    "Updated": "2025-05-06",
+    "Fingerprint": [
+      "jeewms"
+    ],
+    "Poc": [
+      {
+        "Source": "nuclei-template",
+        "Path": [
+          "http/vulnerabilities/other/jeewms-lfi.yaml"
+        ]
+      }
+    ]
+  },
+  {
+    "Name": "jellyfin",
+    "Category": "component",
+    "Description": "Jellyfin",
+    "Updated": "2025-05-06",
+    "Fingerprint": [
+      "jellyfin"
+    ],
+    "Poc": [
+      {
+        "Source": "nuclei-template",
+        "Path": [
+          "http/cves/2021/CVE-2021-21402.yaml",
+          "http/cves/2021/CVE-2021-29490.yaml",
+          "http/default-logins/jellyfin/jellyfin-default-login.yaml"
+        ]
+      }
+    ]
+  },
+  {
+    "Name": "jenkins",
+    "Category": "cloud",
+    "Description": "Jenkins",
+    "Updated": "2025-05-06",
+    "Fingerprint": [
+      "jenkins"
+    ],
+    "Poc": [
+      {
+        "Source": "nuclei-template",
+        "Path": [
+          "http/cves/2018/CVE-2018-1000600.yaml",
+          "http/cves/2018/CVE-2018-1000861.yaml",
+          "http/default-logins/jenkins/jenkins-default.yaml",
+          "http/vulnerabilities/jenkins/jenkins-script.yaml",
+          "http/vulnerabilities/jenkins/unauthenticated-jenkins.yaml"
+        ]
+      }
+    ]
+  },
+  {
+    "Name": "jetty",
+    "Category": "component",
+    "Description": "Jetty",
+    "Updated": "2025-05-06",
+    "Fingerprint": [
+      "jetty"
+    ],
+    "Poc": [
+      {
+        "Source": "nuclei-template",
+        "Path": [
+          "http/cves/2021/CVE-2021-28164.yaml",
+          "http/cves/2021/CVE-2021-28169.yaml",
+          "http/cves/2021/CVE-2021-34429.yaml"
+        ]
+      }
+    ]
+  },
+  {
+    "Name": "jinher-oa",
+    "Category": "oa",
+    "Description": "金合oa",
+    "Updated": "2025-05-06",
+    "Fingerprint": [
+      "jinher"
+    ],
+    "Poc": [
+      {
+        "Source": "some_nuclei_templates",
+        "Path": [
+          "jinher-oa-sql-GetSqlData.yaml",
+          "jinher-oa-sql-time-GetTreeDate.yaml"
+        ]
+      },
+      {
+        "Source": "nuclei-template",
+        "Path": [
+          "http/default-logins/jinher/jinher-oa-default-login.yaml",
+          "http/vulnerabilities/jinhe/jinhe-jc6-sqli.yaml"
+        ]
+      }
+    ]
+  },
+  {
+    "Name": "jira",
+    "Category": "cloud",
+    "Description": "Jira",
+    "Updated": "2025-05-06",
+    "Fingerprint": [
+      "jira"
+    ],
+    "Poc": [
+      {
+        "Source": "nuclei-template",
+        "Path": [
+          "http/cves/2019/CVE-2019-8442.yaml",
+          "http/cves/2019/CVE-2019-8446.yaml",
+          "http/cves/2019/CVE-2019-8449.yaml",
+          "http/cves/2019/CVE-2019-8451.yaml",
+          "http/cves/2019/CVE-2019-11581.yaml",
+          "http/cves/2020/CVE-2020-14179.yaml",
+          "http/cves/2020/CVE-2020-14181.yaml",
+          "http/cves/2020/CVE-2020-29453.yaml",
+          "http/cves/2020/CVE-2020-36289.yaml",
+          "http/cves/2021/CVE-2021-26086.yaml",
+          "http/cves/2023/CVE-2023-26255.yaml",
+          "http/cves/2023/CVE-2023-26256.yaml",
+          "http/vulnerabilities/jira/jira-unauthenticated-dashboards.yaml",
+          "http/vulnerabilities/jira/jira-unauthenticated-adminprojects.yaml",
+          "http/vulnerabilities/jira/jira-servicedesk-signup.yaml"
+        ]
+      }
+    ]
+  },
+  {
+    "Name": "joomla",
+    "Category": "cms",
+    "Description": "Joomla",
+    "Updated": "2025-05-06",
+    "Fingerprint": [
+      "joomla"
+    ],
+    "Poc": [
+      {
+        "Source": "nuclei-template",
+        "Path": [
+          "http/cves/2015/CVE-2015-7297.yaml",
+          "http/cves/2017/CVE-2017-8917.yaml",
+          "http/cves/2018/CVE-2018-7314.yaml",
+          "http/cves/2018/CVE-2018-6605.yaml"
+        ]
+      }
+    ]
+  },
+  {
+    "Name": "jumpserver",
+    "Category": "device",
+    "Description": "Jumpserver",
+    "Updated": "2025-05-06",
+    "Fingerprint": [
+      "jumpserver"
+    ],
+    "Poc": [
+      {
+        "Source": "nuclei-template",
+        "Path": [
+          "http/cves/2023/CVE-2023-42442.yaml"
+        ]
+      },
+      {
+        "Source": "some_nuclei_templates",
+        "Path": [
+          "jumpserver-session-unauth.yaml"
+        ]
+      }
+    ]
+  },
+  {
+    "Name": "jupyter",
+    "Category": "component",
+    "Description": "Jupyter Notebook and hub",
+    "Updated": "2025-05-06",
+    "Fingerprint": [
+      "jupyter",
+      "notebook",
+      "jupyterhub"
+    ],
+    "Poc": [
+      {
+        "Source": "nuclei-template",
+        "Path": [
+          "http/vulnerabilities/jupyter-notebook-rce.yaml",
+          "http/default-logins/jupyterhub/jupyterhub-default-login.yaml"
+        ]
+      }
+    ]
+  },
+  {
+    "Name": "kafka",
+    "Category": "component",
+    "Description": "Kafka",
+    "Updated": "2025-05-06",
+    "Fingerprint": [
+      "kafka"
+    ],
+    "Poc": [
+      {
+        "Source": "nuclei-template",
+        "Path": [
+          "http/cves/2023/CVE-2023-52251.yaml",
+          "http/default-logins/apache/kafka-center-default-login.yaml",
+          "http/technologies/apache/kafka-manager-panel.yaml"
+        ]
+      }
+    ]
+  },
+  {
+    "Name": "kibana",
+    "Category": "component",
+    "Description": "Kibana",
+    "Updated": "2025-05-06",
+    "Fingerprint": [
+      "kibana"
+    ],
+    "Poc": [
+      {
+        "Source": "nuclei-template",
+        "Path": [
+          "http/cves/2018/CVE-2018-17246.yaml",
+          "http/cves/2019/CVE-2019-7609.yaml"
+        ]
+      }
+    ]
+  },
+  {
+    "Name": "kingdee",
+    "Category": "component",
+    "Description": "Kingdee",
+    "Updated": "2025-05-06",
+    "Fingerprint": [
+      "kingdee"
+    ],
+    "Poc": [
+      {
+        "Source": "nuclei-template",
+        "Path": [
+          "http/vulnerabilities/other/kingdee-eas-directory-traversal.yaml",
+          "http/vulnerabilities/other/kingdee-erp-rce.yaml"
+        ]
+      },
+      {
+        "Source": "some_nuclei_templates",
+        "Path": [
+          "Kingdee-Cloud-rce-kdsvc.yaml",
+          "Kingdee-Cloud-read-CommonFileServer.yaml"
+        ]
+      }
+    ]
+  },
+  {
+    "Name": "kingsoft",
+    "Category": "component",
+    "Description": "Kingsoft",
+    "Updated": "2025-05-06",
+    "Fingerprint": [
+      "kingsoft"
+    ],
+    "Poc": [
+      {
+        "Source": "nuclei-template",
+        "Path": [
+          "http/default-logins/others/kingsoft-v8-default-login.yaml",
+          "http/vulnerabilities/other/kingsoft-v8-file-read.yaml"
+        ]
+      }
+    ]
+  },
+  {
+    "Name": "kong",
+    "Category": "cloud",
+    "Description": "Kong",
+    "Updated": "2025-05-06",
+    "Fingerprint": [
+      "kong"
+    ],
+    "Poc": [
+      {
+        "Source": "nuclei-template",
+        "Path": [
+          "http/cves/2020/CVE-2020-11710.yaml",
+          "http/cves/2021/CVE-2021-42192.yaml"
+        ]
+      }
+    ]
+  },
+  {
+    "Name": "kubernetes",
+    "Category": "cloud",
+    "Description": "Kubernetes",
+    "Updated": "2025-05-06",
+    "Fingerprint": [
+      "kubernetes"
+    ],
+    "Poc": [
+      {
+        "Source": "nuclei-template",
+        "Path": [
+          "http/technologies/kubernetes/kube-api/kube-api-nodes.yaml",
+          "http/cves/2018/CVE-2018-18264.yaml"
+        ]
+      }
+    ]
+  },
+  {
+    "Name": "landray",
+    "Category": "oa",
+    "Description": "Landray OA",
+    "Updated": "2025-05-06",
+    "Fingerprint": [
+      "landray"
+    ],
+    "Poc": [
+      {
+        "Source": "nuclei-template",
+        "Path": [
+          "http/cnvd/2021/CNVD-2021-28277.yaml"
+        ]
+      }
+    ]
+  },
+  {
+    "Name": "lanproxy",
+    "Category": "device",
+    "Description": "Lanproxy",
+    "Updated": "2025-05-06",
+    "Fingerprint": [
+      "lanproxy"
+    ],
+    "Poc": [
+      {
+        "Source": "nuclei-template",
+        "Path": [
+          "http/cves/2021/CVE-2021-3019.yaml"
+        ]
+      }
+    ]
+  },
+  {
+    "Name": "laravel",
+    "Category": "cms",
+    "Description": "Laravel",
+    "Updated": "2025-05-06",
+    "Fingerprint": [
+      "laravel"
+    ],
+    "Poc": [
+      {
+        "Source": "nuclei-template",
+        "Path": [
+          "http/cves/2021/CVE-2021-3129.yaml",
+          "http/cves/2022/CVE-2022-40734.yaml"
+        ]
+      }
+    ]
+  },
+  {
+    "Name": "maccms",
+    "Category": "cms",
+    "Description": "Maccms",
+    "Updated": "2025-05-06",
+    "Fingerprint": [
+      "maccms"
+    ],
+    "Poc": [
+      {
+        "Source": "nuclei-template",
+        "Path": [
+          "http/vulnerabilities/backdoor/maccmsv10-backdoor.yaml"
+        ]
+      }
+    ]
+  },
+  {
+    "Name": "message-solution",
+    "Category": "component",
+    "Description": "Message Solution",
+    "Updated": "2025-05-06",
+    "Fingerprint": [
+      "message-solution",
+      "MessageSolution"
+    ],
+    "Poc": [
+      {
+        "Source": "nuclei-template",
+        "Path": [
+          "http/cnvd/2021/CNVD-2021-10543.yaml"
+        ]
+      }
+    ]
+  },
+  {
+    "Name": "metinfo",
+    "Category": "cms",
+    "Description": "MetInfo",
+    "Updated": "2025-05-06",
+    "Fingerprint": [
+      "metinfo"
+    ],
+    "Poc": [
+      {
+        "Source": "nuclei-template",
+        "Path": [
+          "http/cves/2019/CVE-2019-16996.yaml",
+          "http/cves/2019/CVE-2019-16997.yaml",
+          "http/cves/2019/CVE-2019-17418.yaml",
+          "http/vulnerabilities/other/metinfo-lfi.yaml",
+          "http/cnvd/2018/CNVD-2018-13393.yaml"
+        ]
+      }
+    ]
+  },
+  {
+    "Name": "mingyuanyun",
+    "Category": "component",
+    "Description": "mingyuanyun,明源云ERP系统",
+    "Updated": "2025-05-06",
+    "Fingerprint": [
+      "mingyuanyun"
+    ],
+    "Poc": [
+      {
+        "Source": "some_nuclei_templates",
+        "Path": [
+          "mingyuanyun-ERP-upload-ApiUpdate.yaml"
+        ]
+      }
+    ]
+  },
+  {
+    "Name": "minio",
+    "Category": "component",
+    "Description": "Minio",
+    "Updated": "2025-05-06",
+    "Fingerprint": [
+      "minio"
+    ],
+    "Poc": [
+      {
+        "Source": "nuclei-template",
+        "Path": [
+          "http/default-logins/minio/minio-default-login.yaml",
+          "http/cves/2023/CVE-2023-28432.yaml"
+        ]
+      }
+    ]
+  },
+  {
+    "Name": "mongo-express",
+    "Category": "component",
+    "Description": "Mongo Express",
+    "Updated": "2025-05-06",
+    "Fingerprint": [
+      "mongo-express"
+    ],
+    "Poc": [
+      {
+        "Source": "nuclei-template",
+        "Path": [
+          "http/cves/2019/CVE-2019-10758.yaml",
+          "http/cves/2020/CVE-2020-24391.yaml"
+        ]
+      }
+    ]
+  },
+  {
+    "Name": "mpsec",
+    "Category": "device",
+    "Description": "Mpsec",
+    "Updated": "2025-05-06",
+    "Fingerprint": [
+      "mpsec"
+    ],
+    "Poc": [
+      {
+        "Source": "nuclei-template",
+        "Path": [
+          "http/cnvd/2021/CNVD-2021-43984.yaml"
+        ]
+      }
+    ]
+  },
+  {
+    "Name": "myucms",
+    "Category": "cms",
+    "Description": "MyUcms",
+    "Updated": "2025-05-06",
+    "Fingerprint": [
+      "myucms"
+    ],
+    "Poc": [
+      {
+        "Source": "nuclei-template",
+        "Path": [
+          "http/vulnerabilities/other/myucms-lfr.yaml"
+        ]
+      }
+    ]
+  },
+  {
+    "Name": "nagios",
+    "Category": "component",
+    "Description": "Nagios",
+    "Updated": "2025-05-06",
+    "Fingerprint": [
+      "nagios"
+    ],
+    "Poc": [
+      {
+        "Source": "nuclei-template",
+        "Path": [
+          "http/cves/2018/CVE-2018-10735.yaml",
+          "http/cves/2018/CVE-2018-10736.yaml",
+          "http/cves/2018/CVE-2018-10737.yaml",
+          "http/cves/2018/CVE-2018-10738.yaml",
+          "http/cves/2021/CVE-2021-25296.yaml",
+          "http/cves/2021/CVE-2021-25297.yaml",
+          "http/cves/2021/CVE-2021-25298.yaml",
+          "http/cves/2023/CVE-2023-40931.yaml",
+          "http/cves/2023/CVE-2023-48084.yaml",
+          "http/default-logins/nagios/nagios-default-login.yaml",
+          "http/default-logins/nagios/nagiosxi-default-login.yaml"
+        ]
+      }
+    ]
+  },
+  {
+    "Name": "natshell",
+    "Category": "component",
+    "Description": "Natshell",
+    "Updated": "2025-05-06",
+    "Fingerprint": [
+      "natshell"
+    ],
+    "Poc": [
+      {
+        "Source": "nuclei-template",
+        "Path": [
+          "http/vulnerabilities/other/natshell-path-traversal.yaml",
+          "http/vulnerabilities/other/natshell-rce.yaml"
+        ]
+      }
+    ]
+  },
+  {
+    "Name": "netentsec",
+    "Category": "device",
+    "Description": "Netentsec，网康科技",
+    "Updated": "2025-05-06",
+    "Fingerprint": [
+      "netentsec"
+    ],
+    "Poc": [
+      {
+        "Source": "nuclei-template",
+        "Path": [
+          "http/cves/2024/CVE-2024-2330.yaml",
+          "http/default-logins/nsicg/nsicg-default-login.yaml",
+          "http/vulnerabilities/other/ns-asg-file-read.yaml",
+          "http/vulnerabilities/other/qi-anxin-netkang-next-generation-firewall-rce.yaml"
+        ]
+      }
+    ]
+  },
+  {
+    "Name": "netgear",
+    "Category": "device",
+    "Description": "Netgear",
+    "Updated": "2025-05-06",
+    "Fingerprint": [
+      "netgear"
+    ],
+    "Poc": [
+      {
+        "Source": "nuclei-template",
+        "Path": [
+          "http/cves/2017/CVE-2017-5521.yaml",
+          "http/cves/2020/CVE-2020-27866.yaml",
+          "http/cves/2022/CVE-2022-29383.yaml",
+          "http/vulnerabilities/netgear/netgear-dgn-rce.yaml"
+        ]
+      }
+    ]
+  },
+  {
+    "Name": "next.js",
+    "Category": "framework",
+    "Description": "Next.js",
+    "Updated": "2025-05-06",
+    "Fingerprint": [
+      "next.js",
+      "nextjs",
+      "zeit"
+    ],
+    "Poc": [
+      {
+        "Source": "nuclei-template",
+        "Path": [
+          "http/cves/2017/CVE-2017-16877.yaml",
+          "http/cves/2018/CVE-2018-6184.yaml",
+          "http/cves/2020/CVE-2020-5284.yaml",
+          "http/cves/2024/CVE-2024-34351.yaml",
+          "http/cves/2025/CVE-2025-29927.yaml"
+        ]
+      }
+    ]
+  },
+  {
+    "Name": "nexus",
+    "Category": "component",
+    "Description": "Nexus",
+    "Updated": "2025-05-06",
+    "Fingerprint": [
+      "nexus"
+    ],
+    "Poc": [
+      {
+        "Source": "nuclei-template",
+        "Path": [
+          "http/cves/2019/CVE-2019-7238.yaml",
+          "http/cves/2020/CVE-2020-10199.yaml",
+          "http/default-logins/nexus/nexus-default-login.yaml",
+          "http/cves/2020/CVE-2020-24571.yaml",
+          "http/cves/2024/CVE-2024-4956.yaml",
+          "http/cves/2024/CVE-2024-5082.yaml"
+        ]
+      }
+    ]
+  },
+  {
+    "Name": "nhttpd",
+    "Category": "component",
+    "Description": "Nhttpd",
+    "Updated": "2025-05-06",
+    "Fingerprint": [
+      "nostromo",
+      "nhttpd"
+    ],
+    "Poc": [
+      {
+        "Source": "nuclei-template",
+        "Path": [
+          "http/cves/2019/CVE-2019-16278.yaml"
+        ]
+      }
+    ]
+  },
+  {
+    "Name": "node-red",
+    "Category": "component",
+    "Description": "Node-RED",
+    "Updated": "2025-05-06",
+    "Fingerprint": [
+      "node-red"
+    ],
+    "Poc": [
+      {
+        "Source": "nuclei-template",
+        "Path": [
+          "http/cves/2021/CVE-2021-3223.yaml",
+          "http/default-logins/node-red/nodered-default-login.yaml"
+        ]
+      }
+    ]
+  },
+  {
+    "Name": "novnc",
+    "Category": "component",
+    "Description": "NoVNC",
+    "Updated": "2025-05-06",
+    "Fingerprint": [
+      "novnc"
+    ],
+    "Poc": [
+      {
+        "Source": "nuclei-template",
+        "Path": [
+          "http/cves/2021/CVE-2021-3654.yaml"
+        ]
+      }
+    ]
+  },
+  {
+    "Name": "nps",
+    "Category": "component",
+    "Description": "NPS",
+    "Updated": "2025-05-06",
+    "Fingerprint": [
+      "nps"
+    ],
+    "Poc": [
+      {
+        "Source": "nuclei-template",
+        "Path": [
+          "http/default-logins/nps/nps-default-login.yaml",
+          "http/vulnerabilities/nps/nps-auth-bypass.yaml"
+        ]
+      }
+    ]
+  },
+  {
+    "Name": "ns-asg",
+    "Category": "device",
+    "Description": "NS-ASG，网康科技",
+    "Updated": "2025-05-06",
+    "Fingerprint": [
+      "ns-asg"
+    ],
+    "Poc": [
+      {
+        "Source": "nuclei-template",
+        "Path": [
+          "http/vulnerabilities/other/ns-asg-file-read.yaml"
+        ]
+      }
+    ]
+  },
+  {
+    "Name": "nsfocus",
+    "Category": "device",
+    "Description": "NSFOCUS",
+    "Updated": "2025-05-06",
+    "Fingerprint": [
+      "nsfocus"
+    ],
+    "Poc": [
+      {
+        "Source": "nuclei-template",
+        "Path": [
+          "http/vulnerabilities/other/nsfocus-auth-bypass.yaml",
+          "http/vulnerabilities/other/nsfocus-lfi.yaml"
+        ]
+      },
+      {
+        "Source": "some_nuclei_templates",
+        "Path": [
+          "Nsfocus-SAS-login-bypass-local_user.yaml",
+          "Nsfocus-SAS-rce-Exec.yaml",
+          "Nsfocus-SAS-read-GetFile.yaml"
+        ]
+      }
+    ]
+  },
+  {
+    "Name": "nuuo",
+    "Category": "device",
+    "Description": "NUUO NVRsolo",
+    "Updated": "2025-05-06",
+    "Fingerprint": [
+      "nuuo"
+    ],
+    "Poc": [
+      {
+        "Source": "nuclei-template",
+        "Path": [
+          "http/vulnerabilities/other/nuuo-file-inclusion.yaml",
+          "http/vulnerabilities/other/nuuo-nvrmini2-rce.yaml"
+        ]
+      }
+    ]
+  },
+  {
+    "Name": "odoo",
+    "Category": "cms",
+    "Description": "Odoo",
+    "Updated": "2025-05-06",
+    "Fingerprint": [
+      "odoo"
+    ],
+    "Poc": [
+      {
+        "Source": "nuclei-template",
+        "Path": [
+          "http/cves/2017/CVE-2017-9416.yaml"
+        ]
+      }
+    ]
+  },
+  {
+    "Name": "openfire",
+    "Category": "component",
+    "Description": "Openfire",
+    "Updated": "2025-05-06",
+    "Fingerprint": [
+      "openfire"
+    ],
+    "Poc": [
+      {
+        "Source": "nuclei-template",
+        "Path": [
+          "http/cves/2019/CVE-2019-18393.yaml",
+          "http/cves/2019/CVE-2019-18394.yaml",
+          "http/cves/2023/CVE-2023-32315.yaml"
+        ]
+      }
+    ]
+  },
+  {
+    "Name": "opentsdb",
+    "Category": "component",
+    "Description": "OpenTSDB",
+    "Updated": "2025-05-06",
+    "Fingerprint": [
+      "opentsdb"
+    ],
+    "Poc": [
+      {
+        "Source": "nuclei-template",
+        "Path": [
+          "http/cves/2020/CVE-2020-35476.yaml"
+        ]
+      }
+    ]
+  },
+  {
+    "Name": "panabit",
+    "Category": "device",
+    "Description": "Panabit",
+    "Updated": "2025-05-06",
+    "Fingerprint": [
+      "panabit"
+    ],
+    "Poc": [
+      {
+        "Source": "nuclei-template",
+        "Path": [
+          "http/default-logins/others/panabit-ixcache-default-login.yaml",
+          "http/default-logins/panabit/panabit-default-login.yaml",
+          "http/vulnerabilities/other/panabit-ixcache-rce.yaml"
+        ]
+      }
+    ]
+  },
+  {
+    "Name": "pandora-fms",
+    "Category": "component",
+    "Description": "Pandora FMS",
+    "Updated": "2025-05-06",
+    "Fingerprint": [
+      "pandora-fms",
+      "pandora_fms"
+    ],
+    "Poc": [
+      {
+        "Source": "nuclei-template",
+        "Path": [
+          "http/cves/2019/CVE-2019-20224.yaml",
+          "http/cves/2020/CVE-2020-8497.yaml",
+          "http/cves/2020/CVE-2020-13851.yaml"
+        ]
+      }
+    ]
+  },
+  {
+    "Name": "pbootcms",
+    "Category": "cms",
+    "Description": "PbootCMS",
+    "Updated": "2025-05-06",
+    "Fingerprint": [
+      "pbootcms"
+    ],
+    "Poc": [
+      {
+        "Source": "nuclei-template",
+        "Path": [
+          "http/vulnerabilities/other/pbootcms-database-file-download.yaml"
+        ]
+      }
+    ]
+  },
+  {
+    "Name": "php-cgi",
+    "Category": "component",
+    "Description": "PHP-CGI",
+    "Updated": "2025-05-06",
+    "Fingerprint": [
+      "php-cgi"
+    ],
+    "Poc": [
+      {
+        "Source": "nuclei-template",
+        "Path": [
+          "http/cves/2012/CVE-2012-1823.yaml"
+        ]
+      }
+    ]
+  },
+  {
+    "Name": "phpmyadmin",
+    "Category": "component",
+    "Description": "phpMyAdmin",
+    "Updated": "2025-05-06",
+    "Fingerprint": [
+      "phpmyadmin"
+    ],
+    "Poc": [
+      {
+        "Source": "nuclei-template",
+        "Path": [
+          "http/cves/2018/CVE-2018-12613.yaml",
+          "http/cves/2019/CVE-2019-6799.yaml",
+          "http/default-logins/phpmyadmin/phpmyadmin-default-login.yaml",
+          "http/vulnerabilities/phpmyadmin-unauth.yaml"
+        ]
+      }
+    ]
+  },
+  {
+    "Name": "phpok",
+    "Category": "cms",
+    "Description": "Phpok",
+    "Updated": "2025-05-06",
+    "Fingerprint": [
+      "phpok"
+    ],
+    "Poc": [
+      {
+        "Source": "nuclei-template",
+        "Path": [
+          "http/vulnerabilities/other/phpok-sqli.yaml"
+        ]
+      }
+    ]
+  },
+  {
+    "Name": "phpunit",
+    "Category": "component",
+    "Description": "PHPUnit",
+    "Updated": "2025-05-06",
+    "Fingerprint": [
+      "phpunit"
+    ],
+    "Poc": [
+      {
+        "Source": "nuclei-template",
+        "Path": [
+          "http/cves/2017/CVE-2017-9841.yaml"
+        ]
+      }
+    ]
+  },
+  {
+    "Name": "powercreator-cms",
+    "Category": "cms",
+    "Description": "PowerCreator CMS",
+    "Updated": "2025-05-06",
+    "Fingerprint": [
+      "powercreator"
+    ],
+    "Poc": [
+      {
+        "Source": "nuclei-template",
+        "Path": [
+          "http/vulnerabilities/other/powercreator-cms-rce.yaml"
+        ]
+      }
+    ]
+  },
+  {
+    "Name": "pprof",
+    "Category": "component",
+    "Description": "Pprof",
+    "Updated": "2025-05-06",
+    "Fingerprint": [
+      "pprof",
+      "prrof"
+    ],
+    "Poc": [
+      {
+        "Source": "nuclei-template",
+        "Path": [
+          "http/cves/2019/CVE-2019-11248.yaml"
+        ]
+      }
+    ]
+  },
+  {
+    "Name": "prometheus",
+    "Category": "component",
+    "Description": "Prometheus",
+    "Updated": "2025-05-06",
+    "Fingerprint": [
+      "prometheus"
+    ],
+    "Poc": [
+      {
+        "Source": "nuclei-template",
+        "Path": [
+          "http/cves/2021/CVE-2021-29622.yaml"
+        ]
+      }
+    ]
+  },
+  {
+    "Name": "pulse-secure",
+    "Category": "device",
+    "Description": "Pulse Secure",
+    "Updated": "2025-05-06",
+    "Fingerprint": [
+      "pulse"
+    ],
+    "Poc": [
+      {
+        "Source": "nuclei-template",
+        "Path": [
+          "http/cves/2019/CVE-2019-11510.yaml"
+        ]
+      }
+    ]
+  },
+  {
+    "Name": "pyspider",
+    "Category": "component",
+    "Description": "Pyspider",
+    "Updated": "2025-05-06",
+    "Fingerprint": [
+      "pyspider"
+    ],
+    "Poc": [
+      {
+        "Source": "nuclei-template",
+        "Path": [
+          "http/vulnerabilities/other/pyspider-unauthorized-access.yaml"
+        ]
+      }
+    ]
+  },
+  {
+    "Name": "qibo-cms",
+    "Category": "cms",
+    "Description": "Qibo CMS",
+    "Updated": "2025-05-06",
+    "Fingerprint": [
+      "qibosoft"
+    ],
+    "Poc": [
+      {
+        "Source": "nuclei-template",
+        "Path": [
+          "http/vulnerabilities/qibocms-file-download.yaml"
+        ]
+      }
+    ]
+  },
+  {
+    "Name": "qizhi-fortress-aircraft",
+    "Category": "device",
+    "Description": "Qizhi Fortress Aircraft",
+    "Updated": "2025-05-06",
+    "Fingerprint": [
+      "qizhi"
+    ],
+    "Poc": [
+      {
+        "Source": "nuclei-template",
+        "Path": [
+          "http/vulnerabilities/other/qizhi-fortressaircraft-unauth.yaml"
+        ]
+      }
+    ]
+  },
+  {
+    "Name": "qnap",
+    "Category": "device",
+    "Description": "QNAP",
+    "Updated": "2025-05-06",
+    "Fingerprint": [
+      "qnap",
+      "photo_station"
+    ],
+    "Poc": [
+      {
+        "Source": "nuclei-template",
+        "Path": [
+          "http/cves/2019/CVE-2019-7192.yaml",
+          "http/cves/2022/CVE-2022-27593.yaml",
+          "http/cves/2023/CVE-2023-47218.yaml"
+        ]
+      }
+    ]
+  },
+  {
+    "Name": "rabbitmq",
+    "Category": "component",
+    "Description": "RabbitMQ",
+    "Updated": "2025-05-06",
+    "Fingerprint": [
+      "rabbitmq"
+    ],
+    "Poc": [
+      {
+        "Source": "nuclei-template",
+        "Path": [
+          "http/default-logins/rabbitmq/rabbitmq-default-login.yaml"
+        ]
+      }
+    ]
+  },
+  {
+    "Name": "rail",
+    "Category": "component",
+    "Description": "ruby on rails",
+    "Updated": "2025-05-06",
+    "Fingerprint": [
+      "rails"
+    ],
+    "Poc": [
+      {
+        "Source": "nuclei-template",
+        "Path": [
+          "http/cves/2018/CVE-2018-3760.yaml",
+          "http/cves/2019/CVE-2019-5418.yaml",
+          "http/cves/2020/CVE-2020-8163.yaml"
+        ]
+      }
+    ]
+  },
+  {
+    "Name": "razor",
+    "Category": "component",
+    "Description": "Cobub Razor",
+    "Updated": "2025-05-06",
+    "Fingerprint": [
+      "razor"
+    ],
+    "Poc": [
+      {
+        "Source": "nuclei-template",
+        "Path": [
+          "http/cves/2018/CVE-2018-8770.yaml"
+        ]
+      }
+    ]
+  },
+  {
+    "Name": "rconfig",
+    "Category": "device",
+    "Description": "RConfig",
+    "Updated": "2025-05-06",
+    "Fingerprint": [
+      "rconfig"
+    ],
+    "Poc": [
+      {
+        "Source": "nuclei-template",
+        "Path": [
+          "http/cves/2019/CVE-2019-16662.yaml",
+          "http/cves/2020/CVE-2020-9425.yaml",
+          "http/cves/2020/CVE-2020-10220.yaml",
+          "http/cves/2020/CVE-2020-10546.yaml",
+          "http/cves/2020/CVE-2020-10547.yaml",
+          "http/cves/2020/CVE-2020-10548.yaml",
+          "http/cves/2020/CVE-2020-10549.yaml",
+          "http/cves/2020/CVE-2020-13638.yaml",
+          "http/cves/2021/CVE-2021-29006.yaml",
+          "http/default-logins/rconfig-default-login.yaml",
+          "http/vulnerabilities/other/rconfig-file-upload.yaml"
+        ]
+      }
+    ]
+  },
+  {
+    "Name": "resin",
+    "Category": "component",
+    "Description": "Resin",
+    "Updated": "2025-05-06",
+    "Fingerprint": [
+      "resin"
+    ],
+    "Poc": [
+      {
+        "Source": "nuclei-template",
+        "Path": [
+          "http/vulnerabilities/other/resin-cnnvd-200705-315.yaml",
+          "http/vulnerabilities/other/resin-inputfile-fileread.yaml",
+          "http/vulnerabilities/other/resin-viewfile-lfr.yaml",
+          "http/cves/2021/CVE-2021-44138.yaml"
+        ]
+      }
+    ]
+  },
+  {
+    "Name": "rockmongo",
+    "Category": "component",
+    "Description": "RockMongo",
+    "Updated": "2025-05-06",
+    "Fingerprint": [
+      "rockmongo"
+    ],
+    "Poc": [
+      {
+        "Source": "nuclei-template",
+        "Path": [
+          "http/default-logins/rockmongo/rockmongo-default-login.yaml"
+        ]
+      }
+    ]
+  },
+  {
+    "Name": "ruijie",
+    "Category": "device",
+    "Description": "Ruijie",
+    "Updated": "2025-05-06",
+    "Fingerprint": [
+      "ruijie"
+    ],
+    "Poc": [
+      {
+        "Source": "nuclei-template",
+        "Path": [
+          "http/cnvd/2020/CNVD-2020-56167.yaml",
+          "http/cnvd/2021/CNVD-2021-09650.yaml",
+          "http/cnvd/2021/CNVD-2021-14536.yaml",
+          "http/cnvd/2021/CNVD-2021-17369.yaml",
+          "http/vulnerabilities/ruijie/ruijie-eg-rce.yaml",
+          "http/vulnerabilities/ruijie/ruijie-eg-login-rce.yaml",
+          "http/default-logins/ruijie/ruijie-nbr-default-login.yaml",
+          "http/vulnerabilities/ruijie/ruijie-excu-shell.yaml",
+          "http/vulnerabilities/ruijie/ruijie-nbr-fileupload.yaml",
+          "http/vulnerabilities/ruijie/ruijie-networks-lfi.yaml",
+          "http/vulnerabilities/ruijie/ruijie-nmc-sync-rce.yaml",
+          "http/vulnerabilities/ruijie/ruijie-password-leak.yaml",
+          "http/vulnerabilities/ruijie/ruijie-rg-eg-web-mis-rce.yaml"
+        ]
+      },
+      {
+        "Source": "some_nuclei_templates",
+        "Path": [
+          "ruijie-switch-configuration-leak.yaml"
+        ]
+      }
+    ]
+  },
+  {
+    "Name": "ruoyi",
+    "Category": "cms",
+    "Description": "RuoYi",
+    "Updated": "2025-05-06",
+    "Fingerprint": [
+      "ruoyi"
+    ],
+    "Poc": [
+      {
+        "Source": "nuclei-template",
+        "Path": [
+          "http/cnvd/2021/CNVD-2021-01931.yaml"
+        ]
+      }
+    ]
+  },
+  {
+    "Name": "saltstack",
+    "Category": "component",
+    "Description": "SaltStack",
+    "Updated": "2025-05-06",
+    "Fingerprint": [
+      "saltstack"
+    ],
+    "Poc": [
+      {
+        "Source": "nuclei-template",
+        "Path": [
+          "http/cves/2020/CVE-2020-16846.yaml",
+          "http/cves/2021/CVE-2021-25281.yaml"
+        ]
+      }
+    ]
+  },
+  {
+    "Name": "samsung-wlan",
+    "Category": "device",
+    "Description": "Samsung WLAN",
+    "Updated": "2025-05-06",
+    "Fingerprint": [
+      "samsung",
+      "wea453e"
+    ],
+    "Poc": [
+      {
+        "Source": "nuclei-template",
+        "Path": [
+          "http/default-logins/samsung/samsung-wlan-default-login.yaml",
+          "http/vulnerabilities/samsung/samsung-wlan-ap-rce.yaml",
+          "http/vulnerabilities/samsung/samsung-wlan-ap-lfi.yaml"
+        ]
+      }
+    ]
+  },
+  {
+    "Name": "sangfor",
+    "Category": "device",
+    "Description": "Sangfor",
+    "Updated": "2025-05-06",
+    "Fingerprint": [
+      "sangfor"
+    ],
+    "Poc": [
+      {
+        "Source": "nuclei-template",
+        "Path": [
+          "http/vulnerabilities/other/sangfor-download-lfi.yaml",
+          "http/vulnerabilities/sangfor/sangfor-ba-rce.yaml",
+          "http/vulnerabilities/sangfor/sangfor-edr-auth-bypass.yaml",
+          "http/vulnerabilities/sangfor/sangfor-edr-rce.yaml",
+          "http/vulnerabilities/other/sangfor-cphp-rce.yaml",
+          "http/cnvd/2020/CNVD-2020-46552.yaml",
+          "http/vulnerabilities/other/sangfor-sysuser-conf.yaml",
+          "http/vulnerabilities/sangfor/sangfor-login-rce.yaml",
+          "http/vulnerabilities/sangfor/sangfor-ngaf-lfi.yaml"
+        ]
+      }
+    ]
+  },
+  {
+    "Name": "satellian",
+    "Category": "device",
+    "Description": "Satellian Intellian Aptus Web",
+    "Updated": "2025-05-06",
+    "Fingerprint": [
+      "aptus"
+    ],
+    "Poc": [
+      {
+        "Source": "nuclei-template",
+        "Path": [
+          "http/cves/2020/CVE-2020-7980.yaml"
+        ]
+      }
+    ]
+  },
+  {
+    "Name": "seacms",
+    "Category": "cms",
+    "Description": "SeaCMS",
+    "Updated": "2025-05-06",
+    "Fingerprint": [
+      "seacms"
+    ],
+    "Poc": [
+      {
+        "Source": "nuclei-template",
+        "Path": [
+          "http/vulnerabilities/other/seacms-rce.yaml",
+          "http/vulnerabilities/other/seacms-sqli.yaml"
+        ]
+      }
+    ]
+  },
+  {
+    "Name": "secgate",
+    "Category": "component",
+    "Description": "secgate,网神360",
+    "Updated": "2025-05-06",
+    "Fingerprint": [
+      "secgate"
+    ],
+    "Poc": [
+      {
+        "Source": "some_nuclei_templates",
+        "Path": [
+          "qax-SecGate-3600_upload_upfile.yaml"
+        ]
+      },
+      {
+        "Source": "nuclei-template",
+        "Path": [
+          "http/vulnerabilities/secworld/secgate-3600-file-upload.yaml"
+        ]
+      }
+    ]
+  },
+  {
+    "Name": "secnet",
+    "Category": "device",
+    "Description": "SecNet",
+    "Updated": "2025-05-06",
+    "Fingerprint": [
+      "secnet"
+    ],
+    "Poc": [
+      {
+        "Source": "nuclei-template",
+        "Path": [
+          "http/default-logins/others/secnet-ac-default-login.yaml"
+        ]
+      }
+    ]
+  },
+  {
+    "Name": "seeyon",
+    "Category": "oa",
+    "Description": "Seeyon,致远OA",
+    "Updated": "2025-05-06",
+    "Fingerprint": [
+      "seeyon",
+      "致远oa"
+    ],
+    "Poc": [
+      {
+        "Source": "nuclei-template",
+        "Path": [
+          "http/vulnerabilities/seeyon/zhiyuan-oa-info-leak.yaml",
+          "http/vulnerabilities/yonyou/yonyou-u8-oa-sqli.yaml",
+          "http/vulnerabilities/seeyon/zhiyuan-file-upload.yaml",
+          "http/cnvd/2019/CNVD-2019-19299.yaml",
+          "http/cnvd/2020/CNVD-2020-62422.yaml",
+          "http/default-logins/seeyon/seeyon-monitor-default-login.yaml",
+          "http/default-logins/seeyon/seeyon-a8-default-login.yaml",
+          "http/vulnerabilities/seeyon/zhiyuan-oa-session-leak.yaml",
+          "http/vulnerabilities/seeyon/zhiyuan-oa-info-leak.yaml",
+          "http/vulnerabilities/seeyon/seeyon-oa-setextno-sqli.yaml",
+          "http/vulnerabilities/seeyon/seeyon-config-exposure.yaml",
+          "http/vulnerabilities/seeyon/seeyon-createmysql-exposure.yaml",
+          "http/vulnerabilities/seeyon/seeyon-initdata-exposure.yaml",
+          "http/vulnerabilities/seeyon/seeyon-oa-sp2-file-upload.yaml",
+          "http/vulnerabilities/seeyon/wooyun-2015-148227.yaml",
+          "http/vulnerabilities/other/seeyon-oa-log4j.yaml"
+        ]
+      },
+      {
+        "Source": "some_nuclei_templates",
+        "Path": [
+          "seeyon-M1Server-rce-userTokenService.yaml"
+        ]
+      }
+    ]
+  },
+  {
+    "Name": "shiro",
+    "Category": "component",
+    "Description": "Apache Shiro",
+    "Updated": "2025-05-06",
+    "Fingerprint": [
+      "shiro"
+    ],
+    "Poc": [
+      {
+        "Source": "nuclei-template",
+        "Path": [
+          "http/vulnerabilities/apache/shiro/shiro-deserialization-detection.yaml"
+        ]
+      }
+    ]
+  },
+  {
+    "Name": "shiziyu-cms",
+    "Category": "cms",
+    "Description": "Shiziyu CMS",
+    "Updated": "2025-05-06",
+    "Fingerprint": [
+      "shiziyu",
+      "狮子鱼"
+    ],
+    "Poc": [
+      {
+        "Source": "nuclei-template",
+        "Path": [
+          "http/vulnerabilities/shiziyu-cms/shiziyu-cms-apicontroller-sqli.yaml"
+        ]
+      }
+    ]
+  },
+  {
+    "Name": "shopxo",
+    "Category": "cms",
+    "Description": "ShopXO",
+    "Updated": "2025-05-06",
+    "Fingerprint": [
+      "shopxo"
+    ],
+    "Poc": [
+      {
+        "Source": "nuclei-template",
+        "Path": [
+          "http/cnvd/2021/CNVD-2021-15822.yaml"
+        ]
+      }
+    ]
+  },
+  {
+    "Name": "showdoc",
+    "Category": "cms",
+    "Description": "ShowDoc",
+    "Updated": "2025-05-06",
+    "Fingerprint": [
+      "showdoc"
+    ],
+    "Poc": [
+      {
+        "Source": "nuclei-template",
+        "Path": [
+          "http/default-logins/showdoc/showdoc-default-login.yaml",
+          "http/cnvd/2020/CNVD-2020-26585.yaml"
+        ]
+      }
+    ]
+  },
+  {
+    "Name": "solarwinds",
+    "Category": "component",
+    "Description": "SolarWinds",
+    "Updated": "2025-05-06",
+    "Fingerprint": [
+      "solarwinds"
+    ],
+    "Poc": [
+      {
+        "Source": "nuclei-template",
+        "Path": [
+          "http/cves/2020/CVE-2020-10148.yaml",
+          "http/cves/2021/CVE-2021-35250.yaml",
+          "http/cves/2024/CVE-2024-28987.yaml",
+          "http/cves/2024/CVE-2024-28995.yaml",
+          "http/default-logins/solarwinds/solarwinds-default-login.yaml"
+        ]
+      }
+    ]
+  },
+  {
+    "Name": "sonarqube",
+    "Category": "component",
+    "Description": "SonarQube",
+    "Updated": "2025-05-06",
+    "Fingerprint": [
+      "sonarqube"
+    ],
+    "Poc": [
+      {
+        "Source": "nuclei-template",
+        "Path": [
+          "http/cves/2020/CVE-2020-27986.yaml",
+          "http/default-logins/sonarqube/sonarqube-default-login.yaml"
+        ]
+      }
+    ]
+  },
+  {
+    "Name": "sonicwall",
+    "Category": "device",
+    "Description": "Sonicwall",
+    "Updated": "2025-05-06",
+    "Fingerprint": [
+      "sonicwall"
+    ],
+    "Poc": [
+      {
+        "Source": "nuclei-template",
+        "Path": [
+          "http/vulnerabilities/other/sonicwall-sslvpn-shellshock.yaml"
+        ]
+      }
+    ]
+  },
+  {
+    "Name": "spark",
+    "Category": "component",
+    "Description": "Apache Spark",
+    "Updated": "2025-05-06",
+    "Fingerprint": [
+      "spark"
+    ],
+    "Poc": [
+      {
+        "Source": "nuclei-template",
+        "Path": [
+          "http/vulnerabilities/other/unauth-spark-api.yaml",
+          "http/vulnerabilities/other/spark-webui-unauth.yaml",
+          "http/cves/2022/CVE-2022-33891.yaml"
+        ]
+      }
+    ]
+  },
+  {
+    "Name": "sponip",
+    "Category": "device",
+    "Description": "Sponip,世邦IP",
+    "Updated": "2025-05-06",
+    "Fingerprint": [
+      "sponip"
+    ],
+    "Poc": [
+      {
+        "Source": "nuclei-template",
+        "Path": [
+          "http/vulnerabilities/other/sponip-network-system-ping-rce.yaml"
+        ]
+      }
+    ]
+  },
+  {
+    "Name": "spring",
+    "Category": "component",
+    "Description": "Spring boot,spring cloud,spring framework",
+    "Updated": "2025-05-06",
+    "Fingerprint": [
+      "spring"
+    ],
+    "Poc": [
+      {
+        "Source": "nuclei-template",
+        "Path": [
+          "http/cves/2022/CVE-2022-22947.yaml",
+          "http/cves/2016/CVE-2016-4977.yaml",
+          "http/cves/2019/CVE-2019-3799.yaml",
+          "http/cves/2020/CVE-2020-5405.yaml",
+          "http/cves/2020/CVE-2020-5410.yaml",
+          "http/cves/2021/CVE-2021-21234.yaml",
+          "http/cves/2021/CVE-2021-44910.yaml",
+          "http/cves/2022/CVE-2022-22963.yaml",
+          "http/cves/2022/CVE-2022-22965.yaml",
+          "http/technologies/springboot-actuator.yaml",
+          "http/technologies/springboot-whitelabel.yaml",
+          "http/vulnerabilities/springboot/springboot-actuators-jolokia-xxe.yaml",
+          "http/vulnerabilities/springboot/springboot-h2-db-rce.yaml",
+          "http/vulnerabilities/springboot/springboot-log4j-rce.yaml"
+        ]
+      }
+    ]
+  },
+  {
+    "Name": "supervisord",
+    "Category": "component",
+    "Description": "Supervisord",
+    "Updated": "2025-05-06",
+    "Fingerprint": [
+      "supervisord"
+    ],
+    "Poc": [
+      {
+        "Source": "nuclei-template",
+        "Path": [
+          "http/cves/2017/CVE-2017-11610.yaml"
+        ]
+      }
+    ]
+  },
+  {
+    "Name": "tamronos",
+    "Category": "device",
+    "Description": "Tamron",
+    "Updated": "2025-05-06",
+    "Fingerprint": [
+      "tamron"
+    ],
+    "Poc": [
+      {
+        "Source": "nuclei-template",
+        "Path": [
+          "http/vulnerabilities/other/tamronos-rce.yaml",
+          "http/vulnerabilities/other/tamronos-user-creation.yaml"
+        ]
+      }
+    ]
+  },
+  {
+    "Name": "tbk-dvr",
+    "Category": "device",
+    "Description": "TBK-DVR",
+    "Updated": "2025-05-06",
+    "Fingerprint": [
+      "tbk-dvr"
+    ],
+    "Poc": [
+      {
+        "Source": "nuclei-template",
+        "Path": [
+          "http/cves/2018/CVE-2018-9995.yaml"
+        ]
+      }
+    ]
+  },
+  {
+    "Name": "telecom-gateway",
+    "Category": "device",
+    "Description": "Telecom Gateway",
+    "Updated": "2025-05-06",
+    "Fingerprint": [
+      "telecom"
+    ],
+    "Poc": [
+      {
+        "Source": "nuclei-template",
+        "Path": [
+          "http/default-logins/others/telecom-gateway-default-login.yaml"
+        ]
+      }
+    ]
+  },
+  {
+    "Name": "terramaster",
+    "Category": "device",
+    "Description": "TerraMaster 存储系统",
+    "Updated": "2025-05-06",
+    "Fingerprint": [
+      "terramaster"
+    ],
+    "Poc": [
+      {
+        "Source": "nuclei-template",
+        "Path": [
+          "http/cves/2020/CVE-2020-15568.yaml",
+          "http/cves/2020/CVE-2020-28185.yaml",
+          "http/cves/2020/CVE-2020-28188.yaml",
+          "http/cves/2022/CVE-2022-24990.yaml"
+        ]
+      }
+    ]
+  },
+  {
+    "Name": "thinkadmin",
+    "Category": "cms",
+    "Description": "ThinkAdmin",
+    "Updated": "2025-05-06",
+    "Fingerprint": [
+      "thinkadmin"
+    ],
+    "Poc": [
+      {
+        "Source": "nuclei-template",
+        "Path": [
+          "http/cves/2020/CVE-2020-25540.yaml"
+        ]
+      }
+    ]
+  },
+  {
+    "Name": "thinkcmf",
+    "Category": "cms",
+    "Description": "ThinkCMF",
+    "Updated": "2025-05-06",
+    "Fingerprint": [
+      "thinkcmf"
+    ],
+    "Poc": [
+      {
+        "Source": "nuclei-template",
+        "Path": [
+          "http/vulnerabilities/thinkcmf/thinkcmf-lfi.yaml",
+          "http/vulnerabilities/thinkcmf/thinkcmf-rce.yaml",
+          "http/vulnerabilities/thinkcmf/thinkcmf-arbitrary-code-execution.yaml"
+        ]
+      }
+    ]
+  },
+  {
+    "Name": "thinkphp",
+    "Category": "component",
+    "Description": "ThinkPHP",
+    "Updated": "2025-05-06",
+    "Fingerprint": [
+      "thinkphp"
+    ],
+    "Poc": [
+      {
+        "Source": "nuclei-template",
+        "Path": [
+          "http/vulnerabilities/thinkphp/thinkphp-2-rce.yaml",
+          "http/vulnerabilities/thinkphp/thinkphp-501-rce.yaml",
+          "http/vulnerabilities/thinkphp/thinkphp-509-information-disclosure.yaml",
+          "http/vulnerabilities/thinkphp/thinkphp-5022-rce.yaml",
+          "http/vulnerabilities/thinkphp/thinkphp-5023-rce.yaml",
+          "http/vulnerabilities/thinkphp/thinkphp6-arbitrary-write.yaml",
+          "http/cves/2022/CVE-2022-47945.yaml",
+          "http/cnvd/2022/CNVD-2022-86535.yaml"
+        ]
+      }
+    ]
+  },
+  {
+    "Name": "tongda-oa",
+    "Category": "oa",
+    "Description": "Tongda OA",
+    "Updated": "2025-05-06",
+    "Fingerprint": [
+      "tongda"
+    ],
+    "Poc": [
+      {
+        "Source": "nuclei-template",
+        "Path": [
+          "http/vulnerabilities/tongda/tongda-insert-sqli.yaml",
+          "http/vulnerabilities/tongda/tongda-meeting-unauth.yaml",
+          "http/vulnerabilities/tongda/tongda-api-file-upload.yaml",
+          "http/vulnerabilities/tongda/tongda-auth-bypass.yaml",
+          "http/vulnerabilities/tongda/tongda-action-uploadfile.yaml",
+          "http/vulnerabilities/tongda/tongda-session-disclosure.yaml",
+          "http/vulnerabilities/tongda/tongda-video-file-read.yaml"
+        ]
+      },
+      {
+        "Source": "some_nuclei_templates",
+        "Path": [
+          "tongda-oa-rce-moare.yaml"
+        ]
+      }
+    ]
+  },
+  {
+    "Name": "topsec",
+    "Category": "device",
+    "Description": "topsec,天融信",
+    "Updated": "2025-05-06",
+    "Fingerprint": [
+      "topsec"
+    ],
+    "Poc": [
+      {
+        "Source": "some_nuclei_templates",
+        "Path": [
+          "topsec-topSAG-synRequest-rce.yaml"
+        ]
+      },
+      {
+        "Source": "nuclei-template",
+        "Path": [
+          "http/vulnerabilities/topsec/topsec-topacm-rce.yaml",
+          "http/vulnerabilities/topsec/topsec-topapplb-auth-bypass.yaml"
+        ]
+      }
+    ]
+  },
+  {
+    "Name": "tpshop",
+    "Category": "cms",
+    "Description": "TPShop",
+    "Updated": "2025-05-06",
+    "Fingerprint": [
+      "tpshop"
+    ],
+    "Poc": [
+      {
+        "Source": "nuclei-template",
+        "Path": [
+          "http/vulnerabilities/other/tpshop-directory-traversal.yaml"
+        ]
+      }
+    ]
+  },
+  {
+    "Name": "tvt",
+    "Category": "device",
+    "Description": "TVT,同为",
+    "Updated": "2025-05-06",
+    "Fingerprint": [
+      "tvt"
+    ],
+    "Poc": [
+      {
+        "Source": "nuclei-template",
+        "Path": [
+          "http/cves/2019/CVE-2019-20085.yaml",
+          "http/cves/2024/CVE-2024-7339.yaml"
+        ]
+      }
+    ]
+  },
+  {
+    "Name": "ueditor",
+    "Category": "component",
+    "Description": "UEditor",
+    "Updated": "2025-05-06",
+    "Fingerprint": [
+      "ueditor"
+    ],
+    "Poc": [
+      {
+        "Source": "nuclei-template",
+        "Path": [
+          "http/vulnerabilities/other/ueditor-file-upload.yaml",
+          "http/vulnerabilities/ueditor/ueditor-ssrf.yaml",
+          "http/vulnerabilities/ueditor/ueditor-xss.yaml"
+        ]
+      }
+    ]
+  },
+  {
+    "Name": "uwsgi",
+    "Category": "component",
+    "Description": "uWSGI",
+    "Updated": "2025-05-06",
+    "Fingerprint": [
+      "uwsgi"
+    ],
+    "Poc": [
+      {
+        "Source": "nuclei-template",
+        "Path": [
+          "http/cves/2018/CVE-2018-7490.yaml"
+        ]
+      }
+    ]
+  },
+  {
+    "Name": "vbulletin",
+    "Category": "cms",
+    "Description": "vBulletin",
+    "Updated": "2025-05-06",
+    "Fingerprint": [
+      "vbulletin"
+    ],
+    "Poc": [
+      {
+        "Source": "nuclei-template",
+        "Path": [
+          "http/cves/2019/CVE-2019-16759.yaml",
+          "http/cves/2020/CVE-2020-12720.yaml",
+          "http/cves/2020/CVE-2020-17496.yaml",
+          "http/cves/2023/CVE-2023-25135.yaml"
+        ]
+      }
+    ]
+  },
+  {
+    "Name": "venustech",
+    "Category": "device",
+    "Description": "venustech,启明星辰",
+    "Updated": "2025-05-06",
+    "Fingerprint": [
+      "venustech",
+      "启明星辰"
+    ],
+    "Poc": [
+      {
+        "Source": "some_nuclei_templates",
+        "Path": [
+          "venustech-vpn-download-file-read.yaml"
+        ]
+      }
+    ]
+  },
+  {
+    "Name": "vmware",
+    "Category": "cloud",
+    "Description": "VMware",
+    "Updated": "2025-05-06",
+    "Fingerprint": [
+      "vmware",
+      "vcenter"
+    ],
+    "Poc": [
+      {
+        "Source": "nuclei-template",
+        "Path": [
+          "http/cves/2022/CVE-2022-22954.yaml",
+          "http/vulnerabilities/vmware/vmware-vcenter-lfi.yaml",
+          "http/vulnerabilities/vmware/vmware-vcenter-lfi-linux.yaml",
+          "http/cves/2021/CVE-2021-21985.yaml",
+          "http/cves/2021/CVE-2021-21972.yaml",
+          "http/cves/2021/CVE-2021-21975.yaml",
+          "http/technologies/vmware/vmware-detect.yaml",
+          "http/technologies/vmware/vmware-horizon-version.yaml",
+          "http/vulnerabilities/vmware/vmware-vcenter-log4j-jndi-rce.yaml"
+        ]
+      }
+    ]
+  },
+  {
+    "Name": "wanhu-oa",
+    "Category": "oa",
+    "Description": "万户oa",
+    "Updated": "2025-05-06",
+    "Fingerprint": [
+      "wanhu",
+      "万户"
+    ],
+    "Poc": [
+      {
+        "Source": "some_nuclei_templates",
+        "Path": [
+          "wanhu-ezOFFICE-sql-time-productlist.yaml",
+          "wanhu-ezOFFICE-upload-wpsservlet.yaml"
+        ]
+      },
+      {
+        "Source": "nuclei-template",
+        "Path": [
+          "http/vulnerabilities/wanhu/wanhu-documentedit-sqli.yaml",
+          "http/vulnerabilities/wanhu/wanhu-download-ftp-file-read.yaml",
+          "http/vulnerabilities/wanhu/wanhu-oa-fileupload-controller-arbitrary-file-upload.yaml",
+          "http/vulnerabilities/wanhu/wanhuoa-downloadservlet-lfi.yaml",
+          "http/vulnerabilities/wanhu/wanhuoa-officeserverservlet-file-upload.yaml",
+          "http/vulnerabilities/wanhu/wanhuoa-smartupload-file-upload.yaml"
+        ]
+      }
+    ]
+  },
+  {
+    "Name": "weaver",
+    "Category": "oa",
+    "Description": "E-Office",
+    "Updated": "2025-05-06",
+    "Fingerprint": [
+      "e-office",
+      "ecology",
+      "ebridge",
+      "weaver"
+    ],
+    "Poc": [
+      {
+        "Source": "nuclei-template",
+        "Path": [
+          "http/cnvd/2021/CNVD-2021-49104.yaml",
+          "http/cnvd/2022/CNVD-2022-43245.yaml",
+          "http/cnvd/2023/CNVD-2023-12632.yaml",
+          "http/cves/2023/CVE-2023-2648.yaml",
+          "http/vulnerabilities/weaver/ecology/ecology-mysql-config.yaml",
+          "http/vulnerabilities/weaver/eoffice/weaver-eoffice-file-upload.yaml",
+          "http/vulnerabilities/weaver/weaver-checkserver-sqli.yaml",
+          "http/vulnerabilities/weaver/weaver-e-cology-validate-sqli.yaml",
+          "http/vulnerabilities/weaver/weaver-e-mobile-rce.yaml",
+          "http/vulnerabilities/weaver/weaver-ebridge-lfi.yaml",
+          "http/vulnerabilities/weaver/weaver-ecology-bshservlet-rce.yaml",
+          "http/vulnerabilities/weaver/weaver-ecology-getsqldata-sqli.yaml",
+          "http/vulnerabilities/weaver/weaver-ecology-hrmcareer-sqli.yaml",
+          "http/vulnerabilities/weaver/weaver-group-xml-sqli.yaml",
+          "http/vulnerabilities/weaver/weaver-jquery-file-upload.yaml",
+          "http/vulnerabilities/weaver/weaver-ktreeuploadaction-file-upload.yaml",
+          "http/vulnerabilities/weaver/weaver-lazyuploadify-file-upload.yaml",
+          "http/vulnerabilities/weaver/weaver-login-sessionkey.yaml",
+          "http/vulnerabilities/weaver/weaver-mysql-config-info-leak.yaml",
+          "http/vulnerabilities/weaver/weaver-office-server-file-upload.yaml",
+          "http/vulnerabilities/weaver/weaver-officeserver-lfi.yaml",
+          "http/vulnerabilities/weaver/weaver-signaturedownload-lfi.yaml",
+          "http/vulnerabilities/weaver/weaver-sptmforportalthumbnail-lfi.yaml",
+          "http/vulnerabilities/weaver/weaver-uploadify-file-upload.yaml",
+          "http/vulnerabilities/weaver/weaver-uploadoperation-file-upload.yaml",
+          "http/vulnerabilities/weaver/weaver-userselect-unauth.yaml",
+          "http/vulnerabilities/other/ecology-oa-file-sqli.yaml",
+          "http/vulnerabilities/weaver/ecology/ecology-arbitrary-file-upload.yaml",
+          "http/vulnerabilities/weaver/ecology/ecology-filedownload-directory-traversal.yaml",
+          "http/vulnerabilities/weaver/ecology/ecology-mysql-config.yaml",
+          "http/vulnerabilities/weaver/ecology/ecology-springframework-directory-traversal.yaml",
+          "http/vulnerabilities/weaver/ecology/ecology-v8-sqli.yaml",
+          "http/vulnerabilities/weaver/ecology/ecology-syncuserinfo-sqli.yaml"
+        ]
+      },
+      {
+        "Source": "some_nuclei_templates",
+        "Path": [
+          "weaver-E-Office-upload-upload.yaml"
+        ]
+      }
+    ]
+  },
+  {
+    "Name": "weblogic",
+    "Category": "component",
+    "Description": "Weblogic",
+    "Updated": "2025-05-06",
+    "Fingerprint": [
+      "weblogic"
+    ],
+    "Poc": [
+      {
+        "Source": "nuclei-template",
+        "Path": [
+          "http/default-logins/weblogic/weblogic-weak-login.yaml",
+          "http/cves/2017/CVE-2017-10271.yaml",
+          "http/cves/2019/CVE-2019-2725.yaml",
+          "http/cves/2019/CVE-2019-2729.yaml",
+          "http/cves/2020/CVE-2020-14750.yaml",
+          "http/cves/2014/CVE-2014-4210.yaml",
+          "http/cves/2018/CVE-2018-2894.yaml",
+          "http/cves/2020/CVE-2020-14750.yaml",
+          "http/cves/2020/CVE-2020-14882.yaml",
+          "http/cves/2020/CVE-2020-14883.yaml"
+        ]
+      }
+    ]
+  },
+  {
+    "Name": "webmin",
+    "Category": "component",
+    "Description": "Webmin",
+    "Updated": "2025-05-06",
+    "Fingerprint": [
+      "webmin"
+    ],
+    "Poc": [
+      {
+        "Source": "nuclei-template",
+        "Path": [
+          "http/cves/2019/CVE-2019-15107.yaml",
+          "http/cves/2019/CVE-2019-15642.yaml",
+          "http/cves/2022/CVE-2022-0824.yaml",
+          "http/cves/2022/CVE-2022-36446.yaml",
+          "http/default-logins/webmin-default-login.yaml"
+        ]
+      }
+    ]
+  },
+  {
+    "Name": "wecrm",
+    "Category": "component",
+    "Description": "wecrm,任我行CRM系统",
+    "Updated": "2025-05-06",
+    "Fingerprint": [
+      "wecrm",
+      "任我行"
+    ],
+    "Poc": [
+      {
+        "Source": "some_nuclei_templates",
+        "Path": [
+          "wecrm-crm-sql-SmsDataList.yaml"
+        ]
+      }
+    ]
+  },
+  {
+    "Name": "weiphp",
+    "Category": "cms",
+    "Description": "WeiPHP",
+    "Updated": "2025-05-06",
+    "Fingerprint": [
+      "weiphp"
+    ],
+    "Poc": [
+      {
+        "Source": "nuclei-template",
+        "Path": [
+          "http/cnvd/2020/CNVD-2020-68596.yaml",
+          "http/cves/2020/CVE-2020-20300.yaml"
+        ]
+      }
+    ]
+  },
+  {
+    "Name": "wifisky",
+    "Category": "device",
+    "Description": "Wifisky",
+    "Updated": "2025-05-06",
+    "Fingerprint": [
+      "wifisky"
+    ],
+    "Poc": [
+      {
+        "Source": "nuclei-template",
+        "Path": [
+          "http/default-logins/wifisky/wifisky-default-login.yaml",
+          "http/vulnerabilities/other/wifisky7-rce.yaml"
+        ]
+      }
+    ]
+  },
+  {
+    "Name": "wordpress",
+    "Category": "cms",
+    "Description": "WordPress",
+    "Updated": "2025-05-06",
+    "Fingerprint": [
+      "wordpress"
+    ],
+    "Poc": [
+      {
+        "Source": "nuclei-template",
+        "Path": [
+          "http/cves/2019/CVE-2019-19985.yaml",
+          "http/cves/2019/CVE-2019-14205.yaml",
+          "http/vulnerabilities/wordpress/wp-xmlrpc-brute-force.yaml",
+          "http/vulnerabilities/wordpress/wp-user-enum.yaml",
+          "http/vulnerabilities/wordpress/wp-gallery-file-upload.yaml",
+          "http/vulnerabilities/wordpress/wordpress-rce-simplefilelist.yaml",
+          "http/cves/2025/CVE-2025-30567.yaml",
+          "http/cves/2024/CVE-2024-27954.yaml",
+          "http/cves/2024/CVE-2024-9047.yaml",
+          "http/cves/2024/CVE-2024-27956.yaml",
+          "http/cves/2024/CVE-2024-25600.yaml"
+        ]
+      }
+    ]
+  },
+  {
+    "Name": "wuzhicms",
+    "Category": "cms",
+    "Description": "WUZHI CMS",
+    "Updated": "2025-05-06",
+    "Fingerprint": [
+      "wuzhicms"
+    ],
+    "Poc": [
+      {
+        "Source": "nuclei-template",
+        "Path": [
+          "http/vulnerabilities/other/wuzhicms-sqli.yaml"
+        ]
+      }
+    ]
+  },
+  {
+    "Name": "xdcms",
+    "Category": "cms",
+    "Description": "XDCMS",
+    "Updated": "2025-05-06",
+    "Fingerprint": [
+      "xdcms"
+    ],
+    "Poc": [
+      {
+        "Source": "nuclei-template",
+        "Path": [
+          "http/vulnerabilities/other/xdcms-sqli.yaml"
+        ]
+      }
+    ]
+  },
+  {
+    "Name": "xiuno",
+    "Category": "cms",
+    "Description": "Xiuno",
+    "Updated": "2025-05-06",
+    "Fingerprint": [
+      "xiuno"
+    ],
+    "Poc": [
+      {
+        "Source": "nuclei-template",
+        "Path": [
+          "http/cnvd/2019/CNVD-2019-01348.yaml"
+        ]
+      }
+    ]
+  },
+  {
+    "Name": "xunchi",
+    "Category": "cms",
+    "Description": "Xunchi，迅优CMS",
+    "Updated": "2025-05-06",
+    "Fingerprint": [
+      "xunchi",
+      "xunyou"
+    ],
+    "Poc": [
+      {
+        "Source": "nuclei-template",
+        "Path": [
+          "http/cnvd/2020/CNVD-2020-23735.yaml"
+        ]
+      }
+    ]
+  },
+  {
+    "Name": "yapi",
+    "Category": "component",
+    "Description": "YApi",
+    "Updated": "2025-05-06",
+    "Fingerprint": [
+      "yapi"
+    ],
+    "Poc": [
+      {
+        "Source": "nuclei-template",
+        "Path": [
+          "http/vulnerabilities/other/yapi-rce.yaml"
+        ]
+      }
+    ]
+  },
+  {
+    "Name": "yonyou",
+    "Category": "oa",
+    "Description": "Yonyou",
+    "Updated": "2025-05-06",
+    "Fingerprint": [
+      "yonyou"
+    ],
+    "Poc": [
+      {
+        "Source": "nuclei-template",
+        "Path": [
+          "http/vulnerabilities/yonyou/yonyou-grp-u8-xxe.yaml",
+          "http/vulnerabilities/yonyou/yonyou-filereceiveservlet-fileupload.yaml",
+          "http/cnvd/2021/CNVD-2021-30167.yaml",
+          "http/vulnerabilities/yonyou/yonyou-u8-oa-sqli.yaml",
+          "http/vulnerabilities/yonyou/yonyou-ksoa-dept-sqli.yaml",
+          "http/vulnerabilities/yonyou/yonyou-nc-accept-fileupload.yaml",
+          "http/vulnerabilities/yonyou/yonyou-nc-baseapp-deserialization.yaml",
+          "http/vulnerabilities/yonyou/yonyou-nc-dispatcher-fileupload.yaml",
+          "http/vulnerabilities/yonyou/yonyou-nc-info-leak.yaml",
+          "http/vulnerabilities/yonyou/yonyou-u8-sqli.yaml"
+        ]
+      },
+      {
+        "Source": "some_nuclei_templates",
+        "Path": [
+          "yonyou-grp-u8-sql-time-bx_historyDataCheck.yaml",
+          "yonyou-ksoa-sql-servletimagefield.yaml",
+          "yonyou-ksoa-sql-time-PayBill.yaml",
+          "yonyou-ksoa-sql-time-TaskRequestServlet.yaml",
+          "yonyou-mobile-upload-uploadApk.yaml",
+          "yonyou-nc-cloud-upload-jsinvoke.yaml",
+          "yonyou-u8-crm-fileread-getemaildata.yaml",
+          "yonyou-u8-crm-upload-getemaildata.yaml"
+        ]
+      }
+    ]
+  },
+  {
+    "Name": "zabbix",
+    "Category": "component",
+    "Description": "Zabbix",
+    "Updated": "2025-05-06",
+    "Fingerprint": [
+      "zabbix"
+    ],
+    "Poc": [
+      {
+        "Source": "nuclei-template",
+        "Path": [
+          "http/cves/2016/CVE-2016-10134.yaml",
+          "http/cves/2019/CVE-2019-17382.yaml",
+          "http/cves/2022/CVE-2022-23131.yaml",
+          "http/cves/2022/CVE-2022-23134.yaml",
+          "http/default-logins/zabbix/zabbix-default-login.yaml"
+        ]
+      }
+    ]
+  },
+  {
+    "Name": "zcms",
+    "Category": "cms",
+    "Description": "ZCMS",
+    "Updated": "2025-05-06",
+    "Fingerprint": [
+      "zcms"
+    ],
+    "Poc": [
+      {
+        "Source": "nuclei-template",
+        "Path": [
+          "http/vulnerabilities/other/zcms-v3-sqli.yaml"
+        ]
+      }
+    ]
+  },
+  {
+    "Name": "zentao",
+    "Category": "component",
+    "Description": "Zentao，禅道项目管理软件",
+    "Updated": "2025-05-06",
+    "Fingerprint": [
+      "zentao"
+    ],
+    "Poc": [
+      {
+        "Source": "nuclei-template",
+        "Path": [
+          "http/cnvd/2022/CNVD-2022-42853.yaml"
+        ]
+      }
+    ]
+  },
+  {
+    "Name": "zeroshell",
+    "Category": "component",
+    "Description": "ZeroShell",
+    "Updated": "2025-05-06",
+    "Fingerprint": [
+      "zeroshell"
+    ],
+    "Poc": [
+      {
+        "Source": "nuclei-template",
+        "Path": [
+          "http/cves/2019/CVE-2019-12725.yaml"
+        ]
+      }
+    ]
+  },
+  {
+    "Name": "zimbra",
+    "Category": "component",
+    "Description": "Zimbra",
+    "Updated": "2025-05-06",
+    "Fingerprint": [
+      "zimbra"
+    ],
+    "Poc": [
+      {
+        "Source": "nuclei-template",
+        "Path": [
+          "http/cves/2019/CVE-2019-9670.yaml",
+          "http/cves/2022/CVE-2022-37042.yaml",
+          "http/vulnerabilities/other/zimbra-preauth-ssrf.yaml"
+        ]
+      }
+    ]
+  },
+  {
+    "Name": "zzcms",
+    "Category": "cms",
+    "Description": "ZZCMS",
+    "Updated": "2025-05-06",
+    "Fingerprint": [
+      "zzcms"
+    ],
+    "Poc": [
+      {
+        "Source": "nuclei-template",
+        "Path": [
+          "http/cves/2022/CVE-2022-40443.yaml"
+        ]
+      }
+    ]
+  },
+  {
+    "Name": "zzzcms",
+    "Category": "cms",
+    "Description": "ZZZCMS",
+    "Updated": "2025-05-06",
+    "Fingerprint": [
+      "zzzcms"
+    ],
+    "Poc": [
+      {
+        "Source": "nuclei-template",
+        "Path": [
+          "http/cves/2019/CVE-2019-9041.yaml",
+          "http/cves/2022/CVE-2022-23881.yaml",
+          "http/vulnerabilities/zzzcms/zzzcms-info-disclosure.yaml"
+        ]
+      }
+    ]
+  }
+]

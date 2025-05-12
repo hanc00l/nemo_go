@@ -594,7 +594,8 @@ func (s *Service) KeepDaemonAlive(ctx context.Context, args *string, replay *Kee
 		return err
 	}
 	daemonInfo.ManualReloadFlag = workerAliveStatus.ManualReloadFlag
-	daemonInfo.ManualFileSyncFlag = workerAliveStatus.ManualFileSyncFlag
+	daemonInfo.ManualInitEnvFlag = workerAliveStatus.ManualInitEnvFlag
+	daemonInfo.ManualConfigAndPocSyncFlag = workerAliveStatus.ManualConfigAndPocSyncFlag
 	daemonInfo.ManualUpdateOptionFlag = workerAliveStatus.ManualUpdateOptionFlag
 	if workerAliveStatus.ManualUpdateOptionFlag {
 		w := WorkerOption{}
@@ -603,8 +604,9 @@ func (s *Service) KeepDaemonAlive(ctx context.Context, args *string, replay *Kee
 		}
 	}
 	workerAliveStatus.ManualUpdateOptionFlag = false
-	workerAliveStatus.ManualFileSyncFlag = false
+	workerAliveStatus.ManualInitEnvFlag = false
 	workerAliveStatus.ManualReloadFlag = false
+	workerAliveStatus.ManualConfigAndPocSyncFlag = false
 	workerAliveStatus.IsDaemonProcess = true
 	workerAliveStatus.WorkerDaemonUpdateTime = time.Now()
 	err = SetWorkerStatusToRedis(rdb, *args, workerAliveStatus)

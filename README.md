@@ -34,7 +34,7 @@
 ### 2、指纹信息
 
 - [HTTPX](https://github.com/projectdiscovery/httpx) 获取HTTP指纹、Web截图、IconHash指纹等
-- [ChainReactor](https://github.com/chainreactors/fingers) HTTP被动指纹识别
+- [ChainReactor](https://github.com/chainreactors/fingers) 、[FingerprintHub](https://github.com/0x727/FingerprintHub) HTTP被动指纹识别
 - [fingerprintx](https://github.com/praetorian-inc/fingerprintx)获取非HTTP协议指纹
 
 ### 3、API接口 （需提供相应的Key)
@@ -54,6 +54,8 @@
 ### 5、Poc验证与目录扫描
 
 - [Nuclei](https://github.com/projectdiscovery/nuclei) && [Nuclei-Templates](https://github.com/projectdiscovery/nuclei-templates)
+- [some_nuclei_templates](https://github.com/hanc00l/some_nuclei_templates)
+- 指纹与Poc关联库：[poc_map](https://github.com/hanc00l/poc_map)
 
 ### 6、分布式任务
 
@@ -75,9 +77,9 @@
 - IP/Domain黑名单、一键拉黑
 
 ### 8、TODO
-- [ ] 指纹信息优化（支持更多指纹识别方式）
-- [ ] Poc验证优化（支持更多Poc验证方式、前端批量管理Poc）
-- [ ] 指纹 + Poc 联动验证
+- [X] 指纹信息优化（支持更多指纹识别方式）
+- [X] Poc验证优化（支持更多Poc验证方式、前端批量管理Poc）
+- [X] 指纹 + Poc 联动验证
 - [ ] Standalone模式优化后开源
 - [ ] 资产管理优化（支持更多资产类型、资产搜索、资产导入导出）
 - [ ] 十万级分布式节点统一管理（支持节点管理、任务动态伸缩等）

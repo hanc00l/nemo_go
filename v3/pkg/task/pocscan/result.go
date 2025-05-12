@@ -11,13 +11,11 @@ type Result struct {
 	sync.RWMutex
 	VulResult []db.VulDocument
 }
-
-type PocFiles struct {
-	Name     string `json:"name"`
-	PathFile string `json:"text"`
-	Type     string `json:"type"` //dir or file
+type Info struct {
+	Name     string                 `json:"name,omitempty"`
+	Severity string                 `json:"severity,omitempty"`
+	Metadata map[string]interface{} `json:"metadata,omitempty"`
 }
-
 type NucleiJSONResult struct {
 	// Template is the relative filename for the template
 	Template string `json:"template,omitempty"`
@@ -28,6 +26,8 @@ type NucleiJSONResult struct {
 	TemplateID string `json:"template-id"`
 	// MatcherName is the name of the matcher matched if any.
 	MatcherName string `json:"matcher-name,omitempty"`
+	// Info contains the information about the template.
+	Info Info `json:"info,omitempty"`
 	// Type is the type of the result event.
 	Type string `json:"type"`
 	// Host is the host input on which match was found.

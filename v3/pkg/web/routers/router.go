@@ -88,14 +88,18 @@ func InitRouter() {
 
 	web.CtrlGet("/vul-list", (*controllers.VulController).IndexAction)
 	web.CtrlPost("/vul-list", (*controllers.VulController).ListAction)
+	web.CtrlGet("/vul-info", (*controllers.VulController).InfoIndexAction)
+	web.CtrlPost("/vul-info", (*controllers.VulController).InfoAction)
 	web.CtrlPost("/vul-delete", (*controllers.VulController).DeleteAction)
 	web.CtrlPost("/vul-load-pocfile", (*controllers.VulController).LoadPocFileAction)
 
 	web.CtrlGet("/worker-list", (*controllers.WorkerController).IndexAction)
 	web.CtrlPost("/worker-list", (*controllers.WorkerController).ListAction)
-	web.CtrlPost("/worker-reload", (*controllers.WorkerController).ManualReloadWorkerAction)
 	web.CtrlPost("/worker-edit", (*controllers.WorkerController).EditWorkerAction)
-	web.CtrlPost("/worker-update", (*controllers.WorkerController).UpdateWorkerAction)
+	web.CtrlPost("/worker-reload", (*controllers.WorkerController).ManualReloadWorkerAction)
+	web.CtrlPost("/worker-update", (*controllers.WorkerController).ManualUpdateWorkerAction)
+	web.CtrlPost("/worker-init", (*controllers.WorkerController).ManualInitWorkerAction)
+	web.CtrlPost("/worker-sync", (*controllers.WorkerController).ManualSyncWorkerAction)
 
 	web.CtrlGet("/notify-list", (*controllers.NotifyController).IndexAction)
 	web.CtrlPost("/notify-list", (*controllers.NotifyController).ListAction)
@@ -124,4 +128,11 @@ func InitRouter() {
 	web.CtrlPost("/config-worker-test-onlineapi", (*controllers.ConfigController).TestOnlineAPIKeyAction)
 	web.CtrlPost("/config-worker-test-llmapi", (*controllers.ConfigController).TestLLMAPIKeyAction)
 
+	web.CtrlGet("/pocfile-index", (*controllers.PocFileController).IndexAction)
+	web.CtrlPost("/pocfile-list", (*controllers.PocFileController).ListFilesAction)
+	web.CtrlPost("/pocfile-upload", (*controllers.PocFileController).UploadFileAction)
+	web.CtrlGet("/pocfile-download", (*controllers.PocFileController).DownloadFileAction)
+	web.CtrlPost("/pocfile-delete", (*controllers.PocFileController).DeleteFileAction)
+	web.CtrlGet("/pocfile-search", (*controllers.PocFileController).SearchFilesAction)
+	web.CtrlPost("/pocfile-createFolder", (*controllers.PocFileController).CreateFolderAction)
 }

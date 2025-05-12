@@ -1,7 +1,6 @@
 package controllers
 
 import (
-	"github.com/hanc00l/nemo_go/v3/pkg/conf"
 	"github.com/hanc00l/nemo_go/v3/pkg/db"
 	"github.com/hanc00l/nemo_go/v3/pkg/logging"
 	"github.com/hanc00l/nemo_go/v3/pkg/task/execute"
@@ -15,9 +14,10 @@ type VulController struct {
 
 type vulRequestParam struct {
 	DatableRequestParam
-	Host    string `json:"host" form:"host"`
-	PocFile string `json:"pocfile" form:"pocfile"`
-	Source  string `json:"source" form:"source"`
+	Host     string `json:"host" form:"host"`
+	PocFile  string `json:"pocfile" form:"pocfile"`
+	Source   string `json:"source" form:"source"`
+	Severity string `json:"severity" form:"severity"`
 }
 
 type VulData struct {
@@ -26,8 +26,22 @@ type VulData struct {
 	Authority      string `json:"authority"`
 	Url            string `json:"url"`
 	PocFile        string `json:"pocfile"`
+	Severity       string `json:"severity"`
 	Source         string `json:"source"`
 	TaskId         string `json:"task_id"`
+	CreateTime     string `json:"create_time"`
+	UpdateDatetime string `json:"update_time"`
+}
+
+type VulDetailDataInfo struct {
+	Id             string `json:"id"`
+	Authority      string `json:"authority"`
+	Url            string `json:"url"`
+	PocFile        string `json:"pocfile"`
+	Severity       string `json:"severity"`
+	Name           string `json:"name"`
+	Source         string `json:"source"`
+	Extra          string `json:"extra"`
 	CreateTime     string `json:"create_time"`
 	UpdateDatetime string `json:"update_time"`
 }
@@ -94,6 +108,9 @@ func (c *VulController) getListData(req vulRequestParam) (resp DataTableResponse
 	if req.Source != "" {
 		filter["source"] = req.Source
 	}
+	if req.Severity != "" {
+		filter["severity"] = req.Severity
+	}
 	taskId := c.GetString("task_id")
 	var collectionName string
 	if taskId != "" {
@@ -118,9 +135,10 @@ func (c *VulController) getListData(req vulRequestParam) (resp DataTableResponse
 			Url:            row.Url,
 			PocFile:        row.PocFile,
 			Source:         row.Source,
+			Severity:       row.Severity,
 			TaskId:         row.TaskId,
-			CreateTime:     row.CreateTime.In(conf.LocalTimeLocation).Format("2006-01-02 15:04:05"),
-			UpdateDatetime: row.UpdateTime.In(conf.LocalTimeLocation).Format("2006-01-02 15:04:05"),
+			CreateTime:     FormatDateTime(row.CreateTime),
+			UpdateDatetime: FormatDateTime(row.UpdateTime),
 		}
 		resp.Data = append(resp.Data, task)
 	}
@@ -190,4 +208,66 @@ func (c *VulController) LoadPocFileAction() {
 		})
 	}
 	c.Data["json"] = pocList
+}
+
+func (c *VulController) InfoIndexAction() {
+	c.TplName = "vul-info.html"
+	c.Layout = "base.html"
+}
+
+func (c *VulController) InfoAction() {
+	defer func(c *VulController, encoding ...bool) {
+		_ = c.ServeJSON(encoding...)
+	}(c)
+
+	id := c.GetString("id")
+	if len(id) == 0 {
+		logging.RuntimeLog.Error("empty id")
+		c.FailedStatus("empty id")
+		return
+	}
+	workspaceId := c.GetWorkspace()
+	if len(workspaceId) == 0 {
+		c.FailedStatus("未选择当前的工作空间！")
+		return
+	}
+	mongoClient, err := db.GetClient()
+	if err != nil {
+		logging.RuntimeLog.Error(err)
+		c.FailedStatus(err.Error())
+		return
+	}
+	defer db.CloseClient(mongoClient)
+	taskId := c.GetString("task_id")
+	var collectionName string
+	if taskId != "" {
+		collectionName = db.TaskVul
+	} else {
+		collectionName = db.GlobalVul
+	}
+	vul := db.NewVul(workspaceId, collectionName, mongoClient)
+	doc, err := vul.Get(id)
+	if err != nil {
+		logging.RuntimeLog.Error(err)
+		c.FailedStatus(err.Error())
+		return
+	}
+	if doc.Id.Hex() != id {
+		c.FailedStatus("未找到该漏洞详情！")
+		return
+	}
+	infoData := VulDetailDataInfo{
+		Id:             doc.Id.Hex(),
+		Authority:      doc.Authority,
+		Url:            doc.Url,
+		PocFile:        doc.PocFile,
+		Source:         doc.Source,
+		Severity:       doc.Severity,
+		Name:           doc.Name,
+		Extra:          doc.Extra,
+		CreateTime:     FormatDateTime(doc.CreateTime),
+		UpdateDatetime: FormatDateTime(doc.UpdateTime),
+	}
+	c.Data["json"] = infoData
+	return
 }

@@ -94,7 +94,7 @@ func Do(taskInfo execute.ExecutorTaskInfo) (result []OnlineSearchResult) {
 	}
 	re := executor.GetRequiredResources()
 	if len(re) > 0 {
-		err := core.CheckRequiredResource(re)
+		err := core.CheckRequiredResource(re, false)
 		if err != nil {
 			logging.RuntimeLog.Errorf("任务资源检查和请求失败:%s", err.Error())
 			return

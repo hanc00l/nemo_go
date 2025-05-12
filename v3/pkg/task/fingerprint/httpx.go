@@ -22,13 +22,22 @@ type Httpx struct {
 	Config  execute.FingerprintConfig
 	IsProxy bool
 	// 被动指纹引擎
-	chainreactorsEngine *fingers.Engine
+	chainreactorsEngine  *fingers.Engine
+	fingerprintHubEngine *FingerprintHubEngine
 }
 
 func (h *Httpx) GetRequiredResources() (re []core.RequiredResource) {
 	re = append(re, core.RequiredResource{
 		Category: resource.HttpxCategory,
 		Name:     utils.GetThirdpartyBinNameByPlatform(utils.Httpx),
+	})
+	re = append(re, core.RequiredResource{
+		Category: resource.DictCategory,
+		Name:     "web_fingerprint_v4.json",
+	})
+	re = append(re, core.RequiredResource{
+		Category: resource.DictCategory,
+		Name:     "web_poc_map_v2.json",
 	})
 	return
 }
@@ -78,6 +87,7 @@ func (h *Httpx) Run(target []string) (result Result) {
 func (h *Httpx) ParseContentResult(content []byte) (result Result) {
 	result.FingerResults = make(map[string]interface{})
 	h.loadChainReactorsFingers()
+	h.loadFingerprintHubEngine()
 
 	lines := bytes.Split(content, []byte{'\n'})
 	for _, line := range lines {
@@ -102,11 +112,14 @@ func (h *Httpx) ParseHttpxJson(content []byte) (resultJSON HttpxResult) {
 	if resultJSON.FaviconURL != "" && resultJSON.IconHash != "" {
 		resultJSON.FaviconContent, _ = h.getFaviconImage(resultJSON.IconHash, resultJSON.FaviconURL)
 	}
+	// 被动指纹匹配
 	if len(resultJSON.RawHeader) > 0 {
 		var header, body []byte
 		header, _ = base64.StdEncoding.DecodeString(resultJSON.RawHeader)
 		body, _ = base64.StdEncoding.DecodeString(resultJSON.Body)
 		resultJSON.Fingers = append(resultJSON.Fingers, h.MatchChainReactorsFingers(header, body)...)
+		resultJSON.Fingers = append(resultJSON.Fingers, h.fingerprintHubEngine.Match(resultJSON.IconHash, string(header), string(body))...)
+		resultJSON.Fingers = utils.RemoveDuplicatesAndSort(resultJSON.Fingers)
 	}
 
 	return
@@ -164,7 +177,7 @@ func (h *Httpx) MatchChainReactorsFingers(header, body []byte) (fingers []string
 	return
 }
 
-// loadChainReactorsFingers 加载ChainReactorsFingers指纹
+// loadChainReactorsFingers 加载ChainReactorsFingers指纹引擎
 func (h *Httpx) loadChainReactorsFingers() {
 	if h.chainreactorsEngine != nil {
 		return
@@ -177,6 +190,20 @@ func (h *Httpx) loadChainReactorsFingers() {
 		return
 	}
 	logging.CLILog.Info("已加载chainreactors指纹引擎")
+}
+
+// loadFingerprintHubEngine 加载FingerprintHub指纹引擎
+func (h *Httpx) loadFingerprintHubEngine() {
+	if h.fingerprintHubEngine != nil {
+		return
+	}
+	h.fingerprintHubEngine = NewFingerprintHubEngine()
+	err := h.fingerprintHubEngine.LoadFromFile(filepath.Join(conf.GetAbsRootPath(), "thirdparty/dict/web_fingerprint_v4.json"))
+	if err != nil {
+		logging.RuntimeLog.Error(err)
+		return
+	}
+	logging.CLILog.Info("已加载FingerprintHub指纹引擎")
 }
 
 func InsertInto(s string, interval int, sep rune) string {

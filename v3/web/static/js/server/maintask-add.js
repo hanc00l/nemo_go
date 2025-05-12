@@ -171,6 +171,7 @@ function fill_form_with_data(data) {
         if (data.pocscan.enabled) {
             $('#div_pocscan').show();
             $('#pocscan_bin').val(data.pocscan.pocbin);
+            $('#pocscan_poc_type').val(data.pocscan.config.pocType);
             $('#pocscan_base_web_status').prop('checked', data.pocscan.config.baseWebStatus);
             $('#pocscan_poc_file').val(data.pocscan.config.pocFile);
         } else {

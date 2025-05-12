@@ -24,8 +24,8 @@ type Nuclei struct {
 	IsProxy bool
 }
 
-func (n *Nuclei) LoadPocFiles() (pocFiles []string) {
-	pocBase := filepath.Join(conf.GetRootPath(), "thirdparty/nuclei/nuclei-templates")
+func (n *Nuclei) loadPocFilesFromBasePath(pocBase string) (pocFiles []string) {
+	basePath := filepath.Base(pocBase)
 	//统一路径为“/”
 	if runtime.GOOS == "windows" {
 		pocBase = strings.ReplaceAll(pocBase, "\\", "/")
@@ -50,25 +50,41 @@ func (n *Nuclei) LoadPocFiles() (pocFiles []string) {
 				return nil
 			}
 			if info.IsDir() || strings.HasSuffix(path, ".yaml") {
-				pocFiles = append(pocFiles, pocFile)
+				pocFiles = append(pocFiles, fmt.Sprintf("%s/%s", basePath, pocFile))
 			}
 			return nil
 		})
 	if err != nil {
 		logging.RuntimeLog.Error(err)
 	}
-	sort.Strings(pocFiles)
 	return
+}
 
+func (n *Nuclei) LoadPocFiles() (pocFiles []string) {
+	sourcePaths := map[string]string{
+		"some_nuclei_templates": "some_nuclei_templates",
+		"nuclei-template":       "nuclei-templates",
+	}
+	for _, p := range sourcePaths {
+		pocBase := filepath.Join(conf.GetAbsRootPath(), "thirdparty/nuclei", p)
+		pocFiles = append(pocFiles, n.loadPocFilesFromBasePath(pocBase)...)
+	}
+	// 排序
+	sort.Strings(pocFiles)
+
+	return
 }
 
 func (n *Nuclei) IsExecuteFromCmd() bool {
 	return true
 }
 
+func (n *Nuclei) GetDir() string {
+	return filepath.Join(conf.GetAbsRootPath(), "thirdparty/nuclei")
+}
+
 func (n *Nuclei) GetExecuteCmd() string {
 	return filepath.Join(conf.GetAbsRootPath(), "thirdparty/nuclei", utils.GetThirdpartyBinNameByPlatform(utils.Nuclei))
-
 }
 
 func (n *Nuclei) GetExecuteArgs(inputTempFile, outputTempFile string) (cmdArgs []string) {
@@ -83,7 +99,7 @@ func (n *Nuclei) GetExecuteArgs(inputTempFile, outputTempFile string) (cmdArgs [
 	cmdArgs = append(
 		cmdArgs,
 		"--timeout", "5", "-no-color", "-disable-update-check", "-silent",
-		"-t", filepath.Join(conf.GetAbsRootPath(), "thirdparty/nuclei/nuclei-templates", n.Config.PocFile),
+		"-t", n.Config.PocFile,
 		"-j", "-o", outputTempFile, "-l", inputTempFile,
 	)
 	if n.IsProxy {
@@ -103,8 +119,12 @@ func (n *Nuclei) GetRequiredResources() (re []core.RequiredResource) {
 		Name:     utils.GetThirdpartyBinNameByPlatform(utils.Nuclei),
 	})
 	re = append(re, core.RequiredResource{
-		Category: resource.NucleiCategory,
+		Category: resource.PocFileCategory,
 		Name:     "nuclei-templates",
+	})
+	re = append(re, core.RequiredResource{
+		Category: resource.PocFileCategory,
+		Name:     "some_nuclei_templates",
 	})
 	return
 }
@@ -117,6 +137,9 @@ func (n *Nuclei) Run(target []string) (result Result) {
 func (n *Nuclei) ParseContentResult(content []byte) (result Result) {
 	lines := bytes.Split(content, []byte{'\n'})
 	for _, line := range lines {
+		if len(line) == 0 {
+			continue
+		}
 		var xr NucleiJSONResult
 		err := json.Unmarshal(line, &xr)
 		if err != nil {
@@ -133,6 +156,8 @@ func (n *Nuclei) ParseContentResult(content []byte) (result Result) {
 			Url:       xr.URL,
 			PocFile:   xr.TemplateID,
 			Source:    "nuclei",
+			Name:      xr.Info.Name,
+			Severity:  xr.Info.Severity,
 			Extra:     string(pretty.Pretty(line)),
 		})
 	}

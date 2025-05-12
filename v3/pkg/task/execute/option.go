@@ -96,10 +96,10 @@ type OnlineAPIConfig struct {
 }
 
 type PocscanConfig struct {
-	Target               string `json:"target,omitempty" `
-	PocFile              string `json:"pocFile,omitempty" form:"pocFile"`
-	IsScanBaseWebStatus  bool   `json:"baseWebStatus,omitempty" form:"baseWebStatus"`
-	IsScanPocMatchFinger bool   `json:"pocMatchFinger,omitempty" form:"pocMatchFinger"`
+	Target              string `json:"target,omitempty" `
+	PocType             string `json:"pocType" form:"pocType"`
+	PocFile             string `json:"pocFile,omitempty" form:"pocFile"`
+	IsScanBaseWebStatus bool   `json:"baseWebStatus,omitempty" form:"baseWebStatus"`
 }
 
 type StandaloneScanConfig struct {

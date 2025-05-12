@@ -138,27 +138,34 @@ func PrepareWorkerOptions() *WorkerOption {
 }
 
 func ReloadWorkerRunEnv() bool {
-	// 清除旧的worker可执行文件及thirdparty目录
+	// 增加误删除检查
+	var skipRemoveResource bool
 	workerBin := utils.GetThirdpartyBinNameByPlatform(utils.Worker)
-	workerPathName, err := filepath.Abs(filepath.Join(conf.GetRootPath(), workerBin))
-	if err != nil {
-		logging.RuntimeLog.Error(err)
-		return false
+	serverBin := utils.GetThirdpartyBinNameByPlatform(utils.Server)
+	workerPathName, err1 := filepath.Abs(filepath.Join(conf.GetRootPath(), workerBin))
+	serverPathName, err2 := filepath.Abs(filepath.Join(conf.GetRootPath(), serverBin))
+	if err1 == nil && err2 == nil && utils.CheckFileExist(serverPathName) && utils.CheckFileExist(workerPathName) {
+		skipRemoveResource = true
+		logging.CLILog.Info("Wanning: worker与server文件同时存在，为防止误删除文件，将不执行清空旧文件操作")
+		logging.RuntimeLog.Info("Wanning: worker与server文件同时存在，为防止误删除文件，将不执行清空旧文件操作")
 	}
-	err = os.RemoveAll(workerPathName)
-	if err != nil {
-		logging.RuntimeLog.Errorf(err.Error())
-		return false
-	}
-	thirdpartyPath, err := filepath.Abs(filepath.Join(conf.GetRootPath(), "thirdparty"))
-	if err != nil {
-		logging.RuntimeLog.Error(err)
-		return false
-	}
-	err = os.RemoveAll(thirdpartyPath)
-	if err != nil {
-		logging.RuntimeLog.Errorf(err.Error())
-		return false
+	if !skipRemoveResource {
+		// 清除旧的worker可执行文件及thirdparty目录
+		err := os.RemoveAll(workerPathName)
+		if err != nil {
+			logging.RuntimeLog.Errorf(err.Error())
+			return false
+		}
+		thirdpartyPath, err := filepath.Abs(filepath.Join(conf.GetRootPath(), "thirdparty"))
+		if err != nil {
+			logging.RuntimeLog.Error(err)
+			return false
+		}
+		err = os.RemoveAll(thirdpartyPath)
+		if err != nil {
+			logging.RuntimeLog.Errorf(err.Error())
+			return false
+		}
 	}
 	// 下载worker可执行文件
 	return PrepareWorkerRunEnv()
@@ -172,7 +179,7 @@ func PrepareWorkerRunEnv() bool {
 		return false
 	}
 	if !utils.MakePath(logPath) {
-		logging.RuntimeLog.Error("create log path fail")
+		logging.RuntimeLog.Error("创建日志文件路径失败")
 		return false
 	}
 	// 准备worker可执行文件
@@ -190,12 +197,28 @@ func PrepareWorkerRunEnv() bool {
 		Category: resource.WorkerCategory,
 		Name:     workerBin,
 	})
-	err = CheckRequiredResource(re)
+	err = CheckRequiredResource(re, false)
 	if err != nil {
 		logging.RuntimeLog.Errorf("获取资源失败:%s", err.Error())
 		return false
 	}
 	return true
+}
+
+func SyncConfigAndDataFileResource() error {
+	var re []RequiredResource
+	for category, res := range resource.Resources {
+		for n, r := range res {
+			if r.Type == resource.DirAndFile || r.Type == resource.DataFile || r.Type == resource.ConfigFile {
+				re = append(re, RequiredResource{
+					Category: category,
+					Name:     n,
+				})
+			}
+		}
+	}
+	// 同步：对已存在的资源进行更新
+	return CheckRequiredResource(re, true)
 }
 
 func CheckWorkerPerformance(workerPerformance int) {
@@ -289,12 +312,21 @@ func StartWorkerDaemon() {
 			//更新运行参数后，强制重启worker
 			replay.ManualReloadFlag = true
 		}
+		// 同步配置和poc文件
+		if replay.ManualConfigAndPocSyncFlag {
+			logging.CLILog.Info("开始同步配置、Poc文件...")
+			logging.RuntimeLog.Info("开始同步配置、Poc文件...")
+			err = SyncConfigAndDataFileResource()
+			if err != nil {
+				logging.RuntimeLog.Errorf("同步配置文件、Poc失败：%v", err)
+			}
+		}
 		// 收到server的手动重启worker命令，执行停止worker、文件同步、重启worker
-		if replay.ManualReloadFlag || replay.ManualFileSyncFlag {
+		if replay.ManualReloadFlag || replay.ManualInitEnvFlag {
 			if KillWorker() {
-				if replay.ManualFileSyncFlag {
-					logging.CLILog.Info("manual start worker sync...")
-					logging.RuntimeLog.Info("manual start worker sync...")
+				if replay.ManualInitEnvFlag {
+					logging.CLILog.Info("开始重置worker环境...")
+					logging.RuntimeLog.Info("开始重置worker环境...")
 					// 强制更新：删除worker和thirdparty目录，重新请求worker二进制文件
 					ReloadWorkerRunEnv()
 				}

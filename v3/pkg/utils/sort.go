@@ -162,3 +162,23 @@ func CompareStringSlices(s1, s2 []string, isSort bool) bool {
 	}
 	return true
 }
+
+// RemoveDuplicatesAndSort 将字符串数组转换为小写，去除重复元素并排序
+func RemoveDuplicatesAndSort(arr []string) []string {
+	// 使用map来记录已经出现过的字符串
+	seen := make(map[string]bool)
+	var result []string
+
+	// 遍历数组，将每个字符串转换为小写
+	for _, str := range arr {
+		lowerStr := strings.ToLower(str)
+		if !seen[lowerStr] {
+			seen[lowerStr] = true
+			result = append(result, lowerStr)
+		}
+	}
+
+	// 对结果数组进行排序
+	sort.Strings(result)
+	return result
+}

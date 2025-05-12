@@ -25,6 +25,8 @@ type VulDocument struct {
 	Url       string `bson:"url" json:"url"`
 	Source    string `bson:"source" json:"source"`
 	PocFile   string `bson:"pocfile" json:"pocfile"`
+	Name      string `bson:"name" json:"name"`
+	Severity  string `bson:"severity" json:"severity"`
 	Extra     string `bson:"extra,omitempty" json:"extra,omitempty"`
 	TaskId    string `bson:"taskId" json:"taskId"`
 

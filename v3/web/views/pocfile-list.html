@@ -1,0 +1,151 @@
+<main class="app-content">
+    <div class="app-title">
+        <div>
+            <h1><i class="fa fa-file-text-o"></i> POC文件</h1>
+            <p>管理Nemo的POC验证所需的YAML/JSON/TXT/XML/CSV/JS/SVG文件</p>
+        </div>
+        <ul class="app-breadcrumb breadcrumb">
+            <li class="breadcrumb-item"><i class="fa fa-home fa-lg"></i></li>
+            <li class="breadcrumb-item"><a href="#">POC文件</a></li>
+        </ul>
+    </div>
+    <div class="row">
+        <div class="col-md-12">
+            <div class="tile">
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <div class="input-group">
+                            <input type="text" class="form-control" id="currentPath" value="" placeholder="当前路径"
+                                   readonly>
+                            <div class="input-group-append">
+                                <button class="btn btn-primary" type="button" id="btnGoUp">
+                                    <i class="fa fa-level-up"></i> 上级目录
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6 text-right">
+                        <button class="btn btn-primary" type="button" id="btnDeleteSelected">
+                            <i class="fa fa-trash"></i> 删除文件与目录
+                        </button>
+                        <button class="btn btn-primary" type="button" id="btnNewFolder">
+                            <i class="fa fa-folder"></i> 新建目录
+                        </button>
+                        <button class="btn btn-success" type="button" id="btnUpload">
+                            <i class="fa fa-upload"></i> 上传文件
+                        </button>
+                        <input type="file" id="fileInput" style="display: none;" multiple>
+                    </div>
+                </div>
+
+                <div class="row mb-3">
+                    <div class="col-md-12">
+                        <div class="input-group">
+                            <input type="text" class="form-control" id="searchKeyword" placeholder="输入关键词搜索...">
+                            <div class="input-group-append">
+                                <select class="form-control" id="searchMode">
+                                    <option value="name">按文件名</option>
+                                    <option value="content">按文件内容</option>
+                                </select>
+                                <button class="btn btn-primary" type="button" id="btnSearch">
+                                    <i class="fa fa-search"></i> 搜索
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="table-responsive">
+                    <table class="table table-hover table-bordered" id="fileTable">
+                        <thead>
+                        <tr>
+                            <th width="5%"><input type="checkbox" id="selectAll"></th>
+                            <th width="40%">文件名</th>
+                            <th width="10%">大小</th>
+                            <th width="20%">修改时间</th>
+                            <th width="15%">MD5</th>
+                            <th width="10%">操作</th>
+                        </tr>
+                        </thead>
+                        <tbody id="fileTableBody">
+                        <!-- 文件列表将通过JS动态加载 -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- 新建目录模态框 -->
+    <div class="modal fade" id="newFolderModal" tabindex="-1" role="dialog" aria-labelledby="newFolderModalLabel"
+         aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="newFolderModalLabel">新建目录</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label for="folderName">目录名称</label>
+                        <input type="text" class="form-control" id="folderName" placeholder="请输入目录名称">
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">取消</button>
+                    <button type="button" class="btn btn-primary" id="btnCreateFolder">创建</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 上传进度模态框 -->
+    <div class="modal fade" id="uploadProgressModal" tabindex="-1" role="dialog"
+         aria-labelledby="uploadProgressModalLabel"
+         aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="uploadProgressModalLabel">文件上传</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="progress">
+                        <div class="progress-bar progress-bar-striped progress-bar-animated" id="uploadProgressBar"
+                             role="progressbar" style="width: 0%">0%
+                        </div>
+                    </div>
+                    <div id="uploadStatus" class="mt-2"></div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal" id="btnCancelUpload">取消
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</main>
+
+<script src="static/js/jquery/jquery-3.3.1.min.js"></script>
+<script src="static/js/bootstrap/popper.min.js"></script>
+<script src="static/js/bootstrap/bootstrap.min.js"></script>
+<script src="static/js/main.js"></script>
+<script src="static/js/plugins/pace.min.js"></script>
+<!-- Data table plugin-->
+<script src="static/js/plugins/jquery.dataTables.min.js"></script>
+<script src="static/js/plugins/dataTables.bootstrap.min.js"></script>
+<script src="static/js/sweetalert/sweetalert.min.js"></script>
+<script src="static/js/jquery/jquery.bootstrap-duallistbox.js"></script>
+<script src="static/js/plugins/jquery.form.min.js"></script>
+<script src="static/js/server/pocfile-list.js"></script>
+<script>
+    $(function () {
+        $("title").html("Poc文件-Nemo");
+    });
+</script>
+
+

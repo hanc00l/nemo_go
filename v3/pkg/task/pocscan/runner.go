@@ -14,6 +14,7 @@ import (
 type Executor interface {
 	IsExecuteFromCmd() bool
 	GetExecuteCmd() string
+	GetDir() string
 	GetExecuteArgs(inputTempFile, outputTempFile string) (cmdArgs []string)
 	GetRequiredResources() (re []core.RequiredResource)
 	Run(target []string) (result Result)
@@ -42,7 +43,7 @@ func Do(taskInfo execute.ExecutorTaskInfo) (result Result) {
 	}
 	re := executor.GetRequiredResources()
 	if len(re) > 0 {
-		err := core.CheckRequiredResource(re)
+		err := core.CheckRequiredResource(re, false)
 		if err != nil {
 			logging.RuntimeLog.Errorf("任务资源检查和请求失败:%s", err.Error())
 			return
@@ -79,6 +80,11 @@ func runByCmd(executor Executor, target []string, r *Result) {
 	var stderr bytes.Buffer
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = &stderr
+	// 由于poc file是相对路径，所以需要设置工作目录
+	workDir := executor.GetDir()
+	if len(workDir) > 0 {
+		cmd.Dir = workDir
+	}
 	err = cmd.Run()
 	if err != nil {
 		logging.RuntimeLog.Error(err, stderr.String())

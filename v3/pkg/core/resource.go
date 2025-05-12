@@ -14,18 +14,28 @@ type RequiredResource struct {
 	Name     string
 }
 
-func CheckRequiredResource(resourceList []RequiredResource) error {
+// CheckRequiredResource 检查并同步资源
+// syncExistResource：为true，只同步已存在的资源；false，同步不存在的资源
+func CheckRequiredResource(resourceList []RequiredResource, syncExistResource bool) error {
 	for _, v := range resourceList {
 		var r resource.Resource
 		var ok bool
 		if r, ok = resource.Resources[v.Category][v.Name]; !ok {
-			return fmt.Errorf("resource %s:%s is not valid", v.Category, v.Name)
+			return fmt.Errorf("资源%s:%s非法", v.Category, v.Name)
 		}
 		filePath := filepath.Join(conf.GetRootPath(), r.Path, r.Name)
-		if utils.CheckFileExist(filePath) {
+		resourceExistCheck := utils.CheckFileExist(filePath)
+		if syncExistResource == true && resourceExistCheck == false {
 			continue
 		}
-		logging.RuntimeLog.Warningf("resource %s:%s is not available,requesting...", v.Category, v.Name)
+		if syncExistResource == false && resourceExistCheck == true {
+			continue
+		}
+		if syncExistResource {
+			logging.RuntimeLog.Warningf("资源 %s:%s存在，强制更新...", v.Category, v.Name)
+		} else {
+			logging.RuntimeLog.Warningf("资源%s:%s不存在，请求资源...", v.Category, v.Name)
+		}
 		args := RequestResourceArgs{
 			Category: v.Category,
 			Name:     v.Name,
@@ -33,7 +43,7 @@ func CheckRequiredResource(resourceList []RequiredResource) error {
 		var resp ResourceResultArgs
 		err := CallXClient("RequestResource", &args, &resp)
 		if err != nil {
-			return fmt.Errorf("request resource fail:%s", err.Error())
+			return fmt.Errorf("请求资源失败:%s", err.Error())
 		}
 		rdata := resource.Resource{
 			Name:  r.Name,
@@ -47,10 +57,10 @@ func CheckRequiredResource(resourceList []RequiredResource) error {
 		} else if r.Type == resource.DirAndFile {
 			err = resource.SaveDirResource(&rdata)
 		} else {
-			err = fmt.Errorf("unsupported resource type:%s", r.Type)
+			err = fmt.Errorf("不支持的资源类型:%s", r.Type)
 		}
 		if err != nil {
-			return fmt.Errorf("save resource %s:%s fail:%s", v.Category, v.Name, err.Error())
+			return fmt.Errorf("保存资源%s:%s失败:%s", v.Category, v.Name, err.Error())
 		}
 	}
 	return nil

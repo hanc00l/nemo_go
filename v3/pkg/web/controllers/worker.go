@@ -57,51 +57,6 @@ func (c *WorkerController) ListAction() {
 	c.Data["json"] = resp
 }
 
-// ManualReloadWorkerAction 重启worker
-func (c *WorkerController) ManualReloadWorkerAction() {
-	defer func(c *WorkerController, encoding ...bool) {
-		_ = c.ServeJSON(encoding...)
-	}(c)
-	if c.CheckMultiAccessRequest([]RequestRole{SuperAdmin, Admin}, false) == false {
-		c.FailedStatus("当前用户权限不允许！")
-		return
-	}
-
-	worker := c.GetString("worker_name")
-	if worker == "" {
-		c.FailedStatus("worker name is empty")
-		return
-	}
-	rdb, err := core.GetRedisClient()
-	if err != nil {
-		logging.RuntimeLog.Errorf("get redis client fail:%v", err)
-		return
-	}
-	defer rdb.Close()
-
-	workerAliveStatus, err := core.GetWorkerStatusFromRedis(rdb, worker)
-	if errors.Is(err, redis.Nil) {
-		c.FailedStatus("worker不存在！")
-		return
-	} else if err != nil {
-		logging.RuntimeLog.Errorf(err.Error())
-		return
-	}
-	if workerAliveStatus.IsDaemonProcess == false {
-		c.FailedStatus("worker不是daemon进程！")
-		return
-	}
-
-	workerAliveStatus.ManualReloadFlag = true
-	err = core.SetWorkerStatusToRedis(rdb, worker, workerAliveStatus)
-	if err != nil {
-		logging.RuntimeLog.Errorf(err.Error())
-		c.FailedStatus("设置worker重启标志失败！")
-		return
-	}
-	c.SucceededStatus("已设置worker重启标志，等待worker的daemon进程执行！")
-}
-
 // EditWorkerAction 更改worker
 func (c *WorkerController) EditWorkerAction() {
 	defer func(c *WorkerController, encoding ...bool) {
@@ -145,8 +100,23 @@ func (c *WorkerController) EditWorkerAction() {
 	return
 }
 
-// UpdateWorkerAction 更新worker的启动参数
-func (c *WorkerController) UpdateWorkerAction() {
+func (c *WorkerController) ManualUpdateWorkerAction() {
+	c.updateWorkAliveOptions("update")
+}
+
+// ManualReloadWorkerAction 重启worker
+func (c *WorkerController) ManualReloadWorkerAction() {
+	c.updateWorkAliveOptions("reload")
+}
+
+func (c *WorkerController) ManualInitWorkerAction() {
+	c.updateWorkAliveOptions("init")
+}
+func (c *WorkerController) ManualSyncWorkerAction() {
+	c.updateWorkAliveOptions("sync")
+}
+
+func (c *WorkerController) updateWorkAliveOptions(updateType string) {
 	defer func(c *WorkerController, encoding ...bool) {
 		_ = c.ServeJSON(encoding...)
 	}(c)
@@ -183,8 +153,15 @@ func (c *WorkerController) UpdateWorkerAction() {
 		c.FailedStatus("worker不是daemon进程！")
 		return
 	}
-	workerAliveStatus.ManualUpdateOptionFlag = true
-	workerAliveStatus.ManualFileSyncFlag = true
+	if updateType == "reload" {
+		workerAliveStatus.ManualReloadFlag = true
+	} else if updateType == "sync" {
+		workerAliveStatus.ManualConfigAndPocSyncFlag = true
+	} else if updateType == "init" {
+		workerAliveStatus.ManualInitEnvFlag = true
+	} else if updateType == "update" {
+		workerAliveStatus.ManualUpdateOptionFlag = true
+	}
 	workerAliveStatus.WorkerUpdateOption, err = json.Marshal(req)
 	if err != nil {
 		logging.RuntimeLog.Error(err.Error())
@@ -194,10 +171,10 @@ func (c *WorkerController) UpdateWorkerAction() {
 	err = core.SetWorkerStatusToRedis(rdb, worker, workerAliveStatus)
 	if err != nil {
 		logging.RuntimeLog.Errorf(err.Error())
-		c.FailedStatus("设置worker启动参数失败！")
+		c.FailedStatus("设置参数失败！")
 		return
 	}
-	c.SucceededStatus("已设置worker启动参数，等待worker的daemon进程执行！")
+	c.SucceededStatus("已设置，等待worker的daemon进程执行！")
 	return
 }
 

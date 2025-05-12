@@ -1,0 +1,81 @@
+<main class="app-content">
+    <div class="row">
+        <div class="col-md-12">
+            <div class="tile">
+                <div class="tile-body">
+                    <!-- 任务详情卡片 -->
+                    <div class="row mb-4">
+                        <div class="col-md-12">
+                            <div class="card shadow-sm">
+                                <div class="card-header bg-primary text-white">
+                                    <h2 class="card-title mb-0"><i class="fa fa-tasks"></i> <span
+                                            id="vul_pocfile"></span></h2>
+                                </div>
+                                <div class="card-body">
+                                    <!-- 第一组：漏洞基本信息 -->
+                                    <div class="row mb-3">
+                                        <div class="col-md-12">
+                                            <span class="badge badge-info">名称</span>
+                                            <span class="badge badge-light" id="vul_name"></span>
+                                        </div>
+                                    </div>
+                                    <div class="row mb-3">
+                                        <div class="col-md-4">
+                                            <span class="badge badge-info">资产</span>
+                                            <span class="badge badge-light" id="vul_authority"></span>
+                                        </div>
+                                        <div class="col-md-4">
+                                            <span class="badge badge-info">等级</span>
+                                            <span class="badge badge-light" id="vul_severity"></span>
+                                        </div>
+                                        <div class="col-md-4">
+                                            <span class="badge badge-info">来源</span>
+                                            <span class="badge badge-light" id="vul_source"></span>
+                                        </div>
+                                    </div>
+
+                                    <div class="row mb-3">
+                                        <div class="col-md-4">
+                                            <span class="badge badge-info">Url</span>
+                                            <span class="badge badge-light" id="vul_url"></span>
+                                        </div>
+                                        <div class="col-md-4">
+                                            <span class="badge badge-info">创建时间</span>
+                                            <span class="badge badge-light" id="vul_create_time"></span>
+                                        </div>
+
+                                        <div class="col-md-4">
+                                            <span class="badge badge-info">更新时间</span>
+                                            <span class="badge badge-light" id="vul_update_time"></span>
+                                        </div>
+                                    </div>
+                                    <!-- 漏洞参数 -->
+                                    <div class="row mb-3">
+                                        <div class="col-md-12">
+                                            <span class="badge badge-info">验证详情</span>
+                                            <div class="card bg-light p-3">
+                                                <pre class="mb-0" id="vul_extra"></pre>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</main>
+
+<script src="static/js/jquery/jquery-3.3.1.min.js"></script>
+<script src="static/js/bootstrap/popper.min.js"></script>
+<script src="static/js/bootstrap/bootstrap.min.js"></script>
+<script src="static/js/main.js"></script>
+<script src="static/js/plugins/pace.min.js"></script>
+<script src="static/js/server/vul-info.js"></script>
+<script>
+    $(function () {
+        $("title").html("漏洞详情-Nemo");
+    });
+</script>

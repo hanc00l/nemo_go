@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/google/uuid"
-	"github.com/hanc00l/nemo_go/v3/pkg/conf"
 	"github.com/hanc00l/nemo_go/v3/pkg/core"
 	"github.com/hanc00l/nemo_go/v3/pkg/db"
 	"github.com/hanc00l/nemo_go/v3/pkg/logging"
@@ -193,7 +192,7 @@ func (c *MainTaskController) getListData(req mainTaskRequestParam) (resp DataTab
 			IsCron:         row.IsCron,
 			ProgressRate:   fmt.Sprintf("%d%%", int(row.ProgressRate*100.0)),
 			Progress:       row.Progress,
-			CreateDatetime: row.CreateTime.In(conf.LocalTimeLocation).Format("2006-01-02 15:04:05"),
+			CreateDatetime: FormatDateTime(row.CreateTime),
 		}
 		if len(row.Target) > 100 {
 			task.Target = row.Target[:100] + "..."
@@ -201,7 +200,7 @@ func (c *MainTaskController) getListData(req mainTaskRequestParam) (resp DataTab
 			task.Target = row.Target
 		}
 		if row.StartTime != nil {
-			task.StartDatetime = row.UpdateTime.In(conf.LocalTimeLocation).Format("2006-01-02 15:04:05")
+			task.StartDatetime = FormatDateTime(row.UpdateTime)
 		}
 		if row.Status == core.SUCCESS || row.Status == core.FAILURE {
 			if row.EndTime != nil && row.StartTime != nil {
@@ -215,10 +214,10 @@ func (c *MainTaskController) getListData(req mainTaskRequestParam) (resp DataTab
 			} else {
 				task.Status = "disabled"
 			}
-			task.ProgressRate = fmt.Sprintf("已执行: %d次", int(row.CronTaskInfo.CronRunCount))
+			task.ProgressRate = fmt.Sprintf("已执行: %d次", row.CronTaskInfo.CronRunCount)
 			task.Result = "启动规则: " + row.CronTaskInfo.CronExpr
 			if row.CronTaskInfo.CronLastRun != nil {
-				task.StartDatetime = row.CronTaskInfo.CronLastRun.In(conf.LocalTimeLocation).Format("2006-01-02 15:04:05")
+				task.StartDatetime = FormatDateTime(*row.CronTaskInfo.CronLastRun)
 			}
 		}
 
@@ -523,19 +522,19 @@ func (c *MainTaskController) InfoAction() {
 	infoData.Result = doc.Result
 	infoData.Progress = doc.Progress
 	infoData.ProgressRate = fmt.Sprintf("%d", int(doc.ProgressRate*100.0)) + "%"
-	infoData.CreateDatetime = doc.CreateTime.In(conf.LocalTimeLocation).Format("2006-01-02 15:04:05")
+	infoData.CreateDatetime = FormatDateTime(doc.CreateTime)
 	if doc.StartTime != nil {
-		infoData.StartDatetime = doc.StartTime.In(conf.LocalTimeLocation).Format("2006-01-02 15:04:05")
+		infoData.StartDatetime = FormatDateTime(*doc.StartTime)
 	}
 	if doc.EndTime != nil {
-		infoData.EndDatetime = doc.EndTime.In(conf.LocalTimeLocation).Format("2006-01-02 15:04:05")
+		infoData.EndDatetime = FormatDateTime(*doc.EndTime)
 	}
 	if doc.Status == core.SUCCESS || doc.Status == core.FAILURE {
 		if doc.StartTime != nil && doc.EndTime != nil {
 			infoData.Runtime = doc.EndTime.Sub(*doc.StartTime).Truncate(time.Second).String()
 		}
 	}
-	infoData.CreateDatetime = doc.CreateTime.In(conf.LocalTimeLocation).Format("2006-01-02 15:04:05")
+	infoData.CreateDatetime = FormatDateTime(doc.CreateTime)
 
 	if doc.OrgId != "" {
 		org := db.NewOrg(workspaceId, mongoClient)
@@ -608,14 +607,14 @@ func (c *MainTaskController) InfoExecutorTaskAction() {
 			Status:         row.Status,
 			Result:         row.Result,
 			Args:           row.Args,
-			CreateDatetime: row.CreateTime.In(conf.LocalTimeLocation).Format("2006-01-02 15:04:05"),
-			UpdateDatetime: row.UpdateTime.In(conf.LocalTimeLocation).Format("2006-01-02 15:04:05"),
+			CreateDatetime: FormatDateTime(row.CreateTime),
+			UpdateDatetime: FormatDateTime(row.UpdateTime),
 		}
 		if row.StartTime != nil {
-			item.StartDatetime = row.StartTime.In(conf.LocalTimeLocation).Format("2006-01-02 15:04:05")
+			item.StartDatetime = FormatDateTime(*row.StartTime)
 		}
 		if row.EndTime != nil {
-			item.EndDatetime = row.EndTime.In(conf.LocalTimeLocation).Format("2006-01-02 15:04:05")
+			item.EndDatetime = FormatDateTime(*row.EndTime)
 		}
 		if row.Status == core.SUCCESS || row.Status == core.FAILURE {
 			if row.StartTime != nil && row.EndTime != nil {

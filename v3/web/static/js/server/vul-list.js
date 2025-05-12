@@ -21,6 +21,7 @@ $(function () {
                         "host": $('#host').val(),
                         "pocfile": $('#pocfile').val(),
                         "source": $('#source').val(),
+                        "severity": $('#severity').val(),
                         "task_id": $.urlParam('task_id'),
                     });
                 }
@@ -42,8 +43,13 @@ $(function () {
                     }
                 },
                 {data: "url", title: "Url", width: "15%"},
-                {data: "pocfile", title: "Poc文件", width: "25%"},
-                {data: "source", title: "来源", width: "8%"},
+                {
+                    data: "pocfile", title: "Poc文件", width: "25%",
+                    "render": function (data, type, row) {
+                        return '<a href="/vul-info?id=' + row["id"] + '" target=_blank>' + data + '</a>';
+                    }
+                },
+                {data: "severity", title: "等级", width: "8%"},
                 {data: "create_time", title: "创建时间", width: "8%"},
                 {data: "update_time", title: "更新时间", width: "8%"},
                 {
