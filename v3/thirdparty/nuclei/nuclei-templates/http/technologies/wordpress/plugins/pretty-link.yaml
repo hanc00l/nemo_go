@@ -1,7 +1,7 @@
 id: wordpress-pretty-link
 
 info:
-  name: PrettyLinks – Affiliate Links, Link Branding, Link Tracking & Marketing Plugin Detection
+  name: PrettyLinks – Affiliate Links, Link Branding, Link Tracking, Marketing and Stripe Payments Plugin Detection
   author: ricardomaia
   severity: info
   reference:

@@ -57,7 +57,7 @@
     "Name": "activemq-apollo",
     "Category": "component",
     "Description": "apache apollo",
-    "Updated": "2025-05-06",
+    "Updated": "2025-05-12",
     "Fingerprint": [
       "apollo"
     ],
@@ -68,7 +68,8 @@
           "http/cves/2022/CVE-2022-22897.yaml",
           "http/cves/2023/CVE-2023-47643.yaml",
           "http/default-logins/apache/apache-apollo-default-login.yaml",
-          "http/default-logins/apollo/apollo-default-login.yaml"
+          "http/default-logins/apollo/apollo-default-login.yaml",
+          "http/misconfiguration/apollo-adminservice-unauth.yaml"
         ]
       }
     ]
@@ -114,7 +115,7 @@
     "Name": "alibaba-nacos",
     "Category": "cloud",
     "Description": "Alibaba nacos",
-    "Updated": "2025-05-06",
+    "Updated": "2025-05-12",
     "Fingerprint": [
       "nacos"
     ],
@@ -126,7 +127,9 @@
           "http/cves/2021/CVE-2021-29442.yaml",
           "http/default-logins/nacos/nacos-default-login.yaml",
           "http/vulnerabilities/other/nacos-auth-bypass.yaml",
-          "http/vulnerabilities/other/nacos-info-leak.yaml"
+          "http/vulnerabilities/other/nacos-info-leak.yaml",
+          "http/misconfiguration/nacos/nacos-create-user.yaml",
+          "http/misconfiguration/nacos-authentication-bypass.yaml"
         ]
       }
     ]
@@ -152,10 +155,11 @@
   {
     "Name": "an-heng",
     "Category": "device",
-    "Description": "安恒，安恒信息安全设备",
-    "Updated": "2025-05-06",
+    "Description": "安恒，安恒信息安全设备，明御运维审计与风险控制系统",
+    "Updated": "2025-05-12",
     "Fingerprint": [
-      "安恒"
+      "安恒",
+      "明御"
     ],
     "Poc": [
       {
@@ -164,6 +168,12 @@
           "anheng-DAS-Gateway-rce-suffix.yaml",
           "anheng-DAS-USM-SSRF-xmlrpc.yaml"
         ]
+      },
+      {
+        "Source": "nuclei-template",
+        "Path": [
+          "http/misconfiguration/mingyu-xmlrpc-sock-adduser.yaml"
+        ]
       }
     ]
   },
@@ -171,7 +181,7 @@
     "Name": "apache-airflow",
     "Category": "component",
     "Description": "Apache Airflow",
-    "Updated": "2025-05-06",
+    "Updated": "2025-05-12",
     "Fingerprint": [
       "airflow"
     ],
@@ -185,7 +195,9 @@
           "http/cves/2021/CVE-2021-38540.yaml",
           "http/cves/2022/CVE-2022-24288.yaml",
           "http/cves/2022/CVE-2022-40127.yaml",
-          "http/default-logins/apache/airflow-default-login.yaml"
+          "http/default-logins/apache/airflow-default-login.yaml",
+          "http/misconfiguration/airflow/airflow-debug.yaml",
+          "http/misconfiguration/airflow/unauthenticated-airflow.yaml"
         ]
       }
     ]
@@ -229,7 +241,7 @@
     "Name": "apache-couchdb",
     "Category": "component",
     "Description": "ApacheCouchDB",
-    "Updated": "2025-05-06",
+    "Updated": "2025-05-12",
     "Fingerprint": [
       "couchdb"
     ],
@@ -239,7 +251,8 @@
         "Path": [
           "http/cves/2017/CVE-2017-12635.yaml",
           "http/default-logins/couchdb/couchdb-default-login.yaml",
-          "http/vulnerabilities/other/couchdb-adminparty.yaml"
+          "http/vulnerabilities/other/couchdb-adminparty.yaml",
+          "http/misconfiguration/apache/apache-couchdb-unauth.yaml"
         ]
       }
     ]
@@ -361,7 +374,7 @@
     "Name": "apache-nifi",
     "Category": "component",
     "Description": "Apache NiFi",
-    "Updated": "2025-05-06",
+    "Updated": "2025-05-12",
     "Fingerprint": [
       "apache-nifi",
       "nifi"
@@ -370,7 +383,8 @@
       {
         "Source": "nuclei-template",
         "Path": [
-          "http/vulnerabilities/apache/apache-nifi-rce.yaml"
+          "http/vulnerabilities/apache/apache-nifi-rce.yaml",
+          "http/misconfiguration/apache/apache-nifi-unauth.yaml"
         ]
       }
     ]
@@ -439,7 +453,8 @@
           "http/cves/2024/CVE-2024-45216.yaml",
           "http/vulnerabilities/apache/apache-solr-file-read.yaml",
           "http/vulnerabilities/apache/apache-solr-log4j-rce.yaml",
-          "http/cves/2019/CVE-2019-17558.yaml"
+          "http/cves/2019/CVE-2019-17558.yaml",
+          "http/misconfiguration/solr-query-dashboard.yaml"
         ]
       }
     ]
@@ -448,7 +463,7 @@
     "Name": "apache-struts",
     "Category": "component",
     "Description": "Apache Struts",
-    "Updated": "2025-05-06",
+    "Updated": "2025-05-12",
     "Fingerprint": [
       "struts"
     ],
@@ -463,7 +478,8 @@
           "http/cves/2018/CVE-2018-11776.yaml",
           "http/cves/2019/CVE-2019-0230.yaml",
           "http/cves/2020/CVE-2020-17530.yaml",
-          "http/cves/2021/CVE-2021-31805.yaml"
+          "http/cves/2021/CVE-2021-31805.yaml",
+          "http/misconfiguration/struts-ognl-console.yaml"
         ]
       }
     ]
@@ -619,7 +635,7 @@
     "Name": "confluence",
     "Category": "oa",
     "Description": "Confluence",
-    "Updated": "2025-05-06",
+    "Updated": "2025-05-12",
     "Fingerprint": [
       "confluence"
     ],
@@ -634,7 +650,8 @@
           "http/cves/2021/CVE-2021-26085.yaml",
           "http/cves/2022/CVE-2022-26134.yaml",
           "http/cves/2022/CVE-2022-26138.yaml",
-          "http/cves/2023/CVE-2023-22515.yaml"
+          "http/cves/2023/CVE-2023-22515.yaml",
+          "http/misconfiguration/confluence/confluence-oauth-admin.yaml"
         ]
       }
     ]
@@ -922,7 +939,7 @@
     "Name": "elasticsearch",
     "Category": "component",
     "Description": "Elasticsearch",
-    "Updated": "2025-05-06",
+    "Updated": "2025-05-12",
     "Fingerprint": [
       "elasticsearch"
     ],
@@ -935,7 +952,8 @@
           "http/cves/2015/CVE-2015-3337.yaml",
           "http/cves/2015/CVE-2015-5531.yaml",
           "http/default-logins/elasticsearch/elasticsearch-default-login.yaml",
-          "http/vulnerabilities/other/elasticsearch5-log4j-rce.yaml"
+          "http/vulnerabilities/other/elasticsearch5-log4j-rce.yaml",
+          "http/misconfiguration/elasticsearch.yaml"
         ]
       }
     ]
@@ -980,6 +998,23 @@
         "Source": "nuclei-template",
         "Path": [
           "http/technologies/kubernetes/etcd/etcd-version.yaml"
+        ]
+      }
+    ]
+  },
+  {
+    "Name": "everything",
+    "Category": "component",
+    "Description": "Everything",
+    "Updated": "2025-05-12",
+    "Fingerprint": [
+      "everything"
+    ],
+    "Poc": [
+      {
+        "Source": "nuclei-template",
+        "Path": [
+          "http/misconfiguration/everything-listing.yaml"
         ]
       }
     ]
@@ -1206,10 +1241,28 @@
     ]
   },
   {
+    "Name": "gitea",
+    "Category": "component",
+    "Description": "Gitea",
+    "Updated": "2025-05-12",
+    "Fingerprint": [
+      "gitea"
+    ],
+    "Poc": [
+      {
+        "Source": "nuclei-template",
+        "Path": [
+          "http/cves/2020/CVE-2020-14144.yaml",
+          "http/vulnerabilities/gitea/gitea-rce.yaml"
+        ]
+      }
+    ]
+  },
+  {
     "Name": "gitlab",
     "Category": "component",
     "Description": "Gitlab",
-    "Updated": "2025-05-06",
+    "Updated": "2025-05-12",
     "Fingerprint": [
       "gitlab"
     ],
@@ -1224,7 +1277,11 @@
           "http/cves/2022/CVE-2022-0735.yaml",
           "http/cves/2022/CVE-2022-1162.yaml",
           "http/cves/2022/CVE-2022-2185.yaml",
-          "http/default-logins/gitlab/gitlab-weak-login.yaml"
+          "http/default-logins/gitlab/gitlab-weak-login.yaml",
+          "http/misconfiguration/gitlab/gitlab-public-repos.yaml",
+          "http/misconfiguration/gitlab/gitlab-uninitialized-password.yaml",
+          "http/misconfiguration/gitlab/gitlab-api-user-enum.yaml",
+          "http/misconfiguration/gitlab/gitlab-user-enum.yaml"
         ]
       }
     ]
@@ -1384,7 +1441,7 @@
     "Name": "hikvision",
     "Category": "device",
     "Description": "Hikvision",
-    "Updated": "2025-05-06",
+    "Updated": "2025-05-12",
     "Fingerprint": [
       "hikvision"
     ],
@@ -1399,7 +1456,8 @@
           "http/vulnerabilities/hikvision/hikvision-ivms-file-upload-bypass.yaml",
           "http/vulnerabilities/hikvision/hikvision-ivms-file-upload-rce.yaml",
           "http/vulnerabilities/hikvision/hikvision-js-files-upload.yaml",
-          "http/vulnerabilities/other/hikvision-isecure-center-rce.yaml"
+          "http/vulnerabilities/other/hikvision-isecure-center-rce.yaml",
+          "http/misconfiguration/hikvision-env.yaml"
         ]
       },
       {
@@ -1551,7 +1609,7 @@
     "Name": "jboss",
     "Category": "component",
     "Description": "JBoss",
-    "Updated": "2025-05-06",
+    "Updated": "2025-05-12",
     "Fingerprint": [
       "jboss"
     ],
@@ -1561,7 +1619,34 @@
         "Path": [
           "http/cves/2017/CVE-2017-12149.yaml",
           "http/default-logins/jboss/jboss-jbpm-default-login.yaml",
-          "http/default-logins/jboss/jmx-default-login.yaml"
+          "http/default-logins/jboss/jmx-default-login.yaml",
+          "http/misconfiguration/jboss-web-service.yaml"
+        ]
+      }
+    ]
+  },
+  {
+    "Name": "jeecg-boot",
+    "Category": "component",
+    "Description": "Jeecg Boot",
+    "Updated": "2025-05-12",
+    "Fingerprint": [
+      "jeecg"
+    ],
+    "Poc": [
+      {
+        "Source": "nuclei-template",
+        "Path": [
+          "http/cves/2021/CVE-2021-37304.yaml",
+          "http/cves/2021/CVE-2021-37305.yaml",
+          "http/cves/2023/CVE-2023-1454.yaml",
+          "http/cves/2023/CVE-2023-4450.yaml",
+          "http/cves/2023/CVE-2023-33510.yaml",
+          "http/cves/2023/CVE-2023-34659.yaml",
+          "http/cves/2023/CVE-2023-38992.yaml",
+          "http/cves/2024/CVE-2024-48307.yaml",
+          "http/exposures/apis/jeecg-boot-swagger.yaml",
+          "http/vulnerabilities/other/jeeplus-cms-resetpassword-sqli.yaml"
         ]
       }
     ]
@@ -1606,7 +1691,7 @@
     "Name": "jenkins",
     "Category": "cloud",
     "Description": "Jenkins",
-    "Updated": "2025-05-06",
+    "Updated": "2025-05-12",
     "Fingerprint": [
       "jenkins"
     ],
@@ -1618,7 +1703,8 @@
           "http/cves/2018/CVE-2018-1000861.yaml",
           "http/default-logins/jenkins/jenkins-default.yaml",
           "http/vulnerabilities/jenkins/jenkins-script.yaml",
-          "http/vulnerabilities/jenkins/unauthenticated-jenkins.yaml"
+          "http/vulnerabilities/jenkins/unauthenticated-jenkins.yaml",
+          "http/misconfiguration/jenkins/jenkins-openuser-register.yaml"
         ]
       }
     ]
@@ -1745,7 +1831,7 @@
     "Name": "jupyter",
     "Category": "component",
     "Description": "Jupyter Notebook and hub",
-    "Updated": "2025-05-06",
+    "Updated": "2025-05-12",
     "Fingerprint": [
       "jupyter",
       "notebook",
@@ -1756,7 +1842,10 @@
         "Source": "nuclei-template",
         "Path": [
           "http/vulnerabilities/jupyter-notebook-rce.yaml",
-          "http/default-logins/jupyterhub/jupyterhub-default-login.yaml"
+          "http/default-logins/jupyterhub/jupyterhub-default-login.yaml",
+          "http/misconfiguration/jupyter-ipython-unauth.yaml",
+          "http/misconfiguration/jupyter-lab-unauth.yaml",
+          "http/misconfiguration/jupyter-notebooks-exposed.yaml"
         ]
       }
     ]
@@ -1765,7 +1854,7 @@
     "Name": "kafka",
     "Category": "component",
     "Description": "Kafka",
-    "Updated": "2025-05-06",
+    "Updated": "2025-05-12",
     "Fingerprint": [
       "kafka"
     ],
@@ -1775,7 +1864,8 @@
         "Path": [
           "http/cves/2023/CVE-2023-52251.yaml",
           "http/default-logins/apache/kafka-center-default-login.yaml",
-          "http/technologies/apache/kafka-manager-panel.yaml"
+          "http/technologies/apache/kafka-manager-panel.yaml",
+          "http/misconfiguration/apache/kafka-manager-unauth.yaml"
         ]
       }
     ]
@@ -1784,7 +1874,7 @@
     "Name": "kibana",
     "Category": "component",
     "Description": "Kibana",
-    "Updated": "2025-05-06",
+    "Updated": "2025-05-12",
     "Fingerprint": [
       "kibana"
     ],
@@ -1793,7 +1883,8 @@
         "Source": "nuclei-template",
         "Path": [
           "http/cves/2018/CVE-2018-17246.yaml",
-          "http/cves/2019/CVE-2019-7609.yaml"
+          "http/cves/2019/CVE-2019-7609.yaml",
+          "http/misconfiguration/exposed-kibana.yaml"
         ]
       }
     ]
@@ -1863,7 +1954,7 @@
     "Name": "kubernetes",
     "Category": "cloud",
     "Description": "Kubernetes",
-    "Updated": "2025-05-06",
+    "Updated": "2025-05-12",
     "Fingerprint": [
       "kubernetes"
     ],
@@ -1872,7 +1963,10 @@
         "Source": "nuclei-template",
         "Path": [
           "http/technologies/kubernetes/kube-api/kube-api-nodes.yaml",
-          "http/cves/2018/CVE-2018-18264.yaml"
+          "http/cves/2018/CVE-2018-18264.yaml",
+          "http/misconfiguration/kubernetes/kubernetes-metrics.yaml",
+          "http/misconfiguration/kubernetes/kubernetes-pods-api.yaml",
+          "http/misconfiguration/kubernetes/unauth-etcd-server.yaml"
         ]
       }
     ]
@@ -1915,7 +2009,7 @@
     "Name": "laravel",
     "Category": "cms",
     "Description": "Laravel",
-    "Updated": "2025-05-06",
+    "Updated": "2025-05-12",
     "Fingerprint": [
       "laravel"
     ],
@@ -1924,7 +2018,10 @@
         "Source": "nuclei-template",
         "Path": [
           "http/cves/2021/CVE-2021-3129.yaml",
-          "http/cves/2022/CVE-2022-40734.yaml"
+          "http/cves/2022/CVE-2022-40734.yaml",
+          "http/misconfiguration/laravel-debug-enabled.yaml",
+          "http/misconfiguration/laravel-debug-infoleak.yaml",
+          "http/misconfiguration/laravel-horizon-unauth.yaml"
         ]
       }
     ]
@@ -2464,7 +2561,7 @@
     "Name": "phpmyadmin",
     "Category": "component",
     "Description": "phpMyAdmin",
-    "Updated": "2025-05-06",
+    "Updated": "2025-05-12",
     "Fingerprint": [
       "phpmyadmin"
     ],
@@ -2475,7 +2572,9 @@
           "http/cves/2018/CVE-2018-12613.yaml",
           "http/cves/2019/CVE-2019-6799.yaml",
           "http/default-logins/phpmyadmin/phpmyadmin-default-login.yaml",
-          "http/vulnerabilities/phpmyadmin-unauth.yaml"
+          "http/vulnerabilities/phpmyadmin-unauth.yaml",
+          "http/misconfiguration/phpmyadmin/phpmyadmin-server-import.yaml",
+          "http/misconfiguration/phpmyadmin/phpmyadmin-misconfiguration.yaml"
         ]
       }
     ]
@@ -2553,7 +2652,7 @@
     "Name": "prometheus",
     "Category": "component",
     "Description": "Prometheus",
-    "Updated": "2025-05-06",
+    "Updated": "2025-05-12",
     "Fingerprint": [
       "prometheus"
     ],
@@ -2561,7 +2660,9 @@
       {
         "Source": "nuclei-template",
         "Path": [
-          "http/cves/2021/CVE-2021-29622.yaml"
+          "http/cves/2021/CVE-2021-29622.yaml",
+          "http/misconfiguration/prometheus/prometheus-unauth.yaml",
+          "http/misconfiguration/prometheus/prometheus-config.yaml"
         ]
       }
     ]
@@ -2965,7 +3066,7 @@
     "Name": "seeyon",
     "Category": "oa",
     "Description": "Seeyon,致远OA",
-    "Updated": "2025-05-06",
+    "Updated": "2025-05-12",
     "Fingerprint": [
       "seeyon",
       "致远oa"
@@ -2989,7 +3090,8 @@
           "http/vulnerabilities/seeyon/seeyon-initdata-exposure.yaml",
           "http/vulnerabilities/seeyon/seeyon-oa-sp2-file-upload.yaml",
           "http/vulnerabilities/seeyon/wooyun-2015-148227.yaml",
-          "http/vulnerabilities/other/seeyon-oa-log4j.yaml"
+          "http/vulnerabilities/other/seeyon-oa-log4j.yaml",
+          "http/misconfiguration/seeyon-unauth.yaml"
         ]
       },
       {
@@ -3166,7 +3268,7 @@
     "Name": "spring",
     "Category": "component",
     "Description": "Spring boot,spring cloud,spring framework",
-    "Updated": "2025-05-06",
+    "Updated": "2025-05-12",
     "Fingerprint": [
       "spring"
     ],
@@ -3187,7 +3289,17 @@
           "http/technologies/springboot-whitelabel.yaml",
           "http/vulnerabilities/springboot/springboot-actuators-jolokia-xxe.yaml",
           "http/vulnerabilities/springboot/springboot-h2-db-rce.yaml",
-          "http/vulnerabilities/springboot/springboot-log4j-rce.yaml"
+          "http/vulnerabilities/springboot/springboot-log4j-rce.yaml",
+          "http/misconfiguration/jolokia/jolokia-info-disclosure.yaml",
+          "http/misconfiguration/jolokia/jolokia-mbean-search.yaml",
+          "http/misconfiguration/springboot/springboot-env.yaml",
+          "http/misconfiguration/springboot/spring-eureka.yaml",
+          "http/misconfiguration/springboot/springboot-dump.yaml",
+          "http/misconfiguration/springboot/springboot-gateway.yaml",
+          "http/misconfiguration/springboot/springboot-heapdump.yaml",
+          "http/misconfiguration/springboot/springboot-jolokia.yaml",
+          "http/misconfiguration/springboot/springboot-info.yaml",
+          "http/exposures/apis/swagger-api.yaml"
         ]
       }
     ]
@@ -3205,6 +3317,23 @@
         "Source": "nuclei-template",
         "Path": [
           "http/cves/2017/CVE-2017-11610.yaml"
+        ]
+      }
+    ]
+  },
+  {
+    "Name": "swagger-ui",
+    "Category": "component",
+    "Description": "Swagger UI",
+    "Updated": "2025-05-12",
+    "Fingerprint": [
+      "swagger"
+    ],
+    "Poc": [
+      {
+        "Source": "nuclei-template",
+        "Path": [
+          "http/exposures/apis/swagger-api.yaml"
         ]
       }
     ]
@@ -3563,7 +3692,7 @@
     "Name": "weaver",
     "Category": "oa",
     "Description": "E-Office",
-    "Updated": "2025-05-06",
+    "Updated": "2025-05-12",
     "Fingerprint": [
       "e-office",
       "ecology",
@@ -3606,7 +3735,8 @@
           "http/vulnerabilities/weaver/ecology/ecology-mysql-config.yaml",
           "http/vulnerabilities/weaver/ecology/ecology-springframework-directory-traversal.yaml",
           "http/vulnerabilities/weaver/ecology/ecology-v8-sqli.yaml",
-          "http/vulnerabilities/weaver/ecology/ecology-syncuserinfo-sqli.yaml"
+          "http/vulnerabilities/weaver/ecology/ecology-syncuserinfo-sqli.yaml",
+          "http/misconfiguration/ecology-info-leak.yaml"
         ]
       },
       {
@@ -3874,7 +4004,7 @@
     "Name": "zabbix",
     "Category": "component",
     "Description": "Zabbix",
-    "Updated": "2025-05-06",
+    "Updated": "2025-05-12",
     "Fingerprint": [
       "zabbix"
     ],
@@ -3886,7 +4016,8 @@
           "http/cves/2019/CVE-2019-17382.yaml",
           "http/cves/2022/CVE-2022-23131.yaml",
           "http/cves/2022/CVE-2022-23134.yaml",
-          "http/default-logins/zabbix/zabbix-default-login.yaml"
+          "http/default-logins/zabbix/zabbix-default-login.yaml",
+          "http/misconfiguration/zabbix-dashboards-access.yaml"
         ]
       }
     ]

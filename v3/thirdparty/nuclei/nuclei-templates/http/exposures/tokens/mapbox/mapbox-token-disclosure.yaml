@@ -1,0 +1,49 @@
+id: mapbox-token-disclosure
+
+info:
+  name: Mapbox Token Disclosure
+  author: Devang-Solanki
+  severity: medium
+  description: Mapbox secret token is exposed to external users.
+  reference:
+    - https://docs.gitguardian.com/secrets-detection/detectors/specifics/mapbox_token
+    - https://github.com/zricethezav/gitleaks/blob/master/cmd/generate/config/rules/mapbox.go
+  metadata:
+    verified: true
+    max-request: 2
+  tags: token,exposure,mapbox
+
+flow: http(1) && http(2)
+
+http:
+  - method: GET
+    path:
+      - "{{BaseURL}}"
+
+    matchers:
+      - type: regex
+        part: body
+        name: token
+        regex:
+          - 'sk\.eyJ1Ijoi\w+\.[\w-]*'
+        internal: true
+
+  - raw:
+      - |
+        @Host: https://api.mapbox.com:443
+        GET /geocoding/v5/mapbox.places/Los%20Angeles.json?access_token={{token}} HTTP/1.1
+        Host: api.mapbox.com
+
+    disable-path-automerge: true
+    matchers:
+      - type: dsl
+        dsl:
+          - 'status_code == 200'
+          - 'contains_all(body, "type","query","features")'
+        condition: and
+
+    extractors:
+      - type: dsl
+        dsl:
+          - token
+# digest: 490a0046304402200d5e9c800ce4325dc0593c14db40afab44fd6bd6943dd4786812970595f96edd02204fec473af68d8fc15018ad35a47587a39b89a9ef3615e6c582c76d5f4733cc6e:922c64590222798bb761d5b6d8e72950
