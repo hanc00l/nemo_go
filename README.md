@@ -19,6 +19,7 @@
 
 ![login](v3/docs/image/index.png)
 ![dashboard](v3/docs/image/dashboard.png)
+![mcp server](v3/docs/image/mcp_tool.png)
 
 
 ## 特性
