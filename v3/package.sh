@@ -32,7 +32,7 @@ tar -cvzf release/nemo_darwin_amd64.tar \
   --exclude=thirdparty/fingerprintx/fingerprintx_linux_amd64 \
   --exclude=thirdparty/fingerprintx/fingerprintx_windows_amd64.exe \
   server_darwin_amd64 worker_darwin_amd64 daemon_worker_darwin_amd64 \
-  conf log thirdparty web  version.txt
+  conf log thirdparty web docs version.txt
 
 tar -cvzf release/nemo_linux_amd64.tar \
   --exclude=thirdparty/nuclei/nuclei_darwin_amd64 \
@@ -49,7 +49,7 @@ tar -cvzf release/nemo_linux_amd64.tar \
   --exclude=thirdparty/fingerprintx/fingerprintx_darwin_amd64 \
   --exclude=thirdparty/fingerprintx/fingerprintx_windows_amd64.exe \
   server_linux_amd64 worker_linux_amd64 daemon_worker_linux_amd64 \
-  conf log thirdparty web version.txt \
+  conf log thirdparty web docs version.txt \
   Dockerfile docker docker-compose.yaml docker_start.sh server_install.sh worker_install.sh
 
 tar -cvzf release/nemo_windows_amd64.tar \
@@ -66,6 +66,6 @@ tar -cvzf release/nemo_windows_amd64.tar \
   --exclude=thirdparty/fingerprintx/fingerprintx_darwin_amd64 \
   --exclude=thirdparty/fingerprintx/fingerprintx_linux_amd64 \
   server_windows_amd64.exe worker_windows_amd64.exe daemon_worker_windows_amd64.exe \
-  conf log thirdparty web version.txt
+  conf log thirdparty web docs version.txt
 
   echo "package done..."

@@ -77,6 +77,7 @@ type Server struct {
 	Database     Database    `yaml:"database"`     // 数据库配置
 	Redis        Redis       `yaml:"redis"`        // redis配置
 	RedisTunnel  RedisTunnel `yaml:"redisTunnel"`  // 提供redis tunnel服务的配置
+	MCPServer    MCPServer   `yaml:"mcpServer"`    // mcp服务配置
 }
 
 type Worker struct {
@@ -145,6 +146,20 @@ type APIToken struct {
 
 type Proxy struct {
 	Host []string `yaml:"host" json:"host"`
+}
+type AuthToken struct {
+	Token       string   `yaml:"token" json:"token"`
+	Description string   `yaml:"description" json:"description"`
+	WorkspaceId []string `yaml:"workspaceId" json:"workspaceId"`
+}
+
+type MCPServer struct {
+	Host      string      `yaml:"host" json:"host"`
+	Port      int         `yaml:"port" json:"port"`
+	TLSEnable bool        `yaml:"tlsEnable" json:"tlsEnable"`
+	TLSCert   string      `yaml:"tlsCert" json:"tlsCert"`
+	TLSKey    string      `yaml:"tlsKey" json:"tlsKey"`
+	AuthToken []AuthToken `yaml:"authToken" json:"authToken"`
 }
 
 // WriteConfig 写配置到yaml文件中

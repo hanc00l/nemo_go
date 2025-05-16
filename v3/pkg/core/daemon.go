@@ -209,7 +209,7 @@ func SyncConfigAndDataFileResource() error {
 	var re []RequiredResource
 	for category, res := range resource.Resources {
 		for n, r := range res {
-			if r.Type == resource.DirAndFile || r.Type == resource.DataFile || r.Type == resource.ConfigFile {
+			if r.Type == resource.Dir || r.Type == resource.DataFile || r.Type == resource.ConfigFile {
 				re = append(re, RequiredResource{
 					Category: category,
 					Name:     n,

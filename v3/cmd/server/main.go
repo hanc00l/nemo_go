@@ -6,6 +6,7 @@ import (
 	"github.com/beego/beego/v2/core/logs"
 	"github.com/beego/beego/v2/server/web"
 	beegoContext "github.com/beego/beego/v2/server/web/context"
+	"github.com/hanc00l/nemo_go/v3/cmd/server/interal"
 	"github.com/hanc00l/nemo_go/v3/pkg/cert"
 	"github.com/hanc00l/nemo_go/v3/pkg/conf"
 	"github.com/hanc00l/nemo_go/v3/pkg/core"
@@ -114,6 +115,10 @@ func main() {
 	}
 	if option.Cron {
 		core.StartCronTaskDamon()
+		time.Sleep(time.Second * 1)
+	}
+	if option.MCPServer {
+		go interal.StartMCPServer()
 		time.Sleep(time.Second * 1)
 	}
 	go core.StartSaveRuntimeLog(core.GetWorkerNameBySelf())

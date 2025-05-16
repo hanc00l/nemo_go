@@ -54,7 +54,7 @@ func CheckRequiredResource(resourceList []RequiredResource, syncExistResource bo
 		}
 		if r.Type == resource.ExecuteFile || r.Type == resource.DataFile || r.Type == resource.ConfigFile {
 			err = resource.SaveFileResource(&rdata)
-		} else if r.Type == resource.DirAndFile {
+		} else if r.Type == resource.Dir {
 			err = resource.SaveDirResource(&rdata)
 		} else {
 			err = fmt.Errorf("不支持的资源类型:%s", r.Type)

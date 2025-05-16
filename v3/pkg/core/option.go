@@ -43,6 +43,7 @@ type ServerOption struct {
 	Cron        bool `long:"cron" description:"cron service"`
 	Service     bool `long:"service" description:"rpc service"`
 	RedisTunnel bool `long:"redis-tunnel" description:"redis tunnel service"`
+	MCPServer   bool `long:"mcp" description:"mcp server service"`
 	WebOption   `group:"web-option"`
 }
 

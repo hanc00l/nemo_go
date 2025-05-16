@@ -49,8 +49,6 @@ type MainTaskDocument struct {
 	StartTime    *time.Time `bson:"start_time,omitempty"`
 	EndTime      *time.Time `bson:"end_time,omitempty"`
 
-	NotifyId []string `bson:"notifyId,omitempty"`
-
 	CreateTime time.Time `bson:"create_time"`
 	UpdateTime time.Time `bson:"update_time"`
 }

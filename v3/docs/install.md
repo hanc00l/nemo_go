@@ -35,6 +35,7 @@ Linux版本进行介绍安装步骤，在Mac、Windows平台及其它请参考�
 - 5000：Http，web界面
 - 5001：RPC接口，用于worker将任务结果保存到server
 - 5002：Redis安全代理隧道，用于Worker与Server通信
+- 5500：MCP Server监听地址
 - 27017：mongodb数据库，用于数据存储，默认在127.0.0.1上开放；
 - 6379：服务器Redis，用于存储任务队列，默认在127.0.0.1上开放；使用Redis安全代理隧道后，该端口不需要暴露到公网
 

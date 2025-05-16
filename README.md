@@ -1,6 +1,6 @@
 # Nemo v3
 
-**[安装手册](v3/docs/install.md)** • **[快速使用](v3/docs/quickstart.md)** 
+**[安装手册](v3/docs/install.md)** • **[快速使用](v3/docs/quickstart.md)** • **[MCPServer](v3/docs/mcp_server.md)** 
 
 **Nemo**是用来进行自动化信息收集的一个简单平台，通过集成常用的信息收集工具和技术，实现对内网及互联网资产信息的自动收集，提高隐患排查和渗透测试的工作效率。
 
@@ -15,6 +15,7 @@
 - LLMAPI接口：新增通过Kimi、Qwen、Deepseek等LLMAPI接口去获取企业域名信息（有一定的幻觉）；
 - 企业备案信息：新增通过ChinaZ接口获取企业备案信息（高可靠性），实现给定企业名称实现自动化的信息收集；
 - 新增Standalone模式：支持单文件worker部署，无需依赖其他组件，适合实战中内网渗透的快速信息收集与Nemo的集成（后续在优化后开源）；
+- 新增MCP Server，为AI模型与外部数据源或工具提供交互接口；
 
 ![login](v3/docs/image/index.png)
 ![dashboard](v3/docs/image/dashboard.png)

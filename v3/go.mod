@@ -14,6 +14,7 @@ require (
 	github.com/lair-framework/go-nmap v0.0.0-20191202052157-3507e0b03523
 	github.com/likexian/whois v1.15.5
 	github.com/likexian/whois-parser v1.24.20
+	github.com/mark3labs/mcp-go v0.27.0
 	github.com/northes/go-moonshot v0.5.2
 	github.com/oschwald/geoip2-golang v1.9.0
 	github.com/pkg/errors v0.9.1
@@ -22,6 +23,7 @@ require (
 	github.com/redis/go-redis/v9 v9.7.0
 	github.com/remeh/sizedwaitgroup v1.0.0
 	github.com/robfig/cron/v3 v3.0.1
+	github.com/sashabaranov/go-openai v1.38.0
 	github.com/shirou/gopsutil/v3 v3.23.7
 	github.com/sirupsen/logrus v1.9.3
 	github.com/smallnest/rpcx v1.8.36
@@ -157,12 +159,12 @@ require (
 	github.com/rs/xid v1.5.0 // indirect
 	github.com/rubyist/circuitbreaker v2.2.1+incompatible // indirect
 	github.com/saintfish/chardet v0.0.0-20230101081208-5e3ef4b5456d // indirect
-	github.com/sashabaranov/go-openai v1.38.0 // indirect
 	github.com/shiena/ansicolor v0.0.0-20200904210342-c7312218db18 // indirect
 	github.com/shoenig/go-m1cpu v0.1.6 // indirect
 	github.com/smallnest/quick v0.2.0 // indirect
 	github.com/smallnest/rsocket v0.0.0-20241130025819-fb14bead82dd // indirect
 	github.com/soheilhy/cmux v0.1.5 // indirect
+	github.com/spf13/cast v1.7.1 // indirect
 	github.com/syndtr/goleveldb v1.0.0 // indirect
 	github.com/templexxx/cpufeat v0.0.0-20180724012125-cef66df7f161 // indirect
 	github.com/templexxx/xor v0.0.0-20191217153810-f85b25db303b // indirect
@@ -183,6 +185,7 @@ require (
 	github.com/xdg-go/stringprep v1.0.4 // indirect
 	github.com/xi2/xz v0.0.0-20171230120015-48954b6210f8 // indirect
 	github.com/xtaci/kcp-go v5.4.20+incompatible // indirect
+	github.com/yosida95/uritemplate/v3 v3.0.2 // indirect
 	github.com/youmark/pkcs8 v0.0.0-20240726163527-a2c0da244d78 // indirect
 	github.com/yuin/goldmark v1.5.4 // indirect
 	github.com/yuin/goldmark-emoji v1.0.1 // indirect
