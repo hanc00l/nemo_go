@@ -82,8 +82,9 @@ func LoadDirResource(category string, name string) (*Resource, error) {
 
 func SaveDirResource(resource *Resource) (err error) {
 	// 创建目录
-	if !utils.MakePath(filepath.Join(conf.GetRootPath(), resource.Path)) {
-		return fmt.Errorf("can not save resource %s", resource.Path)
+	resourcePath := filepath.Join(conf.GetRootPath(), resource.Path, resource.Name)
+	if !utils.MakePath(resourcePath) {
+		return fmt.Errorf("can not save resource %s", resourcePath)
 	}
 	// 保存文件
 	var resources []Resource
@@ -92,10 +93,10 @@ func SaveDirResource(resource *Resource) (err error) {
 		return err
 	}
 	for _, r := range resources {
-		if !utils.MakePath(filepath.Join(conf.GetRootPath(), resource.Path, r.Path)) {
+		if !utils.MakePath(filepath.Join(resourcePath, r.Path)) {
 			return fmt.Errorf("can not save resource %s", r.Path)
 		}
-		filePath := filepath.Join(conf.GetRootPath(), resource.Path, r.Path, r.Name)
+		filePath := filepath.Join(resourcePath, r.Path, r.Name)
 		fileMode := 0644
 		if resource.Type == ExecuteFile {
 			fileMode = 0755
@@ -107,7 +108,7 @@ func SaveDirResource(resource *Resource) (err error) {
 	}
 	// 检验文件是否存在和MD5是否一致
 	for _, r := range resources {
-		filePath := filepath.Join(conf.GetRootPath(), resource.Path, r.Path, r.Name)
+		filePath := filepath.Join(resourcePath, r.Path, r.Name)
 		if !utils.CheckFileExist(filePath) {
 			return fmt.Errorf("resource %s save error, file not exist", r.Name)
 		}

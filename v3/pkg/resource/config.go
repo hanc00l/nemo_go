@@ -4,7 +4,7 @@ const (
 	ExecuteFile = "executeFile"
 	ConfigFile  = "configFile"
 	DataFile    = "dataFile"
-	DirAndFile  = "dirAndFile"
+	Dir         = "dir"
 )
 
 const (
@@ -105,7 +105,7 @@ func init() {
 
 	//poc文件
 	pocfile := make(map[string]Resource)
-	pocfile["nuclei-templates"] = Resource{Name: "nuclei-templates", Type: DirAndFile, Path: "thirdparty/nuclei"}
-	pocfile["some_nuclei_templates"] = Resource{Name: "some_nuclei_templates", Type: DirAndFile, Path: "thirdparty/nuclei"}
+	pocfile["nuclei-templates"] = Resource{Name: "nuclei-templates", Type: Dir, Path: "thirdparty/nuclei"}
+	pocfile["some_nuclei_templates"] = Resource{Name: "some_nuclei_templates", Type: Dir, Path: "thirdparty/nuclei"}
 	Resources[PocFileCategory] = pocfile
 }
