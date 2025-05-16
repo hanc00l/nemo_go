@@ -35,14 +35,22 @@ func MatchAssetPoc(docs []db.AssetDocument, pocscanConfig execute.PocscanConfig)
 	}
 	targetPocMapResult = make(map[string]execute.PocscanConfig)
 	for _, doc := range docs {
-		if len(doc.App) == 0 {
+		// match fingerprint：app、service
+		var fingerprint []string
+		if len(doc.App) > 0 {
+			fingerprint = append(fingerprint, doc.App...)
+		}
+		if len(doc.Service) > 0 {
+			fingerprint = append(fingerprint, doc.Service)
+		}
+		if len(fingerprint) == 0 {
 			continue
 		}
-		pocList := matchSingle(doc.App, mapInfo)
+		pocList := matchSingle(fingerprint, mapInfo)
 		if len(pocList) == 0 {
 			continue
 		}
-		logging.RuntimeLog.Infof("指纹：%s匹配到poc: %s", doc.App, pocList)
+		logging.RuntimeLog.Infof("指纹：%v 匹配到poc: %s", fingerprint, pocList)
 		c := pocscanConfig
 		c.Target = doc.Authority
 		c.PocFile = strings.Join(pocList, ",")
