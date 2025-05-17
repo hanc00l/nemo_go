@@ -38,13 +38,13 @@ func init() {
 	worker := make(map[string]Resource)
 	worker["worker_darwin_amd64"] = Resource{Name: "worker_darwin_amd64", Type: ExecuteFile, Path: "."}
 	worker["worker_linux_amd64"] = Resource{Name: "worker_linux_amd64", Type: ExecuteFile, Path: "."}
-	worker["worker_win_amd64.exe"] = Resource{Name: "worker_win_amd64.exe", Type: ExecuteFile, Path: "."}
+	worker["worker_windows_amd64.exe"] = Resource{Name: "worker_windows_amd64.exe", Type: ExecuteFile, Path: "."}
 	Resources[WorkerCategory] = worker
 
 	gogo := make(map[string]Resource)
 	gogo["gogo_darwin_amd64"] = Resource{Name: "gogo_darwin_amd64", Type: ExecuteFile, Path: "thirdparty/gogo"}
 	gogo["gogo_linux_amd64"] = Resource{Name: "gogo_linux_amd64", Type: ExecuteFile, Path: "thirdparty/gogo"}
-	gogo["gogo_win_amd64.exe"] = Resource{Name: "gogo_win_amd64.exe", Type: ExecuteFile, Path: "thirdparty/gogo"}
+	gogo["gogo_windows_amd64.exe"] = Resource{Name: "gogo_windows_amd64.exe", Type: ExecuteFile, Path: "thirdparty/gogo"}
 	Resources[GogoCategory] = gogo
 
 	dict := make(map[string]Resource)
@@ -59,25 +59,25 @@ func init() {
 	massdns := make(map[string]Resource)
 	massdns["massdns_darwin_amd64"] = Resource{Name: "massdns_darwin_amd64", Type: ExecuteFile, Path: "thirdparty/massdns"}
 	massdns["massdns_linux_amd64"] = Resource{Name: "massdns_linux_amd64", Type: ExecuteFile, Path: "thirdparty/massdns"}
-	massdns["massdns_win_amd64.exe"] = Resource{Name: "massdns_win_amd64.exe", Type: ExecuteFile, Path: "thirdparty/massdns"}
+	massdns["massdns_windows_amd64.exe"] = Resource{Name: "massdns_windows_amd64.exe", Type: ExecuteFile, Path: "thirdparty/massdns"}
 	Resources[MassdnsCategory] = massdns
 
 	subfinder := make(map[string]Resource)
 	subfinder["subfinder_darwin_amd64"] = Resource{Name: "subfinder_darwin_amd64", Type: ExecuteFile, Path: "thirdparty/subfinder"}
 	subfinder["subfinder_linux_amd64"] = Resource{Name: "subfinder_linux_amd64", Type: ExecuteFile, Path: "thirdparty/subfinder"}
-	subfinder["subfinder_win_amd64.exe"] = Resource{Name: "subfinder_win_amd64.exe", Type: ExecuteFile, Path: "thirdparty/subfinder"}
+	subfinder["subfinder_windows_amd64.exe"] = Resource{Name: "subfinder_windows_amd64.exe", Type: ExecuteFile, Path: "thirdparty/subfinder"}
 	Resources[SubfinderCategory] = subfinder
 
 	httpx := make(map[string]Resource)
 	httpx["httpx_darwin_amd64"] = Resource{Name: "httpx_darwin_amd64", Type: ExecuteFile, Path: "thirdparty/httpx"}
 	httpx["httpx_linux_amd64"] = Resource{Name: "httpx_linux_amd64", Type: ExecuteFile, Path: "thirdparty/httpx"}
-	httpx["httpx_win_amd64.exe"] = Resource{Name: "httpx_win_amd64.exe", Type: ExecuteFile, Path: "thirdparty/httpx"}
+	httpx["httpx_windows_amd64.exe"] = Resource{Name: "httpx_windows_amd64.exe", Type: ExecuteFile, Path: "thirdparty/httpx"}
 	Resources[HttpxCategory] = httpx
 
 	fingerprintx := make(map[string]Resource)
 	fingerprintx["fingerprintx_darwin_amd64"] = Resource{Name: "fingerprintx_darwin_amd64", Type: ExecuteFile, Path: "thirdparty/fingerprintx"}
 	fingerprintx["fingerprintx_linux_amd64"] = Resource{Name: "fingerprintx_linux_amd64", Type: ExecuteFile, Path: "thirdparty/fingerprintx"}
-	fingerprintx["fingerprintx_win_amd64.exe"] = Resource{Name: "fingerprintx_win_amd64.exe", Type: ExecuteFile, Path: "thirdparty/fingerprintx"}
+	fingerprintx["fingerprintx_windows_amd64.exe"] = Resource{Name: "fingerprintx_windows_amd64.exe", Type: ExecuteFile, Path: "thirdparty/fingerprintx"}
 	Resources[FingerprintxCategory] = fingerprintx
 	//IP归属地数据库文件
 	qqwry := make(map[string]Resource)
@@ -100,7 +100,7 @@ func init() {
 	nuclei := make(map[string]Resource)
 	nuclei["nuclei_darwin_amd64"] = Resource{Name: "nuclei_darwin_amd64", Type: ExecuteFile, Path: "thirdparty/nuclei"}
 	nuclei["nuclei_linux_amd64"] = Resource{Name: "nuclei_linux_amd64", Type: ExecuteFile, Path: "thirdparty/nuclei"}
-	nuclei["nuclei_win_amd64.exe"] = Resource{Name: "nuclei_win_amd64.exe", Type: ExecuteFile, Path: "thirdparty/nuclei"}
+	nuclei["nuclei_windows_amd64.exe"] = Resource{Name: "nuclei_windows_amd64.exe", Type: ExecuteFile, Path: "thirdparty/nuclei"}
 	Resources[NucleiCategory] = nuclei
 
 	//poc文件
