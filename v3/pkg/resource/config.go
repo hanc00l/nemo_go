@@ -21,6 +21,7 @@ const (
 	Geolite2Category     = "geolite2"
 	NmapCategory         = "nmap"
 	PocFileCategory      = "pocfile"
+	ZombieCategory       = "zombie"
 )
 
 type Resource struct {
@@ -102,6 +103,12 @@ func init() {
 	nuclei["nuclei_linux_amd64"] = Resource{Name: "nuclei_linux_amd64", Type: ExecuteFile, Path: "thirdparty/nuclei"}
 	nuclei["nuclei_windows_amd64.exe"] = Resource{Name: "nuclei_windows_amd64.exe", Type: ExecuteFile, Path: "thirdparty/nuclei"}
 	Resources[NucleiCategory] = nuclei
+
+	zombie := make(map[string]Resource)
+	zombie["zombie_darwin_amd64"] = Resource{Name: "zombie_darwin_amd64", Type: ExecuteFile, Path: "thirdparty/zombie"}
+	zombie["zombie_linux_amd64"] = Resource{Name: "zombie_linux_amd64", Type: ExecuteFile, Path: "thirdparty/zombie"}
+	zombie["zombie_windows_amd64.exe"] = Resource{Name: "zombie_windows_amd64.exe", Type: ExecuteFile, Path: "thirdparty/zombie"}
+	Resources[ZombieCategory] = zombie
 
 	//poc文件
 	pocfile := make(map[string]Resource)

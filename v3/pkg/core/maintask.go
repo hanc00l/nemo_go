@@ -417,7 +417,7 @@ func computeMainTaskProgressRate(mainTaskId string, args string) (result float64
 				total[execute.OnlineAPI][s.Status] += s.Count
 			case "fingerprint":
 				total[execute.FingerPrint][s.Status] += s.Count
-			case "nuclei":
+			case "nuclei", "zombie":
 				total[execute.PocScan][s.Status] += s.Count
 			case "qwen", "kimi", "deepseek", "icpPlus":
 				total[execute.LLMAPI][s.Status] += s.Count

@@ -269,22 +269,29 @@ func Fingerprint(configJSON string) (result string, err error) {
 	// 如果任务获取到结果，则新建下一步任务
 	if len(config.PocScan) > 0 {
 		// 获取pocscan配置，目前只支持nuclei模式
-		var executor string
 		var pocscanConfig execute.PocscanConfig
-		for k, v := range config.PocScan {
-			executor = k
+		for _, v := range config.PocScan {
 			pocscanConfig = v
 			break
 		}
 		// 匹配指纹识别结果，只有在指纹识别模块才能启用
 		if pocscanConfig.PocType == "matchFinger" {
+			// 根据指纹结果匹配poc文件，并启动nuclei任务
 			targetPocMapResult := core.MatchAssetPoc(resultArgs.Result, pocscanConfig)
 			if len(targetPocMapResult) > 0 {
 				for target, newPocConfig := range targetPocMapResult {
 					newConfig := config
-					newConfig.Target = target
-					newConfig.PocScan[executor] = newPocConfig
-					_ = newNextExecutorTask(newConfig, target, executor)
+					newConfig.PocScan["nuclei"] = newPocConfig
+					_ = newNextExecutorTask(newConfig, target, "nuclei")
+				}
+			}
+			// 如果有密码爆破，则匹配service，并启动zombie任务
+			if pocscanConfig.IsBrutePassword {
+				serviceTargets := core.MatchAssetService(resultArgs.Result)
+				if len(serviceTargets) > 0 {
+					newConfig := config
+					newConfig.PocScan["zombie"] = pocscanConfig
+					_ = newNextExecutorTask(newConfig, strings.Join(serviceTargets, ","), "zombie")
 				}
 			}
 		} else {

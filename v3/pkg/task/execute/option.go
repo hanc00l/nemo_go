@@ -99,6 +99,7 @@ type PocscanConfig struct {
 	Target              string `json:"target,omitempty" `
 	PocType             string `json:"pocType" form:"pocType"`
 	PocFile             string `json:"pocFile,omitempty" form:"pocFile"`
+	IsBrutePassword     bool   `json:"brutePassword,omitempty" form:"brutePassword"`
 	IsScanBaseWebStatus bool   `json:"baseWebStatus,omitempty" form:"baseWebStatus"`
 }
 

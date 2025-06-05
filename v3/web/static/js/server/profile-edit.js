@@ -88,8 +88,12 @@ $(function () {
         $('#pocscan_config input, #pocscan_config select').prop('disabled', !isEnabled);
         if (isEnabled && $('#pocscan_poc_type').val() === 'selectedPocFile') {
             $('#pocscan_poc_file').multiselect('enable')
+            $('#pocscan_brute_password').prop('disabled', true);
+            $('#pocscan_base_web_status').prop('disabled', false);
         } else {
             $('#pocscan_poc_file').multiselect('disable')
+            $('#pocscan_brute_password').prop('disabled', false);
+            $('#pocscan_base_web_status').prop('disabled', true);
         }
     });
     // 生成
@@ -101,8 +105,12 @@ $(function () {
         const pocType = $(this).val();
         if (pocType === 'matchFinger') {
             $('#pocscan_poc_file').multiselect('disable');
+            $('#pocscan_brute_password').prop('disabled', false);
+            $('#pocscan_base_web_status').prop('disabled', true);
         } else {
             $('#pocscan_poc_file').multiselect('enable');
+            $('#pocscan_brute_password').prop('disabled', true);
+            $('#pocscan_base_web_status').prop('disabled', false);
         }
     });
 });
@@ -299,6 +307,7 @@ function process_form_data() {
     const pocscan_poc_type = $('#pocscan_poc_type').val();
     const pocscan_base_web_status = $('#pocscan_base_web_status').is(':checked');
     const pocscanPocFile = $('#pocscan_poc_file').val().join(',');
+    const brutePassword = $('#pocscan_brute_password').is(':checked');
     if (pocscan_enabled && pocscan_base_web_status) {
         if (!fingerprint_enabled || !fingerprintHttpx) {
             alert('请先开启指纹识别，并选择Httpx工具，web状态识别需要Httpx工具');
@@ -308,6 +317,10 @@ function process_form_data() {
     if (pocscan_enabled && pocscan_poc_type === "selectedPocFile") {
         if (pocscanPocFile.length === 0) {
             alert('请选择POC文件');
+            return false;
+        }
+        if (brutePassword) {
+            alert('自动密码爆破功能只支持指纹自动匹配方式');
             return false;
         }
     }
@@ -402,7 +415,8 @@ function process_form_data() {
             config: {
                 pocType: pocscan_poc_type,
                 baseWebStatus: pocscan_base_web_status,
-                pocFile: pocscanPocFile
+                pocFile: pocscanPocFile,
+                brutePassword: brutePassword
             }
         },
         standalone: {
@@ -490,6 +504,7 @@ function fill_form_with_data(data) {
             $('#pocscan_bin').val(data.pocscan.pocbin);
             $('#pocscan_base_web_status').prop('checked', data.pocscan.config.baseWebStatus);
             $('#pocscan_poc_type').val(data.pocscan.config.pocType);
+            $('#pocscan_brute_password').prop('checked', data.pocscan.config.brutePassword);
             if (data.pocscan.config.pocType === "selectedPocFile") {
                 $('#pocscan_poc_file').multiselect('enable');
                 if (isNotEmpty(data.pocscan.config.pocFile)) {

@@ -40,6 +40,7 @@ var taskTopicDefineMap = map[string]string{
 	"deepseek":    TopicPassive,
 	"fingerprint": TopicFinger,
 	"nuclei":      TopicPocscan,
+	"zombie":      TopicPocscan,
 	"standalone":  TopicStandalone,
 	//test:
 	"test": TopicCustom,

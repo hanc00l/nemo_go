@@ -25,6 +25,7 @@ type Executor interface {
 func NewExecutor(executeName string, config execute.PocscanConfig, isProxy bool) Executor {
 	executorMap := map[string]Executor{
 		"nuclei": &Nuclei{Config: config, IsProxy: isProxy},
+		"zombie": &Zombie{Config: config, IsProxy: isProxy},
 	}
 
 	return executorMap[executeName]

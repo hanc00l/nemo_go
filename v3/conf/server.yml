@@ -29,7 +29,7 @@ mcpServer:
   tlsCert:
   tlsKey:
   authToken:
-    - token: da8Ae0e295eba72a7rgb1d34b13d86b5
+    - token: da8Ae0e295eba72a7rgb1d34b13d86b
       description: Token for nemo user
       workspaceId:
         - 9690c0a2-e4fc-43f0-a259-7c0d054be229

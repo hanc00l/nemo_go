@@ -174,6 +174,7 @@ function fill_form_with_data(data) {
             $('#pocscan_poc_type').val(data.pocscan.config.pocType);
             $('#pocscan_base_web_status').prop('checked', data.pocscan.config.baseWebStatus);
             $('#pocscan_poc_file').val(data.pocscan.config.pocFile);
+            $('#pocscan_brute_password').prop('checked', data.pocscan.config.brutePassword);
         } else {
             $('#div_pocscan').hide();
         }
@@ -266,9 +267,6 @@ function generate_maintask_name() {
     if (isProxy) {
         name += "-[代理]"
     }
-    // const date = new Date();
-    // const formattedDate = String(date.getFullYear()).slice(-2) + String(date.getMonth() + 1).padStart(2, '0') + String(date.getDate()).padStart(2, '0');
-    // name += "-" + formattedDate;
 
     $('#name').val(name);
 }

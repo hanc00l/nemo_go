@@ -31,6 +31,7 @@ var taskMaps = map[string]interface{}{
 	"icpPlus":     ICPPlusScan,
 	"fingerprint": Fingerprint,
 	"nuclei":      PocScan,
+	"zombie":      PocScan,
 	"qwen":        LLMScan,
 	"kimi":        LLMScan,
 	"deepseek":    LLMScan,

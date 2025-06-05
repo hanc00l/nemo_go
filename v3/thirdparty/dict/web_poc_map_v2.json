@@ -488,7 +488,7 @@
     "Name": "apache-tomcat",
     "Category": "component",
     "Description": "Apache Tomcat",
-    "Updated": "2025-05-06",
+    "Updated": "2025-06-03",
     "Fingerprint": [
       "tomcat"
     ],
@@ -498,7 +498,8 @@
         "Path": [
           "http/cves/2017/CVE-2017-12615.yaml",
           "http/cves/2018/CVE-2018-11759.yaml",
-          "http/default-logins/apache/tomcat-default-login.yaml"
+          "http/default-logins/apache/tomcat-default-login.yaml",
+          "http/cves/2025/CVE-2025-24813.yaml"
         ]
       }
     ]
@@ -1989,6 +1990,23 @@
     ]
   },
   {
+    "Name": "langflow",
+    "Category": "component",
+    "Description": "LangFlow",
+    "Updated": "2025-06-03",
+    "Fingerprint": [
+      "langflow"
+    ],
+    "Poc": [
+      {
+        "Source": "nuclei-template",
+        "Path": [
+          "http/cves/2025/CVE-2025-3248.yaml"
+        ]
+      }
+    ]
+  },
+  {
     "Name": "lanproxy",
     "Category": "device",
     "Description": "Lanproxy",
@@ -3450,7 +3468,7 @@
     "Name": "thinkphp",
     "Category": "component",
     "Description": "ThinkPHP",
-    "Updated": "2025-05-06",
+    "Updated": "2025-06-03",
     "Fingerprint": [
       "thinkphp"
     ],
@@ -3461,7 +3479,6 @@
           "http/vulnerabilities/thinkphp/thinkphp-2-rce.yaml",
           "http/vulnerabilities/thinkphp/thinkphp-501-rce.yaml",
           "http/vulnerabilities/thinkphp/thinkphp-509-information-disclosure.yaml",
-          "http/vulnerabilities/thinkphp/thinkphp-5022-rce.yaml",
           "http/vulnerabilities/thinkphp/thinkphp-5023-rce.yaml",
           "http/vulnerabilities/thinkphp/thinkphp6-arbitrary-write.yaml",
           "http/cves/2022/CVE-2022-47945.yaml",

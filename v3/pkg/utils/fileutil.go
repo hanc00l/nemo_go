@@ -179,6 +179,7 @@ const (
 	Subfinder    BinShortName = "subfinder"
 	Fingerprintx BinShortName = "fingerprintx"
 	Gogo         BinShortName = "gogo"
+	Zombie       BinShortName = "zombie"
 )
 
 // GetThirdpartyBinNameByPlatform 根据当前运行平台及架构，生成指定的文件名称
