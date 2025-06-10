@@ -17,30 +17,40 @@ func SyncTaskAsset(workspaceId string, taskId string) (result string) {
 
 	globalAsset := db.NewAsset(workspaceId, db.GlobalAsset, "", mongoClient)
 	taskAsset := db.NewAsset(workspaceId, db.TaskAsset, taskId, mongoClient)
-	//logging.RuntimeLog.Infof("同步任务历史资产, workspaceId:%s, taskId:%s", workspaceId, taskId)
-	taskAssetDocs, err := taskAsset.Find(bson.M{db.TaskId: taskId}, 0, 0, false, false)
+	//分页同步任务历史资产：
+	totalCount, err := taskAsset.Count(bson.M{db.TaskId: taskId})
 	if err != nil {
-		logging.RuntimeLog.Errorf("获取任务资产失败,taskId:%s,err:%v", taskId, err.Error())
+		logging.RuntimeLog.Errorf("获取任务资产数量失败, taskId:%s, %s", taskId, err.Error())
 		return
 	}
+	logging.RuntimeLog.Infof("同步任务历史资产, workspaceId:%s, taskId:%s，总数量:%d", workspaceId, taskId, totalCount)
+	pageSize := 100
+	pageCount := calculatePageCount(totalCount, pageSize)
 	var assetSaveResult AssetSaveResultResp
-	for _, taskDoc := range taskAssetDocs {
-		taskDoc.Id = bson.NewObjectID() // 重新生成id
-		taskDoc.TaskId = ""             // 保存到全局focusAsset中必须要去掉task字段
-		globalDss, err := globalAsset.InsertOrUpdate(taskDoc)
+	for i := 0; i < pageCount; i++ {
+		taskAssetDocs, err := taskAsset.Find(bson.M{db.TaskId: taskId}, i+1, pageSize, true, false)
 		if err != nil {
-			logging.RuntimeLog.Errorf("同步任务资产失败, docId:%s, err:%v", taskDoc.Id, err)
-			continue
+			logging.RuntimeLog.Errorf("获取任务资产失败, taskId:%s, err:%v", taskId, err.Error())
+			return
 		}
-		if !globalDss.IsSuccess {
-			logging.RuntimeLog.Errorf("同步任务资产失败, docId:%s", taskDoc.Id)
-			continue
-		}
-		assetSaveResult.AssetTotal++
-		if globalDss.IsNew {
-			assetSaveResult.AssetNew++
-		} else if globalDss.IsUpdated {
-			assetSaveResult.AssetUpdate++
+		for _, taskDoc := range taskAssetDocs {
+			taskDoc.Id = bson.NewObjectID() // 重新生成id
+			taskDoc.TaskId = ""             // 保存到全局focusAsset中必须要去掉task字段
+			globalDss, err := globalAsset.InsertOrUpdate(taskDoc)
+			if err != nil {
+				logging.RuntimeLog.Errorf("同步任务资产失败, docId:%s, err:%v", taskDoc.Id, err)
+				continue
+			}
+			if !globalDss.IsSuccess {
+				logging.RuntimeLog.Errorf("同步任务资产失败, docId:%s", taskDoc.Id)
+				continue
+			}
+			assetSaveResult.AssetTotal++
+			if globalDss.IsNew {
+				assetSaveResult.AssetNew++
+			} else if globalDss.IsUpdated {
+				assetSaveResult.AssetUpdate++
+			}
 		}
 	}
 	// 同步漏洞：
@@ -88,4 +98,14 @@ func SyncTaskHistoryVul(workspaceId string, taskId string, mongoClient *mongo.Cl
 	}
 
 	return
+}
+
+func calculatePageCount(totalCount, pageSize int) int {
+	if pageSize <= 0 {
+		return 0 // 或根据业务需求返回其他值
+	}
+	if totalCount <= 0 {
+		return 0
+	}
+	return (totalCount + pageSize - 1) / pageSize
 }
