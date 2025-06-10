@@ -104,7 +104,10 @@ func (c *WorkerController) ManualUpdateWorkerAction() {
 	c.updateWorkAliveOptions("update")
 }
 
-// ManualReloadWorkerAction 重启worker
+func (c *WorkerController) ManualStopWorkerAction() {
+	c.updateWorkAliveOptions("stop")
+}
+
 func (c *WorkerController) ManualReloadWorkerAction() {
 	c.updateWorkAliveOptions("reload")
 }
@@ -149,7 +152,8 @@ func (c *WorkerController) updateWorkAliveOptions(updateType string) {
 		logging.RuntimeLog.Errorf(err.Error())
 		return
 	}
-	if workerAliveStatus.IsDaemonProcess == false {
+	// 非daemon进程不能执行reload、sync、init、update
+	if updateType != "stop" && workerAliveStatus.IsDaemonProcess == false {
 		c.FailedStatus("worker不是daemon进程！")
 		return
 	}
@@ -161,6 +165,8 @@ func (c *WorkerController) updateWorkAliveOptions(updateType string) {
 		workerAliveStatus.ManualInitEnvFlag = true
 	} else if updateType == "update" {
 		workerAliveStatus.ManualUpdateOptionFlag = true
+	} else if updateType == "stop" {
+		workerAliveStatus.ManualStopFlag = true
 	}
 	workerAliveStatus.WorkerUpdateOption, err = json.Marshal(req)
 	if err != nil {
@@ -174,7 +180,8 @@ func (c *WorkerController) updateWorkAliveOptions(updateType string) {
 		c.FailedStatus("设置参数失败！")
 		return
 	}
-	c.SucceededStatus("已设置，等待worker的daemon进程执行！")
+	logging.RuntimeLog.Infof("指定节点:%s 设置:%s", workerAliveStatus.WorkerName, updateType)
+	c.SucceededStatus("已设置，等待worker进程执行！")
 	return
 }
 

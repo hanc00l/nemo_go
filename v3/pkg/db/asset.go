@@ -321,11 +321,11 @@ func (fa *Asset) InsertOrUpdate(doc AssetDocument) (dss DataSaveStatus, err erro
 	return
 }
 
-func (fa *Asset) Find(filter bson.M, page, rowsPerPage int, sortByDate bool, excludeHttpBody bool) (docs []AssetDocument, err error) {
+func (fa *Asset) Find(filter bson.M, page, pageSize int, sortByDate bool, excludeHttpBody bool) (docs []AssetDocument, err error) {
 	opts := options.Find()
-	if page > 0 && rowsPerPage > 0 {
-		opts.SetSkip(int64((page - 1) * rowsPerPage))
-		opts.SetLimit(int64(rowsPerPage))
+	if page > 0 && pageSize > 0 {
+		opts.SetSkip(int64((page - 1) * pageSize))
+		opts.SetLimit(int64(pageSize))
 	}
 	if sortByDate {
 		opts.SetSort(bson.D{{Key: UpdateTime, Value: -1}, {Key: "authority", Value: 1}})

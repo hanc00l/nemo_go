@@ -100,6 +100,7 @@ func InitRouter() {
 	web.CtrlPost("/worker-update", (*controllers.WorkerController).ManualUpdateWorkerAction)
 	web.CtrlPost("/worker-init", (*controllers.WorkerController).ManualInitWorkerAction)
 	web.CtrlPost("/worker-sync", (*controllers.WorkerController).ManualSyncWorkerAction)
+	web.CtrlPost("/worker-stop", (*controllers.WorkerController).ManualStopWorkerAction)
 
 	web.CtrlGet("/notify-list", (*controllers.NotifyController).IndexAction)
 	web.CtrlPost("/notify-list", (*controllers.NotifyController).ListAction)

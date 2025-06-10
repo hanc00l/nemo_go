@@ -9,6 +9,7 @@ import (
 )
 
 type KeepAliveDaemonInfo struct {
+	ManualStopFlag             bool // 停止
 	ManualReloadFlag           bool // 重启
 	ManualConfigAndPocSyncFlag bool // 同步已存在的配置、Poc
 	ManualInitEnvFlag          bool // 重置

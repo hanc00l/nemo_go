@@ -565,7 +565,12 @@ func (s *Service) KeepAlive(ctx context.Context, args *WorkerStatus, replay *str
 		*replay = "set worker status fail"
 		return err
 	}
-	*replay = "ok"
+	// 远程关闭worker（针对standalone模式）
+	if workerAliveStatus.ManualStopFlag {
+		*replay = "stop"
+	} else {
+		*replay = "ok"
+	}
 
 	return nil
 }
@@ -593,6 +598,8 @@ func (s *Service) KeepDaemonAlive(ctx context.Context, args *string, replay *Kee
 		logging.RuntimeLog.Errorf(err.Error())
 		return err
 	}
+	// 远程关闭worker（针对daemon模式）
+	daemonInfo.ManualStopFlag = workerAliveStatus.ManualStopFlag
 	daemonInfo.ManualReloadFlag = workerAliveStatus.ManualReloadFlag
 	daemonInfo.ManualInitEnvFlag = workerAliveStatus.ManualInitEnvFlag
 	daemonInfo.ManualConfigAndPocSyncFlag = workerAliveStatus.ManualConfigAndPocSyncFlag
@@ -603,10 +610,12 @@ func (s *Service) KeepDaemonAlive(ctx context.Context, args *string, replay *Kee
 			daemonInfo.WorkerRunOption = &w
 		}
 	}
+	// 复位标志
 	workerAliveStatus.ManualUpdateOptionFlag = false
 	workerAliveStatus.ManualInitEnvFlag = false
 	workerAliveStatus.ManualReloadFlag = false
 	workerAliveStatus.ManualConfigAndPocSyncFlag = false
+	workerAliveStatus.ManualStopFlag = false
 	workerAliveStatus.IsDaemonProcess = true
 	workerAliveStatus.WorkerDaemonUpdateTime = time.Now()
 	err = SetWorkerStatusToRedis(rdb, *args, workerAliveStatus)

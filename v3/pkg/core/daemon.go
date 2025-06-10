@@ -322,8 +322,14 @@ func StartWorkerDaemon() {
 			}
 		}
 		// 收到server的手动重启worker命令，执行停止worker、文件同步、重启worker
-		if replay.ManualReloadFlag || replay.ManualInitEnvFlag {
+		if replay.ManualReloadFlag || replay.ManualInitEnvFlag || replay.ManualStopFlag {
 			if KillWorker() {
+				if replay.ManualStopFlag {
+					logging.CLILog.Info("停止worker...")
+					logging.RuntimeLog.Info("停止worker...")
+					time.Sleep(5 * time.Second)
+					os.Exit(0)
+				}
 				if replay.ManualInitEnvFlag {
 					logging.CLILog.Info("开始重置worker环境...")
 					logging.RuntimeLog.Info("开始重置worker环境...")

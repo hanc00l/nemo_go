@@ -22,7 +22,7 @@ type ExecuteTaskDocument struct {
 
 	TaskId        string  `bson:"taskId" json:"taskId"`
 	MainTaskId    string  `bson:"mainTaskId" json:"mainTaskId"`
-	Executor      string  `bson:"executor,omitempty" json:"executor,omitempty"`
+	Executor      string  `bson:"executor" json:"executor"`
 	Target        string  `bson:"target" json:"target"`
 	ExcludeTarget string  `bson:"excludeTarget,omitempty" json:"excludeTarget,omitempty"`
 	Args          string  `bson:"args" json:"args"`
@@ -118,7 +118,7 @@ func (t *ExecutorTask) Find(filter bson.M, page, pageSize int) (result []Execute
 	opts := options.Find()
 	if page > 0 && pageSize > 0 {
 		opts.SetLimit(int64(pageSize))
-		opts.SetSkip(int64(page * pageSize))
+		opts.SetSkip(int64((page - 1) * pageSize))
 	}
 	opts.SetSort(bson.M{UpdateTime: -1})
 	cur, err := col.Find(t.Ctx, filter, opts)

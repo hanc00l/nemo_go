@@ -62,6 +62,7 @@ type WorkerStatus struct {
 	TaskExecutedNumber int       `json:"task_number"`
 	TaskStartedNumber  int       `json:"started_number"`
 	// worker's run status
+	ManualStopFlag             bool   `json:"manual_stop_flag"`
 	ManualReloadFlag           bool   `json:"manual_reload_flag"`
 	ManualInitEnvFlag          bool   `json:"manual_init_env_flag"`
 	ManualConfigAndPocSyncFlag bool   `json:"manual_config_and_poc_sync_flag"`

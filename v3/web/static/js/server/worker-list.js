@@ -162,6 +162,12 @@ $(function () {
         let text = "该操作会下发重启命令到所有选定Worker，由Daemon进程重启Worker；如果Worker不是由Daemon进程启动的将无法重启！"
         batch_op_worker(url, title, text)
     });
+    $("#batch_stop").click(function () {
+        let url = "worker-stop"
+        let title = "确定要批量退出选定的Worker?"
+        let text = "该操作会下发退出命令到所有选定Worker，由Daemon进程关闭Worker；如果Worker不是由Daemon进程启动或独立模式的将无法退出！"
+        batch_op_worker(url, title, text)
+    });
     $("#batch_sync").click(function () {
         let url = "worker-sync"
         let title = "确定要批量同步选定的Worker的配置、Poc文件?"
