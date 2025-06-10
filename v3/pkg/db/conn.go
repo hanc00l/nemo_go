@@ -2,6 +2,7 @@ package db
 
 import (
 	"context"
+	"fmt"
 	"github.com/hanc00l/nemo_go/v3/pkg/conf"
 	"github.com/hanc00l/nemo_go/v3/pkg/logging"
 	"go.mongodb.org/mongo-driver/v2/mongo"
@@ -22,25 +23,47 @@ func getDbConfig() {
 	}
 }
 
-func GetClient() (*mongo.Client, error) {
+func GetClientWithRetry(maxRetries int, retryInterval time.Duration) (*mongo.Client, error) {
 	if len(configString) == 0 {
 		getDbConfig()
 	}
-	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
-	defer cancel()
 
-	client, err := mongo.Connect(options.Client().ApplyURI(configString))
-	if err != nil {
-		logging.RuntimeLog.Fatal("Failed to connect database")
-		return nil, err
-	}
-	err = client.Ping(ctx, readpref.Primary())
-	if err != nil {
-		logging.RuntimeLog.Fatal("Failed to connect database:")
-		return nil, err
+	var client *mongo.Client
+	var err error
+
+	// 重试逻辑
+	for i := 0; i < maxRetries; i++ {
+		ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+
+		// 尝试连接
+		client, err = mongo.Connect(options.Client().ApplyURI(configString))
+		if err != nil {
+			cancel()
+			logging.RuntimeLog.Errorf("Attempt %d/%d: Failed to connect to database: %v", i+1, maxRetries, err)
+			time.Sleep(retryInterval)
+			continue
+		}
+
+		// 尝试 Ping
+		err = client.Ping(ctx, readpref.Primary())
+		cancel() // 确保在Ping后取消context
+		if err != nil {
+			_ = client.Disconnect(context.Background()) // 关闭无效连接
+			logging.RuntimeLog.Errorf("Attempt %d/%d: Failed to ping database: %v", i+1, maxRetries, err)
+			time.Sleep(retryInterval)
+			continue
+		}
+
+		// 连接成功
+		return client, nil
 	}
 
-	return client, nil
+	// 所有重试都失败
+	return nil, fmt.Errorf("failed to connect to MongoDB after %d attempts", maxRetries)
+}
+
+func GetClient() (*mongo.Client, error) {
+	return GetClientWithRetry(5, 5*time.Second)
 }
 
 func CloseClient(client *mongo.Client) {

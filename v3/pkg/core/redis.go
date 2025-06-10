@@ -49,15 +49,32 @@ type RedisProxyServer struct {
 }
 
 func GetRedisClient() (*redis.Client, error) {
+	return GetRedisClientWithRetry(5, 5*time.Second)
+}
+
+func GetRedisClientWithRetry(maxRetries int, retryInterval time.Duration) (*redis.Client, error) {
 	if redisOptions == nil {
 		getRedisConfig()
 	}
-	rdb := redis.NewClient(redisOptions)
-	_, err := rdb.Ping(context.Background()).Result()
-	if err != nil {
-		return nil, err
+
+	var rdb *redis.Client
+	var err error
+
+	// 重试逻辑
+	for i := 0; i < maxRetries; i++ {
+		rdb = redis.NewClient(redisOptions)
+		_, err = rdb.Ping(context.Background()).Result()
+		if err == nil {
+			return rdb, nil
+		}
+
+		// 如果不是最后一次重试，则等待一段时间
+		if i < maxRetries-1 {
+			time.Sleep(retryInterval)
+		}
 	}
-	return rdb, nil
+
+	return nil, fmt.Errorf("failed to connect to redis after %d attempts: %v", maxRetries, err)
 }
 
 func CloseRedisClient(client *redis.Client) error {
