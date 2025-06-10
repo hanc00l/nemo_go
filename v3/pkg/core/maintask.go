@@ -35,11 +35,16 @@ const (
 var (
 	globalMainTaskLock       string = "main_task_lock"
 	globalMainTaskUpdateTime string = "main_task_update_time"
+	globalStandaloneTaskLock string = "standalone_task_lock"
 )
 
 // StartMainTaskDamon MainTask任务的后台监控
 func StartMainTaskDamon() {
-	const ProcessCycle = 10
+	const (
+		BaseInterval = 10 * time.Second // 基础固定间隔
+		MaxJitter    = 10 * time.Second // 最大随机增加量
+	)
+	r := rand.New(rand.NewSource(time.Now().UnixNano()))
 	redisClient, err := GetRedisClient()
 	if err != nil {
 		logging.RuntimeLog.Error(err.Error())
@@ -50,12 +55,12 @@ func StartMainTaskDamon() {
 	}(redisClient)
 
 	for {
-		// 随机休眠 5-15秒
-		randomNumber := rand.Intn(ProcessCycle-5+1) + 5
-		// 休眠
-		time.Sleep(time.Duration(randomNumber) * time.Second)
+		// 随机睡眠
+		jitter := time.Duration(r.Int63n(int64(MaxJitter) + 1))
+		sleepTime := BaseInterval + jitter
+		time.Sleep(sleepTime)
 		// 尝试获取锁
-		lock := NewRedisLock(globalMainTaskLock, ProcessCycle*time.Second, redisClient)
+		lock := NewRedisLock(globalMainTaskLock, BaseInterval, redisClient)
 		acquired, err := lock.TryLock()
 		if err != nil {
 			logging.RuntimeLog.Error("获取分布式锁失败:", err.Error())
@@ -68,7 +73,7 @@ func StartMainTaskDamon() {
 		}
 		mainTaskUpdateTime, err := getTimeFromRedis(redisClient, globalMainTaskUpdateTime)
 		// 如果有多个service实例，为了避免重复处理，设置一个时间间隔，防止多个实例同时处理任务
-		if errors.Is(err, redis.Nil) || time.Now().Sub(mainTaskUpdateTime).Seconds() >= ProcessCycle {
+		if errors.Is(err, redis.Nil) || time.Now().Sub(mainTaskUpdateTime).Seconds() >= BaseInterval.Seconds() {
 			// 处理已开始的任务
 			processStartedTask()
 			// 处理新建的任务
@@ -467,8 +472,11 @@ func newExecutorTask(executorTaskInfo execute.ExecutorTaskInfo) (err error) {
 	}
 	// 正常目标处理
 	executorTaskInfo.Target = strings.Join(normalTarget, ",")
-	if err = sendExecutorTaskToMq(executorTaskInfo); err != nil {
-		return
+	//　standalone任务不送入消息队列，只写入数据库；其他任务送入消息队列
+	if executorTaskInfo.Executor != "standalone" {
+		if err = sendExecutorTaskToMq(executorTaskInfo); err != nil {
+			return
+		}
 	}
 	if err = addExecutorTaskToDb(executorTaskInfo); err != nil {
 		return
