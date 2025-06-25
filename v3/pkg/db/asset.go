@@ -271,6 +271,16 @@ func (fa *Asset) DeleteByHost(host string) (isSuccess bool, err error) {
 	return
 }
 
+func (fa *Asset) DeleteByOrgId(orgId string) (isSuccess bool, err error) {
+	col := fa.Client.Database(fa.DatabaseName).Collection(fa.CollectionName)
+	_, err = col.DeleteMany(fa.Ctx, bson.M{"org": orgId})
+	if err != nil {
+		return false, err
+	}
+	isSuccess = true
+	return
+}
+
 func (fa *Asset) FindByAuthority(authority string) (doc *AssetDocument, err error) {
 	doc = &AssetDocument{}
 	col := fa.Client.Database(fa.DatabaseName).Collection(fa.CollectionName)

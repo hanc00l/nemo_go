@@ -65,6 +65,17 @@ func (o *Org) Get(id string) (doc OrgDocument, err error) {
 	return
 }
 
+func (o *Org) GetByName(orgName string) (doc OrgDocument, err error) {
+	// 查询文档
+	col := o.Client.Database(o.DatabaseName).Collection(o.CollectionName)
+	filter := bson.M{"name": orgName}
+	err = col.FindOne(o.Ctx, filter).Decode(&doc)
+	if err != nil {
+		return
+	}
+	return
+}
+
 func (o *Org) Find(filter bson.M, page, pageSize int) (docs []OrgDocument, err error) {
 	col := o.Client.Database(o.DatabaseName).Collection(o.CollectionName)
 	opts := options.Find().SetSort(bson.D{{SortNumber, -1}, {"name", 1}, {UpdateTime, -1}})

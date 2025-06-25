@@ -237,11 +237,22 @@ func processExecutorTask(mainTaskInfo execute.MainTaskInfo) (err error) {
 	// LLMAPI任务，是top任务，可以直接开始、并行开始的
 	// 注意：如果有LLMAPI任务，则域名和onlineapi只会在LLMAPI任务中执行
 	if len(mainTaskInfo.ExecutorConfig.LLMAPI) > 0 {
-		for executor, _ := range mainTaskInfo.ExecutorConfig.LLMAPI {
-			if err = f(executor, mainTaskInfo); err != nil {
-				return err
+		var targets []string
+		// 按行拆分目标，并发执行
+		if mainTaskInfo.TargetSliceType == SliceByLine {
+			targets = strings.Split(mainTaskInfo.Target, ",")
+		} else {
+			targets = []string{mainTaskInfo.Target}
+		}
+		for _, target := range targets {
+			for executor, _ := range mainTaskInfo.ExecutorConfig.LLMAPI {
+				mti := mainTaskInfo
+				mti.Target = target
+				if err = f(executor, mti); err != nil {
+					return err
+				}
+				succeedTask++
 			}
-			succeedTask++
 		}
 	} else {
 		if len(mainTaskInfo.ExecutorConfig.DomainScan) > 0 {

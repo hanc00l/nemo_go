@@ -96,6 +96,7 @@ function fill_form_with_data(data) {
             $('#kimi').prop('checked', data.llmapi.kimi);
             $('#deepseek').prop('checked', data.llmapi.deepseek);
             $('#icpPlus').prop('checked', data.llmapi.icpPlus);
+            $('#llmapi_autoAssociateOrg').prop('checked', data.llmapi.config?.autoAssociateOrg || false);
         } else {
             $('#div_llmapi').hide();
         }

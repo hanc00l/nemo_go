@@ -122,7 +122,22 @@ func (c *OrganizationController) DeleteAction() {
 	}
 	defer db.CloseClient(mongoClient)
 
-	_ = c.CheckErrorAndStatus(db.NewOrg(workspaceId, mongoClient).Delete(id))
+	org := db.NewOrg(workspaceId, mongoClient)
+	orgDoc, err := org.Get(id)
+	if err != nil {
+		logging.RuntimeLog.Errorf("获取组织%s失败：%s", id, err.Error())
+		c.FailedStatus("根据id获取组织失败")
+		return
+	}
+	if orgDoc.Id.Hex() != id {
+		c.FailedStatus("记录不存在！")
+	}
+	if isSuccess := c.CheckErrorAndStatus(org.Delete(id)); !isSuccess {
+		return
+	}
+	//删除该组织下的所有资产
+	asset := db.NewAsset(workspaceId, db.GlobalAsset, "", mongoClient)
+	_, _ = asset.DeleteByOrgId(id)
 
 	return
 }

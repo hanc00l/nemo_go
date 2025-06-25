@@ -196,12 +196,13 @@ function process_form_data() {
     const status = $('#status').is(':checked');
 
 
-    // 获取端口扫描部分的字段值
+    // 获取llmapi字段值
     const llmapi_enabled = $('#enable_llmapi').is(':checked');
     const qwen = $('#qwen').is(':checked');
     const kimi = $('#kimi').is(':checked');
     const deepseek = $('#deepseek').is(':checked');
     const icpPlus = $('#icpPlus').is(':checked');
+    const autoAssociateOrg = $('#llmapi_autoAssociateOrg').is(':checked');
     if (llmapi_enabled) {
         if (!qwen && !kimi && !deepseek && !icpPlus) {
             alert('请选择至少一种LLMAPI工具');
@@ -348,6 +349,9 @@ function process_form_data() {
             kimi: kimi,
             deepseek: deepseek,
             icpPlus: icpPlus,
+            config: {
+                autoAssociateOrg: autoAssociateOrg
+            }
         },
         portscan: {
             enabled: portscan_enabled,
@@ -445,6 +449,7 @@ function fill_form_with_data(data) {
             $('#kimi').prop('checked', data.llmapi.kimi);
             $('#deepseek').prop('checked', data.llmapi.deepseek);
             $('#icpPlus').prop('checked', data.llmapi.icpPlus);
+            $('#llmapi_autoAssociateOrg').prop('checked', data.llmapi.config.autoAssociateOrg);
         }
         // 端口扫描部分
         if (data.portscan.enabled) {

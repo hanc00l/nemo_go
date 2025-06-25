@@ -86,6 +86,11 @@ type ResourceResultArgs struct {
 	Bytes []byte
 }
 
+type AssociateOrgArgs struct {
+	WorkspaceId string
+	OrgName     string
+}
+
 type AssetSaveResultResp struct {
 	AssetTotal  int `json:"assetTotal,omitempty"`
 	AssetNew    int `json:"assetNew,omitempty"`
@@ -651,6 +656,48 @@ func (s *Service) RequestResource(ctx context.Context, args *RequestResourceArgs
 		return err
 	}
 	*replay = ResourceResultArgs{Hash: rr.Hash, Bytes: rr.Bytes, Path: rr.Path}
+
+	return nil
+}
+
+func (s *Service) AssociateOrg(ctx context.Context, args *AssociateOrgArgs, replay *string) error {
+	if args == nil || args.OrgName == "" || args.WorkspaceId == "" {
+		{
+			logging.RuntimeLog.Error("no org name or workspaceId")
+			return errors.New("no org name or workspaceId")
+		}
+	}
+	mongoClient, err := db.GetClient()
+	if err != nil {
+		logging.RuntimeLog.Errorf("get mongo client fail:%v", err)
+		return err
+	}
+	defer db.CloseClient(mongoClient)
+
+	org := db.NewOrg(args.WorkspaceId, mongoClient)
+	// 查询org是否存在
+	orgDoc, err := org.GetByName(args.OrgName)
+	if (err != nil && errors.Is(err, mongo.ErrNoDocuments)) || orgDoc.Name == "" {
+		// 创建org
+		orgDoc = db.OrgDocument{
+			Id:          bson.NewObjectID(),
+			Name:        args.OrgName,
+			Description: args.OrgName + "（由系统自动创建的组织）",
+			SortNumber:  100,
+			Status:      "enable",
+		}
+		isSuccess, err := org.Insert(orgDoc)
+		if err != nil {
+			logging.RuntimeLog.Errorf(err.Error())
+			return err
+		}
+		if !isSuccess {
+			logging.RuntimeLog.Errorf("创建org失败:%s", args.OrgName)
+			return errors.New("创建org失败")
+		}
+	}
+
+	*replay = orgDoc.Id.Hex()
 
 	return nil
 }

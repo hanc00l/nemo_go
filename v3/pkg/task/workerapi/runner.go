@@ -352,6 +352,17 @@ func LLMScan(configJSON string) (result string, err error) {
 	result = fmt.Sprintf("域名：%d%s", len(taskResult), taskResult)
 	// 如果任务获取到结果，则新建下一步任务(domainscan或者onlineapi)
 	if len(taskResult) > 0 {
+		var llmConfig execute.LLMAPIConfig
+		for _, v := range config.LLMAPI {
+			llmConfig = v
+			break
+		}
+		// 自动关联组织
+		if llmConfig.AutoAssociateOrg {
+			if orgId, err := callAssociateOrg(config.Target, config.WorkspaceId); err == nil && orgId != "" {
+				config.OrgId = orgId
+			}
+		}
 		for _, target := range taskResult {
 			for executor, _ := range config.DomainScan {
 				_ = newNextExecutorTask(config, target, executor)
@@ -391,6 +402,17 @@ func ICPPlusScan(configJSON string) (result string, err error) {
 	result = fmt.Sprintf("域名：%d%s", len(domainResult), domainResult)
 	// 下一步任务：
 	if len(domainResult) > 0 {
+		var llmConfig execute.LLMAPIConfig
+		for _, v := range config.LLMAPI {
+			llmConfig = v
+			break
+		}
+		// 自动关联组织
+		if llmConfig.AutoAssociateOrg {
+			if orgId, err := callAssociateOrg(config.Target, config.WorkspaceId); err == nil && orgId != "" {
+				config.OrgId = orgId
+			}
+		}
 		for _, target := range domainResult {
 			for executor, _ := range config.DomainScan {
 				_ = newNextExecutorTask(config, target, executor)
@@ -401,4 +423,21 @@ func ICPPlusScan(configJSON string) (result string, err error) {
 		}
 	}
 	return SucceedTask(result), nil
+}
+
+func callAssociateOrg(orgName string, workspaceId string) (orgId string, err error) {
+	args := core.AssociateOrgArgs{
+		WorkspaceId: workspaceId,
+		OrgName:     orgName,
+	}
+	err = core.CallXClient("AssociateOrg", &args, &orgId)
+	if err != nil {
+		logging.RuntimeLog.Errorf("关联组织失败：%s", err)
+	} else {
+		if orgId == "" {
+			logging.RuntimeLog.Errorf("自动关联组织失败：%s", orgName)
+		}
+	}
+
+	return
 }

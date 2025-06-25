@@ -14,11 +14,12 @@ type ProfileController struct {
 }
 
 type llmapiData struct {
-	IsEnable bool `json:"enabled" form:"enabled"`
-	Qwen     bool `json:"qwen" form:"qwen"`
-	Kimi     bool `json:"kimi" form:"kimi"`
-	Deepseek bool `json:"deepseek" form:"deepseek"`
-	ICPPlus  bool `json:"icpPlus" form:"icpPlus"`
+	IsEnable bool                 `json:"enabled" form:"enabled"`
+	Qwen     bool                 `json:"qwen" form:"qwen"`
+	Kimi     bool                 `json:"kimi" form:"kimi"`
+	Deepseek bool                 `json:"deepseek" form:"deepseek"`
+	ICPPlus  bool                 `json:"icpPlus" form:"icpPlus"`
+	Config   execute.LLMAPIConfig `json:"config" form:"config"`
 }
 
 type portscanData struct {
@@ -419,6 +420,10 @@ func parseProfileInfoData(doc db.ProfileDocument) (profileInfo ProfileInfoData, 
 			if _, ok := executorConfigArgs.LLMAPI["icpPlus"]; ok {
 				profileInfo.LLMAPIData.ICPPlus = true
 			}
+			for _, v := range executorConfigArgs.LLMAPI {
+				profileInfo.LLMAPIData.Config = v
+				break
+			}
 		}
 		if len(executorConfigArgs.PortScan) > 0 {
 			profileInfo.PortscanData.IsEnable = true
@@ -537,17 +542,17 @@ func (c *ProfileController) processProfileInfoData() (doc db.ProfileDocument, er
 		if profileInfo.LLMAPIData.IsEnable && (profileInfo.LLMAPIData.Qwen || profileInfo.LLMAPIData.Kimi || profileInfo.LLMAPIData.Deepseek || profileInfo.LLMAPIData.ICPPlus) {
 			executorConfigArgs.LLMAPI = make(map[string]execute.LLMAPIConfig)
 			if profileInfo.LLMAPIData.Qwen {
-				executorConfigArgs.LLMAPI["qwen"] = execute.LLMAPIConfig{}
+				executorConfigArgs.LLMAPI["qwen"] = profileInfo.LLMAPIData.Config
 			}
 			if profileInfo.LLMAPIData.Kimi {
-				executorConfigArgs.LLMAPI["kimi"] = execute.LLMAPIConfig{}
+				executorConfigArgs.LLMAPI["kimi"] = profileInfo.LLMAPIData.Config
 			}
 			if profileInfo.LLMAPIData.Deepseek {
-				executorConfigArgs.LLMAPI["deepseek"] = execute.LLMAPIConfig{}
+				executorConfigArgs.LLMAPI["deepseek"] = profileInfo.LLMAPIData.Config
 			}
 			// icpPlus 接口比较特殊，和LLMAPI一样都是根据组织机构查询，所以先放到llmapi的配置里
 			if profileInfo.LLMAPIData.ICPPlus {
-				executorConfigArgs.LLMAPI["icpPlus"] = execute.LLMAPIConfig{}
+				executorConfigArgs.LLMAPI["icpPlus"] = profileInfo.LLMAPIData.Config
 			}
 		}
 		if profileInfo.PortscanData.IsEnable && (profileInfo.PortscanData.Nmap || profileInfo.PortscanData.Masscan || profileInfo.PortscanData.Gogo) {

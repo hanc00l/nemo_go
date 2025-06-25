@@ -115,5 +115,6 @@ type StandaloneScanConfig struct {
 }
 
 type LLMAPIConfig struct {
-	Target string `json:"target,omitempty" form:"-"`
+	Target           string `json:"target,omitempty" form:"-"`
+	AutoAssociateOrg bool   `json:"autoAssociateOrg,omitempty" form:"autoAssociateOrg"`
 }
