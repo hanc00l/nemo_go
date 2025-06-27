@@ -239,7 +239,11 @@ func (s *Service) UpdateTask(ctx context.Context, args *TaskStatusArgs, replay *
 	executorTask := db.NewExecutorTask(mongoClient)
 	executorTaskDoc, err := executorTask.GetByTaskId(args.TaskID)
 	if err != nil {
-		return err
+		*replay = false
+		if !errors.Is(err, mongo.ErrNoDocuments) {
+			return err
+		}
+		return fmt.Errorf("task not exists:%s", args.TaskID)
 	}
 	dt := time.Now()
 	update := bson.M{db.Status: args.State, "worker": args.Worker, "result": args.Result}

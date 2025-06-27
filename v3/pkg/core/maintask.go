@@ -319,15 +319,38 @@ func processExecutorTask(mainTaskInfo execute.MainTaskInfo) (err error) {
 	// fingerprint、pocscan任务，是需要等前面的任务执行完成后再开始的；或者前面没有任务，直接开始执行
 	if succeedTask == 0 {
 		if len(mainTaskInfo.ExecutorConfig.FingerPrint) > 0 {
-			// fingerprint不区分executor，由执行行时根据任务配置决定
-			if err = f(execute.FingerPrint, mainTaskInfo); err != nil {
-				return err
+			var targets []string
+			// 按行拆分目标，并发执行
+			if mainTaskInfo.TargetSliceType == SliceByLine {
+				targets = strings.Split(mainTaskInfo.Target, ",")
+			} else {
+				targets = []string{mainTaskInfo.Target}
 			}
-		}
-		if len(mainTaskInfo.ExecutorConfig.PocScan) > 0 {
-			for executor, _ := range mainTaskInfo.ExecutorConfig.PocScan {
-				if err = f(executor, mainTaskInfo); err != nil {
+			for _, target := range targets {
+				mti := mainTaskInfo
+				mti.Target = target
+				// fingerprint不区分executor，由执行行时根据任务配置决定
+				if err = f(execute.FingerPrint, mti); err != nil {
 					return err
+				}
+			}
+		} else {
+			if len(mainTaskInfo.ExecutorConfig.PocScan) > 0 {
+				var targets []string
+				// 按行拆分目标，并发执行
+				if mainTaskInfo.TargetSliceType == SliceByLine {
+					targets = strings.Split(mainTaskInfo.Target, ",")
+				} else {
+					targets = []string{mainTaskInfo.Target}
+				}
+				for _, target := range targets {
+					mti := mainTaskInfo
+					mti.Target = target
+					for executor, _ := range mainTaskInfo.ExecutorConfig.PocScan {
+						if err = f(executor, mti); err != nil {
+							return err
+						}
+					}
 				}
 			}
 		}
