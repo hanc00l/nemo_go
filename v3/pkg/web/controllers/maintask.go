@@ -35,6 +35,7 @@ type TaskData struct {
 	ProgressRate   string `json:"progress_rate"`
 	Progress       string `json:"progress"`
 	CreateDatetime string `json:"create_time"`
+	UpdateDatetime string `json:"update_time"`
 	StartDatetime  string `json:"start_time"`
 	Runtime        string `json:"runtime"`
 	IsCron         bool   `json:"cron"`
@@ -193,6 +194,7 @@ func (c *MainTaskController) getListData(req mainTaskRequestParam) (resp DataTab
 			ProgressRate:   fmt.Sprintf("%d%%", int(row.ProgressRate*100.0)),
 			Progress:       row.Progress,
 			CreateDatetime: FormatDateTime(row.CreateTime),
+			UpdateDatetime: FormatDateTime(row.UpdateTime),
 		}
 		if len(row.Target) > 100 {
 			task.Target = row.Target[:100] + "..."

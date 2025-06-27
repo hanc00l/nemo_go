@@ -81,7 +81,7 @@ $(function () {
                     },
                 },
                 {data: "create_time", title: "创建时间", width: "8%"},
-                {data: "start_time", title: "启动时间", width: "8%"},
+                {data: "update_time", title: "更新时间", width: "8%"},
                 {data: "runtime", title: "执行时长", width: "5%"},
                 {
                     title: "操作",
