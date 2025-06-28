@@ -272,7 +272,7 @@ func (s *Service) UpdateTask(ctx context.Context, args *TaskStatusArgs, replay *
 }
 
 func (s *Service) NewTask(ctx context.Context, args *execute.ExecutorTaskInfo, replay *bool) error {
-	err := newExecutorTask(*args)
+	err := NewExecutorTask(*args)
 	if err != nil {
 		*replay = false
 		return err

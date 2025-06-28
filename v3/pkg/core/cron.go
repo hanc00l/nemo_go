@@ -19,8 +19,8 @@ type CronTaskJob struct {
 }
 
 var (
-	globalCronTaskLock       string = "cron_task_lock"
-	globalCronTackUpdateFlag string = "cron_task_update_flag"
+	globalCronTaskLock       = "cron_task_lock"
+	globalCronTackUpdateFlag = "cron_task_update_flag"
 )
 
 var (

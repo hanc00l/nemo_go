@@ -33,9 +33,9 @@ const (
 )
 
 var (
-	globalMainTaskLock       string = "main_task_lock"
-	globalMainTaskUpdateTime string = "main_task_update_time"
-	globalStandaloneTaskLock string = "standalone_task_lock"
+	globalMainTaskLock       = "main_task_lock"
+	globalMainTaskUpdateTime = "main_task_update_time"
+	globalStandaloneTaskLock = "standalone_task_lock"
 )
 
 // StartMainTaskDamon MainTask任务的后台监控
@@ -208,7 +208,7 @@ func processExecutorTask(mainTaskInfo execute.MainTaskInfo) (err error) {
 			Executor:     executor,
 			TaskId:       uuid.New().String(),
 		}
-		err = newExecutorTask(executorTaskInfo)
+		err = NewExecutorTask(executorTaskInfo)
 		if err != nil {
 			logging.RuntimeLog.Errorf("创建executor任务失败,mainTaskInfo:%v, err:%v", executorTaskInfo, err)
 			return
@@ -216,17 +216,15 @@ func processExecutorTask(mainTaskInfo execute.MainTaskInfo) (err error) {
 		return nil
 	}
 	var succeedTask int
+
+	ts := NewTaskSlice(mainTaskInfo.Target, mainTaskInfo.TargetSliceType, mainTaskInfo.TargetSliceNum)
+	targets := ts.SplitTargets()
 	// ip、域名、OnlineAPI、Standalone任务，是top任务，可以直接开始、并行开始的
 	if len(mainTaskInfo.ExecutorConfig.Standalone) > 0 {
-		ipSlice := NewTaskSlice()
-		ipSlice.IpSliceNumber = mainTaskInfo.TargetSliceNum
-		ipSlice.TaskMode = mainTaskInfo.TargetSliceType
-		ipSlice.IpTarget = strings.Split(mainTaskInfo.Target, ",")
-		targets, _ := ipSlice.DoIpSlice()
 		for _, target := range targets {
 			mti := mainTaskInfo
 			mti.Target = target
-			for executor, _ := range mainTaskInfo.ExecutorConfig.Standalone {
+			for executor := range mainTaskInfo.ExecutorConfig.Standalone {
 				if err = f(executor, mti); err != nil {
 					return err
 				}
@@ -237,15 +235,8 @@ func processExecutorTask(mainTaskInfo execute.MainTaskInfo) (err error) {
 	// LLMAPI任务，是top任务，可以直接开始、并行开始的
 	// 注意：如果有LLMAPI任务，则域名和onlineapi只会在LLMAPI任务中执行
 	if len(mainTaskInfo.ExecutorConfig.LLMAPI) > 0 {
-		var targets []string
-		// 按行拆分目标，并发执行
-		if mainTaskInfo.TargetSliceType == SliceByLine {
-			targets = strings.Split(mainTaskInfo.Target, ",")
-		} else {
-			targets = []string{mainTaskInfo.Target}
-		}
 		for _, target := range targets {
-			for executor, _ := range mainTaskInfo.ExecutorConfig.LLMAPI {
+			for executor := range mainTaskInfo.ExecutorConfig.LLMAPI {
 				mti := mainTaskInfo
 				mti.Target = target
 				if err = f(executor, mti); err != nil {
@@ -256,18 +247,10 @@ func processExecutorTask(mainTaskInfo execute.MainTaskInfo) (err error) {
 		}
 	} else {
 		if len(mainTaskInfo.ExecutorConfig.DomainScan) > 0 {
-			// 域名扫描任务，按行拆分目标，并发执行
-			var targets []string
-			// 按行拆分目标，并发执行
-			if mainTaskInfo.TargetSliceType == SliceByLine {
-				targets = strings.Split(mainTaskInfo.Target, ",")
-			} else {
-				targets = []string{mainTaskInfo.Target}
-			}
 			for _, target := range targets {
 				mti := mainTaskInfo
 				mti.Target = target
-				for executor, _ := range mainTaskInfo.ExecutorConfig.DomainScan {
+				for executor := range mainTaskInfo.ExecutorConfig.DomainScan {
 					if err = f(executor, mti); err != nil {
 						return err
 					}
@@ -276,14 +259,7 @@ func processExecutorTask(mainTaskInfo execute.MainTaskInfo) (err error) {
 			}
 		}
 		if len(mainTaskInfo.ExecutorConfig.OnlineAPI) > 0 {
-			for executor, _ := range mainTaskInfo.ExecutorConfig.OnlineAPI {
-				var targets []string
-				// 按行拆分目标，并发执行
-				if mainTaskInfo.TargetSliceType == SliceByLine {
-					targets = strings.Split(mainTaskInfo.Target, ",")
-				} else {
-					targets = []string{mainTaskInfo.Target}
-				}
+			for executor := range mainTaskInfo.ExecutorConfig.OnlineAPI {
 				for _, target := range targets {
 					mti := mainTaskInfo
 					mti.Target = target
@@ -300,15 +276,10 @@ func processExecutorTask(mainTaskInfo execute.MainTaskInfo) (err error) {
 		}
 	}
 	if len(mainTaskInfo.ExecutorConfig.PortScan) > 0 {
-		ipSlice := NewTaskSlice()
-		ipSlice.IpSliceNumber = mainTaskInfo.TargetSliceNum
-		ipSlice.TaskMode = mainTaskInfo.TargetSliceType
-		ipSlice.IpTarget = strings.Split(mainTaskInfo.Target, ",")
-		targets, _ := ipSlice.DoIpSlice()
 		for _, target := range targets {
 			mti := mainTaskInfo
 			mti.Target = target
-			for executor, _ := range mainTaskInfo.ExecutorConfig.PortScan {
+			for executor := range mainTaskInfo.ExecutorConfig.PortScan {
 				if err = f(executor, mti); err != nil {
 					return err
 				}
@@ -319,13 +290,6 @@ func processExecutorTask(mainTaskInfo execute.MainTaskInfo) (err error) {
 	// fingerprint、pocscan任务，是需要等前面的任务执行完成后再开始的；或者前面没有任务，直接开始执行
 	if succeedTask == 0 {
 		if len(mainTaskInfo.ExecutorConfig.FingerPrint) > 0 {
-			var targets []string
-			// 按行拆分目标，并发执行
-			if mainTaskInfo.TargetSliceType == SliceByLine {
-				targets = strings.Split(mainTaskInfo.Target, ",")
-			} else {
-				targets = []string{mainTaskInfo.Target}
-			}
 			for _, target := range targets {
 				mti := mainTaskInfo
 				mti.Target = target
@@ -336,17 +300,10 @@ func processExecutorTask(mainTaskInfo execute.MainTaskInfo) (err error) {
 			}
 		} else {
 			if len(mainTaskInfo.ExecutorConfig.PocScan) > 0 {
-				var targets []string
-				// 按行拆分目标，并发执行
-				if mainTaskInfo.TargetSliceType == SliceByLine {
-					targets = strings.Split(mainTaskInfo.Target, ",")
-				} else {
-					targets = []string{mainTaskInfo.Target}
-				}
 				for _, target := range targets {
 					mti := mainTaskInfo
 					mti.Target = target
-					for executor, _ := range mainTaskInfo.ExecutorConfig.PocScan {
+					for executor := range mainTaskInfo.ExecutorConfig.PocScan {
 						if err = f(executor, mti); err != nil {
 							return err
 						}
@@ -497,7 +454,7 @@ func computeMainTaskProgressRate(mainTaskId string, args string) (result float64
 	return
 }
 
-func newExecutorTask(executorTaskInfo execute.ExecutorTaskInfo) (err error) {
+func NewExecutorTask(executorTaskInfo execute.ExecutorTaskInfo) (err error) {
 	// 检查目标中是否有黑名单
 	blackTarget, normalTarget := checkTargetForBlacklist(executorTaskInfo.Target, executorTaskInfo.WorkspaceId)
 	// 黑名单处理

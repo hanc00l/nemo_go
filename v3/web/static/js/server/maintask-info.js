@@ -60,7 +60,7 @@ function load_executor_task_data(maintaskId) {
     $.ajax({
         type: 'POST',
         url: '/maintask-executor-tasks', // Beego处理URL
-        data: {maintaskId: maintaskId,taskStatus:$('#select_task_status').val()},
+        data: {maintaskId: maintaskId, taskStatus: $('#select_task_status').val()},
         dataType: 'json',
         success: function (response) {
             renderTaskList(response, maintaskId);
@@ -94,6 +94,9 @@ function renderTaskList(tasks, maintaskId) {
                         <td>
                             <a class="btn btn-sm btn-danger" href="javascript:delete_executor_ask('${task.id}','${maintaskId}')" role="button" title="删除">
                                 <i class="fa fa-trash-o"></i>
+                            </a>
+                            <a class="btn btn-sm btn-info" href="javascript:redo_executor_ask('${task.id}','${maintaskId}')" role="button" title="重新执行">
+                                <i class="fa fa-reply"></i>
                             </a>
                         </td>
                     </tr>
@@ -130,6 +133,36 @@ function delete_executor_ask(id, maintaskId) {
             });
         });
 }
+
+
+function redo_executor_ask(id, maintaskId) {
+    swal({
+            title: "确定要重新执行?",
+            text: "该操作会重新执行该任务, 只有在主任务还未结束的时候才可以重新执行该任务。是否继续?",
+            type: "warning",
+            showCancelButton: true,
+            confirmButtonColor: "#DD6B55",
+            confirmButtonText: "确认",
+            cancelButtonText: "取消",
+            closeOnConfirm: true
+        },
+        function () {
+            $.ajax({
+                type: 'post',
+                url: '/maintask-executor-task-redo',
+                data: {id: id},
+                success: function (data) {
+                    show_response_message("重新执行任务", data, function () {
+                        load_executor_task_data(maintaskId);
+                    })
+                },
+                error: function (xhr, type, error) {
+                    swal('Warning', error, 'error');
+                }
+            });
+        });
+}
+
 
 function view_tree() {
     window.location.href = '/maintask-tree?maintaskId=' + $('#task_id').text();

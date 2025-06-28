@@ -79,16 +79,15 @@ func domainDoPortscan(config execute.ExecutorTaskInfo, domainscanConfig execute.
 	newConfig.DomainScan = nil
 	newConfig.PortScan = make(map[string]execute.PortscanConfig)
 	newConfig.PortScan[domainscanConfig.ResultPortscanBin] = *domainscanConfig.ResultPortscanConfig
-	ipSlice := core.NewTaskSlice()
-	ipSlice.IpSliceNumber = config.TargetSliceNum
-	ipSlice.TaskMode = config.TargetSliceType
-	// C段和IP扫描只需要扫描一次，C段扫描优先级高于IP扫描
+	var portScanTarget string
 	if domainscanConfig.IsIPSubnetPortScan {
-		ipSlice.IpTarget = utils.SetToSlice(subnetMap)
+		portScanTarget = utils.SetToString(subnetMap)
 	} else if domainscanConfig.IsIPPortScan {
-		ipSlice.IpTarget = utils.SetToSlice(ipMap)
+		portScanTarget = utils.SetToString(ipMap)
 	}
-	targets, _ := ipSlice.DoIpSlice()
+	// 默认不进行拆分
+	ts := core.NewTaskSlice(portScanTarget, 0, 0)
+	targets := ts.SplitTargets()
 	for _, target := range targets {
 		_ = newNextExecutorTask(newConfig, target, domainscanConfig.ResultPortscanBin)
 	}

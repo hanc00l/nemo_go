@@ -14,7 +14,7 @@ $(function () {
         $('#profile-tab').tab('show');
     });
     $('#target_split').change(function () {
-        if ($(this).val() === "2") {
+        if ($(this).val() !== "0") {
             $('#target_split_num').prop('disabled', false);
         } else {
             $('#target_split_num').prop('disabled', true);
@@ -75,8 +75,8 @@ function process_form_data() {
         alert("目标不能为空！");
         return null;
     }
-    if (mainTaskInfoData.target_split === 2 && mainTaskInfoData.target_split_num <= 1) {
-        alert("IP分片数量必须大于1！");
+    if (mainTaskInfoData.target_split !==0 && mainTaskInfoData.target_split_num < 1) {
+        alert("拆分数量必须大于等于1！");
         return null;
     }
     if (mainTaskInfoData.is_cron_task && !isNotEmpty(mainTaskInfoData.cron_expr)) {
