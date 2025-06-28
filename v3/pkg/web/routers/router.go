@@ -65,6 +65,7 @@ func InitRouter() {
 	web.CtrlPost("/maintask-info", (*controllers.MainTaskController).InfoAction)
 	web.CtrlPost("/maintask-executor-tasks", (*controllers.MainTaskController).InfoExecutorTaskAction)
 	web.CtrlPost("/maintask-executor-task-delete", (*controllers.MainTaskController).DeleteExecutorTaskAction)
+	web.CtrlPost("/maintask-executor-task-redo", (*controllers.MainTaskController).RedoExecutorTaskAction)
 	web.CtrlPost("/maintask-change-cron-status", (*controllers.MainTaskController).ChangeCronTaskStatusAction)
 	web.CtrlPost("/maintask-redo", (*controllers.MainTaskController).RedoMaintaskAction)
 	web.CtrlGet("/maintask-tree", (*controllers.MainTaskController).MaintaskTreeAction)

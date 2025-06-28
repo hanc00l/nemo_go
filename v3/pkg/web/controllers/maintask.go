@@ -7,6 +7,7 @@ import (
 	"github.com/hanc00l/nemo_go/v3/pkg/core"
 	"github.com/hanc00l/nemo_go/v3/pkg/db"
 	"github.com/hanc00l/nemo_go/v3/pkg/logging"
+	"github.com/hanc00l/nemo_go/v3/pkg/task/execute"
 	"go.mongodb.org/mongo-driver/v2/bson"
 	"time"
 )
@@ -503,9 +504,9 @@ func (c *MainTaskController) InfoAction() {
 	if doc.TargetSliceType == 0 {
 		infoData.TargetSplit = "不拆分"
 	} else if doc.TargetSliceType == 1 {
-		infoData.TargetSplit = "按行拆分"
+		infoData.TargetSplit = fmt.Sprintf("按行每%d个拆分", doc.TargetSliceNum)
 	} else if doc.TargetSliceType == 2 {
-		infoData.TargetSplit = fmt.Sprintf("按IP: %d拆分", doc.TargetSliceNum)
+		infoData.TargetSplit = fmt.Sprintf("按IP每%d个拆分", doc.TargetSliceNum)
 	} else {
 		infoData.TargetSplit = "错误的拆分类型"
 	}
@@ -732,6 +733,94 @@ func (c *MainTaskController) RedoMaintaskAction() {
 	}
 	c.CheckErrorAndStatus(mainTask.Insert(docNew))
 
+	return
+}
+
+// RedoExecutorTaskAction 重新执行一Executor任务
+func (c *MainTaskController) RedoExecutorTaskAction() {
+	defer func(c *MainTaskController, encoding ...bool) {
+		_ = c.ServeJSON(encoding...)
+	}(c)
+	if c.CheckMultiAccessRequest([]RequestRole{SuperAdmin, Admin}, false) == false {
+		c.FailedStatus("当前用户权限不允许！")
+		return
+	}
+
+	workspaceId := c.GetWorkspace()
+	if len(workspaceId) == 0 {
+		c.FailedStatus("未选择当前的工作空间！")
+		return
+	}
+	id := c.GetString("id")
+	if len(id) == 0 {
+		logging.RuntimeLog.Error("empty id")
+		c.FailedStatus("empty id")
+		return
+	}
+	mongoClient, err := db.GetClient()
+	if err != nil {
+		logging.RuntimeLog.Error(err.Error())
+		c.FailedStatus(err.Error())
+		return
+	}
+	defer db.CloseClient(mongoClient)
+
+	executorTask := db.NewExecutorTask(mongoClient)
+	executorDoc, err := executorTask.GetById(id)
+	if err != nil {
+		logging.RuntimeLog.Error(err.Error())
+		c.FailedStatus(err.Error())
+		return
+	}
+	if executorDoc.Id.Hex() != id {
+		c.FailedStatus("该任务不存在！")
+		return
+	}
+	mainTask := db.NewMainTask(mongoClient)
+	mainTaskDoc, err := mainTask.GetByTaskId(executorDoc.MainTaskId)
+	if err != nil {
+		logging.RuntimeLog.Error(err.Error())
+		c.FailedStatus(err.Error())
+		return
+	}
+	if mainTaskDoc.WorkspaceId != workspaceId {
+		c.FailedStatus("Maintask任务不存在或不属于当前工作空间！")
+		return
+	}
+	if mainTaskDoc.Status == core.SUCCESS || mainTaskDoc.Status == core.FAILURE {
+		c.FailedStatus("Maintask任务已执行完毕，无法重新执行！")
+		return
+	}
+	var executorConfig execute.ExecutorConfig
+	err = json.Unmarshal([]byte(mainTaskDoc.Args), &executorConfig)
+	if err != nil {
+		logging.RuntimeLog.Error(err.Error())
+		c.FailedStatus("参数解析失败！")
+		return
+	}
+	executorTaskInfoNew := execute.ExecutorTaskInfo{
+		Executor:  executorDoc.Executor,
+		TaskId:    uuid.New().String(),
+		PreTaskId: executorDoc.PreTaskId,
+		MainTaskInfo: execute.MainTaskInfo{
+			Target:          executorDoc.Target,
+			ExcludeTarget:   mainTaskDoc.ExcludeTarget,
+			ExecutorConfig:  executorConfig,
+			OrgId:           mainTaskDoc.OrgId,
+			WorkspaceId:     mainTaskDoc.WorkspaceId,
+			MainTaskId:      mainTaskDoc.TaskId,
+			IsProxy:         mainTaskDoc.IsProxy,
+			TargetSliceType: mainTaskDoc.TargetSliceType,
+			TargetSliceNum:  mainTaskDoc.TargetSliceNum,
+		},
+	}
+	err = core.NewExecutorTask(executorTaskInfoNew)
+	if err != nil {
+		logging.RuntimeLog.Error(err.Error())
+		c.FailedStatus("重新执行任务失败！")
+		return
+	}
+	c.SucceededStatus("重新执行任务成功！")
 	return
 }
 
