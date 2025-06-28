@@ -25,7 +25,7 @@ $(function () {
         if (btnValue === "close") {
             window.close();
         } else {
-            history.back();
+            window.location.href = '/profile-list';
         }
     });
 

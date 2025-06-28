@@ -1,10 +1,11 @@
 $(function () {
-    const id = $('#hidden_id').val();
     init_notify_multiselect();
+    const id = $('#hidden_id').val();
     if (id !== "") {
         load_workspace_data(id);
+    } else {
+        load_notify_data(null);
     }
-
     $('#workspaceForm').on('submit', function (e) {
         e.preventDefault();
         save_workspace_data();
@@ -22,8 +23,8 @@ function load_workspace_data(id) {
             $('#sort_number').val(data.sort_number);
             $('#status').val(data.status);
             $('#workspace_description').val(data.workspace_description);
-            $('#select_notify').val(data.notify.split(','));
-            $('#select_notify').multiselect('rebuild');
+            const selectedData = data.notify.split(',');
+            load_notify_data(selectedData);
         },
         error: function (xhr, type, error) {
             swal('Warning', error, 'error');
@@ -83,10 +84,9 @@ function init_notify_multiselect() {
         enableCollapsibleOptGroups: true,
         filterPlaceholder: '搜索...',
     });
-    load_notify_data();
 }
 
-function load_notify_data() {
+function load_notify_data(selectedData) {
     $.ajax({
         url: '/notify-list-select', // 替换为你的 API 地址
         method: 'POST',
@@ -102,6 +102,9 @@ function load_notify_data() {
                 $('#select_notify').append(option);
             });
             // 初始化或刷新 Multiselect
+            if (selectedData) {
+                $('#select_notify').val(selectedData);
+            }
             $('#select_notify').multiselect('rebuild');
         },
         error: function (xhr, status, error) {

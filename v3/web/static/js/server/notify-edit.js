@@ -11,9 +11,6 @@ $(function () {
         e.preventDefault();
         save_notify_data();
     });
-    $('#btn_cancel').click(function () {
-        history.back();
-    });
 });
 
 function save_notify_data() {
