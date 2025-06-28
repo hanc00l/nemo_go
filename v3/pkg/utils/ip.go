@@ -4,7 +4,6 @@ import (
 	"errors"
 	"fmt"
 	"github.com/hanc00l/nemo_go/v3/pkg/logging"
-	"math"
 	"math/big"
 	"net"
 	"net/netip"
@@ -128,6 +127,22 @@ func GetClientIp() (ip string, err error) {
 	return "", errors.New("can not find the client ip address")
 }
 
+// ipToUint32 converts an IP address to uint32
+func ipToUint32(ip net.IP) uint32 {
+	ip = ip.To4()
+	return uint32(ip[0])<<24 | uint32(ip[1])<<16 | uint32(ip[2])<<8 | uint32(ip[3])
+}
+
+// uint32ToIP converts a uint32 back to an IP address
+func uint32ToIP(i uint32) net.IP {
+	return net.IP{
+		byte(i >> 24),
+		byte(i >> 16),
+		byte(i >> 8),
+		byte(i),
+	}
+}
+
 // ParseIP 将IP地址、IP地址段、IP地址范围解析为IP地址列表，支持ipv4/ipv6
 func ParseIP(ip string) (ipResults []string) {
 	//192.168.1.1
@@ -137,18 +152,28 @@ func ParseIP(ip string) (ipResults []string) {
 	}
 	//192.168.1.0/24
 	if CheckIPV4Subnet(ip) {
-		addr, ipv4sub, err := net.ParseCIDR(ip)
+		// Parse the CIDR notation
+		_, ipNet, err := net.ParseCIDR(ip)
 		if err != nil {
-			return
+			return nil
 		}
-		ones, bits := ipv4sub.Mask.Size()
-		ipStart := IPV4ToUInt32(addr.String())
-		ipSize := int(math.Pow(2, float64(bits-ones)))
-		for i := 0; i < ipSize; i++ {
-			ipResults = append(ipResults, UInt32ToIPV4(uint32(i)+ipStart))
+		// Get the IP and mask
+		ipx := ipNet.IP
+		mask := ipNet.Mask
+		// Calculate the number of IPs in the subnet
+		ones, bits := mask.Size()
+		numIPs := 1 << uint(bits-ones) // 2^(32-ones) for IPv4
+		// Convert IP to uint32 for arithmetic
+		ipInt := ipToUint32(ipx)
+		ips := make([]string, 0, numIPs)
+		// Generate all IPs in the subnet
+		for i := uint32(0); i < uint32(numIPs); i++ {
+			newIP := uint32ToIP(ipInt + i)
+			ips = append(ips, newIP.String())
 		}
-		return
+		return ips
 	}
+
 	//2409:8929:42d:bf31:1840:27ba:d669:8200/120
 	if CheckIPV6Subnet(ip) {
 		ipv6Prefix, err := netip.ParsePrefix(ip)
