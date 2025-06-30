@@ -9,6 +9,7 @@ import (
 	"github.com/hanc00l/nemo_go/v3/pkg/logging"
 	"github.com/hanc00l/nemo_go/v3/pkg/utils"
 	"go.mongodb.org/mongo-driver/v2/bson"
+	"net"
 	"net/http"
 )
 
@@ -59,7 +60,13 @@ func (c *LoginController) LoginAction() {
 		_ = c.SetSession(Workspace, workspaceList[0].WorkspaceId)
 		_ = c.SetSession(User, userDoc.Username)
 		_ = c.SetSession(UserRole, userDoc.Role)
-		logging.RuntimeLog.Infof("%s login from ip:%s", userDoc.Username, c.Ctx.Input.IP())
+		//RemoteAddr是ip:port格式，需要分割
+		ip, _, err := net.SplitHostPort(c.Ctx.Request.RemoteAddr)
+		if err != nil {
+			//IP()的返回可能是代理服务器的值，也可能被依靠
+			ip = c.Ctx.Input.IP()
+		}
+		logging.RuntimeLog.Infof("%s login from ip:%s", userDoc.Username, ip)
 		//c.UpdateOnlineUser()
 		c.Redirect("/dashboard", http.StatusFound)
 	}
