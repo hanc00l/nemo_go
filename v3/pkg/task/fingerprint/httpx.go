@@ -53,7 +53,7 @@ func (h *Httpx) GetExecuteCmd() string {
 func (h *Httpx) GetExecuteArgs(inputTempFile, outputTempFile string) (cmdArgs []string) {
 	cmdArgs = append(cmdArgs,
 		"-random-agent", "-l", inputTempFile, "-o", outputTempFile,
-		"-retries", "3", "-threads", "50", "-timeout", "5", "-disable-update-check",
+		"-retries", "3", "-threads", "20", "-timeout", "5", "-disable-update-check",
 		"-title", "-server", "-status-code", "-content-type", "-follow-redirects", "-json", "-silent", "-no-color", "-tls-grab", "-jarm",
 		"-ehb", "-irrb",
 		// -esb, -exclude-screenshot-bytes  enable excluding screenshot bytes from json output
@@ -61,7 +61,7 @@ func (h *Httpx) GetExecuteArgs(inputTempFile, outputTempFile string) (cmdArgs []
 		// -irrb, -include-response-base64     include base64 encoded http request/response in JSON output (-json only)
 	)
 	if h.Config.IsScreenshot {
-		cmdArgs = append(cmdArgs, "-screenshot", "--system-chrome")
+		cmdArgs = append(cmdArgs, "-screenshot", "-system-chrome")
 	}
 	if h.Config.IsIconHash {
 		cmdArgs = append(cmdArgs, "-favicon")
