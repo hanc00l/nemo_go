@@ -114,8 +114,8 @@ func (c *WorkspaceController) getListData(req workspaceRequestParam) (resp DataT
 			var notifyList []string
 			for _, notifyId := range row.NotifyId {
 				notifyDoc, err := notify.Get(notifyId)
-				if err != nil {
-					logging.RuntimeLog.Error(err)
+				if err != nil || notifyDoc.Status != "enable" {
+					//logging.RuntimeLog.Error(err)
 					continue
 				}
 				notifyList = append(notifyList, notifyDoc.Name)
