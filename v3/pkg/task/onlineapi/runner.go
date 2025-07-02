@@ -260,6 +260,7 @@ func retriedQuery(executor Executor, config execute.OnlineAPIConfig, query strin
 		if apiKey.apiKeyInUse = getOneAPIKey(apiKey); apiKey.apiKeyInUse == "" {
 			return nil, 0, errors.New(fmt.Sprintf("%s没有可用的key", apiKey.apiName))
 		}
+		time.Sleep(3 * time.Second)
 	}
 	if retriedCount >= RETRIED {
 		return nil, 0, errors.New(fmt.Sprintf("%s 查询重试次数达到上限", apiKey.apiName))
