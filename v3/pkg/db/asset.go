@@ -221,9 +221,10 @@ func (fa *Asset) Insert(doc AssetDocument) (isSuccess bool, err error) {
 		}
 	}
 	if len(doc.Ip.IpV6) > 0 {
-		for i := 0; i < len(doc.Ip.IpV6); i++ {
-			doc.Ip.IpV6[i].IPIntHigh, doc.Ip.IpV6[i].IPIntLow = utils.IPV6ToDoubleInt64(doc.Ip.IpV6[i].IPName)
-		}
+		// MongoDB 的 BSON 格式对数值类型有限制，而你的 IPIntHigh 和 IPIntLow 使用了 uint64，当存储的值过大时会导致 overflows int64 错误。
+		//for i := 0; i < len(doc.Ip.IpV6); i++ {
+		//	doc.Ip.IpV6[i].IPIntHigh, doc.Ip.IpV6[i].IPIntLow = utils.IPV6ToDoubleInt64(doc.Ip.IpV6[i].IPName)
+		//}
 	}
 	// 时间
 	now := time.Now()
@@ -858,8 +859,8 @@ func RecordToDoc(headers, record []string, orgId string) (*AssetDocument, error)
 			ips := strings.Split(value, ",")
 			for _, ip := range ips {
 				if ip != "" {
-					h, l := utils.IPV6ToDoubleInt64(ip)
-					doc.Ip.IpV6 = append(doc.Ip.IpV6, IPV6{IPName: ip, IPIntHigh: h, IPIntLow: l})
+					//h, l := utils.IPV6ToDoubleInt64(ip)
+					doc.Ip.IpV6 = append(doc.Ip.IpV6, IPV6{IPName: ip})
 				}
 			}
 		case "ip.ipv6.location":
