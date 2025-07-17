@@ -28,7 +28,7 @@ type VulDocument struct {
 	Name      string `bson:"name" json:"name"`
 	Severity  string `bson:"severity" json:"severity"`
 	Extra     string `bson:"extra,omitempty" json:"extra,omitempty"`
-	TaskId    string `bson:"taskId" json:"taskId"`
+	TaskId    string `bson:"taskId" json:"taskId,omitempty"`
 
 	CreateTime time.Time `bson:"create_time" json:"-"`
 	UpdateTime time.Time `bson:"update_time" json:"-"`

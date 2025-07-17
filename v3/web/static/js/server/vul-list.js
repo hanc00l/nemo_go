@@ -37,19 +37,24 @@ $(function () {
                 },
                 {data: "index", title: "序号", width: "5%"},
                 {
-                    data: "authority", title: "资产", width: "20%",
+                    data: "authority", title: "资产", width: "10%",
                     "render": function (data, type, row) {
                         return '<a href="/asset-list?authority=' + data + '" target=_blank>' + data + '</a>';
                     }
                 },
-                {data: "url", title: "Url", width: "15%"},
+                {data: "name", title: "名称", width: "35%"},
                 {
-                    data: "pocfile", title: "Poc文件", width: "25%",
+                    data: "pocfile", title: "Poc文件", width: "20%",
                     "render": function (data, type, row) {
                         return '<a href="/vul-info?id=' + row["id"] + '" target=_blank>' + data + '</a>';
                     }
                 },
-                {data: "severity", title: "等级", width: "8%"},
+                {
+                    data: "severity", title: "等级", width: "8%",
+                    "render": function (data, type, row) {
+                        return get_severity_color(data);
+                    }
+                },
                 {data: "create_time", title: "创建时间", width: "8%"},
                 {data: "update_time", title: "更新时间", width: "8%"},
                 {
@@ -85,4 +90,21 @@ $(function () {
 
 function delete_vul(id) {
     delete_by_id('#list_table', '/vul-delete', id);
+}
+
+function get_severity_color(severity) {
+    switch (severity) {
+        case "critical":
+            return '<span class="badge bg-danger" style="font-size: 12px;color: white;">' + severity + '</span>';
+        case "high":
+            return '<span class="badge bg-danger" style="font-size: 12px;color: white;">' + severity + '</span>';
+        case "medium":
+            return '<span class="badge bg-warning" style="font-size: 12px;color: white;">' + severity + '</span>';
+        case "low":
+            return '<span class="badge bg-success" style="font-size: 12px;color: white;">' + severity + '</span>';
+        case "info":
+            return '<span class="badge bg-info" style="font-size: 12px;color: white;">' + severity + '</span>';
+        default:
+            return '<span class="badge bg-secondary" style="font-size: 12px; color: white;">' + severity + '</span>';
+    }
 }

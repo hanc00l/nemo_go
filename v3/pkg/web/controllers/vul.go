@@ -26,6 +26,7 @@ type VulData struct {
 	Authority      string `json:"authority"`
 	Url            string `json:"url"`
 	PocFile        string `json:"pocfile"`
+	Name           string `json:"name"`
 	Severity       string `json:"severity"`
 	Source         string `json:"source"`
 	TaskId         string `json:"task_id"`
@@ -134,6 +135,7 @@ func (c *VulController) getListData(req vulRequestParam) (resp DataTableResponse
 			Authority:      row.Authority,
 			Url:            row.Url,
 			PocFile:        row.PocFile,
+			Name:           row.Name,
 			Source:         row.Source,
 			Severity:       row.Severity,
 			TaskId:         row.TaskId,
