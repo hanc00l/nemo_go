@@ -18,13 +18,16 @@ api:
         key:
     hunter:
         key:
-    icp:
+    icpChinaz:
         key:
-    icpPlus:
+    icpPlusChinaz:
+        key:
+    icpBeianx:
         key:
 llmapi:
+    maxTokens: 8192
     kimi:
-        api: https://api.moonshot.cn/v1/chat/completions
+        api: https://api.moonshot.cn/v1
         model: moonshot-v1-auto
         token:
     deepseek:
