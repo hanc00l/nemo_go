@@ -18,6 +18,12 @@
                 <div class="tile-body">
                     <form>
                         <div class="form-group">
+                            <label class="col-form-label" for="input_max_tokens">
+                                <b>MaxTokens</b>
+                            </label>
+                            <small>0表示使用默认值（推荐8192或者更大，需根据实际情况调整）</small>
+                            <input class="form-control" id="input_max_tokens" type="text"
+                                   value="0">
                             <label class="col-form-label" for="input_kimi_api">
                                 <b>Kimi</b>
                             </label>
@@ -124,19 +130,26 @@
                             <input class="form-control" id="input_quake_key" type="text"
                                    placeholder="quake token，多个token以,分隔"
                                    value="">
-                            <label class="col-form-label" for="input_icp_key">
+                            <label class="col-form-label" for="input_icp_chinaz_key">
                                 <b>Chinaz ICP</b>
                             </label>
                             <small>Token:</small>
-                            <input class="form-control" id="input_icp_key" type="text"
+                            <input class="form-control" id="input_icp_chinaz_key" type="text"
                                    placeholder="chinaz icp token，多个token以,分隔"
                                    value="">
-                            <label class="col-form-label" for="input_icpPlus_key">
+                            <label class="col-form-label" for="input_icpPlus_chinaz_key">
                                 <b>Chinaz组织备案域名查询</b>
                             </label>
                             <small>Token:</small>
-                            <input class="form-control" id="input_icpPlus_key" type="text"
+                            <input class="form-control" id="input_icpPlus_chinaz_key" type="text"
                                    placeholder="chinaz icp plus token，多个token以,分隔"
+                                   value="">
+                            <label class="col-form-label" for="input_icp_beianx_key">
+                                <b>Beianx ICP备案查询</b>
+                            </label>
+                            <small>Token:</small>
+                            <input class="form-control" id="input_icp_beianx_key" type="text"
+                                   placeholder="Beianx icp token，多个token以,分隔"
                                    value="">
                         </div>
                     </form>

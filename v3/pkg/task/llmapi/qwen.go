@@ -13,7 +13,7 @@ type Qwen struct {
 }
 
 func (q *Qwen) Run(target string, api conf.APIToken, config execute.LLMAPIConfig) (result Result) {
-	content, err := CallAPI(api.API, api.Model, api.Token, target)
+	content, err := CallAPI(api.API, api.Model, api.Token, GetSystemContent(), GetUserPrompt(target))
 	if err != nil {
 		logging.RuntimeLog.Error("调用API失败：", err)
 		return

@@ -10,6 +10,14 @@ import (
 	"strings"
 )
 
+/*
+maxTokens 最大生成长度，为0时使用默认值
+经测试，目前各API的长度为：
+- kimi: 16384
+- qwen: 16384
+- deepseek: 8192
+*/
+
 type Result []string
 
 type Executor interface {
@@ -55,7 +63,15 @@ func Do(taskInfo execute.ExecutorTaskInfo) (result Result) {
 	return vr
 }
 
-func CallAPI(apiBase, model, apiKey string, target string) (string, error) {
+func DoCallAPI(apiName, systemContent, userPrompt string) (string, error) {
+	executor, api := NewExecutor(apiName, false)
+	if executor == nil {
+		return "", fmt.Errorf("executor %s not found", apiName)
+	}
+	return CallAPI(api.API, api.Model, api.Token, systemContent, userPrompt)
+}
+
+func CallAPI(apiBase, model, apiKey string, systemContent, userPrompt string) (string, error) {
 	// 创建自定义配置
 	config := openai.DefaultConfig(apiKey)
 	config.BaseURL = apiBase
@@ -66,20 +82,24 @@ func CallAPI(apiBase, model, apiKey string, target string) (string, error) {
 	messages := []openai.ChatCompletionMessage{
 		{
 			Role:    openai.ChatMessageRoleSystem,
-			Content: GetSystemContent(),
+			Content: systemContent,
 		},
 		{
 			Role:    openai.ChatMessageRoleUser,
-			Content: GetUserPrompt(target),
+			Content: userPrompt,
 		},
 	}
 	// 调用API
+	request := openai.ChatCompletionRequest{
+		Model:    model,
+		Messages: messages,
+	}
+	if conf.GlobalWorkerConfig().LLMAPI.MaxTokens > 0 {
+		request.MaxTokens = conf.GlobalWorkerConfig().LLMAPI.MaxTokens
+	}
 	resp, err := client.CreateChatCompletion(
 		context.Background(),
-		openai.ChatCompletionRequest{
-			Model:    model,
-			Messages: messages,
-		},
+		request,
 	)
 	if err != nil {
 		return "", err

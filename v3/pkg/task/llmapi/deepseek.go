@@ -22,7 +22,7 @@ type DeepSeekOpenAI struct {
 }
 
 func (d *DeepSeekOpenAI) Run(target string, api conf.APIToken, config execute.LLMAPIConfig) (result Result) {
-	content, err := CallAPI(api.API, api.Model, api.Token, target)
+	content, err := CallAPI(api.API, api.Model, api.Token, GetSystemContent(), GetUserPrompt(target))
 	if err != nil {
 		logging.RuntimeLog.Error("调用API失败：", err)
 		return
@@ -119,8 +119,8 @@ func (d *DeepSeek) Do(target string, apiToken conf.APIToken) (response Response,
 				Content: GetUserPrompt(target),
 				Role:    "user",
 			}},
-		Model:     "deepseek-chat",
-		MaxTokens: 2048,
+		Model: "deepseek-chat",
+		//MaxTokens: 4096,
 		ResponseFormat: struct {
 			Type string `json:"type"`
 		}{
