@@ -36,6 +36,10 @@ func Do(taskInfo execute.ExecutorTaskInfo) (result Result) {
 	result = Result{FingerResults: make(map[string]interface{})}
 
 	if config, ok := taskInfo.FingerPrint["fingerprint"]; ok {
+		if len(config.PortList) > 0 {
+			portsListAll := utils.ParsePortList(config.PortList)
+			taskInfo.Target = utils.FormatTargetByPortList(taskInfo.Target, portsListAll)
+		}
 		if config.IsHttpx {
 			exeResult := do1("httpx", config, taskInfo.Target, taskInfo.IsProxy)
 			for domain, fingerResult := range exeResult.FingerResults {

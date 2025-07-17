@@ -61,7 +61,7 @@
                                             <span class="badge badge-light" id="task_run_time"></span>
                                         </div>
                                         <div class="col-md-2">
-                                            <span class="badge badge-info" title="执行中/待执行/总任务">子任务</span>
+                                            <span class="badge badge-info" title="执行中/待执行/总任务">子任务数</span>
                                             <span class="badge badge-light" id="task_executors_num"
                                                   title="待执行/执行中/总任务"></span>
                                         </div>
@@ -73,16 +73,20 @@
                                             <span class="badge badge-light" id="task_progress"></span>
                                         </div>
                                         <div class="col-md-2">
-                                            <span class="badge badge-info">任务结果</span>
-                                            <span class="badge badge-light" id="task_result"></span>
-                                        </div>
-                                        <div class="col-md-2">
                                             <span class="badge badge-info">启用代理</span>
                                             <span class="badge badge-light" id="task_proxy"></span>
                                         </div>
                                         <div class="col-md-2">
                                             <span class="badge badge-info">定时任务</span>
                                             <span class="badge badge-light" id="task_cron"></span>
+                                        </div>
+                                        <div class="col-md-2">
+                                            <span class="badge badge-info">任务结果</span>
+                                            <span class="badge badge-light" id="task_result"></span>
+                                        </div>
+                                        <div class="col-md-2">
+                                            <span class="badge badge-info">任务报告</span>
+                                            <span class="badge badge-light" id="task_report"></span>
                                         </div>
                                     </div>
 
@@ -95,13 +99,13 @@
 
                                     <!-- 任务目标和排除目标 -->
                                     <div class="row mb-3">
-                                        <div class="col-md-6">
+                                        <div class="col-md-12">
                                             <span class="badge badge-info">任务目标</span>
                                             <div class="card bg-light p-3">
                                                 <pre class="mb-0" id="task_target"></pre>
                                             </div>
                                         </div>
-                                        <div class="col-md-6">
+                                        <div class="col-md-12">
                                             <span class="badge badge-info">排除的目标</span>
                                             <div class="card bg-light p-3">
                                                 <pre class="mb-0" id="task_exclude_target"></pre>
@@ -122,61 +126,68 @@
                             </div>
                         </div>
                     </div>
-
                     <!-- 子任务列表卡片 -->
                     <div class="row" id="task_executor_card">
-                        <div class="col-md-12">
-                            <div class="card shadow-sm">
-                                <div class="card-header bg-primary text-white">
-                                    <h2 class="card-title mb-0"><i class="fa fa-list"></i>子任务列表&nbsp;&nbsp;<i
-                                            class="fa fa-random" aria-hidden="true"></i><a onclick=view_tree() href="#"><span
-                                            style="color: white;">查看任务流程图</span></a>&nbsp;
-                                    <select title="任务状态" id="select_task_status" style="width: 200px;font-size: 14px;">
-                                        <option value="" selected>--全部任务--</option>
-                                        <option value="CREATED">已创建</option>
-                                        <option value="STARTED">执行中</option>
-                                        <option value="SUCCESS">成功</option>
-                                        <option value="FAILURE">失败</option>
-                                    </select>
-                                    </h2>
-                                </div>
-                                <div class="card-body">
-                                    <table class="table table-hover table-bordered" id="task_executor_table">
-                                        <thead class="thead-light">
-                                        <tr>
-                                            <th width="3%">序号</th>
-                                            <th width="5%">任务名称</th>
-                                            <th width="5%">任务状态</th>
-                                            <th width="25%">目标</th>
-                                            <th width="12%">结果</th>
-                                            <th width="8%">启动时间</th>
-                                            <th width="8%">完成时间</th>
-                                            <th width="6%">执行时长</th>
-                                            <th width="8%">worker</th>
-                                            <th width="8%">创建时间</th>
-                                            <th width="8%">操作</th>
-                                        </tr>
-                                        </thead>
-                                        <tbody id="task_executor_tbody">
-                                        </tbody>
-                                    </table>
+                        <div class="col-md-12 ">
+                            <div class="tile">
+                                <div class="tile-body">
+                                    <form class="row">
+                                        <div class="form-group col-md-2">
+                                            <label class="control-label" for="executor_name">任务名称</label>
+                                            <input class="form-control" type="text" id="executor_name"
+                                                   placeholder="任务名称">
+                                        </div>
+                                        <div class="form-group col-md-3">
+                                            <label class="control-label" for="worker_name">Worker</label>
+                                            <input class="form-control" type="text" id="worker_name"
+                                                   placeholder="Worker名称">
+                                        </div>
+                                        <div class="form-group col-md-2">
+                                            <label class="control-label" for="select_task_status">任务状态</label>
+                                            <select class="form-control" title="任务状态" id="select_task_status">
+                                                <option value="" selected>--全部任务--</option>
+                                                <option value="CREATED">已创建</option>
+                                                <option value="STARTED">执行中</option>
+                                                <option value="SUCCESS">成功</option>
+                                                <option value="FAILURE">失败</option>
+                                            </select>
+                                        </div>
+                                        <div class="form-group col-md-4 align-self-end">
+                                            <button class="btn btn-primary" type="button" id="search"><i
+                                                    class="fa fa-fw fa-lg fa-search"></i>搜索
+                                            </button>
+                                        </div>
+                                    </form>
                                 </div>
                             </div>
+                            <div class="tile">
+                                <div class="tile-body">
+                                    <table class="table table-hover table-bordered dataTable no-footer" id="list_table"
+                                           role="grid"
+                                           aria-describedby="list_table" width="100%">
+                                    </table>
+                                </div>
+                                <!----tile body-->
+                            </div> <!-- tile -->
                         </div>
                     </div>
                 </div>
             </div>
         </div>
     </div>
+    </div>
 </main>
 
 <script src="static/js/jquery/jquery-3.3.1.min.js"></script>
 <script src="static/js/bootstrap/popper.min.js"></script>
 <script src="static/js/bootstrap/bootstrap.min.js"></script>
-<script src="static/js/main.js"></script>
 <script src="static/js/plugins/pace.min.js"></script>
-<script src="static/js/server/maintask-info.js"></script>
+<script src="static/js/main.js"></script>
+<script src="static/js/plugins/jquery.dataTables.min.js"></script>
+<script src="static/js/plugins/dataTables.bootstrap.min.js"></script>
 <script src="static/js/sweetalert/sweetalert.min.js"></script>
+<script src="static/js/jquery/jquery.bootstrap-duallistbox.js"></script>
+<script src="static/js/server/maintask-info.js"></script>
 <script>
     $(function () {
         $("title").html("任务详情-Nemo");

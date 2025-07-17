@@ -62,6 +62,7 @@ function process_form_data() {
         is_cron_task: $('#is_cron_task').is(':checked'),
         cron_expr: $('#cron_exp').val(),
         is_proxy: $('#is_proxy').is(':checked'),
+        report_llmapi: $('#report_llmapi').val(),
     };
     if (!isNotEmpty(mainTaskInfoData.name)) {
         alert("任务名称不能为空！");
@@ -89,16 +90,16 @@ function process_form_data() {
 function fill_form_with_data(data) {
     if (data.config_type === "staged") {
         $('#div_standalone').hide();
-        // llmapi部分
-        if (data.llmapi.enabled) {
-            $('#div_llmapi').show();
-            $('#qwen').prop('checked', data.llmapi.qwen);
-            $('#kimi').prop('checked', data.llmapi.kimi);
-            $('#deepseek').prop('checked', data.llmapi.deepseek);
-            $('#icpPlus').prop('checked', data.llmapi.icpPlus);
-            $('#llmapi_autoAssociateOrg').prop('checked', data.llmapi.config?.autoAssociateOrg || false);
+        // icp部分
+        if (data.icp.enabled) {
+            $('#div_icp').show();
+            $('#chinaz').prop('checked', data.icp?.chinaz||false);
+            $('#beianx').prop('checked', data.icp?.beianx||false);
+            $('#query_type_icpPlus').prop('checked', data.icp?.icpPlus||false);
+            $('#query_type_icpPlus2').prop('checked', data.icp?.icpPlus2||false);
+            $('#icp_autoAssociateOrg').prop('checked', data.icp.config?.autoAssociateOrg || false);
         } else {
-            $('#div_llmapi').hide();
+            $('#div_icp').hide();
         }
         // 端口扫描部分
         if (data.portscan.enabled) {
@@ -110,6 +111,7 @@ function fill_form_with_data(data) {
             $('#portscan_rate').val(data.portscan.config.rate);
             $('#portscan_tech').val(data.portscan.config.tech);
             $('#portscan_PortscanConfig_maxOpenedPortPerIp').val(data.portscan.config.maxOpenedPortPerIp);
+            $('#portscan_PortscanConfig_sliceNumber').val(data.portscan.config.sliceNumber);
             $('#portscan_is_ping').prop('checked', data.portscan.config?.ping || false);
         } else {
             $('#div_portscan').hide();
@@ -146,8 +148,6 @@ function fill_form_with_data(data) {
             $('#fofa').prop('checked', data.onlineapi.fofa);
             $('#hunter').prop('checked', data.onlineapi.hunter);
             $('#quake').prop('checked', data.onlineapi.quake);
-            $('#whois').prop('checked', data.onlineapi.whois);
-            $('#icp').prop('checked', data.onlineapi.icp);
             $('#onlineapi_search_by_keyword').prop('checked', data.onlineapi.config?.searchbykeyword || false);
             $('#onlineapi_is_ignore_cdn').prop('checked', data?.onlineapi.config?.ignorecdn || false);
             $('#onlineapi_is_ignore_china_other').prop('checked', data.onlineapi.config?.ignorechinaother || false);
@@ -165,6 +165,8 @@ function fill_form_with_data(data) {
             $('#fingerprint_screenshot').prop('checked', data.fingerprint.config?.screenshot || false);
             $('#fingerprint_icon_hash').prop('checked', data.fingerprint.config?.iconhash || false);
             $('#fingerprint_fingerprintx').prop('checked', data.fingerprint.config?.fingerprintx || false);
+            $('#fingerprint_portlist').val(data.fingerprint.config.portlist);
+            $('#fingerprint_portlist_enable').prop('checked', isNotEmpty(data.fingerprint.config.portlist));
         } else {
             $('#div_fingerprint').hide();
         }
@@ -236,14 +238,14 @@ function show_profile_info(id) {
 
 function init_profile_info() {
     // 设置任务模板的默认配置
-    $('#div_llmapi').hide();
+    $('#div_icp').hide();
     $('#div_portscan').hide();
     $('#div_domainscan').hide();
     $('#div_onlineapi').hide();
     $('#div_fingerprint').hide();
     $('#div_pocscan').hide();
     $('#div_standalone').hide();
-    $('#llmapi_config input, #llmapi_config select').prop('disabled', true);
+    $('#icp_config input, #icp_config select').prop('disabled', true);
     $('#portscan_config input, #portscan_config select').prop('disabled', true);
     $('#domainscan_config input, #domainscan_config select').prop('disabled', true);
     $('#onlineapi_config input, #onlineapi_config select').prop('disabled', true);

@@ -2,7 +2,6 @@ package controllers
 
 import (
 	"encoding/base64"
-	"encoding/json"
 	"errors"
 	"fmt"
 	"github.com/google/uuid"
@@ -11,7 +10,6 @@ import (
 	"github.com/hanc00l/nemo_go/v3/pkg/db"
 	"github.com/hanc00l/nemo_go/v3/pkg/logging"
 	"github.com/hanc00l/nemo_go/v3/pkg/task/custom"
-	"github.com/hanc00l/nemo_go/v3/pkg/task/onlineapi"
 	"github.com/hanc00l/nemo_go/v3/pkg/utils"
 	"go.mongodb.org/mongo-driver/v2/bson"
 	"os"
@@ -39,18 +37,18 @@ type AssetListData struct {
 	Location []string `json:"location"`
 	Org      string   `json:"org"`
 
-	Service    string   `json:"service"`
-	Title      string   `json:"title"`
-	Header     string   `json:"header"`
-	Cert       string   `json:"cert"`
-	Banner     string   `json:"banner"`
-	App        []string `json:"app"`
-	Memo       string   `json:"memo"`
-	IconHash   string   `json:"icon_hash"`
-	IsNew      bool     `json:"new"`
-	IsUpdate   bool     `json:"update"`
-	IsCDN      bool     `json:"cdn"`
-	IsHoneypot bool     `json:"honeypot"`
+	Service      string   `json:"service"`
+	Title        string   `json:"title"`
+	Header       string   `json:"header"`
+	Cert         string   `json:"cert"`
+	Banner       string   `json:"banner"`
+	App          []string `json:"app"`
+	Memo         string   `json:"memo"`
+	IconHash     string   `json:"icon_hash"`
+	IsNew        bool     `json:"new"`
+	IsUpdate     bool     `json:"update"`
+	IsCDNOrCloud bool     `json:"cdn"`
+	IsHoneypot   bool     `json:"honeypot"`
 
 	ScreenshotFile []string `json:"screenshot"` //base64编码的图片文件
 	IconImage      []string `json:"iconimage"`  //base64编码的icon图片文件
@@ -59,7 +57,6 @@ type AssetListData struct {
 
 	Icp        string `json:"icp"` // 备案信息
 	IcpCompany string `json:"icp_company"`
-	Whois      string `json:"whois"`
 
 	WorkspaceId string `json:"workspace"`
 	UpdateTime  string `json:"update_time"`
@@ -70,6 +67,7 @@ type assetRequestParam struct {
 	TaskId         string `form:"task_id"`
 	Query          string `form:"query"`
 	OrgId          string `form:"org_id"`
+	IsNoCDNCloud   bool   `form:"no_cdn_cloud"`
 	IsSelectNew    bool   `form:"new"`
 	IsSelectUpdate bool   `form:"update"`
 	IsOrderByDate  bool   `form:"order_by_date"`
@@ -238,7 +236,7 @@ func (c *AssetController) AssetStatisticsAction() {
 	//
 	f := func(s string, unwind bool, ignore ...string) (r []db.StatisticData, err error) {
 		i := 0
-		data, err := focusAsset.Aggregate(filter, s, limit, unwind)
+		data, err := focusAsset.Aggregate(filter, s, limit*2, unwind)
 		if err != nil {
 			return nil, err
 		}
@@ -598,6 +596,19 @@ func (c *AssetController) parseQueryParam(req *assetRequestParam) (query bson.M,
 			return
 		}
 	}
+	if req.IsNoCDNCloud {
+		// 添加 cdn 和 cloud 条件
+		query["$or"] = []bson.M{
+			{"cdn": bson.M{"$ne": true}},
+			{"cdn": nil},
+			{"cdn": bson.M{"$exists": false}},
+		}
+		query["$or"] = []bson.M{
+			{"cloud": bson.M{"$ne": true}},
+			{"cloud": nil},
+			{"cloud": bson.M{"$exists": false}},
+		}
+	}
 	if req.IsSelectNew {
 		query["new"] = true
 	}
@@ -647,30 +658,29 @@ func (c *AssetController) getListData(workspaceId, taskId string, req assetReque
 	vul := db.NewVul(workspaceId, db.GlobalVul, mongoClient)
 	icpStringMap := make(map[string]string)
 	icpCompanyMap := make(map[string]string)
-	queryData := db.NewQueryData(db.GlobalDatabase, mongoClient)
-	whoisMap := make(map[string]string)
+	icp := db.NewICP(mongoClient)
 
 	for i, result := range results {
 		asset := AssetListData{
-			Id:          result.Id.Hex(),
-			Index:       req.Start + 1 + i,
-			Authority:   result.Authority,
-			Host:        result.Host,
-			Status:      result.HttpStatus,
-			Service:     result.Service,
-			Title:       result.Title,
-			Header:      result.HttpHeader,
-			Cert:        result.Cert,
-			Banner:      result.Banner,
-			App:         result.App,
-			Memo:        result.Memo,
-			IsNew:       result.IsNewAsset,
-			IsUpdate:    result.IsUpdated,
-			IsCDN:       result.IsCDN,
-			IconHash:    result.IconHash,
-			IsHoneypot:  honeypot.IsHoneypot(result.Host),
-			WorkspaceId: workspaceId,
-			UpdateTime:  FormatDateTime(result.UpdateTime),
+			Id:           result.Id.Hex(),
+			Index:        req.Start + 1 + i,
+			Authority:    result.Authority,
+			Host:         result.Host,
+			Status:       result.HttpStatus,
+			Service:      result.Service,
+			Title:        result.Title,
+			Header:       result.HttpHeader,
+			Cert:         result.Cert,
+			Banner:       result.Banner,
+			App:          result.App,
+			Memo:         result.Memo,
+			IsNew:        result.IsNewAsset,
+			IsUpdate:     result.IsUpdated,
+			IsCDNOrCloud: result.IsCDN || result.IsCloud,
+			IconHash:     result.IconHash,
+			IsHoneypot:   honeypot.IsHoneypot(result.Host),
+			WorkspaceId:  workspaceId,
+			UpdateTime:   FormatDateTime(result.UpdateTime),
 		}
 		if len(result.OrgId) > 0 {
 			if _, ok := orgNameMap[result.OrgId]; !ok {
@@ -732,33 +742,19 @@ func (c *AssetController) getListData(workspaceId, taskId string, req assetReque
 		//icp:
 		if result.Category == db.CategoryDomain && len(result.Domain) > 0 {
 			if _, ok := icpStringMap[result.Domain]; !ok {
-				icpResult, errIcp := queryData.GetByDomain(result.Domain, db.QueryICP)
-				if errIcp == nil {
-					var icpInfo onlineapi.ICPInfo
-					errIcp = json.Unmarshal([]byte(icpResult.Content), &icpInfo)
-					if errIcp == nil && len(icpInfo.Domain) > 0 {
-						icpStringMap[result.Domain] = icpResult.Content
-						icpCompanyMap[result.Domain] = icpInfo.CompanyName
-					}
+				icpResult, errIcp := icp.GetByDomain(result.Domain)
+				if errIcp == nil && icpResult != nil && icpResult.Domain == result.Domain {
+					icpStringMap[result.Domain] = icpResult.ToJSONString()
+					icpCompanyMap[result.Domain] = icpResult.UnitName
+				} else {
+					icpStringMap[result.Domain] = ""
+					icpCompanyMap[result.Domain] = ""
 				}
 			}
-			if _, ok := icpCompanyMap[result.Domain]; ok {
+			asset.Icp = icpStringMap[result.Domain]
+			// 如果定义的org和icp的单位完全一样，就不重复显示
+			if icpCompanyMap[result.Domain] != asset.Org {
 				asset.IcpCompany = icpCompanyMap[result.Domain]
-			}
-			if _, ok := icpStringMap[result.Domain]; ok {
-				asset.Icp = icpStringMap[result.Domain]
-			}
-		}
-		//whois
-		if result.Category == db.CategoryDomain && len(result.Domain) > 0 {
-			if _, ok := whoisMap[result.Domain]; !ok {
-				whoisResult, errWhois := queryData.GetByDomain(result.Domain, db.QueryWhois)
-				if errWhois == nil {
-					whoisMap[result.Domain] = whoisResult.Content
-				}
-			}
-			if _, ok := whoisMap[result.Domain]; ok {
-				asset.Whois = whoisMap[result.Domain]
 			}
 		}
 		resp.Data = append(resp.Data, asset)

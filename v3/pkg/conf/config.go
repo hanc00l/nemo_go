@@ -125,14 +125,16 @@ type API struct {
 	Fofa             APIKey `yaml:"fofa" json:"fofa"`
 	Quake            APIKey `yaml:"quake" json:"quake"`
 	Hunter           APIKey `yaml:"hunter" json:"hunter"`
-	ICP              APIKey `yaml:"icp" json:"icp"`
-	ICPPlus          APIKey `yaml:"icpPlus" json:"icpPlus"`
+	ICPChinaz        APIKey `yaml:"icpChinaz" json:"icpChinaz"`
+	ICPPlusChinaz    APIKey `yaml:"icpPlusChinaz" json:"icpPlusChinaz"`
+	ICPBeianx        APIKey `yaml:"icpBeianx" json:"icpBeianx"`
 }
 
 type LLMAPI struct {
-	Kimi     APIToken `yaml:"kimi" json:"kimi"`
-	DeepSeek APIToken `yaml:"deepseek" json:"deepseek"`
-	Qwen     APIToken `yaml:"qwen" json:"qwen"`
+	MaxTokens int      `yaml:"maxTokens" json:"maxTokens"`
+	Kimi      APIToken `yaml:"kimi" json:"kimi"`
+	DeepSeek  APIToken `yaml:"deepseek" json:"deepseek"`
+	Qwen      APIToken `yaml:"qwen" json:"qwen"`
 }
 
 type APIKey struct {

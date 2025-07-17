@@ -13,13 +13,13 @@ type ProfileController struct {
 	BaseController
 }
 
-type llmapiData struct {
-	IsEnable bool                 `json:"enabled" form:"enabled"`
-	Qwen     bool                 `json:"qwen" form:"qwen"`
-	Kimi     bool                 `json:"kimi" form:"kimi"`
-	Deepseek bool                 `json:"deepseek" form:"deepseek"`
-	ICPPlus  bool                 `json:"icpPlus" form:"icpPlus"`
-	Config   execute.LLMAPIConfig `json:"config" form:"config"`
+type icpData struct {
+	IsEnable bool              `json:"enabled" form:"enabled"`
+	ICPPlus  bool              `json:"icpPlus" form:"icpPlus"`
+	ICPPlus2 bool              `json:"icpPlus2" form:"icpPlus2"`
+	Chinaz   bool              `json:"chinaz" form:"chinaz"`
+	Beianx   bool              `json:"beianx" form:"beianx"`
+	Config   execute.ICPConfig `json:"config" form:"config"`
 }
 
 type portscanData struct {
@@ -41,8 +41,6 @@ type onlineapiData struct {
 	Fofa     bool                    `json:"fofa" form:"fofa"`
 	Hunter   bool                    `json:"hunter" form:"hunter"`
 	Quake    bool                    `json:"quake" form:"quake"`
-	Whois    bool                    `json:"whois" form:"whois"`
-	ICP      bool                    `json:"icp" form:"icp"`
 	Config   execute.OnlineAPIConfig `json:"config" form:"config"`
 }
 
@@ -72,7 +70,7 @@ type ProfileInfoData struct {
 	Status          string          `json:"status" form:"status"`
 	SortNumber      int             `json:"sort_number" form:"sort_number"`
 	ConfigType      string          `json:"config_type" form:"config_type"`
-	LLMAPIData      llmapiData      `json:"llmapi" form:"llmapi"`
+	ICPData         icpData         `json:"icp" form:"icp"`
 	PortscanData    portscanData    `json:"portscan" form:"portscan"`
 	DomainscanData  domainscanData  `json:"domainscan" form:"domainscan"`
 	OnlineapiData   onlineapiData   `json:"onlineapi" form:"onlineapi"`
@@ -172,8 +170,8 @@ func (c *ProfileController) getListData(req profileRequestParam) (resp DataTable
 		if err != nil {
 			logging.RuntimeLog.Error(err)
 		} else {
-			if executorConfigArgs.LLMAPI != nil {
-				for executorName, _ := range executorConfigArgs.LLMAPI {
+			if executorConfigArgs.ICP != nil {
+				for executorName, _ := range executorConfigArgs.ICP {
 					u.Executors = append(u.Executors, executorName)
 				}
 			}
@@ -405,24 +403,24 @@ func parseProfileInfoData(doc db.ProfileDocument) (profileInfo ProfileInfoData, 
 		}
 	} else {
 		profileInfo.ConfigType = "staged"
-		if len(executorConfigArgs.LLMAPI) > 0 {
-			profileInfo.LLMAPIData.IsEnable = true
-			if _, ok := executorConfigArgs.LLMAPI["qwen"]; ok {
-				profileInfo.LLMAPIData.Qwen = true
+		if len(executorConfigArgs.ICP) > 0 {
+			profileInfo.ICPData.IsEnable = true
+			if _, ok := executorConfigArgs.ICP["icpPlus"]; ok {
+				profileInfo.ICPData.ICPPlus = true
 			}
-			if _, ok := executorConfigArgs.LLMAPI["kimi"]; ok {
-				profileInfo.LLMAPIData.Kimi = true
+			if _, ok := executorConfigArgs.ICP["icpPlus2"]; ok {
+				profileInfo.ICPData.ICPPlus2 = true
 			}
-			if _, ok := executorConfigArgs.LLMAPI["deepseek"]; ok {
-				profileInfo.LLMAPIData.Deepseek = true
-			}
-			// icpPlus 接口比较特殊，和LLMAPI一样都是根据组织机构查询，所以先放到llmapi的配置里
-			if _, ok := executorConfigArgs.LLMAPI["icpPlus"]; ok {
-				profileInfo.LLMAPIData.ICPPlus = true
-			}
-			for _, v := range executorConfigArgs.LLMAPI {
-				profileInfo.LLMAPIData.Config = v
+			for _, v := range executorConfigArgs.ICP {
+				profileInfo.ICPData.Config = v
 				break
+			}
+			for _, v := range profileInfo.ICPData.Config.APIName {
+				if v == "chinaz" {
+					profileInfo.ICPData.Chinaz = true
+				} else if v == "beianx" {
+					profileInfo.ICPData.Beianx = true
+				}
 			}
 		}
 		if len(executorConfigArgs.PortScan) > 0 {
@@ -465,12 +463,6 @@ func parseProfileInfoData(doc db.ProfileDocument) (profileInfo ProfileInfoData, 
 			if _, ok := executorConfigArgs.OnlineAPI["quake"]; ok {
 				profileInfo.OnlineapiData.Quake = true
 			}
-			if _, ok := executorConfigArgs.OnlineAPI["whois"]; ok {
-				profileInfo.OnlineapiData.Whois = true
-			}
-			if _, ok := executorConfigArgs.OnlineAPI["icp"]; ok {
-				profileInfo.OnlineapiData.ICP = true
-			}
 			for _, v := range executorConfigArgs.OnlineAPI {
 				profileInfo.OnlineapiData.Config = v
 				break
@@ -479,18 +471,6 @@ func parseProfileInfoData(doc db.ProfileDocument) (profileInfo ProfileInfoData, 
 		if len(executorConfigArgs.FingerPrint) > 0 {
 			profileInfo.FingerprintData.IsEnable = true
 			if v, ok := executorConfigArgs.FingerPrint["fingerprint"]; ok {
-				if v.IsHttpx {
-					profileInfo.FingerprintData.Config.IsHttpx = true
-				}
-				if v.IsFingerprintx {
-					profileInfo.FingerprintData.Config.IsFingerprintx = true
-				}
-				if v.IsIconHash {
-					v.IsIconHash = true
-				}
-				if v.IsScreenshot {
-					profileInfo.FingerprintData.Config.IsScreenshot = true
-				}
 				profileInfo.FingerprintData.Config = v
 			}
 		}
@@ -539,20 +519,19 @@ func (c *ProfileController) processProfileInfoData() (doc db.ProfileDocument, er
 	var executorConfigArgs execute.ExecutorConfig
 	if profileInfo.ConfigType == "staged" {
 		// staged模式
-		if profileInfo.LLMAPIData.IsEnable && (profileInfo.LLMAPIData.Qwen || profileInfo.LLMAPIData.Kimi || profileInfo.LLMAPIData.Deepseek || profileInfo.LLMAPIData.ICPPlus) {
-			executorConfigArgs.LLMAPI = make(map[string]execute.LLMAPIConfig)
-			if profileInfo.LLMAPIData.Qwen {
-				executorConfigArgs.LLMAPI["qwen"] = profileInfo.LLMAPIData.Config
+		if profileInfo.ICPData.IsEnable {
+			if profileInfo.ICPData.Chinaz {
+				profileInfo.ICPData.Config.APIName = append(profileInfo.ICPData.Config.APIName, "chinaz")
 			}
-			if profileInfo.LLMAPIData.Kimi {
-				executorConfigArgs.LLMAPI["kimi"] = profileInfo.LLMAPIData.Config
+			if profileInfo.ICPData.Beianx {
+				profileInfo.ICPData.Config.APIName = append(profileInfo.ICPData.Config.APIName, "beianx")
 			}
-			if profileInfo.LLMAPIData.Deepseek {
-				executorConfigArgs.LLMAPI["deepseek"] = profileInfo.LLMAPIData.Config
+			executorConfigArgs.ICP = make(map[string]execute.ICPConfig)
+			if profileInfo.ICPData.ICPPlus {
+				executorConfigArgs.ICP["icpPlus"] = profileInfo.ICPData.Config
 			}
-			// icpPlus 接口比较特殊，和LLMAPI一样都是根据组织机构查询，所以先放到llmapi的配置里
-			if profileInfo.LLMAPIData.ICPPlus {
-				executorConfigArgs.LLMAPI["icpPlus"] = profileInfo.LLMAPIData.Config
+			if profileInfo.ICPData.ICPPlus2 {
+				executorConfigArgs.ICP["icpPlus2"] = profileInfo.ICPData.Config
 			}
 		}
 		if profileInfo.PortscanData.IsEnable && (profileInfo.PortscanData.Nmap || profileInfo.PortscanData.Masscan || profileInfo.PortscanData.Gogo) {
@@ -581,7 +560,7 @@ func (c *ProfileController) processProfileInfoData() (doc db.ProfileDocument, er
 				executorConfigArgs.DomainScan["subfinder"] = profileInfo.DomainscanData.Config
 			}
 		}
-		if profileInfo.OnlineapiData.IsEnable && (profileInfo.OnlineapiData.Fofa || profileInfo.OnlineapiData.Hunter || profileInfo.OnlineapiData.Quake || profileInfo.OnlineapiData.Whois || profileInfo.OnlineapiData.ICP) {
+		if profileInfo.OnlineapiData.IsEnable && (profileInfo.OnlineapiData.Fofa || profileInfo.OnlineapiData.Hunter || profileInfo.OnlineapiData.Quake) {
 			executorConfigArgs.OnlineAPI = make(map[string]execute.OnlineAPIConfig)
 			if profileInfo.OnlineapiData.Fofa {
 				executorConfigArgs.OnlineAPI["fofa"] = profileInfo.OnlineapiData.Config
@@ -591,12 +570,6 @@ func (c *ProfileController) processProfileInfoData() (doc db.ProfileDocument, er
 			}
 			if profileInfo.OnlineapiData.Quake {
 				executorConfigArgs.OnlineAPI["quake"] = profileInfo.OnlineapiData.Config
-			}
-			if profileInfo.OnlineapiData.Whois {
-				executorConfigArgs.OnlineAPI["whois"] = profileInfo.OnlineapiData.Config
-			}
-			if profileInfo.OnlineapiData.ICP {
-				executorConfigArgs.OnlineAPI["icp"] = profileInfo.OnlineapiData.Config
 			}
 		}
 		if profileInfo.FingerprintData.IsEnable && (profileInfo.FingerprintData.Config.IsFingerprintx || profileInfo.FingerprintData.Config.IsHttpx || profileInfo.FingerprintData.Config.IsIconHash || profileInfo.FingerprintData.Config.IsScreenshot) {

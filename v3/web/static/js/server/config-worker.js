@@ -14,12 +14,15 @@ $(function () {
                 quake: {
                     key: $('#input_quake_key').val()
                 },
-                icp: {
-                    key: $('#input_icp_key').val()
+                icpChinaz: {
+                    key: $('#input_icp_chinaz_key').val()
                 },
-                icpPlus: {
-                    key: $('#input_icpPlus_key').val()
-                }
+                icpPlusChinaz: {
+                    key: $('#input_icpPlus_chinaz_key').val()
+                },
+                icpBeianx: {
+                    key: $('#input_icp_beianx_key').val()
+                },
             },
         };
         save_worker_config(data);
@@ -31,8 +34,9 @@ $(function () {
         test_llm_api();
     })
     $('#buttonSaveLLM').click(function () {
-        var data = {
+        const data = {
             llmapi: {
+                maxTokens: parseInt($('#input_max_tokens').val()),
                 kimi: {
                     api: $('#input_kimi_api').val(),
                     model: $('#input_kimi_model').val(),
@@ -91,8 +95,10 @@ function load_worker_config() {
             $('#input_fofa_key').val(response.api.fofa.key);
             $('#input_hunter_key').val(response.api.hunter.key);
             $('#input_quake_key').val(response.api.quake.key);
-            $('#input_icp_key').val(response.api.icp.key);
-            $('#input_icpPlus_key').val(response.api.icpPlus.key);
+            $('#input_icp_chinaz_key').val(response.api.icpChinaz.key);
+            $('#input_icpPlus_chinaz_key').val(response.api.icpPlusChinaz.key);
+            $('#input_icp_beianx_key').val(response.api.icpBeianx.key);
+            $('#input_max_tokens').val(response.llmapi.maxTokens);
             $('#input_kimi_api').val(response.llmapi.kimi.api);
             $('#input_kimi_model').val(response.llmapi.kimi.model);
             $('#input_kimi_token').val(response.llmapi.kimi.token);

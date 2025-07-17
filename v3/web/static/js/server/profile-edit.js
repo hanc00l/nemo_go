@@ -5,13 +5,13 @@ $(function () {
         load_profile_data(id);
     } else {
         load_pocfile_data(null);
-        $('#llmapi_config input, #llmapi_config select').prop('disabled', true);
+        $('#icp_config input, #icp_config select').prop('disabled', true);
         $('#portscan_config input, #portscan_config select').prop('disabled', true);
         $('#domainscan_config input, #domainscan_config select').prop('disabled', true);
         $('#onlineapi_config input, #onlineapi_config select').prop('disabled', true);
         $('#fingerprint_config input, #fingerprint_config select').prop('disabled', true);
         $('#pocscan_config input, #pocscan_config select').prop('disabled', true);
-        $('#pocscan_poc_file').multiselect('disable');
+        //$('#pocscan_poc_file').multiselect('disable');
     }
 
     $.urlParam = function (param) {
@@ -54,9 +54,9 @@ $(function () {
         }
     });
 
-    $('#enable_llmapi').change(function () {
+    $('#enable_icp').change(function () {
         const isEnabled = $(this).prop('checked');
-        $('#llmapi_config input, #llmapi_config select').prop('disabled', !isEnabled);
+        $('#icp_config input, #icp_config select').prop('disabled', !isEnabled);
     });
 
     $('#enable_portscan').change(function () {
@@ -80,6 +80,8 @@ $(function () {
     $('#enable_fingerprint').change(function () {
         const isEnabled = $(this).prop('checked');
         $('#fingerprint_config input, #fingerprint_config select').prop('disabled', !isEnabled);
+        const isPortlistEnabled = $('#fingerprint_portlist_enable').is(':checked');
+        $('#fingerprint_portlist').prop('disabled', !isPortlistEnabled);
     });
 
     // POC扫描
@@ -112,6 +114,11 @@ $(function () {
             $('#pocscan_brute_password').prop('disabled', true);
             $('#pocscan_base_web_status').prop('disabled', false);
         }
+    });
+    // 指纹识别
+    $('#fingerprint_portlist_enable').change(function () {
+        const isEnabled = $(this).prop('checked');
+        $('#fingerprint_portlist').prop('disabled', !isEnabled);
     });
 });
 
@@ -196,19 +203,23 @@ function process_form_data() {
     const status = $('#status').is(':checked');
 
 
-    // 获取llmapi字段值
-    const llmapi_enabled = $('#enable_llmapi').is(':checked');
-    const qwen = $('#qwen').is(':checked');
-    const kimi = $('#kimi').is(':checked');
-    const deepseek = $('#deepseek').is(':checked');
-    const icpPlus = $('#icpPlus').is(':checked');
-    const autoAssociateOrg = $('#llmapi_autoAssociateOrg').is(':checked');
-    if (llmapi_enabled) {
-        if (!qwen && !kimi && !deepseek && !icpPlus) {
-            alert('请选择至少一种LLMAPI工具');
+    // 获取icp字段值
+    const icp_enabled = $('#enable_icp').is(':checked');
+    const chinaz = $('#chinaz').is(':checked');
+    const beianx = $('#beianx').is(':checked');
+    const query_type = $('input[name="query_type"]:checked').val();
+    const autoAssociateOrg = $('#icp_autoAssociateOrg').is(':checked');
+    if (icp_enabled) {
+        if (query_type === "") {
+            alert('请选择ICP备按查询方式');
+            return false;
+        }
+        if (!chinaz && !beianx) {
+            alert('请选择至少一种ICP接口方式');
             return false;
         }
     }
+
     // 获取端口扫描部分的字段值
     const portscan_enabled = $('#enable_portscan').is(':checked');
     const nmap = $('#nmap').is(':checked');
@@ -218,6 +229,7 @@ function process_form_data() {
     const portscanRate = $('#portscan_rate').val();
     const portscanTech = $('#portscan_tech').val();
     const portscanMaxOpenedPortPerIp = $('#portscan_PortscanConfig_maxOpenedPortPerIp').val();
+    const sliceNumber = $('#portscan_PortscanConfig_sliceNumber').val();
     const portscanIsPing = $('#portscan_is_ping').is(':checked');
     if (portscan_enabled) {
         if (!nmap && !masscan && !gogo) {
@@ -269,8 +281,6 @@ function process_form_data() {
     const fofa = $('#fofa').is(':checked');
     const hunter = $('#hunter').is(':checked');
     const quake = $('#quake').is(':checked');
-    const whois = $('#whois').is(':checked');
-    const icp = $('#icp').is(':checked');
     const onlineapiSearchByKeyword = $('#onlineapi_search_by_keyword').is(':checked');
     const onlineapiIsIgnoreCdn = $('#onlineapi_is_ignore_cdn').is(':checked');
     const onlineapiIsIgnoreChinaOther = $('#onlineapi_is_ignore_china_other').is(':checked');
@@ -279,7 +289,7 @@ function process_form_data() {
     const onlineapiSearchLimitCount = $('#onlineapi_search_limit_count').val();
     const onlineapiSearchPageSize = $('#onlineapi_search_page_size').val();
     if (onlineapi_enabled) {
-        if (!fofa && !hunter && !quake && !whois && !icp) {
+        if (!fofa && !hunter && !quake) {
             alert('请选择至少一种在线API');
             return false;
         }
@@ -290,6 +300,8 @@ function process_form_data() {
     const fingerprintScreenshot = $('#fingerprint_screenshot').is(':checked');
     const fingerprintIconHash = $('#fingerprint_icon_hash').is(':checked');
     const fingerprintFingerprintx = $('#fingerprint_fingerprintx').is(':checked');
+    let fingerprintPortlist = $('#fingerprint_portlist').val();
+    const fingerprintPortlistEnable = $('#fingerprint_portlist_enable').is(':checked');
     if (fingerprint_enabled) {
         if (!fingerprintHttpx && !fingerprintFingerprintx) {
             alert('请选择至少一种指纹识别工具');
@@ -300,6 +312,14 @@ function process_form_data() {
                 alert('请选择Httpx工具，web指纹识别需要Httpx工具');
                 return false;
             }
+        }
+        if (fingerprintPortlistEnable) {
+            if (!isNotEmpty(fingerprintPortlist)) {
+                alert('请输入端口列表');
+                return false;
+            }
+        } else {
+            fingerprintPortlist = "";
         }
     }
     // 获取POC扫描部分的字段值
@@ -343,12 +363,12 @@ function process_form_data() {
         status: status ? 'enable' : 'disable',
         sort_number: parseInt(sort_number),
         config_type: configType,
-        llmapi: {
-            enabled: llmapi_enabled,
-            qwen: qwen,
-            kimi: kimi,
-            deepseek: deepseek,
-            icpPlus: icpPlus,
+        icp: {
+            enabled: icp_enabled,
+            chinaz: chinaz,
+            beianx: beianx,
+            icpPlus: query_type === 'icpPlus',
+            icpPlus2: query_type === 'icpPlus2',
             config: {
                 autoAssociateOrg: autoAssociateOrg
             }
@@ -363,7 +383,8 @@ function process_form_data() {
                 rate: parseInt(portscanRate),
                 ping: portscanIsPing,
                 tech: portscanTech,
-                maxOpenedPortPerIp: parseInt(portscanMaxOpenedPortPerIp)
+                maxOpenedPortPerIp: parseInt(portscanMaxOpenedPortPerIp),
+                sliceNumber: parseInt(sliceNumber),
             }
         },
         domainscan: {
@@ -392,8 +413,6 @@ function process_form_data() {
             fofa: fofa,
             hunter: hunter,
             quake: quake,
-            whois: whois,
-            icp: icp,
             config: {
                 keywordsearch: onlineapiSearchByKeyword,
                 ignorecdn: onlineapiIsIgnoreCdn,
@@ -410,7 +429,8 @@ function process_form_data() {
                 httpx: fingerprintHttpx,
                 screenshot: fingerprintScreenshot,
                 iconhash: fingerprintIconHash,
-                fingerprintx: fingerprintFingerprintx
+                fingerprintx: fingerprintFingerprintx,
+                portlist: fingerprintPortlist
             }
         },
         pocscan: {
@@ -443,13 +463,13 @@ function fill_form_with_data(data) {
     $('#sort_number').val(data.sort_number);
     $('#status').prop('checked', data.status === 'enable');
     if (data.config_type === "staged") {
-        // llmapi部分
-        if (data.llmapi.enabled) {
-            $('#qwen').prop('checked', data.llmapi.qwen);
-            $('#kimi').prop('checked', data.llmapi.kimi);
-            $('#deepseek').prop('checked', data.llmapi.deepseek);
-            $('#icpPlus').prop('checked', data.llmapi.icpPlus);
-            $('#llmapi_autoAssociateOrg').prop('checked', data.llmapi.config.autoAssociateOrg);
+        // icp部分
+        if (data.icp.enabled) {
+            $('#chinaz').prop('checked', data.icp.chinaz);
+            $('#beianx').prop('checked', data.icp.beianx);
+            $('#query_type_icpPlus').prop('checked', data.icp.icpPlus);
+            $('#query_type_icpPlus2').prop('checked', data.icp.icpPlus2);
+            $('#icp_autoAssociateOrg').prop('checked', data.icp.config.autoAssociateOrg);
         }
         // 端口扫描部分
         if (data.portscan.enabled) {
@@ -460,6 +480,7 @@ function fill_form_with_data(data) {
             $('#portscan_rate').val(data.portscan.config.rate);
             $('#portscan_tech').val(data.portscan.config.tech);
             $('#portscan_PortscanConfig_maxOpenedPortPerIp').val(data.portscan.config.maxOpenedPortPerIp);
+            $('#portscan_PortscanConfig_sliceNumber').val(data.portscan.config.sliceNumber);
             $('#portscan_is_ping').prop('checked', data.portscan.config.ping);
         }
 
@@ -487,8 +508,6 @@ function fill_form_with_data(data) {
             $('#fofa').prop('checked', data.onlineapi.fofa);
             $('#hunter').prop('checked', data.onlineapi.hunter);
             $('#quake').prop('checked', data.onlineapi.quake);
-            $('#whois').prop('checked', data.onlineapi.whois);
-            $('#icp').prop('checked', data.onlineapi.icp);
             $('#onlineapi_search_by_keyword').prop('checked', data.onlineapi.config.searchbykeyword);
             $('#onlineapi_is_ignore_cdn').prop('checked', data.onlineapi.config.ignorecdn);
             $('#onlineapi_is_ignore_china_other').prop('checked', data.onlineapi.config.ignorechinaother);
@@ -503,6 +522,8 @@ function fill_form_with_data(data) {
             $('#fingerprint_screenshot').prop('checked', data.fingerprint.config.screenshot);
             $('#fingerprint_icon_hash').prop('checked', data.fingerprint.config.iconhash);
             $('#fingerprint_fingerprintx').prop('checked', data.fingerprint.config.fingerprintx);
+            $('#fingerprint_portlist').val(data.fingerprint.config.portlist);
+            $('#fingerprint_portlist_enable').prop('checked', isNotEmpty(data.fingerprint.config.portlist));
         }
         // POC扫描部分
         if (data.pocscan.enabled) {
@@ -530,18 +551,27 @@ function fill_form_with_data(data) {
         $('#standalone_is_verbose').prop('checked', data.standalone.config.verbose);
         $('#standalone_is_poc_scan').prop('checked', data.standalone.config.pocscan);
     }
-    $('#enable_llmapi').prop('checked', data.llmapi.enabled);
+    $('#enable_icp').prop('checked', data.icp.enabled);
     $('#enable_portscan').prop('checked', data.portscan.enabled);
     $('#enable_domainscan').prop('checked', data.domainscan.enabled);
     $('#enable_onlineapi').prop('checked', data.onlineapi.enabled);
     $('#enable_fingerprint').prop('checked', data.fingerprint.enabled);
     $('#enable_pocscan').prop('checked', data.pocscan.enabled);
-    $('#llmapi_config input, #llmapi_config select').prop('disabled', !data.llmapi.enabled);
+    $('#icp_config input, #icp_config select').prop('disabled', !data.icp.enabled);
     $('#portscan_config input, #portscan_config select').prop('disabled', !data.portscan.enabled);
     $('#domainscan_config input, #domainscan_config select').prop('disabled', !data.domainscan.enabled);
     $('#onlineapi_config input, #onlineapi_config select').prop('disabled', !data.onlineapi.enabled);
     $('#fingerprint_config input, #fingerprint_config select').prop('disabled', !data.fingerprint.enabled);
     $('#pocscan_config input, #pocscan_config select').prop('disabled', !data.pocscan.enabled);
+    if (data.fingerprint.enabled) {
+        if (isNotEmpty(data.fingerprint.config.portlist)) {
+            $('#fingerprint_portlist_enable').prop('checked', true);
+            $('#fingerprint_portlist').prop('disabled', false);
+        } else {
+            $('#fingerprint_portlist_enable').prop('checked', false);
+            $('#fingerprint_portlist').prop('disabled', true);
+        }
+    }
 
     if (data.config_type === "staged") {
         $('#staged-tab').tab('show');
@@ -556,13 +586,8 @@ function generate_profile_name() {
     const stringBuilder = [];
     const configType = $('input[name="config_type"]:checked').val();
     if (configType === "staged") {
-        if ($('#enable_llmapi').is(':checked')) {
-            if ($('#qwen').is(':checked') || $('#kimi').is(':checked') || $('#deepseek').is(':checked')) {
-                stringBuilder.push("LLMAPI");
-            }
-            if ($('#icpPlus').is(':checked')) {
-                stringBuilder.push("ICPPlus");
-            }
+        if ($('#enable_icp').is(':checked')) {
+            stringBuilder.push("ICP备案");
         }
         if ($('#enable_portscan').is(':checked')) {
             const port = $('#portscan_port').val();
@@ -588,7 +613,11 @@ function generate_profile_name() {
             }
         }
         if ($('#enable_fingerprint').is(':checked')) {
-            stringBuilder.push("指纹识别");
+            if ($('#fingerprint_portlist_enable').is(':checked') && $('#fingerprint_portlist').val() !== "") {
+                stringBuilder.push("指纹识别(指定端口)");
+            } else {
+                stringBuilder.push("指纹识别");
+            }
         }
         if ($('#enable_pocscan').is(':checked')) {
             stringBuilder.push("Poc扫描");

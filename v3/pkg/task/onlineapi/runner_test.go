@@ -8,12 +8,9 @@ import (
 func getOnlineAPITaskInfo() execute.ExecutorTaskInfo {
 	executorConfig := execute.ExecutorConfig{
 		OnlineAPI: map[string]execute.OnlineAPIConfig{
-			"fofa":    {},
-			"hunter":  {},
-			"quake":   {},
-			"whois":   {},
-			"icp":     {},
-			"icpPlus": {},
+			"fofa":   {},
+			"hunter": {},
+			"quake":  {},
 		},
 	}
 	taskInfo := execute.ExecutorTaskInfo{
@@ -38,18 +35,4 @@ func TestResult_ParseResult(t *testing.T) {
 	for _, doc := range docs {
 		t.Log(doc)
 	}
-}
-
-func TestWhois_Run(t *testing.T) {
-	taskInfo := getOnlineAPITaskInfo()
-	taskInfo.Executor = "whois"
-	result := DoQuery(taskInfo)
-	t.Log(result)
-}
-
-func TestICP_Run(t *testing.T) {
-	taskInfo := getOnlineAPITaskInfo()
-	taskInfo.Executor = "icp"
-	result := DoQuery(taskInfo)
-	t.Log(result)
 }

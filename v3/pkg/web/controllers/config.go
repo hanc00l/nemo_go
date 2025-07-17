@@ -7,6 +7,7 @@ import (
 	"github.com/hanc00l/nemo_go/v3/pkg/db"
 	"github.com/hanc00l/nemo_go/v3/pkg/logging"
 	"github.com/hanc00l/nemo_go/v3/pkg/task/execute"
+	"github.com/hanc00l/nemo_go/v3/pkg/task/icp"
 	"github.com/hanc00l/nemo_go/v3/pkg/task/llmapi"
 	"github.com/hanc00l/nemo_go/v3/pkg/task/onlineapi"
 	"github.com/remeh/sizedwaitgroup"
@@ -200,13 +201,19 @@ func (c *ConfigController) TestOnlineAPIKeyAction() {
 		swg.Add()
 		go testOnlineAPI("quake", &swg, msgChan)
 	}
-	if len(apiKeys.ICP.Key) > 0 {
+	if len(apiKeys.ICPChinaz.Key) > 0 {
 		swg.Add()
-		go testQueryAPI("icp", &swg, msgChan)
+		go testICPAPI("chinaz", &swg, msgChan)
 	}
-	if len(apiKeys.ICPPlus.Key) > 0 {
+	if len(apiKeys.ICPPlusChinaz.Key) > 0 {
 		swg.Add()
-		go testICPPlusAPI("icpPlus", &swg, msgChan)
+		go testICPPlusAPI("chinaz", &swg, msgChan)
+	}
+	if len(apiKeys.ICPBeianx.Key) > 0 {
+		swg.Add()
+		go testICPAPI("beianx", &swg, msgChan)
+		swg.Add()
+		go testICPPlusAPI("beianx", &swg, msgChan)
 	}
 	swg.Wait()
 	done <- struct{}{}
@@ -299,12 +306,12 @@ func testOnlineAPI(apiName string, swg *sizedwaitgroup.SizedWaitGroup, testMsgCh
 }
 
 // testOnlineAPI 多线程方式测试在线接口的可用性
-func testQueryAPI(apiName string, swg *sizedwaitgroup.SizedWaitGroup, testMsgChan chan string) {
+func testICPAPI(apiName string, swg *sizedwaitgroup.SizedWaitGroup, testMsgChan chan string) {
 	defer swg.Done()
 
 	executorConfig := execute.ExecutorConfig{
-		OnlineAPI: map[string]execute.OnlineAPIConfig{
-			"icp": {},
+		ICP: map[string]execute.ICPConfig{
+			"icp": {APIName: []string{apiName}},
 		},
 	}
 	taskInfo := execute.ExecutorTaskInfo{
@@ -312,19 +319,17 @@ func testQueryAPI(apiName string, swg *sizedwaitgroup.SizedWaitGroup, testMsgCha
 			WorkspaceId:    "test",
 			Target:         "fofa.info",
 			OrgId:          "test",
-			MainTaskId:     "onlineapi_test",
+			MainTaskId:     "icp_test",
 			ExecutorConfig: executorConfig,
 		},
+		Executor: "icp",
 	}
 	taskInfo.MainTaskInfo.ExecutorConfig = executorConfig
-
-	taskInfo.Executor = apiName
-	result := onlineapi.DoQuery(taskInfo)
-
+	result := icp.Do(taskInfo, true)
 	if len(result) > 0 {
-		testMsgChan <- fmt.Sprintf("%s: OK!\n", apiName)
+		testMsgChan <- fmt.Sprintf("%s-%s: OK!\n", "ICP备案查询", apiName)
 	} else {
-		testMsgChan <- fmt.Sprintf("%s: fail\n", apiName)
+		testMsgChan <- fmt.Sprintf("%s-%s: fail\n", "ICP备案查询", apiName)
 	}
 	return
 }
@@ -333,8 +338,8 @@ func testICPPlusAPI(apiName string, swg *sizedwaitgroup.SizedWaitGroup, testMsgC
 	defer swg.Done()
 
 	executorConfig := execute.ExecutorConfig{
-		OnlineAPI: map[string]execute.OnlineAPIConfig{
-			"icpPlus": {},
+		ICP: map[string]execute.ICPConfig{
+			"icpPlus": {APIName: []string{apiName}},
 		},
 	}
 	taskInfo := execute.ExecutorTaskInfo{
@@ -342,19 +347,18 @@ func testICPPlusAPI(apiName string, swg *sizedwaitgroup.SizedWaitGroup, testMsgC
 			WorkspaceId:    "test",
 			Target:         "厦门享联科技有限公司",
 			OrgId:          "test",
-			MainTaskId:     "onlineapi_test",
+			MainTaskId:     "icp_test",
 			ExecutorConfig: executorConfig,
 		},
+		Executor: "icpPlus",
 	}
 	taskInfo.MainTaskInfo.ExecutorConfig = executorConfig
-
-	taskInfo.Executor = apiName
-	result := onlineapi.DoICPPlusQuery(taskInfo)
+	result := icp.Do(taskInfo, true)
 
 	if len(result) > 0 {
-		testMsgChan <- fmt.Sprintf("%s: OK!\n", apiName)
+		testMsgChan <- fmt.Sprintf("%s-%s: OK!\n", "ICP查询组织备案", apiName)
 	} else {
-		testMsgChan <- fmt.Sprintf("%s: fail\n", apiName)
+		testMsgChan <- fmt.Sprintf("%s-%s: fail\n", "ICP查询组织备案", "apiName")
 	}
 	return
 }

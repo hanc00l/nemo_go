@@ -9,6 +9,7 @@ import (
 	"github.com/hanc00l/nemo_go/v3/pkg/db"
 	"github.com/hanc00l/nemo_go/v3/pkg/logging"
 	"github.com/hanc00l/nemo_go/v3/pkg/task/execute"
+	"github.com/hanc00l/nemo_go/v3/pkg/utils"
 	"github.com/redis/go-redis/v9"
 	"go.mongodb.org/mongo-driver/v2/bson"
 	"math/rand"
@@ -133,6 +134,10 @@ func processStartedTask() {
 					Result:   result,
 				})
 			}
+			// 生成报告
+			if len(task.ReportLLMApi) > 0 {
+				go GenerateReport(task.WorkspaceId, task.Id.Hex(), task.TaskId, task.ReportLLMApi)
+			}
 		} else {
 			// 任务执行中或未执行
 			status = task.Status
@@ -232,9 +237,19 @@ func processExecutorTask(mainTaskInfo execute.MainTaskInfo) (err error) {
 			}
 		}
 	}
-	// LLMAPI任务，是top任务，可以直接开始、并行开始的
-	// 注意：如果有LLMAPI任务，则域名和onlineapi只会在LLMAPI任务中执行
-	if len(mainTaskInfo.ExecutorConfig.LLMAPI) > 0 {
+	// ICP/llmapi任务，是top任务，可以直接开始、并行开始的
+	if len(mainTaskInfo.ExecutorConfig.ICP) > 0 {
+		for _, target := range targets {
+			for executor := range mainTaskInfo.ExecutorConfig.ICP {
+				mti := mainTaskInfo
+				mti.Target = target
+				if err = f(executor, mti); err != nil {
+					return err
+				}
+				succeedTask++
+			}
+		}
+	} else if len(mainTaskInfo.ExecutorConfig.LLMAPI) > 0 {
 		for _, target := range targets {
 			for executor := range mainTaskInfo.ExecutorConfig.LLMAPI {
 				mti := mainTaskInfo
@@ -266,10 +281,6 @@ func processExecutorTask(mainTaskInfo execute.MainTaskInfo) (err error) {
 					if err = f(executor, mti); err != nil {
 						return err
 					}
-					// 特殊情况，icp、whois任务，不计入成功任务数
-					if executor == "icp" || executor == "whois" {
-						continue
-					}
 					succeedTask++
 				}
 			}
@@ -279,11 +290,25 @@ func processExecutorTask(mainTaskInfo execute.MainTaskInfo) (err error) {
 		for _, target := range targets {
 			mti := mainTaskInfo
 			mti.Target = target
-			for executor := range mainTaskInfo.ExecutorConfig.PortScan {
-				if err = f(executor, mti); err != nil {
-					return err
+			for executor, config := range mainTaskInfo.ExecutorConfig.PortScan {
+				// 有端口拆分
+				if config.SliceNumber > 0 {
+					portSliceArray := utils.SplitPort(config.Port, config.SliceNumber)
+					for _, portSlice := range portSliceArray {
+						mtiBySlicePort := mti
+						config.Port = portSlice
+						mtiBySlicePort.PortScan[executor] = config
+						if err = f(executor, mtiBySlicePort); err != nil {
+							return err
+						}
+						succeedTask++
+					}
+				} else {
+					if err = f(executor, mti); err != nil {
+						return err
+					}
+					succeedTask++
 				}
-				succeedTask++
 			}
 		}
 	}
@@ -319,6 +344,9 @@ func computeTaskCategoryRate(exeConfig execute.ExecutorConfig) (categoryRate map
 	categoryRate = make(map[string]float64)
 	taskCategoryTotal := 0
 	if len(exeConfig.LLMAPI) > 0 {
+		taskCategoryTotal++
+	}
+	if len(exeConfig.ICP) > 0 {
 		taskCategoryTotal++
 	}
 	if len(exeConfig.PortScan) > 0 {
@@ -367,6 +395,11 @@ func computeTaskCategoryRate(exeConfig execute.ExecutorConfig) (categoryRate map
 	} else {
 		categoryRate[execute.LLMAPI] = 0
 	}
+	if len(exeConfig.ICP) > 0 {
+		categoryRate[execute.ICP] = taskCategoryRate
+	} else {
+		categoryRate[execute.ICP] = 0
+	}
 	if len(exeConfig.Standalone) > 0 {
 		categoryRate[execute.Standalone] = 1
 	} else {
@@ -402,6 +435,7 @@ func computeMainTaskProgressRate(mainTaskId string, args string) (result float64
 	total[execute.PocScan] = make(map[string]int)
 	total[execute.Standalone] = make(map[string]int)
 	total[execute.LLMAPI] = make(map[string]int)
+	total[execute.ICP] = make(map[string]int)
 	for _, r := range executorTaskResult {
 		for _, s := range r.Statuses {
 			switch r.Executor {
@@ -409,14 +443,16 @@ func computeMainTaskProgressRate(mainTaskId string, args string) (result float64
 				total[execute.PortScan][s.Status] += s.Count
 			case "subfinder", "massdns":
 				total[execute.DomainScan][s.Status] += s.Count
-			case "fofa", "hunter", "quake", "icp", "whois":
+			case "fofa", "hunter", "quake":
 				total[execute.OnlineAPI][s.Status] += s.Count
 			case "fingerprint":
 				total[execute.FingerPrint][s.Status] += s.Count
 			case "nuclei", "zombie":
 				total[execute.PocScan][s.Status] += s.Count
-			case "qwen", "kimi", "deepseek", "icpPlus":
+			case "qwen", "kimi", "deepseek":
 				total[execute.LLMAPI][s.Status] += s.Count
+			case "icp", "icpPlus", "icpPlus2":
+				total[execute.ICP][s.Status] += s.Count
 			case "standalone":
 				total[execute.Standalone][s.Status] += s.Count
 			}

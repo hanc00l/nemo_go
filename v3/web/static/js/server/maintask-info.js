@@ -1,7 +1,98 @@
 $(function () {
-    load_maintask_data();
-    $('#select_task_status').change(function () {
-        load_executor_task_data($('#task_id').text());
+    const urlParams = new URLSearchParams(window.location.search);
+    const id = urlParams.get('id');
+    if (!isNotEmpty(id)) {
+        alert("任务ID未提供");
+        return;
+    }
+    load_maintask_data(id);
+    $('#list_table').DataTable(
+        {
+            "paging": true,
+            "serverSide": true,
+            "autowidth": false,
+            "sort": false,
+            "pagingType": "full_numbers",//分页样式
+            'iDisplayLength': 50,
+            "dom": '<i><t><"bottom"lp>',
+            "ajax": {
+                "url": "/maintask-executor-tasks",
+                "type": "post",
+                "data": function (d) {
+                    init_dataTables_defaultParam(d);
+                    return $.extend({}, d, {
+                        "id": id,
+                        "name": $('#executor_name').val(),
+                        "status": $('#select_task_status').val(),
+                        "worker": $('#worker_name').val(),
+                    });
+                }
+            },
+            columns: [
+                {
+                    data: "id",
+                    className: "dt-body-center",
+                    title: '<input  type="checkbox" class="checkall" />',
+                    "render": function (data, type, row) {
+                        return '<input type="checkbox" class="checkchild" value="' + data + '"/>';
+                    }
+                },
+                {data: "index", title: "序号", width: "5%"},
+                {data: "executor", title: "任务名称", width: "8%"},
+                {
+                    data: "status", title: "状态", width: "5%",
+                    "render": function (data, type, row) {
+                        return get_status_color(data);
+                    }
+                },
+                {
+                    data: "target", title: "目标", width: "20%",
+                    "render": function (data, type, row) {
+                        return '<div style="width:100%;white-space:normal;word-wrap:break-word;word-break:break-all;">' + data + '</div>';
+                    }
+                },
+                {
+                    data: "result", title: "结果", width: "15%",
+                    "render": function (data, type, row) {
+                        return '<div style="width:100%;white-space:normal;word-wrap:break-word;word-break:break-all;">' + data + '</div>';
+                    }
+                },
+                {data: "start_time", title: "开始时间", width: "8%"},
+                {data: "end_time", title: "结束时间", width: "8%"},
+                {data: "runtime", title: "时长", width: "5%"},
+                {
+                    data: "worker", title: "Worker", width: "10%",
+                    "render": function (data, type, row) {
+                        return '<div style="width:100%;white-space:normal;word-wrap:break-word;word-break:break-all;">' + data + '</div>';
+                    }
+                },
+                {data: "create_time", title: "创建时间", width: "8%"},
+                {
+                    title: "操作", width: "8%",
+                    "render": function (data, type, row, meta) {
+                        let str_data = "";
+                        str_data += '<a class="btn btn-sm btn-danger"  href="javascript:delete_executor_ask(\'' + row.id + '\')" role="button" title="删除"> <i class="fa fa-trash-o"></i> </a>';
+                        str_data += '<a class="btn btn-sm btn-info"  href="javascript:redo_executor_ask(\'' + row.id + '\')" role="button" title="重新执行"> <i class="fa fa-reply"></i> </a>';
+                        return str_data;
+                    }
+                }
+
+            ],
+            infoCallback: function (settings, start, end, max, total, pre) {
+                return "共<b>" + total + "</b>条记录，当前显示" + start + "到" + end + "记录";
+            },
+            drawCallback: function (setting) {
+                set_page_jump($(this));
+            }
+        }
+    );//end datatable
+
+    $(".checkall").click(function () {
+        const check = $(this).prop("checked");
+        $(".checkchild").prop("checked", check);
+    });
+    $('#search').click(function () {
+        $("#list_table").DataTable().draw(true);
     });
 })
 
@@ -29,16 +120,14 @@ function fill_form_with_data(data) {
     if (data.is_cron_task === true) {
         $('#task_executor_card').hide();
     }
+    if (data.report === "success") {
+        $('#task_report').html('<a href="maintask-report?task_id=' + data.task_id + '" target="_blank"><i class="fa fa-file-text-o" aria-hidden="true"></i> 查看报告(' + data.report_llmapi + ')</a>');
+    } else {
+        $('#task_report').text(data.report_llmapi);
+    }
 }
 
-function load_maintask_data() {
-    const urlParams = new URLSearchParams(window.location.search);
-    const id = urlParams.get('id'); // 假设URL参数名为id
-
-    if (!isNotEmpty(id)) {
-        alert("任务ID未提供");
-        return;
-    }
+function load_maintask_data(id) {
     $.ajax({
         type: 'POST',
         url: '/maintask-info', // Beego处理URL
@@ -46,7 +135,6 @@ function load_maintask_data() {
         dataType: 'json',
         success: function (response) {
             fill_form_with_data(response);
-            load_executor_task_data(response.task_id);
         },
         error: function (xhr, status, error) {
             // 请求失败，处理错误
@@ -56,57 +144,7 @@ function load_maintask_data() {
     });
 }
 
-function load_executor_task_data(maintaskId) {
-    $.ajax({
-        type: 'POST',
-        url: '/maintask-executor-tasks', // Beego处理URL
-        data: {maintaskId: maintaskId, taskStatus: $('#select_task_status').val()},
-        dataType: 'json',
-        success: function (response) {
-            renderTaskList(response, maintaskId);
-        },
-        error: function (xhr, status, error) {
-            // 请求失败，处理错误
-            console.error('请求失败:', error);
-            alert('请求失败: ' + error);
-        }
-    });
-}
-
-// 渲染任务列表
-function renderTaskList(tasks, maintaskId) {
-    const tbody = $("#task_executor_tbody")
-    tbody.empty(); // 清空现有内容
-
-    tasks.forEach((task, index) => {
-        const row = `
-                    <tr>
-                        <td>${index + 1}</td>
-                        <td>${task.executor}</td>
-                        <td>${task.status}</td>
-                        <td><div style="width:100%;white-space:normal;word-wrap:break-word;word-break:break-all;">${task.target}</div></td>
-                        <td><div style="width:100%;white-space:normal;word-wrap:break-word;word-break:break-all;">${task.result}</div></td>
-                        <td><div style="width:100%;white-space:normal;word-wrap:break-word;word-break:break-all;">${task.start_time}</div></td>
-                        <td><div style="width:100%;white-space:normal;word-wrap:break-word;word-break:break-all;">${task.end_time}</div></td>
-                        <td>${task.runtime}</td>
-                        <td><div style="width:100%;white-space:normal;word-wrap:break-word;word-break:break-all;">${task.worker}</div></td>
-                        <td><div style="width:100%;white-space:normal;word-wrap:break-word;word-break:break-all;">${task.create_time}</div></td>
-                        <td>
-                            <a class="btn btn-sm btn-danger" href="javascript:delete_executor_ask('${task.id}','${maintaskId}')" role="button" title="删除">
-                                <i class="fa fa-trash-o"></i>
-                            </a>
-                            <a class="btn btn-sm btn-info" href="javascript:redo_executor_ask('${task.id}','${maintaskId}')" role="button" title="重新执行">
-                                <i class="fa fa-reply"></i>
-                            </a>
-                        </td>
-                    </tr>
-                `;
-        tbody.append(row);
-    });
-}
-
-
-function delete_executor_ask(id, maintaskId) {
+function delete_executor_ask(id) {
     swal({
             title: "确定要删除?",
             text: "该操作会删除该任务, 是否继续?",
@@ -123,9 +161,7 @@ function delete_executor_ask(id, maintaskId) {
                 url: '/maintask-executor-task-delete',
                 data: {id: id},
                 success: function (data) {
-                    show_response_message("删除任务", data, function () {
-                        load_executor_task_data(maintaskId);
-                    })
+                    $("#list_table").DataTable().draw(true);
                 },
                 error: function (xhr, type, error) {
                     swal('Warning', error, 'error');
@@ -133,7 +169,6 @@ function delete_executor_ask(id, maintaskId) {
             });
         });
 }
-
 
 function redo_executor_ask(id, maintaskId) {
     swal({
@@ -152,9 +187,7 @@ function redo_executor_ask(id, maintaskId) {
                 url: '/maintask-executor-task-redo',
                 data: {id: id},
                 success: function (data) {
-                    show_response_message("重新执行任务", data, function () {
-                        load_executor_task_data(maintaskId);
-                    })
+                    $("#list_table").DataTable().draw(true);
                 },
                 error: function (xhr, type, error) {
                     swal('Warning', error, 'error');
@@ -163,7 +196,17 @@ function redo_executor_ask(id, maintaskId) {
         });
 }
 
-
-function view_tree() {
-    window.location.href = '/maintask-tree?maintaskId=' + $('#task_id').text();
+function get_status_color(status) {
+    switch (status) {
+        case "FAILURE":
+            return '<span class="badge bg-danger" style="font-size: 12px;color: white;">失败</span>';
+        case "STARTED":
+            return '<span class="badge bg-info" style="font-size: 12px;color: white;">执行中</span>';
+        case "SUCCESS":
+            return '<span class="badge bg-success" style="font-size: 12px;color: white;">成功</span>';
+        case "CREATED":
+            return '<span class="badge bg-secondary" style="font-size: 12px;color: white;">已创建</span>';
+        default:
+            return '<span class="badge bg-secondary" style="font-size: 12px; color: white;">status</span>';
+    }
 }

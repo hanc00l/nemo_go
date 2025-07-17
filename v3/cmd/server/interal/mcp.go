@@ -10,7 +10,6 @@ import (
 	"github.com/hanc00l/nemo_go/v3/pkg/db"
 	"github.com/hanc00l/nemo_go/v3/pkg/logging"
 	"github.com/hanc00l/nemo_go/v3/pkg/task/execute"
-	"github.com/hanc00l/nemo_go/v3/pkg/task/onlineapi"
 	"github.com/mark3labs/mcp-go/mcp"
 	"go.mongodb.org/mongo-driver/v2/bson"
 	"os"
@@ -476,8 +475,7 @@ func getTaskResultData(workspaceId, taskId string, filter bson.M, pageSize, page
 	vul := db.NewVul(workspaceId, db.GlobalVul, mongoClient)
 	icpStringMap := make(map[string]string)
 	icpCompanyMap := make(map[string]string)
-	queryData := db.NewQueryData(db.GlobalDatabase, mongoClient)
-	whoisMap := make(map[string]string)
+	icp := db.NewICP(mongoClient)
 
 	for _, result := range results {
 		asset := AssetData{
@@ -538,35 +536,31 @@ func getTaskResultData(workspaceId, taskId string, filter bson.M, pageSize, page
 		//icp:
 		if result.Category == db.CategoryDomain && len(result.Domain) > 0 {
 			if _, ok := icpStringMap[result.Domain]; !ok {
-				icpResult, errIcp := queryData.GetByDomain(result.Domain, db.QueryICP)
-				if errIcp == nil {
-					var icpInfo onlineapi.ICPInfo
-					errIcp = json.Unmarshal([]byte(icpResult.Content), &icpInfo)
-					if errIcp == nil && len(icpInfo.Domain) > 0 {
-						icpStringMap[result.Domain] = icpResult.Content
-						icpCompanyMap[result.Domain] = icpInfo.CompanyName
-					}
+				icpResult, errIcp := icp.GetByDomain(result.Domain)
+				if errIcp == nil && icpResult != nil && icpResult.Domain == result.Domain {
+					icpStringMap[result.Domain] = icpResult.ToJSONString()
+					icpCompanyMap[result.Domain] = icpResult.UnitName
 				}
 			}
-			if _, ok := icpCompanyMap[result.Domain]; ok {
-				asset.IcpCompany = icpCompanyMap[result.Domain]
-			}
-			if _, ok := icpStringMap[result.Domain]; ok {
-				asset.Icp = icpStringMap[result.Domain]
-			}
 		}
-		//whois
-		if result.Category == db.CategoryDomain && len(result.Domain) > 0 {
-			if _, ok := whoisMap[result.Domain]; !ok {
-				whoisResult, errWhois := queryData.GetByDomain(result.Domain, db.QueryWhois)
-				if errWhois == nil {
-					whoisMap[result.Domain] = whoisResult.Content
-				}
-			}
-			if _, ok := whoisMap[result.Domain]; ok {
-				asset.Whois = whoisMap[result.Domain]
-			}
+		if _, ok := icpCompanyMap[result.Domain]; ok {
+			asset.IcpCompany = icpCompanyMap[result.Domain]
 		}
+		if _, ok := icpStringMap[result.Domain]; ok {
+			asset.Icp = icpStringMap[result.Domain]
+		}
+
+		////whois
+		//if result.Category == db.CategoryDomain && len(result.Domain) > 0 {
+		//	if _, ok := whoisMap[result.Domain]; !ok {
+		//		whoisResult, errWhois := icp.GetByDomain(result.Domain, db.QueryWhois)
+		//		if errWhois == nil {
+		//			whoisMap[result.Domain] = whoisResult.Content
+		//		}
+		//	}
+		//	if _, ok := whoisMap[result.Domain]; ok {
+		//		asset.Whois = whoisMap[result.Domain]
+		//	}
 		respData = append(respData, asset)
 	}
 	resp := ResponseAssetData{

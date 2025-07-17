@@ -134,6 +134,15 @@ func (t *ExecutorTask) Find(filter bson.M, page, pageSize int) (result []Execute
 	return
 }
 
+func (t *ExecutorTask) Count(filter bson.M) (int, error) {
+	col := t.Client.Database(t.DatabaseName).Collection(t.CollectionName)
+	count, err := col.CountDocuments(t.Ctx, filter)
+	if err != nil {
+		return 0, err
+	}
+	return int(count), nil
+}
+
 func (t *ExecutorTask) Update(id string, update bson.M) (isSuccess bool, err error) {
 	// 更新文档
 	idd, _ := bson.ObjectIDFromHex(id)

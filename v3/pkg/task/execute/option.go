@@ -3,6 +3,7 @@ package execute
 import "time"
 
 const (
+	ICP         = "icp"
 	LLMAPI      = "llmapi"
 	PortScan    = "portscan"
 	DomainScan  = "domainscan"
@@ -44,6 +45,7 @@ type ExecutorConfig struct {
 	FingerPrint map[string]FingerprintConfig    `json:"fingerprint,omitempty" form:"fingerprint"`
 	PocScan     map[string]PocscanConfig        `json:"pocscan,omitempty" form:"pocscan"`
 	LLMAPI      map[string]LLMAPIConfig         `json:"llmapi,omitempty" form:"llmapi"`
+	ICP         map[string]ICPConfig            `json:"icp,omitempty" form:"icp"`
 	Standalone  map[string]StandaloneScanConfig `json:"standalone,omitempty" form:"standalone"`
 }
 
@@ -56,6 +58,8 @@ type PortscanConfig struct {
 	Tech          string `json:"tech,omitempty" form:"tech"`
 	// 扫描结果中单个IP最多开放的端口数量，超过该数量则跳过该IP
 	MaxOpenedPortPerIp int `json:"maxOpenedPortPerIp,omitempty" form:"maxOpenedPortPerIp"`
+	// 对端口扫描结果进行切片，切片数量，如果切片数量为0则不切片
+	SliceNumber int `json:"sliceNumber,omitempty" form:"sliceNumber"`
 }
 
 type DomainscanConfig struct {
@@ -78,6 +82,8 @@ type FingerprintConfig struct {
 	IsFingerprintx bool   `json:"fingerprintx,omitempty" form:"fingerprintx"`
 	IsScreenshot   bool   `json:"screenshot,omitempty" form:"screenshot"`
 	IsIconHash     bool   `json:"iconhash,omitempty" form:"iconhash"`
+	// 指纹识别时使用的端口列表，端口列表格式为nmap的格式，比如"22,80,443,5900-5910"
+	PortList string `json:"portlist,omitempty" form:"portlist"`
 }
 
 type OnlineAPIConfig struct {
@@ -117,4 +123,10 @@ type StandaloneScanConfig struct {
 type LLMAPIConfig struct {
 	Target           string `json:"target,omitempty" form:"-"`
 	AutoAssociateOrg bool   `json:"autoAssociateOrg,omitempty" form:"autoAssociateOrg"`
+}
+
+type ICPConfig struct {
+	Target           string   `json:"target,omitempty" form:"-"`
+	APIName          []string `json:"apiName" form:"apiName"`
+	AutoAssociateOrg bool     `json:"autoAssociateOrg,omitempty" form:"autoAssociateOrg"`
 }

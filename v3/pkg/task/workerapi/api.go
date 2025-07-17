@@ -26,9 +26,9 @@ var taskMaps = map[string]interface{}{
 	"fofa":        OnlineAPI,
 	"hunter":      OnlineAPI,
 	"quake":       OnlineAPI,
-	"whois":       QueryData,
-	"icp":         QueryData,
-	"icpPlus":     ICPPlusScan,
+	"icp":         ICPScan,
+	"icpPlus":     ICPScan,
+	"icpPlus2":    ICPScan,
 	"fingerprint": Fingerprint,
 	"nuclei":      PocScan,
 	"zombie":      PocScan,
@@ -81,7 +81,7 @@ func StartWorker(topicName string, concurrency int) error {
 	log.Set(logger)
 	logging.RuntimeLog.Infof("starting worker: %s", WStatus.WorkerName)
 	logging.CLILog.Infof("starting worker: %s", WStatus.WorkerName)
-
+	worker.Quit()
 	return worker.Launch()
 }
 

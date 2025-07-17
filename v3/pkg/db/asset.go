@@ -59,6 +59,7 @@ type AssetDocument struct {
 	Memo          string `bson:"memo,omitempty"`  //备注
 	IsCDN         bool   `bson:"cdn,omitempty"`
 	CName         string `bson:"cname,omitempty"`
+	IsCloud       bool   `bson:"cloud,omitempty"`
 
 	IsNewAsset bool   `bson:"new"`    // 是否是新资产
 	IsUpdated  bool   `bson:"update"` // 是否有更新
@@ -192,6 +193,10 @@ func DiffAsset(oldDoc *AssetDocument, newDoc *AssetDocument) (update bson.M, upd
 		update["cdn"] = newDoc.IsCDN
 		updateCount++
 	}
+	if newDoc.IsCloud != oldDoc.IsCloud {
+		update["cloud"] = newDoc.IsCloud
+		updateCount++
+	}
 	// 更新时间
 	update[UpdateTime] = time.Now()
 
@@ -209,7 +214,7 @@ func NewAsset(databaseName, collectionName string, taskId string, client *mongo.
 	}
 }
 
-func (fa *Asset) Insert(doc AssetDocument) (isSuccess bool, err error) {
+func (a *Asset) Insert(doc AssetDocument) (isSuccess bool, err error) {
 	// 生成_id
 	if doc.Id.IsZero() {
 		doc.Id = bson.NewObjectID()
@@ -232,8 +237,8 @@ func (fa *Asset) Insert(doc AssetDocument) (isSuccess bool, err error) {
 	doc.CreateTime = now
 	doc.UpdateTime = now
 	// 插入文档
-	col := fa.Client.Database(fa.DatabaseName).Collection(fa.CollectionName)
-	_, err = col.InsertOne(fa.Ctx, doc)
+	col := a.Client.Database(a.DatabaseName).Collection(a.CollectionName)
+	_, err = col.InsertOne(a.Ctx, doc)
 	if err != nil {
 		return
 	}
@@ -241,10 +246,10 @@ func (fa *Asset) Insert(doc AssetDocument) (isSuccess bool, err error) {
 	return
 }
 
-func (fa *Asset) Delete(id string) (isSuccess bool, err error) {
+func (a *Asset) Delete(id string) (isSuccess bool, err error) {
 	_idd, _ := bson.ObjectIDFromHex(id)
-	col := fa.Client.Database(fa.DatabaseName).Collection(fa.CollectionName)
-	_, err = col.DeleteOne(fa.Ctx, bson.M{ID: _idd})
+	col := a.Client.Database(a.DatabaseName).Collection(a.CollectionName)
+	_, err = col.DeleteOne(a.Ctx, bson.M{ID: _idd})
 	if err != nil {
 		return false, err
 	}
@@ -252,9 +257,9 @@ func (fa *Asset) Delete(id string) (isSuccess bool, err error) {
 	return
 }
 
-func (fa *Asset) DeleteByTaskId(taskId string) (isSuccess bool, err error) {
-	col := fa.Client.Database(fa.DatabaseName).Collection(fa.CollectionName)
-	_, err = col.DeleteMany(fa.Ctx, bson.M{TaskId: taskId})
+func (a *Asset) DeleteByTaskId(taskId string) (isSuccess bool, err error) {
+	col := a.Client.Database(a.DatabaseName).Collection(a.CollectionName)
+	_, err = col.DeleteMany(a.Ctx, bson.M{TaskId: taskId})
 	if err != nil {
 		return false, err
 	}
@@ -262,9 +267,9 @@ func (fa *Asset) DeleteByTaskId(taskId string) (isSuccess bool, err error) {
 	return
 }
 
-func (fa *Asset) DeleteByHost(host string) (isSuccess bool, err error) {
-	col := fa.Client.Database(fa.DatabaseName).Collection(fa.CollectionName)
-	_, err = col.DeleteMany(fa.Ctx, bson.M{"host": host})
+func (a *Asset) DeleteByHost(host string) (isSuccess bool, err error) {
+	col := a.Client.Database(a.DatabaseName).Collection(a.CollectionName)
+	_, err = col.DeleteMany(a.Ctx, bson.M{"host": host})
 	if err != nil {
 		return false, err
 	}
@@ -272,9 +277,9 @@ func (fa *Asset) DeleteByHost(host string) (isSuccess bool, err error) {
 	return
 }
 
-func (fa *Asset) DeleteByOrgId(orgId string) (isSuccess bool, err error) {
-	col := fa.Client.Database(fa.DatabaseName).Collection(fa.CollectionName)
-	_, err = col.DeleteMany(fa.Ctx, bson.M{"org": orgId})
+func (a *Asset) DeleteByOrgId(orgId string) (isSuccess bool, err error) {
+	col := a.Client.Database(a.DatabaseName).Collection(a.CollectionName)
+	_, err = col.DeleteMany(a.Ctx, bson.M{"org": orgId})
 	if err != nil {
 		return false, err
 	}
@@ -282,23 +287,23 @@ func (fa *Asset) DeleteByOrgId(orgId string) (isSuccess bool, err error) {
 	return
 }
 
-func (fa *Asset) FindByAuthority(authority string) (doc *AssetDocument, err error) {
+func (a *Asset) FindByAuthority(authority string) (doc *AssetDocument, err error) {
 	doc = &AssetDocument{}
-	col := fa.Client.Database(fa.DatabaseName).Collection(fa.CollectionName)
-	filter := bson.D{{"authority", authority}, {TaskId, fa.TaskId}}
-	err = col.FindOne(fa.Ctx, filter).Decode(doc)
+	col := a.Client.Database(a.DatabaseName).Collection(a.CollectionName)
+	filter := bson.D{{"authority", authority}, {TaskId, a.TaskId}}
+	err = col.FindOne(a.Ctx, filter).Decode(doc)
 	if err != nil {
 		return nil, err
 	}
 	return
 }
 
-func (fa *Asset) Update(id string, update bson.M) (isSuccess bool, err error) {
+func (a *Asset) Update(id string, update bson.M) (isSuccess bool, err error) {
 	_idd, _ := bson.ObjectIDFromHex(id)
-	col := fa.Client.Database(fa.DatabaseName).Collection(fa.CollectionName)
+	col := a.Client.Database(a.DatabaseName).Collection(a.CollectionName)
 	filter := bson.D{{ID, _idd}}
 	updateDoc := bson.D{{"$set", update}}
-	_, err = col.UpdateOne(fa.Ctx, filter, updateDoc)
+	_, err = col.UpdateOne(a.Ctx, filter, updateDoc)
 	if err != nil {
 		return
 	}
@@ -306,11 +311,11 @@ func (fa *Asset) Update(id string, update bson.M) (isSuccess bool, err error) {
 	return
 }
 
-func (fa *Asset) InsertOrUpdate(doc AssetDocument) (dss DataSaveStatus, err error) {
-	oldDoc, err := fa.FindByAuthority(doc.Authority)
+func (a *Asset) InsertOrUpdate(doc AssetDocument) (dss DataSaveStatus, err error) {
+	oldDoc, err := a.FindByAuthority(doc.Authority)
 	if oldDoc == nil {
 		dss.IsNew = true
-		dss.IsSuccess, err = fa.Insert(doc)
+		dss.IsSuccess, err = a.Insert(doc)
 		return
 	}
 	// 更新文档
@@ -322,8 +327,8 @@ func (fa *Asset) InsertOrUpdate(doc AssetDocument) (dss DataSaveStatus, err erro
 	}
 	filter := bson.D{{ID, oldDoc.Id}}
 	updateDoc := bson.D{{"$set", update}}
-	col := fa.Client.Database(fa.DatabaseName).Collection(fa.CollectionName)
-	_, err = col.UpdateOne(fa.Ctx, filter, updateDoc)
+	col := a.Client.Database(a.DatabaseName).Collection(a.CollectionName)
+	_, err = col.UpdateOne(a.Ctx, filter, updateDoc)
 	if err != nil {
 		return
 	}
@@ -332,7 +337,7 @@ func (fa *Asset) InsertOrUpdate(doc AssetDocument) (dss DataSaveStatus, err erro
 	return
 }
 
-func (fa *Asset) Find(filter bson.M, page, pageSize int, sortByDate bool, excludeHttpBody bool) (docs []AssetDocument, err error) {
+func (a *Asset) Find(filter bson.M, page, pageSize int, sortByDate bool, excludeHttpBody bool) (docs []AssetDocument, err error) {
 	opts := options.Find()
 	if page > 0 && pageSize > 0 {
 		opts.SetSkip(int64((page - 1) * pageSize))
@@ -346,44 +351,44 @@ func (fa *Asset) Find(filter bson.M, page, pageSize int, sortByDate bool, exclud
 	if excludeHttpBody {
 		opts.SetProjection(bson.D{{Key: "body", Value: 0}})
 	}
-	col := fa.Client.Database(fa.DatabaseName).Collection(fa.CollectionName)
-	cursor, err := col.Find(fa.Ctx, filter, opts)
+	col := a.Client.Database(a.DatabaseName).Collection(a.CollectionName)
+	cursor, err := col.Find(a.Ctx, filter, opts)
 	if err != nil {
 		return nil, err
 	}
 	defer func(cursor *mongo.Cursor, ctx context.Context) {
 		_ = cursor.Close(ctx)
-	}(cursor, fa.Ctx)
+	}(cursor, a.Ctx)
 
-	if err = cursor.All(fa.Ctx, &docs); err != nil {
+	if err = cursor.All(a.Ctx, &docs); err != nil {
 		return nil, err
 	}
 	return
 }
 
-func (fa *Asset) Count(filter bson.M) (int, error) {
-	col := fa.Client.Database(fa.DatabaseName).Collection(fa.CollectionName)
-	count, err := col.CountDocuments(fa.Ctx, filter)
+func (a *Asset) Count(filter bson.M) (int, error) {
+	col := a.Client.Database(a.DatabaseName).Collection(a.CollectionName)
+	count, err := col.CountDocuments(a.Ctx, filter)
 	if err != nil {
 		return 0, err
 	}
 	return int(count), nil
 }
 
-func (fa *Asset) Get(id string) (doc AssetDocument, err error) {
-	col := fa.Client.Database(fa.DatabaseName).Collection(fa.CollectionName)
+func (a *Asset) Get(id string) (doc AssetDocument, err error) {
+	col := a.Client.Database(a.DatabaseName).Collection(a.CollectionName)
 	_idd, err := bson.ObjectIDFromHex(id)
 	if err != nil {
 		return
 	}
 	filter := bson.D{{ID, _idd}}
-	err = col.FindOne(fa.Ctx, filter).Decode(&doc)
+	err = col.FindOne(a.Ctx, filter).Decode(&doc)
 	return
 }
 
-func (fa *Asset) Aggregate(filter bson.M, field string, limit int, unwind bool) (results []StatisticData, err error) {
+func (a *Asset) Aggregate(filter bson.M, field string, limit int, unwind bool) (results []StatisticData, err error) {
 	// 获取集合
-	collection := fa.Client.Database(fa.DatabaseName).Collection(fa.CollectionName)
+	collection := a.Client.Database(a.DatabaseName).Collection(a.CollectionName)
 	// 定义聚合函数
 	var pipeline mongo.Pipeline
 
@@ -414,23 +419,23 @@ func (fa *Asset) Aggregate(filter bson.M, field string, limit int, unwind bool) 
 		pipeline = append(pipeline, bson.D{{"$limit", limit}})
 	}
 	// 执行聚合查询
-	cursor, err := collection.Aggregate(fa.Ctx, pipeline)
+	cursor, err := collection.Aggregate(a.Ctx, pipeline)
 	if err != nil {
 		return nil, err
 	}
 	defer func(cursor *mongo.Cursor, ctx context.Context) {
 		_ = cursor.Close(ctx)
-	}(cursor, fa.Ctx)
+	}(cursor, a.Ctx)
 
 	// 解析结果为 StatisticData 数组
-	err = cursor.All(fa.Ctx, &results)
+	err = cursor.All(a.Ctx, &results)
 	return
 }
 
 // GenerateChartData 生成图表数据，days参数指定要统计的天数
-func (fa *Asset) GenerateChartData(days int) (ApexChartData, error) {
+func (a *Asset) GenerateChartData(days int) (ApexChartData, error) {
 	// 1. 获取原始统计数据
-	stats, err := fa.getCategoryStats(days)
+	stats, err := a.getCategoryStats(days)
 	if err != nil {
 		return ApexChartData{}, err
 	}
@@ -439,8 +444,8 @@ func (fa *Asset) GenerateChartData(days int) (ApexChartData, error) {
 	return convertToApexChartData(stats, days)
 }
 
-func (fa *Asset) getCategoryStats(days int) ([]CategoryStats, error) {
-	collection := fa.Client.Database(fa.DatabaseName).Collection(fa.CollectionName)
+func (a *Asset) getCategoryStats(days int) ([]CategoryStats, error) {
+	collection := a.Client.Database(a.DatabaseName).Collection(a.CollectionName)
 
 	startDate := time.Now().Add(-time.Duration(days) * 24 * time.Hour)
 	pipeline := mongo.Pipeline{
@@ -555,16 +560,16 @@ func convertToApexChartData(stats []CategoryStats, days int) (ApexChartData, err
 }
 
 // ExportToCSV 查询MongoDB并将结果导出为CSV文件
-func (fa *Asset) ExportToCSV(filter bson.M, outputFile string, fields []string) (int64, error) {
-	collection := fa.Client.Database(fa.DatabaseName).Collection(fa.CollectionName)
+func (a *Asset) ExportToCSV(filter bson.M, outputFile string, fields []string) (int64, error) {
+	collection := a.Client.Database(a.DatabaseName).Collection(a.CollectionName)
 	// 2. 执行查询
 	opts := options.Find()
 	opts.SetProjection(bson.D{{Key: "body", Value: 0}})
-	cur, err := collection.Find(fa.Ctx, filter, opts)
+	cur, err := collection.Find(a.Ctx, filter, opts)
 	if err != nil {
 		return 0, err
 	}
-	defer cur.Close(fa.Ctx)
+	defer cur.Close(a.Ctx)
 
 	// 3. 创建CSV文件
 	file, err := os.Create(outputFile)
@@ -590,7 +595,7 @@ func (fa *Asset) ExportToCSV(filter bson.M, outputFile string, fields []string) 
 
 	// 6. 遍历结果并写入CSV
 	var count int64
-	for cur.Next(fa.Ctx) {
+	for cur.Next(a.Ctx) {
 		var doc AssetDocument
 		if err := cur.Decode(&doc); err != nil {
 			return count, err
@@ -622,7 +627,7 @@ func getAllFieldNames() []string {
 		"ip.ipv4.ip", "ip.ipv4.location", "ip.ipv6.ip", "ip.ipv6.location",
 		"domain", "service", "server", "banner", "title", "app",
 		"status", "header", "cert", "icon_hash",
-		"color", "memo", "cdn", "cname",
+		"color", "memo", "cdn", "cname", "cloud",
 		"create_time", "update_time",
 	}
 }
@@ -701,6 +706,8 @@ func docToRecord(doc *AssetDocument, fields []string) ([]string, error) {
 			record[i] = strconv.FormatBool(doc.IsCDN)
 		case "cname":
 			record[i] = doc.CName
+		case "cloud":
+			record[i] = strconv.FormatBool(doc.IsCloud)
 		case "create_time":
 			record[i] = doc.CreateTime.In(conf.LocalTimeLocation).Format(time.RFC3339)
 		case "update_time":
@@ -714,7 +721,7 @@ func docToRecord(doc *AssetDocument, fields []string) ([]string, error) {
 }
 
 // ImportFromCSV 将CSV文件导入到MongoDB
-func (fa *Asset) ImportFromCSV(filename string, orgId string, funcCall RecordToDocFunc, insertAndUpdate bool) (int64, error) {
+func (a *Asset) ImportFromCSV(filename string, orgId string, funcCall RecordToDocFunc, insertAndUpdate bool) (int64, error) {
 	// 1. 打开CSV文件
 	file, err := os.Open(filename)
 	if err != nil {
@@ -731,7 +738,7 @@ func (fa *Asset) ImportFromCSV(filename string, orgId string, funcCall RecordToD
 		return 0, fmt.Errorf("failed to read CSV headers: %v", err)
 	}
 	// 4. 准备批量写入
-	collection := fa.Client.Database(fa.DatabaseName).Collection(fa.CollectionName)
+	collection := a.Client.Database(a.DatabaseName).Collection(a.CollectionName)
 	var documents []AssetDocument
 	var totalInserted int64
 	batchSize := 100 // 每批插入100条记录
@@ -760,14 +767,14 @@ func (fa *Asset) ImportFromCSV(filename string, orgId string, funcCall RecordToD
 		// 7. 批量插入
 		if len(documents) >= batchSize {
 			if insertAndUpdate {
-				count, err := fa.importByUpdate(documents)
+				count, err := a.importByUpdate(documents)
 				if err != nil {
 					return totalInserted, err
 				}
 				totalInserted += count
 				totalInserted += count
 			} else {
-				result, err := collection.InsertMany(fa.Ctx, documents)
+				result, err := collection.InsertMany(a.Ctx, documents)
 				if err != nil {
 					return totalInserted, fmt.Errorf("batch insert failed: %v", err)
 				}
@@ -780,13 +787,13 @@ func (fa *Asset) ImportFromCSV(filename string, orgId string, funcCall RecordToD
 	// 8. 插入剩余记录
 	if len(documents) > 0 {
 		if insertAndUpdate {
-			count, err := fa.importByUpdate(documents)
+			count, err := a.importByUpdate(documents)
 			if err != nil {
 				return totalInserted, err
 			}
 			totalInserted += count
 		} else {
-			result, err := collection.InsertMany(fa.Ctx, documents)
+			result, err := collection.InsertMany(a.Ctx, documents)
 			if err != nil {
 				return totalInserted, fmt.Errorf("final batch insert failed: %v", err)
 			}
@@ -797,9 +804,9 @@ func (fa *Asset) ImportFromCSV(filename string, orgId string, funcCall RecordToD
 	return totalInserted, nil
 }
 
-func (fa *Asset) importByUpdate(docs []AssetDocument) (count int64, err error) {
+func (a *Asset) importByUpdate(docs []AssetDocument) (count int64, err error) {
 	for _, doc := range docs {
-		dss, err := fa.InsertOrUpdate(doc)
+		dss, err := a.InsertOrUpdate(doc)
 		if err != nil {
 			return 0, err
 		}
@@ -900,6 +907,10 @@ func RecordToDoc(headers, record []string, orgId string) (*AssetDocument, error)
 			}
 		case "cname":
 			doc.CName = value
+		case "cloud":
+			if isCloud, err := strconv.ParseBool(value); err == nil {
+				doc.IsCloud = isCloud
+			}
 		case "create_time":
 			if t, err := time.Parse(time.RFC3339, value); err == nil {
 				doc.CreateTime = t

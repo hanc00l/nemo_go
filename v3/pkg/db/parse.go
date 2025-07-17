@@ -120,7 +120,7 @@ func GetEqQuery(x interface{}, y interface{}) bson.M {
 		ipv4Location := bson.M{"ip.ipv4": bson.M{"$elemMatch": GetRegexQuery("location", y)}}
 		ipv6Location := bson.M{"ip.ipv6": bson.M{"$elemMatch": GetRegexQuery("location", y)}}
 		return getOrQuery(ipv4Location, ipv6Location)
-	case "cdn", "new", "update":
+	case "cdn", "cloud", "new", "update":
 		b, err := strconv.ParseBool(y.(string))
 		if err != nil {
 			return bson.M{}
@@ -173,7 +173,7 @@ func getNeQuery(x interface{}, y interface{}) bson.M {
 	key := x.(string)
 	switch key {
 	// 模糊查询的字段
-	case "cdn", "new", "update":
+	case "cdn", "cloud", "new", "update":
 		b, err := strconv.ParseBool(y.(string))
 		if err == nil {
 			y = b

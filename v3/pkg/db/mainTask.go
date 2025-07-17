@@ -49,6 +49,9 @@ type MainTaskDocument struct {
 	StartTime    *time.Time `bson:"start_time,omitempty"`
 	EndTime      *time.Time `bson:"end_time,omitempty"`
 
+	ReportLLMApi string `bson:"reportLLMApi,omitempty"`
+	Report       string `bson:"report,omitempty"`
+
 	CreateTime time.Time `bson:"create_time"`
 	UpdateTime time.Time `bson:"update_time"`
 }

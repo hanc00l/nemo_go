@@ -57,7 +57,6 @@
                                         </div>
                                     </div>
                                 </div>
-
                             </fieldset>
 
 
@@ -154,6 +153,20 @@
                                             <input class="form-control" id="cron_exp">
                                         </div>
                                     </div>
+                                    <div class="form-group row border-bottom pb-3 mb-3">
+                                        <div class="col-md-2 form-group">
+                                            <label for="report_llmapi"><strong>大模型接口生成报告</strong></label>
+                                        </div>
+                                        <div class="col-md-8">
+                                            <select class="form-control" id="report_llmapi"
+                                                    style="width: 200px;">
+                                                <option value="" selected>--请选择LLMAPI接口--</option>
+                                                <option value="deepseek">DeepSeek</option>
+                                                <option value="qwen">QWen</option>
+                                                <option value="kimi">Kimi</option>
+                                            </select>
+                                        </div>
+                                    </div>
                                     <div class="form-group row pb-3 mb-3">
                                         <div class="col-md-2 form-group">
                                             <label for="is_proxy"><strong>代理设置</strong><i
@@ -172,27 +185,34 @@
                                 <div class="tab-pane fade" id="profile" role="tabpanel"
                                      aria-labelledby="profile-tab">
 
-                                    <!-- LLMAPI部分 -->
-                                    <div class="form-group row border-bottom mt-3" id="div_llmapi">
+                                    <!-- ICP部分 -->
+                                    <div class="form-group row border-bottom mt-3" id="div_icp">
                                         <div class="col-md-2 form-group">
-                                            <label><strong>组织机构查询</strong>
-                                                <i class="fa fa-question-circle"
-                                                   aria-hidden="true"
-                                                   title="调用在线大模型API或组织机构备案域名查询，通过提示词得到目标的域名；注意：请输入目标为公司名称或组织名称，通过大模型API接口提取得到目标的域名信息；具体提法词请查看源代码或文档"></i>
-                                            </label>
+                                            <label><strong>ICP备案查询</strong></label>
                                         </div>
-                                        <div class="col-md-8" id="llmapi_config">
-                                            <div class="checkbox">
-                                                <label><input type="checkbox" id="qwen">Qwen</label>
-                                                <label><input type="checkbox" id="kimi">Kimi</label>
-                                                <label><input type="checkbox" id="deepseek">Deepseek</label>
-                                                <label><input type="checkbox" id="icpPlus">组织机构备案域名查询</label>
+                                        <div class="col-md-8" id="icp_config">
+                                            <div class="form-group">
+                                                <div class="form-check">
+                                                    <label class="form-check-label">
+                                                        <input class="form-check-input" id="query_type_icpPlus"
+                                                               type="radio" name="query_type" value="icpPlus"
+                                                               checked="">根据单位名称获取备案域名
+                                                    </label>
+                                                </div>
+                                                <div class="form-check">
+                                                    <label class="form-check-label">
+                                                        <input class="form-check-input" id="query_type_icpPlus2"
+                                                               type="radio" name="query_type" value="icpPlus2">域名-备案单位-备案域名
+                                                    </label>
+                                                </div>
                                             </div>
                                             <div class="checkbox">
-                                                <label><input type="checkbox" id="llmapi_autoAssociateOrg">
+                                                <label><input type="checkbox" id="chinaz">Chinaz</label>
+                                                <label><input type="checkbox" id="beianx">Beianx</label>
+                                                <label><input type="checkbox" id="icp_autoAssociateOrg">
                                                     自动关联/创建组织机构<i class="fa fa-question-circle"
                                                                             aria-hidden="true"
-                                                                            title='将目标的组织机构名称自动关联到任务结果的资产中；如果没有对应的组织机构（名称完全一致），则会自动创建新的组织机构。注意：目标拆分模式请选择按行拆分。'></i></label>
+                                                                            title='将目标的单位名称自动关联到任务结果的资产的组织中；如果没有对应的组织机构（名称完全一致），则会自动创建新的组织机构。注意：目标拆分模式请选择按行拆分。'></i></label>
                                             </div>
                                         </div>
                                     </div>
@@ -205,8 +225,7 @@
                                             <div class="checkbox">
                                                 <label><input type="checkbox" id="nmap">
                                                     Nmap</label>
-                                                <label><input type="checkbox" id="masscan"
-                                                >
+                                                <label><input type="checkbox" id="masscan">
                                                     Masscan</label>
                                                 <label><input type="checkbox" id="gogo">
                                                     Gogo</label>
@@ -214,7 +233,6 @@
                                             <div class="form-group">
                                                 <label for="portscan_port">端口：</label>
                                                 <input class="form-control" id="portscan_port" type="text"
-
                                                        placeholder=""
                                                        value="--top-ports 1000" list="datalist_port">
                                                 <datalist id="datalist_port" style="display:none;">
@@ -230,13 +248,16 @@
                                                     <option value="">自定义端口</option>
                                                 </datalist>
                                             </div>
+                                            <div class="checkbox">
+                                                <label><input type="checkbox" id="portscan_is_ping">
+                                                    允许Ping</label>
+                                            </div>
                                             <div class="form-group">
                                                 <label for="portscan_rate">扫描速度<i
                                                         class="fa fa-question-circle"
                                                         aria-hidden="true"
                                                         title="Send packets per second&#10;对应--min-rate(nmap)、--rate(masscan)、--thread(gogo)参数"></i></label>
                                                 <input class="form-control" id="portscan_rate"
-
                                                        type="text" placeholder="1000（默认）" style="width: 100px;"
                                                        value="1000">
                                             </div>
@@ -246,8 +267,7 @@
                                                         aria-hidden="true"
                                                         title="使用nmap时的选项，masscan只使用SYN扫描，gogo只使用TCP扫描"></i></label>
                                                 <select class="form-control" id="portscan_tech"
-                                                        style="width: 100px;"
-                                                >
+                                                        style="width: 100px;">
                                                     <option value="-sS" selected>-sS
                                                     </option>
                                                     <option value="-sT">-sT</option>
@@ -264,11 +284,13 @@
 
                                                        value="50">
                                             </div>
-                                            <div class="checkbox">
-                                                <label><input type="checkbox" id="portscan_is_ping"
-                                                >
-                                                    允许Ping</label>
-                                            </div>
+                                            <label for="portscan_PortscanConfig_sliceNumber">端口切片数量<i
+                                                    class="fa fa-question-circle"
+                                                    aria-hidden="true"
+                                                    title="按指定数量分组对端口进行拆分，以便并发扫描，如果为0或空则不拆分"></i></label>
+                                            <input class="form-control" type="number" style="width: 100px;"
+                                                   id="portscan_PortscanConfig_sliceNumber"
+                                                   value="0">
                                         </div>
                                     </div>
 
@@ -287,16 +309,13 @@
                                             <div class="form-group">
                                                 <label><strong>结果过滤：</strong></label>
                                                 <div class="checkbox">
-                                                    <label><input type="checkbox" id="domainscan_is_ignore_cdn"
-                                                    >
+                                                    <label><input type="checkbox" id="domainscan_is_ignore_cdn">
                                                         忽略CDN域名和IP</label>
                                                     <label><input type="checkbox"
-                                                                  id="domainscan_is_ignore_china_other"
-                                                    >
+                                                                  id="domainscan_is_ignore_china_other">
                                                         忽略中国港澳台地区IP</label>
                                                     <label><input type="checkbox"
-                                                                  id="domainscan_is_ignore_outside_china"
-                                                    >
+                                                                  id="domainscan_is_ignore_outside_china">
                                                         忽略中国以外IP</label>
                                                 </div>
                                                 <label><strong>IP进行主动扫描<i
@@ -378,14 +397,12 @@
                                                                value="50">
                                                     </div>
                                                 </div>
-
                                                 <label for="domainscan_PortscanConfig_maxOpenedPortPerIp">域名被解析到同一个IP的阈值<i
                                                         class="fa fa-question-circle"
                                                         aria-hidden="true"
                                                         title="域名解析到同一个IP的数量超过该阈值，则该域名可能是被泛解析的域名，将被过滤掉不会被保存到结果中"></i>：</label>
                                                 <input class="form-control" type="number" style="width: 100px;"
                                                        id="domainscan_PortscanConfig_maxOpenedPortPerIp"
-
                                                        value="100">
                                                 <label for="domainscan_wordlist_file">子域名暴力破解字典<i
                                                         class="fa fa-question-circle"
@@ -410,20 +427,14 @@
                                             <div class="checkbox">
                                                 <label><input type="checkbox" id="fofa">
                                                     Fofa</label>
-                                                <label><input type="checkbox" id="hunter"
-                                                >
+                                                <label><input type="checkbox" id="hunter">
                                                     Hunter</label>
                                                 <label><input type="checkbox" id="quake">
                                                     Quake</label>
-                                                <label><input type="checkbox" id="whois">
-                                                    Whois</label>
-                                                <label><input type="checkbox" id="icp">
-                                                    ICP</label>
                                             </div>
                                             <div class="form-group">
                                                 <div class="checkbox">
-                                                    <label><input type="checkbox" id="onlineapi_search_by_keyword"
-                                                    >
+                                                    <label><input type="checkbox" id="onlineapi_search_by_keyword">
                                                         自定义关键词语法搜索<i
                                                                 class="fa fa-question-circle"
                                                                 aria-hidden="true"
@@ -431,16 +442,13 @@
                                                 </div>
                                                 <label><strong>结果过滤：</strong></label>
                                                 <div class="checkbox">
-                                                    <label><input type="checkbox" id="onlineapi_is_ignore_cdn"
-                                                    >
+                                                    <label><input type="checkbox" id="onlineapi_is_ignore_cdn">
                                                         忽略CDN域名和IP</label>
                                                     <label><input type="checkbox"
-                                                                  id="onlineapi_is_ignore_china_other"
-                                                    >
+                                                                  id="onlineapi_is_ignore_china_other">
                                                         忽略中国港澳台地区IP</label>
                                                     <label><input type="checkbox"
-                                                                  id="onlineapi_is_ignore_outside_china"
-                                                    >
+                                                                  id="onlineapi_is_ignore_outside_china">
                                                         忽略中国以外IP</label>
                                                 </div>
                                                 <label for="onlineapi_search_start_time">指定搜索开始时间<i
@@ -465,7 +473,6 @@
                                                         title='在线资产API采用分页查询的方式，每页返回的记录数量'></i></label>
                                                 <input class="form-control" type="number" style="width: 100px;"
                                                        id="onlineapi_search_page_size"
-
                                                        value="100">
                                             </div>
                                         </div>
@@ -492,6 +499,32 @@
                                                     Fingerprintx<i class="fa fa-question-circle"
                                                                    aria-hidden="true"
                                                                    title='调用fingerprintx进行非HTTP协议指纹识别'></i></label>
+                                            </div>
+                                            <div class="form-group">
+                                                <label for="fingerprint_portlist_enable">
+                                                    <input type="checkbox" id="fingerprint_portlist_enable">
+                                                    单独指定端口<i
+                                                        class="fa fa-question-circle"
+                                                        aria-hidden="true"
+                                                        title="默认不指定端口，任务的目标由上一级任务的结果生成；如果指定端口，则将上一级任务中的ip或域名与端口进行组合，作为新的目标。"></i></label>
+                                                <input class="form-control" id="fingerprint_portlist" type="text"
+                                                       placeholder=""
+                                                       value="" list="datalist_portlist">
+                                                <datalist id="datalist_portlist" style="display:none;">
+                                                    <option value="" selected>自定义端口</option>
+                                                    <option value="--top-ports 1000">
+                                                        --top-ports 1000
+                                                    </option>
+                                                    <option value="--top-ports 100">
+                                                        --top-ports 100
+                                                    </option>
+                                                    <option value="--top-ports 10">
+                                                        --top-ports 10
+                                                    </option>
+                                                    <option value="1-65535">
+                                                        1-65535
+                                                    </option>
+                                                </datalist>
                                             </div>
                                         </div>
                                     </div>
@@ -566,7 +599,6 @@
                                                         aria-hidden="true"
                                                         title="Send packets per second&#10;对应--min-rate(nmap)、--rate(masscan)、--thread(gogo)参数"></i></label>
                                                 <input class="form-control" id="standalone_rate"
-
                                                        type="text" placeholder="1000（默认）" style="width: 100px;"
                                                        value="1000">
                                             </div>
@@ -577,18 +609,14 @@
                                                         title="如果扫描结果中某个IP的开放端口数量超过该阈值，则该IP将被过滤掉不会被保存到结果中"></i></label>
                                                 <input class="form-control" type="number" style="width: 100px;"
                                                        id="standalone_PortscanConfig_maxOpenedPortPerIp"
-
                                                        value="50">
                                             </div>
                                             <div class="checkbox">
-                                                <label><input type="checkbox" id="standalone_is_ping"
-                                                >
+                                                <label><input type="checkbox" id="standalone_is_ping">
                                                     允许Ping</label>
-                                                <label><input type="checkbox" id="standalone_is_verbose"
-                                                >
+                                                <label><input type="checkbox" id="standalone_is_verbose">
                                                     详细指纹探测</label>
-                                                <label><input type="checkbox" id="standalone_is_poc_scan"
-                                                >
+                                                <label><input type="checkbox" id="standalone_is_poc_scan">
                                                     进行POC扫描</label>
                                             </div>
                                         </div>

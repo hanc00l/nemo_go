@@ -706,7 +706,7 @@ func getDomainInfo(domain *db.Domain, portInfoCacheMap map[int]PortInfo, disable
 	if icpInfo := icp.LookupICP(domain.DomainName); icpInfo != nil {
 		icpContent, _ := json.Marshal(*icpInfo)
 		r.DomainAttr = append(r.DomainAttr, DomainAttrInfo{
-			Tag:     "ICP",
+			Tag:     "ICPChinaz",
 			Content: string(icpContent),
 		})
 	}

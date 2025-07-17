@@ -155,17 +155,29 @@ func parseHttpxResult(config execute.ExecutorTaskInfo, authority string, result 
 			doc.Category = db.CategoryDomain
 		}
 	}
-	if len(result.A) > 0 {
-		for _, a := range result.A {
-			if utils.CheckIPV4(a) {
-				doc.Ip.IpV4 = append(doc.Ip.IpV4, db.IPV4{
-					IPName: a,
-				})
-			} else if utils.CheckIPV6(a) {
-				doc.Ip.IpV6 = append(doc.Ip.IpV6, db.IPV6{
-					IPName: a,
-				})
-			}
+	// httpx的A记录的不只有域名解析的IP，同时还带有dns的地址，所以暂时不用
+	//if len(result.A) > 0 {
+	//	for _, a := range result.A {
+	//		if utils.CheckIPV4(a) {
+	//			doc.Ip.IpV4 = append(doc.Ip.IpV4, db.IPV4{
+	//				IPName: a,
+	//			})
+	//		} else if utils.CheckIPV6(a) {
+	//			doc.Ip.IpV6 = append(doc.Ip.IpV6, db.IPV6{
+	//				IPName: a,
+	//			})
+	//		}
+	//	}
+	//}
+	if len(result.Host) > 0 {
+		if utils.CheckIPV4(result.Host) {
+			doc.Ip.IpV4 = append(doc.Ip.IpV4, db.IPV4{
+				IPName: result.Host,
+			})
+		} else if utils.CheckIPV6(result.Host) {
+			doc.Ip.IpV6 = append(doc.Ip.IpV6, db.IPV6{
+				IPName: result.Host,
+			})
 		}
 	}
 	if result.StatusCode > 0 {

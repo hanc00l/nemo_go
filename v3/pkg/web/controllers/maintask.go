@@ -24,6 +24,14 @@ type mainTaskRequestParam struct {
 	Target   string `json:"target" form:"target"`
 }
 
+type executorTaskRequestParam struct {
+	DatableRequestParam
+	TaskName   string `json:"name" form:"name"`
+	TaskStatus string `json:"status" form:"status"`
+	TaskId     string `json:"id" form:"id"`
+	WorkerName string `json:"worker" form:"worker"`
+}
+
 type TaskData struct {
 	Id             string `json:"id"`
 	Index          int    `json:"index"`
@@ -56,6 +64,7 @@ type MainTaskInfoData struct {
 	IsCronTask     bool   `json:"is_cron_task" form:"is_cron_task"`
 	CronExpr       string `json:"cron_expr" form:"cron_expr"`
 	IsProxy        bool   `json:"is_proxy" form:"is_proxy"`
+	ReportLLMApi   string `json:"report_llmapi" form:"report_llmapi"`
 }
 
 type MainTaskDetailInfoData struct {
@@ -75,6 +84,8 @@ type MainTaskDetailInfoData struct {
 
 	Status         string `json:"status"`
 	Result         string `json:"result"`
+	ReportLLMApi   string `json:"report_llmapi"`
+	Report         string `json:"report"`
 	Progress       string `json:"progress"`
 	ProgressRate   string `json:"progress_rate"`
 	CreateDatetime string `json:"create_time"`
@@ -85,13 +96,12 @@ type MainTaskDetailInfoData struct {
 
 type ExecutorTaskInfoData struct {
 	Id             string `json:"id"`
+	Index          int    `json:"index"`
 	Executor       string `json:"executor"`
 	Target         string `json:"target"`
-	Args           string `json:"args"`
 	Status         string `json:"status"`
 	Result         string `json:"result"`
 	Worker         string `json:"worker"`
-	ProgressRate   string `json:"progress_rate"`
 	CreateDatetime string `json:"create_time"`
 	UpdateDatetime string `json:"update_time"`
 	StartDatetime  string `json:"start_time"`
@@ -316,6 +326,7 @@ func processMainTaskInfoData(data MainTaskInfoData) (mainTask db.MainTaskDocumen
 		mainTask.CronTaskInfo.CronEnabled = true
 	}
 	mainTask.IsProxy = data.IsProxy
+	mainTask.ReportLLMApi = data.ReportLLMApi
 	return
 }
 
@@ -501,6 +512,10 @@ func (c *MainTaskController) InfoAction() {
 	infoData.Target = doc.Target
 	infoData.ExcludeTarget = doc.ExcludeTarget
 	infoData.IsCronTask = doc.IsCron
+	infoData.ReportLLMApi = doc.ReportLLMApi
+	if len(doc.Report) > 0 {
+		infoData.Report = "success"
+	}
 	if doc.TargetSliceType == 0 {
 		infoData.TargetSplit = "不拆分"
 	} else if doc.TargetSliceType == 1 {
@@ -565,17 +580,21 @@ func (c *MainTaskController) InfoExecutorTaskAction() {
 	defer func(c *MainTaskController, encoding ...bool) {
 		_ = c.ServeJSON(encoding...)
 	}(c)
+	var req executorTaskRequestParam
+	var resp DataTableResponseData
+	err := c.ParseForm(&req)
+	if err != nil {
+		c.FailedStatus(err.Error())
+		return
+	}
+	if len(req.TaskId) == 0 {
+		c.FailedStatus("empty id")
+		return
+	}
 	if c.CheckMultiAccessRequest([]RequestRole{SuperAdmin, Admin}, false) == false {
 		c.FailedStatus("当前用户权限不允许！")
 		return
 	}
-	maintaskId := c.GetString("maintaskId")
-	if len(maintaskId) == 0 {
-		logging.RuntimeLog.Error("empty id")
-		c.FailedStatus("empty id")
-		return
-	}
-	taskStatus := c.GetString("taskStatus")
 	workspaceId := c.GetWorkspace()
 	if len(workspaceId) == 0 {
 		c.FailedStatus("未选择当前的工作空间！")
@@ -589,27 +608,50 @@ func (c *MainTaskController) InfoExecutorTaskAction() {
 	}
 	defer db.CloseClient(mongoClient)
 
-	executorTask := db.NewExecutorTask(mongoClient)
-	filter := bson.M{"mainTaskId": maintaskId, "workspaceId": workspaceId}
-	if len(taskStatus) > 0 {
-		filter["status"] = taskStatus
+	mainTask := db.NewMainTask(mongoClient)
+	mainTaskDoc, err := mainTask.GetById(req.TaskId)
+	if err != nil {
+		c.FailedStatus("该任务不存在！")
+		c.FailedStatus(err.Error())
+		return
 	}
-	results, err := executorTask.Find(filter, 0, 0)
+	if mainTaskDoc.Id.Hex() != req.TaskId {
+		c.FailedStatus("该任务不存在！")
+		return
+	}
+	filter := bson.M{"mainTaskId": mainTaskDoc.TaskId, "workspaceId": workspaceId}
+	if len(req.TaskName) > 0 {
+		filter["executor"] = req.TaskName
+	}
+	if len(req.TaskStatus) > 0 {
+		filter["status"] = req.TaskStatus
+	}
+	if len(req.WorkerName) > 0 {
+		filter["worker"] = bson.M{"$regex": req.WorkerName, "$options": "i"}
+	}
+	if req.Length <= 0 {
+		req.Length = 50
+	}
+	if req.Start < 0 {
+		req.Start = 0
+	}
+	startPage := req.Start/req.Length + 1
+	executorTask := db.NewExecutorTask(mongoClient)
+	results, err := executorTask.Find(filter, startPage, req.Length)
 	if err != nil {
 		logging.RuntimeLog.Error(err)
 		c.FailedStatus(err.Error())
 		return
 	}
-	var infoData []ExecutorTaskInfoData
-	for _, row := range results {
+	for i, row := range results {
 		item := ExecutorTaskInfoData{
 			Id:             row.Id.Hex(),
+			Index:          req.Start + i + 1,
 			Executor:       row.Executor,
 			Target:         row.Target,
 			Worker:         row.Worker,
 			Status:         row.Status,
 			Result:         row.Result,
-			Args:           row.Args,
 			CreateDatetime: FormatDateTime(row.CreateTime),
 			UpdateDatetime: FormatDateTime(row.UpdateTime),
 		}
@@ -624,9 +666,58 @@ func (c *MainTaskController) InfoExecutorTaskAction() {
 				item.Runtime = row.EndTime.Sub(*row.StartTime).Truncate(time.Second).String()
 			}
 		}
-		infoData = append(infoData, item)
+		resp.Data = append(resp.Data, item)
 	}
-	c.Data["json"] = infoData
+	total, _ := executorTask.Count(filter)
+	resp.RecordsTotal = total
+	resp.RecordsFiltered = total
+	resp.Draw = req.Draw
+	if len(resp.Data) == 0 {
+		resp.Data = make([]interface{}, 0)
+	}
+	c.Data["json"] = resp
+	return
+}
+
+func (c *MainTaskController) MaintaskReportAction() {
+	task_id := c.GetString("task_id")
+	if len(task_id) == 0 {
+		logging.RuntimeLog.Error("empty task_id")
+		c.Abort("500")
+		return
+	}
+	workspaceId := c.GetWorkspace()
+	if len(workspaceId) == 0 {
+		c.Abort("500")
+		return
+	}
+	mongoClient, err := db.GetClient()
+	if err != nil {
+		logging.RuntimeLog.Error(err)
+		c.Abort("500")
+		return
+	}
+	defer db.CloseClient(mongoClient)
+	mainTask := db.NewMainTask(mongoClient)
+	doc, err := mainTask.GetByTaskId(task_id)
+	if err != nil {
+		logging.RuntimeLog.Error(err)
+		c.Abort("500")
+		return
+	}
+	if doc.WorkspaceId != workspaceId {
+		c.Abort("500")
+		return
+	}
+	// 设置 Content-Type
+	c.Ctx.Output.Header("Content-Type", "text/html; charset=utf-8")
+	// 返回文件内容
+	err = c.Ctx.Output.Body([]byte(doc.Report))
+	if err != nil {
+		logging.RuntimeLog.Error(err)
+		c.Abort("500")
+	}
+
 	return
 }
 
@@ -730,6 +821,7 @@ func (c *MainTaskController) RedoMaintaskAction() {
 		TargetSliceNum:  doc.TargetSliceNum,
 		IsCron:          doc.IsCron,
 		CronTaskInfo:    doc.CronTaskInfo,
+		ReportLLMApi:    doc.ReportLLMApi,
 	}
 	c.CheckErrorAndStatus(mainTask.Insert(docNew))
 

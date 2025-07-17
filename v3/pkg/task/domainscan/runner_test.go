@@ -31,3 +31,10 @@ func TestResult_ParseResult(t *testing.T) {
 		t.Log(doc)
 	}
 }
+
+func TestResovleSubdomain(t *testing.T) {
+	domain := "yewxt.elane.cn"
+	cname, resolvedSubdomains := ResolveDomain(domain)
+	t.Log(cname)
+	t.Log(resolvedSubdomains)
+}

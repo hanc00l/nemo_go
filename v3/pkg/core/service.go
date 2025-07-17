@@ -19,6 +19,7 @@ import (
 	"go.mongodb.org/mongo-driver/v2/mongo"
 	"os"
 	"path/filepath"
+	"regexp"
 	"strings"
 	"sync"
 	"time"
@@ -295,6 +296,20 @@ func (s *Service) SaveTaskResult(ctx context.Context, args *TaskAssetDocumentRes
 
 	taskAsset := db.NewAsset(args.WorkspaceId, db.TaskAsset, args.MainTaskId, mongoClient)
 	var newAsset, updateAsset, blacklist []string
+	fCheckCloud := func(location string) bool {
+		if len(location) == 0 {
+			return false
+		}
+		// 使用正则表达式匹配 [云名称] 的格式
+		// 方括号中至少包含一个非方括号的字符
+		pattern := `\[[^\[\]]+\]`
+		matched, err := regexp.MatchString(pattern, location)
+		if err != nil {
+			// 如果正则匹配出错，默认返回false
+			return false
+		}
+		return matched
+	}
 	for _, doc := range args.Result {
 		if blc.IsHostBlocked(doc.Host) {
 			blacklist = append(blacklist, doc.Host)
@@ -304,10 +319,16 @@ func (s *Service) SaveTaskResult(ctx context.Context, args *TaskAssetDocumentRes
 			if ipv4.Location == "" {
 				doc.Ip.IpV4[k].Location = ipl4.Find(ipv4.IPName)
 			}
+			if !doc.IsCloud && fCheckCloud(doc.Ip.IpV4[k].Location) {
+				doc.IsCloud = true
+			}
 		}
 		for k, ipv6 := range doc.Ip.IpV6 {
 			if ipv6.Location == "" {
 				doc.Ip.IpV6[k].Location = ipl6.Find(ipv6.IPName)
+			}
+			if !doc.IsCloud && fCheckCloud(doc.Ip.IpV4[k].Location) {
+				doc.IsCloud = true
 			}
 		}
 		dss, err := taskAsset.InsertOrUpdate(doc)
@@ -438,7 +459,7 @@ func (s *Service) SaveVulResult(ctx context.Context, args *VulResultArgs, replay
 	return nil
 }
 
-func (s *Service) SaveQueryData(ctx context.Context, args *[]db.QueryDocument, replay *string) error {
+func (s *Service) SaveICPData(ctx context.Context, args *[]db.ICPDocument, replay *string) error {
 	mongoClient, err := db.GetClient()
 	if err != nil {
 		logging.RuntimeLog.Errorf("get mongo client fail:%v", err)
@@ -446,26 +467,18 @@ func (s *Service) SaveQueryData(ctx context.Context, args *[]db.QueryDocument, r
 	}
 	defer db.CloseClient(mongoClient)
 
-	q := db.NewQueryData(db.GlobalDatabase, mongoClient)
+	i := db.NewICP(mongoClient)
 	for _, doc := range *args {
-		oldDoc, _ := q.GetByDomain(doc.Domain, doc.Category)
-		if oldDoc == nil {
-			_, err = q.Insert(&doc)
-			if err != nil {
-				logging.RuntimeLog.Errorf(err.Error())
-				return err
-			}
-		} else {
-			if oldDoc.Content != doc.Content {
-				_, err = q.Update(oldDoc.Id, doc)
-				if err != nil {
-					logging.RuntimeLog.Errorf(err.Error())
-					return err
-				}
-			}
+		d, err := i.InsertOrUpdate(doc)
+		if err != nil {
+			logging.RuntimeLog.Errorf(err.Error())
+			return err
+		}
+		if !d.IsSuccess {
+			logging.RuntimeLog.Warningf("保存ICP数据失败：%s", doc.Domain)
 		}
 	}
-	*replay = fmt.Sprintf("数据:%d", len(*args))
+	*replay = fmt.Sprintf("ICP数据:%d", len(*args))
 
 	return nil
 }
@@ -511,7 +524,7 @@ func (s *Service) SaveRuntimeLog(ctx context.Context, args *RuntimeLogArgs, repl
 	return nil
 }
 
-func (s *Service) LookupQueryData(ctx context.Context, args *db.QueryDocument, replay *db.QueryDocument) error {
+func (s *Service) LookupICPData(ctx context.Context, args *string, replay *db.ICPDocument) error {
 	mongoClient, err := db.GetClient()
 	if err != nil {
 		logging.RuntimeLog.Errorf("get mongo client fail:%v", err)
@@ -519,15 +532,18 @@ func (s *Service) LookupQueryData(ctx context.Context, args *db.QueryDocument, r
 	}
 	defer db.CloseClient(mongoClient)
 
-	q := db.NewQueryData(db.GlobalDatabase, mongoClient)
-	doc, err := q.GetByDomain(args.Domain, args.Category)
+	i := db.NewICP(mongoClient)
+	doc, err := i.GetByDomain(*args)
 	if err != nil && !errors.Is(err, mongo.ErrNoDocuments) {
 		logging.RuntimeLog.Errorf(err.Error())
 		return err
 	}
 	if doc == nil {
-		*replay = db.QueryDocument{}
+		*replay = db.ICPDocument{}
+	} else {
+		*replay = *doc
 	}
+
 	return nil
 }
 

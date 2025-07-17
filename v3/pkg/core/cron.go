@@ -141,6 +141,7 @@ func (j CronTaskJob) Run() {
 		Args:            docCron.Args,
 		TargetSliceType: docCron.TargetSliceType,
 		TargetSliceNum:  docCron.TargetSliceNum,
+		ReportLLMApi:    docCron.ReportLLMApi,
 		IsCron:          false,
 		Status:          CREATED,
 	}

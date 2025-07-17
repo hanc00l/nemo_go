@@ -9,6 +9,7 @@ import (
 	"github.com/hanc00l/nemo_go/v3/pkg/task/domainscan"
 	"github.com/hanc00l/nemo_go/v3/pkg/task/execute"
 	"github.com/hanc00l/nemo_go/v3/pkg/task/fingerprint"
+	"github.com/hanc00l/nemo_go/v3/pkg/task/icp"
 	"github.com/hanc00l/nemo_go/v3/pkg/task/llmapi"
 	"github.com/hanc00l/nemo_go/v3/pkg/task/onlineapi"
 	"github.com/hanc00l/nemo_go/v3/pkg/task/pocscan"
@@ -212,33 +213,6 @@ func OnlineAPI(configJSON string) (result string, err error) {
 	return SucceedTask(result), nil
 }
 
-func QueryData(configJSON string) (result string, err error) {
-	var ok bool
-	var config execute.ExecutorTaskInfo
-	ok, config, result, err = checkTask(configJSON)
-	if !ok || err != nil {
-		return
-	}
-	// 执行任务
-	// icp、whois
-	taskResult := onlineapi.DoQuery(config)
-	if len(taskResult) > 0 {
-		var docResult []db.QueryDocument
-		for _, doc := range taskResult {
-			docResult = append(docResult, db.QueryDocument{
-				Domain:   doc.Domain,
-				Category: doc.Category,
-				Content:  doc.Content,
-			})
-		}
-		if err = core.CallXClient("SaveQueryData", &docResult, &result); err != nil {
-			logging.RuntimeLog.Error(err)
-		}
-	}
-	// 不需要新建下一步任务
-	return SucceedTask(result), nil
-}
-
 func Fingerprint(configJSON string) (result string, err error) {
 	var ok bool
 	var config execute.ExecutorTaskInfo
@@ -374,7 +348,7 @@ func LLMScan(configJSON string) (result string, err error) {
 	return SucceedTask(result), nil
 }
 
-func ICPPlusScan(configJSON string) (result string, err error) {
+func ICPScan(configJSON string) (result string, err error) {
 	var ok bool
 	var config execute.ExecutorTaskInfo
 	ok, config, result, err = checkTask(configJSON)
@@ -382,42 +356,58 @@ func ICPPlusScan(configJSON string) (result string, err error) {
 		return
 	}
 	// 执行任务
-	taskResult := onlineapi.DoICPPlusQuery(config)
+	taskResult := icp.Do(config, false)
 	var domainResult []string
 	if len(taskResult) > 0 {
-		var docResult []db.QueryDocument
-		for _, doc := range taskResult {
-			docResult = append(docResult, db.QueryDocument{
-				Domain:   doc.Domain,
-				Category: doc.Category,
-				Content:  doc.Content,
-			})
-			domainResult = append(domainResult, doc.Domain)
+		var docResult []db.ICPDocument
+		for _, data := range taskResult {
+			domainResult = append(domainResult, data.Domain)
+			// 只保存新的数据
+			if !data.IsLookupData {
+				docResult = append(docResult, db.ICPDocument{
+					Domain:         data.Domain,
+					UnitName:       data.UnitName,
+					CompanyType:    data.CompanyType,
+					SiteLicense:    data.SiteLicense,
+					ServiceLicence: data.ServiceLicence,
+					VerifyTime:     data.VerifyTime,
+					Source:         data.Source,
+				})
+			}
 		}
-		if err = core.CallXClient("SaveQueryData", &docResult, &result); err != nil {
-			logging.RuntimeLog.Error(err)
+		if len(docResult) > 0 {
+			if err = core.CallXClient("SaveICPData", &docResult, &result); err != nil {
+				logging.RuntimeLog.Error(err)
+			}
 		}
 	}
 	result = fmt.Sprintf("域名：%d%s", len(domainResult), domainResult)
 	// 下一步任务：
 	if len(domainResult) > 0 {
-		var llmConfig execute.LLMAPIConfig
-		for _, v := range config.LLMAPI {
-			llmConfig = v
+		var icpConfig execute.ICPConfig
+		for _, v := range config.ICP {
+			icpConfig = v
 			break
 		}
 		// 自动关联组织
-		if llmConfig.AutoAssociateOrg {
-			if orgId, err := callAssociateOrg(config.Target, config.WorkspaceId); err == nil && orgId != "" {
+		if icpConfig.AutoAssociateOrg {
+			if orgId, err := callAssociateOrg(taskResult[0].UnitName, config.WorkspaceId); err == nil && orgId != "" {
 				config.OrgId = orgId
 			}
 		}
 		for _, target := range domainResult {
-			for executor, _ := range config.DomainScan {
-				_ = newNextExecutorTask(config, target, executor)
-			}
-			for executor, _ := range config.OnlineAPI {
-				_ = newNextExecutorTask(config, target, executor)
+			if len(config.DomainScan) > 0 {
+				for executor, _ := range config.DomainScan {
+					_ = newNextExecutorTask(config, target, executor)
+				}
+			} else if len(config.OnlineAPI) > 0 {
+				for executor, _ := range config.OnlineAPI {
+					_ = newNextExecutorTask(config, target, executor)
+				}
+			} else if len(config.FingerPrint) > 0 {
+				for executor, _ := range config.FingerPrint {
+					_ = newNextExecutorTask(config, target, executor)
+				}
 			}
 		}
 	}

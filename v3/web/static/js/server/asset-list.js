@@ -26,6 +26,7 @@ $(function () {
                     return $.extend({}, d, {
                         "task_id": $.urlParam('task_id'),
                         "query": $('#query').val(),
+                        "no_cdn_cloud": $('#checkbox_asset_no_cdn_cloud').is(":checked"),
                         "new": $('#checkbox_asset_new').is(":checked"),
                         "update": $('#checkbox_asset_update').is(":checked"),
                         "order_by_date": $('#checkbox_select_order_by_date').is(":checked"),
@@ -60,11 +61,13 @@ $(function () {
                         strData = generateLink(data, row["service"]);
                         let brOrg = "</br>";
                         if (row['org']) {
-                            strData += brOrg + '<span class="custom-shape custom-shape-org" title="所属组织">' + row['org'] + '</span>';
-                            brOrg = "&nbsp;";
+                            strData += brOrg + '<span title="所属组织" style="color:darkgray"><small>' + row['org'] + '</small></span>';
+                            brOrg = "</br>";
+                        } else {
+                            brOrg = "";
                         }
                         if (row['icp_company']) {
-                            strData += brOrg + '<span class="custom-shape custom-shape-org" title="ICP备案">' + row['icp_company'] + '</span>';
+                            strData += brOrg + '<span title="ICP备案主体" style="color:darkgray"><small>' + row['icp_company'] + '</small></span>';
                         }
                         let br = "</br>";
                         if (row["new"] || row["update"]) {
@@ -76,7 +79,7 @@ $(function () {
                             br = "";
                         }
                         if (row["cdn"]) {
-                            strData += br + '<i class="fa fa-cloud" style="color:#FFA500" aria-hidden="true" title="CDN"></i>&nbsp;';
+                            strData += br + '<i class="fa fa-cloud" style="color:#FFA500" aria-hidden="true" title="CDN/Cloud"></i>&nbsp;';
                             br = "";
                         }
                         if (row['memo']) {
@@ -126,7 +129,7 @@ $(function () {
                             } else if (statusText.startsWith("5")) {
                                 color = "#FF0000"; // 5xx: 红色
                             }
-                            strData += `<span style="color: ${color};">[${statusText}]</span>`;
+                            strData += `<br/><span style="color: ${color};">[${statusText}]</span>`;
                         }
 
                         return strData;
@@ -156,7 +159,7 @@ $(function () {
                 {
                     data: 'header', title: '指纹信息', width: '26%',
                     render: function (data, type, row, meta) {
-                        if (!isNotEmpty(row['header']) && !isNotEmpty(row['cert']) && !isNotEmpty(row['banner']) && !isNotEmpty(row['vul']) && !isNotEmpty(row['memo']) && !isNotEmpty(row['icp']) && !isNotEmpty(row['whois'])) return "";
+                        if (!isNotEmpty(row['header']) && !isNotEmpty(row['cert']) && !isNotEmpty(row['banner']) && !isNotEmpty(row['vul']) && !isNotEmpty(row['memo']) && !isNotEmpty(row['icp'])) return "";
                         let is_active = "active";
                         let strData = ' <ul class="nav nav-tabs" id="myTab_' + row["id"] + '">';
                         if (isNotEmpty(row['header'])) {
@@ -181,10 +184,6 @@ $(function () {
                         }
                         if (isNotEmpty(row['icp'])) {
                             strData += ' <li class="nav-item active"><a class="nav-link ' + is_active + '" data-toggle="tab" href="#icp_' + row["id"] + '">ICP</a></li>'
-                            is_active = "";
-                        }
-                        if (isNotEmpty(row['whois'])) {
-                            strData += ' <li class="nav-item active"><a class="nav-link ' + is_active + '" data-toggle="tab" href="#whois_' + row["id"] + '">Whois</a></li>'
                         }
                         strData += '</ul>';
                         is_active = "show active";
@@ -226,12 +225,6 @@ $(function () {
                             strData += '<div id="icp_' + row["id"] + '" class="tab-pane fade ' + is_active + '">';
                             strData += '<div style="width:100%;white-space:normal;word-wrap:break-word;word-break:break-all;">';
                             strData += encodeHtml(row['icp']) + '</div></div>';
-                            is_active = "";
-                        }
-                        if (isNotEmpty(row['whois'])) {
-                            strData += '<div id="whois_' + row["id"] + '" class="tab-pane fade ' + is_active + '">';
-                            strData += '<div style="width:100%;white-space:normal;word-wrap:break-word;word-break:break-all;">';
-                            strData += encodeHtml(row['whois']) + '</div></div>';
                         }
                         return strData;
                     }
@@ -524,10 +517,7 @@ function get_result_output(arrayObj, limit_length = 40) {
         const key = arrayObj[index - 1]["Field"];
         const value = arrayObj[index - 1]["Count"];
         output += output_prefix;
-        output += '<span class="badge badge-pill badge-info">' + value + '</span>';
-        if (value < 10) {
-            output += "&nbsp;";
-        }
+        output += '<span class="badge badge-pill badge-info" style="white-space: pre;">' + value.toString().padStart(3, ' ') + '</span>';
         if (limit_length > 0) {
             let showed_key = encodeHtml(String(key).substr(0, limit_length));
             if (String(key).length > limit_length) showed_key += '...';
@@ -574,6 +564,7 @@ function asset_export() {
         data: {
             "task_id": $.urlParam('task_id'),
             "query": $('#query').val(),
+            "no_cdn_cloud": $('#checkbox_asset_no_cdn_cloud').is(":checked"),
             "new": $('#checkbox_asset_new').is(":checked"),
             "update": $('#checkbox_asset_update').is(":checked"),
             "order_by_date": $('#checkbox_select_order_by_date').is(":checked"),
