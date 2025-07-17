@@ -36,8 +36,4 @@ const (
 	StartTime          = "start_time"
 	EndTime            = "end_time"
 	Cron               = "cron"
-	QueryICP           = "icp"
-	QueryICPPlus       = "icpPlus"
-	QueryWhois         = "whois"
-	QueryCategory      = "category"
 )
