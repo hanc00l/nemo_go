@@ -1,0 +1,115 @@
+<main class="app-content">
+    <div class="app-title">
+        <div>
+            <h1><i class="fa fa-th-list"></i>&nbsp;ICP备案列表</h1>
+            <p>管理通过API接口获取到的ICP备案信息</p>
+        </div>
+        <ul class="app-breadcrumb breadcrumb side">
+            <li class="breadcrumb-item"><i class="fa fa-home fa-lg"></i></li>
+            <li class="breadcrumb-item"><a href="/index">首页</a></li>
+            <li class="breadcrumb-item active"><a href="#">ICP备案列表</a></li>
+        </ul>
+    </div>
+    <div class="row">
+        <div class="col-md-12">
+            <div class="tile">
+                <div class="tile-body">
+                    <form class="row">
+                        <div class="form-group col-md-2">
+                            <label class="control-label" for="domain">备案域名</label>
+                            <input class="form-control" type="text" id="domain" placeholder="">
+                        </div>
+                        <div class="form-group col-md-4">
+                            <label class="control-label" for="unit_name">备案主体名称</label>
+                            <input class="form-control" type="text" id="unit_name" placeholder="">
+                        </div>
+                        <div class="form-group col-md-4 align-self-end">
+                            <button class="btn btn-primary" type="button" id="search"><i
+                                    class="fa fa-fw fa-lg fa-search"></i>搜索
+                            </button>
+                            <button class="btn btn-primary" type="button" id="online_search"><i
+                                    class="fa fa-fw fa-lg fa-search"></i>在线查询
+                            </button>
+                            <div class="btn-group" role="group">
+                                <button id="btnGroupDrop1" type="button" class="btn btn-secondary dropdown-toggle"
+                                        data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                    <i class="fa fa-angle-double-down"></i>其它
+                                </button>
+                                <div class="dropdown-menu" aria-labelledby="btnGroupDrop1">
+                                    <a class="dropdown-item" href="#" id="batch_delete"><i
+                                            class="fa fa-fw fa-lg fa-remove"></i>删除选择的ICP备案</a>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+            <div class="tile">
+                <div class="tile-body">
+                    <table class="table table-hover table-bordered dataTable no-footer" id="list_table" role="grid"
+                           aria-describedby="list_table" width="100%">
+                    </table>
+                    <!-- 模态对话框：-->
+                    <div class="modal fade" id="online_search_modal" tabindex="-1" role="dialog"
+                         aria-labelledby="myModalLabel"
+                         aria-hidden="true">
+                        <div class="modal-dialog">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h4 class="modal-title" id="myModalLabel">
+                                        在线查询ICP备案
+                                    </h4>
+                                </div>
+                                <div class="modal-body">
+                                    <form class="form-horizontal" role="form">
+                                        <div class="form-group">
+                                            <label class="control-label no-padding-right"
+                                                   for="search_key"><span
+                                                    class="text-danger">*</span>ICP备案域名或主体名称</label>
+                                            <div>
+                                                <input class="form-control " title="ICP备案名称"
+                                                       placeholder="请输入完整、准确的ICP备案域名或主体名称"
+                                                       id="search_key">
+                                            </div>
+                                        </div>
+                                        <div class="form-group"><p>
+                                            <i><small>在线查询会花费一定时间，请耐心等待；调用beianx.cn接口查询ICP备案，需配置相应的API接口信息，且需要消耗查询次数，请谨慎使用。</small></i>
+                                        </div>
+                                        <div class="hr hr-16 hr-dotted"></div>
+                                        <div class="modal-footer">
+                                            <button type="button" class="btn btn-secondary" data-dismiss="modal"
+                                                    aria-hidden="true">取消
+                                            </button>
+                                            <button class="btn btn-primary org-update" type="button"
+                                                    id="online_api_search">
+                                                <span>查询</span> <i class="fa fa-send m-l-10"></i>
+                                            </button>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div><!-- /.modal-content -->
+                        </div><!-- /.modal-dialog -->
+                    </div>
+                </div>
+                <!----tile body-->
+            </div> <!-- tile -->
+        </div> <!-- col md-12 -->
+    </div>
+    <!--row-->
+</main>
+<script src="static/js/jquery/jquery-3.3.1.min.js"></script>
+<script src="static/js/bootstrap/popper.min.js"></script>
+<script src="static/js/bootstrap/bootstrap.min.js"></script>
+<script src="static/js/main.js"></script>
+<script src="static/js/plugins/pace.min.js"></script>
+<!-- Data table plugin-->
+<script type="text/javascript" src="static/js/plugins/jquery.dataTables.min.js"></script>
+<script type="text/javascript" src="static/js/plugins/dataTables.bootstrap.min.js"></script>
+<script src="static/js/sweetalert/sweetalert.min.js"></script>
+<script src="static/js/jquery/jquery.bootstrap-duallistbox.js"></script>
+<script type="text/javascript" src="static/js/server/icp-list.js"></script>
+<script>
+    $(function () {
+        $("title").html("ICP备案管理-Nemo");
+    });
+</script>

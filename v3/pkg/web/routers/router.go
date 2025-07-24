@@ -138,4 +138,17 @@ func InitRouter() {
 	web.CtrlPost("/pocfile-delete", (*controllers.PocFileController).DeleteFileAction)
 	web.CtrlGet("/pocfile-search", (*controllers.PocFileController).SearchFilesAction)
 	web.CtrlPost("/pocfile-createFolder", (*controllers.PocFileController).CreateFolderAction)
+
+	web.CtrlGet("/unit-list", (*controllers.UnitController).IndexAction)
+	web.CtrlPost("/unit-list", (*controllers.UnitController).ListAction)
+	web.CtrlPost("/unit-delete", (*controllers.UnitController).DeleteAction)
+	web.CtrlPost("/unit-get", (*controllers.UnitController).GetAction)
+	web.CtrlPost("/unit-update", (*controllers.UnitController).UpdateAction)
+	web.CtrlPost("/unit-online-api-search", (*controllers.UnitController).OnlineAPISearchAction)
+	web.CtrlPost("/unit-export", (*controllers.UnitController).ExportAction)
+
+	web.CtrlGet("/icp-list", (*controllers.ICPController).IndexAction)
+	web.CtrlPost("/icp-list", (*controllers.ICPController).ListAction)
+	web.CtrlPost("/icp-delete", (*controllers.ICPController).DeleteAction)
+	web.CtrlPost("/icp-online-api-search", (*controllers.ICPController).OnlineAPISearchAction)
 }

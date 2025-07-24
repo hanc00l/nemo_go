@@ -1,0 +1,243 @@
+<main class="app-content">
+    <div class="app-title">
+        <div>
+            <h1><i class="fa fa-th-list"></i>&nbsp;主体列表</h1>
+            <p>管理通过API接口获取到的主体信息</p>
+        </div>
+        <ul class="app-breadcrumb breadcrumb side">
+            <li class="breadcrumb-item"><i class="fa fa-home fa-lg"></i></li>
+            <li class="breadcrumb-item"><a href="/index">首页</a></li>
+            <li class="breadcrumb-item active"><a href="#">主体列表</a></li>
+        </ul>
+    </div>
+    <div class="row">
+        <div class="col-md-12">
+            <div class="tile">
+                <div class="tile-body">
+                    <form class="row">
+                        <div class="form-group col-md-2">
+                            <label class="control-label" for="parent_unit_name">上级主体名称</label>
+                            <input class="form-control" type="text" id="parent_unit_name" placeholder="">
+                        </div>
+                        <div class="form-group col-md-2">
+                            <label class="control-label" for="unit_name">主体名称</label>
+                            <input class="form-control" type="text" id="unit_name" placeholder="">
+                        </div>
+                        <div class="form-check form-check-inline">
+                            <label class="form-check-label"
+                                   for="checkbox_fuzzy">
+                                <input class="form-check-input"
+                                       id="checkbox_fuzzy" type="checkbox">模糊匹配
+                            </label>
+                        </div>
+                        <div class="form-group col-md-4 align-self-end">
+                            <button class="btn btn-primary" type="button" id="search"><i
+                                    class="fa fa-fw fa-lg fa-search"></i>搜索
+                            </button>
+                            <button class="btn btn-primary" type="button" id="online_search"><i
+                                    class="fa fa-fw fa-lg fa-search"></i>在线查询
+                            </button>
+                            <div class="btn-group" role="group">
+                                <button id="btnGroupDrop1" type="button" class="btn btn-secondary dropdown-toggle"
+                                        data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                    <i class="fa fa-angle-double-down"></i>其它
+                                </button>
+                                <div class="dropdown-menu" aria-labelledby="btnGroupDrop1">
+                                    <a class="dropdown-item" href="#" id="unit_export"><i
+                                            class="fa fa-fw fa-lg fa-cloud-download"></i>导出</a>
+                                    <a class="dropdown-item" href="#" id="batch_delete"><i
+                                            class="fa fa-fw fa-lg fa-remove"></i>删除选择的主体</a>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+            <div class="tile">
+                <div class="tile-body">
+                    <table class="table table-hover table-bordered dataTable no-footer" id="list_table" role="grid"
+                           aria-describedby="list_table" width="100%">
+                    </table>
+                    <!-- 模态对话框：修改-->
+                    <div class="modal fade" id="edit_modal" tabindex="-1" role="dialog"
+                         aria-labelledby="myModalLabel"
+                         aria-hidden="true">
+                        <div class="modal-dialog">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h4 class="modal-title">
+                                        在线查询主体单位信息
+                                    </h4>
+                                </div>
+                                <div class="modal-body">
+                                    <form class="form-horizontal" role="form">
+                                        <div class="form-group">
+                                            <label class="control-label no-padding-right"
+                                                   for="edit_parent_unit_name">上级主体名称</label>
+                                            <div>
+                                                <input class="form-control " title="主体名称"
+                                                       placeholder="请输入完整、准确的主体名称"
+                                                       id="edit_parent_unit_name">
+                                            </div>
+                                        </div>
+                                        <div class="form-group">
+                                            <label class="control-label no-padding-right"
+                                                   for="search_unit_name"><span
+                                                    class="text-danger">*</span>主体名称</label>
+                                            <div>
+                                                <input class="form-control " title="主体名称"
+                                                       placeholder="请输入完整、准确的主体名称"
+                                                       id="edit_unit_name">
+                                            </div>
+                                        </div>
+                                        <div class="form-group">
+                                            <label class="control-label" for="edit_unit_type">主体类型</label>
+                                            <select class="form-control" title="主体类型" id="edit_unit_type">
+                                                <option value="" selected>--主体类型--</option>
+                                                <option value="branch">分支机构</option>
+                                                <option value="invest">对外投资</option>
+                                            </select>
+                                        </div>
+                                        <div class="form-group">
+                                            <label class="control-label no-padding-right"
+                                                   for="edit_invest_ration">投资比例<i
+                                                    class="fa fa-question-circle"
+                                                    aria-hidden="true"
+                                                    title="当为上级主体的对外投资机构时，输入投资占比。"></i>
+                                            </label>
+                                            <div>
+                                                <input class="form-control col-md-7" title="投资比例"
+                                                       id="edit_invest_ration"
+                                                       value="">
+                                            </div>
+                                        </div>
+
+                                        <div class="hr hr-16 hr-dotted"></div>
+                                        <div class="modal-footer">
+                                            <button type="button" class="btn btn-secondary" data-dismiss="modal"
+                                                    aria-hidden="true">取消
+                                            </button>
+                                            <button class="btn btn-primary org-update" type="button"
+                                                    id="update_unit_info">
+                                                <span>更新</span> <i class="fa fa-send m-l-10"></i>
+                                            </button>
+                                        </div>
+                                        <input type="hidden" name="hidden_id" id="hidden_id" value="">
+                                    </form>
+                                </div>
+                            </div><!-- /.modal-content -->
+                        </div><!-- /.modal-dialog -->
+                    </div>
+                    <div class="modal fade" id="online_search_modal" tabindex="-1" role="dialog"
+                         aria-labelledby="myModalLabel"
+                         aria-hidden="true">
+                        <div class="modal-dialog">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h4 class="modal-title" id="myModalLabel">
+                                        在线查询主体单位信息
+                                    </h4>
+                                </div>
+                                <div class="modal-body">
+                                    <form class="form-horizontal" role="form">
+                                        <div class="form-group">
+                                            <label class="control-label no-padding-right"
+                                                   for="search_unit_name"><span
+                                                    class="text-danger">*</span>主体名称</label>
+                                            <div>
+                                                <input class="form-control " title="主体名称"
+                                                       placeholder="请输入完整、准确的主体名称"
+                                                       id="search_unit_name">
+                                            </div>
+                                        </div>
+                                        <div class="form-group">
+                                            <div class="checkbox">
+                                                <label><input type="checkbox" id="search_is_branch">
+                                                    包含分支机构</label>
+                                            </div>
+                                            <div class="checkbox">
+                                                <label><input type="checkbox" id="search_is_invest">
+                                                    包含对外投资机构</label>
+                                            </div>
+                                            <label class="control-label no-padding-right"
+                                                   for="search_invest_ration">对外投资所占比例<i
+                                                    class="fa fa-question-circle"
+                                                    aria-hidden="true"
+                                                    title="只保存和查询超过指定投资比例的主体单位，例如：50表示只保存和查询投资比例大于等于50%的主体单位。"></i>
+                                            </label>
+                                            <div>
+                                                <input class="form-control col-md-7" title="投资比例"
+                                                       id="search_invest_ration"
+                                                       value="100">
+                                            </div>
+                                        </div>
+                                        <div class="form-group">
+                                            <label class="control-label no-padding-right"
+                                                   for="search_max_depth">递归查询层级<i
+                                                    class="fa fa-question-circle"
+                                                    aria-hidden="true"
+                                                    title="递归查询层级，1表示当前主体及必须的下属机构，2表示当前主体及下属机构的下属机构，以此类推；默认1，建议不超过3层"></i></label>
+                                            <div>
+                                                <input class="form-control col-md-7" title="递归查询层级"
+                                                       id="search_max_depth"
+                                                       value="1">
+                                            </div>
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="search_online_api_cookie">
+                                                <b><span class="text-danger">*</span>蜂鸟网站Cookie</b><i
+                                                    class="fa fa-question-circle"
+                                                    aria-hidden="true"
+                                                    title="调用在线查询API需要Cookie，请登录相关网站获取。"></i>
+                                            </label>
+                                            <textarea class="form-control" id="search_online_api_cookie" rows="4"
+                                                      placeholder="完整的API Cookie值，例如：PHPSESSID=1234567890;"></textarea>
+                                        </div>
+                                        <div class="form-group">
+                                            <div class="checkbox">
+                                                <label><input type="checkbox" id="search_icp_online_api">
+                                                    调用beianx查询ICP备案信息<i
+                                                            class="fa fa-question-circle"
+                                                            aria-hidden="true"
+                                                            title="调用ICP备案在线查询API同步查询备案信息，需要配置相应的API及cookie。"></i></label>
+                                            </div>
+                                            <i><small>在线查询会花费一定时间，请耐心等待；在线API查询需要消耗查询次数，请谨慎使用并确保cookie有效。</small></i>
+                                        </div>
+                                        <div class="hr hr-16 hr-dotted"></div>
+                                        <div class="modal-footer">
+                                            <button type="button" class="btn btn-secondary" data-dismiss="modal"
+                                                    aria-hidden="true">取消
+                                            </button>
+                                            <button class="btn btn-primary org-update" type="button"
+                                                    id="online_api_search">
+                                                <span>查询</span> <i class="fa fa-send m-l-10"></i>
+                                            </button>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div><!-- /.modal-content -->
+                        </div><!-- /.modal-dialog -->
+                    </div>
+                </div>
+                <!----tile body-->
+            </div> <!-- tile -->
+        </div> <!-- col md-12 -->
+    </div>
+    <!--row-->
+</main>
+<script src="static/js/jquery/jquery-3.3.1.min.js"></script>
+<script src="static/js/bootstrap/popper.min.js"></script>
+<script src="static/js/bootstrap/bootstrap.min.js"></script>
+<script src="static/js/main.js"></script>
+<script src="static/js/plugins/pace.min.js"></script>
+<!-- Data table plugin-->
+<script type="text/javascript" src="static/js/plugins/jquery.dataTables.min.js"></script>
+<script type="text/javascript" src="static/js/plugins/dataTables.bootstrap.min.js"></script>
+<script src="static/js/sweetalert/sweetalert.min.js"></script>
+<script src="static/js/jquery/jquery.bootstrap-duallistbox.js"></script>
+<script type="text/javascript" src="static/js/server/unit-list.js"></script>
+<script>
+    $(function () {
+        $("title").html("主体管理-Nemo");
+    });
+</script>

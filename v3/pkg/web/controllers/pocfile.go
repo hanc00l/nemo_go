@@ -11,6 +11,7 @@ import (
 	"os"
 	"path/filepath"
 	"regexp"
+	"strconv"
 	"strings"
 )
 
@@ -257,7 +258,7 @@ func (c *PocFileController) DownloadFileAction() {
 
 	c.Ctx.Output.Header("Content-Type", contentType)
 	c.Ctx.Output.Header("Content-Disposition", "attachment; filename="+fileName)
-	c.Ctx.Output.Header("Content-Length", string(fileInfo.Size()))
+	c.Ctx.Output.Header("Content-Length", strconv.FormatInt(fileInfo.Size(), 10))
 
 	_, err = io.Copy(c.Ctx.ResponseWriter, file)
 	if err != nil {
