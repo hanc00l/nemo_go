@@ -41,8 +41,7 @@ $(function () {
                     data: "unit_name", title: "主体名称", width: "30%",
                     render: function (data, type, row) {
                         let strData = '';
-                        strData += data + '&nbsp;<a href=https://www.beianx.cn/search/' + data + ' target="_blank"><img src="/static/images/beianx-favicon.ico" style="max-width:16px;" title="在beianx.cn中查看"></a>';
-                        strData += '<a href=/unit-list?unitName=' + encodeURIComponent(data) + ' target="_blank">&nbsp;<i class="fa fa-external-link" aria-hidden="true"></i></a>';
+                        strData += data + '<a href=/unit-list?unitName=' + encodeURIComponent(data) + ' target="_blank">&nbsp;<i class="fa fa-external-link" aria-hidden="true"></i></a>';
                         return strData;
                     }
                 },
@@ -55,6 +54,7 @@ $(function () {
                     width: "6%",
                     "render": function (data, type, row, meta) {
                         let strData = ''
+                        strData += '<a href=https://www.beianx.cn/search/' + row['unit_name'] + ' target="_blank"><img src="/static/images/beianx-favicon.ico" style="max-width:16px;" title="在beianx.cn中查看"></a>';
                         strData += '&nbsp;<a onclick=delete_unit("' + row.id + '") href="#"><i class="fa fa-trash" title="删除"></i></a>';
                         return strData;
                     }

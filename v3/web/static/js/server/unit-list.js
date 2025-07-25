@@ -51,9 +51,7 @@ $(function () {
                     data: "unit_name", title: "主体名称", width: "20%",
                     render: function (data, type, row) {
                         let strData = '';
-                        strData += data + '&nbsp;<a href=https://www.riskbird.com/ent/' + data + '.html?entid=' + row["ent_id"] + ' target=blank><img src="/static/images/riskbird-favicon.ico" style="max-width:16px;" title="在RiskBird中查看"></a>'
-                        strData += '<a href=/unit-list?parentUnitName=' + encodeURIComponent(data) + '>&nbsp;<i class="fa fa-external-link" aria-hidden="true"></i></a>';
-
+                        strData += data + '<a href=/unit-list?parentUnitName=' + encodeURIComponent(data) + '>&nbsp;<i class="fa fa-external-link" aria-hidden="true"></i></a>';
                         return strData;
                     }
                 },
@@ -76,6 +74,7 @@ $(function () {
                     width: "6%",
                     "render": function (data, type, row, meta) {
                         let strData = ''
+                        strData += '<a href=https://www.riskbird.com/ent/' + row['unit_name'] + '.html?entid=' + row["ent_id"] + ' target=blank><img src="/static/images/riskbird-favicon.ico" style="max-width:16px;" title="在RiskBird中查看"></a>'
                         strData += '&nbsp;<a onclick=edit_unit("' + row.id + '") href="#"><i class="fa fa-edit" title="修改"></i></a>';
                         strData += '&nbsp;<a onclick=delete_unit("' + row.id + '") href="#"><i class="fa fa-trash" title="删除"></i></a>';
                         return strData;
