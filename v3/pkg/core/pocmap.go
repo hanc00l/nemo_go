@@ -200,8 +200,9 @@ func matchSingle(app []string, pocMap []MapInfo) (pocList []string) {
 
 func getPocList(mapInfo MapInfo) (pocList []string) {
 	sourcePaths := map[string]string{
-		"some_nuclei_templates": "some_nuclei_templates",
-		"nuclei-template":       "nuclei-templates",
+		"some_nuclei_templates":    "some_nuclei_templates",
+		"nuclei-template":          "nuclei-templates",
+		"private_nuclei_templates": "private_nuclei_templates",
 	}
 	for _, poc := range mapInfo.Poc {
 		pocPath, ok := sourcePaths[poc.Source]
