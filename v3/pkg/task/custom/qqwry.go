@@ -1,18 +1,19 @@
 package custom
 
 // forked from https://github.com/freshcn/qqwry
-
+// qqwry.dat 下载地址：https://github.com/metowolf/qqwry.dat
 import (
 	"bytes"
 	"compress/zlib"
 	"encoding/binary"
 	"fmt"
-	"github.com/hanc00l/nemo_go/v3/pkg/logging"
 	"io"
 	"net"
 	"net/http"
 	"os"
 	"strings"
+
+	"github.com/hanc00l/nemo_go/v3/pkg/logging"
 
 	"golang.org/x/text/encoding/simplifiedchinese"
 )
