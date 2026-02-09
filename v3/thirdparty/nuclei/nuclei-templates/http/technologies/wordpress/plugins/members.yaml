@@ -9,7 +9,7 @@ info:
   metadata:
     plugin_namespace: members
     wpscan: https://wpscan.com/plugin/members
-  tags: tech,wordpress,wp-plugin,top-200
+  tags: tech,wordpress,wp-plugin,top-200,discovery
 
 http:
   - method: GET
@@ -46,4 +46,4 @@ http:
         part: body
         regex:
           - '(?i)Stable.tag:\s?([\w.]+)'
-# digest: 4a0a0047304502202bd0dfb86267983a5ea376714237073c06043a517bd0af82f9602c44c41f4cbe02210081883565dec960170b4fe83b27b63245c3fc00c9d0bd07f8bfadad4e557b6aa8:922c64590222798bb761d5b6d8e72950
+# digest: 4b0a00483046022100ef130260b4ff008ea5f772106d7798d8669a0b37e57f6b96bd258bafbb64ae01022100a936d2c891c247d7eb311b0abfc6e10b8d8c4cc600c9eced3f7b8930d931c159:922c64590222798bb761d5b6d8e72950

@@ -9,7 +9,7 @@ info:
   metadata:
     plugin_namespace: aryo-activity-log
     wpscan: https://wpscan.com/plugin/aryo-activity-log
-  tags: tech,wordpress,wp-plugin,top-200
+  tags: tech,wordpress,wp-plugin,top-200,discovery
 
 http:
   - method: GET
@@ -46,4 +46,4 @@ http:
         part: body
         regex:
           - '(?i)Stable.tag:\s?([\w.]+)'
-# digest: 490a0046304402204d9456c3642ca3003c7b896fc0d17110873317f76f8dbe766b541cb4b1442e5102205bc94f30f254b14046f718577cdc69ac29e46b118bbde5622c0f035db7f354c4:922c64590222798bb761d5b6d8e72950
+# digest: 4a0a0047304502203597753300eac546cfc985ea41978890279a6385e0ef5e9dd0d9c8edd5617915022100ee6494b24fa06bbc43a9f22669506b5c883a0c534af22524d47f762fccff6f38:922c64590222798bb761d5b6d8e72950

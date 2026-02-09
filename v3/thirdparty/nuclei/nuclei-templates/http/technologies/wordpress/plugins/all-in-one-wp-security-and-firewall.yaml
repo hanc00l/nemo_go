@@ -9,7 +9,7 @@ info:
   metadata:
     plugin_namespace: all-in-one-wp-security-and-firewall
     wpscan: https://wpscan.com/plugin/all-in-one-wp-security-and-firewall
-  tags: tech,wordpress,wp-plugin,top-100,top-200
+  tags: tech,wordpress,wp-plugin,top-100,top-200,discovery
 
 http:
   - method: GET
@@ -46,4 +46,4 @@ http:
         part: body
         regex:
           - '(?i)Stable.tag:\s?([\w.]+)'
-# digest: 4a0a004730450220719ac188b4ee6f8e145435efec1d4e4fbbafa56662fb32f54e0f1e2081b4f7a9022100b4048f3084d57f3bae4c5d4529c25e780e1e84234cbc085c22d8e9b71c733914:922c64590222798bb761d5b6d8e72950
+# digest: 4b0a00483046022100f9f0f1d792a1f0d479a4378cc2c72323f45a31ed6fbf8f33220c2bf7d01489cf022100a8a11b43882c5e7893c600c1472a699a799d7257f1d7710fcdc71219f34dd777:922c64590222798bb761d5b6d8e72950

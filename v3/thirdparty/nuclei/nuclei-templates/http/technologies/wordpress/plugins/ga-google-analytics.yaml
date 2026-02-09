@@ -9,7 +9,7 @@ info:
   metadata:
     plugin_namespace: ga-google-analytics
     wpscan: https://wpscan.com/plugin/ga-google-analytics
-  tags: tech,wordpress,wp-plugin,top-200
+  tags: tech,wordpress,wp-plugin,top-200,discovery
 
 http:
   - method: GET
@@ -46,4 +46,4 @@ http:
         part: body
         regex:
           - '(?i)Stable.tag:\s?([\w.]+)'
-# digest: 4a0a00473045022100b2daf08eee9bd2312b16f7eb07ce766d65655e53971fff1df8e38cb30a39165f022074127d5b0356d47e62267e1dce0d9f5ac6c02d3d1b37fc7c27c3e50a11c47a48:922c64590222798bb761d5b6d8e72950
+# digest: 4a0a0047304502206456cadd944d61f40955410879a468b5b0c48e0a6916b85943a91f4e0526bcbd022100d9d8fe6a1626cdfdc830323998fb142438b846391bfa7d0200a54f61d40b6844:922c64590222798bb761d5b6d8e72950

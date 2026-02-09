@@ -12,7 +12,7 @@ info:
     max-request: 1
     shodan-query:
       - http.component:"wordpress"
-  tags: tech,wp,wordpress,plugin,detection,wp-plugin
+  tags: tech,wp,wordpress,plugin,detection,wp-plugin,discovery
 
 http:
   - method: GET
@@ -385806,4 +385806,4 @@ http:
           - 'regex("/plugins/admin-notices-for-woocommerce/", body)'
           - 'status_code == 200'
         condition: and
-# digest: 4b0a00483046022100b20ea8feefef96378be35dfdb7f7366dfe197697828a9d370ff9a9677fd18fa2022100bd558f7c1d6ed1d16a3dae64d2870dbd74953bc8e1dc9235b5ae8ab24bd9548a:922c64590222798bb761d5b6d8e72950
+# digest: 4a0a00473045022050568205ee5c1bb310c6c9b6c0e9e0b5f62cca2085c0809149f908ff1ca5a724022100d576b32be2a546e0e61b8e1d305cc1eecd7e1a305fd6e226956694743abe6133:922c64590222798bb761d5b6d8e72950

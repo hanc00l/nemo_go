@@ -9,7 +9,7 @@ info:
   metadata:
     plugin_namespace: one-click-demo-import
     wpscan: https://wpscan.com/plugin/one-click-demo-import
-  tags: tech,wordpress,wp-plugin,top-100,top-200
+  tags: tech,wordpress,wp-plugin,top-100,top-200,discovery
 
 http:
   - method: GET
@@ -46,4 +46,4 @@ http:
         part: body
         regex:
           - '(?i)Stable.tag:\s?([\w.]+)'
-# digest: 4a0a004730450220096f15427f377f238da6654856ba629f605283f3ee454fe40d41cd6fd351104e022100a65efdcd2572967a549e63c30ba2f90f0fe9e2632aceb2b03a2010452c1a0ea6:922c64590222798bb761d5b6d8e72950
+# digest: 4a0a0047304502203969a2de0b81cf2527b9b9f68d51a94887c0bd3f3f0fd5e38ec068522296809802210096a65965f943ebe200c8a14b89178bd98274811ef4423d568651d915d1a71c13:922c64590222798bb761d5b6d8e72950

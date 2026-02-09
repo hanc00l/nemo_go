@@ -9,7 +9,7 @@ info:
   metadata:
     plugin_namespace: wp-rollback
     wpscan: https://wpscan.com/plugin/wp-rollback
-  tags: tech,wordpress,wp-plugin,top-200
+  tags: tech,wordpress,wp-plugin,top-200,discovery
 
 http:
   - method: GET
@@ -46,4 +46,4 @@ http:
         part: body
         regex:
           - '(?i)Stable.tag:\s?([\w.]+)'
-# digest: 490a00463044022062162ee3ad6df72ac9e7b339148f144eab1202bec51434599840e692360ae3e7022063cbb42bbc35a63dae0e4ece551a1d287949aeef6a66816afff62402e0d4b100:922c64590222798bb761d5b6d8e72950
+# digest: 4b0a00483046022100b966fbce8d68ca7e8708f6eaa75be9a9aaa5c816f8edf66715a2b06b78e00bc10221008087bb3578bca1e61fc8e5f046e1a2bb0a7a385f595f71741a64d7e02b808054:922c64590222798bb761d5b6d8e72950

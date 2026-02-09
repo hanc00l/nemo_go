@@ -9,7 +9,7 @@ info:
   metadata:
     plugin_namespace: coming-soon
     wpscan: https://wpscan.com/plugin/coming-soon
-  tags: tech,wordpress,wp-plugin,top-100,top-200
+  tags: tech,wordpress,wp-plugin,top-100,top-200,discovery
 
 http:
   - method: GET
@@ -46,4 +46,4 @@ http:
         part: body
         regex:
           - '(?i)Stable.tag:\s?([\w.]+)'
-# digest: 4a0a00473045022100ae4e6de80ee830d99261f05a6f23a3a820a99da1f72ec2486d849692f2f5462a022014161afda1b91d2e6f9cc2458d7ae72ed4dd66db8f38a68ea3c663ad206b6f24:922c64590222798bb761d5b6d8e72950
+# digest: 4a0a00473045022021fd3440850fb30e43403d1cb89112a6a49846023c0e23ec8ae43da4ec9d234f022100b9e1b0a96bbd40cad0e8cbad5b56117c9d792e60d3a29495efe209b6360d5968:922c64590222798bb761d5b6d8e72950

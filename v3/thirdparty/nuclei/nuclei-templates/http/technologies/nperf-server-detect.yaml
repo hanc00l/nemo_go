@@ -12,7 +12,7 @@ info:
     verified: true
     max-request: 1
     shodan-query: product:"nPerf"
-  tags: tech,nperf,detect
+  tags: tech,nperf,detect,discovery
 
 http:
   - method: GET
@@ -38,4 +38,4 @@ http:
         part: header
         kval:
           - Server
-# digest: 4b0a00483046022100f10b1bea396c37077d00953447b5d81a286172200edb4fcbb86cad457637744a022100e3552ea63ba5db2aa8a32ff1095e2e3468934d3fb16c7252bdf80b0a5a11e33b:922c64590222798bb761d5b6d8e72950
+# digest: 4a0a004730450220571c39a74f2c40e0d1ce75f24d96cff4722e3c9403bd6d78b15385df6cec86ba022100e1b772b661c7eef99fd97aefa56979b4d0c313993944edccbed04a7cbd75afc5:922c64590222798bb761d5b6d8e72950

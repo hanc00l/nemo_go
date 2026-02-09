@@ -9,7 +9,7 @@ info:
   metadata:
     plugin_namespace: mailchimp-for-wp
     wpscan: https://wpscan.com/plugin/mailchimp-for-wp
-  tags: tech,wordpress,wp-plugin,top-100,top-200
+  tags: tech,wordpress,wp-plugin,top-100,top-200,discovery
 
 http:
   - method: GET
@@ -46,4 +46,4 @@ http:
         part: body
         regex:
           - '(?i)Stable.tag:\s?([\w.]+)'
-# digest: 4a0a0047304502210082e0c979e96aee28ca713b9ed712336c3cd1ee7f4648acdbfb7fa48e19fbe50002205381ff68a7caaa7c921a2f9d583c8b52a7fc6c85600af5a8de4f9d6100ce7933:922c64590222798bb761d5b6d8e72950
+# digest: 490a004630440220212f9278ebf48853ab2fab95d9fd5b6d22bc05a17e966ec83c2889acc5e03310022043579d1f2700bf09a7820325a845c4b84ebadbf2cad86edd4471d77a7f8d96b5:922c64590222798bb761d5b6d8e72950

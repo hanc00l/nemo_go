@@ -9,7 +9,7 @@ info:
   metadata:
     plugin_namespace: tablepress
     wpscan: https://wpscan.com/plugin/tablepress
-  tags: tech,wordpress,wp-plugin,top-100,top-200
+  tags: tech,wordpress,wp-plugin,top-100,top-200,discovery
 
 http:
   - method: GET
@@ -46,4 +46,4 @@ http:
         part: body
         regex:
           - '(?i)Stable.tag:\s?([\w.]+)'
-# digest: 4a0a00473045022100c716b71bb63cdc4800a3cc5029ffed60443ec73b5cc8f77d2103f2a052c633fc0220053bd2f92400eea8bf682194cf3e36f6f3d3c6e8dfb9baa97a8c99ed795434a3:922c64590222798bb761d5b6d8e72950
+# digest: 490a00463044022065928a2446715eb62cb2c63be38741ae1f8d5f34a1c0ec8df404ec54a2c02c1c022024686ae7339672357fd285229314d2270fd8043498fb98d0d30c6c51184b94e7:922c64590222798bb761d5b6d8e72950

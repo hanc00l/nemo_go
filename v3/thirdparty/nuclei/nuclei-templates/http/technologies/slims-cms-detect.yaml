@@ -11,7 +11,7 @@ info:
     verified: true
     max-request: 1
     shodan-query: html:'content="SLiMS'
-  tags: tech,slims,cms,senayan
+  tags: tech,slims,cms,senayan,discovery
 
 http:
   - method: GET
@@ -23,4 +23,4 @@ http:
         part: body
         words:
           - 'content="SLiMS'
-# digest: 490a00463044022053568e8b21343a3a11ee5dbb44aca2efffadaa9a9d65a0eac0be9b272e9a303202204ed64a145ea0bba178fc2d114ee2b5b66c6c8d2ae6e07f333bc6d3660b93e6bb:922c64590222798bb761d5b6d8e72950
+# digest: 4a0a0047304502202601cfb7ab4af6049f26826567b151624344a5096a776df04bcd1b024b4a58780221008207b057dd4acbd88f226ac61f353c43746b1947c82850788fe360772846a2c7:922c64590222798bb761d5b6d8e72950

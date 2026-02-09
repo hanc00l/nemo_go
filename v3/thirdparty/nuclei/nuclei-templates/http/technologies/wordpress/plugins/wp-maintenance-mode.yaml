@@ -9,7 +9,7 @@ info:
   metadata:
     plugin_namespace: wp-maintenance-mode
     wpscan: https://wpscan.com/plugin/wp-maintenance-mode
-  tags: tech,wordpress,wp-plugin,top-200
+  tags: tech,wordpress,wp-plugin,top-200,discovery
 
 http:
   - method: GET
@@ -46,4 +46,4 @@ http:
         part: body
         regex:
           - '(?i)Stable.tag:\s?([\w.]+)'
-# digest: 4b0a00483046022100c5f7d446cb423650ca750d94eb511df199bf67cc146a9a07acdfe0d4d6d688c7022100d577cc861a73824481a444ff24be6ecd149cf8e1f12667aee28f3aaa5500ac3c:922c64590222798bb761d5b6d8e72950
+# digest: 4b0a00483046022100e0ee049c4596665593d41824c825a83897f28dd7ea5a9f91d30b074939d11dfe022100b787ba9a4a5bc5250604a22ef822c9a210aa55300ef34bcb403457ce1344df5d:922c64590222798bb761d5b6d8e72950

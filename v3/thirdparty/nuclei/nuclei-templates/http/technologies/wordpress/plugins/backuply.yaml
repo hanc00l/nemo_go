@@ -9,7 +9,7 @@ info:
   metadata:
     plugin_namespace: backuply
     wpscan: https://wpscan.com/plugin/backuply
-  tags: tech,wordpress,wp-plugin,top-200
+  tags: tech,wordpress,wp-plugin,top-200,discovery
 
 http:
   - method: GET
@@ -46,4 +46,4 @@ http:
         part: body
         regex:
           - '(?i)Stable.tag:\s?([\w.]+)'
-# digest: 490a00463044022040d16ab14f7fa4632cc884b66118d00957c47a98dc9c747031f4940ca06f48210220009bd2903fdf04b3958f20660063bf9314e69e50c61fcd071f81a4cb5b8a74e0:922c64590222798bb761d5b6d8e72950
+# digest: 4a0a0047304502207583a927a9ba250f8da5288975f8bb31fb2f808116cf3cd30feafd183349dbb20221009a6761fd8e139291510f9a667c2b888d212a64202d540b8debb9b5636456b280:922c64590222798bb761d5b6d8e72950

@@ -9,7 +9,7 @@ info:
   metadata:
     plugin_namespace: sg-cachepress
     wpscan: https://wpscan.com/plugin/sg-cachepress
-  tags: tech,wordpress,wp-plugin,top-100,top-200
+  tags: tech,wordpress,wp-plugin,top-100,top-200,discovery
 
 http:
   - method: GET
@@ -46,4 +46,4 @@ http:
         part: body
         regex:
           - '(?i)Stable.tag:\s?([\w.]+)'
-# digest: 490a00463044022059a68f495f0b5af11e63a0abc4171c0fa540cc77f40bf550d8b17221cbaeeb850220409d8d4ba1e800c713bc03e33a323be95b2c34f2d0bcac0d25ba7c30bb3f61b4:922c64590222798bb761d5b6d8e72950
+# digest: 4a0a00473045022100ada7822edb3f3417b03dd4125d6e73b7758b50ba9b430d893ca9111888703a4e022076e8e40fd8b4b6b0c93d98d4e5b138784decd677582d6af781961c820f509865:922c64590222798bb761d5b6d8e72950

@@ -9,7 +9,7 @@ info:
   metadata:
     plugin_namespace: woo-cart-abandonment-recovery
     wpscan: https://wpscan.com/plugin/woo-cart-abandonment-recovery
-  tags: tech,wordpress,wp-plugin,top-200
+  tags: tech,wordpress,wp-plugin,top-200,discovery
 
 http:
   - method: GET
@@ -46,4 +46,4 @@ http:
         part: body
         regex:
           - '(?i)Stable.tag:\s?([\w.]+)'
-# digest: 4a0a00473045022100822fc516347ad4ce75bc58164083e8467fab3727ccd93dfa37c2ff362cedc26e02200bc66e5c3b6c6866d8505687f6bef8a3be6cb8a46e8b2db357efef9fae7f0fcf:922c64590222798bb761d5b6d8e72950
+# digest: 490a00463044022041b12c3aed47c74664f3aacd5f6ff77aa93e24148e8280d7de5ab4a40aae56b30220506b6bcb92d7eb67c4bd83bc93ca8ea4313653fdcf77d08bdf2738519d44bd1d:922c64590222798bb761d5b6d8e72950

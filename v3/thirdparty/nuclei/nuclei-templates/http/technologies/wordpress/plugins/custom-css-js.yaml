@@ -9,7 +9,7 @@ info:
   metadata:
     plugin_namespace: custom-css-js
     wpscan: https://wpscan.com/plugin/custom-css-js
-  tags: tech,wordpress,wp-plugin,top-100,top-200
+  tags: tech,wordpress,wp-plugin,top-100,top-200,discovery
 
 http:
   - method: GET
@@ -46,4 +46,4 @@ http:
         part: body
         regex:
           - '(?i)Stable.tag:\s?([\w.]+)'
-# digest: 4a0a0047304502206bd88a52492044fd536fac634a9df9d7b0022835b8bd1dab870a7f46caab5dac022100ddf58b8f703f804a54f77bdf26b733bea715268b4b1914a6f1cbc95596b17648:922c64590222798bb761d5b6d8e72950
+# digest: 490a004630440220083f8314abd7a856048472577fd544f9d6f2aa97d750af38caa8c50593bbab09022033dad3aa139a497f351e60333f4b66a2b4ec7cbfd8117e25497e2217313fb06f:922c64590222798bb761d5b6d8e72950

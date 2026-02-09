@@ -9,7 +9,7 @@ info:
   metadata:
     plugin_namespace: imagify
     wpscan: https://wpscan.com/plugin/imagify
-  tags: tech,wordpress,wp-plugin,top-100,top-200
+  tags: tech,wordpress,wp-plugin,top-100,top-200,discovery
 
 http:
   - method: GET
@@ -46,4 +46,4 @@ http:
         part: body
         regex:
           - '(?i)Stable.tag:\s?([\w.]+)'
-# digest: 490a0046304402202d5f37e468ce5031f5b657addf99855b1a28974e16a2fc4c77ffee50d6bdfb7f022008ad637cab5d98386780017eaf143071411ef33681566738a4aa7f2a52873c34:922c64590222798bb761d5b6d8e72950
+# digest: 4a0a004730450220220aa92fba8527c15c72ec6cea0e144e4d2af29cb6fc4cfa496296e06a0e26be022100d9bc1306c2f98fe42030877e9f621e70c26e93d2850cd9a0000a6de97903821e:922c64590222798bb761d5b6d8e72950

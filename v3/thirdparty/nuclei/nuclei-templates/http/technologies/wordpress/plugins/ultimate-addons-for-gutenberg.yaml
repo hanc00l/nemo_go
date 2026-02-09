@@ -9,7 +9,7 @@ info:
   metadata:
     plugin_namespace: ultimate-addons-for-gutenberg
     wpscan: https://wpscan.com/plugin/ultimate-addons-for-gutenberg
-  tags: tech,wordpress,wp-plugin,top-100,top-200
+  tags: tech,wordpress,wp-plugin,top-100,top-200,discovery
 
 http:
   - method: GET
@@ -46,4 +46,4 @@ http:
         part: body
         regex:
           - '(?i)Stable.tag:\s?([\w.]+)'
-# digest: 4a0a0047304502210081d0dff3c3b69ba9a7af0107e658ea9d32aac3056032b1306bbd3f5af637ace902200ec55167d0c3533ce96e3e8ba4615646acfb1cdb8796896b2f30479cc7172255:922c64590222798bb761d5b6d8e72950
+# digest: 490a00463044022026a13cb6c63dccc27204a047816cf0ba99d3aba82e61e4b5d0459ec9c8d42f26022062b5b1331520afb74f323b837a355f7572dc024310e9d8acbf47c60ddde529d8:922c64590222798bb761d5b6d8e72950

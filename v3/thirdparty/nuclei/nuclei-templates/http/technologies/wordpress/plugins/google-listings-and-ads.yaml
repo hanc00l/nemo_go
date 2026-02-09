@@ -9,7 +9,7 @@ info:
   metadata:
     plugin_namespace: google-listings-and-ads
     wpscan: https://wpscan.com/plugin/google-listings-and-ads
-  tags: tech,wordpress,wp-plugin,top-100,top-200
+  tags: tech,wordpress,wp-plugin,top-100,top-200,discovery
 
 http:
   - method: GET
@@ -46,4 +46,4 @@ http:
         part: body
         regex:
           - '(?i)Stable.tag:\s?([\w.]+)'
-# digest: 490a0046304402204167ffc3dcbe5e7e9a95d54c10752c20e02aaf5bc35321284c9a578c65c22c1002206d7cf2589c25e95f0991379e89982eaaf1b3c018c91fdd50e8c7feadad5421f1:922c64590222798bb761d5b6d8e72950
+# digest: 4b0a004830460221008825db0337cb2f92f91a424847763d12a1a7553f9be905c79b6d8ba472140eda022100a5869bf1d39b9a42515fc6ee8bc76d3f0fa3577cf743dde0f172a58dca2e022d:922c64590222798bb761d5b6d8e72950

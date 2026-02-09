@@ -9,7 +9,7 @@ info:
   metadata:
     plugin_namespace: fluentform
     wpscan: https://wpscan.com/plugin/fluentform
-  tags: tech,wordpress,wp-plugin,top-200
+  tags: tech,wordpress,wp-plugin,top-200,discovery
 
 http:
   - method: GET
@@ -46,4 +46,4 @@ http:
         part: body
         regex:
           - '(?i)Stable.tag:\s?([\w.]+)'
-# digest: 4a0a004730450220328d4c01bc19fa9549dd23da9fd03d2ed9067e7ae3e20bc224eb606f96685437022100d1cc1832715c5ed21076130165313f383c95438978a42ffb9d225707f36dd8cf:922c64590222798bb761d5b6d8e72950
+# digest: 4b0a004830460221009702a505d12dd11e5b6a29707787f0ebfca9ea23ab751e32af31d28a438da414022100aaf70e69c7732c88dc7218372a6c1b125e72e135fa1a8eb5246e71c917506ddb:922c64590222798bb761d5b6d8e72950
