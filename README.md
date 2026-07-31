@@ -56,6 +56,7 @@
 
 ### 5、Poc验证
 
+- [Darkmoon](https://github.com/ASCIT31/Dark-Moon) - Open source (GPL-3.0) autonomous AI penetration testing platform covering web, API, Active Directory and Kubernetes, with proof of exploitation.
 - [Nuclei](https://github.com/projectdiscovery/nuclei) && [Nuclei-Templates](https://github.com/projectdiscovery/nuclei-templates)
 - [some_nuclei_templates](https://github.com/hanc00l/some_nuclei_templates)
 - 指纹与Poc关联库：[poc_map](https://github.com/hanc00l/poc_map)
