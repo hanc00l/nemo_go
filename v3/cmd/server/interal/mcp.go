@@ -580,12 +580,21 @@ func newMainTask(config execute.ExecutorConfig, workspaceId string, target strin
 		return err
 	}
 	defer db.CloseClient(mongoClient)
+	// 将原始target字符串解析为TargetMap并序列化：
+	// 任务调度器 processCreatedTask 使用 UnmarshalTargetMap 期望 JSON 格式（如 {"ip":"1.2.3.0/24"}），
+	// 直接存原始字符串会导致任务卡在 STARTED 不执行（MCP建任务bug修复）
+	targetMapList := core.ParseStringTargetToTargetMap(target, false)
+	targetMap := make(map[string]string)
+	for k, v := range targetMapList {
+		targetMap[k] = strings.Join(v, ",")
+	}
+	targetContent, _ := json.Marshal(targetMap)
 	doc := db.MainTaskDocument{
 		WorkspaceId: workspaceId,
 		TaskId:      taskId,
 		TaskName:    taskName,
 		Description: description,
-		Target:      target,
+		Target:      string(targetContent),
 		Args:        string(configJson),
 		Status:      core.CREATED,
 	}
