@@ -1,3 +1,5 @@
+[![MseeP.ai Security Assessment Badge](https://mseep.net/pr/hanc00l-nemo-go-badge.png)](https://mseep.ai/app/hanc00l-nemo-go)
+
 # Nemo v3
 
 **[安装手册](v3/docs/install.md)** • **[快速使用](v3/docs/quickstart.md)** • **[MCPServer](v3/docs/mcp_server.md)** 
